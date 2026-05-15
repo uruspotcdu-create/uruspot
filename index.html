@@ -271,6 +271,23 @@ img { display: block; max-width: 100%; }
 }
 .cat-card-highlight .cat-card-title { font-size: 30px; }
 
+/* card especial Dónde Comer — fondo dorado oscuro */
+.cat-card-donde {
+  grid-column: span 3;
+  background: linear-gradient(135deg, #1e1408 0%, #140e05 60%, #0e1a12 100%);
+  min-height: 160px;
+  border-top: 1px solid rgba(196,135,42,0.18);
+}
+.cat-card-donde .cat-card-title { font-size: 28px; }
+.cat-card-donde::before {
+  background: linear-gradient(135deg, rgba(196,135,42,0.18) 0%, rgba(29,92,64,0.15) 100%);
+}
+.cat-card-donde .cat-card-bg { font-size: 160px; opacity: 0.07; }
+.cat-card-donde:hover .cat-card-bg { opacity: 0.14; }
+.cat-card-donde::after {
+  background: linear-gradient(90deg, var(--oro), var(--verde), var(--oro));
+}
+
 /* RESTO GRID */
 .resto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,0.10);border:1px solid rgba(26,25,22,0.10)}
 .rcard{background:#fff;display:flex;flex-direction:column;padding:32px 28px 28px;text-decoration:none;position:relative;overflow:hidden;min-height:180px;transition:background 0.4s var(--ease),transform 0.4s var(--ease),box-shadow 0.4s ease}
@@ -378,6 +395,7 @@ img { display: block; max-width: 100%; }
   .resto-grid{grid-template-columns:repeat(3,1fr)}
   .rcard-feat{grid-column:span 2}
   .cat-grid{grid-template-columns:repeat(3,1fr)}
+  .cat-card-donde{grid-column:span 3}
 }
 @media(max-width:860px){
   :root{--gutter:28px;--section-gap:80px}
@@ -390,6 +408,7 @@ img { display: block; max-width: 100%; }
   .bar-grid{grid-template-columns:repeat(3,1fr)}
   .cat-grid{grid-template-columns:repeat(2,1fr)}
   .cat-card-highlight{grid-column:span 2}
+  .cat-card-donde{grid-column:span 2}
 }
 @media(max-width:640px){
   :root{--gutter:18px;--section-gap:60px}
@@ -433,8 +452,10 @@ img { display: block; max-width: 100%; }
   #grain{display:none}
   .cat-grid{grid-template-columns:1fr 1fr}
   .cat-card-highlight{grid-column:span 2}
+  .cat-card-donde{grid-column:span 2}
   .cat-card{min-height:150px;padding:24px 20px 20px}
   .cat-card-title{font-size:18px}
+  .cat-card-donde .cat-card-title{font-size:20px}
 }
 @media(max-width:380px){
   .hero-title{font-size:34px;letter-spacing:-1px}
@@ -443,6 +464,7 @@ img { display: block; max-width: 100%; }
   .ccard-featured{grid-column:span 1}
   .cat-grid{grid-template-columns:1fr}
   .cat-card-highlight{grid-column:span 1}
+  .cat-card-donde{grid-column:span 1}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:0.001ms!important;animation-iteration-count:1!important;transition-duration:0.001ms!important}
@@ -596,6 +618,18 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
           <span class="cat-card-sub">5+ lugares</span>
         </div>
       </a>
+
+      <!-- ══ NUEVA TARJETA: DÓNDE COMER ══ -->
+      <a class="cat-card cat-card-donde reveal" href="https://uruspot.blogspot.com/p/donde-comer-en-concepcion-del-uruguay.html" aria-label="Ver guía completa — Dónde Comer en CDU" style="animation-delay:0.42s">
+        <div class="cat-card-bg" aria-hidden="true">🗺️</div>
+        <div class="cat-card-arrow" aria-hidden="true">↗</div>
+        <div class="cat-card-content">
+          <span class="cat-card-emoji">🗺️</span>
+          <span class="cat-card-title">Dónde Comer en CDU</span>
+          <span class="cat-card-sub">Guía completa · 44 lugares verificados · Mapa interactivo</span>
+        </div>
+      </a>
+
     </div>
   </section>
 
@@ -662,7 +696,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
       </a>
       <a class="rcard reveal" href="https://uruspot.blogspot.com/2026/05/sanduba-comida-rapida-concepcion-del.html" style="animation-delay:0.45s">
         <div class="rcard-shine" aria-hidden="true"></div>
-<div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍔</span><span class="rcard-name">Sanduba</span><div class="pills"><span class="pill pill-default">Rápido</span><span class="pill pill-price">$</span></div></div>
+        <div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍔</span><span class="rcard-name">Sanduba</span><div class="pills"><span class="pill pill-default">Rápido</span><span class="pill pill-price">$</span></div></div>
       </a>
       <a class="rcard reveal" href="https://uruspot.blogspot.com/2026/05/pimienta-negra-restaurante-concepcion.html" style="animation-delay:0.50s">
         <div class="rcard-shine" aria-hidden="true"></div>
