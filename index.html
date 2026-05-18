@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-<noscript><link rel="stylesheet" href="https:s.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
 <style>
 :root {
   --void:        #060605;
@@ -89,7 +89,8 @@ img { display: block; max-width: 100%; }
 @keyframes orbFloat2{from{transform:translate(0,0) scale(1)}to{transform:translate(30px,-20px) scale(1.12)}}
 
 .hero-topbar { position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:36px var(--gutter);flex-shrink:0; }
-.city-tag { display:inline-flex;align-items:center;gap:12px;background:rgba(242,237,227,0.05);border:1px solid rgba(242,237,227,0.14);border-radius:2px;padding:10px 20px 10px 10px;backdrop-filter:blur(20px); }
+.city-tag { display:inline-flex;align-items:center;gap:12px;background:rgba(242,237,227,0.08);border:1px solid rgba(242,237,227,0.14);border-radius:2px;padding:10px 20px 10px 10px; }
+@media(min-width:769px){ .city-tag { backdrop-filter:blur(20px); } }
 .city-flag { width:32px;height:32px;border-radius:2px;background:linear-gradient(135deg,var(--verde),var(--oro));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
 .city-name { font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,0.90);display:block;line-height:1; }
 .city-sub { font-size:8px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(242,237,227,0.32);display:block;margin-top:3px; }
@@ -105,7 +106,8 @@ img { display: block; max-width: 100%; }
 .hero-title { font-family:var(--f-display);font-size:clamp(58px,9.5vw,116px);line-height:0.87;letter-spacing:-3px;color:var(--parchment);margin-bottom:36px;display:block; }
 .hero-title .eyebrow { font-family:var(--f-italic);font-style:italic;font-size:clamp(14px,1.8vw,22px);font-weight:400;letter-spacing:7px;color:rgba(242,237,227,0.38);display:block;margin-bottom:18px;line-height:1; }
 .hero-title .main-line { display:block; }
-.hero-title .main-line em { font-style:italic;background:linear-gradient(100deg,rgba(242,237,227,0.95) 0%,rgba(242,192,96,0.95) 35%,rgba(242,237,227,0.88) 70%,rgba(196,135,42,0.90) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 100%;animation:titleShimmer 5s ease-in-out infinite alternate; }
+.hero-title .main-line em { font-style:italic;background:linear-gradient(100deg,rgba(242,237,227,0.95) 0%,rgba(242,192,96,0.95) 35%,rgba(242,237,227,0.88) 70%,rgba(196,135,42,0.90) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 100%; }
+@media(min-width:769px){ .hero-title .main-line em { animation:titleShimmer 5s ease-in-out infinite alternate; } }
 @keyframes titleShimmer{from{background-position:0% 50%}to{background-position:100% 50%}}
 
 .hero-rule { display:flex;align-items:center;gap:14px;margin-bottom:34px; }
