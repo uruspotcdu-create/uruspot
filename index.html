@@ -838,6 +838,20 @@ img { display: block; max-width: 100%; }
 }
 @media(max-width:768px){#grain{display:none}}
 a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-radius:2px}
+   @media(max-width:768px){
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .live-dot,
+  .rcard-open-dot,
+  .usb-live-dot,
+  .uft-live-dot,
+  .ubc-live-dot {
+    animation-duration: 2.5s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -860,7 +874,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
       </div>
     </div>
     <div class="hero-logo">
-     <img src="https://i.imgur.com/Ep9iLoZ.png" alt="URU SPOT — Guía Local" width="160" height="48" style="width:auto;max-width:160px;height:auto;" fetchpriority="high" />
+   <img src="https://i.imgur.com/Ep9iLoZ.png" alt="URU SPOT — Guía Local" width="160" height="48" style="width:auto;max-width:160px;" fetchpriority="high" />
     </div>
   </div>
 
@@ -2304,8 +2318,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     try{const res=await fetch(WX_URL,{cache:'no-store'});if(!res.ok)throw new Error();const data=await res.json();renderWeather(data);}
     catch(e){renderError();}
   }
-  fetchWeather();
-  setInterval(fetchWeather,10*60*1000);
+  setTimeout(fetchWeather, 1200);
+setInterval(fetchWeather,10*60*1000);
 })();
 </script>
 </body>
