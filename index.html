@@ -826,6 +826,1275 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
 </div>
+  <!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  URU SPOT · SERVICIOS ESENCIALES · Concepción del Uruguay       ║
+  ║  10 bloques premium — mismo sistema que farmacia/colectivos      ║
+  ║  Pegar dentro de <main class="main-body"> antes de #categorias  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
+
+<!-- ══════════════════════════════════════════════════════════════
+     ESTILOS GLOBALES DE TODOS LOS BLOQUES
+     (un único <style> para no repetir)
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+
+/* ── BASE COMPARTIDA ─────────────────────────────────────────── */
+.usb-wrap {
+  width: 100%;
+  margin: 0 0 72px 0;
+  display: block;
+  position: relative;
+}
+
+/* Header de sección */
+.usb-hdr {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  position: relative;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.usb-hdr::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: rgba(26,25,22,0.12);
+}
+.usb-hdr-accent {
+  position: absolute;
+  bottom: -1px; left: 0;
+  display: flex;
+  height: 3px;
+}
+.usb-hdr-accent span:nth-child(1) { display: block; width: 80px; height: 3px; }
+.usb-hdr-accent span:nth-child(2) { display: block; width: 32px; height: 3px; background: var(--oro); }
+.usb-hdr-accent span:nth-child(3) { display: block; width: 12px; height: 3px; background: var(--parchment2); opacity: 0.4; }
+.usb-eyebrow {
+  font-family: var(--f-ui);
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 3.5px; text-transform: uppercase;
+  display: block; margin-bottom: 8px;
+}
+.usb-title {
+  font-family: var(--f-display);
+  font-size: clamp(24px, 3.2vw, 34px);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1; letter-spacing: -0.5px;
+}
+.usb-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--ink); color: var(--parchment);
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 8px 16px; border-radius: 2px;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Tarjeta oscura principal */
+.usb-card {
+  background: var(--ink);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s ease;
+  box-shadow: 0 24px 72px -12px rgba(6,6,5,0.40);
+}
+.usb-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 36px 88px -12px rgba(6,6,5,0.60);
+}
+
+/* Topbar shimmer */
+.usb-topbar {
+  height: 3px; width: 100%;
+  background-size: 200% 100%;
+  flex-shrink: 0;
+}
+
+/* Glow radial interior */
+.usb-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 0;
+}
+
+/* Body principal */
+.usb-body {
+  position: relative; z-index: 1;
+  display: flex; align-items: center;
+  gap: 0; padding: 44px 52px;
+}
+
+/* Ícono con pulso */
+.usb-icon {
+  width: 72px; height: 72px;
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-right: 36px;
+}
+
+/* Contenido central */
+.usb-content {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+/* Chip LIVE */
+.usb-live {
+  display: inline-flex; align-items: center; gap: 10px;
+  border-radius: 2px; padding: 7px 16px;
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  width: fit-content;
+}
+.usb-live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0;
+}
+@keyframes usbPulse {
+  0%   { box-shadow: 0 0 0 0 var(--dot-color, rgba(255,255,255,0.9)); }
+  65%  { box-shadow: 0 0 0 8px rgba(0,0,0,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+}
+
+/* Título italic */
+.usb-card-title {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: clamp(22px, 3vw, 32px);
+  color: var(--parchment);
+  line-height: 1.1; letter-spacing: -0.5px;
+  display: block;
+}
+
+/* Subtítulo */
+.usb-subtitle {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: 15px; color: rgba(242,237,227,0.42);
+  line-height: 1.75;
+}
+.usb-subtitle strong {
+  font-style: normal; font-weight: 400; color: var(--oro2);
+}
+
+/* Divisor vertical */
+.usb-vdiv {
+  width: 1px; height: 80px;
+  background: rgba(242,237,227,0.08);
+  margin: 0 44px; flex-shrink: 0;
+}
+
+/* CTA botón */
+.usb-cta {
+  display: inline-flex; align-items: center; gap: 12px;
+  color: #fff;
+  font-family: var(--f-ui); font-size: 11px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 18px 40px; border-radius: 2px;
+  text-decoration: none; white-space: nowrap;
+  flex-shrink: 0; min-height: 56px;
+  position: relative; overflow: hidden;
+  transition: filter 0.35s ease, transform 0.4s var(--ease), box-shadow 0.4s ease;
+}
+.usb-cta:hover { filter: brightness(1.15); transform: translateY(-4px); }
+.usb-cta-arr {
+  font-size: 16px;
+  transition: transform 0.4s var(--ease);
+  display: inline-block;
+}
+.usb-cta:hover .usb-cta-arr { transform: translate(3px,-3px); }
+
+/* Footer de tarjeta */
+.usb-footer {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 52px 20px;
+  border-top: 1px solid rgba(242,237,227,0.07);
+  gap: 16px; flex-wrap: wrap;
+}
+.usb-infos {
+  display: flex; align-items: center;
+  gap: 20px; flex-wrap: wrap;
+}
+.usb-info-item {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(242,237,227,0.22);
+}
+.usb-info-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: rgba(196,135,42,0.45); flex-shrink: 0;
+}
+.usb-source {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.35s ease; border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+}
+.usb-source:hover { border-bottom-color: currentColor; filter: brightness(1.3); }
+
+/* ── BLOQUE EMERGENCIAS — grid especial 3 chips ─────────────── */
+.usb-emg-grid {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: rgba(255,255,255,0.05);
+  padding: 0 52px 36px;
+}
+.usb-emg-chip {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; padding: 28px 16px;
+  text-decoration: none;
+  transition: background 0.35s ease;
+}
+.usb-emg-chip:hover { background: rgba(255,255,255,0.04); }
+.usb-emg-num {
+  font-family: var(--f-display);
+  font-size: 48px; line-height: 1;
+  color: var(--parchment); letter-spacing: -2px;
+}
+.usb-emg-label {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(242,237,227,0.35);
+}
+.usb-emg-sub {
+  font-family: var(--f-italic); font-style: italic;
+  font-size: 12px; color: rgba(242,237,227,0.20);
+}
+.usb-emg-divider {
+  width: 1px;
+  background: rgba(242,237,227,0.08);
+  align-self: stretch;
+}
+
+/* ── BLOQUE DÓLAR — 3 cotizaciones inline ───────────────────── */
+.usb-dolar-grid {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: rgba(255,255,255,0.05);
+  padding: 0 52px 36px;
+}
+.usb-dolar-chip {
+  display: flex; flex-direction: column;
+  gap: 8px; padding: 24px 20px;
+}
+.usb-dolar-type {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(242,237,227,0.30);
+}
+.usb-dolar-val {
+  font-family: var(--f-display); font-size: 32px; line-height: 1;
+  color: var(--parchment); letter-spacing: -1px;
+}
+.usb-dolar-val span { font-size: 16px; color: rgba(242,237,227,0.45); }
+.usb-dolar-sub {
+  font-family: var(--f-italic); font-style: italic;
+  font-size: 11px; color: rgba(242,237,227,0.22);
+}
+
+/* ── MOBILE ─────────────────────────────────────────────────── */
+@media(max-width:640px) {
+  .usb-body {
+    flex-direction: column; align-items: flex-start;
+    padding: 28px var(--gutter); gap: 20px;
+  }
+  .usb-icon { width: 52px; height: 52px; margin-right: 0; }
+  .usb-vdiv { display: none; }
+  .usb-cta {
+    width: 100%; justify-content: center;
+    padding: 16px 24px;
+  }
+  .usb-footer {
+    padding: 14px var(--gutter) 18px;
+    flex-direction: column; align-items: flex-start; gap: 10px;
+  }
+  .usb-emg-grid, .usb-dolar-grid {
+    grid-template-columns: 1fr;
+    padding: 0 var(--gutter) 28px;
+  }
+  .usb-emg-divider { display: none; }
+  .usb-emg-num { font-size: 36px; }
+}
+</style>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  1. 🏥 HOSPITAL JUSTO JOSÉ DE URQUIZA
+     Color: #7b3068 (bordo salud) — mapea a maps + web municipal
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-hosp-top    { animation: usbBar-hosp 4s linear infinite; }
+  .usb-hosp-card   { border-left: 5px solid #7b3068; }
+  .usb-hosp-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(123,48,104,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(196,135,42,0.05) 0%, transparent 58%);
+  }
+  @keyframes usbBar-hosp {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .usb-hosp-icon   {
+    background: rgba(123,48,104,0.14);
+    border: 1px solid rgba(123,48,104,0.38);
+    animation: usbPulse-hosp 3.5s ease infinite;
+  }
+  @keyframes usbPulse-hosp {
+    0%,100% { box-shadow: 0 0 0 0 rgba(123,48,104,0); }
+    50%     { box-shadow: 0 0 0 8px rgba(123,48,104,0.18); }
+  }
+  .usb-hosp-live   {
+    background: rgba(123,48,104,0.12);
+    border: 1px solid rgba(123,48,104,0.38);
+    color: rgba(195,110,180,0.95);
+  }
+  .usb-hosp-dot    { background: #c36eb4; }
+  .usb-hosp-cta    { background: #7b3068; box-shadow: 0 8px 40px rgba(123,48,104,0.50); }
+  .usb-hosp-source { color: rgba(195,110,180,0.45); }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="Hospital Justo José de Urquiza — Guardia">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#7b3068;">Salud · Guardia</span>
+      <h2 class="usb-title">🏥 Hospital Justo J. de Urquiza</h2>
+    </div>
+    <span class="usb-badge">Guardia 24 hs</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#7b3068;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-hosp-card">
+    <div class="usb-topbar usb-hosp-top"
+         style="background:linear-gradient(90deg,#3d1535,#7b3068 20%,#a8459c 45%,#7b3068 70%,#3d1535);background-size:200% 100%;"
+         aria-hidden="true"></div>
+    <div class="usb-body">
+      <div class="usb-icon usb-hosp-icon" aria-hidden="true">
+        <!-- Cruz de hospital SVG -->
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="14" y="2"  width="12" height="36" rx="4" fill="#c36eb4" filter="url(#hglow)"/>
+          <rect x="2"  y="14" width="36" height="12" rx="4" fill="#c36eb4" filter="url(#hglow)"/>
+          <defs>
+            <filter id="hglow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-hosp-live" role="status" aria-live="polite">
+          <span class="usb-live-dot usb-hosp-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(195,110,180,0.9);" aria-hidden="true"></span>
+          Guardia permanente · 24 hs
+        </div>
+        <span class="usb-card-title">Hospital Justo José de Urquiza — CdU</span>
+        <p class="usb-subtitle">
+          Guardia central de la ciudad, atención de urgencias y emergencias.<br/>
+          Ver <strong>ubicación en el mapa</strong>, teléfono y cómo llegar.
+        </p>
+      </div>
+      <div class="usb-vdiv" aria-hidden="true"></div>
+      <a class="usb-cta usb-hosp-cta"
+         href="https://www.google.com/maps/search/Hospital+Justo+Jose+de+Urquiza+Concepcion+del+Uruguay"
+         target="_blank" rel="noopener noreferrer" aria-label="Ver hospital en Google Maps">
+        Ver en Maps <span class="usb-cta-arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Guardia permanente</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>CdU · Entre Ríos</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Emergencias · Internación</div>
+      </div>
+      <a class="usb-source usb-hosp-source"
+         href="https://www.google.com/maps/search/Hospital+Justo+Jose+de+Urquiza+Concepcion+del+Uruguay"
+         target="_blank" rel="noopener noreferrer">Fuente: Google Maps</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  2. 🚨 EMERGENCIAS RÁPIDAS — SAME · POLICÍA · BOMBEROS
+     Color: #c0392b — panel de tres números grandes
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-emg-top  { animation: usbBar-emg 4s linear infinite; }
+  .usb-emg-card { border-left: 5px solid #c0392b; }
+  .usb-emg-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(192,57,43,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(196,135,42,0.05) 0%, transparent 58%);
+  }
+  @keyframes usbBar-emg {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .usb-emg-icon-w {
+    background: rgba(192,57,43,0.14);
+    border: 1px solid rgba(192,57,43,0.38);
+    animation: usbPulse-emg 3.5s ease infinite;
+  }
+  @keyframes usbPulse-emg {
+    0%,100% { box-shadow: 0 0 0 0 rgba(192,57,43,0); }
+    50%     { box-shadow: 0 0 0 10px rgba(192,57,43,0.20); }
+  }
+  .usb-emg-live-chip {
+    background: rgba(192,57,43,0.12);
+    border: 1px solid rgba(192,57,43,0.38);
+    color: rgba(231,76,60,0.95);
+  }
+  .usb-emg-live-dot  { background: #e74c3c; }
+  .usb-emg-cta-btn   { background: #c0392b; box-shadow: 0 8px 40px rgba(192,57,43,0.50); }
+  .usb-emg-src       { color: rgba(231,76,60,0.40); }
+  .usb-emg-num-accent{ color: #e74c3c; }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="Números de emergencia en Concepción del Uruguay">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#c0392b;">Urgencias · Emergencias</span>
+      <h2 class="usb-title">🚨 Emergencias rápidas</h2>
+    </div>
+    <span class="usb-badge">Marcado directo</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#c0392b;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-emg-card">
+    <div class="usb-topbar usb-emg-top"
+         style="background:linear-gradient(90deg,#5c0e08,#c0392b 20%,#e74c3c 45%,#c0392b 70%,#5c0e08);background-size:200% 100%;"
+         aria-hidden="true"></div>
+    <div class="usb-body" style="padding-bottom:28px;">
+      <div class="usb-icon usb-emg-icon-w" aria-hidden="true">
+        <!-- Sirena SVG -->
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <ellipse cx="19" cy="22" rx="14" ry="10" fill="#e74c3c" opacity="0.9"/>
+          <rect x="13" y="8" width="12" height="14" rx="3" fill="#e74c3c"/>
+          <rect x="8"  y="30" width="22" height="5" rx="2" fill="#c0392b"/>
+          <circle cx="8"  cy="14" r="3" fill="#e74c3c" opacity="0.5"/>
+          <circle cx="30" cy="14" r="3" fill="#e74c3c" opacity="0.5"/>
+          <rect x="16" y="10" width="6" height="2" rx="1" fill="#fff" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-emg-live-chip" role="status" aria-live="polite">
+          <span class="usb-live-dot usb-emg-live-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(231,76,60,0.9);" aria-hidden="true"></span>
+          Disponibles las 24 hs
+        </div>
+        <span class="usb-card-title">Números de emergencia en CdU</span>
+        <p class="usb-subtitle">
+          SAME, Policía y Bomberos — los tres accesos directos de la ciudad.<br/>
+          <strong>Marcalos desde tu celular con un toque.</strong>
+        </p>
+      </div>
+    </div>
+    <!-- Grid de 3 números -->
+    <div class="usb-emg-grid" role="list" aria-label="Números de emergencia">
+      <a class="usb-emg-chip" href="tel:107" role="listitem" aria-label="SAME — marcar 107">
+        <div class="usb-emg-num usb-emg-num-accent">107</div>
+        <div class="usb-emg-label">🚑 SAME</div>
+        <div class="usb-emg-sub">Emergencias médicas</div>
+      </a>
+      <div class="usb-emg-divider" aria-hidden="true"></div>
+      <a class="usb-emg-chip" href="tel:911" role="listitem" aria-label="Policía — marcar 911">
+        <div class="usb-emg-num usb-emg-num-accent">911</div>
+        <div class="usb-emg-label">🚓 Policía</div>
+        <div class="usb-emg-sub">Seguridad</div>
+      </a>
+      <div class="usb-emg-divider" aria-hidden="true"></div>
+      <a class="usb-emg-chip" href="tel:100" role="listitem" aria-label="Bomberos — marcar 100">
+        <div class="usb-emg-num usb-emg-num-accent">100</div>
+        <div class="usb-emg-label">🔥 Bomberos</div>
+        <div class="usb-emg-sub">Incendio · Rescate</div>
+      </a>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Toque directo desde móvil</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>CdU · Entre Ríos · Argentina</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Sin costo</div>
+      </div>
+      <span class="usb-source usb-emg-src">Números oficiales nacionales</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  3. 🔌 ENERSA — CORTES DE LUZ
+     Color: #c49b17 (amarillo eléctrico)
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-ener-card { border-left: 5px solid #c49b17; }
+  .usb-ener-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(196,155,23,0.13) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(29,92,64,0.06) 0%, transparent 58%);
+  }
+  .usb-ener-icon {
+    background: rgba(196,155,23,0.14);
+    border: 1px solid rgba(196,155,23,0.40);
+    animation: usbPulse-ener 3.5s ease infinite;
+  }
+  @keyframes usbPulse-ener {
+    0%,100% { box-shadow: 0 0 0 0 rgba(196,155,23,0); }
+    50%     { box-shadow: 0 0 0 10px rgba(196,155,23,0.18); }
+  }
+  .usb-ener-live  {
+    background: rgba(196,155,23,0.12);
+    border: 1px solid rgba(196,155,23,0.40);
+    color: rgba(242,192,70,0.95);
+  }
+  .usb-ener-dot   { background: #f2c050; }
+  .usb-ener-cta   { background: #c49b17; box-shadow: 0 8px 40px rgba(196,155,23,0.45); }
+  .usb-ener-src   { color: rgba(242,192,70,0.40); }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="ENERSA — Cortes de luz Entre Ríos">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#c49b17;">Servicios · Electricidad</span>
+      <h2 class="usb-title">🔌 Cortes de luz — ENERSA</h2>
+    </div>
+    <span class="usb-badge">Avisos oficiales</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#c49b17;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-ener-card">
+    <div class="usb-topbar"
+         style="background:linear-gradient(90deg,#5c4200,#c49b17 20%,#f2c050 45%,#c49b17 70%,#5c4200);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
+         aria-hidden="true"></div>
+    <div class="usb-body">
+      <div class="usb-icon usb-ener-icon" aria-hidden="true">
+        <!-- Rayo SVG -->
+        <svg width="36" height="40" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <polygon points="22,2 8,22 18,22 14,38 28,18 18,18" fill="#f2c050"
+                   filter="drop-shadow(0 0 8px rgba(242,192,80,0.7))"/>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-ener-live" role="status" aria-live="polite">
+          <span class="usb-live-dot usb-ener-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(242,192,80,0.9);" aria-hidden="true"></span>
+          Avisos y cortes programados
+        </div>
+        <span class="usb-card-title">ENERSA — Distribuidora eléctrica de Entre Ríos</span>
+        <p class="usb-subtitle">
+          Cortes programados, avisos de emergencia y reclamos.<br/>
+          Todo desde el sitio oficial de <strong>ENERSA</strong> para la provincia.
+        </p>
+      </div>
+      <div class="usb-vdiv" aria-hidden="true"></div>
+      <a class="usb-cta usb-ener-cta"
+         href="https://enersa.com.ar"
+         target="_blank" rel="noopener noreferrer" aria-label="Ir al sitio oficial de ENERSA">
+        Ver cortes <span class="usb-cta-arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Avisos programados</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Entre Ríos · Argentina</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Reclamos en línea</div>
+      </div>
+      <a class="usb-source usb-ener-src"
+         href="https://enersa.com.ar" target="_blank" rel="noopener noreferrer">Fuente: enersa.com.ar</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  4. 🚕 REMISES — DIRECTORIO LOCAL
+     Color: #1a5c8a (azul noche movilidad)
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-rem-card { border-left: 5px solid #1a5c8a; }
+  .usb-rem-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(26,92,138,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(196,135,42,0.05) 0%, transparent 58%);
+  }
+  .usb-rem-icon {
+    background: rgba(26,92,138,0.14);
+    border: 1px solid rgba(26,92,138,0.40);
+    animation: usbPulse-rem 3.5s ease infinite;
+  }
+  @keyframes usbPulse-rem {
+    0%,100% { box-shadow: 0 0 0 0 rgba(26,92,138,0); }
+    50%     { box-shadow: 0 0 0 9px rgba(26,92,138,0.20); }
+  }
+  .usb-rem-live  {
+    background: rgba(26,92,138,0.12);
+    border: 1px solid rgba(26,92,138,0.38);
+    color: rgba(70,160,230,0.95);
+  }
+  .usb-rem-dot   { background: #46a0e6; }
+  .usb-rem-cta   { background: #1a5c8a; box-shadow: 0 8px 40px rgba(26,92,138,0.50); }
+  .usb-rem-src   { color: rgba(70,160,230,0.40); }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="Remises en Concepción del Uruguay">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#1a5c8a;">Movilidad · Traslados</span>
+      <h2 class="usb-title">🚕 Remises en CdU</h2>
+    </div>
+    <span class="usb-badge">Directorio local</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#1a5c8a;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-rem-card">
+    <div class="usb-topbar"
+         style="background:linear-gradient(90deg,#0a2d46,#1a5c8a 20%,#2680c2 45%,#1a5c8a 70%,#0a2d46);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
+         aria-hidden="true"></div>
+    <div class="usb-body">
+      <div class="usb-icon usb-rem-icon" aria-hidden="true">
+        <!-- Auto SVG -->
+        <svg width="42" height="32" viewBox="0 0 42 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2" y="12" width="38" height="14" rx="4" fill="#2680c2"/>
+          <path d="M8 12 L13 4 H29 L34 12Z" fill="#46a0e6"/>
+          <rect x="14" y="5" width="14" height="6" rx="1" fill="#0a2d46" opacity="0.6"/>
+          <circle cx="10" cy="27" r="4" fill="#0a2d46"/>
+          <circle cx="32" cy="27" r="4" fill="#0a2d46"/>
+          <circle cx="10" cy="27" r="2" fill="#46a0e6" opacity="0.5"/>
+          <circle cx="32" cy="27" r="2" fill="#46a0e6" opacity="0.5"/>
+          <rect x="0" y="17" width="3" height="6" rx="1" fill="#2680c2" opacity="0.5"/>
+          <rect x="39" y="17" width="3" height="6" rx="1" fill="#f2c050"/>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-rem-live" role="status">
+          <span class="usb-live-dot usb-rem-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(70,160,230,0.9);" aria-hidden="true"></span>
+          Remiserías de CdU disponibles
+        </div>
+        <span class="usb-card-title">Remises y taxis en Concepción del Uruguay</span>
+        <p class="usb-subtitle">
+          Directorio actualizado de remiserías locales con <strong>teléfono y ubicación</strong>.<br/>
+          Buscalas en el mapa o llamá directo desde la ficha.
+        </p>
+      </div>
+      <div class="usb-vdiv" aria-hidden="true"></div>
+      <a class="usb-cta usb-rem-cta"
+         href="https://www.google.com/maps/search/remises+Concepcion+del+Uruguay+Entre+Rios"
+         target="_blank" rel="noopener noreferrer" aria-label="Buscar remises en Google Maps">
+        Ver en Maps <span class="usb-cta-arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Teléfonos directos</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>CdU · Entre Ríos</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Traslados 24 hs</div>
+      </div>
+      <a class="usb-source usb-rem-src"
+         href="https://www.google.com/maps/search/remises+Concepcion+del+Uruguay"
+         target="_blank" rel="noopener noreferrer">Fuente: Google Maps</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  5. 🚌 TERMINAL DE ÓMNIBUS — PLATAFORMA 10
+     Color: #1a4f8a (azul terminal)
+     ══════════════════════════════════════════════════════════════ -->
+<!-- reutiliza estilos del bloque colectivos del sitio original -->
+<div class="ubc-wrap reveal" role="region" aria-label="Terminal de ómnibus larga distancia — Plataforma 10">
+  <div class="ubc-section-header">
+    <div>
+      <span class="ubc-eyebrow">Transporte · Larga Distancia</span>
+      <h2 class="ubc-section-title">🚌 Terminal de ómnibus</h2>
+    </div>
+    <span class="ubc-badge">Tiempo real</span>
+    <div class="ubc-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+  <div class="ubc-card">
+    <div class="ubc-topbar" aria-hidden="true"></div>
+    <div class="ubc-body">
+      <div class="ubc-icon" aria-hidden="true">
+        <svg class="ubc-bus-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2" y="4" width="32" height="22" rx="4"/>
+          <rect x="4" y="6" width="28" height="12" rx="1" fill="#0e2d5c"/>
+          <circle cx="9"  cy="29" r="4"/>
+          <circle cx="27" cy="29" r="4"/>
+          <rect x="0" y="14" width="2" height="6" rx="1"/>
+          <rect x="34" y="14" width="2" height="6" rx="1"/>
+          <rect x="12" y="0" width="12" height="4" rx="1" fill="#2563b0" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="ubc-content">
+        <div class="ubc-live" role="status" aria-live="polite">
+          <span class="ubc-live-dot" aria-hidden="true"></span>Horarios en tiempo real
+        </div>
+        <span class="ubc-title">Terminal CdU — salidas y llegadas larga distancia</span>
+        <p class="ubc-subtitle">Consultá todas las empresas, horarios y disponibilidad de asientos.<br/>
+          Reservá tu pasaje directamente en <strong>Plataforma 10</strong>.</p>
+      </div>
+      <div class="ubc-vdivider" aria-hidden="true"></div>
+      <a class="ubc-cta"
+         href="https://www.plataforma10.com.ar/horarios-de-omnibus/concepcion-del-uruguay"
+         target="_blank" rel="noopener noreferrer" aria-label="Ver horarios en Plataforma 10">
+        Ver horarios <span class="ubc-cta-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="ubc-footer">
+      <div class="ubc-infos">
+        <div class="ubc-info-item"><span class="ubc-info-dot" aria-hidden="true"></span>Larga distancia</div>
+        <div class="ubc-info-item"><span class="ubc-info-dot" aria-hidden="true"></span>CdU · Entre Ríos · Argentina</div>
+        <div class="ubc-info-item"><span class="ubc-info-dot" aria-hidden="true"></span>Reserva online disponible</div>
+      </div>
+      <a class="ubc-source"
+         href="https://www.plataforma10.com.ar" target="_blank" rel="noopener noreferrer">Fuente: plataforma10.com.ar</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  6. ⛽ PRECIOS DE COMBUSTIBLE
+     Color: #7a3c1e (marrón combustible)
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-naf-card { border-left: 5px solid #7a3c1e; }
+  .usb-naf-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(122,60,30,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(196,135,42,0.06) 0%, transparent 58%);
+  }
+  .usb-naf-icon {
+    background: rgba(122,60,30,0.14);
+    border: 1px solid rgba(122,60,30,0.40);
+    animation: usbPulse-naf 3.5s ease infinite;
+  }
+  @keyframes usbPulse-naf {
+    0%,100% { box-shadow: 0 0 0 0 rgba(122,60,30,0); }
+    50%     { box-shadow: 0 0 0 9px rgba(122,60,30,0.20); }
+  }
+  .usb-naf-live  {
+    background: rgba(122,60,30,0.12);
+    border: 1px solid rgba(122,60,30,0.40);
+    color: rgba(220,120,60,0.95);
+  }
+  .usb-naf-dot   { background: #dc783c; }
+  .usb-naf-cta   { background: #7a3c1e; box-shadow: 0 8px 40px rgba(122,60,30,0.50); }
+  .usb-naf-src   { color: rgba(220,120,60,0.40); }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="Precios de combustible en Argentina">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#7a3c1e;">Movilidad · Combustible</span>
+      <h2 class="usb-title">⛽ Precio del combustible</h2>
+    </div>
+    <span class="usb-badge">Secretaría de Energía</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#7a3c1e;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-naf-card">
+    <div class="usb-topbar"
+         style="background:linear-gradient(90deg,#3a1808,#7a3c1e 20%,#dc783c 45%,#7a3c1e 70%,#3a1808);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
+         aria-hidden="true"></div>
+    <div class="usb-body">
+      <div class="usb-icon usb-naf-icon" aria-hidden="true">
+        <!-- Surtidor SVG -->
+        <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="4" y="6" width="20" height="34" rx="3" fill="#dc783c"/>
+          <rect x="6" y="8" width="16" height="10" rx="2" fill="#3a1808" opacity="0.5"/>
+          <rect x="7" y="20" width="14" height="3" rx="1" fill="#fff" opacity="0.2"/>
+          <rect x="7" y="25" width="10" height="2" rx="1" fill="#fff" opacity="0.15"/>
+          <rect x="24" y="10" width="8" height="4" rx="2" fill="#dc783c"/>
+          <rect x="28" y="10" width="4" height="18" rx="2" fill="#dc783c"/>
+          <path d="M28 28 Q36 28 36 20" stroke="#dc783c" stroke-width="3" fill="none"/>
+          <rect x="0"  y="38" width="28" height="4" rx="2" fill="#3a1808" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-naf-live" role="status">
+          <span class="usb-live-dot usb-naf-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(220,120,60,0.9);" aria-hidden="true"></span>
+          Precios oficiales actualizados
+        </div>
+        <span class="usb-card-title">Precios de nafta en surtidores — Entre Ríos</span>
+        <p class="usb-subtitle">
+          Consultá el precio oficial de la nafta, gasoil y premium<br/>
+          en surtidores de <strong>todo el país y tu zona</strong> — Secretaría de Energía.
+        </p>
+      </div>
+      <div class="usb-vdiv" aria-hidden="true"></div>
+      <a class="usb-cta usb-naf-cta"
+         href="https://www.argentina.gob.ar/energia/combustibles/surtidores"
+         target="_blank" rel="noopener noreferrer" aria-label="Ver precios de combustible oficiales">
+        Ver precios <span class="usb-cta-arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Datos por surtidor</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Entre Ríos · Argentina</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Nafta · Gasoil · Premium</div>
+      </div>
+      <a class="usb-source usb-naf-src"
+         href="https://www.argentina.gob.ar/energia/combustibles/surtidores"
+         target="_blank" rel="noopener noreferrer">Fuente: argentina.gob.ar · Energía</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  7. 🎭 AGENDA Y EVENTOS MUNICIPALES
+     Color: #2d6a3f (verde municipal)
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-age-card { border-left: 5px solid #2d6a3f; }
+  .usb-age-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(45,106,63,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(196,135,42,0.05) 0%, transparent 58%);
+  }
+  .usb-age-icon {
+    background: rgba(45,106,63,0.14);
+    border: 1px solid rgba(45,106,63,0.40);
+    animation: usbPulse-age 3.5s ease infinite;
+  }
+  @keyframes usbPulse-age {
+    0%,100% { box-shadow: 0 0 0 0 rgba(45,106,63,0); }
+    50%     { box-shadow: 0 0 0 9px rgba(45,106,63,0.20); }
+  }
+  .usb-age-live  {
+    background: rgba(45,106,63,0.12);
+    border: 1px solid rgba(45,106,63,0.40);
+    color: rgba(80,190,110,0.95);
+  }
+  .usb-age-dot   { background: #50be6e; }
+  .usb-age-cta   { background: #2d6a3f; box-shadow: 0 8px 40px rgba(45,106,63,0.50); }
+  .usb-age-src   { color: rgba(80,190,110,0.40); }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="Agenda y eventos — Municipio CdU">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#2d6a3f;">Ciudad · Cultura · Agenda</span>
+      <h2 class="usb-title">🎭 Eventos en CdU</h2>
+    </div>
+    <span class="usb-badge">Agenda municipal</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#2d6a3f;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-age-card">
+    <div class="usb-topbar"
+         style="background:linear-gradient(90deg,#0e2a1a,#2d6a3f 20%,#50be6e 45%,#2d6a3f 70%,#0e2a1a);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
+         aria-hidden="true"></div>
+    <div class="usb-body">
+      <div class="usb-icon usb-age-icon" aria-hidden="true">
+        <!-- Calendario SVG -->
+        <svg width="38" height="40" viewBox="0 0 38 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2" y="8" width="34" height="30" rx="4" fill="#2d6a3f"/>
+          <rect x="2" y="8" width="34" height="11" rx="4" fill="#50be6e"/>
+          <rect x="2" y="15" width="34" height="4" fill="#50be6e"/>
+          <rect x="11" y="2" width="4" height="10" rx="2" fill="#0e2a1a"/>
+          <rect x="23" y="2" width="4" height="10" rx="2" fill="#0e2a1a"/>
+          <rect x="7"  y="24" width="6" height="6" rx="1" fill="#50be6e" opacity="0.6"/>
+          <rect x="16" y="24" width="6" height="6" rx="1" fill="#50be6e" opacity="0.6"/>
+          <rect x="25" y="24" width="6" height="6" rx="1" fill="#50be6e" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-age-live" role="status">
+          <span class="usb-live-dot usb-age-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(80,190,110,0.9);" aria-hidden="true"></span>
+          Agenda oficial actualizada
+        </div>
+        <span class="usb-card-title">Eventos, cultura y agenda en Concepción del Uruguay</span>
+        <p class="usb-subtitle">
+          Shows, ferias, festivales, deportes y actividades municipales.<br/>
+          Todo desde el sitio oficial del <strong>Municipio de CdU</strong>.
+        </p>
+      </div>
+      <div class="usb-vdiv" aria-hidden="true"></div>
+      <a class="usb-cta usb-age-cta"
+         href="https://www.concepciondeluruguay.gob.ar"
+         target="_blank" rel="noopener noreferrer" aria-label="Ver agenda municipal de Concepción del Uruguay">
+        Ver agenda <span class="usb-cta-arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Shows · Ferias · Cultura</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>CdU · Entre Ríos</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Fuente oficial</div>
+      </div>
+      <a class="usb-source usb-age-src"
+         href="https://www.concepciondeluruguay.gob.ar"
+         target="_blank" rel="noopener noreferrer">Fuente: concepciondeluruguay.gob.ar</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  8. 🌡️ PRONÓSTICO EXTENDIDO — 7 DÍAS
+     Color: #1a7a9a (celeste cielo)
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-wx-card { border-left: 5px solid #1a7a9a; }
+  .usb-wx-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(26,122,154,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(196,135,42,0.05) 0%, transparent 58%);
+  }
+  .usb-wx-icon {
+    background: rgba(26,122,154,0.14);
+    border: 1px solid rgba(26,122,154,0.40);
+    animation: usbPulse-wx 3.5s ease infinite;
+  }
+  @keyframes usbPulse-wx {
+    0%,100% { box-shadow: 0 0 0 0 rgba(26,122,154,0); }
+    50%     { box-shadow: 0 0 0 9px rgba(26,122,154,0.20); }
+  }
+  .usb-wx-live  {
+    background: rgba(26,122,154,0.12);
+    border: 1px solid rgba(26,122,154,0.40);
+    color: rgba(60,185,230,0.95);
+  }
+  .usb-wx-dot   { background: #3cb9e6; }
+  .usb-wx-cta   { background: #1a7a9a; box-shadow: 0 8px 40px rgba(26,122,154,0.50); }
+  .usb-wx-src   { color: rgba(60,185,230,0.40); }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="Pronóstico extendido 7 días CdU">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#1a7a9a;">Ciudad · Clima extendido</span>
+      <h2 class="usb-title">🌡️ Pronóstico 7 días</h2>
+    </div>
+    <span class="usb-badge">Actualizado hoy</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#1a7a9a;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-wx-card">
+    <div class="usb-topbar"
+         style="background:linear-gradient(90deg,#0a3a4a,#1a7a9a 20%,#3cb9e6 45%,#1a7a9a 70%,#0a3a4a);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
+         aria-hidden="true"></div>
+    <div class="usb-body">
+      <div class="usb-icon usb-wx-icon" aria-hidden="true">
+        <!-- Sol+Nube SVG -->
+        <svg width="44" height="40" viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="16" cy="14" r="10" fill="#f2c050" filter="drop-shadow(0 0 8px rgba(242,192,80,0.6))"/>
+          <line x1="16" y1="0"  x2="16" y2="4"  stroke="#f2c050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="16" y1="24" x2="16" y2="28" stroke="#f2c050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="2"  y1="14" x2="6"  y2="14" stroke="#f2c050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="26" y1="14" x2="30" y2="14" stroke="#f2c050" stroke-width="2" stroke-linecap="round"/>
+          <ellipse cx="32" cy="28" rx="12" ry="8" fill="#3cb9e6"/>
+          <ellipse cx="24" cy="30" rx="9"  ry="7" fill="#3cb9e6"/>
+          <ellipse cx="38" cy="30" rx="7"  ry="6" fill="#3cb9e6" opacity="0.8"/>
+          <rect x="16" y="30" width="26" height="4" rx="2" fill="#1a7a9a" opacity="0.4"/>
+          <line x1="21" y1="36" x2="19" y2="40" stroke="#3cb9e6" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="27" y1="36" x2="25" y2="40" stroke="#3cb9e6" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="33" y1="36" x2="31" y2="40" stroke="#3cb9e6" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-wx-live" role="status">
+          <span class="usb-live-dot usb-wx-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(60,185,230,0.9);" aria-hidden="true"></span>
+          Pronóstico en tiempo real
+        </div>
+        <span class="usb-card-title">Pronóstico extendido — Concepción del Uruguay</span>
+        <p class="usb-subtitle">
+          Los próximos 7 días para CdU: temperatura, lluvia, viento y más.<br/>
+          <strong>Planificá tu semana</strong> con el pronóstico detallado de la ciudad.
+        </p>
+      </div>
+      <div class="usb-vdiv" aria-hidden="true"></div>
+      <a class="usb-cta usb-wx-cta"
+         href="https://www.tiempo.com/concepcion-del-uruguay.htm"
+         target="_blank" rel="noopener noreferrer" aria-label="Ver pronóstico 7 días en tiempo.com">
+        Ver pronóstico <span class="usb-cta-arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>7 días · Horario · Lluvia</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>CdU · Entre Ríos</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Actualizado cada hora</div>
+      </div>
+      <a class="usb-source usb-wx-src"
+         href="https://www.tiempo.com/concepcion-del-uruguay.htm"
+         target="_blank" rel="noopener noreferrer">Fuente: tiempo.com</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  9. 💵 DÓLAR DEL DÍA — COTIZACIONES
+     Color: #9a7c14 (dorado / billete)
+     Muestra 3 tipos: Oficial · Blue · Tarjeta
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-dol-card { border-left: 5px solid #9a7c14; }
+  .usb-dol-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(154,124,20,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(29,92,64,0.06) 0%, transparent 58%);
+  }
+  .usb-dol-icon {
+    background: rgba(154,124,20,0.14);
+    border: 1px solid rgba(154,124,20,0.40);
+    animation: usbPulse-dol 3.5s ease infinite;
+  }
+  @keyframes usbPulse-dol {
+    0%,100% { box-shadow: 0 0 0 0 rgba(154,124,20,0); }
+    50%     { box-shadow: 0 0 0 9px rgba(154,124,20,0.20); }
+  }
+  .usb-dol-live  {
+    background: rgba(154,124,20,0.12);
+    border: 1px solid rgba(154,124,20,0.40);
+    color: rgba(230,190,50,0.95);
+  }
+  .usb-dol-dot   { background: #e6be32; }
+  .usb-dol-cta   { background: #9a7c14; box-shadow: 0 8px 40px rgba(154,124,20,0.50); }
+  .usb-dol-src   { color: rgba(230,190,50,0.40); }
+  .usb-dolar-chip-divider { width:1px; background: rgba(242,237,227,0.08); align-self: stretch; }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="Cotización del dólar hoy en Argentina">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#9a7c14;">Economía · Cotizaciones</span>
+      <h2 class="usb-title">💵 Dólar del día</h2>
+    </div>
+    <span class="usb-badge">En vivo</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#9a7c14;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-dol-card">
+    <div class="usb-topbar"
+         style="background:linear-gradient(90deg,#4a3800,#9a7c14 20%,#e6be32 45%,#9a7c14 70%,#4a3800);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
+         aria-hidden="true"></div>
+    <div class="usb-body" style="padding-bottom:28px;">
+      <div class="usb-icon usb-dol-icon" aria-hidden="true">
+        <!-- Billete SVG -->
+        <svg width="44" height="32" viewBox="0 0 44 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2" y="6" width="40" height="20" rx="3" fill="#e6be32" opacity="0.9"/>
+          <rect x="4" y="8" width="36" height="16" rx="2" fill="#4a3800" opacity="0.15"/>
+          <circle cx="22" cy="16" r="6" fill="#9a7c14" opacity="0.5"/>
+          <circle cx="22" cy="16" r="4" fill="#e6be32" opacity="0.8"/>
+          <rect x="6"  y="10" width="6" height="12" rx="1" fill="#9a7c14" opacity="0.25"/>
+          <rect x="32" y="10" width="6" height="12" rx="1" fill="#9a7c14" opacity="0.25"/>
+          <text x="22" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="#4a3800" font-family="serif">$</text>
+          <rect x="0"  y="2"  width="44" height="2" rx="1" fill="#9a7c14" opacity="0.3"/>
+          <rect x="0"  y="28" width="44" height="2" rx="1" fill="#9a7c14" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-dol-live" role="status">
+          <span class="usb-live-dot usb-dol-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(230,190,50,0.9);" aria-hidden="true"></span>
+          Cotizaciones en tiempo real
+        </div>
+        <span class="usb-card-title">Dólar hoy — Oficial · Blue · Tarjeta</span>
+        <p class="usb-subtitle">
+          Las tres cotizaciones del dólar actualizadas en tiempo real.<br/>
+          Ver también <strong>crypto, euro, real</strong> y todas las divisas.
+        </p>
+      </div>
+    </div>
+    <!-- Grid cotizaciones (valores simbólicos — se actualizan desde dolarito) -->
+    <div class="usb-dolar-grid" role="list" aria-label="Tipos de dólar">
+      <div class="usb-dolar-chip" role="listitem">
+        <div class="usb-dolar-type">💰 Oficial</div>
+        <div class="usb-dolar-val"><span>$</span>—</div>
+        <div class="usb-dolar-sub">Banco Nación · hoy</div>
+      </div>
+      <div class="usb-dolar-chip" role="listitem">
+        <div class="usb-dolar-type">📋 Blue</div>
+        <div class="usb-dolar-val"><span>$</span>—</div>
+        <div class="usb-dolar-sub">Mercado informal · hoy</div>
+      </div>
+      <div class="usb-dolar-chip" role="listitem">
+        <div class="usb-dolar-type">💳 Tarjeta</div>
+        <div class="usb-dolar-val"><span>$</span>—</div>
+        <div class="usb-dolar-sub">Turista · hoy</div>
+      </div>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Actualizado en tiempo real</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Argentina</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Todas las divisas</div>
+      </div>
+      <a class="usb-source usb-dol-src"
+         href="https://dolarito.ar" target="_blank" rel="noopener noreferrer">Fuente: dolarito.ar</a>
+    </div>
+    <!-- CTA separado abajo para no romper el grid de cotizaciones -->
+    <div style="position:relative;z-index:1;padding:0 52px 36px;display:flex;justify-content:flex-end;">
+      <a class="usb-cta usb-dol-cta"
+         href="https://dolarito.ar"
+         target="_blank" rel="noopener noreferrer" aria-label="Ver cotizaciones en dolarito.ar">
+        Ver cotizaciones <span class="usb-cta-arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+  10. 📈 INFLACIÓN Y PRECIOS — INDEC
+      Color: #4a2c9a (violeta datos económicos)
+      ══════════════════════════════════════════════════════════════ -->
+<style>
+  .usb-ind-card { border-left: 5px solid #4a2c9a; }
+  .usb-ind-card::before {
+    background:
+      radial-gradient(ellipse 60% 90% at 95% 50%, rgba(74,44,154,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 70% at 5% 50%,  rgba(196,135,42,0.05) 0%, transparent 58%);
+  }
+  .usb-ind-icon {
+    background: rgba(74,44,154,0.14);
+    border: 1px solid rgba(74,44,154,0.40);
+    animation: usbPulse-ind 3.5s ease infinite;
+  }
+  @keyframes usbPulse-ind {
+    0%,100% { box-shadow: 0 0 0 0 rgba(74,44,154,0); }
+    50%     { box-shadow: 0 0 0 9px rgba(74,44,154,0.20); }
+  }
+  .usb-ind-live  {
+    background: rgba(74,44,154,0.12);
+    border: 1px solid rgba(74,44,154,0.40);
+    color: rgba(140,100,240,0.95);
+  }
+  .usb-ind-dot   { background: #8c64f0; }
+  .usb-ind-cta   { background: #4a2c9a; box-shadow: 0 8px 40px rgba(74,44,154,0.50); }
+  .usb-ind-src   { color: rgba(140,100,240,0.40); }
+</style>
+
+<div class="usb-wrap reveal" role="region" aria-label="Inflación e IPC — INDEC Argentina">
+  <div class="usb-hdr">
+    <div>
+      <span class="usb-eyebrow" style="color:#4a2c9a;">Economía · Precios · Datos</span>
+      <h2 class="usb-title">📈 Inflación y precios — INDEC</h2>
+    </div>
+    <span class="usb-badge">Datos oficiales</span>
+    <div class="usb-hdr-accent" aria-hidden="true">
+      <span style="background:#4a2c9a;"></span>
+      <span></span><span></span>
+    </div>
+  </div>
+  <div class="usb-card usb-ind-card">
+    <div class="usb-topbar"
+         style="background:linear-gradient(90deg,#1e1040,#4a2c9a 20%,#8c64f0 45%,#4a2c9a 70%,#1e1040);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
+         aria-hidden="true"></div>
+    <div class="usb-body">
+      <div class="usb-icon usb-ind-icon" aria-hidden="true">
+        <!-- Gráfico de línea SVG -->
+        <svg width="42" height="36" viewBox="0 0 42 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="0" y="32" width="42" height="2" rx="1" fill="#8c64f0" opacity="0.4"/>
+          <rect x="0" y="0"  width="2"  height="34" rx="1" fill="#8c64f0" opacity="0.4"/>
+          <polyline points="4,28 10,22 16,18 22,14 28,10 34,6 40,2"
+                    stroke="#8c64f0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+                    filter="drop-shadow(0 0 6px rgba(140,100,240,0.6))"/>
+          <circle cx="10" cy="22" r="2.5" fill="#8c64f0"/>
+          <circle cx="22" cy="14" r="2.5" fill="#8c64f0"/>
+          <circle cx="34" cy="6"  r="2.5" fill="#8c64f0"/>
+          <circle cx="40" cy="2"  r="3"   fill="#c86ef0" filter="drop-shadow(0 0 5px rgba(200,110,240,0.8))"/>
+        </svg>
+      </div>
+      <div class="usb-content">
+        <div class="usb-live usb-ind-live" role="status">
+          <span class="usb-live-dot usb-ind-dot" style="animation:usbPulse 2.5s ease infinite;--dot-color:rgba(140,100,240,0.9);" aria-hidden="true"></span>
+          Datos oficiales del INDEC
+        </div>
+        <span class="usb-card-title">Inflación, IPC y precios — Instituto Nacional de Estadística</span>
+        <p class="usb-subtitle">
+          Índice de Precios al Consumidor, inflación mensual e interanual.<br/>
+          Todo desde la fuente oficial: <strong>INDEC Argentina</strong>.
+        </p>
+      </div>
+      <div class="usb-vdiv" aria-hidden="true"></div>
+      <a class="usb-cta usb-ind-cta"
+         href="https://www.indec.gob.ar/indec/web/Nivel4-Tema-3-5-31"
+         target="_blank" rel="noopener noreferrer" aria-label="Ver datos de inflación en INDEC">
+        Ver IPC <span class="usb-cta-arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="usb-footer">
+      <div class="usb-infos">
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>IPC mensual e interanual</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Argentina</div>
+        <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Fuente gubernamental</div>
+      </div>
+      <a class="usb-source usb-ind-src"
+         href="https://www.indec.gob.ar"
+         target="_blank" rel="noopener noreferrer">Fuente: indec.gob.ar</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     FIN DEL BLOQUE DE SERVICIOS ESENCIALES — URU SPOT © 2026
+     Pegar todo este archivo antes de <!-- ══ CATEGORÍAS ══ -->
+     ════════════════════════════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     SCRIPT: Carga cotizaciones del dólar desde API pública
+     Pegar junto con el HTML de arriba, antes del cierre </body>
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+(function fetchDolar() {
+  var types = [
+    { key: 'oficial',  label: '💰 Oficial',  sub: 'Banco Nación · hoy' },
+    { key: 'blue',     label: '📋 Blue',     sub: 'Mercado informal · hoy' },
+    { key: 'tarjeta',  label: '💳 Tarjeta',  sub: 'Turista · hoy' },
+  ];
+
+  fetch('https://dolarapi.com/v1/dolares', { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var map = {};
+      data.forEach(function(d) { map[d.casa] = d; });
+
+      var chips = document.querySelectorAll('.usb-dolar-chip');
+      var keys  = ['oficial', 'blue', 'tarjeta'];
+      keys.forEach(function(k, i) {
+        var d = map[k];
+        if (!d || !chips[i]) return;
+        var val    = chips[i].querySelector('.usb-dolar-val');
+        var lbl    = chips[i].querySelector('.usb-dolar-type');
+        var sub    = chips[i].querySelector('.usb-dolar-sub');
+        if (val) val.innerHTML = '<span>$</span>' + Math.round(d.venta).toLocaleString('es-AR');
+        if (lbl) lbl.textContent = types[i].label;
+        if (sub) sub.textContent = 'Compra: $' + Math.round(d.compra).toLocaleString('es-AR');
+      });
+    })
+    .catch(function() {
+      /* Si la API falla, los guiones se mantienen — sin romperse */
+    });
+})();
+</script>
   <!-- ══ CATEGORÍAS ══ -->
   <section id="categorias" aria-labelledby="title-categorias">
     <div class="section-header">
