@@ -700,6 +700,53 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     .uft-footer{padding:14px var(--gutter) 18px;flex-direction:column;align-items:flex-start;gap:10px}
   }
 </style>
+  <!-- COLECTIVOS STYLES -->
+<style>
+  .ubc-wrap{width:100%;margin:0 0 80px 0;display:block;position:relative}
+  .ubc-section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;padding-bottom:20px;position:relative;gap:16px;flex-wrap:wrap}
+  .ubc-section-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(26,25,22,0.12)}
+  .ubc-header-accent{position:absolute;bottom:-1px;left:0;display:flex;height:3px}
+  .ubc-header-accent span:nth-child(1){display:block;width:80px;height:3px;background:#1a4f8a}
+  .ubc-header-accent span:nth-child(2){display:block;width:32px;height:3px;background:var(--oro)}
+  .ubc-header-accent span:nth-child(3){display:block;width:12px;height:3px;background:var(--parchment2);opacity:0.4}
+  .ubc-eyebrow{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:#1a4f8a;display:block;margin-bottom:8px}
+  .ubc-section-title{font-family:var(--f-display);font-size:clamp(24px,3.2vw,34px);font-weight:400;color:var(--ink);line-height:1;letter-spacing:-0.5px}
+  .ubc-badge{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--parchment);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:8px 16px;border-radius:2px;white-space:nowrap;flex-shrink:0}
+  .ubc-card{background:var(--ink);border-left:5px solid #1a4f8a;position:relative;overflow:hidden;display:flex;flex-direction:column;transition:transform 0.4s var(--ease),box-shadow 0.4s ease;box-shadow:0 24px 72px -12px rgba(6,6,5,0.40)}
+  .ubc-card:hover{transform:translateY(-4px);box-shadow:0 36px 88px -12px rgba(6,6,5,0.60)}
+  .ubc-topbar{height:3px;width:100%;background:linear-gradient(90deg,#0e2d5c,#1a4f8a 20%,#2563b0 45%,#1a4f8a 70%,#0e2d5c);background-size:200% 100%;animation:ubc-bar 4s linear infinite;flex-shrink:0}
+  @keyframes ubc-bar{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+  .ubc-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 90% at 95% 50%,rgba(26,79,138,0.15) 0%,transparent 62%),radial-gradient(ellipse 40% 70% at 5% 50%,rgba(196,135,42,0.05) 0%,transparent 58%);pointer-events:none;z-index:0}
+  .ubc-body{position:relative;z-index:1;display:flex;align-items:center;gap:0;padding:44px 52px}
+  .ubc-icon{width:72px;height:72px;background:rgba(26,79,138,0.14);border:1px solid rgba(26,79,138,0.38);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:36px;animation:ubc-icon-pulse 3.5s ease infinite}
+  @keyframes ubc-icon-pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,79,138,0)}50%{box-shadow:0 0 0 8px rgba(26,79,138,0.18)}}
+  .ubc-bus-icon{width:38px;height:38px;fill:#2563b0;display:block;filter:drop-shadow(0 0 8px rgba(26,79,138,0.60))}
+  .ubc-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+  .ubc-live{display:inline-flex;align-items:center;gap:10px;background:rgba(26,79,138,0.12);border:1px solid rgba(26,79,138,0.36);border-radius:2px;padding:7px 16px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(37,99,176,0.95);width:fit-content}
+  .ubc-live-dot{width:6px;height:6px;background:#2563b0;border-radius:50%;flex-shrink:0;animation:ubc-pulse 2.5s ease infinite}
+  @keyframes ubc-pulse{0%{box-shadow:0 0 0 0 rgba(37,99,176,0.9)}65%{box-shadow:0 0 0 8px rgba(37,99,176,0)}100%{box-shadow:0 0 0 0 rgba(37,99,176,0)}}
+  .ubc-title{font-family:var(--f-display);font-style:italic;font-size:clamp(22px,3vw,32px);color:var(--parchment);line-height:1.1;letter-spacing:-0.5px;display:block}
+  .ubc-subtitle{font-family:var(--f-italic);font-style:italic;font-size:15px;color:rgba(242,237,227,0.42);line-height:1.75}
+  .ubc-subtitle strong{font-style:normal;font-weight:400;color:var(--oro2)}
+  .ubc-vdivider{width:1px;height:80px;background:rgba(242,237,227,0.08);margin:0 44px;flex-shrink:0}
+  .ubc-cta{display:inline-flex;align-items:center;gap:12px;background:#1a4f8a;color:#fff;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:18px 40px;border-radius:2px;text-decoration:none;white-space:nowrap;flex-shrink:0;min-height:56px;position:relative;overflow:hidden;transition:background 0.4s var(--ease),transform 0.4s var(--ease),box-shadow 0.4s ease;box-shadow:0 8px 40px rgba(26,79,138,0.50)}
+  .ubc-cta:hover{background:#2563b0;transform:translateY(-4px);box-shadow:0 24px 60px rgba(26,79,138,0.65)}
+  .ubc-cta-arrow{font-size:16px;transition:transform 0.4s var(--ease);display:inline-block}
+  .ubc-cta:hover .ubc-cta-arrow{transform:translate(3px,-3px)}
+  .ubc-footer{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:16px 52px 20px;border-top:1px solid rgba(242,237,227,0.07);gap:16px;flex-wrap:wrap}
+  .ubc-infos{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .ubc-info-item{display:flex;align-items:center;gap:7px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,0.22)}
+  .ubc-info-dot{width:4px;height:4px;border-radius:50%;background:rgba(37,99,176,0.55);flex-shrink:0}
+  .ubc-source{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(37,99,176,0.50);text-decoration:none;transition:color 0.35s ease;border-bottom:1px solid transparent;padding-bottom:1px}
+  .ubc-source:hover{color:#2563b0;border-bottom-color:rgba(37,99,176,0.35)}
+  @media(max-width:640px){
+    .ubc-body{flex-direction:column;align-items:flex-start;padding:28px var(--gutter);gap:20px}
+    .ubc-icon{width:52px;height:52px;margin-right:0;animation:none}
+    .ubc-vdivider{display:none}
+    .ubc-cta{width:100%;justify-content:center;padding:16px 24px}
+    .ubc-footer{padding:14px var(--gutter) 18px;flex-direction:column;align-items:flex-start;gap:10px}
+  }
+</style>
 
 <!-- BLOQUE FARMACIA -->
 <div class="uft-wrap reveal" role="region" aria-label="Farmacia de turno en Concepción del Uruguay">
@@ -738,7 +785,47 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
 </div>
-
+  <!-- BLOQUE COLECTIVOS -->
+<div class="ubc-wrap reveal" role="region" aria-label="Colectivos urbanos en Concepción del Uruguay">
+  <div class="ubc-section-header">
+    <div>
+      <span class="ubc-eyebrow">Transporte · Urbano</span>
+      <h2 class="ubc-section-title">🚌 Colectivos urbanos</h2>
+    </div>
+    <span class="ubc-badge">Tiempo real</span>
+    <div class="ubc-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+  <div class="ubc-card">
+    <div class="ubc-topbar" aria-hidden="true"></div>
+    <div class="ubc-body">
+      <div class="ubc-icon" aria-hidden="true">
+        <svg class="ubc-bus-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2" y="6" width="32" height="20" rx="3"/>
+          <rect x="4" y="8" width="28" height="10" rx="1" fill="#0e2d5c"/>
+          <circle cx="9" cy="29" r="3"/>
+          <circle cx="27" cy="29" r="3"/>
+          <rect x="0" y="14" width="2" height="6" rx="1"/>
+          <rect x="34" y="14" width="2" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="ubc-content">
+        <div class="ubc-live" role="status" aria-live="polite"><span class="ubc-live-dot" aria-hidden="true"></span>Horarios en tiempo real</div>
+        <span class="ubc-title">Colectivos en CdU — líneas y horarios</span>
+        <p class="ubc-subtitle">San Isidro, 192 Viviendas, Hospital-Centro y más.<br/>Seguí tu línea en el <strong>mapa en vivo</strong> y sabé cuándo llega.</p>
+      </div>
+      <div class="ubc-vdivider" aria-hidden="true"></div>
+      <a class="ubc-cta" href="https://moovitapp.com/index/es-419/transporte_p%C3%BAblico-lines-Concepci%C3%B3n_del_Uruguay-5697-1351451" target="_blank" rel="noopener noreferrer">Ver ahora <span class="ubc-cta-arrow" aria-hidden="true">↗</span></a>
+    </div>
+    <div class="ubc-footer">
+      <div class="ubc-infos">
+        <div class="ubc-info-item"><span class="ubc-info-dot" aria-hidden="true"></span>Buses del Uruguay</div>
+        <div class="ubc-info-item"><span class="ubc-info-dot" aria-hidden="true"></span>CdU · Entre Ríos · Argentina</div>
+        <div class="ubc-info-item"><span class="ubc-info-dot" aria-hidden="true"></span>Rastreo en tiempo real</div>
+      </div>
+      <a class="ubc-source" href="https://moovitapp.com/index/es-419/transporte_p%C3%BAblico-lines-Concepci%C3%B3n_del_Uruguay-5697-1351451" target="_blank" rel="noopener noreferrer">Fuente: moovitapp.com</a>
+    </div>
+  </div>
+</div>
   <!-- ══ CATEGORÍAS ══ -->
   <section id="categorias" aria-labelledby="title-categorias">
     <div class="section-header">
