@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8" /><meta name="theme-color" content="#060605" />
+<link rel="dns-prefetch" href="//fonts.googleapis.com" />
+<link rel="dns-prefetch" href="//fonts.gstatic.com" />
+<link rel="dns-prefetch" href="//api.open-meteo.com" />
+<link rel="dns-prefetch" href="//dolarapi.com" />
+<link rel="dns-prefetch" href="//i.imgur.com" />
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/uruspotcdu-create/uruspot/main/img/ChatGPT%20Image%203%20may%202026,%2023_02_39.png" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="description" content="URU SPOT — La guía gastronómica premium de Concepción del Uruguay. Restaurantes, cafés, bares, panaderías, heladerías, hosterías y gimnasios." />
@@ -779,6 +784,21 @@ img { display: block; max-width: 100%; }
   .hero-inner-left{width:100%}
   .wx-hero{width:100%;align-self:stretch}
 }
+   @media(max-width:768px){
+  .wx-hero-icon,
+  .wx-hero-city::before,
+  .hero-rule-dot,
+  .hero-title .main-line em,
+  .wx-skeleton {
+    animation: none !important;
+    transition: none !important;
+  }
+  .us-section .ccard-bg {
+    background-image: none !important;
+    background: #1a1916 !important;
+  }
+}
+   
 /* OPT-1: animaciones de servicios esenciales desactivadas en móvil.
    Solo se mantiene el live-dot pulsando (da contexto al usuario). */
 @media(max-width:768px){
@@ -829,7 +849,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
       </div>
     </div>
     <div class="hero-logo">
-      <img src="https://i.imgur.com/Ep9iLoZ.png" alt="URU SPOT — Guía Local" style="width:auto;max-width:160px;height:auto;" fetchpriority="high" />
+     <img src="https://i.imgur.com/Ep9iLoZ.png" alt="URU SPOT — Guía Local" width="160" height="48" style="width:auto;max-width:160px;height:auto;" fetchpriority="high" />
     </div>
   </div>
 
@@ -2051,11 +2071,21 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     const docH = document.documentElement.scrollHeight - document.documentElement.clientHeight;
     bar.style.width = docH > 0 ? (scrollTop / docH * 100) + '%' : '0%';
   }
-  window.addEventListener('scroll', updateProgress, { passive: true });
+
 
   const nav = document.getElementById('main-nav');
   function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 60); }
-  window.addEventListener('scroll', updateNav, { passive: true });
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateProgress();
+        updateNav();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
 
   const sections = document.querySelectorAll('section[id]');
   const navItems = document.querySelectorAll('.nav-item[data-section]');
