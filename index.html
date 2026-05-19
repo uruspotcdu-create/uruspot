@@ -1326,8 +1326,53 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     }
   }
 
+function runSearch(query) {
+    const q = normalize(query.trim());
+    let totalVisible = 0;
+
+    grids.forEach(function(g) {
+      const grid = document.getElementById(g.id);
+      const noRes = document.getElementById(g.noRes);
+      if (!grid) return;
+
+      const items = grid.querySelectorAll('.searchable');
+      let visibleInGrid = 0;
+
+      items.forEach(function(item) {
+        const name = normalize(item.dataset.name || '');
+        const tags = normalize(item.dataset.tags || '');
+        const matches = !q || name.includes(q) || tags.includes(q);
+
+        if (matches) {
+          item.classList.remove('search-hidden');
+          visibleInGrid++;
+          totalVisible++;
+        } else {
+          item.classList.add('search-hidden');
+        }
+      });
+
+      if (noRes) {
+        noRes.classList.toggle('visible', q.length > 0 && visibleInGrid === 0);
+      }
+    });
+
+    if (q.length > 0) {
+      searchCount.textContent = totalVisible + (totalVisible === 1 ? ' resultado' : ' resultados');
+    } else {
+      searchCount.textContent = '';
+    }
+  }
+
   searchInput.addEventListener('input', function() {
     runSearch(this.value);
+  });
+
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      runSearch(this.value);
+    }
   });
 
   /* ── CLIMA ── */
