@@ -8,7 +8,7 @@
 <link rel="dns-prefetch" href="//dolarapi.com" />
 <link rel="dns-prefetch" href="//i.imgur.com" />
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/uruspotcdu-create/uruspot/main/img/ChatGPT%20Image%203%20may%202026,%2023_02_39.png" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" /><link rel="preload" as="image" href="https://i.imgur.com/Ep9iLoZ.png" fetchpriority="high" />
 <meta name="description" content="URU SPOT — La guía gastronómica premium de Concepción del Uruguay. Restaurantes, cafés, bares, panaderías, heladerías, hosterías y gimnasios." />
 <title>URU SPOT · Guía Local · Concepción del Uruguay</title><!-- Open Graph -->
 <meta property="og:type"         content="website" />
@@ -72,12 +72,18 @@ img { display: block; max-width: 100%; }
 }
 @media(min-width:769px){
   #progress-bar {
-    background: linear-gradient(90deg, var(--verde2), var(--oro3), var(--verde2));
-    background-size: 200% 100%;
+    background: var(--verde2);
+    overflow: hidden;
+  }
+  #progress-bar::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, var(--oro3), transparent);
     animation: shimmerBar 3s linear infinite;
+    pointer-events: none;
   }
 }
-@keyframes shimmerBar { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+@keyframes shimmerBar { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 
 #grain{ display:none; }
 
@@ -90,9 +96,15 @@ img { display: block; max-width: 100%; }
     radial-gradient(ellipse 45% 55% at 12% 88%, rgba(196,135,42,0.18) 0%, transparent 58%),
     radial-gradient(ellipse 38% 45% at 52% 52%, rgba(29,92,64,0.07) 0%, transparent 65%),
     linear-gradient(168deg, #060a07 0%, #060605 45%, #0a0800 100%);
-  animation: meshPulse 20s ease-in-out infinite alternate;
 }
-@keyframes meshPulse { from{filter:brightness(1) saturate(1)} to{filter:brightness(1.08) saturate(1.15) hue-rotate(6deg)} }
+   .hero-mesh::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 62% 72% at 78% 12%, rgba(29,92,64,0.10) 0%, transparent 60%);
+  animation: meshPulse 20s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes meshPulse { from{opacity:0} to{opacity:1} }
 .hero-lines { position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none; }
 .hero-lines::before { content:'';position:absolute;top:0;right:14%;width:1px;height:65%;background:linear-gradient(to bottom,transparent,rgba(196,135,42,0.20) 30%,rgba(196,135,42,0.08) 80%,transparent); }
 .hero-lines::after { content:'';position:absolute;bottom:18%;left:0;width:42%;height:1px;background:linear-gradient(to right,transparent,rgba(29,92,64,0.22) 40%,rgba(29,92,64,0.08) 80%,transparent); }
@@ -121,8 +133,7 @@ img { display: block; max-width: 100%; }
 .hero-title .eyebrow { font-family:var(--f-italic);font-style:italic;font-size:clamp(14px,1.8vw,22px);font-weight:400;letter-spacing:7px;color:rgba(242,237,227,0.38);display:block;margin-bottom:18px;line-height:1; }
 .hero-title .main-line { display:block; }
 .hero-title .main-line em { font-style:italic;background:linear-gradient(100deg,rgba(242,237,227,0.95) 0%,rgba(242,192,96,0.95) 35%,rgba(242,237,227,0.88) 70%,rgba(196,135,42,0.90) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 100%; }
-@media(min-width:769px){ .hero-title .main-line em { animation:titleShimmer 5s ease-in-out infinite alternate; } }
-@keyframes titleShimmer{from{background-position:0% 50%}to{background-position:100% 50%}}
+
 
 .hero-rule { display:flex;align-items:center;gap:14px;margin-bottom:34px; }
 .hero-rule-line { height:1px;width:56px;background:linear-gradient(90deg,var(--oro2),transparent);flex-shrink:0; }
@@ -407,8 +418,26 @@ img { display: block; max-width: 100%; }
 
 /* FOOTER */
 .footer{background:var(--void);position:relative;overflow:hidden;padding:80px var(--gutter) 60px;display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center}
-.footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--verde3),var(--verde),var(--oro),var(--oro2),var(--verde));background-size:200% 100%;animation:shimmerBar 4s linear infinite}
-.footer::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 65% 55% at 50% 0%,rgba(29,92,64,0.09) 0%,transparent 65%);pointer-events:none}
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--verde3);
+  overflow: hidden;
+  z-index: 2;
+}
+.footer::before::after {
+  /* esto no funciona en CSS, usamos un enfoque distinto — ver abajo */
+}
+.footer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 65% 55% at 50% 0%, rgba(29,92,64,0.09) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 1;
+}
 .footer-logo{opacity:0.30;transition:opacity 0.4s ease,transform 0.4s ease;position:relative;z-index:1}
 .footer-logo:hover{opacity:0.55;transform:scale(1.05)}
 .footer-logo img{width:auto;max-width:88px;height:auto;object-fit:contain;filter:brightness(1.3)}
@@ -416,7 +445,25 @@ img { display: block; max-width: 100%; }
 .footer-stats{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
 .footer-stat{font-family:var(--f-ui);font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,0.20)}
 .footer-stat strong{color:var(--oro2);font-weight:700}
-.footer-copy{font-family:var(--f-ui);font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(242,237,227,0.18);position:relative;z-index:1}
+.footer-copy{font-family:var(--f-ui);font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(242,237,227,0.18);position:relative;z-index:1}.footer-shimmer {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--verde3);
+  overflow: hidden;
+  z-index: 3;
+}
+.footer-shimmer::after .usb-hosp-topbar{background:#3d1535;overflow:hidden;position:relative;}
+.usb-hosp-topbar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#3d1535,#7b3068 20%,#a8459c 45%,#7b3068 70%,#3d1535);animation:usb-hosp-bar 4s linear infinite;pointer-events:none;}
+@keyframes usb-hosp-bar{from{transform:translateX(-100%)}to{transform:translateX(100%)}} { 
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--verde3), var(--verde), var(--oro), var(--oro2), var(--verde));
+  animation: shimmerBar 4s linear infinite;
+  pointer-events: none;
+}
+   
 
 /* REVEAL */
 .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s var(--ease),transform 0.7s var(--ease)}
@@ -437,8 +484,9 @@ img { display: block; max-width: 100%; }
 .uft-urgency-badge{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--parchment);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:8px 16px;border-radius:2px;white-space:nowrap;flex-shrink:0}
 .uft-card{background:var(--ink);border-left:5px solid #c0392b;position:relative;overflow:hidden;display:flex;flex-direction:column;transition:transform 0.4s var(--ease),box-shadow 0.4s ease;box-shadow:0 24px 72px -12px rgba(6,6,5,0.40)}
 .uft-card:hover{transform:translateY(-4px);box-shadow:0 36px 88px -12px rgba(6,6,5,0.60)}
-.uft-topbar{height:3px;width:100%;background:linear-gradient(90deg,#5c0e08,#c0392b 20%,#e74c3c 45%,#c0392b 70%,#5c0e08);background-size:200% 100%;animation:uft-bar 4s linear infinite;flex-shrink:0}
-@keyframes uft-bar{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.uft-topbar{height:3px;width:100%;background:#5c0e08;overflow:hidden;flex-shrink:0;position:relative;}
+.uft-topbar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#5c0e08,#c0392b 20%,#e74c3c 45%,#c0392b 70%,#5c0e08);animation:uft-bar 4s linear infinite;pointer-events:none;}
+@keyframes uft-bar { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 .uft-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 90% at 95% 50%,rgba(192,57,43,0.13) 0%,transparent 62%),radial-gradient(ellipse 40% 70% at 5% 50%,rgba(196,135,42,0.06) 0%,transparent 58%);pointer-events:none;z-index:0}
 .uft-body{position:relative;z-index:1;display:flex;align-items:center;gap:0;padding:44px 52px}
 .uft-icon{width:72px;height:72px;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.32);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:36px;animation:uft-icon-pulse 3.5s ease infinite}
@@ -478,8 +526,9 @@ img { display: block; max-width: 100%; }
 .ubc-badge{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--parchment);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:8px 16px;border-radius:2px;white-space:nowrap;flex-shrink:0}
 .ubc-card{background:var(--ink);border-left:5px solid #1a4f8a;position:relative;overflow:hidden;display:flex;flex-direction:column;transition:transform 0.4s var(--ease),box-shadow 0.4s ease;box-shadow:0 24px 72px -12px rgba(6,6,5,0.40)}
 .ubc-card:hover{transform:translateY(-4px);box-shadow:0 36px 88px -12px rgba(6,6,5,0.60)}
-.ubc-topbar{height:3px;width:100%;background:linear-gradient(90deg,#0e2d5c,#1a4f8a 20%,#2563b0 45%,#1a4f8a 70%,#0e2d5c);background-size:200% 100%;animation:ubc-bar 4s linear infinite;flex-shrink:0}
-@keyframes ubc-bar{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.ubc-topbar{height:3px;width:100%;background:#0e2d5c;overflow:hidden;flex-shrink:0;position:relative;}
+.ubc-topbar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0e2d5c,#1a4f8a 20%,#2563b0 45%,#1a4f8a 70%,#0e2d5c);animation:ubc-bar 4s linear infinite;pointer-events:none;}
+@keyframes ubc-bar { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 .ubc-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 90% at 95% 50%,rgba(26,79,138,0.15) 0%,transparent 62%),radial-gradient(ellipse 40% 70% at 5% 50%,rgba(196,135,42,0.05) 0%,transparent 58%);pointer-events:none;z-index:0}
 .ubc-body{position:relative;z-index:1;display:flex;align-items:center;gap:0;padding:44px 52px}
 .ubc-icon{width:72px;height:72px;background:rgba(26,79,138,0.14);border:1px solid rgba(26,79,138,0.38);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:36px;animation:ubc-icon-pulse 3.5s ease infinite}
@@ -642,8 +691,9 @@ img { display: block; max-width: 100%; }
 @media(min-width:769px){
   .wx-hero-card{backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
 }
-.wx-hero-bar{height:2px;background:linear-gradient(90deg,transparent,rgba(196,135,42,0.60) 30%,rgba(242,192,96,0.90) 50%,rgba(196,135,42,0.60) 70%,transparent);background-size:200% 100%;animation:wx-shimmer 3s ease infinite}
-@keyframes wx-shimmer{0%{background-position:-200% 50%}100%{background-position:200% 50%}}
+.wx-hero-bar{height:2px;background:rgba(196,135,42,0.20);overflow:hidden;position:relative;}
+.wx-hero-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(196,135,42,0.60) 30%,rgba(242,192,96,0.90) 50%,rgba(196,135,42,0.60) 70%,transparent);animation:wx-shimmer 3s ease infinite;pointer-events:none;}
+@keyframes wx-shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 .wx-hero-body{padding:22px 24px 18px}
 .wx-hero-city{font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,0.35);display:flex;align-items:center;gap:6px;margin-bottom:16px}
 .wx-hero-city::before{content:'';display:block;width:5px;height:5px;border-radius:50%;background:var(--oro2);flex-shrink:0;animation:wx-citydot 3s ease-in-out infinite alternate}
@@ -830,6 +880,7 @@ img { display: block; max-width: 100%; }
 /* OPT-6: will-change solo en desktop, auto en móvil */
 @media(min-width:769px){
   .rcard,.gcard,.cat-card,.bcard,.litem{will-change:transform}
+  .hero-orb-1,.hero-orb-2,.wx-hero-icon{transform:translateZ(0)}
 }
 @media(max-width:768px){
   .rcard,.gcard,.cat-card,.bcard,.litem{will-change:auto}
@@ -1073,9 +1124,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-hosp-card">
-    <div class="usb-topbar usb-hosp-top"
-         style="background:linear-gradient(90deg,#3d1535,#7b3068 20%,#a8459c 45%,#7b3068 70%,#3d1535);background-size:200% 100%;"
-         aria-hidden="true"></div>
+    <div class="usb-topbar usb-hosp-topbar" aria-hidden="true"></div>
     <div class="usb-body">
       <div class="usb-icon usb-hosp-icon" aria-hidden="true">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1134,9 +1183,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-emg-card">
-    <div class="usb-topbar usb-emg-top"
-         style="background:linear-gradient(90deg,#5c0e08,#c0392b 20%,#e74c3c 45%,#c0392b 70%,#5c0e08);background-size:200% 100%;"
-         aria-hidden="true"></div>
+<div class="usb-topbar usb-emg-topbar" aria-hidden="true"></div>
     <div class="usb-body" style="padding-bottom:28px;">
       <div class="usb-icon usb-emg-icon-w" aria-hidden="true">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1204,9 +1251,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-ener-card">
-    <div class="usb-topbar"
-         style="background:linear-gradient(90deg,#5c4200,#c49b17 20%,#f2c050 45%,#c49b17 70%,#5c4200);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
-         aria-hidden="true"></div>
+    <div class="usb-topbar usb-ener-topbar" aria-hidden="true"></div>
     <div class="usb-body">
       <div class="usb-icon usb-ener-icon" aria-hidden="true">
         <svg width="36" height="40" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1258,9 +1303,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-rem-card">
-    <div class="usb-topbar"
-         style="background:linear-gradient(90deg,#0a2d46,#1a5c8a 20%,#2680c2 45%,#1a5c8a 70%,#0a2d46);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
-         aria-hidden="true"></div>
+    <div class="usb-topbar usb-rem-topbar" aria-hidden="true"></div>
     <div class="usb-body">
       <div class="usb-icon usb-rem-icon" aria-hidden="true">
         <svg width="42" height="32" viewBox="0 0 42 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1371,9 +1414,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-naf-card" style="border-left:5px solid #7a3c1e;">
-    <div class="usb-topbar"
-         style="background:linear-gradient(90deg,#3a1808,#7a3c1e 20%,#dc783c 45%,#7a3c1e 70%,#3a1808);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
-         aria-hidden="true"></div>
+   <div class="usb-topbar usb-naf-topbar" aria-hidden="true"></div>
     <div class="usb-body">
       <div class="usb-icon" style="background:rgba(122,60,30,0.14);border:1px solid rgba(122,60,30,0.40);animation:usbPulse-naf 3.5s ease infinite;" aria-hidden="true">
         <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1432,9 +1473,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-age-card">
-    <div class="usb-topbar"
-         style="background:linear-gradient(90deg,#0e2a1a,#2d6a3f 20%,#50be6e 45%,#2d6a3f 70%,#0e2a1a);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
-         aria-hidden="true"></div>
+   <div class="usb-topbar usb-age-topbar" aria-hidden="true"></div>
     <div class="usb-body">
       <div class="usb-icon usb-age-icon" aria-hidden="true">
         <svg width="38" height="40" viewBox="0 0 38 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1493,9 +1532,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-wx-card">
-    <div class="usb-topbar"
-         style="background:linear-gradient(90deg,#0a3a4a,#1a7a9a 20%,#3cb9e6 45%,#1a7a9a 70%,#0a3a4a);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
-         aria-hidden="true"></div>
+   <div class="usb-topbar usb-wx-topbar" aria-hidden="true"></div>
     <div class="usb-body">
       <div class="usb-icon usb-wx-icon" aria-hidden="true">
         <svg width="44" height="40" viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1558,9 +1595,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-dol-card">
-    <div class="usb-topbar"
-         style="background:linear-gradient(90deg,#4a3800,#9a7c14 20%,#e6be32 45%,#9a7c14 70%,#4a3800);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
-         aria-hidden="true"></div>
+   <div class="usb-topbar usb-dol-topbar" aria-hidden="true"></div>
     <div class="usb-body" style="padding-bottom:28px;">
       <div class="usb-icon usb-dol-icon" aria-hidden="true">
         <svg width="44" height="32" viewBox="0 0 44 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1637,9 +1672,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
   </div>
   <div class="usb-card usb-ind-card">
-    <div class="usb-topbar"
-         style="background:linear-gradient(90deg,#1e1040,#4a2c9a 20%,#8c64f0 45%,#4a2c9a 70%,#1e1040);background-size:200% 100%;animation:usbBar-emg 4s linear infinite;"
-         aria-hidden="true"></div>
+    <div class="usb-topbar usb-ind-topbar" aria-hidden="true"></div>
     <div class="usb-body">
       <div class="usb-icon usb-ind-icon" aria-hidden="true">
         <svg width="42" height="36" viewBox="0 0 42 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1834,16 +1867,16 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     </div>
     <div class="cafe-grid" id="grid-cafes">
       <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" href="https://uruspot.blogspot.com/2026/05/nero-cafe-de-especialidad-concepcion.html">
-        <div class="ccard-bg" style="background:linear-gradient(135deg,#1a0f06 0%,#0a0804 100%);background-image:url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=70');background-size:cover;background-position:center"></div>
+        <div class="ccard-bg" style="background:linear-gradient(135deg,#1a0f06 0%,#0a0804 100%);background-image:url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=65&auto=format&fm=webp');background-size:cover;background-position:center"></div>
         <div class="ccard-overlay"></div><div class="ccard-border"></div>
         <span class="badge">Top</span>
         <div class="ccard-inner"><span class="ccard-label">Especialidad</span><span class="ccard-name">Nero Café</span><div class="pills" style="margin-top:4px"><span class="pill pill-rating">★ 4.9</span></div></div>
       </a>
-      <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" href="https://uruspot.blogspot.com/2026/05/la-ris-concepcion-del-uruguay.html" style="animation-delay:0.07s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=70');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
-      <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" href="https://uruspot.blogspot.com/2026/05/cultura-cafe-concepcion-del-uruguay.html" style="animation-delay:0.14s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=70');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
-      <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" href="https://uruspot.blogspot.com/2026/05/cafeteria-london-cafe-concepcion-del.html" style="animation-delay:0.21s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=70');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
-      <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" href="https://uruspot.blogspot.com/2026/05/helena-cafe-resto-concepcion-del-uruguay.html" style="animation-delay:0.28s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=70');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
-      <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" href="https://uruspot.blogspot.com/2026/05/bella-vista-concepcion-del-uruguay.html" style="animation-delay:0.35s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=70');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
+      <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" href="https://uruspot.blogspot.com/2026/05/la-ris-concepcion-del-uruguay.html" style="animation-delay:0.07s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=65&auto=format&fm=webp');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
+      <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" href="https://uruspot.blogspot.com/2026/05/cultura-cafe-concepcion-del-uruguay.html" style="animation-delay:0.14s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=65&auto=format&fm=webp');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
+      <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" href="https://uruspot.blogspot.com/2026/05/cafeteria-london-cafe-concepcion-del.html" style="animation-delay:0.21s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=65&auto=format&fm=webp');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
+      <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" href="https://uruspot.blogspot.com/2026/05/helena-cafe-resto-concepcion-del-uruguay.html" style="animation-delay:0.28s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=65&auto=format&fm=webp');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
+      <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" href="https://uruspot.blogspot.com/2026/05/bella-vista-concepcion-del-uruguay.html" style="animation-delay:0.35s"><div class="ccard-bg" style="background-image:url('https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=65&auto=format&fm=webp');background-size:cover;background-position:center"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
     </div>
     <p class="search-no-results" id="no-results-cafes">No se encontraron cafés con ese nombre.</p>
   </section>
@@ -2018,6 +2051,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
 </main>
 
 <footer class="footer" role="contentinfo">
+  <div class="footer-shimmer" aria-hidden="true"></div>
   <a class="footer-logo" href="#" aria-label="URU SPOT — ir al inicio">
     <img src="https://i.imgur.com/Ep9iLoZ.png" alt="URU SPOT" width="88" height="26" loading="lazy" />
   </a>
@@ -2135,10 +2169,14 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
 
   const revealEls = document.querySelectorAll('.reveal');
   const revealObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); }
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    requestAnimationFrame(function() {
+      entry.target.classList.add('visible');
     });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    revealObserver.unobserve(entry.target);
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
   revealEls.forEach(el => revealObserver.observe(el));
 
   document.querySelector('.btn-ghost')?.addEventListener('click', function (e) {
@@ -2318,8 +2356,14 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     try{const res=await fetch(WX_URL,{cache:'no-store'});if(!res.ok)throw new Error();const data=await res.json();renderWeather(data);}
     catch(e){renderError();}
   }
-  setTimeout(fetchWeather, 1200);
-setInterval(fetchWeather,10*60*1000);
+  const scheduleWx = window.requestIdleCallback
+  ? (cb) => window.requestIdleCallback(cb, { timeout: 3000 })
+  : (cb) => setTimeout(cb, 1200);
+
+scheduleWx(function() {
+  fetchWeather();
+  setInterval(fetchWeather, 10 * 60 * 1000);
+});
 })();
 </script>
 </body>
