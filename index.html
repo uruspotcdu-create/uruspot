@@ -1366,6 +1366,14 @@ function runSearch(query) {
 
   searchInput.addEventListener('input', function() {
     runSearch(this.value);
+    if (this.value.trim().length > 1) {
+      const firstVisible = document.querySelector('.searchable:not(.search-hidden)');
+      if (firstVisible) {
+        setTimeout(function() {
+          firstVisible.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
   });
 
   searchInput.addEventListener('keydown', function(e) {
