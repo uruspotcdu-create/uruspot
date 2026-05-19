@@ -503,624 +503,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
   @media(max-width:768px){
   #grain{display:none}
 }
-
-/* ══════════════════════════════════════
-   WIDGET CLIMA HERO — esquina derecha
-══════════════════════════════════════ */
-
-/* Modificamos .hero-inner para soportar el layout de dos columnas */
-.hero-inner {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-end !important;
-  justify-content: space-between !important;
-  gap: 48px;
-}
-
-.hero-inner-left {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-/* Widget clima flotante — hero */
-.wx-hero {
-  flex-shrink: 0;
-  width: 280px;
-  align-self: center;
-  position: relative;
-  z-index: 4;
-}
-
-.wx-hero-card {
-  background: rgba(10, 10, 8, 0.72);
-  border: 1px solid rgba(242,237,227,0.10);
-  border-radius: 4px;
-  overflow: hidden;
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
-}
-.wx-hero-card:hover {
-  border-color: rgba(196,135,42,0.28);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.50);
-}
-
-/* Barra superior dorada */
-.wx-hero-bar {
-  height: 2px;
-  background: linear-gradient(90deg,
-    transparent,
-    rgba(196,135,42,0.60) 30%,
-    rgba(242,192,96,0.90) 50%,
-    rgba(196,135,42,0.60) 70%,
-    transparent
-  );
-  background-size: 200% 100%;
-  animation: wx-shimmer 3s ease infinite;
-}
-@keyframes wx-shimmer {
-  0%   { background-position: -200% 50%; }
-  100% { background-position:  200% 50%; }
-}
-
-.wx-hero-body {
-  padding: 22px 24px 18px;
-}
-
-/* Ciudad */
-.wx-hero-city {
-  font-family: var(--f-ui);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(242,237,227,0.35);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-.wx-hero-city::before {
-  content: '';
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--oro2);
-  flex-shrink: 0;
-  animation: wx-citydot 3s ease-in-out infinite alternate;
-}
-@keyframes wx-citydot {
-  from { opacity: 0.4; }
-  to   { opacity: 1; box-shadow: 0 0 6px rgba(223,160,64,0.8); }
-}
-
-/* Temperatura principal */
-.wx-hero-main {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-.wx-hero-icon {
-  font-size: 44px;
-  line-height: 1;
-  flex-shrink: 0;
-  filter: drop-shadow(0 2px 12px rgba(0,0,0,0.5));
-  animation: wx-iconFloat 4s ease-in-out infinite alternate;
-}
-@keyframes wx-iconFloat {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-4px); }
-}
-.wx-hero-temp-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.wx-hero-temp {
-  font-family: var(--f-display);
-  font-size: 52px;
-  line-height: 1;
-  color: var(--parchment);
-  letter-spacing: -2px;
-  display: flex;
-  align-items: flex-start;
-}
-.wx-hero-temp sup {
-  font-family: var(--f-ui);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--oro2);
-  margin-top: 8px;
-  letter-spacing: 0;
-}
-.wx-hero-desc {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 13px;
-  color: rgba(242,237,227,0.55);
-  line-height: 1.3;
-}
-
-/* Separador */
-.wx-hero-sep {
-  height: 1px;
-  background: rgba(242,237,227,0.07);
-  margin: 14px 0;
-}
-
-/* Datos secundarios */
-.wx-hero-data {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.wx-hero-datum {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.wx-hero-datum-label {
-  font-family: var(--f-ui);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(242,237,227,0.22);
-}
-.wx-hero-datum-val {
-  font-family: var(--f-ui);
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(242,237,227,0.80);
-  letter-spacing: 0.3px;
-}
-
-/* Footer del hero card */
-.wx-hero-footer {
-  padding: 10px 24px 14px;
-  border-top: 1px solid rgba(242,237,227,0.05);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.wx-hero-updated {
-  font-family: var(--f-ui);
-  font-size: 7px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: rgba(242,237,227,0.18);
-}
-.wx-hero-frase {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 9px;
-  color: rgba(196,135,42,0.60);
-  text-align: right;
-  max-width: 120px;
-  line-height: 1.4;
-}
-
-/* Estado de carga */
-.wx-skeleton {
-  background: linear-gradient(90deg,
-    rgba(255,255,255,0.03) 25%,
-    rgba(255,255,255,0.07) 50%,
-    rgba(255,255,255,0.03) 75%
-  );
-  background-size: 200% 100%;
-  animation: wx-skel 1.4s linear infinite;
-  border-radius: 2px;
-}
-@keyframes wx-skel {
-  0%   { background-position: 200% 50%; }
-  100% { background-position: -200% 50%; }
-}
-.wx-skel-temp  { height: 52px; width: 120px; margin-bottom: 8px; }
-.wx-skel-desc  { height: 14px; width: 90px; }
-.wx-skel-datum { height: 20px; width: 60px; }
-
-/* ══════════════════════════════════════
-   BLOQUE CLIMA — main-body (detalle)
-══════════════════════════════════════ */
-.wx-wrap {
-  width: 100%;
-  margin: 0 0 80px 0;
-  display: block;
-  position: relative;
-}
-
-/* Encabezado de sección — idéntico al patrón del sitio */
-.wx-section-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  position: relative;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.wx-section-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: rgba(26,25,22,0.12);
-}
-.wx-section-header-accent {
-  position: absolute;
-  bottom: -1px; left: 0;
-  display: flex;
-  height: 3px;
-}
-.wx-section-header-accent span:nth-child(1) { display:block;width:80px;height:3px;background:var(--verde2); }
-.wx-section-header-accent span:nth-child(2) { display:block;width:32px;height:3px;background:var(--oro); }
-.wx-section-header-accent span:nth-child(3) { display:block;width:12px;height:3px;background:var(--parchment2);opacity:0.4; }
-.wx-eyebrow {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
-  color: var(--verde2);
-  display: block;
-  margin-bottom: 8px;
-}
-.wx-section-title {
-  font-family: var(--f-display);
-  font-size: clamp(24px,3.2vw,34px);
-  font-weight: 400;
-  color: var(--ink);
-  line-height: 1;
-  letter-spacing: -0.5px;
-}
-.wx-live-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--ink);
-  color: var(--parchment);
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  padding: 8px 16px;
-  border-radius: 2px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.wx-live-dot-badge {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--verde2);
-  animation: wx-livebadge 2.5s ease infinite;
-}
-@keyframes wx-livebadge {
-  0%,100% { box-shadow: 0 0 0 0 rgba(38,122,85,0.9); }
-  65%      { box-shadow: 0 0 0 6px rgba(38,122,85,0); }
-}
-
-/* Card principal del bloque */
-.wx-card {
-  background: var(--ink);
-  border-left: 5px solid var(--verde);
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  transition: transform 0.4s var(--ease), box-shadow 0.4s ease;
-  box-shadow: 0 24px 72px -12px rgba(6,6,5,0.40);
-}
-.wx-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 36px 88px -12px rgba(6,6,5,0.60);
-}
-.wx-card::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 55% 80% at 95% 50%, rgba(29,92,64,0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 65% at 5%  50%, rgba(196,135,42,0.07) 0%, transparent 55%);
-  pointer-events: none; z-index: 0;
-}
-
-/* Topbar verde animada */
-.wx-card-topbar {
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    var(--verde3),
-    var(--verde) 25%,
-    var(--verde2) 50%,
-    var(--oro)   75%,
-    var(--verde3)
-  );
-  background-size: 200% 100%;
-  animation: wx-cardbar 4s linear infinite;
-  z-index: 2;
-}
-@keyframes wx-cardbar {
-  0%   { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
-/* Columna izquierda — temperatura principal */
-.wx-col-main {
-  position: relative; z-index: 1;
-  padding: 48px 44px 40px;
-  border-right: 1px solid rgba(242,237,227,0.07);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.wx-city-label {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(242,237,227,0.30);
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.wx-city-label::before {
-  content: '📍';
-  font-size: 11px;
-}
-
-.wx-main-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-.wx-big-icon {
-  font-size: 64px;
-  line-height: 1;
-  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.6));
-  animation: wx-iconFloat 4s ease-in-out infinite alternate;
-  flex-shrink: 0;
-}
-.wx-temp-block {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.wx-big-temp {
-  font-family: var(--f-display);
-  font-size: 72px;
-  line-height: 1;
-  color: var(--parchment);
-  letter-spacing: -3px;
-  display: flex;
-  align-items: flex-start;
-}
-.wx-big-temp sup {
-  font-family: var(--f-ui);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--oro2);
-  margin-top: 12px;
-  letter-spacing: 0;
-}
-.wx-condition {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 20px;
-  color: rgba(242,237,227,0.65);
-  letter-spacing: -0.3px;
-}
-
-/* Frase contextual */
-.wx-phrase {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 14px;
-  color: rgba(196,135,42,0.75);
-  line-height: 1.7;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(242,237,227,0.07);
-}
-
-/* Columna derecha — datos */
-.wx-col-data {
-  position: relative; z-index: 1;
-  padding: 48px 40px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.wx-data-title {
-  font-family: var(--f-ui);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(242,237,227,0.22);
-  margin-bottom: 28px;
-}
-
-.wx-data-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px 20px;
-  flex: 1;
-}
-
-.wx-datum {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.wx-datum-icon {
-  font-size: 20px;
-  line-height: 1;
-  margin-bottom: 2px;
-}
-.wx-datum-val {
-  font-family: var(--f-display);
-  font-size: 26px;
-  color: var(--parchment);
-  letter-spacing: -0.5px;
-  line-height: 1;
-}
-.wx-datum-val sup {
-  font-family: var(--f-ui);
-  font-size: 11px;
-  color: var(--oro2);
-  vertical-align: super;
-}
-.wx-datum-label {
-  font-family: var(--f-ui);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(242,237,227,0.28);
-}
-
-/* Barra de humedad */
-.wx-humidity-bar {
-  height: 3px;
-  background: rgba(242,237,227,0.08);
-  border-radius: 2px;
-  margin-top: 6px;
-  overflow: hidden;
-}
-.wx-humidity-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--verde), var(--verde2));
-  border-radius: 2px;
-  transition: width 1.2s var(--ease);
-  width: 0%;
-}
-
-/* Footer del bloque */
-.wx-card-footer {
-  grid-column: 1 / -1;
-  position: relative; z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 44px 18px;
-  border-top: 1px solid rgba(242,237,227,0.06);
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.wx-footer-infos {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.wx-footer-item {
-  font-family: var(--f-ui);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(242,237,227,0.20);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.wx-footer-dot {
-  width: 3px; height: 3px;
-  border-radius: 50%;
-  background: rgba(29,92,64,0.60);
-  flex-shrink: 0;
-}
-.wx-source-link {
-  font-family: var(--f-ui);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(29,92,64,0.55);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  padding-bottom: 1px;
-  transition: color 0.3s ease, border-color 0.3s ease;
-}
-.wx-source-link:hover {
-  color: var(--verde2);
-  border-bottom-color: rgba(38,122,85,0.4);
-  text-decoration: none;
-}
-
-/* ══════════════════════════════════════
-   RESPONSIVE CLIMA
-══════════════════════════════════════ */
-@media (max-width: 1100px) {
-  .wx-hero { width: 240px; }
-  .wx-hero-temp { font-size: 44px; }
-  .wx-hero-icon { font-size: 36px; }
-}
-
-@media (max-width: 860px) {
-  /* Hero: vuelve a columna única, widget debajo del texto */
-  .hero-inner {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 32px !important;
-  }
-  .wx-hero { width: 100%; max-width: 360px; }
-
-  /* Bloque: columna única */
-  .wx-card {
-    grid-template-columns: 1fr;
-  }
-  .wx-col-main { border-right: none; border-bottom: 1px solid rgba(242,237,227,0.07); padding: 36px 32px 28px; }
-  .wx-col-data { padding: 28px 32px 32px; }
-  .wx-card-footer { padding: 12px 32px 16px; }
-}
-
-@media (max-width: 640px) {
-  .wx-hero { max-width: 100%; }
-  .wx-hero-body { padding: 18px 20px 14px; }
-  .wx-hero-footer { padding: 9px 20px 12px; }
-  .wx-hero-temp { font-size: 40px; }
-  .wx-hero-icon { font-size: 34px; }
-
-  .wx-wrap { margin: 0 0 56px 0; }
-  .wx-col-main { padding: 28px var(--gutter) 24px; }
-  .wx-col-data { padding: 24px var(--gutter) 28px; }
-  .wx-card-footer { padding: 12px var(--gutter) 14px; }
-  .wx-big-temp { font-size: 56px; }
-  .wx-big-icon { font-size: 50px; }
-  .wx-data-grid { gap: 20px 16px; }
-  .wx-datum-val { font-size: 22px; }
-}
-
-@media (max-width: 380px) {
-  .wx-data-grid { grid-template-columns: 1fr; }
-  .wx-big-temp { font-size: 48px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wx-hero-bar, .wx-card-topbar,
-  .wx-hero-icon, .wx-big-icon,
-  .wx-hero-city::before, .wx-live-dot-badge { animation: none; }
-  .wx-card, .wx-hero-card { transition: none; }
-  .wx-humidity-fill { transition: none; }
-}
-
-@media (max-width: 768px) {
-  .wx-card:hover { transform: none; box-shadow: 0 24px 72px -12px rgba(6,6,5,0.40); }
-  .wx-card { transition: none; }
-}
-
 </style>
 </head>
 <body>
@@ -1148,91 +530,33 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
   </div>
 
   <div class="hero-inner">
-
-    <!-- ── Columna izquierda: contenido original del hero ── -->
-    <div class="hero-inner-left">
-      <div class="live-chip" role="status" aria-live="polite">
-        <span class="live-dot" aria-hidden="true"></span>
-        Actualizado Mayo 2026
-      </div>
-      <h1 class="hero-title">
-        <span class="eyebrow">La guía de</span>
-        <span class="main-line"><em>Concepción</em></span>
-        <span class="main-line"><em>del Uruguay</em></span>
-      </h1>
-      <div class="hero-rule" aria-hidden="true">
-        <span class="hero-rule-line"></span>
-        <span class="hero-rule-dot"></span>
-      </div>
-      <p class="hero-sub">
-        Todo lo que vale la pena en la ciudad.<br />
-        <strong>Gastronomía, cafés, bares, panaderías, hosterías y más — URU SPOT, sin mentiras.</strong>
-      </p>
-      <div class="stats-strip" role="list" aria-label="Estadísticas">
-        <div class="stat" role="listitem"><div class="stat-num">50<sup>+</sup></div><div class="stat-label">Lugares</div></div>
-        <div class="stat" role="listitem"><div class="stat-num">6</div><div class="stat-label">Categorías</div></div>
-        <div class="stat" role="listitem"><div class="stat-num">100<sup>%</sup></div><div class="stat-label">Local</div></div>
-      </div>
-      <div class="hero-ctas">
-        <a class="btn-ghost" href="#categorias" aria-label="Ver categorías">Ver la guía ↓</a>
-      </div>
+    <div class="live-chip" role="status" aria-live="polite">
+      <span class="live-dot" aria-hidden="true"></span>
+      Actualizado Mayo 2026
     </div>
+    <h1 class="hero-title">
+      <span class="eyebrow">La guía de</span>
+      <span class="main-line"><em>Concepción</em></span>
+      <span class="main-line"><em>del Uruguay</em></span>
+    </h1>
+    <div class="hero-rule" aria-hidden="true">
+      <span class="hero-rule-line"></span>
+      <span class="hero-rule-dot"></span>
+    </div>
+    <p class="hero-sub">
+      Todo lo que vale la pena en la ciudad.<br />
+      <strong>Gastronomía, cafés, bares, panaderías, hosterías y más — URU SPOT, sin mentiras.</strong>
+    </p>
+    <div class="stats-strip" role="list" aria-label="Estadísticas">
+      <div class="stat" role="listitem"><div class="stat-num">50<sup>+</sup></div><div class="stat-label">Lugares</div></div>
+      <div class="stat" role="listitem"><div class="stat-num">6</div><div class="stat-label">Categorías</div></div>
+      <div class="stat" role="listitem"><div class="stat-num">100<sup>%</sup></div><div class="stat-label">Local</div></div>
+    </div>
+    <div class="hero-ctas">
 
-    <!-- ── Columna derecha: widget clima ── -->
-    <aside class="wx-hero" aria-label="Clima actual en Concepción del Uruguay">
-      <div class="wx-hero-card">
-        <div class="wx-hero-bar" aria-hidden="true"></div>
-        <div class="wx-hero-body">
-          <div class="wx-hero-city">Concepción del Uruguay · En vivo</div>
-          <div class="wx-hero-main">
-            <div class="wx-hero-icon" id="wx-hero-icon" aria-hidden="true">⏳</div>
-            <div class="wx-hero-temp-wrap">
-              <div class="wx-hero-temp" id="wx-hero-temp" aria-live="polite">
-                <span class="wx-skeleton wx-skel-temp" id="wx-hero-temp-skel"></span>
-              </div>
-              <div class="wx-hero-desc" id="wx-hero-desc">
-                <span class="wx-skeleton wx-skel-desc"></span>
-              </div>
-            </div>
-          </div>
-          <div class="wx-hero-sep" aria-hidden="true"></div>
-          <div class="wx-hero-data">
-            <div class="wx-hero-datum">
-              <div class="wx-hero-datum-label">Sensación</div>
-              <div class="wx-hero-datum-val" id="wx-hero-feels">
-                <span class="wx-skeleton wx-skel-datum"></span>
-              </div>
-            </div>
-            <div class="wx-hero-datum">
-              <div class="wx-hero-datum-label">Humedad</div>
-              <div class="wx-hero-datum-val" id="wx-hero-hum">
-                <span class="wx-skeleton wx-skel-datum"></span>
-              </div>
-            </div>
-            <div class="wx-hero-datum">
-              <div class="wx-hero-datum-label">Viento</div>
-              <div class="wx-hero-datum-val" id="wx-hero-wind">
-                <span class="wx-skeleton wx-skel-datum"></span>
-              </div>
-            </div>
-            <div class="wx-hero-datum">
-              <div class="wx-hero-datum-label">Lluvia hoy</div>
-              <div class="wx-hero-datum-val" id="wx-hero-rain">
-                <span class="wx-skeleton wx-skel-datum"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="wx-hero-footer">
-          <span class="wx-hero-updated" id="wx-hero-updated">Cargando...</span>
-          <span class="wx-hero-frase" id="wx-hero-frase"></span>
-        </div>
-      </div>
-    </aside>
-
+      <a class="btn-ghost" href="#categorias" aria-label="Ver categorías">Ver la guía ↓</a>
+    </div>
   </div>
-  <!-- FIN hero-inner -->
-
   <div class="hero-fade" aria-hidden="true"></div>
 </header>
 
@@ -1253,15 +577,38 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
 </nav>
 
 <main class="main-body" id="main-content">
+  <!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║   URU SPOT — BLOQUE FARMACIA DE TURNO v2.0                       ║
+  ║   Adaptado al sitio estático: uruspotcdu-create.github.io        ║
+  ║                                                                  ║
+  ║   DÓNDE PEGAR:                                                   ║
+  ║   Inmediatamente después de:                                     ║
+  ║     <main class="main-body" id="main-content">                   ║
+  ║   Y antes de:                                                    ║
+  ║     <!-- ══ CATEGORÍAS ══ -->                                    ║
+  ║                                                                  ║
+  ║   Fuente de datos: todoconcepcion.com (actualización diaria)     ║
+  ║   Sin mantenimiento requerido de tu parte.                       ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
 
-<!-- ══ ESTILOS DEL BLOQUE FARMACIA ══ -->
+<!-- ══ ESTILOS DEL BLOQUE ══ -->
 <style>
+  /* Usa los tokens exactos del sitio:
+     --void, --void2, --void3, --soil, --parchment, --parchment2,
+     --verde, --verde2, --verde3, --oro, --oro2, --oro3,
+     --f-display, --f-ui, --f-italic, --ease              */
+
+  /* ── Contenedor raíz ── */
   .uft-wrap {
     width: 100%;
     margin: 0 0 80px 0;
     display: block;
     position: relative;
   }
+
+  /* ── Encabezado de sección (replica el patrón del sitio) ── */
   .uft-section-header {
     display: flex;
     align-items: flex-end;
@@ -1322,6 +669,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     white-space: nowrap;
     flex-shrink: 0;
   }
+
+  /* ── Card principal ── */
   .uft-card {
     background: var(--ink);
     border-left: 5px solid #c0392b;
@@ -1336,6 +685,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     transform: translateY(-4px);
     box-shadow: 0 36px 88px -12px rgba(6,6,5,0.60);
   }
+
+  /* Barra superior animada roja */
   .uft-topbar {
     height: 3px;
     width: 100%;
@@ -1355,6 +706,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     0%   { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
   }
+
+  /* Fondo ambiental — radial rojo muy sutil */
   .uft-card::before {
     content: '';
     position: absolute;
@@ -1365,6 +718,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     pointer-events: none;
     z-index: 0;
   }
+
+  /* Patrón de cruz tenue */
   .uft-card::after {
     content: '';
     position: absolute;
@@ -1376,6 +731,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
       repeating-linear-gradient(0deg,  transparent, transparent 26px, rgba(192,57,43,1) 26px, rgba(192,57,43,1) 28px),
       repeating-linear-gradient(90deg, transparent, transparent 26px, rgba(192,57,43,1) 26px, rgba(192,57,43,1) 28px);
   }
+
+  /* ── Cuerpo ── */
   .uft-body {
     position: relative;
     z-index: 1;
@@ -1384,6 +741,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     gap: 0;
     padding: 44px 52px;
   }
+
+  /* ── Ícono de cruz ── */
   .uft-icon {
     width: 72px;
     height: 72px;
@@ -1410,6 +769,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     display: block;
     filter: drop-shadow(0 0 8px rgba(192,57,43,0.55));
   }
+
+  /* ── Contenido central ── */
   .uft-content {
     flex: 1;
     min-width: 0;
@@ -1417,6 +778,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     flex-direction: column;
     gap: 10px;
   }
+
+  /* Live chip — reutiliza el patrón del hero */
   .uft-live {
     display: inline-flex;
     align-items: center;
@@ -1446,6 +809,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     65%  { box-shadow: 0 0 0 8px rgba(231,76,60,0); }
     100% { box-shadow: 0 0 0 0   rgba(231,76,60,0); }
   }
+
   .uft-title {
     font-family: var(--f-display);
     font-style: italic;
@@ -1455,6 +819,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     letter-spacing: -0.5px;
     display: block;
   }
+
   .uft-subtitle {
     font-family: var(--f-italic);
     font-style: italic;
@@ -1467,6 +832,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     font-weight: 400;
     color: var(--oro2);
   }
+
+  /* Divisor vertical */
   .uft-vdivider {
     width: 1px;
     height: 80px;
@@ -1474,6 +841,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     margin: 0 44px;
     flex-shrink: 0;
   }
+
+  /* ── CTA ── replica .btn-primary del sitio con color rojo ── */
   .uft-cta {
     display: inline-flex;
     align-items: center;
@@ -1524,6 +893,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     display: inline-block;
   }
   .uft-cta:hover .uft-cta-arrow { transform: translate(3px, -3px); }
+
+  /* ── Footer info ── */
   .uft-footer {
     position: relative;
     z-index: 1;
@@ -1535,12 +906,14 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     gap: 16px;
     flex-wrap: wrap;
   }
+
   .uft-infos {
     display: flex;
     align-items: center;
     gap: 20px;
     flex-wrap: wrap;
   }
+
   .uft-info-item {
     display: flex;
     align-items: center;
@@ -1559,6 +932,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     background: rgba(196,135,42,0.45);
     flex-shrink: 0;
   }
+
   .uft-source {
     font-family: var(--f-ui);
     font-size: 8px;
@@ -1576,6 +950,10 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     border-bottom-color: rgba(231,76,60,0.35);
     text-decoration: none;
   }
+
+  /* ══════════════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════════════ */
   @media (max-width: 860px) {
     .uft-body   { padding: 36px 40px; }
     .uft-footer { padding: 14px 40px 18px; }
@@ -1583,8 +961,10 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     .uft-icon { width: 60px; height: 60px; margin-right: 28px; }
     .uft-cross { width: 28px; height: 28px; }
   }
+
   @media (max-width: 640px) {
     .uft-wrap { margin: 0 0 56px 0; }
+
     .uft-body {
       flex-direction: column;
       align-items: flex-start;
@@ -1611,11 +991,14 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     .uft-infos { gap: 14px; }
     .uft-section-header { margin-bottom: 20px; }
   }
+
   @media (max-width: 380px) {
     .uft-body { padding: 22px var(--gutter); }
     .uft-footer { padding: 12px var(--gutter) 16px; }
     .uft-title { font-size: 20px; }
   }
+
+  /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
     .uft-topbar    { animation: none; }
     .uft-live-dot  { animation: none; }
@@ -1623,6 +1006,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
     .uft-cta,
     .uft-card      { transition: none; }
   }
+
+  /* ── Mobile hover off ── */
   @media (max-width: 768px) {
     .uft-card:hover {
       transform: none;
@@ -1632,8 +1017,14 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
   }
 </style>
 
-<!-- ══ BLOQUE FARMACIA DE TURNO ══ -->
+<!-- ══════════════════════════════════════
+     HTML — BLOQUE FARMACIA DE TURNO
+     Pegá desde aquí hasta el comentario
+     de cierre al final del bloque.
+══════════════════════════════════════ -->
 <div class="uft-wrap reveal" role="region" aria-label="Farmacia de turno en Concepción del Uruguay">
+
+  <!-- Encabezado de sección — idéntico al patrón del resto del sitio -->
   <div class="uft-section-header">
     <div>
       <span class="uft-eyebrow">Salud · Urgencias</span>
@@ -1644,15 +1035,25 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
       <span></span><span></span><span></span>
     </div>
   </div>
+
+  <!-- Card principal -->
   <div class="uft-card">
+
+    <!-- Barra animada roja superior -->
     <div class="uft-topbar" aria-hidden="true"></div>
+
+    <!-- Cuerpo -->
     <div class="uft-body">
+
+      <!-- Cruz de farmacia -->
       <div class="uft-icon" aria-hidden="true">
         <svg class="uft-cross" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <rect x="12" y="0"  width="12" height="36" rx="3"/>
           <rect x="0"  y="12" width="36" height="12" rx="3"/>
         </svg>
       </div>
+
+      <!-- Textos -->
       <div class="uft-content">
         <div class="uft-live" role="status" aria-live="polite">
           <span class="uft-live-dot" aria-hidden="true"></span>
@@ -1664,7 +1065,11 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
           Teléfono, dirección y mapa — todo desde la web.
         </p>
       </div>
+
+      <!-- Divisor vertical (solo desktop) -->
       <div class="uft-vdivider" aria-hidden="true"></div>
+
+      <!-- Botón -->
       <a
         class="uft-cta"
         href="https://www.todoconcepcion.com/TodoConcepcion/farmacias-de-turno-disponibles-hoy/"
@@ -1675,7 +1080,10 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
         Ver ahora
         <span class="uft-cta-arrow" aria-hidden="true">↗</span>
       </a>
+
     </div>
+
+    <!-- Footer informativo -->
     <div class="uft-footer">
       <div class="uft-infos" aria-label="Información del servicio">
         <div class="uft-info-item">
@@ -1701,139 +1109,12 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
         Fuente: todoconcepcion.com
       </a>
     </div>
+
   </div>
 </div>
 <!-- ══ FIN BLOQUE FARMACIA DE TURNO — URU SPOT v2.0 ══ -->
-
-
-<!-- ══ BLOQUE CLIMA ══ -->
-<div class="wx-wrap reveal" role="region" aria-label="Clima en Concepción del Uruguay">
-
-  <!-- Encabezado de sección -->
-  <div class="wx-section-header">
-    <div>
-      <span class="wx-eyebrow">Tiempo en vivo</span>
-      <h2 class="wx-section-title">🌤 Clima en CdU ahora</h2>
-    </div>
-    <span class="wx-live-badge">
-      <span class="wx-live-dot-badge" aria-hidden="true"></span>
-      En tiempo real
-    </span>
-    <div class="wx-section-header-accent" aria-hidden="true">
-      <span></span><span></span><span></span>
-    </div>
-  </div>
-
-  <!-- Card principal -->
-  <div class="wx-card">
-    <div class="wx-card-topbar" aria-hidden="true"></div>
-
-    <!-- Columna principal -->
-    <div class="wx-col-main">
-      <div class="wx-city-label">Concepción del Uruguay, Entre Ríos</div>
-      <div class="wx-main-row">
-        <div class="wx-big-icon" id="wx-big-icon" aria-hidden="true">⏳</div>
-        <div class="wx-temp-block">
-          <div class="wx-big-temp" aria-live="polite">
-            <span id="wx-big-temp">--</span><sup>°C</sup>
-          </div>
-          <div class="wx-condition" id="wx-condition">Cargando...</div>
-        </div>
-      </div>
-      <p class="wx-phrase" id="wx-phrase" aria-live="polite">
-        Obteniendo datos del clima...
-      </p>
-    </div>
-
-    <!-- Columna datos -->
-    <div class="wx-col-data">
-      <div class="wx-data-title">Detalles del tiempo</div>
-      <div class="wx-data-grid">
-
-        <div class="wx-datum">
-          <div class="wx-datum-icon" aria-hidden="true">🌡</div>
-          <div class="wx-datum-val">
-            <span id="wx-feels">--</span><sup>°C</sup>
-          </div>
-          <div class="wx-datum-label">Sensación</div>
-        </div>
-
-        <div class="wx-datum">
-          <div class="wx-datum-icon" aria-hidden="true">💧</div>
-          <div class="wx-datum-val">
-            <span id="wx-hum">--</span><sup>%</sup>
-          </div>
-          <div class="wx-datum-label">Humedad</div>
-          <div class="wx-humidity-bar" aria-hidden="true">
-            <div class="wx-humidity-fill" id="wx-hum-bar"></div>
-          </div>
-        </div>
-
-        <div class="wx-datum">
-          <div class="wx-datum-icon" aria-hidden="true">🌬</div>
-          <div class="wx-datum-val">
-            <span id="wx-wind">--</span><sup> km/h</sup>
-          </div>
-          <div class="wx-datum-label">Viento</div>
-        </div>
-
-        <div class="wx-datum">
-          <div class="wx-datum-icon" aria-hidden="true">🌧</div>
-          <div class="wx-datum-val">
-            <span id="wx-rain">--</span><sup> mm</sup>
-          </div>
-          <div class="wx-datum-label">Lluvia hoy</div>
-        </div>
-
-        <div class="wx-datum">
-          <div class="wx-datum-icon" aria-hidden="true">☀️</div>
-          <div class="wx-datum-val" style="font-size:18px;">
-            <span id="wx-uv">--</span>
-          </div>
-          <div class="wx-datum-label">Índice UV</div>
-        </div>
-
-        <div class="wx-datum">
-          <div class="wx-datum-icon" aria-hidden="true">👁</div>
-          <div class="wx-datum-val" style="font-size:18px;">
-            <span id="wx-vis">--</span><sup> km</sup>
-          </div>
-          <div class="wx-datum-label">Visibilidad</div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="wx-card-footer">
-      <div class="wx-footer-infos">
-        <div class="wx-footer-item">
-          <span class="wx-footer-dot" aria-hidden="true"></span>
-          Actualización automática
-        </div>
-        <div class="wx-footer-item">
-          <span class="wx-footer-dot" aria-hidden="true"></span>
-          CdU · -32.4825, -58.2372
-        </div>
-        <div class="wx-footer-item">
-          <span class="wx-footer-dot" aria-hidden="true"></span>
-          <span id="wx-updated-main">Cargando...</span>
-        </div>
-      </div>
-      <a
-        class="wx-source-link"
-        href="https://open-meteo.com"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Fuente: open-meteo.com
-      </a>
-    </div>
-
-  </div>
-</div>
-<!-- ══ FIN BLOQUE CLIMA ══ -->
-
+  
+  
 
   <!-- ══ CATEGORÍAS ══ -->
   <section id="categorias" aria-labelledby="title-categorias">
@@ -2180,8 +1461,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
 <script>
 (function () {
   'use strict';
-
-  /* ── Tu JS original ─────────────────────────────────── */
   const bar = document.getElementById('progress-bar');
   function updateProgress() {
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -2240,188 +1519,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
   setTimeout(function () {
     document.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
   }, 800);
-
-  /* ── CLIMA — Open-Meteo API ──────────────────────────── */
-
-  const WX_LAT  = -32.4825;
-  const WX_LON  = -58.2372;
-  const WX_URL  =
-    `https://api.open-meteo.com/v1/forecast` +
-    `?latitude=${WX_LAT}&longitude=${WX_LON}` +
-    `&current=temperature_2m,relative_humidity_2m,apparent_temperature,` +
-    `weather_code,wind_speed_10m,precipitation,uv_index,visibility` +
-    `&daily=precipitation_sum` +
-    `&timezone=America%2FArgentina%2FBuenos_Aires` +
-    `&forecast_days=1`;
-
-  /* Mapeo de WMO weather codes a emoji + descripción */
-  function wxDecode(code) {
-    const map = {
-      0:  { icon: '☀️',  desc: 'Despejado' },
-      1:  { icon: '🌤',  desc: 'Mayormente despejado' },
-      2:  { icon: '⛅',  desc: 'Parcialmente nublado' },
-      3:  { icon: '☁️',  desc: 'Nublado' },
-      45: { icon: '🌫',  desc: 'Neblina' },
-      48: { icon: '🌫',  desc: 'Niebla con escarcha' },
-      51: { icon: '🌦',  desc: 'Llovizna leve' },
-      53: { icon: '🌦',  desc: 'Llovizna moderada' },
-      55: { icon: '🌧',  desc: 'Llovizna intensa' },
-      61: { icon: '🌧',  desc: 'Lluvia leve' },
-      63: { icon: '🌧',  desc: 'Lluvia moderada' },
-      65: { icon: '🌧',  desc: 'Lluvia intensa' },
-      71: { icon: '🌨',  desc: 'Nieve leve' },
-      73: { icon: '❄️',  desc: 'Nieve moderada' },
-      75: { icon: '❄️',  desc: 'Nieve intensa' },
-      80: { icon: '🌦',  desc: 'Chaparrón leve' },
-      81: { icon: '🌧',  desc: 'Chaparrón moderado' },
-      82: { icon: '⛈',  desc: 'Chaparrón fuerte' },
-      95: { icon: '⛈',  desc: 'Tormenta' },
-      96: { icon: '⛈',  desc: 'Tormenta con granizo' },
-      99: { icon: '⛈',  desc: 'Tormenta fuerte' },
-    };
-    return map[code] || { icon: '🌡', desc: 'Variable' };
-  }
-
-  /* Frases contextuales según condición y temperatura */
-  function wxPhrase(code, temp, rain) {
-    if (code >= 95) return '⚡ Tormenta en CdU — ideal para quedarse en un café hoy.';
-    if (code >= 61) return '☔ Está lloviendo — perfecto para un buen restaurante bajo techo.';
-    if (code >= 51) return '🌧 Llovizna en la ciudad — llevá paraguas si salís a comer.';
-    if (code >= 45) return '🌫 Neblina esta mañana — tranquilo para un café con medias lunas.';
-    if (temp >= 30) return '🔥 Calor intenso — ideal para una heladería o un bar con ventilador.';
-    if (temp >= 24) return '☀️ Día hermoso — perfecto para comer afuera en la costanera.';
-    if (temp >= 18) return '🌤 Buen clima — una tarde ideal para recorrer la guía.';
-    if (temp >= 12) return '🧥 Fresquito — un bodegón o una panadería caen perfecto.';
-    if (temp >= 6)  return '❄ Frío en CdU — el momento perfecto para un café con leche.';
-    return '🧣 Mucho frío — noche de bodegón y vino tinto.';
-  }
-
-  /* Hora local formateada */
-  function fmtTime() {
-    return new Date().toLocaleTimeString('es-AR', {
-      hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires'
-    });
-  }
-
-  /* Aplica datos al DOM */
-  function renderWeather(d) {
-    const c   = d.current;
-    const wx  = wxDecode(c.weather_code);
-    const tmp = Math.round(c.temperature_2m);
-    const apt = Math.round(c.apparent_temperature);
-    const hum = Math.round(c.relative_humidity_2m);
-    const wnd = Math.round(c.wind_speed_10m);
-    const prec = (c.precipitation || 0).toFixed(1);
-    const uvi = Math.round(c.uv_index ?? 0);
-    const vis = Math.round((c.visibility ?? 0) / 1000);
-    const frase = wxPhrase(c.weather_code, tmp, prec);
-    const hora  = fmtTime();
-
-    /* ── Hero widget ── */
-    const heroTemp = document.getElementById('wx-hero-temp');
-    if (heroTemp) {
-      heroTemp.innerHTML = `${tmp}<sup>°C</sup>`;
-    }
-    const heroIcon = document.getElementById('wx-hero-icon');
-    if (heroIcon) heroIcon.textContent = wx.icon;
-
-    const heroDesc = document.getElementById('wx-hero-desc');
-    if (heroDesc) heroDesc.textContent = wx.desc;
-
-    const heroFeels = document.getElementById('wx-hero-feels');
-    if (heroFeels) heroFeels.textContent = `${apt}°C`;
-
-    const heroHum = document.getElementById('wx-hero-hum');
-    if (heroHum) heroHum.textContent = `${hum}%`;
-
-    const heroWind = document.getElementById('wx-hero-wind');
-    if (heroWind) heroWind.textContent = `${wnd} km/h`;
-
-    const heroRain = document.getElementById('wx-hero-rain');
-    if (heroRain) heroRain.textContent = `${prec} mm`;
-
-    const heroUpdated = document.getElementById('wx-hero-updated');
-    if (heroUpdated) heroUpdated.textContent = `Última act. ${hora}`;
-
-    const heroFrase = document.getElementById('wx-hero-frase');
-    if (heroFrase) heroFrase.textContent = frase.replace(/^[^\s]+\s/, '');
-
-    /* ── Bloque main-body ── */
-    const bigTemp = document.getElementById('wx-big-temp');
-    if (bigTemp) bigTemp.textContent = tmp;
-
-    const bigIcon = document.getElementById('wx-big-icon');
-    if (bigIcon) bigIcon.textContent = wx.icon;
-
-    const cond = document.getElementById('wx-condition');
-    if (cond) cond.textContent = wx.desc;
-
-    const phrase = document.getElementById('wx-phrase');
-    if (phrase) phrase.textContent = frase;
-
-    const feels = document.getElementById('wx-feels');
-    if (feels) feels.textContent = apt;
-
-    const humEl = document.getElementById('wx-hum');
-    if (humEl) humEl.textContent = hum;
-
-    const humBar = document.getElementById('wx-hum-bar');
-    if (humBar) {
-      requestAnimationFrame(() => {
-        setTimeout(() => { humBar.style.width = hum + '%'; }, 300);
-      });
-    }
-
-    const windEl = document.getElementById('wx-wind');
-    if (windEl) windEl.textContent = wnd;
-
-    const rainEl = document.getElementById('wx-rain');
-    if (rainEl) rainEl.textContent = prec;
-
-    const uvEl = document.getElementById('wx-uv');
-    if (uvEl) uvEl.textContent = uvi;
-
-    const visEl = document.getElementById('wx-vis');
-    if (visEl) visEl.textContent = vis;
-
-    const upMain = document.getElementById('wx-updated-main');
-    if (upMain) upMain.textContent = `Actualizado ${hora}`;
-  }
-
-  /* Error fallback */
-  function renderError() {
-    const els = ['wx-hero-temp','wx-hero-desc','wx-big-temp','wx-condition','wx-phrase'];
-    els.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = '—';
-    });
-    const up = document.getElementById('wx-hero-updated');
-    if (up) up.textContent = 'Sin conexión';
-    const upM = document.getElementById('wx-updated-main');
-    if (upM) upM.textContent = 'Sin conexión';
-    const heroIcon = document.getElementById('wx-hero-icon');
-    if (heroIcon) heroIcon.textContent = '📡';
-    const bigIcon = document.getElementById('wx-big-icon');
-    if (bigIcon) bigIcon.textContent = '📡';
-  }
-
-  /* Fetch con retry */
-  async function fetchWeather() {
-    try {
-      const res = await fetch(WX_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      renderWeather(data);
-    } catch (e) {
-      console.warn('URU SPOT Clima — error al obtener datos:', e);
-      renderError();
-    }
-  }
-
-  /* Carga inmediata + refresco cada 10 minutos */
-  fetchWeather();
-  setInterval(fetchWeather, 10 * 60 * 1000);
-
 })();
 </script>
 </body>
