@@ -1450,6 +1450,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   var revealEls=document.querySelectorAll('.reveal');
 
   /* Observer para secciones de nav (rootMargin específico para activación correcta) */
+  var navH=nav?nav.offsetHeight:60;
   var sectionObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(entry.isIntersecting){
@@ -1457,7 +1458,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
         navItems.forEach(function(item){item.classList.toggle('active',item.dataset.section===id);});
       }
     });
-  },{rootMargin:'-'+(nav.offsetHeight+20)+'px 0px -55% 0px',threshold:0});
+  },{rootMargin:'-'+(navH+20)+'px 0px -55% 0px',threshold:0});
   sections.forEach(function(s){sectionObserver.observe(s);});
 
   /* Observer para reveal — separado porque tiene rootMargin diferente (necesario) */
@@ -1630,9 +1631,9 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
      para no competir con LCP. Fallback con requestIdleCallback si load ya ocurrió. */
   function scheduleWeather(){
     if(window.requestIdleCallback){
-      window.requestIdleCallback(function(){fetchWeather();},{ timeout:4000 });
+      window.requestIdleCallback(function(){fetchWeather();},{ timeout:8000 });
     } else {
-      setTimeout(fetchWeather, 500);
+      setTimeout(fetchWeather, 2000);
     }
   }
 
