@@ -85,7 +85,8 @@ img { display: block; max-width: 100%; }
 }
 @keyframes shimmerBar { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 
-#grain{ display:none; }
+#grain{ display:none; } 
+   @font-face { font-display: swap; }
 
 /* HERO */
 .hero { position: relative; min-height: 100svh; display: flex; flex-direction: column; overflow: hidden; background: var(--void); }
@@ -900,7 +901,7 @@ img { display: block; max-width: 100%; }
 }
 @media(max-width:768px){#grain{display:none}}
 a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-radius:2px}
-   @media(max-width:768px){
+@media(max-width:768px){
   * {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
@@ -912,6 +913,15 @@ a:focus-visible{outline:2px solid rgba(29,92,64,0.75);outline-offset:3px;border-
   .ubc-live-dot {
     animation-duration: 2.5s !important;
     animation-iteration-count: infinite !important;
+  }
+  .uft-topbar::after,
+  .ubc-topbar::after,
+  .usb-topbar::after,
+  .wx-hero-bar::after,
+  .footer-shimmer::after,
+  .hero-mesh::after {
+    animation: none !important;
+    display: none !important;
   }
 }
 </style>
