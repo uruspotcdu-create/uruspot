@@ -161,18 +161,11 @@ img{display:block;max-width:100%}
 .section-eyebrow{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:var(--verde);display:block;margin-bottom:8px}
 .section-title{font-family:var(--f-display);font-size:clamp(24px,3.2vw,34px);font-weight:400;color:var(--ink);line-height:1;letter-spacing:-.5px}
 .section-count{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--parchment);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:8px 16px;border-radius:2px;white-space:nowrap;flex-shrink:0}
-.us-section{margin-top:var(--section-gap);content-visibility:auto}
+.us-section{margin-top:var(--section-gap)}
 
 /* ▼ OPTIMIZACIÓN #4: contain-intrinsic-size corregidos para móvil.
    Se usa "auto 1px" para que el browser aprenda el tamaño real en lugar de valores
    fijos que en móvil (1 columna) son erróneos y fuerzan repaints masivos. */
-#restaurantes{contain-intrinsic-size:auto 1px}
-#cafes{contain-intrinsic-size:auto 1px}
-#bares{contain-intrinsic-size:auto 1px}
-#panaderias{contain-intrinsic-size:auto 1px}
-#heladerias{contain-intrinsic-size:auto 1px}
-#hosterias{contain-intrinsic-size:auto 1px}
-#gimnasios{contain-intrinsic-size:auto 1px}
 
 /* ▼ OPTIMIZACIÓN #11: contain:layout style en bloques de servicios esenciales
    (uft-wrap, ubc-wrap, usb-wrap) para reducir trabajo de layout en el scroll */
@@ -1663,7 +1656,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
       requestAnimationFrame(function(){entry.target.classList.add('visible');});
       revealObserver.unobserve(entry.target);
     });
-  },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+ },{threshold:0,rootMargin:'0px 0px -20px 0px'});
   revealEls.forEach(function(el){revealObserver.observe(el);});
 });
 
@@ -1703,7 +1696,7 @@ var ghost=document.querySelector('.btn-ghost');
   /* Fallback: revelar todo a los 800ms por si IntersectionObserver falla */
   setTimeout(function(){
     document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){el.classList.add('visible');});
-  },800);
+  },2500);
 
 /* ── BUSCADOR PREMIUM URU SPOT ── */
 var URU_STORAGE = 'uru_search_recent_v2';
@@ -1985,12 +1978,8 @@ uruRenderRecent();
 
   /* ▼ OPTIMIZACIÓN #3: disparar DESPUÉS del evento load + 500ms de gracia
      para no competir con LCP. Fallback con requestIdleCallback si load ya ocurrió. */
-  function scheduleWeather(){
-    if(window.requestIdleCallback){
-      window.requestIdleCallback(function(){fetchWeather();},{ timeout:8000 });
-    } else {
-      setTimeout(fetchWeather, 4000);
-    }
+function scheduleWeather(){
+    setTimeout(fetchWeather, 1200);
   }
 
   if(document.readyState==='complete'){
