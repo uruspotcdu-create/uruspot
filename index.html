@@ -24,7 +24,7 @@
 <meta property="og:url" content="https://uruspot.pages.dev/" />
 <meta property="og:title" content="URU SPOT · Guía Local · Concepción del Uruguay" />
 <meta property="og:description" content="Todo lo que vale la pena en la ciudad. Restaurantes, cafés, bares, panaderías, heladerías, hosterías y gimnasios — URU SPOT, sin mentiras." />
-<meta property="og:image" content="https://uruspot.pages.dev/img/logof.webp" />
+<meta property="og:image" content="https://uruspot.pages.dev/img/logfof.webp" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:locale" content="es_AR" />
@@ -33,10 +33,10 @@
 <meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
 <style>
-:root{--void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;--parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;--ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;--oro:#c4872a;--oro2:#dfa040;--oro3:#f2c060;--f-display:'DM Serif Display',serif;--f-text:'DM Serif Text',serif;--f-ui:'Syne',sans-serif;--f-italic:'Instrument Serif',serif;--ease:cubic-bezier(0.23,1,0.32,1);--gutter:64px;--section-gap:120px}
+:root{--void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;--parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;--ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;--oro:#c4872a;--oro2:#dfa040;--oro3:#f2c060;--f-display:'DM Serif Display',serif;--f-text:'DM Serif Text',serif;--f-ui:'Syne',sans-serif;--f-italic:'DM Serif Display',serif;--ease:cubic-bezier(0.23,1,0.32,1);--gutter:64px;--section-gap:120px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth;font-size:16px}
 body{background:var(--void);color:var(--parchment);font-family:var(--f-ui);-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -1545,6 +1545,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   /* Observer para secciones de nav (rootMargin específico para activación correcta) */
   var navH = 60; // valor fijo, sin leer el DOM
+ requestAnimationFrame(function(){
   var sectionObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(entry.isIntersecting){
@@ -1552,10 +1553,9 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
         navItems.forEach(function(item){item.classList.toggle('active',item.dataset.section===id);});
       }
     });
-  },{rootMargin:'-'+(navH+20)+'px 0px -55% 0px',threshold:0});
+  },{rootMargin:'-80px 0px -55% 0px',threshold:0});
   sections.forEach(function(s){sectionObserver.observe(s);});
 
-  /* Observer para reveal — separado porque tiene rootMargin diferente (necesario) */
   var revealObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(!entry.isIntersecting)return;
@@ -1564,32 +1564,31 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     });
   },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
   revealEls.forEach(function(el){revealObserver.observe(el);});
+});
 
   /* NAV CLICK — smooth scroll */
+// DESPUÉS — reemplazá el bloque completo
 navItems.forEach(function(item){
     item.addEventListener('click',function(e){
       e.preventDefault();
       var id=this.dataset.section;
-      // Diferir la lectura geométrica un frame para evitar forced reflow
-      requestAnimationFrame(function(){
-        var target=document.getElementById(id);
-        if(!target)return;
-        window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-60-24,behavior:'smooth'});
-      });
+      var target=document.getElementById(id);
+      if(!target)return;
+      var top=target.offsetTop - 84;
+      window.scrollTo({top:top,behavior:'smooth'});
     });
   });
 
   /* CTA ghost scroll */
+// DESPUÉS
 var ghost=document.querySelector('.btn-ghost');
   if(ghost){
     ghost.addEventListener('click',function(e){
       e.preventDefault();
-      // Diferir la lectura geométrica un frame para evitar forced reflow
-      requestAnimationFrame(function(){
-        var target=document.getElementById('categorias');
-        if(!target)return;
-        window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-60-24,behavior:'smooth'});
-      });
+      var target=document.getElementById('categorias');
+      if(!target)return;
+      var top=target.offsetTop - 84;
+      window.scrollTo({top:top,behavior:'smooth'});
     });
   }
 
