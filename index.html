@@ -7,8 +7,6 @@
 <link rel="dns-prefetch" href="//fonts.gstatic.com" />
 <link rel="dns-prefetch" href="//api.open-meteo.com" />
 <link rel="dns-prefetch" href="//dolarapi.com" />
-<link rel="preconnect" href="https://api.open-meteo.com" crossorigin />
-<link rel="preconnect" href="https://dolarapi.com" crossorigin />
 <link rel="icon" type="image/png" href="https://uruspot.pages.dev/img/logof.webp" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <link rel="preload" as="image" href="https://uruspot.pages.dev/img/logof-small.webp" fetchpriority="high" />
@@ -24,7 +22,7 @@
 <meta property="og:url" content="https://uruspot.pages.dev/" />
 <meta property="og:title" content="URU SPOT · Guía Local · Concepción del Uruguay" />
 <meta property="og:description" content="Todo lo que vale la pena en la ciudad. Restaurantes, cafés, bares, panaderías, heladerías, hosterías y gimnasios — URU SPOT, sin mentiras." />
-<meta property="og:image" content="https://uruspot.pages.dev/img/logfof.webp" />
+<meta property="og:image" content="https://uruspot.pages.dev/img/logof.webp" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:locale" content="es_AR" />
@@ -33,10 +31,10 @@
 <meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" media="print" onload="this.media='all'" />
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
 <style>
-:root{--void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;--parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;--ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;--oro:#c4872a;--oro2:#dfa040;--oro3:#f2c060;--f-display:'DM Serif Display',serif;--f-text:'DM Serif Text',serif;--f-ui:'Syne',sans-serif;--f-italic:'DM Serif Display',serif;--ease:cubic-bezier(0.23,1,0.32,1);--gutter:64px;--section-gap:120px}
+:root{--void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;--parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;--ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;--oro:#c4872a;--oro2:#dfa040;--oro3:#f2c060;--f-display:'DM Serif Display',serif;--f-text:'DM Serif Text',serif;--f-ui:'Syne',sans-serif;--f-italic:'Instrument Serif',serif;--ease:cubic-bezier(0.23,1,0.32,1);--gutter:64px;--section-gap:120px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth;font-size:16px}
 body{background:var(--void);color:var(--parchment);font-family:var(--f-ui);-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -147,10 +145,24 @@ img{display:block;max-width:100%}
 .nav-item:hover .nav-emoji{transform:scale(1.2) rotate(-4deg)}
 .nav-divider{width:1px;margin:16px 0;background:rgba(242,237,227,.08);flex-shrink:0}
 
-
+/* ── BUSCADOR ── */
+.search-bar-wrap{position:sticky;top:60px;z-index:800;background:rgba(6,6,5,.97);border-bottom:1px solid rgba(242,237,227,.07);padding:0 var(--gutter);display:flex;align-items:center;gap:16px;height:0;overflow:hidden;transition:height 0.35s var(--ease)}
+.search-bar-wrap.open{height:72px}
+.search-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:none;background:none;cursor:pointer;color:rgba(242,237,227,.55);font-size:18px;flex-shrink:0;transition:color 0.3s ease;padding:0;margin-left:auto}
+.search-icon-btn:hover{color:var(--oro2)}
+.search-input{flex:1;background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.14);border-radius:2px;padding:14px 20px;font-family:var(--f-ui);font-size:13px;font-weight:600;letter-spacing:.5px;color:var(--parchment);outline:none;transition:border-color 0.3s ease,background 0.3s ease}
+.search-input::placeholder{color:rgba(242,237,227,.28);font-weight:400}
+.search-input:focus{border-color:var(--verde2);background:rgba(242,237,227,.09)}
+.search-close{background:none;border:none;color:rgba(242,237,227,.35);font-size:20px;cursor:pointer;padding:8px;transition:color 0.3s ease;flex-shrink:0;line-height:1}
+.search-close:hover{color:var(--parchment)}
+.search-count{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.28);white-space:nowrap;flex-shrink:0;min-width:80px;text-align:right}
+.search-highlight{background:rgba(196,135,42,.35);border-radius:2px;padding:0 2px}
+.search-hidden{display:none!important}
+.search-no-results{display:none;text-align:center;padding:60px 24px;font-family:var(--f-italic);font-style:italic;font-size:18px;color:rgba(26,25,22,.38)}
+.search-no-results.visible{display:block}
 
 /* ── MAIN BODY ── */
-.main-body{background:var(--parchment3);padding:100px var(--gutter) 120px;position:relative;z-index:1}
+.main-body{background:var(--parchment3);padding:100px var(--gutter) 120px;position:relative}
 .main-body::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 0%,rgba(29,92,64,.04) 0%,transparent 45%),radial-gradient(circle at 85% 100%,rgba(196,135,42,.04) 0%,transparent 40%);pointer-events:none}
 .section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:60px;padding-bottom:24px;position:relative;gap:16px;flex-wrap:wrap}
 .section-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(26,25,22,.12)}
@@ -161,11 +173,18 @@ img{display:block;max-width:100%}
 .section-eyebrow{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:var(--verde);display:block;margin-bottom:8px}
 .section-title{font-family:var(--f-display);font-size:clamp(24px,3.2vw,34px);font-weight:400;color:var(--ink);line-height:1;letter-spacing:-.5px}
 .section-count{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--parchment);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:8px 16px;border-radius:2px;white-space:nowrap;flex-shrink:0}
-.us-section{margin-top:var(--section-gap)}
+.us-section{margin-top:var(--section-gap);content-visibility:auto}
 
 /* ▼ OPTIMIZACIÓN #4: contain-intrinsic-size corregidos para móvil.
    Se usa "auto 1px" para que el browser aprenda el tamaño real en lugar de valores
    fijos que en móvil (1 columna) son erróneos y fuerzan repaints masivos. */
+#restaurantes{contain-intrinsic-size:auto 1px}
+#cafes{contain-intrinsic-size:auto 1px}
+#bares{contain-intrinsic-size:auto 1px}
+#panaderias{contain-intrinsic-size:auto 1px}
+#heladerias{contain-intrinsic-size:auto 1px}
+#hosterias{contain-intrinsic-size:auto 1px}
+#gimnasios{contain-intrinsic-size:auto 1px}
 
 /* ▼ OPTIMIZACIÓN #11: contain:layout style en bloques de servicios esenciales
    (uft-wrap, ubc-wrap, usb-wrap) para reducir trabajo de layout en el scroll */
@@ -319,9 +338,8 @@ img{display:block;max-width:100%}
 }
 
 /* ── REVEAL ── */
-.reveal{opacity:1;transform:translateY(0)}
-.js-ready .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s var(--ease),transform 0.7s var(--ease)}
-.js-ready .reveal.visible{opacity:1;transform:translateY(0)}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s var(--ease),transform 0.7s var(--ease)}
+.reveal.visible{opacity:1;transform:translateY(0)}
 
 /* ── FARMACIA ── */
 .uft-wrap{width:100%;margin:0 0 80px 0;display:block;position:relative}
@@ -581,6 +599,7 @@ img{display:block;max-width:100%}
   .btn-primary{font-size:10px;padding:15px 26px}
   .main-nav{padding:0}
   .nav-item{font-size:9px;padding:0 16px;height:52px;letter-spacing:1.5px}
+  .search-bar-wrap{padding-left:var(--gutter);padding-right:var(--gutter)}
   .main-body{padding:48px var(--gutter) 72px}
   .section-title{font-size:22px}
   .resto-grid{grid-template-columns:1fr}
@@ -631,68 +650,8 @@ img{display:block;max-width:100%}
   .usb-emg-num{font-size:36px}
 }
 @media(max-width:380px){.hero-title{font-size:34px;letter-spacing:-1px}.hero-logo img{width:44px}.cafe-grid{grid-template-columns:1fr}.ccard-featured{grid-column:span 1}.cat-grid{grid-template-columns:1fr}.cat-card-highlight{grid-column:span 1}.cat-card-donde{grid-column:span 1}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal,.js-ready .reveal{opacity:1;transform:none;transition:none}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal{opacity:1;transform:none;transition:none}}
 a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:2px}
-  /* ═══ URU SEARCH PREMIUM ═══ */
-.uru-nav-search-btn{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:60px;background:none;border:none;cursor:pointer;color:rgba(242,237,227,.40);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:color .3s ease;white-space:nowrap;flex-shrink:0}
-.uru-nav-search-btn:hover{color:var(--oro2)}
-.uru-nav-kbd{background:rgba(242,237,227,.07);border:1px solid rgba(242,237,227,.12);border-radius:3px;padding:2px 6px;font-size:8px;letter-spacing:1px;color:rgba(242,237,227,.28)}
-.uru-search-overlay{position:sticky;top:60px;left:0;right:0;z-index:800;background:linear-gradient(to bottom,rgba(6,6,5,.99),rgba(8,8,7,.97));border-bottom:1px solid rgba(196,135,42,.18);max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(0.23,1,0.32,1)}
-.uru-search-overlay.open{max-height:620px;}
-@media(max-width:640px){.uru-search-overlay{top:52px;}}
-.uru-search-topline{height:2px;background:rgba(196,135,42,.15);overflow:hidden;position:relative}
-@media(min-width:769px){.uru-search-topline::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(196,135,42,.7) 30%,rgba(242,192,96,.9) 50%,rgba(196,135,42,.7) 70%,transparent);animation:shimmerBar 3s linear infinite;pointer-events:none}}
-.uru-search-inner{padding:24px var(--gutter) 0}
-.uru-search-main{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-.uru-search-icon-left{color:rgba(196,135,42,.60);flex-shrink:0;transition:color .3s ease}
-.uru-search-field{flex:1;background:transparent;border:none;border-bottom:2px solid rgba(196,135,42,.22);padding:8px 0 12px;font-size:clamp(18px,2.5vw,22px);color:var(--parchment);font-family:var(--f-ui);font-weight:600;letter-spacing:.5px;outline:none;transition:border-color .3s ease;caret-color:var(--oro2)}
-.uru-search-field::placeholder{color:rgba(242,237,227,.20);font-weight:400}
-.uru-search-field:focus{border-bottom-color:rgba(196,135,42,.65)}
-.uru-search-clear{background:rgba(242,237,227,.07);border:1px solid rgba(242,237,227,.10);border-radius:50%;width:30px;height:30px;display:none;align-items:center;justify-content:center;cursor:pointer;color:rgba(242,237,227,.35);font-size:13px;transition:all .25s ease;flex-shrink:0}
-.uru-search-clear:hover{background:rgba(196,135,42,.12);border-color:rgba(196,135,42,.35);color:var(--oro2)}
-.uru-search-kbd2{background:rgba(242,237,227,.05);border:1px solid rgba(242,237,227,.10);border-radius:3px;padding:3px 8px;font-size:9px;letter-spacing:1.5px;color:rgba(242,237,227,.22);flex-shrink:0}
-.uru-search-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.uru-search-count{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,.28)}
-.uru-search-count span{color:var(--oro2);font-size:11px}
-.uru-search-filters-toggle{background:none;border:none;cursor:pointer;font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.30);transition:color .25s ease;padding:0}
-.uru-search-filters-toggle:hover{color:var(--oro2)}
-.uru-search-cats{display:flex;gap:7px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid rgba(242,237,227,.06)}
-.uru-cat-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(242,237,227,.05);border:1px solid rgba(242,237,227,.09);border-radius:2px;padding:6px 13px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(242,237,227,.32);cursor:pointer;transition:all .25s ease;white-space:nowrap}
-.uru-cat-chip:hover{background:rgba(196,135,42,.08);border-color:rgba(196,135,42,.25);color:rgba(242,237,227,.70)}
-.uru-cat-chip.active{background:rgba(196,135,42,.14);border-color:rgba(196,135,42,.45);color:var(--oro2)}
-.uru-search-recent{padding:18px 0}
-.uru-recent-label{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,.18);margin-bottom:10px}
-.uru-recent-list{display:flex;gap:7px;flex-wrap:wrap}
-.uru-recent-item{display:inline-flex;align-items:center;gap:6px;background:rgba(242,237,227,.04);border:1px solid rgba(242,237,227,.07);border-radius:2px;padding:5px 11px;font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.28);cursor:pointer;transition:all .25s ease}
-.uru-recent-item:hover{background:rgba(29,92,64,.10);border-color:rgba(29,92,64,.28);color:rgba(242,237,227,.65)}
-.uru-recent-del{font-size:10px;opacity:.22;margin-left:4px;transition:opacity .2s;line-height:1}
-.uru-recent-item:hover .uru-recent-del{opacity:.55}
-.uru-search-results{max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(196,135,42,.18) transparent;padding-bottom:20px}
-.uru-result-group{margin-bottom:18px}
-.uru-result-group-label{font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:rgba(242,237,227,.18);margin-bottom:7px;padding:0 2px}
-.uru-result-list{display:flex;flex-direction:column;gap:1px}
-.uru-result-item{display:flex;align-items:center;gap:14px;padding:9px 12px;background:rgba(242,237,227,.025);border:1px solid transparent;border-radius:2px;cursor:pointer;text-decoration:none;transition:all .22s ease}
-.uru-result-item:hover,.uru-result-item.uru-active{background:rgba(242,237,227,.055);border-color:rgba(196,135,42,.18)}
-.uru-result-item.featured{border-left:3px solid var(--oro);padding-left:9px}
-.uru-result-icon{font-size:20px;flex-shrink:0;width:32px;text-align:center}
-.uru-result-info{flex:1;min-width:0}
-.uru-result-name{font-family:var(--f-ui);font-size:13px;font-weight:700;color:var(--parchment);display:block;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.uru-result-name mark{background:rgba(196,135,42,.28);color:var(--oro2);border-radius:2px;padding:0 2px;font-style:normal}
-.uru-result-sub{font-family:var(--f-ui);font-size:10px;color:rgba(242,237,227,.28);display:block;letter-spacing:.5px;margin-top:1px}
-.uru-result-badge{font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:3px 8px;border-radius:2px;flex-shrink:0;white-space:nowrap}
-.uru-result-badge.top{background:rgba(29,92,64,.18);color:rgba(100,210,155,.80);border:1px solid rgba(29,92,64,.28)}
-.uru-result-badge.gold{background:rgba(196,135,42,.14);color:var(--oro2);border:1px solid rgba(196,135,42,.28)}
-.uru-result-arrow{font-size:16px;color:rgba(242,237,227,.18);flex-shrink:0;transition:color .2s, transform .2s}
-.uru-result-item:hover .uru-result-arrow,.uru-result-item.uru-active .uru-result-arrow{color:var(--oro2);transform:translateX(3px)}
-.uru-no-results{padding:36px 0;text-align:center}
-.uru-no-results-text{font-family:var(--f-italic);font-style:italic;font-size:15px;color:rgba(242,237,227,.22)}
-.uru-no-results-sub{font-family:var(--f-ui);font-size:9px;color:rgba(242,237,227,.14);letter-spacing:1.5px;margin-top:6px;text-transform:uppercase}
-.uru-search-foot{background:rgba(242,237,227,.015);border-top:1px solid rgba(242,237,227,.05);padding:10px var(--gutter);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.uru-search-foot-tips{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.uru-search-tip{font-family:var(--f-ui);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.16);display:flex;align-items:center;gap:4px}
-.uru-search-tip kbd{background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.10);border-radius:3px;padding:2px 5px;font-size:8px;font-family:monospace;color:rgba(242,237,227,.28)}
-.uru-search-brand{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(196,135,42,.22)}
-@media(max-width:640px){.uru-search-kbd2,.uru-nav-kbd,.uru-search-foot-tips{display:none}.uru-search-inner{padding:18px var(--gutter) 0}.uru-search-field{font-size:17px}.uru-search-foot{padding:10px var(--gutter)}}
 </style>
 </head>
 <body>
@@ -779,69 +738,13 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   <div class="nav-divider" aria-hidden="true"></div>
   <a class="nav-item" href="#gimnasios" data-section="gimnasios"><span class="nav-emoji" aria-hidden="true">💪</span> Gimnasios</a>
   <div class="nav-divider" aria-hidden="true"></div>
-<button class="uru-nav-search-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">
-  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-  Buscar
-  <span class="uru-nav-kbd">Ctrl K</span>
-</button>
+  <button class="search-icon-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">🔍</button>
 </nav>
 
-<div class="uru-search-overlay" id="search-bar-wrap" role="search" aria-label="Buscar en URU SPOT">
-  <div class="uru-search-topline" aria-hidden="true"></div>
-  <div class="uru-search-inner">
-
-    <!-- INPUT PRINCIPAL -->
-    <div class="uru-search-main">
-      <svg class="uru-search-icon-left" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6" stroke="currentColor" stroke-width="1.8"/><line x1="13" y1="13" x2="18" y2="18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <input class="uru-search-field" id="search-input" type="search"
-        placeholder="Parrilla, café, El Arca, Nero, gimnasio..."
-        autocomplete="off" spellcheck="false"
-        aria-label="Buscar lugares en URU SPOT" />
-      <span class="uru-search-kbd2"><kbd>ESC</kbd> cerrar</span>
-      <button class="uru-search-clear" id="search-clear-x" aria-label="Limpiar búsqueda" style="display:none">✕</button>
-    </div>
-
-    <!-- META -->
-    <div class="uru-search-meta">
-      <div class="uru-search-count" id="search-count" aria-live="polite">Buscá cualquier lugar de la guía</div>
-      <button class="uru-search-filters-toggle" id="uru-filters-toggle" aria-expanded="true">
-        ⚙ Filtrar por categoría
-      </button>
-    </div>
-
-    <!-- CHIPS DE CATEGORÍA -->
-    <div class="uru-search-cats" id="uru-cat-filters">
-      <button class="uru-cat-chip active" data-cat="all">🗺️ Todo</button>
-      <button class="uru-cat-chip" data-cat="restaurantes">🍽️ Restaurantes</button>
-      <button class="uru-cat-chip" data-cat="cafes">☕ Cafés</button>
-      <button class="uru-cat-chip" data-cat="bares">🍻 Bares</button>
-      <button class="uru-cat-chip" data-cat="panaderias">🥐 Panaderías</button>
-      <button class="uru-cat-chip" data-cat="heladerias">🍦 Heladerías</button>
-      <button class="uru-cat-chip" data-cat="hosterias">🏡 Hosterías</button>
-      <button class="uru-cat-chip" data-cat="gimnasios">💪 Gimnasios</button>
-    </div>
-
-    <!-- RECIENTES -->
-    <div class="uru-search-recent" id="uru-recent-section">
-      <div class="uru-recent-label">Búsquedas recientes</div>
-      <div class="uru-recent-list" id="uru-recent-list"></div>
-    </div>
-
-    <!-- RESULTADOS -->
-    <div class="uru-search-results" id="uru-results-section" style="display:none" aria-live="polite">
-      <div id="uru-results-container"></div>
-    </div>
-
-  </div>
-  <div class="uru-search-foot">
-    <div class="uru-search-foot-tips">
-      <span class="uru-search-tip"><kbd>↵</kbd> ir</span>
-      <span class="uru-search-tip"><kbd>↑↓</kbd> navegar</span>
-      <span class="uru-search-tip"><kbd>ESC</kbd> cerrar</span>
-      <span class="uru-search-tip"><kbd>Ctrl K</kbd> abrir</span>
-    </div>
-    <span class="uru-search-brand">URU SPOT · CdU</span>
-  </div>
+<div class="search-bar-wrap" id="search-bar-wrap" role="search" aria-label="Buscar lugares en URU SPOT">
+  <input class="search-input" id="search-input" type="search" placeholder="Buscá un lugar... ej: parrilla, café, Nero, La Ris..." autocomplete="off" aria-label="Buscar lugares" />
+  <span class="search-count" id="search-count" aria-live="polite"></span>
+  <button class="search-close" id="search-close-btn" aria-label="Cerrar buscador">✕</button>
 </div>
 
 <main class="main-body" id="main-content">
@@ -1192,17 +1095,11 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
         <p class="usb-subtitle">Las tres cotizaciones del dólar actualizadas en tiempo real.<br/>Ver también <strong>crypto, euro, real</strong> y todas las divisas.</p>
       </div>
     </div>
-    <!-- ═══════════════════════════════════════════════════════════════════════
-         FIX A: dolar-grid — IDs por chip + skeletons de carga iniciales
-         Los valores reales son inyectados por el script mejorado debajo.
-         ════════════════════════════════════════════════════════════════════ -->
-    <div class="usb-dolar-grid" role="list" aria-label="Tipos de dólar" id="dolar-grid">
-      <div class="usb-dolar-chip" role="listitem" id="dol-chip-oficial"><div class="usb-dolar-type" id="dol-lbl-oficial">💰 Oficial</div><div class="usb-dolar-val" id="dol-val-oficial"><span class="wx-skeleton" style="display:inline-block;height:32px;width:90px;border-radius:3px;"></span></div><div class="usb-dolar-sub" id="dol-sub-oficial">Cargando...</div></div>
-      <div class="usb-dolar-chip" role="listitem" id="dol-chip-blue"><div class="usb-dolar-type" id="dol-lbl-blue">📋 Blue</div><div class="usb-dolar-val" id="dol-val-blue"><span class="wx-skeleton" style="display:inline-block;height:32px;width:90px;border-radius:3px;"></span></div><div class="usb-dolar-sub" id="dol-sub-blue">Cargando...</div></div>
-      <div class="usb-dolar-chip" role="listitem" id="dol-chip-tarjeta"><div class="usb-dolar-type" id="dol-lbl-tarjeta">💳 Tarjeta</div><div class="usb-dolar-val" id="dol-val-tarjeta"><span class="wx-skeleton" style="display:inline-block;height:32px;width:90px;border-radius:3px;"></span></div><div class="usb-dolar-sub" id="dol-sub-tarjeta">Cargando...</div></div>
+    <div class="usb-dolar-grid" role="list" aria-label="Tipos de dólar">
+      <div class="usb-dolar-chip" role="listitem"><div class="usb-dolar-type">💰 Oficial</div><div class="usb-dolar-val"><span>$</span>—</div><div class="usb-dolar-sub">Banco Nación · hoy</div></div>
+      <div class="usb-dolar-chip" role="listitem"><div class="usb-dolar-type">📋 Blue</div><div class="usb-dolar-val"><span>$</span>—</div><div class="usb-dolar-sub">Mercado informal · hoy</div></div>
+      <div class="usb-dolar-chip" role="listitem"><div class="usb-dolar-type">💳 Tarjeta</div><div class="usb-dolar-val"><span>$</span>—</div><div class="usb-dolar-sub">Turista · hoy</div></div>
     </div>
-    <!-- FIX A: zona de estado — muestra timestamp de actualización o mensaje de error con botón reintentar -->
-    <div id="dolar-estado" style="display:none;position:relative;z-index:1;padding:0 52px 18px;"></div>
     <div class="usb-footer">
       <div class="usb-infos">
         <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Actualizado en tiempo real</div>
@@ -1302,7 +1199,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   <div class="resto-grid" id="grid-restaurantes">
     <a class="rcard rcard-feat reveal searchable" data-name="El Arca" data-tags="restaurante gourmet cocina auténtica" href="https://uruspot.blogspot.com/2026/05/el-arca-resto-bar-concepcion-del-uruguay.html">
       <div class="rcard-shine" aria-hidden="true"></div><span class="badge badge-gold">Imperdible</span>
-      <div class="rcard-content"><div class="rcard-top"><div class="rcard-open"><span class="rcard-open-dot" aria-hidden="true"></span>Verificando...</div><span class="rcard-icon" aria-hidden="true">🚢</span></div><span class="rcard-name">El Arca</span><p class="rcard-desc">Cocina auténtica — el clásico que siempre cumple.</p><div class="pills"><span class="pill pill-rating">★ 4.9</span><span class="pill pill-price">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
+      <div class="rcard-content"><div class="rcard-top"><div class="rcard-open"><span class="rcard-open-dot" aria-hidden="true"></span>Abierto</div><span class="rcard-icon" aria-hidden="true">🚢</span></div><span class="rcard-name">El Arca</span><p class="rcard-desc">Cocina auténtica — el clásico que siempre cumple.</p><div class="pills"><span class="pill pill-rating">★ 4.9</span><span class="pill pill-price">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
     </a>
     <a class="rcard reveal searchable" data-name="Papa Luigi" data-tags="restaurante italiana pizza" href="https://uruspot.blogspot.com/2026/05/papa-luigi-concepcion-del-uruguay.html" style="animation-delay:.05s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍕</span><span class="rcard-name">Papa Luigi</span><div class="pills"><span class="pill pill-rating">★ 4.7</span><span class="pill pill-default">Italiana</span><span class="pill pill-price">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Bella Vista" data-tags="restaurante vista rio costanera" href="https://uruspot.blogspot.com/2026/05/bella-vista-concepcion-del-uruguay.html" style="animation-delay:.10s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌅</span><span class="rcard-name">Bella Vista</span><div class="pills"><span class="pill pill-rating">★ 4.8</span><span class="pill pill-price">$$$</span></div></div></a>
@@ -1399,7 +1296,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 <section class="us-section" id="heladerias" aria-labelledby="title-heladerias">
   <div class="section-header">
     <div><span class="section-eyebrow">Artesanal &amp; fría</span><h2 class="section-title" id="title-heladerias">🍦 Heladerías</h2></div>
-    <span class="section-count">5 lugares</span>
+    <span class="section-count">6 lugares</span>
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="list-items" id="grid-heladerias">
@@ -1454,7 +1351,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
       <div class="gcard-shine" aria-hidden="true"></div>
       <div class="gcard-content"><div class="gcard-top"><div class="gcard-score">★ 8.4</div><span class="gcard-icon" aria-hidden="true">🌿</span></div><span class="gcard-name">CROSS CDELU</span><p class="gcard-desc">Entrenamiento funcional al aire libre con WOD variable. Comunidad excepcional y coaches que realmente se involucran.</p><div class="pills"><span class="pill pill-rating">★ 4.7 Google</span><span class="pill pill-default">Al aire libre</span><span class="pill pill-default">CrossFit</span></div></div>
     </a>
-    <a class="gcard reveal searchable" data-name="Power Gym" data-tags="gimnasio fitness musculacion entrenamiento personal" href="https://uruspot.blogspot.com/2026/05/power-gym-concepcion-del-uruguay.html" style="animation-delay:.28s">
+    <a class="gcard reveal searchable" data-name="Power Gym" data-tags="gimnasio fitness musculacion entrenamiento personal" href="/powergym" style="animation-delay:.28s">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge">Top</span>
       <div class="gcard-content"><div class="gcard-top"><div class="gcard-score">★ 8.7</div><span class="gcard-icon" aria-hidden="true">🏋️</span></div><span class="gcard-name">Power Gym</span><p class="gcard-desc">Instalaciones modernas en Blvd. Yrigoyen 1626. Entrenadores comprometidos y ambiente profesional para todos los niveles.</p><div class="pills"><span class="pill pill-rating">★ 4.5 Google</span><span class="pill pill-default">Blvd. Yrigoyen 1626</span></div></div>
     </a>
@@ -1478,135 +1375,51 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   <p class="footer-copy">URU SPOT © 2026 — Guía Local · Concepción del Uruguay</p>
 </footer>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     FIX A: DÓLAR — fallback elegante + retry automático con backoff exponencial
-     Reemplaza el script original de fetch simple.
-     - Skeleton loaders mientras carga (renderizados en el HTML de arriba)
-     - Retry automático: 3 intentos con backoff 1.2s / 2.4s / 4.8s
-     - Fallback visual elegante en caso de error total (— — con msg + botón reintentar)
-     - Timestamp de última actualización en el pie del bloque
-     - Botón "↻ Actualizar" para refrescar manualmente
-     - Refresco automático cada 10 minutos (igual que el clima)
-     - window.__dolarRetry() expuesto globalmente para el botón inline
-     ══════════════════════════════════════════════════════════════════════════ -->
+<!-- DÓLAR: diferido con requestIdleCallback para no bloquear el hilo principal -->
 <script>
 (function(){
-  'use strict';document.body.classList.add('js-ready');
-
-  var DOL_KEYS   = ['oficial','blue','tarjeta'];
-  var DOL_LABELS = ['💰 Oficial','📋 Blue','💳 Tarjeta'];
-  var DOL_SUBS_FALLBACK = ['Banco Nación · hoy','Mercado informal · hoy','Turista · hoy'];
-  var MAX_RETRIES = 3;
-  var BASE_DELAY  = 1200; /* ms — backoff exponencial: 1.2s → 2.4s → 4.8s */
-
-  function $(id){ return document.getElementById(id); }
-
-  function setEstado(html, visible){
-    var el = $('dolar-estado');
-    if(!el) return;
-    el.innerHTML  = html;
-    el.style.display = visible ? '' : 'none';
-  }
-
-  function setSkeletons(){
-    DOL_KEYS.forEach(function(k){
-      var val = $('dol-val-'+k);
-      var sub = $('dol-sub-'+k);
-      if(val) val.innerHTML = '<span class="wx-skeleton" style="display:inline-block;height:32px;width:90px;border-radius:3px;"></span>';
-      if(sub) sub.textContent = 'Cargando...';
-    });
-    setEstado('', false);
-  }
-
-  function renderDatos(data){
-    var map = {};
-    data.forEach(function(d){ map[d.casa] = d; });
-    var hora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'});
-    DOL_KEYS.forEach(function(k, i){
-      var d   = map[k];
-      var val = $('dol-val-'+k);
-      var sub = $('dol-sub-'+k);
-      if(val) val.innerHTML = d ? '<span>$</span>' + Math.round(d.venta).toLocaleString('es-AR') : '<span style="font-size:18px;opacity:.4">—</span>';
-      if(sub) sub.textContent = d ? 'Compra: $' + Math.round(d.compra).toLocaleString('es-AR') : DOL_SUBS_FALLBACK[i];
-    });
-    setEstado(
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">' +
-        '<span style="font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(230,190,50,.38);">Act. ' + hora + ' · dolarapi.com</span>' +
-        '<button onclick="window.__dolarRetry&&window.__dolarRetry()" style="background:none;border:1px solid rgba(230,190,50,.25);border-radius:2px;color:rgba(230,190,50,.45);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .3s ease;" onmouseover="this.style.borderColor=\'rgba(230,190,50,.6)\';this.style.color=\'rgba(230,190,50,.85)\'" onmouseout="this.style.borderColor=\'rgba(230,190,50,.25)\';this.style.color=\'rgba(230,190,50,.45)\'">↻ Actualizar</button>' +
-      '</div>',
-      true
-    );
-  }
-
-  function renderError(){
-    DOL_KEYS.forEach(function(k, i){
-      var val = $('dol-val-'+k);
-      var sub = $('dol-sub-'+k);
-      if(val) val.innerHTML = '<span style="font-family:var(--f-ui);font-size:13px;font-weight:700;color:rgba(230,190,50,.30);letter-spacing:1px;">— —</span>';
-      if(sub) sub.textContent = DOL_SUBS_FALLBACK[i];
-    });
-    setEstado(
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">' +
-        '<span style="font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(231,76,60,.40);">Sin datos · verificá tu conexión</span>' +
-        '<button onclick="window.__dolarRetry&&window.__dolarRetry()" style="background:none;border:1px solid rgba(231,76,60,.30);border-radius:2px;color:rgba(231,76,60,.55);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .3s ease;" onmouseover="this.style.borderColor=\'rgba(231,76,60,.7)\';this.style.color=\'rgba(231,76,60,.9)\'" onmouseout="this.style.borderColor=\'rgba(231,76,60,.30)\';this.style.color=\'rgba(231,76,60,.55)\'">↻ Reintentar</button>' +
-      '</div>',
-      true
-    );
-  }
-
-  function fetchDolar(intento, manual){
-    intento = intento || 0;
-    if(manual){ setSkeletons(); }
-    var ctrl = new AbortController();
-    var timeout = setTimeout(function(){ ctrl.abort(); }, 3500);
-    fetch('https://dolarapi.com/v1/dolares', { cache:'no-store', signal:ctrl.signal })
-      .then(function(r){
-        clearTimeout(timeout);
-        if(!r.ok) throw new Error('HTTP '+r.status);
-        return r.json();
-      })
+  'use strict';
+  function fetchDolar(){
+    var types=[
+      {label:'💰 Oficial',sub:'Banco Nación · hoy'},
+      {label:'📋 Blue',sub:'Mercado informal · hoy'},
+      {label:'💳 Tarjeta',sub:'Turista · hoy'}
+    ];
+    var ctrl=new AbortController();
+    var t=setTimeout(function(){ctrl.abort();},2500);
+    fetch('https://dolarapi.com/v1/dolares',{cache:'no-store',signal:ctrl.signal})
+      .then(function(r){return r.json();})
       .then(function(data){
-        renderDatos(data);
+        clearTimeout(t);
+        var map={};
+        data.forEach(function(d){map[d.casa]=d;});
+        var chips=document.querySelectorAll('.usb-dolar-chip');
+        var keys=['oficial','blue','tarjeta'];
+        keys.forEach(function(k,i){
+          var d=map[k];if(!d||!chips[i])return;
+          var val=chips[i].querySelector('.usb-dolar-val');
+          var lbl=chips[i].querySelector('.usb-dolar-type');
+          var sub=chips[i].querySelector('.usb-dolar-sub');
+          if(val)val.innerHTML='<span>$</span>'+Math.round(d.venta).toLocaleString('es-AR');
+          if(lbl)lbl.textContent=types[i].label;
+          if(sub)sub.textContent='Compra: $'+Math.round(d.compra).toLocaleString('es-AR');
+        });
       })
-      .catch(function(){
-        clearTimeout(timeout);
-        if(intento < MAX_RETRIES - 1){
-          var delay = BASE_DELAY * Math.pow(2, intento);
-          setTimeout(function(){ fetchDolar(intento + 1, false); }, delay);
-        } else {
-          renderError();
-        }
-      });
+      .catch(function(){clearTimeout(t);});
   }
-
-  /* Exponer retry global para el botón inline */
-  window.__dolarRetry = function(){ fetchDolar(0, true); };
-
-
-  // Esperar el evento 'load' completo (no solo DOMContentLoaded)
-  // para sacar la API del dólar completamente de la ruta crítica del LCP
-  function scheduleDolar(){
-    setTimeout(function(){ fetchDolar(0, false); }, 1500);
-  }
-
- if(document.readyState === 'complete'){
-    scheduleDolar();
-  } else {
-    window.addEventListener('load', function(){
-      scheduleDolar();
-    }, {once:true});
-  }
-
-  /* Refresco automático cada 10 minutos (idéntico al intervalo del clima) */
-  setInterval(function(){ fetchDolar(0, false); }, 10*60*1000);
-
+  var sched=window.requestIdleCallback
+    ?function(cb){window.requestIdleCallback(cb,{timeout:3000});}
+    :function(cb){setTimeout(cb,3000);};
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){sched(fetchDolar);});
+  }else{sched(fetchDolar);}
 })();
 </script>
 
 <!-- JS PRINCIPAL: scroll, nav, reveal, buscador, clima -->
 <script>
 (function(){
-  'use strict';document.body.classList.add('js-ready');
+  'use strict';
 
   /* PROGRESS BAR */
   var bar=document.getElementById('progress-bar');
@@ -1637,47 +1450,44 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   /* Observer para secciones de nav (rootMargin específico para activación correcta) */
   var navH = 60; // valor fijo, sin leer el DOM
-var sectionObserver=new IntersectionObserver(function(entries){
+  var sectionObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(entry.isIntersecting){
         var id=entry.target.getAttribute('id');
         navItems.forEach(function(item){item.classList.toggle('active',item.dataset.section===id);});
       }
     });
-  },{rootMargin:'-80px 0px -55% 0px',threshold:0});
+  },{rootMargin:'-'+(navH+20)+'px 0px -55% 0px',threshold:0});
   sections.forEach(function(s){sectionObserver.observe(s);});
 
+  /* Observer para reveal — separado porque tiene rootMargin diferente (necesario) */
   var revealObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(!entry.isIntersecting)return;
-      entry.target.classList.add('visible');
+      requestAnimationFrame(function(){entry.target.classList.add('visible');});
       revealObserver.unobserve(entry.target);
     });
-  },{threshold:0,rootMargin:'0px 0px -20px 0px'});
+  },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
   revealEls.forEach(function(el){revealObserver.observe(el);});
+
   /* NAV CLICK — smooth scroll */
-// DESPUÉS — reemplazá el bloque completo
-navItems.forEach(function(item){
+  navItems.forEach(function(item){
     item.addEventListener('click',function(e){
       e.preventDefault();
-      var id=this.dataset.section;
-      var target=document.getElementById(id);
+      var target=document.getElementById(this.dataset.section);
       if(!target)return;
-      var top=target.offsetTop - 84;
-      window.scrollTo({top:top,behavior:'smooth'});
+      window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-nav.offsetHeight-24,behavior:'smooth'});
     });
   });
 
   /* CTA ghost scroll */
-// DESPUÉS
-var ghost=document.querySelector('.btn-ghost');
+  var ghost=document.querySelector('.btn-ghost');
   if(ghost){
     ghost.addEventListener('click',function(e){
       e.preventDefault();
       var target=document.getElementById('categorias');
       if(!target)return;
-      var top=target.offsetTop - 84;
-      window.scrollTo({top:top,behavior:'smooth'});
+      window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-nav.offsetHeight-24,behavior:'smooth'});
     });
   }
 
@@ -1691,233 +1501,78 @@ var ghost=document.querySelector('.btn-ghost');
   /* Fallback: revelar todo a los 800ms por si IntersectionObserver falla */
   setTimeout(function(){
     document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){el.classList.add('visible');});
-  },2500);
+  },800);
 
-/* ── BUSCADOR PREMIUM URU SPOT ── */
-var URU_STORAGE = 'uru_search_recent_v2';
-var URU_MAX_REC = 6;
-var uruCurrentCat = 'all';
-var uruCurrentQ = '';
-var uruActiveIdx = -1;
-var uruAllResults = [];
+  /* ── BUSCADOR ── */
+  var searchToggleBtn=document.getElementById('search-toggle-btn');
+  var searchBarWrap=document.getElementById('search-bar-wrap');
+  var searchInput=document.getElementById('search-input');
+  var searchCloseBtn=document.getElementById('search-close-btn');
+  var searchCount=document.getElementById('search-count');
 
-var URU_PLACES = [
-  {name:'El Arca',cat:'restaurantes',emoji:'🚢',tags:'restaurante gourmet cocina auténtica',badge:'gold',badgeTxt:'Imperdible',url:'https://uruspot.blogspot.com/2026/05/el-arca-resto-bar-concepcion-del-uruguay.html'},
-  {name:'Papa Luigi',cat:'restaurantes',emoji:'🍕',tags:'italiana pizza pasta',url:'https://uruspot.blogspot.com/2026/05/papa-luigi-concepcion-del-uruguay.html'},
-  {name:'Bella Vista',cat:'restaurantes',emoji:'🌅',tags:'vista rio costanera',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/bella-vista-concepcion-del-uruguay.html'},
-  {name:'Panza Verde',cat:'restaurantes',emoji:'🌿',tags:'saludable vegano ensaladas',url:'https://uruspot.blogspot.com/2026/05/relajacion-total-panza-verde_3.html'},
-  {name:'Justo José',cat:'restaurantes',emoji:'⚖️',tags:'parrilla asado bar',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/justo-jose-concepcion-del-uruguay.html'},
-  {name:'Bonhomia',cat:'restaurantes',emoji:'✨',tags:'moderno cocteles bar',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/bonhomia-concepcion-del-uruguay.html'},
-  {name:'La Ris',cat:'restaurantes',emoji:'🎨',tags:'cafeteria arte restaurante',url:'https://uruspot.blogspot.com/2026/05/la-ris-concepcion-del-uruguay.html'},
-  {name:'La Gruta',cat:'restaurantes',emoji:'🔥',tags:'parrilla asado',url:'https://uruspot.blogspot.com/2026/05/parrilla-asador-argentino-parrilla-la.html'},
-  {name:'Sanduba',cat:'restaurantes',emoji:'🍔',tags:'rapido sandwich hamburguesa',url:'https://uruspot.blogspot.com/2026/05/sanduba-comida-rapida-concepcion-del.html'},
-  {name:'Pimienta Negra',cat:'restaurantes',emoji:'🌶️',tags:'fusion moderno',url:'https://uruspot.blogspot.com/2026/05/pimienta-negra-restaurante-concepcion.html'},
-  {name:'Parada 33',cat:'restaurantes',emoji:'🍺',tags:'pub cerveza restaurante',url:'https://uruspot.blogspot.com/2026/05/parada-33-pub-restaurante-concepcion.html'},
-  {name:'Faro 3260',cat:'restaurantes',emoji:'🌊',tags:'vista rio costanera',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/faro-3260-restaurante-concepcion-del.html'},
-  {name:'El Calderón',cat:'restaurantes',emoji:'🍲',tags:'casero almuerzo',url:'https://uruspot.blogspot.com/2026/05/el-calderon-restaurante-concepcion-del.html'},
-  {name:'La Segunda',cat:'restaurantes',emoji:'🥩',tags:'parrilla asado carne',url:'https://uruspot.blogspot.com/2026/05/parrilla-la-segunda-concepcion-del.html'},
-  {name:'Dolores Costa',cat:'restaurantes',emoji:'🌴',tags:'costanera rio',url:'https://uruspot.blogspot.com/2026/05/dolores-costa-restaurante-concepcion.html'},
-  {name:'La Delfina',cat:'restaurantes',emoji:'🐬',tags:'pescados mariscos',url:'https://uruspot.blogspot.com/2026/05/la-delfina-restaurante-concepcion-del.html'},
-  {name:'Mamma Mía',cat:'restaurantes',emoji:'🍝',tags:'italiana pasta',url:'https://uruspot.blogspot.com/2026/05/mamma-mia-restaurante-concepcion-del.html'},
-  {name:'Garifo',cat:'restaurantes',emoji:'🍷',tags:'bodegon vino',url:'https://uruspot.blogspot.com/2026/05/bodegon-de-autor-garifo-el-sabor-del.html'},
-  {name:'Baco',cat:'restaurantes',emoji:'🍇',tags:'vinos cava restaurante',url:'https://uruspot.blogspot.com/2026/05/cava-restaurante-el-conventillo-de-baco.html'},
-  {name:'Danubio Azul',cat:'restaurantes',emoji:'🇩🇪',tags:'europeo aleman',url:'https://uruspot.blogspot.com/2026/05/tradicion-gourmet-el-danubio-azul-sabor.html'},
-  {name:'Nero Café',cat:'cafes',emoji:'☕',tags:'especialidad espresso cafe',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/nero-cafe-de-especialidad-concepcion.html'},
-  {name:'La Ris',cat:'cafes',emoji:'🎨',tags:'artesanal cafeteria arte',url:'https://uruspot.blogspot.com/2026/05/la-ris-concepcion-del-uruguay.html'},
-  {name:'Cultura Café',cat:'cafes',emoji:'📚',tags:'cultural arte libros cafe',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/cultura-cafe-concepcion-del-uruguay.html'},
-  {name:'London Café',cat:'cafes',emoji:'🫖',tags:'clasico tradicional cafe',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/cafeteria-london-cafe-concepcion-del.html'},
-  {name:'Helena',cat:'cafes',emoji:'🌸',tags:'moderno desayuno cafe',url:'https://uruspot.blogspot.com/2026/05/helena-cafe-resto-concepcion-del-uruguay.html'},
-  {name:'Bella Vista',cat:'cafes',emoji:'🌅',tags:'elegante vista cafe',url:'https://uruspot.blogspot.com/2026/05/bella-vista-concepcion-del-uruguay.html'},
-  {name:'Justo José',cat:'bares',emoji:'⚖️',tags:'bar parrilla cerveza',url:'https://uruspot.blogspot.com/2026/05/justo-jose-concepcion-del-uruguay.html'},
-  {name:'Bonhomia',cat:'bares',emoji:'✨',tags:'bar cocteles moderno',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/bonhomia-concepcion-del-uruguay.html'},
-  {name:'Klug Gebrau',cat:'bares',emoji:'🍺',tags:'cerveza artesanal cerveceria',url:'https://uruspot.blogspot.com/2026/05/cerveceria-klug-gebrau-concepcion-del.html'},
-  {name:'7 Colinas',cat:'bares',emoji:'🍻',tags:'cerveza artesanal comida',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/craft-beer-urban-food-7-colinas-la.html'},
-  {name:'Drakkar',cat:'bares',emoji:'⚔️',tags:'cerveceria grill bar',url:'https://uruspot.blogspot.com/2026/05/cerveceria-artesanal-grill-drakkar-el.html'},
-  {name:'Bartolo',cat:'bares',emoji:'🍸',tags:'cocteles tragos bar',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/bartolo-bar-concepcion-del-uruguay.html'},
-  {name:'House Garage',cat:'bares',emoji:'🏎️',tags:'garage tematico bar',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/house-garage-concepcion-del-uruguay.html'},
-  {name:'Panettone',cat:'panaderias',emoji:'🥯',tags:'panaderia pasteleria facturas',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/panaderia-panettone-concepcion-del.html'},
-  {name:'La Cuadra',cat:'panaderias',emoji:'🥖',tags:'panaderia pan facturas',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/panaderia-la-cuadra-concepcion-del.html'},
-  {name:'Mi Viejo',cat:'panaderias',emoji:'🍞',tags:'panaderia tradicional pan',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/panaderia-pasteleria-panaderia-mi-viejo.html'},
-  {name:'San Carlos',cat:'panaderias',emoji:'🥐',tags:'panaderia confiteria',url:'https://uruspot.blogspot.com/2026/05/panaderia-confiteria-panaderia-san.html'},
-  {name:'Lo de Juan',cat:'panaderias',emoji:'🍪',tags:'panaderia reposteria tortas',url:'https://uruspot.blogspot.com/2026/05/panaderia-reposteria-lo-de-juan.html'},
-  {name:'Brodë',cat:'panaderias',emoji:'🥐',tags:'panaderia artesanal nuevo',badge:'gold',badgeTxt:'Nuevo',url:'https://uruspot.blogspot.com/2026/05/panaderia-brode-concepcion-del-uruguay.html'},
-  {name:'Yelatti Artesanal',cat:'heladerias',emoji:'🍦',tags:'heladeria artesanal helado',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/context-httpsschema.html'},
-  {name:'Cremolatti',cat:'heladerias',emoji:'🍨',tags:'heladeria helado cremoso',url:'https://uruspot.blogspot.com/2026/05/heladeria-cremolatti-concepcion-del.html'},
-  {name:"Heladería Dany's",cat:'heladerias',emoji:'🍧',tags:'heladeria helado',url:'https://uruspot.blogspot.com/2026/05/heladeria-danys-concepcion-del-uruguay.html'},
-  {name:'Heladería Lucero',cat:'heladerias',emoji:'⭐',tags:'heladeria helado clasica',url:'https://uruspot.blogspot.com/2026/05/heladeria-lucero-uru-spot-concepcion.html'},
-  {name:'Heladería Italia',cat:'heladerias',emoji:'🇮🇹',tags:'italiana artesanal helado',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/heladeria-italia-uru-spot-context.html'},
-  {name:'Casa del Árbol',cat:'hosterias',emoji:'🌳',tags:'hosteria alojamiento hospedaje',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/hosteria-casa-del-arbol-concepcion-del.html'},
-  {name:'Boutique Los Aguaribay',cat:'hosterias',emoji:'🌿',tags:'hosteria boutique alojamiento',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/hosteria-boutique-los-aguaribay.html'},
-  {name:'Bungalows México',cat:'hosterias',emoji:'🏡',tags:'hosteria bungalow alojamiento',url:'https://uruspot.blogspot.com/2026/05/hosteria-bungalows-mexico-concepcion.html'},
-  {name:'Antigua Fonda',cat:'hosterias',emoji:'🪨',tags:'hosteria antigua tradicional alojamiento',url:'https://uruspot.blogspot.com/2026/05/hosteria-antigua-fonda-concepcion-del.html'},
-  {name:'Hostería Mitre',cat:'hosterias',emoji:'🏛️',tags:'hosteria hotel alojamiento',url:'https://uruspot.blogspot.com/2026/05/hosteria-mitre-concepcion-del-uruguay.html'},
-  {name:'Hostería Posta Torreón',cat:'hosterias',emoji:'🏰',tags:'hosteria posta torron alojamiento',url:'https://uruspot.blogspot.com/2026/05/hosteria-posta-terreon-concepcion-del.html'},
-  {name:'Gimnasio 538 Gym',cat:'gimnasios',emoji:'🏋️',tags:'gimnasio fitness musculacion clases',badge:'gold',badgeTxt:'#1 CdU',url:'https://uruspot.blogspot.com/2026/05/gimnasio-538-concepcion-del-uruguay.html'},
-  {name:'Gimnasio Muscle',cat:'gimnasios',emoji:'💪',tags:'gimnasio fitness cardio musculacion',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/gimnasio-muscle-concepcion-del-uruguay.html'},
-  {name:'Gym Lucianos',cat:'gimnasios',emoji:'🤝',tags:'gimnasio fitness personalizado familiar',url:'https://uruspot.blogspot.com/2026/05/lucianos-gym-concepcion-del-uruguay.html'},
-  {name:'CROSS CDELU',cat:'gimnasios',emoji:'🌿',tags:'crossfit funcional aire libre',url:'https://uruspot.blogspot.com/2026/05/cross-gimnasio-concepcion-del-uruguay.html'},
-  {name:'Power Gym',cat:'gimnasios',emoji:'🏋️',tags:'gimnasio fitness entrenamiento personal',badge:'top',badgeTxt:'Top',url:'https://uruspot.blogspot.com/2026/05/power-gym-concepcion-del-uruguay.html'}
-];
+  var grids=[
+    {id:'grid-restaurantes',noRes:'no-results-restaurantes'},
+    {id:'grid-cafes',noRes:'no-results-cafes'},
+    {id:'grid-bares',noRes:'no-results-bares'},
+    {id:'grid-panaderias',noRes:'no-results-panaderias'},
+    {id:'grid-heladerias',noRes:'no-results-heladerias'},
+    {id:'grid-hosterias',noRes:'no-results-hosterias'},
+    {id:'grid-gimnasios',noRes:'no-results-gimnasios'},
+  ];
 
-var URU_CAT_LABELS={restaurantes:'🍽️ Restaurantes',cafes:'☕ Cafés',bares:'🍻 Bares',panaderias:'🥐 Panaderías',heladerias:'🍦 Heladerías',hosterias:'🏡 Hosterías',gimnasios:'💪 Gimnasios'};
-
-function uruNorm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'');}
-function uruLoadRec(){try{return JSON.parse(localStorage.getItem(URU_STORAGE)||'[]');}catch(e){return[];}}
-function uruSaveRec(l){try{localStorage.setItem(URU_STORAGE,JSON.stringify(l));}catch(e){}}
-function uruAddRec(q){if(!q.trim())return;var l=uruLoadRec().filter(function(x){return x!==q;});l.unshift(q);uruSaveRec(l.slice(0,URU_MAX_REC));}
-function uruDelRec(q){uruSaveRec(uruLoadRec().filter(function(x){return x!==q;}));uruRenderRecent();}
-
-function uruHL(text,q){
-  if(!q)return text;
-  var nText=uruNorm(text),nQ=uruNorm(q);
-  var idx=nText.indexOf(nQ);
-  if(idx<0)return text;
-  return text.slice(0,idx)+'<mark>'+text.slice(idx,idx+q.length)+'</mark>'+text.slice(idx+q.length);
-}
-
-function uruRenderRecent(){
-  var el=document.getElementById('uru-recent-list');
-  if(!el)return;
-  var list=uruLoadRec();
-  if(!list.length){
-    el.innerHTML='<span style="font-size:10px;color:rgba(242,237,227,.18);font-style:italic;font-family:var(--f-italic);">Tus búsquedas aparecerán aquí.</span>';
-    return;
+  function openSearch(){
+    searchBarWrap.classList.add('open');
+    searchToggleBtn.setAttribute('aria-expanded','true');
+    setTimeout(function(){searchInput.focus();},350);
   }
-  el.innerHTML=list.map(function(q){
-    return '<div class="uru-recent-item" data-q="'+q+'" tabindex="0">🕐 '+q+
-      '<span class="uru-recent-del" data-del="'+q+'" role="button" aria-label="Eliminar '+q+'">✕</span></div>';
-  }).join('');
-  el.querySelectorAll('.uru-recent-item').forEach(function(item){
-    item.addEventListener('click',function(e){
-      if(e.target.dataset.del){uruDelRec(e.target.dataset.del);return;}
-      var fi=document.getElementById('search-input');
-      if(fi){fi.value=item.dataset.q;fi.dispatchEvent(new Event('input'));fi.focus();}
+  function closeSearch(){
+    searchBarWrap.classList.remove('open');
+    searchToggleBtn.setAttribute('aria-expanded','false');
+    searchInput.value='';
+    runSearch('');
+  }
+  searchToggleBtn.addEventListener('click',function(){
+    searchBarWrap.classList.contains('open')?closeSearch():openSearch();
+  });
+  searchCloseBtn.addEventListener('click',closeSearch);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&searchBarWrap.classList.contains('open'))closeSearch();
+    if((e.key==='f'||e.key==='F')&&(e.ctrlKey||e.metaKey)&&e.shiftKey){e.preventDefault();openSearch();}
+  });
+
+  function normalize(str){
+    return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'');
+  }
+
+  function runSearch(query){
+    var q=normalize(query.trim());
+    var totalVisible=0;
+    grids.forEach(function(g){
+      var grid=document.getElementById(g.id);
+      var noRes=document.getElementById(g.noRes);
+      if(!grid)return;
+      var items=grid.querySelectorAll('.searchable');
+      var visibleInGrid=0;
+      items.forEach(function(item){
+        var name=normalize(item.dataset.name||'');
+        var tags=normalize(item.dataset.tags||'');
+        var matches=!q||name.includes(q)||tags.includes(q);
+        item.classList.toggle('search-hidden',!matches);
+        if(matches){visibleInGrid++;totalVisible++;}
+      });
+      if(noRes)noRes.classList.toggle('visible',q.length>0&&visibleInGrid===0);
     });
-  });
-}
-
-function uruSetActive(idx){
-  var items=document.querySelectorAll('.uru-result-item');
-  items.forEach(function(el,i){el.classList.toggle('uru-active',i===idx);});
-  if(idx>=0&&items[idx])items[idx].scrollIntoView({block:'nearest'});
-}
-
-function uruRenderResults(query,cat){
-  var container=document.getElementById('uru-results-container');
-  var countEl=document.getElementById('search-count');
-  if(!container)return;
-  if(!query.trim()){
-    document.getElementById('uru-recent-section').style.display='';
-    document.getElementById('uru-results-section').style.display='none';
-    countEl.innerHTML='Buscá cualquier lugar de la guía';
-    uruAllResults=[];uruActiveIdx=-1;return;
+    searchCount.textContent=q.length>0?totalVisible+(totalVisible===1?' resultado':' resultados'):'';
   }
-  document.getElementById('uru-recent-section').style.display='none';
-  document.getElementById('uru-results-section').style.display='';
-  var q=uruNorm(query);
-  var filtered=URU_PLACES.filter(function(p){
-    return (cat==='all'||p.cat===cat)&&(uruNorm(p.name).includes(q)||uruNorm(p.tags).includes(q));
+
+  searchInput.addEventListener('input',function(){
+    runSearch(this.value);
+    if(this.value.trim().length>1){
+      var first=document.querySelector('.searchable:not(.search-hidden)');
+      if(first)setTimeout(function(){first.scrollIntoView({behavior:'smooth',block:'center'});},100);
+    }
   });
-  uruAllResults=filtered;uruActiveIdx=-1;
-  if(!filtered.length){
-    container.innerHTML='<div class="uru-no-results"><div class="uru-no-results-text">Sin resultados para "'+query+'"</div><div class="uru-no-results-sub">Probá otro nombre o cambiá la categoría</div></div>';
-    countEl.innerHTML='Sin resultados';return;
-  }
-  var total=filtered.length;
-  countEl.innerHTML='<span>'+total+'</span> resultado'+(total===1?'':'s')+(cat!=='all'?' en '+URU_CAT_LABELS[cat]:'');
-  var grouped={};
-  filtered.forEach(function(p){if(!grouped[p.cat])grouped[p.cat]=[];grouped[p.cat].push(p);});
-  var html='';
-  Object.keys(grouped).forEach(function(c){
-    html+='<div class="uru-result-group"><div class="uru-result-group-label">'+URU_CAT_LABELS[c]+'</div><div class="uru-result-list">';
-    grouped[c].forEach(function(p){
-      html+='<a class="uru-result-item'+(p.badge==='gold'?' featured':'')+'" href="'+p.url+'" target="_blank" rel="noopener">'+
-        '<span class="uru-result-icon">'+p.emoji+'</span>'+
-        '<span class="uru-result-info">'+
-          '<span class="uru-result-name">'+uruHL(p.name,query)+'</span>'+
-          '<span class="uru-result-sub">'+p.cat.charAt(0).toUpperCase()+p.cat.slice(1)+(p.badge?' · '+p.badgeTxt':'')+'</span>'+
-        '</span>'+
-        (p.badge?'<span class="uru-result-badge '+(p.badge==='gold'?'gold':'top')+'">'+p.badgeTxt+'</span>':'')+
-        '<span class="uru-result-arrow">→</span>'+
-      '</a>';
-    });
-    html+='</div></div>';
-  });
-  container.innerHTML=html;
-  container.querySelectorAll('.uru-result-item').forEach(function(a){
-    a.addEventListener('click',function(){uruAddRec(uruCurrentQ);});
-  });
-}
-
-var uruOverlay=document.getElementById('search-bar-wrap');
-var uruField=document.getElementById('search-input');
-var uruNavBtn=document.getElementById('search-toggle-btn');
-
-function uruOpen(){
-  uruOverlay.classList.add('open');
-  if(uruNavBtn)uruNavBtn.setAttribute('aria-expanded','true');
-  setTimeout(function(){if(uruField)uruField.focus();},400);
-  uruRenderRecent();
-}
-function uruClose(){
-  uruOverlay.classList.remove('open');
-  if(uruNavBtn)uruNavBtn.setAttribute('aria-expanded','false');
-  uruActiveIdx=-1;
-}
-
-if(uruNavBtn)uruNavBtn.addEventListener('click',function(){uruOverlay.classList.contains('open')?uruClose():uruOpen();});
-
-document.addEventListener('keydown',function(e){
-  if((e.key==='k'||e.key==='K')&&(e.ctrlKey||e.metaKey)){e.preventDefault();uruOverlay.classList.contains('open')?uruClose():uruOpen();}
-  if(e.key==='Escape'&&uruOverlay.classList.contains('open'))uruClose();
-  if(!uruOverlay.classList.contains('open'))return;
-  if(e.key==='ArrowDown'){e.preventDefault();uruActiveIdx=Math.min(uruActiveIdx+1,uruAllResults.length-1);uruSetActive(uruActiveIdx);}
-  if(e.key==='ArrowUp'){e.preventDefault();uruActiveIdx=Math.max(uruActiveIdx-1,0);uruSetActive(uruActiveIdx);}
-  if(e.key==='Enter'&&uruActiveIdx>=0){
-    var items=document.querySelectorAll('.uru-result-item');
-    if(items[uruActiveIdx]){uruAddRec(uruCurrentQ);items[uruActiveIdx].click();}
-  }
-});
-
-if(uruField){
-  uruField.addEventListener('input',function(){
-    uruCurrentQ=this.value;
-    var clrBtn=document.getElementById('search-clear-x');
-    if(clrBtn)clrBtn.style.display=this.value?'flex':'none';
-    uruRenderResults(uruCurrentQ,uruCurrentCat);
-  });
-  uruField.addEventListener('keydown',function(e){
-    if(e.key==='Enter'&&this.value.trim())uruAddRec(this.value.trim());
-  });
-}
-
-var uClear=document.getElementById('search-clear-x');
-if(uClear)uClear.addEventListener('click',function(){
-  uruField.value='';uruCurrentQ='';
-  this.style.display='none';
-  uruRenderResults('',uruCurrentCat);
-  uruField.focus();
-});
-
-document.querySelectorAll('.uru-cat-chip').forEach(function(chip){
-  chip.addEventListener('click',function(){
-    document.querySelectorAll('.uru-cat-chip').forEach(function(c){c.classList.remove('active');});
-    this.classList.add('active');
-    uruCurrentCat=this.dataset.cat;
-    uruRenderResults(uruCurrentQ,uruCurrentCat);
-  });
-});
-
-var uFiltersToggle=document.getElementById('uru-filters-toggle');
-if(uFiltersToggle)uFiltersToggle.addEventListener('click',function(){
-  var cats=document.getElementById('uru-cat-filters');
-  var open=cats.style.display!=='none';
-  cats.style.display=open?'none':'';
-  this.setAttribute('aria-expanded',open?'false':'true');
-});
-
-uruRenderRecent();
-/* ── FIN BUSCADOR PREMIUM ── */
+  searchInput.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();runSearch(this.value);}});
 
   /* ── CLIMA ── */
   /* ▼ OPTIMIZACIÓN #3: fetch del clima disparado DESPUÉS del evento 'load'
@@ -1973,8 +1628,12 @@ uruRenderRecent();
 
   /* ▼ OPTIMIZACIÓN #3: disparar DESPUÉS del evento load + 500ms de gracia
      para no competir con LCP. Fallback con requestIdleCallback si load ya ocurrió. */
-function scheduleWeather(){
-    setTimeout(fetchWeather, 1200);
+  function scheduleWeather(){
+    if(window.requestIdleCallback){
+      window.requestIdleCallback(function(){fetchWeather();},{ timeout:8000 });
+    } else {
+      setTimeout(fetchWeather, 2000);
+    }
   }
 
   if(document.readyState==='complete'){
