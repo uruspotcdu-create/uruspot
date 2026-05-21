@@ -319,8 +319,9 @@ img{display:block;max-width:100%}
 }
 
 /* ── REVEAL ── */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s var(--ease),transform 0.7s var(--ease)}
-.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal{opacity:1;transform:translateY(0)}
+.js-ready .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s var(--ease),transform 0.7s var(--ease)}
+.js-ready .reveal.visible{opacity:1;transform:translateY(0)}
 
 /* ── FARMACIA ── */
 .uft-wrap{width:100%;margin:0 0 80px 0;display:block;position:relative}
@@ -630,7 +631,7 @@ img{display:block;max-width:100%}
   .usb-emg-num{font-size:36px}
 }
 @media(max-width:380px){.hero-title{font-size:34px;letter-spacing:-1px}.hero-logo img{width:44px}.cafe-grid{grid-template-columns:1fr}.ccard-featured{grid-column:span 1}.cat-grid{grid-template-columns:1fr}.cat-card-highlight{grid-column:span 1}.cat-card-donde{grid-column:span 1}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal{opacity:1;transform:none;transition:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal,.js-ready .reveal{opacity:1;transform:none;transition:none}
 a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:2px}
   /* ═══ URU SEARCH PREMIUM ═══ */
 .uru-nav-search-btn{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:60px;background:none;border:none;cursor:pointer;color:rgba(242,237,227,.40);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:color .3s ease;white-space:nowrap;flex-shrink:0}
@@ -1490,7 +1491,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
      ══════════════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
-  'use strict';
+  'use strict';document.body.classList.add('js-ready');
 
   var DOL_KEYS   = ['oficial','blue','tarjeta'];
   var DOL_LABELS = ['💰 Oficial','📋 Blue','💳 Tarjeta'];
@@ -1585,10 +1586,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   // Esperar el evento 'load' completo (no solo DOMContentLoaded)
   // para sacar la API del dólar completamente de la ruta crítica del LCP
   function scheduleDolar(){
-    var sched2 = window.requestIdleCallback
-      ? function(cb){ window.requestIdleCallback(cb, {timeout:5000}); }
-      : function(cb){ setTimeout(cb, 2500); };
-    sched2(function(){ fetchDolar(0, false); });
+    setTimeout(function(){ fetchDolar(0, false); }, 1500);
   }
 
  if(document.readyState === 'complete'){
@@ -1608,7 +1606,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 <!-- JS PRINCIPAL: scroll, nav, reveal, buscador, clima -->
 <script>
 (function(){
-  'use strict';
+  'use strict';document.body.classList.add('js-ready');
 
   /* PROGRESS BAR */
   var bar=document.getElementById('progress-bar');
@@ -1639,8 +1637,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   /* Observer para secciones de nav (rootMargin específico para activación correcta) */
   var navH = 60; // valor fijo, sin leer el DOM
- requestAnimationFrame(function(){
-  var sectionObserver=new IntersectionObserver(function(entries){
+var sectionObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(entry.isIntersecting){
         var id=entry.target.getAttribute('id');
@@ -1653,13 +1650,11 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   var revealObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(!entry.isIntersecting)return;
-      requestAnimationFrame(function(){entry.target.classList.add('visible');});
+      entry.target.classList.add('visible');
       revealObserver.unobserve(entry.target);
     });
- },{threshold:0,rootMargin:'0px 0px -20px 0px'});
+  },{threshold:0,rootMargin:'0px 0px -20px 0px'});
   revealEls.forEach(function(el){revealObserver.observe(el);});
-});
-
   /* NAV CLICK — smooth scroll */
 // DESPUÉS — reemplazá el bloque completo
 navItems.forEach(function(item){
