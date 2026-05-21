@@ -1,3 +1,5 @@
+html
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1095,11 +1097,17 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
         <p class="usb-subtitle">Las tres cotizaciones del dólar actualizadas en tiempo real.<br/>Ver también <strong>crypto, euro, real</strong> y todas las divisas.</p>
       </div>
     </div>
-    <div class="usb-dolar-grid" role="list" aria-label="Tipos de dólar">
-      <div class="usb-dolar-chip" role="listitem"><div class="usb-dolar-type">💰 Oficial</div><div class="usb-dolar-val"><span>$</span>—</div><div class="usb-dolar-sub">Banco Nación · hoy</div></div>
-      <div class="usb-dolar-chip" role="listitem"><div class="usb-dolar-type">📋 Blue</div><div class="usb-dolar-val"><span>$</span>—</div><div class="usb-dolar-sub">Mercado informal · hoy</div></div>
-      <div class="usb-dolar-chip" role="listitem"><div class="usb-dolar-type">💳 Tarjeta</div><div class="usb-dolar-val"><span>$</span>—</div><div class="usb-dolar-sub">Turista · hoy</div></div>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         FIX A: dolar-grid — IDs por chip + skeletons de carga iniciales
+         Los valores reales son inyectados por el script mejorado debajo.
+         ════════════════════════════════════════════════════════════════════ -->
+    <div class="usb-dolar-grid" role="list" aria-label="Tipos de dólar" id="dolar-grid">
+      <div class="usb-dolar-chip" role="listitem" id="dol-chip-oficial"><div class="usb-dolar-type" id="dol-lbl-oficial">💰 Oficial</div><div class="usb-dolar-val" id="dol-val-oficial"><span class="wx-skeleton" style="display:inline-block;height:32px;width:90px;border-radius:3px;"></span></div><div class="usb-dolar-sub" id="dol-sub-oficial">Cargando...</div></div>
+      <div class="usb-dolar-chip" role="listitem" id="dol-chip-blue"><div class="usb-dolar-type" id="dol-lbl-blue">📋 Blue</div><div class="usb-dolar-val" id="dol-val-blue"><span class="wx-skeleton" style="display:inline-block;height:32px;width:90px;border-radius:3px;"></span></div><div class="usb-dolar-sub" id="dol-sub-blue">Cargando...</div></div>
+      <div class="usb-dolar-chip" role="listitem" id="dol-chip-tarjeta"><div class="usb-dolar-type" id="dol-lbl-tarjeta">💳 Tarjeta</div><div class="usb-dolar-val" id="dol-val-tarjeta"><span class="wx-skeleton" style="display:inline-block;height:32px;width:90px;border-radius:3px;"></span></div><div class="usb-dolar-sub" id="dol-sub-tarjeta">Cargando...</div></div>
     </div>
+    <!-- FIX A: zona de estado — muestra timestamp de actualización o mensaje de error con botón reintentar -->
+    <div id="dolar-estado" style="display:none;position:relative;z-index:1;padding:0 52px 18px;"></div>
     <div class="usb-footer">
       <div class="usb-infos">
         <div class="usb-info-item"><span class="usb-info-dot" aria-hidden="true"></span>Actualizado en tiempo real</div>
@@ -1375,44 +1383,124 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   <p class="footer-copy">URU SPOT © 2026 — Guía Local · Concepción del Uruguay</p>
 </footer>
 
-<!-- DÓLAR: diferido con requestIdleCallback para no bloquear el hilo principal -->
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     FIX A: DÓLAR — fallback elegante + retry automático con backoff exponencial
+     Reemplaza el script original de fetch simple.
+     - Skeleton loaders mientras carga (renderizados en el HTML de arriba)
+     - Retry automático: 3 intentos con backoff 1.2s / 2.4s / 4.8s
+     - Fallback visual elegante en caso de error total (— — con msg + botón reintentar)
+     - Timestamp de última actualización en el pie del bloque
+     - Botón "↻ Actualizar" para refrescar manualmente
+     - Refresco automático cada 10 minutos (igual que el clima)
+     - window.__dolarRetry() expuesto globalmente para el botón inline
+     ══════════════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
   'use strict';
-  function fetchDolar(){
-    var types=[
-      {label:'💰 Oficial',sub:'Banco Nación · hoy'},
-      {label:'📋 Blue',sub:'Mercado informal · hoy'},
-      {label:'💳 Tarjeta',sub:'Turista · hoy'}
-    ];
-    var ctrl=new AbortController();
-    var t=setTimeout(function(){ctrl.abort();},2500);
-    fetch('https://dolarapi.com/v1/dolares',{cache:'no-store',signal:ctrl.signal})
-      .then(function(r){return r.json();})
-      .then(function(data){
-        clearTimeout(t);
-        var map={};
-        data.forEach(function(d){map[d.casa]=d;});
-        var chips=document.querySelectorAll('.usb-dolar-chip');
-        var keys=['oficial','blue','tarjeta'];
-        keys.forEach(function(k,i){
-          var d=map[k];if(!d||!chips[i])return;
-          var val=chips[i].querySelector('.usb-dolar-val');
-          var lbl=chips[i].querySelector('.usb-dolar-type');
-          var sub=chips[i].querySelector('.usb-dolar-sub');
-          if(val)val.innerHTML='<span>$</span>'+Math.round(d.venta).toLocaleString('es-AR');
-          if(lbl)lbl.textContent=types[i].label;
-          if(sub)sub.textContent='Compra: $'+Math.round(d.compra).toLocaleString('es-AR');
-        });
-      })
-      .catch(function(){clearTimeout(t);});
+
+  var DOL_KEYS   = ['oficial','blue','tarjeta'];
+  var DOL_LABELS = ['💰 Oficial','📋 Blue','💳 Tarjeta'];
+  var DOL_SUBS_FALLBACK = ['Banco Nación · hoy','Mercado informal · hoy','Turista · hoy'];
+  var MAX_RETRIES = 3;
+  var BASE_DELAY  = 1200; /* ms — backoff exponencial: 1.2s → 2.4s → 4.8s */
+
+  function $(id){ return document.getElementById(id); }
+
+  function setEstado(html, visible){
+    var el = $('dolar-estado');
+    if(!el) return;
+    el.innerHTML  = html;
+    el.style.display = visible ? '' : 'none';
   }
-  var sched=window.requestIdleCallback
-    ?function(cb){window.requestIdleCallback(cb,{timeout:3000});}
-    :function(cb){setTimeout(cb,3000);};
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',function(){sched(fetchDolar);});
-  }else{sched(fetchDolar);}
+
+  function setSkeletons(){
+    DOL_KEYS.forEach(function(k){
+      var val = $('dol-val-'+k);
+      var sub = $('dol-sub-'+k);
+      if(val) val.innerHTML = '<span class="wx-skeleton" style="display:inline-block;height:32px;width:90px;border-radius:3px;"></span>';
+      if(sub) sub.textContent = 'Cargando...';
+    });
+    setEstado('', false);
+  }
+
+  function renderDatos(data){
+    var map = {};
+    data.forEach(function(d){ map[d.casa] = d; });
+    var hora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'});
+    DOL_KEYS.forEach(function(k, i){
+      var d   = map[k];
+      var val = $('dol-val-'+k);
+      var sub = $('dol-sub-'+k);
+      if(val) val.innerHTML = d ? '<span>$</span>' + Math.round(d.venta).toLocaleString('es-AR') : '<span style="font-size:18px;opacity:.4">—</span>';
+      if(sub) sub.textContent = d ? 'Compra: $' + Math.round(d.compra).toLocaleString('es-AR') : DOL_SUBS_FALLBACK[i];
+    });
+    setEstado(
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">' +
+        '<span style="font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(230,190,50,.38);">Act. ' + hora + ' · dolarapi.com</span>' +
+        '<button onclick="window.__dolarRetry&&window.__dolarRetry()" style="background:none;border:1px solid rgba(230,190,50,.25);border-radius:2px;color:rgba(230,190,50,.45);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .3s ease;" onmouseover="this.style.borderColor=\'rgba(230,190,50,.6)\';this.style.color=\'rgba(230,190,50,.85)\'" onmouseout="this.style.borderColor=\'rgba(230,190,50,.25)\';this.style.color=\'rgba(230,190,50,.45)\'">↻ Actualizar</button>' +
+      '</div>',
+      true
+    );
+  }
+
+  function renderError(){
+    DOL_KEYS.forEach(function(k, i){
+      var val = $('dol-val-'+k);
+      var sub = $('dol-sub-'+k);
+      if(val) val.innerHTML = '<span style="font-family:var(--f-ui);font-size:13px;font-weight:700;color:rgba(230,190,50,.30);letter-spacing:1px;">— —</span>';
+      if(sub) sub.textContent = DOL_SUBS_FALLBACK[i];
+    });
+    setEstado(
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">' +
+        '<span style="font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(231,76,60,.40);">Sin datos · verificá tu conexión</span>' +
+        '<button onclick="window.__dolarRetry&&window.__dolarRetry()" style="background:none;border:1px solid rgba(231,76,60,.30);border-radius:2px;color:rgba(231,76,60,.55);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .3s ease;" onmouseover="this.style.borderColor=\'rgba(231,76,60,.7)\';this.style.color=\'rgba(231,76,60,.9)\'" onmouseout="this.style.borderColor=\'rgba(231,76,60,.30)\';this.style.color=\'rgba(231,76,60,.55)\'">↻ Reintentar</button>' +
+      '</div>',
+      true
+    );
+  }
+
+  function fetchDolar(intento, manual){
+    intento = intento || 0;
+    if(manual){ setSkeletons(); }
+    var ctrl = new AbortController();
+    var timeout = setTimeout(function(){ ctrl.abort(); }, 3500);
+    fetch('https://dolarapi.com/v1/dolares', { cache:'no-store', signal:ctrl.signal })
+      .then(function(r){
+        clearTimeout(timeout);
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        return r.json();
+      })
+      .then(function(data){
+        renderDatos(data);
+      })
+      .catch(function(){
+        clearTimeout(timeout);
+        if(intento < MAX_RETRIES - 1){
+          var delay = BASE_DELAY * Math.pow(2, intento);
+          setTimeout(function(){ fetchDolar(intento + 1, false); }, delay);
+        } else {
+          renderError();
+        }
+      });
+  }
+
+  /* Exponer retry global para el botón inline */
+  window.__dolarRetry = function(){ fetchDolar(0, true); };
+
+  /* Scheduling: idéntico al original — requestIdleCallback diferido */
+  var sched = window.requestIdleCallback
+    ? function(cb){ window.requestIdleCallback(cb, {timeout:3000}); }
+    : function(cb){ setTimeout(cb, 3000); };
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ sched(function(){ fetchDolar(0, false); }); });
+  } else {
+    sched(function(){ fetchDolar(0, false); });
+  }
+
+  /* Refresco automático cada 10 minutos (idéntico al intervalo del clima) */
+  setInterval(function(){ fetchDolar(0, false); }, 10*60*1000);
+
 })();
 </script>
 
