@@ -33,7 +33,7 @@
 <meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" media="print" onload="this.media='all';this.onload=null" />
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
 <style>
 :root{--void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;--parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;--ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;--oro:#c4872a;--oro2:#dfa040;--oro3:#f2c060;--f-display:'DM Serif Display',serif;--f-text:'DM Serif Text',serif;--f-ui:'Syne',sans-serif;--f-italic:'Instrument Serif',serif;--ease:cubic-bezier(0.23,1,0.32,1);--gutter:64px;--section-gap:120px}
@@ -1487,15 +1487,22 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   /* Exponer retry global para el botón inline */
   window.__dolarRetry = function(){ fetchDolar(0, true); };
 
-  /* Scheduling: idéntico al original — requestIdleCallback diferido */
-  var sched = window.requestIdleCallback
-    ? function(cb){ window.requestIdleCallback(cb, {timeout:3000}); }
-    : function(cb){ setTimeout(cb, 3000); };
 
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ sched(function(){ fetchDolar(0, false); }); });
+  // Esperar el evento 'load' completo (no solo DOMContentLoaded)
+  // para sacar la API del dólar completamente de la ruta crítica del LCP
+  function scheduleDolar(){
+    var sched2 = window.requestIdleCallback
+      ? function(cb){ window.requestIdleCallback(cb, {timeout:5000}); }
+      : function(cb){ setTimeout(cb, 2500); };
+    sched2(function(){ fetchDolar(0, false); });
+  }
+
+ if(document.readyState === 'complete'){
+    scheduleDolar();
   } else {
-    sched(function(){ fetchDolar(0, false); });
+    window.addEventListener('load', function(){
+      scheduleDolar();
+    }, {once:true});
   }
 
   /* Refresco automático cada 10 minutos (idéntico al intervalo del clima) */
@@ -1559,23 +1566,30 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   revealEls.forEach(function(el){revealObserver.observe(el);});
 
   /* NAV CLICK — smooth scroll */
-  navItems.forEach(function(item){
+navItems.forEach(function(item){
     item.addEventListener('click',function(e){
       e.preventDefault();
-      var target=document.getElementById(this.dataset.section);
-      if(!target)return;
-      window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-60-24,behavior:'smooth'});
+      var id=this.dataset.section;
+      // Diferir la lectura geométrica un frame para evitar forced reflow
+      requestAnimationFrame(function(){
+        var target=document.getElementById(id);
+        if(!target)return;
+        window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-60-24,behavior:'smooth'});
+      });
     });
   });
 
   /* CTA ghost scroll */
-  var ghost=document.querySelector('.btn-ghost');
+var ghost=document.querySelector('.btn-ghost');
   if(ghost){
     ghost.addEventListener('click',function(e){
       e.preventDefault();
-      var target=document.getElementById('categorias');
-      if(!target)return;
-      window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-60-24,behavior:'smooth'});
+      // Diferir la lectura geométrica un frame para evitar forced reflow
+      requestAnimationFrame(function(){
+        var target=document.getElementById('categorias');
+        if(!target)return;
+        window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-60-24,behavior:'smooth'});
+      });
     });
   }
 
@@ -1720,7 +1734,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     if(window.requestIdleCallback){
       window.requestIdleCallback(function(){fetchWeather();},{ timeout:8000 });
     } else {
-      setTimeout(fetchWeather, 2000);
+      setTimeout(fetchWeather, 4000);
     }
   }
 
