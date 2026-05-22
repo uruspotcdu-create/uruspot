@@ -652,6 +652,131 @@ img{display:block;max-width:100%}
 @media(max-width:380px){.hero-title{font-size:34px;letter-spacing:-1px}.hero-logo img{width:44px}.cafe-grid{grid-template-columns:1fr}.ccard-featured{grid-column:span 1}.cat-grid{grid-template-columns:1fr}.cat-card-highlight{grid-column:span 1}.cat-card-donde{grid-column:span 1}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal{opacity:1;transform:none;transition:none}}
 a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:2px}
+  /* ── ESTADO ABIERTO/CERRADO ── */
+(function(){
+  'use strict';
+
+  var TZ = 'America/Argentina/Buenos_Aires';
+
+  // Horarios reales fetcheados de cada página.
+  // schedules: array de { days:[0-6 Sun=0], open:"HH:MM", close:"HH:MM" }
+  // Si close < open, cruza medianoche.
+  // null = sin datos verificados → no muestra badge.
+  var HORARIOS = {
+    'el-arca':      { schedules: [{ days:[3,4,5,6,0], open:'20:00', close:'07:00' }] },
+    'papa-luigi':   { schedules: [{ days:[2,3,4,5,6,0], open:'19:00', close:'00:00' }] },
+    'bella-vista':  { schedules: [{ days:[2,3,4,5,6,0], open:'08:00', close:'00:00' }] },
+    'justo-jose':   { schedules: [{ days:[0,1,2,3,4,5,6], open:'12:00', close:'01:00' }] },
+    'bonhomia':     { schedules: [
+                        { days:[1,2,3,4,5,6], open:'11:00', close:'14:30' },
+                        { days:[0,1,2,3,4,5,6], open:'19:00', close:'01:00' }
+                      ]},
+    'panza-verde':  { schedules: [
+                        { days:[1,2,3,4,5], open:'10:00', close:'01:00' },
+                        { days:[0,6],       open:'10:00', close:'02:00' }
+                      ]},
+    'la-ris':       { schedules: [
+                        { days:[1,3,4,5,6,0], open:'08:00', close:'16:00' },
+                        { days:[1,3,4,5,6,0], open:'18:00', close:'23:30' }
+                      ]},
+    // Resto sin datos verificados aún
+    'la-gruta':     null,
+    'sanduba':      null,
+    'pimienta-negra': null,
+    'parada-33':    null,
+    'faro-3260':    null,
+    'el-calderon':  null,
+    'la-segunda':   null,
+    'dolores-costa':null,
+    'la-delfina':   null,
+    'mamma-mia':    null,
+    'garifo':       null,
+    'baco':         null,
+    'danubio-azul': null,
+  };
+
+  function toMinutes(hhmm){
+    var p = hhmm.split(':');
+    return parseInt(p[0],10)*60 + parseInt(p[1],10);
+  }
+
+  function isOpenNow(schedules){
+    var now = new Date();
+    // Hora en Argentina
+    var nowAR = new Date(now.toLocaleString('en-US',{timeZone:TZ}));
+    var day = nowAR.getDay(); // 0=Dom
+    var cur = nowAR.getHours()*60 + nowAR.getMinutes();
+
+    for(var i=0;i<schedules.length;i++){
+      var s = schedules[i];
+      var o = toMinutes(s.open);
+      var c = toMinutes(s.close);
+
+      if(c <= o){ // cruza medianoche
+        // abierto si: día actual después de open, O día anterior y antes de close
+        if(s.days.indexOf(day) !== -1 && cur >= o) return true;
+        // día anterior
+        var prevDay = day === 0 ? 6 : day-1;
+        if(s.days.indexOf(prevDay) !== -1 && cur < c) return true;
+      } else {
+        if(s.days.indexOf(day) !== -1 && cur >= o && cur < c) return true;
+      }
+    }
+    return false;
+  }
+
+  // Mapeo data-name → clave de HORARIOS
+  var NAME_MAP = {
+    'El Arca':       'el-arca',
+    'Papa Luigi':    'papa-luigi',
+    'Bella Vista':   'bella-vista',
+    'Justo José':    'justo-jose',
+    'Bonhomia':      'bonhomia',
+    'Panza Verde':   'panza-verde',
+    'La Ris':        'la-ris',
+    'La Gruta':      'la-gruta',
+    'Sanduba':       'sanduba',
+    'Pimienta Negra':'pimienta-negra',
+    'Parada 33':     'parada-33',
+    'Faro 3260':     'faro-3260',
+    'El Calderón':   'el-calderon',
+    'La Segunda':    'la-segunda',
+    'Dolores Costa': 'dolores-costa',
+    'La Delfina':    'la-delfina',
+    'Mamma Mía':     'mamma-mia',
+    'Garifo':        'garifo',
+    'Baco':          'baco',
+    'Danubio Azul':  'danubio-azul',
+  };
+
+  document.querySelectorAll('.rcard.searchable').forEach(function(card){
+    var name = card.dataset.name || '';
+    var key  = NAME_MAP[name];
+    var dot  = card.querySelector('.rcard-open-dot');
+    var lbl  = card.querySelector('.rcard-open');
+    if(!lbl) return;
+
+    if(!key || HORARIOS[key] === null){
+      // Sin datos: ocultamos el badge para no mentir
+      lbl.style.display = 'none';
+      return;
+    }
+
+    var open = isOpenNow(HORARIOS[key].schedules);
+    if(open){
+      lbl.innerHTML = '<span class="rcard-open-dot" style="width:5px;height:5px;background:var(--verde2);border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;"></span>Abierto ahora';
+      lbl.style.background = 'rgba(29,92,64,.09)';
+      lbl.style.borderColor = 'rgba(29,92,64,.25)';
+      lbl.style.color = 'var(--verde2)';
+    } else {
+      lbl.innerHTML = '<span style="width:5px;height:5px;background:#c0392b;border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;"></span>Cerrado';
+      lbl.style.background = 'rgba(192,57,43,.08)';
+      lbl.style.borderColor = 'rgba(192,57,43,.22)';
+      lbl.style.color = '#c0392b';
+    }
+  });
+
+})();
 </style>
 </head>
 <body>
