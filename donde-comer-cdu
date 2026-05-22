@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="La guía gastronómica más completa de Concepción del Uruguay. 55 lugares verificados: restaurantes, bares, cafeterías, panaderías y más.">
+<meta name="theme-color" content="#0c0904">
+<title>Dónde Comer en CDU · Guía Gastronómica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ink:#0c0904;
+  --parchment:#f8f3ea;
+  --parchment-mid:#f0e8d4;
+  --parchment-dark:#e5d9c2;
+  --white:#ffffff;
+  --gold:#b8872a;
+  --gold-bright:#d4a843;
+  --gold-pale:#f0d88a;
+  --copper:#9a5c2a;
+  --forest:#1b3320;
+  --muted:#8a7a62;
+  --border:rgba(184,135,42,.18);
+  --border-s:rgba(184,135,42,.35);
+  --radius:18px;
+  --radius-lg:24px;
+}
+
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--parchment);color:var(--ink);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.5
+}
+
+/* ═══════════════ HERO ═══════════════ */
+.hero{
+  position:relative;min-height:100svh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:max(env(safe-area-inset-top),3rem) 1.5rem 7rem;
+  background:var(--ink);overflow:hidden
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 120%,rgba(184,135,42,.22) 0%,transparent 65%),
+    radial-gradient(ellipse 55% 45% at 10% 8%,rgba(154,92,42,.13) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 40% at 88% 5%,rgba(92,26,26,.15) 0%,transparent 55%);
+  animation:bgpulse 9s ease-in-out infinite alternate
+}
+@keyframes bgpulse{from{opacity:.75}to{opacity:1}}
+
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(184,135,42,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(184,135,42,.03) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,black,transparent)
+}
+
+.corner{position:absolute;width:76px;height:76px;opacity:.28;pointer-events:none}
+.c-tl{top:1.4rem;left:1.4rem}
+.c-tr{top:1.4rem;right:1.4rem;transform:scaleX(-1)}
+.c-bl{bottom:5.5rem;left:1.4rem;transform:scaleY(-1)}
+.c-br{bottom:5.5rem;right:1.4rem;transform:scale(-1,-1)}
+
+.hero-inner{position:relative;z-index:2;max-width:860px;width:100%}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:.7rem;
+  font-size:.6rem;font-weight:500;letter-spacing:.38em;text-transform:uppercase;
+  color:var(--gold-bright);margin-bottom:1.8rem;
+  opacity:0;animation:fadeup .8s cubic-bezier(.16,1,.3,1) forwards .1s
+}
+.eyebrow-line{display:block;width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-bright))}
+.eyebrow-line.r{background:linear-gradient(90deg,var(--gold-bright),transparent)}
+
+.hero-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.8rem,10vw,8.5rem);font-weight:300;line-height:.92;
+  color:var(--parchment);letter-spacing:-.02em;
+  opacity:0;animation:fadeup 1s cubic-bezier(.16,1,.3,1) forwards .25s
+}
+.hero-title strong{
+  display:block;font-weight:700;font-style:italic;
+  background:linear-gradient(135deg,var(--gold-pale) 0%,var(--gold-bright) 45%,var(--copper) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+}
+
+.hero-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
+  font-size:clamp(.9rem,2.2vw,1.2rem);color:rgba(248,243,234,.4);
+  margin-top:1.2rem;letter-spacing:.05em;
+  opacity:0;animation:fadeup .7s ease forwards .45s
+}
+
+.orn{
+  display:flex;align-items:center;justify-content:center;gap:.9rem;
+  margin:2rem 0 1.8rem;opacity:0;animation:fadeup .6s ease forwards .58s
+}
+.ol{height:1px;width:48px;background:linear-gradient(90deg,transparent,var(--gold))}
+.ol.r{background:linear-gradient(90deg,var(--gold),transparent)}
+.od{width:5px;height:5px;background:var(--gold-bright);transform:rotate(45deg)}
+.od.s{transform:rotate(45deg) scale(.5);opacity:.4}
+
+.hero-stats{
+  display:flex;justify-content:center;flex-wrap:wrap;
+  border:1px solid rgba(184,135,42,.18);border-radius:var(--radius-lg);overflow:hidden;
+  background:rgba(255,255,255,.03);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  max-width:560px;margin:0 auto;
+  opacity:0;animation:fadeup .7s ease forwards .72s
+}
+.hs{flex:1;min-width:90px;padding:1.1rem .8rem;text-align:center;border-right:1px solid rgba(184,135,42,.12)}
+.hs:last-child{border-right:none}
+.hs-n{font-family:'Cormorant Garamond',serif;font-size:1.85rem;font-weight:700;color:var(--gold-bright);line-height:1}
+.hs-l{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(248,243,234,.3);margin-top:.3rem}
+
+.scroll-hint{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  opacity:0;animation:fadeup .6s ease forwards 1.1s;
+  color:rgba(248,243,234,.22);font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;z-index:2
+}
+.sh-line{width:1px;height:36px;background:linear-gradient(180deg,rgba(184,135,42,.5),transparent);animation:shdrop 2.2s ease-in-out infinite}
+@keyframes shdrop{0%,100%{transform:scaleY(1);transform-origin:top}50%{transform:scaleY(1.5);transform-origin:top}}
+
+.hero-wave{position:absolute;bottom:-1px;left:0;right:0;height:72px;overflow:hidden;z-index:3}
+.hero-wave svg{display:block;width:100%;height:100%}
+
+/* ═══════════════ MAIN ═══════════════ */
+main{background:var(--parchment)}
+
+.intro-band{
+  background:var(--parchment-mid);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:2.2rem 1.5rem;text-align:center
+}
+.intro-band p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1rem,2.5vw,1.3rem);color:var(--muted);
+  max-width:660px;margin:0 auto;line-height:1.75;letter-spacing:.02em
+}
+.intro-band strong{color:var(--gold);font-style:normal;font-weight:600}
+
+.sec-title{text-align:center;padding:3.5rem 1.5rem 1.2rem}
+.sec-title h2{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,4vw,2.5rem);font-weight:400;color:var(--ink);letter-spacing:-.01em}
+.sec-title p{color:var(--muted);font-size:.78rem;letter-spacing:.05em;margin-top:.4rem}
+.sec-divider{width:44px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:.9rem auto 0}
+
+.cats-wrap{max-width:900px;margin:0 auto;padding:0 1.2rem 1rem}
+.cats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:var(--radius);overflow:hidden
+}
+.cat{
+  background:var(--white);padding:1.5rem 1.1rem;text-align:center;
+  transition:background .2s;cursor:default;position:relative;overflow:hidden
+}
+.cat::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  transform:scaleX(0);transition:transform .3s ease;transform-origin:left
+}
+.cat:hover{background:var(--parchment)}
+.cat:hover::after{transform:scaleX(1)}
+.cat.rest::after{background:linear-gradient(90deg,#c0392b,#e74c3c)}
+.cat.bar::after{background:linear-gradient(90deg,#d4843a,#f39c12)}
+.cat.cafe::after{background:linear-gradient(90deg,#7d6608,var(--gold-bright))}
+.cat.pan::after{background:linear-gradient(90deg,#784212,#ca6f1e)}
+.cat.hela::after{background:linear-gradient(90deg,#1a5276,#2980b9)}
+.cat.host::after{background:linear-gradient(90deg,#1e8449,#27ae60)}
+.cat.gym::after{background:linear-gradient(90deg,#6c3483,#9b59b6)}
+
+.cat-icon{font-size:1.9rem;margin-bottom:.65rem;display:block}
+.cat-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--ink);margin-bottom:.2rem;display:flex;align-items:center;justify-content:center;gap:.35rem}
+.cat-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cat-desc{font-size:.67rem;color:var(--muted);line-height:1.55}
+
+.how-section{max-width:900px;margin:0 auto;padding:0 1.2rem 1rem}
+.how-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:var(--radius);overflow:hidden
+}
+.how-card{background:var(--white);padding:1.8rem 1.5rem;transition:background .2s}
+.how-card:hover{background:var(--parchment)}
+.how-icon{font-size:1.7rem;margin-bottom:.75rem}
+.how-title{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:.45rem}
+.how-text{font-size:.72rem;color:var(--muted);line-height:1.75}
+.how-text strong{color:var(--ink);font-weight:500}
+
+/* ═══════════════ MAP ═══════════════ */
+.map-section{
+  padding:0 1.2rem 1rem;
+  max-width:1140px;margin:0 auto
+}
+.map-topbar{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;margin-bottom:1.1rem;padding:0 .2rem
+}
+.map-topbar-l h3{font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,3vw,1.75rem);font-weight:600;color:var(--ink)}
+.map-topbar-l p{font-size:.7rem;color:var(--muted);margin-top:.2rem;letter-spacing:.03em}
+
+.live-badge{
+  display:flex;align-items:center;gap:.4rem;
+  background:var(--forest);color:#a8d4a0;
+  font-size:.6rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  padding:.4rem .9rem;border-radius:999px;flex-shrink:0
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#5ed65e;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.map-frame{
+  position:relative;border-radius:20px;
+  background:var(--ink);
+  box-shadow:0 0 0 1px var(--border-s),0 0 0 4px rgba(184,135,42,.05),0 2px 0 5px rgba(184,135,42,.1),0 20px 60px rgba(12,9,4,.18)
+}
+.map-chrome{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.2rem;
+  background:linear-gradient(180deg,#1e1710,#130f08);
+  border-bottom:1px solid rgba(184,135,42,.14);
+  border-radius:20px 20px 0 0
+}
+.mc-dots{display:flex;gap:.4rem}
+.mc-dot{width:10px;height:10px;border-radius:50%}
+.mc-dot:nth-child(1){background:#ff5f57}
+.mc-dot:nth-child(2){background:#febc2e}
+.mc-dot:nth-child(3){background:#28c840}
+.mc-title{font-size:.65rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,216,138,.45)}
+.mc-right{font-size:.6rem;color:rgba(240,216,138,.25);letter-spacing:.1em}
+
+.map-frame iframe{
+  display:block;width:100%;height:780px;
+  border:none;border-radius:0;background:#07060a
+}
+
+.map-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:.6rem;padding:.7rem 1.2rem;
+  background:linear-gradient(180deg,#130f08,#1e1710);
+  border-top:1px solid rgba(184,135,42,.1);
+  border-radius:0 0 20px 20px
+}
+.mf-text{font-size:.6rem;color:rgba(240,216,138,.25);letter-spacing:.1em;text-transform:uppercase}
+.mf-legend{display:flex;gap:.85rem;flex-wrap:wrap}
+.mfl{display:flex;align-items:center;gap:.28rem;font-size:.58rem;color:rgba(240,216,138,.35);letter-spacing:.06em}
+.mfl-d{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ═══════════════ INFO CARDS ═══════════════ */
+.info-section{max-width:900px;margin:0 auto;padding:0 1.2rem 1rem}
+.info-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:var(--radius);overflow:hidden
+}
+.ic{background:var(--white);padding:1.7rem 1.4rem;transition:background .2s}
+.ic:hover{background:var(--parchment)}
+.ic-icon{font-size:1.4rem;margin-bottom:.65rem}
+.ic-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:.35rem}
+.ic-text{font-size:.71rem;color:var(--muted);line-height:1.7}
+
+/* ═══════════════ HOURS ═══════════════ */
+.hours-section{max-width:740px;margin:0 auto;padding:0 1.2rem 1rem}
+.hours-table{
+  width:100%;border-collapse:collapse;
+  border:1px solid var(--border);border-radius:14px;overflow:hidden;
+  background:var(--white);box-shadow:0 4px 20px rgba(12,9,4,.05)
+}
+.hours-table thead tr{background:var(--ink)}
+.hours-table thead th{
+  padding:.8rem 1.2rem;font-size:.6rem;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--gold-pale);text-align:left
+}
+.hours-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+.hours-table tbody tr:last-child{border-bottom:none}
+.hours-table tbody tr:hover{background:var(--parchment)}
+.hours-table td{padding:.78rem 1.2rem;font-size:.77rem;color:var(--ink)}
+.hours-table td:first-child{font-weight:500}
+.hours-note{text-align:center;font-size:.68rem;color:var(--muted);margin-top:.8rem;font-style:italic}
+
+/* ═══════════════ ORNAMENTAL DIVIDER ═══════════════ */
+.odiv{
+  display:flex;align-items:center;justify-content:center;gap:1.2rem;
+  padding:2.2rem 1rem;max-width:480px;margin:0 auto;opacity:.4
+}
+.odiv-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.odiv-line.r{background:linear-gradient(90deg,var(--gold),transparent)}
+.odiv-sym{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold)}
+
+/* ═══════════════ FOOTER ═══════════════ */
+footer{
+  background:var(--ink);padding:3.5rem 2rem 4rem;
+  text-align:center;position:relative;overflow:hidden
+}
+footer::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 65% 55% at 50% 100%,rgba(184,135,42,.1) 0%,transparent 70%);
+  pointer-events:none
+}
+.footer-quote{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.3rem,3.5vw,1.9rem);font-style:italic;font-weight:300;
+  color:rgba(248,243,234,.12);
+  position:relative;z-index:1;
+  margin:0 auto 1.8rem;max-width:580px;letter-spacing:.01em;line-height:1.5
+}
+.footer-logo{
+  font-family:'Cormorant Garamond',serif;font-size:1.45rem;
+  font-weight:700;font-style:italic;color:var(--gold-bright);
+  position:relative;z-index:1;margin-bottom:.5rem;letter-spacing:-.01em
+}
+.footer-sub{
+  font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(248,243,234,.18);position:relative;z-index:1
+}
+.footer-links{
+  display:flex;justify-content:center;gap:1.4rem;
+  margin-top:1.5rem;flex-wrap:wrap;position:relative;z-index:1
+}
+.footer-links a{
+  font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(184,135,42,.45);text-decoration:none;transition:color .2s
+}
+.footer-links a:hover{color:var(--gold-bright)}
+
+/* ═══════════════ REVEAL ANIMATION ═══════════════ */
+.reveal{
+  opacity:0;transform:translateY(28px);
+  transition:opacity .85s cubic-bezier(.16,1,.3,1),transform .85s cubic-bezier(.16,1,.3,1)
+}
+.reveal.visible{opacity:1;transform:none}
+.rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}
+
+@keyframes fadeup{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media(max-width:500px){
+  .corner{width:52px;height:52px}
+  .mc-right{display:none}
+  .cats{grid-template-columns:1fr 1fr}
+  .hours-table td,.hours-table th{padding:.6rem .75rem;font-size:.72rem}
+  .map-frame iframe{height:520px}
+  .hs{padding:.9rem .6rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-grid" aria-hidden="true"></div>
+
+  <div class="corner c-tl" aria-hidden="true">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 78 L2 2 L78 2" stroke="#d4a843" stroke-width="1.5"/>
+      <path d="M2 52 L2 2 L52 2" stroke="#d4a843" stroke-width=".5" opacity=".4"/>
+      <circle cx="2" cy="2" r="3" fill="#d4a843"/>
+    </svg>
+  </div>
+  <div class="corner c-tr" aria-hidden="true">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 78 L2 2 L78 2" stroke="#d4a843" stroke-width="1.5"/>
+      <path d="M2 52 L2 2 L52 2" stroke="#d4a843" stroke-width=".5" opacity=".4"/>
+      <circle cx="2" cy="2" r="3" fill="#d4a843"/>
+    </svg>
+  </div>
+  <div class="corner c-bl" aria-hidden="true">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 78 L2 2 L78 2" stroke="#d4a843" stroke-width="1.5"/>
+      <path d="M2 52 L2 2 L52 2" stroke="#d4a843" stroke-width=".5" opacity=".4"/>
+      <circle cx="2" cy="2" r="3" fill="#d4a843"/>
+    </svg>
+  </div>
+  <div class="corner c-br" aria-hidden="true">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 78 L2 2 L78 2" stroke="#d4a843" stroke-width="1.5"/>
+      <path d="M2 52 L2 2 L52 2" stroke="#d4a843" stroke-width=".5" opacity=".4"/>
+      <circle cx="2" cy="2" r="3" fill="#d4a843"/>
+    </svg>
+  </div>
+
+  <div class="hero-inner">
+    <div class="eyebrow">
+      <span class="eyebrow-line" aria-hidden="true"></span>
+      Entre Ríos · Argentina · Guía Local
+      <span class="eyebrow-line r" aria-hidden="true"></span>
+    </div>
+
+    <h1 class="hero-title">
+      Dónde Comer<br>
+      <strong>en CDU</strong>
+    </h1>
+
+    <p class="hero-sub">La guía gastronómica más completa de Concepción del Uruguay</p>
+
+    <div class="orn" aria-hidden="true">
+      <div class="ol"></div>
+      <div class="od s"></div><div class="od"></div><div class="od s"></div>
+      <div class="ol r"></div>
+    </div>
+
+    <div class="hero-stats" role="list">
+      <div class="hs" role="listitem"><div class="hs-n">55</div><div class="hs-l">Lugares</div></div>
+      <div class="hs" role="listitem"><div class="hs-n">7</div><div class="hs-l">Categorías</div></div>
+      <div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Ciudad</div></div>
+      <div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Verificado</div></div>
+    </div>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <div class="sh-line"></div>
+    <span>Explorar</span>
+  </div>
+
+  <div class="hero-wave" aria-hidden="true">
+    <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,72 L0,38 Q180,4 360,30 Q540,56 720,30 Q900,4 1080,30 Q1260,56 1440,38 L1440,72 Z" fill="#f8f3ea"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main>
+
+  <div class="intro-band reveal">
+    <p>Una selección <strong>honesta y personal</strong> de los mejores lugares para comer, tomar algo, desayunar y alojarse en <strong>Concepción del Uruguay</strong>. Solo los que realmente valen la pena.</p>
+  </div>
+
+  <!-- Categorías -->
+  <div class="sec-title reveal">
+    <h2>Las categorías de la guía</h2>
+    <p>Cada lugar fue visitado y verificado personalmente</p>
+    <div class="sec-divider"></div>
+  </div>
+
+  <div class="cats-wrap reveal rd1">
+    <div class="cats">
+      <div class="cat rest">
+        <span class="cat-icon">🍽️</span>
+        <div class="cat-name"><span class="cat-dot" style="background:#c0392b"></span>Restaurantes</div>
+        <div class="cat-desc">Desde parrillas tradicionales hasta cocina de autor.</div>
+      </div>
+      <div class="cat bar">
+        <span class="cat-icon">🍺</span>
+        <div class="cat-name"><span class="cat-dot" style="background:#d4843a"></span>Bares</div>
+        <div class="cat-desc">Cervecerías artesanales y lugares para tomar algo.</div>
+      </div>
+      <div class="cat cafe">
+        <span class="cat-icon">☕</span>
+        <div class="cat-name"><span class="cat-dot" style="background:#9b59b6"></span>Cafeterías</div>
+        <div class="cat-desc">Para el desayuno, la merienda o el trabajo remoto.</div>
+      </div>
+      <div class="cat pan">
+        <span class="cat-icon">🥐</span>
+        <div class="cat-name"><span class="cat-dot" style="background:#c07836"></span>Panaderías</div>
+        <div class="cat-desc">Pan artesanal, facturas y dulces.</div>
+      </div>
+      <div class="cat hela">
+        <span class="cat-icon">🍦</span>
+        <div class="cat-name"><span class="cat-dot" style="background:#2980b9"></span>Heladerías</div>
+        <div class="cat-desc">Las mejores heladerías de la ciudad.</div>
+      </div>
+      <div class="cat host">
+        <span class="cat-icon">🏡</span>
+        <div class="cat-name"><span class="cat-dot" style="background:#27ae60"></span>Hosterías</div>
+        <div class="cat-desc">Alojamientos con encanto local.</div>
+      </div>
+      <div class="cat gym">
+        <span class="cat-icon">💪</span>
+        <div class="cat-name"><span class="cat-dot" style="background:#9b59b6"></span>Gimnasios</div>
+        <div class="cat-desc">Donde entrenar durante tu estadía.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cómo llegar -->
+  <div class="sec-title reveal">
+    <h2>Cómo llegar a Concepción del Uruguay</h2>
+    <p>La ciudad está muy bien conectada desde cualquier punto del país</p>
+    <div class="sec-divider"></div>
+  </div>
+
+  <div class="how-section reveal rd1">
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-icon">🚌</div>
+        <div class="how-title">En colectivo</div>
+        <div class="how-text">Desde <strong>Buenos Aires</strong> salen servicios directos desde Retiro. El viaje dura aprox. <strong>4 a 5 horas</strong>. Flecha Bus y Cóndor Estrella tienen frecuencias diarias.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">🚗</div>
+        <div class="how-title">En auto</div>
+        <div class="how-text">Tomás la <strong>Ruta Nacional 14</strong> hasta Gualeguaychú y luego la 136. Aprox. <strong>330 km</strong> desde Buenos Aires por autovía.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">✈️</div>
+        <div class="how-title">En avión</div>
+        <div class="how-text">Los aeropuertos más cercanos son <strong>Concordia</strong> y <strong>Paraná</strong>. Desde ahí en auto o remís en menos de 2 horas.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">🚢</div>
+        <div class="how-title">Desde Uruguay</div>
+        <div class="how-text">Cruzando desde <strong>Paysandú</strong> por el Puente Internacional General Artigas, en unos 20 minutos de viaje.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Horarios -->
+  <div class="sec-title reveal">
+    <h2>Horarios orientativos por categoría</h2>
+    <p>Siempre consultá antes de ir — los horarios pueden variar</p>
+    <div class="sec-divider"></div>
+  </div>
+
+  <div class="hours-section reveal rd1">
+    <table class="hours-table">
+      <thead>
+        <tr>
+          <th>Categoría</th>
+          <th>Días</th>
+          <th>Horario aprox.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>🍽️ Restaurantes</td><td>Lun a Dom</td><td>12:00–15:00 · 20:00–23:30</td></tr>
+        <tr><td>🍺 Bares</td><td>Mié a Dom</td><td>18:00–02:00</td></tr>
+        <tr><td>☕ Cafeterías</td><td>Lun a Sáb</td><td>07:30–13:00 · 16:00–20:30</td></tr>
+        <tr><td>🥐 Panaderías</td><td>Lun a Sáb</td><td>06:30–13:00 · 16:30–20:00</td></tr>
+        <tr><td>🍦 Heladerías</td><td>Mar a Dom</td><td>14:00–22:00</td></tr>
+        <tr><td>🏡 Hosterías</td><td>Todos los días</td><td>Check-in 14:00 · Check-out 11:00</td></tr>
+      </tbody>
+    </table>
+    <p class="hours-note">* Verificá el horario exacto en cada entrada de la guía antes de visitar.</p>
+  </div>
+
+  <div class="odiv reveal" aria-hidden="true">
+    <div class="odiv-line"></div>
+    <div class="odiv-sym">❧</div>
+    <div class="odiv-line r"></div>
+  </div>
+
+  <!-- MAPA -->
+  <div class="sec-title reveal">
+    <h2>Mapa interactivo</h2>
+    <p>55 lugares marcados · navegá y planeá tu visita</p>
+    <div class="sec-divider"></div>
+  </div>
+
+  <div class="map-section reveal rd1">
+    <div class="map-topbar">
+      <div class="map-topbar-l">
+        <h3>Todos los lugares en un mapa</h3>
+        <p>Hacé clic en cualquier pin · Filtrá por categoría desde el panel lateral</p>
+      </div>
+      <div class="live-badge"><div class="live-dot" aria-hidden="true"></div>Actualizado</div>
+    </div>
+
+    <div class="map-frame">
+      <div class="map-chrome" aria-hidden="true">
+        <div class="mc-dots">
+          <div class="mc-dot"></div>
+          <div class="mc-dot"></div>
+          <div class="mc-dot"></div>
+        </div>
+        <span class="mc-title">Dónde Comer en CDU · Mapa Gastronómico</span>
+        <span class="mc-right">uruspot.pages.dev</span>
+      </div>
+
+      <!-- ✅ MAPA CORREGIDO — ID real de Google My Maps -->
+      <iframe
+        src="https://www.google.com/maps/d/embed?mid=1k9PKHaoWcWkr4SEjAWdBvozs12r4t18"
+        title="Mapa gastronómico interactivo de Concepción del Uruguay"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+
+      <div class="map-footer" aria-hidden="true">
+        <span class="mf-text">55 lugares · CDU · Entre Ríos · Argentina</span>
+        <div class="mf-legend">
+          <div class="mfl"><div class="mfl-d" style="background:#d94f3d"></div>Restaurantes</div>
+          <div class="mfl"><div class="mfl-d" style="background:#d4843a"></div>Bares</div>
+          <div class="mfl"><div class="mfl-d" style="background:#9b59b6"></div>Cafés</div>
+          <div class="mfl"><div class="mfl-d" style="background:#c07836"></div>Panaderías</div>
+          <div class="mfl"><div class="mfl-d" style="background:#2980b9"></div>Heladerías</div>
+          <div class="mfl"><div class="mfl-d" style="background:#27ae60"></div>Hosterías</div>
+          <div class="mfl"><div class="mfl-d" style="background:#9b59b6"></div>Gimnasios</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="odiv reveal" aria-hidden="true">
+    <div class="odiv-line"></div>
+    <div class="odiv-sym">✦</div>
+    <div class="odiv-line r"></div>
+  </div>
+
+  <!-- Sobre la guía -->
+  <div class="sec-title reveal">
+    <h2>Sobre esta guía</h2>
+    <p>Todo lo que necesitás saber antes de usarla</p>
+    <div class="sec-divider"></div>
+  </div>
+
+  <div class="info-section reveal rd1">
+    <div class="info-grid">
+      <div class="ic">
+        <div class="ic-icon">📍</div>
+        <div class="ic-title">Cómo usar el mapa</div>
+        <div class="ic-text">Hacé clic en cualquier pin para ver el nombre del lugar. Desde el panel lateral podés activar y desactivar categorías.</div>
+      </div>
+      <div class="ic">
+        <div class="ic-icon">🧭</div>
+        <div class="ic-title">Para turistas</div>
+        <div class="ic-text">Si llegás de visita, empezá por las hosterías del centro. Desde ahí a pie encontrás cafés, panaderías y restaurantes.</div>
+      </div>
+      <div class="ic">
+        <div class="ic-icon">✍️</div>
+        <div class="ic-title">Selección honesta</div>
+        <div class="ic-text">Cada uno de los 55 lugares fue visitado personalmente. Si está en la guía, es porque vale la pena.</div>
+      </div>
+      <div class="ic">
+        <div class="ic-icon">🔄</div>
+        <div class="ic-title">Siempre actualizada</div>
+        <div class="ic-text">La guía se actualiza regularmente. Si un lugar cerró o abrió uno nuevo, lo reflejamos en el mapa y en el blog.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <p class="footer-quote">"La mejor mesa es la que encontrás cuando no la buscabas."</p>
+  <div class="footer-logo">Dónde Comer en CDU</div>
+  <div class="footer-sub">Guía Gastronómica · Concepción del Uruguay · Entre Ríos · Argentina</div>
+  <nav class="footer-links" aria-label="Navegación del sitio">
+    <a href="/">Inicio</a>
+    <a href="/restaurantes.html">Restaurantes</a>
+    <a href="/bares.html">Bares</a>
+    <a href="/cafes.html">Cafés</a>
+    <a href="/panaderias.html">Panaderías</a>
+    <a href="/hosterias.html">Hosterías</a>
+  </nav>
+</footer>
+
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold: .1});
+  els.forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>
