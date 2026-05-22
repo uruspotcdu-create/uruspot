@@ -9,6 +9,7 @@
 <meta property="og:description" content="El sabor clásico que nunca falla. 21 de Noviembre 38, CDU.">
 <meta property="og:image" content="https://i.imgur.com/x9AxwMH.jpeg">
 <meta property="og:type" content="article">
+<link rel="canonical" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/">
 <title>Papa Luigi · URU SPOT — Guía Gastronómica CDU</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +36,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 
 /* HERO */
 .ficha-hero{position:relative;min-height:70vh;display:flex;flex-direction:column;justify-content:flex-end;padding:7rem 1.5rem 3rem;background:var(--ink);overflow:hidden}
-.fh-img{position:absolute;inset:0;background:url('https://i.imgur.com/x9AxwMH.jpeg') center/cover no-repeat;opacity:.45}
+.fh-img{position:absolute;inset:0;background:url('https://i.imgur.com/x9AxwMH.jpeg') center/cover no-repeat;opacity:.45;will-change:transform}
 .fh-grad{position:absolute;inset:0;background:linear-gradient(0deg,rgba(12,9,4,.97) 0%,rgba(12,9,4,.6) 45%,rgba(12,9,4,.2) 100%)}
 .fh-inner{position:relative;z-index:2;max-width:860px}
 
@@ -141,9 +142,16 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
 .footer-back{display:inline-flex;align-items:center;gap:.4rem;margin-top:1rem;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(184,135,42,.4);text-decoration:none;transition:color .2s}
 .footer-back:hover{color:var(--gold-bright)}
 
+/* REVEAL */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
 .reveal.visible{opacity:1;transform:none}
 .rd1{transition-delay:.1s}.rd2{transition-delay:.2s}
+
+/* OPEN/CLOSED BADGE */
+.open-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.62rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .8rem;border-radius:999px;margin-bottom:1rem}
+.open-badge.open{background:rgba(39,174,96,.15);border:1px solid rgba(39,174,96,.35);color:#27ae60}
+.open-badge.closed{background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.3);color:#c0392b}
+.open-badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
 
 @media(max-width:500px){
   .fh-title{font-size:2.6rem}
@@ -153,27 +161,31 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
   .cta-row{flex-direction:column}
   .btn{justify-content:center}
 }
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+  .reveal{opacity:1;transform:none}
+}
 </style>
 </head>
 <body>
 
 <nav class="topnav">
   <a href="../../" class="nav-back">
-    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
     Volver a la guía
   </a>
   <a href="../../" class="nav-logo">URU SPOT</a>
 </nav>
 
-<section class="ficha-hero">
-  <div class="fh-img"></div>
-  <div class="fh-grad"></div>
+<section class="ficha-hero" aria-label="Papa Luigi — encabezado">
+  <div class="fh-img" role="img" aria-label="Fachada de Papa Luigi"></div>
+  <div class="fh-grad" aria-hidden="true"></div>
   <div class="fh-inner">
-    <div class="fh-badge"><div class="fh-badge-dot"></div>🇮🇹 Tradición Italiana · Pizzería</div>
+    <div class="fh-badge"><div class="fh-badge-dot" aria-hidden="true"></div>🇮🇹 Tradición Italiana · Pizzería</div>
     <h1 class="fh-title">Papa <em>Luigi</em></h1>
-    <p class="fh-sub">Pizzería & Cocina Clásica Italiana · El sabor que nunca falla</p>
+    <p class="fh-sub">Pizzería &amp; Cocina Clásica Italiana · El sabor que nunca falla</p>
     <div class="fh-meta">
-      <div class="score-pill">
+      <div class="score-pill" aria-label="URU SPOT Score: 8.4 sobre 10">
         <div>
           <div class="score-n">8.4</div>
           <div class="score-l">URU SPOT Score</div>
@@ -189,31 +201,34 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
 <main>
 <div class="content-wrap">
 
+  <!-- Badge abierto/cerrado dinámico -->
+  <div id="open-status" class="open-badge" role="status" aria-live="polite" style="margin-top:1.5rem"></div>
+
   <div class="quick-bar reveal">
     <div class="qb-item">
-      <div class="qb-icon">📍</div>
+      <div class="qb-icon" aria-hidden="true">📍</div>
       <div class="qb-label">Dirección</div>
       <div class="qb-val">21 de Noviembre 38</div>
     </div>
     <div class="qb-item">
-      <div class="qb-icon">🕗</div>
+      <div class="qb-icon" aria-hidden="true">🕗</div>
       <div class="qb-label">Horario</div>
       <div class="qb-val">Mar–Dom 19:00–00:00</div>
     </div>
     <div class="qb-item">
-      <div class="qb-icon">📞</div>
-      <div class="qb-label">Pedidos & Reservas</div>
+      <div class="qb-icon" aria-hidden="true">📞</div>
+      <div class="qb-label">Pedidos &amp; Reservas</div>
       <div class="qb-val">03442 43-3624</div>
     </div>
     <div class="qb-item">
-      <div class="qb-icon">💰</div>
+      <div class="qb-icon" aria-hidden="true">💰</div>
       <div class="qb-label">Precio por persona</div>
       <div class="qb-val">$15.000 – $40.000</div>
     </div>
   </div>
 
   <h2 class="s-title reveal">Sobre el lugar</h2>
-  <div class="s-divider reveal"></div>
+  <div class="s-divider reveal" aria-hidden="true"></div>
 
   <div class="desc-block reveal rd1">
     <p>Papa Luigi representa la esencia de la cocina italiana clásica en la ciudad. Su propuesta gira en torno a recetas familiares, ingredientes frescos y una ejecución constante que lo convierten en una referencia obligada para los amantes de la pizza tradicional.</p>
@@ -221,7 +236,7 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
     <p>Ideal para familias, cenas clásicas y quienes buscan ese sabor genuino sin sorpresas: una experiencia confiable y deliciosa en cada visita.</p>
   </div>
 
-  <div class="tags reveal">
+  <div class="tags reveal" aria-label="Etiquetas">
     <span class="tag">Pizzería</span>
     <span class="tag">Cocina Italiana</span>
     <span class="tag">Familias</span>
@@ -231,60 +246,60 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
   </div>
 
   <h2 class="s-title reveal">Galería</h2>
-  <div class="s-divider reveal"></div>
+  <div class="s-divider reveal" aria-hidden="true"></div>
   <div class="photo-grid reveal rd1">
-    <img class="photo-wide" src="https://i.imgur.com/x9AxwMH.jpeg" alt="Fachada y pizzas de Papa Luigi" loading="lazy">
-    <img src="https://i.imgur.com/9nR67Yn.png" alt="Plato de pasta tradicional" loading="lazy">
-    <img src="https://i.imgur.com/HrfGxqb.png" alt="Pizza clásica de Papa Luigi" loading="lazy">
-    <img src="https://i.imgur.com/GBDoQ0Y.png" alt="Interior del local" loading="lazy" style="grid-column:1/-1;aspect-ratio:16/6">
+    <img class="photo-wide" src="https://i.imgur.com/x9AxwMH.jpeg" alt="Fachada y pizzas de Papa Luigi" loading="lazy" decoding="async">
+    <img src="https://i.imgur.com/9nR67Yn.png" alt="Plato de pasta tradicional" loading="lazy" decoding="async">
+    <img src="https://i.imgur.com/HrfGxqb.png" alt="Pizza clásica de Papa Luigi" loading="lazy" decoding="async">
+    <img src="https://i.imgur.com/GBDoQ0Y.png" alt="Interior del local" loading="lazy" decoding="async" style="grid-column:1/-1;aspect-ratio:16/6">
   </div>
 
   <div class="features reveal rd1">
     <div class="feat">
-      <div class="feat-num">01</div>
+      <div class="feat-num" aria-hidden="true">01</div>
       <div class="feat-title">Tradición Italiana</div>
       <div class="feat-text">Recetas familiares e ingredientes frescos fieles a la cocina clásica italiana de siempre.</div>
     </div>
     <div class="feat">
-      <div class="feat-num">02</div>
+      <div class="feat-num" aria-hidden="true">02</div>
       <div class="feat-title">Ideal para Familias</div>
       <div class="feat-text">Ambiente perfecto para cenas tranquilas, encuentros familiares y amantes de la pizza tradicional.</div>
     </div>
     <div class="feat">
-      <div class="feat-num">03</div>
+      <div class="feat-num" aria-hidden="true">03</div>
       <div class="feat-title">Ejecución Constante</div>
       <div class="feat-text">Calidad consistente en cada visita. El sabor clásico que nunca decepciona.</div>
     </div>
   </div>
 
   <h2 class="s-title reveal">Puntuación URU SPOT</h2>
-  <div class="s-divider reveal"></div>
-  <div class="score-card reveal rd1">
+  <div class="s-divider reveal" aria-hidden="true"></div>
+  <div class="score-card reveal rd1" aria-label="Puntuaciones URU SPOT">
     <div class="sc-header">
       <div class="sc-title">URU SPOT Score</div>
-      <div class="sc-score">8.4<span>/10</span></div>
+      <div class="sc-score" aria-label="Puntaje total: 8.4 sobre 10">8.4<span>/10</span></div>
     </div>
     <div class="sc-bars">
       <div class="sc-bar-row">
         <div class="sc-bar-label">🍽️ Comida</div>
-        <div class="sc-bar-track"><div class="sc-bar-fill" style="width:86%"></div></div>
+        <div class="sc-bar-track" role="progressbar" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100" aria-label="Comida: 8.6"><div class="sc-bar-fill" style="width:86%"></div></div>
         <div class="sc-bar-val">8.6</div>
       </div>
       <div class="sc-bar-row">
         <div class="sc-bar-label">💰 Precio</div>
-        <div class="sc-bar-track"><div class="sc-bar-fill" style="width:84%"></div></div>
+        <div class="sc-bar-track" role="progressbar" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" aria-label="Precio: 8.4"><div class="sc-bar-fill" style="width:84%"></div></div>
         <div class="sc-bar-val">8.4</div>
       </div>
       <div class="sc-bar-row">
         <div class="sc-bar-label">🌍 Ambiente</div>
-        <div class="sc-bar-track"><div class="sc-bar-fill" style="width:83%"></div></div>
+        <div class="sc-bar-track" role="progressbar" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100" aria-label="Ambiente: 8.3"><div class="sc-bar-fill" style="width:83%"></div></div>
         <div class="sc-bar-val">8.3</div>
       </div>
     </div>
   </div>
 
-  <h2 class="s-title reveal">Horarios & Precios</h2>
-  <div class="s-divider reveal"></div>
+  <h2 class="s-title reveal">Horarios &amp; Precios</h2>
+  <div class="s-divider reveal" aria-hidden="true"></div>
   <div class="hours-card reveal rd1">
     <div class="hours-head">
       <span class="hours-head-title">Horario semanal</span>
@@ -325,12 +340,14 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
   </div>
 
   <h2 class="s-title reveal">Cómo llegar</h2>
-  <div class="s-divider reveal"></div>
+  <div class="s-divider reveal" aria-hidden="true"></div>
   <div class="map-card reveal rd1">
     <iframe
-      src="https://www.google.com/maps/place/Papa+Luigi/@-32.4857328,-58.2379339,17z/data=!3m1!4b1!4m6!3m5!1s0x95afdbaa0db3304f:0x5dd0b865cbc35cd3!8m2!3d-32.4857328!4d-58.235359!16s%2Fg%2F11c6s4d3ck?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D"
-      title="Mapa Papa Luigi"
-      allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      src="https://maps.google.com/maps?q=Papa+Luigi,+21+de+Noviembre+38,+Concepcion+del+Uruguay,+Entre+Rios,+Argentina&output=embed&hl=es&z=17"
+      title="Ubicación de Papa Luigi en Google Maps"
+      allowfullscreen
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade">
     </iframe>
     <div class="map-info">
       <div class="map-addr">📍 21 de Noviembre 38, Concepción del Uruguay, Entre Ríos</div>
@@ -339,7 +356,7 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
   </div>
 
   <div class="cta-row reveal">
-    <a href="https://www.google.com/maps/place/Papa+Luigi/@-32.4857328,-58.2379339,17z/data=!3m1!4b1!4m6!3m5!1s0x95afdbaa0db3304f:0x5dd0b865cbc35cd3!8m2!3d-32.4857328!4d-58.235359!16s%2Fg%2F11c6s4d3ck?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" class="btn btn-primary">🗺️ Abrir en Google Maps</a>
+    <a href="https://www.google.com/maps/place/Papa+Luigi/@-32.4857328,-58.235359,17z" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🗺️ Abrir en Google Maps</a>
     <a href="tel:+543442433624" class="btn btn-outline">📞 Llamar al 03442 43-3624</a>
   </div>
 
@@ -350,15 +367,7 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
 
   <div class="share-section reveal">
     <p class="share-title">¿Te gustó este lugar? Compartilo</p>
-    <button class="share-btn" onclick="
-      if(navigator.share){
-        navigator.share({title:'Papa Luigi · URU SPOT',text:'Encontré este lugar en URU SPOT, la guía gastronómica de CDU.',url:window.location.href})
-      } else {
-        navigator.clipboard.writeText(window.location.href);
-        this.textContent='✓ Link copiado';
-        setTimeout(()=>this.textContent='📤 Compartir ficha',2000)
-      }
-    ">📤 Compartir ficha</button>
+    <button class="share-btn" id="share-btn" aria-label="Compartir esta ficha">📤 Compartir ficha</button>
   </div>
 
 </div>
@@ -372,25 +381,92 @@ footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
 
 <script>
 (function(){
+  'use strict';
+
+  /* ── REVEAL con IntersectionObserver ── */
   var els=document.querySelectorAll('.reveal');
   var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}});
-  },{threshold:.1});
-  els.forEach(function(el){io.observe(el)});
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.08,rootMargin:'0px 0px -32px 0px'});
+  els.forEach(function(el){io.observe(el);});
 
+  /* Fallback por si IO no dispara */
+  setTimeout(function(){
+    document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){
+      el.classList.add('visible');
+    });
+  },900);
+
+  /* ── BARRAS de puntaje: animar al entrar en viewport ── */
   var bars=document.querySelectorAll('.sc-bar-fill');
   var widths=[];
-  bars.forEach(function(b){widths.push(b.style.width);b.style.width='0'});
+  bars.forEach(function(b){widths.push(b.style.width);b.style.width='0';});
   var scoreCard=document.querySelector('.score-card');
   if(scoreCard){
     var sio=new IntersectionObserver(function(entries){
       if(entries[0].isIntersecting){
-        bars.forEach(function(b,i){setTimeout(function(){b.style.width=widths[i]},i*150)});
+        bars.forEach(function(b,i){
+          setTimeout(function(){b.style.width=widths[i];},i*150);
+        });
         sio.disconnect();
       }
     },{threshold:.3});
     sio.observe(scoreCard);
   }
+
+  /* ── BADGE ABIERTO / CERRADO (hora Argentina) ── */
+  (function(){
+    var badge=document.getElementById('open-status');
+    if(!badge)return;
+    try{
+      var now=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Argentina/Buenos_Aires'}));
+      var day=now.getDay(); // 0=Dom,1=Lun,...
+      var cur=now.getHours()*60+now.getMinutes();
+      // Abre Mar(2)-Dom(0): 19:00-24:00, y Dom madrugada antes de 00:00 conta como mismo turno
+      var open19=19*60, close24=24*60;
+      var isOpenDay=(day>=2&&day<=6)||day===0;
+      var isOpen=isOpenDay&&cur>=open19&&cur<close24;
+      // También cubre si es Dom(0) o cualquier día Lun(1) madrugada: el local cierra a medianoche exacta
+      if(isOpen){
+        badge.className='open-badge open';
+        badge.innerHTML='<span class="open-badge-dot" aria-hidden="true"></span>Abierto ahora';
+      } else if(day===1){
+        badge.className='open-badge closed';
+        badge.innerHTML='<span class="open-badge-dot" aria-hidden="true"></span>Cerrado hoy — abre mañana a las 19:00';
+      } else {
+        badge.className='open-badge closed';
+        badge.innerHTML='<span class="open-badge-dot" aria-hidden="true"></span>Cerrado ahora — abre hoy a las 19:00';
+      }
+    }catch(e){badge.style.display='none';}
+  })();
+
+  /* ── SHARE ── */
+  var shareBtn=document.getElementById('share-btn');
+  if(shareBtn){
+    shareBtn.addEventListener('click',function(){
+      if(navigator.share){
+        navigator.share({
+          title:'Papa Luigi · URU SPOT',
+          text:'Encontré este lugar en URU SPOT, la guía gastronómica de CDU.',
+          url:window.location.href
+        }).catch(function(){});
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(function(){
+          shareBtn.textContent='✓ Link copiado';
+          setTimeout(function(){shareBtn.textContent='📤 Compartir ficha';},2000);
+        }).catch(function(){
+          shareBtn.textContent='✓ Link copiado';
+          setTimeout(function(){shareBtn.textContent='📤 Compartir ficha';},2000);
+        });
+      }
+    });
+  }
+
 })();
 </script>
 </body>
