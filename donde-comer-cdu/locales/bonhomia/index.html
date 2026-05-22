@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bonhomia Restó Bar — Cocina moderna, cócteles y ambiente cuidado en Concepción del Uruguay. Score URU SPOT: 9.0">
+<meta name="theme-color" content="#0d0d0d">
+<meta property="og:title" content="Bonhomia · URU SPOT">
+<meta property="og:description" content="Cocina moderna y cócteles en un ambiente cuidado. Concepción del Uruguay.">
+<meta property="og:image" content="https://i.imgur.com/z28LguU.png">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/">
+<title>Bonhomia · URU SPOT — Guía Gastronómica CDU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--gold:#c9a84c;--gold-light:#e8d5a3;--gold-dark:#8a6820;
+--ink:#0d0d0d;--ink-soft:#1a1a1a;--cream:#faf7f2;--cream-deep:#f0ebe0;
+--muted:#6b6459;--green-accent:#2d6a4f;--green-bright:#40916c;
+--red-accent:#c1121f;--border:rgba(201,168,76,0.25);
+/* Bonhomia accent — cálido ámbar/cobre */
+--accent:#b06a2e;--accent-light:#d4884a;--accent-bg:rgba(176,106,46,0.12);
+}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.12em;color:var(--gold-dark);text-decoration:none;text-transform:uppercase}
+.nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500}
+.nav-badge{background:var(--gold);color:var(--ink);font-size:10px;font-weight:600;letter-spacing:0.15em;padding:5px 14px;border-radius:2px;text-transform:uppercase}
+.hero{position:relative;height:100vh;min-height:600px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 8s ease;filter:brightness(0.62) saturate(0.85)}
+.hero:hover .hero-img{transform:scale(1.02)}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,13,13,0.95) 0%,rgba(13,13,13,0.4) 50%,rgba(13,13,13,0.1) 100%)}
+.hero-content{position:relative;z-index:2;padding:0 72px 72px;max-width:900px}
+.hero-eyebrow{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.eyebrow-line{width:48px;height:1px;background:var(--gold)}
+.eyebrow-text{font-size:11px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;font-weight:500}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(64px,10vw,120px);font-weight:300;color:#fff;line-height:0.9;letter-spacing:-0.02em;margin-bottom:24px}
+.hero-title em{font-style:italic;color:var(--gold-light)}
+.hero-subtitle{font-size:15px;color:rgba(255,255,255,0.7);font-weight:300;letter-spacing:0.05em;max-width:480px;line-height:1.6;margin-bottom:36px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:8px 18px;border:1px solid rgba(201,168,76,0.4);border-radius:2px;font-size:12px;letter-spacing:0.12em;color:rgba(255,255,255,0.85);text-transform:uppercase;font-weight:400;background:rgba(201,168,76,0.08)}
+.chip-gold{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:600}
+.hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(201,168,76,0.3);padding:28px 32px;background:rgba(13,13,13,0.6);backdrop-filter:blur(12px)}
+.score-num{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold);line-height:1}
+.score-label{font-size:10px;letter-spacing:0.3em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:4px}
+.score-stars{color:var(--gold);font-size:14px;margin-top:8px}
+.info-strip{background:var(--ink-soft);color:#fff;display:grid;grid-template-columns:repeat(3,1fr)}
+.info-cell{padding:32px 40px;border-right:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:6px}
+.info-cell:last-child{border-right:none}
+.info-cell-label{font-size:10px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;font-weight:500}
+.info-cell-value{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;color:#fff}
+.info-cell-sub{font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:0.05em}
+.status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:2px;font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase}
+.status-dot{width:6px;height:6px;border-radius:50%}
+.action-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:2px;font-size:12px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;text-decoration:none;transition:opacity .2s,transform .15s;cursor:pointer;border:none;font-family:'DM Sans',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:var(--gold);color:var(--ink)}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.3)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-dark{background:var(--ink);color:#fff;border:1px solid rgba(255,255,255,0.1)}
+.btn-green{background:#2d6a4f;color:#fff}
+.btn-accent{background:var(--accent);color:#fff}
+.page{max-width:1200px;margin:0 auto;padding:80px 48px}
+.section-header{display:flex;align-items:center;gap:20px;margin-bottom:48px}
+.section-line{flex:1;height:1px;background:var(--border)}
+.section-label{font-size:10px;letter-spacing:0.35em;color:var(--gold-dark);text-transform:uppercase;font-weight:600;white-space:nowrap}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start}
+.about-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,52px);font-weight:300;line-height:1.1;color:var(--ink);margin-bottom:28px}
+.about-title strong{font-weight:600}
+.about-body{font-size:15px;line-height:1.85;color:var(--muted);font-weight:300;margin-bottom:20px}
+.pullquote{border-left:3px solid var(--gold);padding:20px 28px;margin:32px 0;background:var(--cream-deep)}
+.pullquote p{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;font-weight:300;color:var(--ink);line-height:1.5}
+.gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:240px 240px;gap:4px;border-radius:4px;overflow:hidden}
+.gallery-main{grid-row:1/3}
+.gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;filter:brightness(0.9) saturate(0.95)}
+.gallery-item{overflow:hidden}
+.gallery-item:hover img{transform:scale(1.04)}
+.tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.tag{padding:7px 16px;border:1px solid var(--border);font-size:11px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;font-weight:400;border-radius:2px}
+.highlights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.highlight-card{background:var(--ink);color:#fff;padding:36px 32px;position:relative;overflow:hidden;transition:background .3s}
+.highlight-card:hover{background:var(--ink-soft)}
+.highlight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0;transition:opacity .3s}
+.highlight-card:hover::before{opacity:1}
+.highlight-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:rgba(201,168,76,0.15);line-height:1;margin-bottom:12px}
+.highlight-title{font-size:13px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#fff;margin-bottom:8px}
+.highlight-text{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6}
+.scores-section{background:var(--cream-deep);padding:80px 48px}
+.scores-inner{max-width:1200px;margin:0 auto}
+.scores-grid{display:grid;grid-template-columns:1fr 2fr;gap:64px;align-items:center}
+.score-big{text-align:center;padding:48px;border:1px solid var(--border);background:var(--cream)}
+.score-big-num{font-family:'Cormorant Garamond',serif;font-size:100px;font-weight:300;color:var(--gold);line-height:1}
+.score-big-den{font-size:18px;color:var(--muted);font-weight:300;margin-top:4px}
+.score-big-label{font-size:10px;letter-spacing:0.35em;color:var(--muted);text-transform:uppercase;margin-top:16px;font-weight:500}
+.score-bars{display:flex;flex-direction:column;gap:28px}
+.score-row-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.score-name{font-size:13px;font-weight:500;color:var(--ink);letter-spacing:0.05em}
+.score-val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--gold-dark)}
+.score-track{height:3px;background:rgba(0,0,0,0.08);border-radius:0}
+.score-fill{height:3px;background:var(--gold);border-radius:0;transform-origin:left;transform:scaleX(0);transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
+.score-fill.animated{transform:scaleX(1)}
+.schedule-block{background:var(--ink);color:#fff;padding:64px 72px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.schedule-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;margin-bottom:24px;color:#fff;line-height:1.1}
+.schedule-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:14px}
+.schedule-row:last-of-type{border-bottom:none}
+.schedule-day{color:rgba(255,255,255,0.5);font-weight:300}
+.schedule-time{color:#fff;font-weight:400}
+.schedule-price-block{padding:28px;border:1px solid rgba(201,168,76,0.2);margin-top:24px}
+.schedule-price-label{font-size:10px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
+.schedule-price-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:#fff;margin-bottom:4px}
+.schedule-price-usd{font-size:12px;color:rgba(255,255,255,0.4)}
+.map-section{background:var(--cream-deep);padding:80px 48px}
+.map-inner{max-width:1200px;margin:0 auto}
+.map-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.map-frame{position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:2px;overflow:hidden;border:1px solid var(--border)}
+.map-frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:block}
+.map-info-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;margin-bottom:20px;line-height:1.2}
+.map-detail{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:8px}
+.map-detail strong{color:var(--ink);font-weight:500}
+.verdict-section{padding:80px 48px}
+.verdict-inner{max-width:1200px;margin:0 auto}
+.verdict-card{display:grid;grid-template-columns:auto 1fr;gap:0;border:1px solid var(--border);overflow:hidden}
+.verdict-accent{width:8px;background:var(--gold)}
+.verdict-content{padding:48px 56px}
+.verdict-label{font-size:10px;letter-spacing:0.35em;color:var(--gold-dark);text-transform:uppercase;font-weight:600;margin-bottom:16px}
+.verdict-text{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;line-height:1.45;color:var(--ink)}
+.footer{background:var(--ink);color:rgba(255,255,255,0.4);padding:40px 48px;display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:0.08em}
+.footer-logo{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--gold);letter-spacing:0.1em;text-decoration:none;text-transform:uppercase}
+.demanda-banner{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.3);padding:16px 24px;display:flex;align-items:center;gap:12px;margin-top:20px;border-radius:2px}
+.demanda-banner span{font-size:12px;color:var(--gold-dark);letter-spacing:0.08em;font-weight:500}
+@media(max-width:768px){
+.nav{padding:16px 20px}
+.nav-tag,.nav-badge{display:none}
+.hero-content{padding:0 20px 44px}
+.hero-score{display:none}
+.page{padding:48px 20px}
+.about-grid,.scores-grid,.map-grid{grid-template-columns:1fr;gap:32px}
+.gallery{grid-template-columns:1fr;grid-template-rows:auto}
+.gallery-main{grid-row:auto}
+.gallery img{height:220px}
+.highlights-grid{grid-template-columns:1fr}
+.highlight-card{padding:28px 20px}
+.schedule-block{grid-template-columns:1fr;padding:44px 20px;gap:32px}
+.info-strip{grid-template-columns:1fr}
+.info-cell{border-right:none;border-bottom:1px solid rgba(255,255,255,0.08);padding:24px 20px}
+.map-grid{grid-template-columns:1fr}
+.map-frame{padding-bottom:70%}
+.verdict-content{padding:28px 24px}
+.verdict-text{font-size:22px}
+.footer{flex-direction:column;gap:14px;text-align:center;padding:32px 20px}
+.scores-section,.map-section,.verdict-section{padding:52px 20px}
+.score-big{padding:32px 20px}
+.score-big-num{font-size:80px}
+.section-header{margin-bottom:32px}
+.action-row{flex-direction:column}
+.btn{justify-content:center}
+.hero-title{font-size:clamp(52px,13vw,90px)}
+}
+@media(max-width:480px){
+.hero-chips .chip{font-size:10px;padding:6px 12px}
+.about-title{font-size:32px}
+.schedule-block{padding:36px 16px}
+.schedule-title{font-size:32px}
+.map-section{padding:40px 16px}
+.map-frame{padding-bottom:80%}
+}
+@media(prefers-reduced-motion:reduce){
+*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+.score-fill{transform:scaleX(1)}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" role="navigation" aria-label="URU SPOT">
+  <a href="../../" class="nav-logo">URU SPOT</a>
+  <span class="nav-tag">Guía gastronómica · Concepción del Uruguay</span>
+  <span class="nav-badge">✨ Destacado</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero" aria-label="Bonhomia Restó Bar — Concepción del Uruguay">
+  <img class="hero-img"
+    src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1400&q=80&auto=format&fm=webp"
+    alt="Interior de Bonhomia Restó Bar — ambiente moderno y cálido, Concepción del Uruguay"
+    fetchpriority="high" loading="eager" width="1400" height="900" />
+  <div class="hero-overlay" aria-hidden="true"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-line" aria-hidden="true"></span>
+      <span class="eyebrow-text">Restó Bar &amp; Coctelería</span>
+    </div>
+    <h1 class="hero-title"><em>Bon</em>homia</h1>
+    <p class="hero-subtitle">Cocina moderna, cócteles de autor y un ambiente que invita a quedarse.</p>
+    <div class="hero-chips">
+      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span>
+      <span class="chip">Concepción del Uruguay</span>
+      <span class="chip">Lun–Dom 11:00–14:30 · 19:00–01:00</span>
+      <span class="chip">$20k – $35k ARS</span>
+    </div>
+  </div>
+  <div class="hero-score" aria-label="Puntuación: 9.0 sobre 10">
+    <div class="score-num">9.0</div>
+    <div class="score-label">URU SPOT Score</div>
+    <div class="score-stars" aria-hidden="true">★★★★★</div>
+  </div>
+</section>
+
+<!-- INFO STRIP -->
+<div class="info-strip" role="complementary" aria-label="Información rápida">
+  <div class="info-cell">
+    <span class="info-cell-label">Estado actual</span>
+    <span class="info-cell-value" id="statusValue">—</span>
+    <span class="info-cell-sub" id="statusSub" aria-live="polite"></span>
+  </div>
+  <div class="info-cell">
+    <span class="info-cell-label">Ubicación</span>
+    <span class="info-cell-value">Concepción del Uruguay</span>
+    <span class="info-cell-sub">Entre Ríos · Zona céntrica</span>
+  </div>
+  <div class="info-cell">
+    <span class="info-cell-label">Contacto</span>
+    <span class="info-cell-value">Consultá por redes</span>
+    <div class="action-row" style="margin-top:12px">
+      <a href="https://www.google.com/maps/place/Bonhomia+Resto+Bar/@-32.4791152,-58.2221372,17z" target="_blank" rel="noopener noreferrer" class="btn btn-primary" aria-label="Ver Bonhomia en Google Maps">🗺️ Cómo llegar</a>
+      <a href="https://www.instagram.com/bonhomia.cdu" target="_blank" rel="noopener noreferrer" class="btn btn-accent" aria-label="Instagram de Bonhomia">📸 Instagram</a>
+    </div>
+    <span class="info-cell-sub" style="margin-top:8px">📈 Alta demanda — conviene reservar antes</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="page" aria-labelledby="about-heading">
+  <div class="section-header">
+    <span class="section-label">Sobre el lugar</span>
+    <span class="section-line" aria-hidden="true"></span>
+  </div>
+  <div class="about-grid">
+    <div>
+      <h2 class="about-title" id="about-heading">
+        Cocina moderna y cócteles en un <strong>ambiente</strong> que se disfruta
+      </h2>
+      <p class="about-body">Bonhomia es uno de los restós más completos de Concepción del Uruguay. Propone una experiencia que va más allá de la comida: carta cuidada, cócteles de autor y una ambientación que equilibra lo moderno con lo acogedor.</p>
+      <p class="about-body">Desde el almuerzo hasta la madrugada, el lugar se adapta al momento del día. Ideal para salidas en pareja, cenas de trabajo o una noche distendida entre amigos, con música y tragos que acompañan sin saturar.</p>
+      <div class="pullquote" role="blockquote">
+        <p>"Uno de los lugares donde la calidad del trago está a la altura de la comida. Ambiente impecable."</p>
+      </div>
+      <div class="tags-row" aria-label="Características del lugar">
+        <span class="tag">Coctelería</span>
+        <span class="tag">Almuerzo</span>
+        <span class="tag">Cena</span>
+        <span class="tag">Vinos</span>
+        <span class="tag">Ambiente moderno</span>
+        <span class="tag">Para parejas</span>
+        <span class="tag">Reuniones</span>
+      </div>
+      <div class="demanda-banner">
+        <span>📈 Alta demanda — se recomienda reservar para la noche</span>
+      </div>
+    </div>
+    <div>
+      <div class="gallery" aria-label="Galería fotográfica de Bonhomia">
+        <div class="gallery-item gallery-main">
+          <img src="https://images.unsplash.com/photo-1559329007-40df8a9345d8?w=800&q=75&auto=format&fm=webp" alt="Ambiente interior de Bonhomia" loading="lazy" decoding="async" />
+        </div>
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&q=70&auto=format&fm=webp" alt="Cócteles de autor en Bonhomia" loading="lazy" decoding="async" />
+        </div>
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=70&auto=format&fm=webp" alt="Platos de Bonhomia Restó Bar" loading="lazy" decoding="async" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HIGHLIGHTS -->
+<div class="highlights-grid" role="list" aria-label="Lo mejor del lugar">
+  <div class="highlight-card" role="listitem">
+    <div class="highlight-num" aria-hidden="true">01</div>
+    <div class="highlight-title">Coctelería de Autor</div>
+    <p class="highlight-text">Tragos elaborados con técnica y creatividad. Una barra que sorprende con cada visita, de día o de noche.</p>
+  </div>
+  <div class="highlight-card" role="listitem">
+    <div class="highlight-num" aria-hidden="true">02</div>
+    <div class="highlight-title">Cocina Moderna</div>
+    <p class="highlight-text">Carta variada con propuestas frescas. Almuerzo ejecutivo y cena con platos más elaborados para cualquier ocasión.</p>
+  </div>
+  <div class="highlight-card" role="listitem">
+    <div class="highlight-num" aria-hidden="true">03</div>
+    <div class="highlight-title">Ambiente &amp; Diseño</div>
+    <p class="highlight-text">Espacios pensados con cuidado estético. El lugar ideal para una salida memorable en Concepción del Uruguay.</p>
+  </div>
+</div>
+
+<!-- SCORES -->
+<section class="scores-section" aria-labelledby="scores-heading">
+  <div class="scores-inner">
+    <div class="section-header">
+      <span class="section-label">URU SPOT Score</span>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <div class="scores-grid">
+      <div class="score-big" aria-label="Puntuación total: 9.0 de 10">
+        <div class="score-big-num">9.0</div>
+        <div class="score-big-den">/ 10</div>
+        <div class="score-big-label">Puntuación URU SPOT</div>
+      </div>
+      <div class="score-bars" id="score-bars">
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">🌟 Ambiente</span>
+            <span class="score-val">9.3</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" data-width="93%" role="meter" aria-valuenow="93" aria-valuemin="0" aria-valuemax="100" aria-label="Ambiente: 9.3 de 10"></div>
+          </div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">🍴 Propuesta gastronómica</span>
+            <span class="score-val">9.0</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" data-width="90%" role="meter" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="Propuesta gastronómica: 9.0 de 10"></div>
+          </div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">🍸 Coctelería</span>
+            <span class="score-val">9.2</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" data-width="92%" role="meter" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" aria-label="Coctelería: 9.2 de 10"></div>
+          </div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">🚗 Accesibilidad</span>
+            <span class="score-val">8.5</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" data-width="85%" role="meter" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Accesibilidad: 8.5 de 10"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HORARIOS -->
+<div class="schedule-block" aria-labelledby="schedule-heading">
+  <div>
+    <h2 class="schedule-title" id="schedule-heading">Horarios &amp; Precio</h2>
+    <div class="schedule-row">
+      <span class="schedule-day">Lunes a Sábado</span>
+      <span class="schedule-time">11:00 – 14:30 hs.</span>
+    </div>
+    <div class="schedule-row">
+      <span class="schedule-day">Domingo</span>
+      <span class="schedule-time">19:00 – 01:00 hs.</span>
+    </div>
+    <div class="schedule-row">
+      <span class="schedule-day">Todos los días</span>
+      <span class="schedule-time">19:00 – 01:00 hs.</span>
+    </div>
+    <div class="schedule-price-block">
+      <div class="schedule-price-label">Precio estimado por persona</div>
+      <div class="schedule-price-val">$20.000 – $35.000 ARS</div>
+      <div class="schedule-price-usd">Menú completo con bebida incluida</div>
+    </div>
+    <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:16px;letter-spacing:0.05em">Información actualizada recientemente</p>
+  </div>
+  <div>
+    <div style="margin-bottom:24px" aria-live="polite">
+      <div id="schedStatusPill" class="status-pill" style="background:rgba(64,145,108,0.15);color:#40916c">
+        <span class="status-dot" id="schedDot" aria-hidden="true"></span>
+        <span id="schedStatusText">Cargando...</span>
+      </div>
+      <p id="schedInfo" style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px"></p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <a href="https://www.google.com/maps/place/Bonhomia+Resto+Bar/@-32.4791152,-58.2221372,17z" target="_blank" rel="noopener noreferrer" class="btn btn-primary" aria-label="Ver Bonhomia en Google Maps">🗺️ Cómo llegar</a>
+      <a href="https://www.instagram.com/bonhomia.cdu" target="_blank" rel="noopener noreferrer" class="btn btn-accent" aria-label="Instagram de Bonhomia">📸 Ver en Instagram</a>
+      <button id="share-btn" class="btn btn-ghost" aria-label="Compartir esta página de Bonhomia">📤 Compartir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAPA -->
+<section class="map-section" aria-labelledby="map-heading">
+  <div class="map-inner">
+    <div class="section-header">
+      <span class="section-label">Cómo llegar</span>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <div class="map-grid">
+      <div class="map-frame">
+        <iframe
+          title="Mapa de ubicación de Bonhomia Restó Bar"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3329.5!2d-58.2247259!3d-32.4791152!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95afdb1d41ebb0e9%3A0x160c8d391d10fa19!2sBonhomia%20Resto%20Bar!5e0!3m2!1ses!2sar!4v1716000000003"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen>
+        </iframe>
+      </div>
+      <div>
+        <h2 class="map-info-title" id="map-heading">Concepción del Uruguay</h2>
+        <p class="map-detail"><strong>Ciudad:</strong> Concepción del Uruguay, Entre Ríos</p>
+        <p class="map-detail"><strong>Zona:</strong> Área céntrica — accesible</p>
+        <p class="map-detail"><strong>Horarios:</strong> Lun–Sáb 11:00–14:30 hs. · Todos los días 19:00–01:00 hs.</p>
+        <p class="map-detail"><strong>Alta demanda:</strong> Recomendamos reservar para la noche del fin de semana.</p>
+        <div style="margin-top:28px;display:flex;flex-direction:column;gap:10px">
+          <a href="https://www.google.com/maps/place/Bonhomia+Resto+Bar/@-32.4791152,-58.2221372,17z/data=!3m1!4b1!4m6!3m5!1s0x95afdb1d41ebb0e9:0x160c8d391d10fa19!8m2!3d-32.4791152!4d-58.2221372!16s%2Fg%2F11g8b9_cjl?entry=ttu" target="_blank" rel="noopener noreferrer" class="btn btn-primary" aria-label="Abrir Bonhomia en Google Maps">🗺️ Abrir en Google Maps</a>
+          <a href="https://www.instagram.com/bonhomia.cdu" target="_blank" rel="noopener noreferrer" class="btn btn-dark" aria-label="Instagram Bonhomia">📸 Instagram</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VERDICT -->
+<section class="verdict-section" aria-labelledby="verdict-heading">
+  <div class="verdict-inner">
+    <div class="section-header">
+      <span class="section-label">Veredicto URU SPOT</span>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <div class="verdict-card">
+      <div class="verdict-accent" aria-hidden="true"></div>
+      <div class="verdict-content">
+        <div class="verdict-label" id="verdict-heading">🟢 Muy recomendado</div>
+        <p class="verdict-text">Bonhomia es de esos lugares que justifican salir a comer. Cocina cuidada, barra con identidad propia y un ambiente que no decepciona. Una de las mejores opciones de Concepción del Uruguay para una experiencia completa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <a href="../../" class="footer-logo">URU SPOT</a>
+  <span>Guía gastronómica de Concepción del Uruguay</span>
+  <span>Información actualizada recientemente</span>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ── ESTADO ABIERTO / CERRADO ── */
+  /* Horarios: Lun–Sáb 11:00–14:30 y todos los días 19:00–01:00 */
+  (function(){
+    var ahora = new Date(new Date().toLocaleString('en-US',{timeZone:'America/Argentina/Buenos_Aires'}));
+    var hora  = ahora.getHours() + ahora.getMinutes()/60;
+    var dia   = ahora.getDay(); // 0=Dom, 1=Lun … 6=Sáb
+    var openColor='#40916c', openBg='rgba(64,145,108,0.15)';
+    var closedColor='#c1121f', closedBg='rgba(193,18,31,0.12)';
+
+    function setStatus(open, sub){
+      var pill=document.getElementById('schedStatusPill');
+      var text=document.getElementById('schedStatusText');
+      var dot =document.getElementById('schedDot');
+      var info=document.getElementById('schedInfo');
+      var val =document.getElementById('statusValue');
+      var subEl=document.getElementById('statusSub');
+      var c=open?openColor:closedColor, bg=open?openBg:closedBg;
+      pill.style.background=bg; pill.style.color=c;
+      dot.style.background=c;
+      text.textContent=open?'Abierto ahora':'Cerrado';
+      if(val){val.textContent=open?'Abierto ahora':'Cerrado';val.style.color=c;}
+      if(info)info.textContent=sub;
+      if(subEl)subEl.textContent=sub;
+    }
+
+    var isOpen = false;
+    var msg = '';
+
+    /* Turno almuerzo: Lun–Sáb (1–6), 11:00–14:30 */
+    if(dia >= 1 && dia <= 6 && hora >= 11 && hora < 14.5){
+      isOpen = true;
+      msg = 'Cierra a las 14:30 hs. (almuerzo)';
+    }
+    /* Turno noche: todos los días 19:00–01:00 (hora 25) */
+    var horaAdj = hora < 2 ? hora + 24 : hora;
+    if(horaAdj >= 19 && horaAdj < 25){
+      isOpen = true;
+      var minsLeft = Math.round((25 - horaAdj)*60);
+      msg = minsLeft <= 60 ? 'Cierra en ' + minsLeft + ' min' : 'Cierra a las 01:00 hs.';
+    }
+    if(!isOpen && msg === ''){
+      if(hora >= 14.5 && hora < 19){
+        msg = 'Abre a las 19:00 hs. (cena)';
+      } else {
+        msg = 'Abre a las 11:00 hs.';
+      }
+    }
+
+    setStatus(isOpen, msg);
+  })();
+
+  /* ── BARRAS de score: animar al hacer scroll ── */
+  var fills=document.querySelectorAll('.score-fill');
+  fills.forEach(function(f){f.style.width=f.dataset.width;});
+  var scoreSection=document.querySelector('.scores-section');
+  if(scoreSection){
+    var sio=new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting){
+        fills.forEach(function(f,i){
+          setTimeout(function(){f.classList.add('animated');},i*150);
+        });
+        sio.disconnect();
+      }
+    },{threshold:.3});
+    sio.observe(scoreSection);
+  }
+
+  /* ── SHARE ── */
+  var shareBtn=document.getElementById('share-btn');
+  if(shareBtn){
+    shareBtn.addEventListener('click',function(){
+      if(navigator.share){
+        navigator.share({
+          title:'Bonhomia — URU SPOT',
+          text:'¡Mirá este restó bar en Concepción del Uruguay! Cocina moderna, cócteles de autor y un ambiente increíble.',
+          url:window.location.href
+        }).catch(function(){});
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(function(){
+          shareBtn.textContent='✓ Link copiado';
+          setTimeout(function(){shareBtn.innerHTML='📤 Compartir';},2000);
+        });
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
