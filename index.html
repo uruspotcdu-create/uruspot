@@ -658,10 +658,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   var TZ = 'America/Argentina/Buenos_Aires';
 
-  // Horarios reales fetcheados de cada página.
-  // schedules: array de { days:[0-6 Sun=0], open:"HH:MM", close:"HH:MM" }
-  // Si close < open, cruza medianoche.
-  // null = sin datos verificados → no muestra badge.
   var HORARIOS = {
     'el-arca':      { schedules: [{ days:[3,4,5,6,0], open:'20:00', close:'07:00' }] },
     'papa-luigi':   { schedules: [{ days:[2,3,4,5,6,0], open:'19:00', close:'00:00' }] },
@@ -679,7 +675,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
                         { days:[1,3,4,5,6,0], open:'08:00', close:'16:00' },
                         { days:[1,3,4,5,6,0], open:'18:00', close:'23:30' }
                       ]},
-    // Resto sin datos verificados aún
     'la-gruta':     null,
     'sanduba':      null,
     'pimienta-negra': null,
@@ -702,9 +697,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   function isOpenNow(schedules){
     var now = new Date();
-    // Hora en Argentina
     var nowAR = new Date(now.toLocaleString('en-US',{timeZone:TZ}));
-    var day = nowAR.getDay(); // 0=Dom
+    var day = nowAR.getDay();
     var cur = nowAR.getHours()*60 + nowAR.getMinutes();
 
     for(var i=0;i<schedules.length;i++){
@@ -712,10 +706,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
       var o = toMinutes(s.open);
       var c = toMinutes(s.close);
 
-      if(c <= o){ // cruza medianoche
-        // abierto si: día actual después de open, O día anterior y antes de close
+      if(c <= o){
         if(s.days.indexOf(day) !== -1 && cur >= o) return true;
-        // día anterior
         var prevDay = day === 0 ? 6 : day-1;
         if(s.days.indexOf(prevDay) !== -1 && cur < c) return true;
       } else {
@@ -725,7 +717,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     return false;
   }
 
-  // Mapeo data-name → clave de HORARIOS
   var NAME_MAP = {
     'El Arca':       'el-arca',
     'Papa Luigi':    'papa-luigi',
@@ -757,7 +748,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     if(!lbl) return;
 
     if(!key || HORARIOS[key] === null){
-      // Sin datos: ocultamos el badge para no mentir
       lbl.style.display = 'none';
       return;
     }
@@ -794,8 +784,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
       <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
     </div>
     <div class="hero-logo">
-      <!-- ▼ OPTIMIZACIÓN #3: eliminado style="width:auto;max-width:160px;" — los atributos width/height
-           son suficientes para que el browser calcule el aspect-ratio y reserve espacio sin CLS -->
    <img src="https://uruspot.pages.dev/img/logof-small.webp" alt="URU SPOT — Guía Local" width="80" height="101" fetchpriority="high" />
     </div>
   </div>
@@ -1057,7 +1045,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   <div class="usb-card usb-hosp-card">
     <div class="usb-topbar usb-hosp-topbar" aria-hidden="true"></div>
     <div class="usb-body">
-      <!-- ▼ OPTIMIZACIÓN #10: SVG del hospital reemplaza feGaussianBlur por filter:drop-shadow CSS (GPU-acelerado) -->
       <div class="usb-icon usb-hosp-icon" aria-hidden="true">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="filter:drop-shadow(0 0 6px rgba(195,110,180,.7))"><rect x="14" y="2" width="12" height="36" rx="4" fill="#c36eb4"/><rect x="2" y="14" width="36" height="12" rx="4" fill="#c36eb4"/></svg>
       </div>
@@ -1090,7 +1077,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   <div class="usb-card usb-emg-card">
     <div class="usb-topbar usb-emg-topbar" aria-hidden="true"></div>
     <div class="usb-body" style="padding-bottom:28px;">
-      <!-- ▼ OPTIMIZACIÓN #10: SVG ambulancia reemplaza feGaussianBlur por filter CSS -->
       <div class="usb-icon usb-emg-icon-w" aria-hidden="true">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="filter:drop-shadow(0 0 6px rgba(192,57,43,.6))"><ellipse cx="19" cy="22" rx="14" ry="10" fill="#e74c3c" opacity=".9"/><rect x="13" y="8" width="12" height="14" rx="3" fill="#e74c3c"/><rect x="8" y="30" width="22" height="5" rx="2" fill="#c0392b"/><circle cx="8" cy="14" r="3" fill="#e74c3c" opacity=".5"/><circle cx="30" cy="14" r="3" fill="#e74c3c" opacity=".5"/><rect x="16" y="10" width="6" height="2" rx="1" fill="#fff" opacity=".5"/></svg>
       </div>
@@ -1388,31 +1374,31 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="cat-grid">
-    <a class="cat-card cat-card-highlight reveal" href="https://uruspot.blogspot.com/p/mejores-restaurantes-concepcion-del.html">
+    <a class="cat-card cat-card-highlight reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-arca-resto-bar/">
       <div class="cat-card-bg" aria-hidden="true">🍽️</div><div class="cat-card-arrow" aria-hidden="true">↗</div>
       <div class="cat-card-content"><span class="cat-card-emoji">🍽️</span><span class="cat-card-title">Restaurantes</span><span class="cat-card-sub">20+ lugares · Guía completa</span></div>
     </a>
-    <a class="cat-card reveal" href="https://uruspot.blogspot.com/p/mejores-cafeterias-concpcion-del-uruguay.html" style="animation-delay:.07s">
+    <a class="cat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/" style="animation-delay:.07s">
       <div class="cat-card-bg" aria-hidden="true">☕</div><div class="cat-card-arrow" aria-hidden="true">↗</div>
       <div class="cat-card-content"><span class="cat-card-emoji">☕</span><span class="cat-card-title">Cafeterías</span><span class="cat-card-sub">6+ lugares</span></div>
     </a>
-    <a class="cat-card reveal" href="https://uruspot.blogspot.com/p/mejores-bares-concepcion-del-uruguay.html" style="animation-delay:.14s">
+    <a class="cat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" style="animation-delay:.14s">
       <div class="cat-card-bg" aria-hidden="true">🍻</div><div class="cat-card-arrow" aria-hidden="true">↗</div>
       <div class="cat-card-content"><span class="cat-card-emoji">🍻</span><span class="cat-card-title">Bares</span><span class="cat-card-sub">7+ lugares</span></div>
     </a>
-    <a class="cat-card reveal" href="https://uruspot.blogspot.com/p/mejores-panaderias-concepcion-del.html" style="animation-delay:.21s">
+    <a class="cat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panettone/" style="animation-delay:.21s">
       <div class="cat-card-bg" aria-hidden="true">🥐</div><div class="cat-card-arrow" aria-hidden="true">↗</div>
       <div class="cat-card-content"><span class="cat-card-emoji">🥐</span><span class="cat-card-title">Panaderías</span><span class="cat-card-sub">6+ lugares</span></div>
     </a>
-    <a class="cat-card reveal" href="https://uruspot.blogspot.com/p/mejores-heladerias-concepcion-del.html" style="animation-delay:.28s">
+    <a class="cat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/yelatti-artesanal/" style="animation-delay:.28s">
       <div class="cat-card-bg" aria-hidden="true">🍦</div><div class="cat-card-arrow" aria-hidden="true">↗</div>
       <div class="cat-card-content"><span class="cat-card-emoji">🍦</span><span class="cat-card-title">Heladerías</span><span class="cat-card-sub">5+ lugares</span></div>
     </a>
-    <a class="cat-card reveal" href="https://uruspot.blogspot.com/p/mejores-hosterias-concepcion-del-uruguay.html" style="animation-delay:.35s">
+    <a class="cat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/antigua-fonda/" style="animation-delay:.35s">
       <div class="cat-card-bg" aria-hidden="true">🏡</div><div class="cat-card-arrow" aria-hidden="true">↗</div>
       <div class="cat-card-content"><span class="cat-card-emoji">🏡</span><span class="cat-card-title">Hosterías</span><span class="cat-card-sub">5+ lugares</span></div>
     </a>
-    <a class="cat-card reveal" href="#gimnasios" style="animation-delay:.42s;background:linear-gradient(135deg,#0a1a14 0%,#111816 100%);">
+    <a class="cat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/gimnasio-538/" style="animation-delay:.42s;background:linear-gradient(135deg,#0a1a14 0%,#111816 100%);">
       <div class="cat-card-bg" aria-hidden="true">💪</div><div class="cat-card-arrow" aria-hidden="true">↗</div>
       <div class="cat-card-content"><span class="cat-card-emoji">💪</span><span class="cat-card-title">Gimnasios</span><span class="cat-card-sub">5 centros · URU SPOT Score</span></div>
     </a>
@@ -1447,14 +1433,14 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <a class="rcard reveal searchable" data-name="Pimienta Negra" data-tags="restaurante fusion moderno" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pimienta-negra/" style="animation-delay:.50s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌶️</span><span class="rcard-name">Pimienta Negra</span><div class="pills"><span class="pill pill-default">Fusión</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Parada 33" data-tags="restaurante pub cerveza" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" style="animation-delay:.55s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍺</span><span class="rcard-name">Parada 33</span><div class="pills"><span class="pill pill-default">Pub</span><span class="pill pill-price">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Faro 3260" data-tags="restaurante vista rio costanera" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/faro-3260/" style="animation-delay:.60s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌊</span><span class="rcard-name">Faro 3260</span><div class="pills"><span class="pill pill-default">Vista al río</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="El Calderón" data-tags="restaurante casero almuerzo" href="https://uruspot.blogspot.com/2026/05/el-calderon-restaurante-concepcion-del.html" style="animation-delay:.65s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍲</span><span class="rcard-name">El Calderón</span><div class="pills"><span class="pill pill-default">Casero</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Segunda" data-tags="restaurante parrilla asado carne" href="https://uruspot.blogspot.com/2026/05/parrilla-la-segunda-concepcion-del.html" style="animation-delay:.70s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🥩</span><span class="rcard-name">La Segunda</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Dolores Costa" data-tags="restaurante costanera rio" href="https://uruspot.blogspot.com/2026/05/dolores-costa-restaurante-concepcion.html" style="animation-delay:.75s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌴</span><span class="rcard-name">Dolores Costa</span><div class="pills"><span class="pill pill-default">Costanera</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Delfina" data-tags="restaurante pescados mariscos" href="https://uruspot.blogspot.com/2026/05/la-delfina-restaurante-concepcion-del.html" style="animation-delay:.80s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🐬</span><span class="rcard-name">La Delfina</span><div class="pills"><span class="pill pill-default">Pescados</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Mamma Mía" data-tags="restaurante italiana pasta" href="https://uruspot.blogspot.com/2026/05/mamma-mia-restaurante-concepcion-del.html" style="animation-delay:.85s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍝</span><span class="rcard-name">Mamma Mía</span><div class="pills"><span class="pill pill-default">Italiana</span><span class="pill pill-price">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Garifo" data-tags="restaurante bodegon vino" href="https://uruspot.blogspot.com/2026/05/bodegon-de-autor-garifo-el-sabor-del.html" style="animation-delay:.90s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍷</span><span class="rcard-name">Garifo</span><div class="pills"><span class="pill pill-default">Bodegón</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Baco" data-tags="restaurante vinos cava" href="https://uruspot.blogspot.com/2026/05/cava-restaurante-el-conventillo-de-baco.html" style="animation-delay:.95s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍇</span><span class="rcard-name">Baco</span><div class="pills"><span class="pill pill-default">Vinos</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Danubio Azul" data-tags="restaurante europeo aleman" href="https://uruspot.blogspot.com/2026/05/tradicion-gourmet-el-danubio-azul-sabor.html" style="animation-delay:1.0s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🇩🇪</span><span class="rcard-name">Danubio Azul</span><div class="pills"><span class="pill pill-default">Europeo</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="El Calderón" data-tags="restaurante casero almuerzo" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" style="animation-delay:.65s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍲</span><span class="rcard-name">El Calderón</span><div class="pills"><span class="pill pill-default">Casero</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Segunda" data-tags="restaurante parrilla asado carne" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" style="animation-delay:.70s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🥩</span><span class="rcard-name">La Segunda</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Dolores Costa" data-tags="restaurante costanera rio" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/dolores-costa/" style="animation-delay:.75s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌴</span><span class="rcard-name">Dolores Costa</span><div class="pills"><span class="pill pill-default">Costanera</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Delfina" data-tags="restaurante pescados mariscos" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-delfina/" style="animation-delay:.80s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🐬</span><span class="rcard-name">La Delfina</span><div class="pills"><span class="pill pill-default">Pescados</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Mamma Mía" data-tags="restaurante italiana pasta" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" style="animation-delay:.85s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍝</span><span class="rcard-name">Mamma Mía</span><div class="pills"><span class="pill pill-default">Italiana</span><span class="pill pill-price">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Garifo" data-tags="restaurante bodegon vino" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/garifo/" style="animation-delay:.90s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍷</span><span class="rcard-name">Garifo</span><div class="pills"><span class="pill pill-default">Bodegón</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Baco" data-tags="restaurante vinos cava" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-conventillo-de-baco/" style="animation-delay:.95s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍇</span><span class="rcard-name">Baco</span><div class="pills"><span class="pill pill-default">Vinos</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Danubio Azul" data-tags="restaurante europeo aleman" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-danubio-azul/" style="animation-delay:1.0s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🇩🇪</span><span class="rcard-name">Danubio Azul</span><div class="pills"><span class="pill pill-default">Europeo</span></div></div></a>
   </div>
   <p class="search-no-results" id="no-results-restaurantes">No se encontraron restaurantes con ese nombre.</p>
 </section>
@@ -1473,18 +1459,16 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="cafe-grid" id="grid-cafes">
-    <!-- ▼ OPTIMIZACIÓN #2: atributos width y height añadidos a TODOS los <img> de cafés
-         para que el browser reserve el espacio exacto antes de descargar → cero CLS -->
-    <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" href="https://uruspot.blogspot.com/2026/05/nero-cafe-de-especialidad-concepcion.html">
+    <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/">
       <div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=60&auto=format&fm=webp" width="400" height="280" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div>
       <div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span>
       <div class="ccard-inner"><span class="ccard-label">Especialidad</span><span class="ccard-name">Nero Café</span><div class="pills" style="margin-top:4px"><span class="pill pill-rating">★ 4.9</span></div></div>
     </a>
-    <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" href="https://uruspot.blogspot.com/2026/05/la-ris-concepcion-del-uruguay.html" style="animation-delay:.07s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
-    <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" href="https://uruspot.blogspot.com/2026/05/cultura-cafe-concepcion-del-uruguay.html" style="animation-delay:.14s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
-    <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" href="https://uruspot.blogspot.com/2026/05/cafeteria-london-cafe-concepcion-del.html" style="animation-delay:.21s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
-    <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" href="https://uruspot.blogspot.com/2026/05/helena-cafe-resto-concepcion-del-uruguay.html" style="animation-delay:.28s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
-    <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" href="https://uruspot.blogspot.com/2026/05/bella-vista-concepcion-del-uruguay.html" style="animation-delay:.35s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
+    <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="animation-delay:.07s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
+    <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" style="animation-delay:.14s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
+    <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/london-cafe/" style="animation-delay:.21s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
+    <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/helena-cafe/" style="animation-delay:.28s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
+    <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="animation-delay:.35s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
   </div>
   <p class="search-no-results" id="no-results-cafes">No se encontraron cafés con ese nombre.</p>
 </section>
@@ -1497,13 +1481,13 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="bar-grid" id="grid-bares">
-    <a class="bcard reveal searchable" data-name="Justo José" data-tags="bar parrilla cerveza" href="https://uruspot.blogspot.com/2026/05/justo-jose-concepcion-del-uruguay.html" style="animation-delay:.04s"><div class="bcard-icon">⚖️</div><div class="bcard-name">Justo José</div></a>
-    <a class="bcard reveal searchable" data-name="Bonhomia" data-tags="bar cocteles moderno" href="https://uruspot.blogspot.com/2026/05/bonhomia-concepcion-del-uruguay.html" style="animation-delay:.09s"><span class="badge">Top</span><div class="bcard-icon">✨</div><div class="bcard-name">Bonhomia</div></a>
-    <a class="bcard reveal searchable" data-name="Klug Gebrau" data-tags="bar cerveza artesanal cerveceria" href="https://uruspot.blogspot.com/2026/05/cerveceria-klug-gebrau-concepcion-del.html" style="animation-delay:.14s"><div class="bcard-icon">🍺</div><div class="bcard-name">Klug Gebrau</div></a>
-    <a class="bcard reveal searchable" data-name="7 Colinas" data-tags="bar cerveza artesanal comida" href="https://uruspot.blogspot.com/2026/05/craft-beer-urban-food-7-colinas-la.html" style="animation-delay:.19s"><span class="badge">Top</span><div class="bcard-icon">🍻</div><div class="bcard-name">7 Colinas</div></a>
-    <a class="bcard reveal searchable" data-name="Drakkar" data-tags="bar cerveceria grill" href="https://uruspot.blogspot.com/2026/05/cerveceria-artesanal-grill-drakkar-el.html" style="animation-delay:.24s"><div class="bcard-icon">⚔️</div><div class="bcard-name">Drakkar</div></a>
-    <a class="bcard reveal searchable" data-name="Bartolo" data-tags="bar cocteles tragos" href="https://uruspot.blogspot.com/2026/05/bartolo-bar-concepcion-del-uruguay.html" style="animation-delay:.29s"><span class="badge">Top</span><div class="bcard-icon">🍸</div><div class="bcard-name">Bartolo</div></a>
-    <a class="bcard reveal searchable" data-name="House Garage" data-tags="bar garage tematico" href="https://uruspot.blogspot.com/2026/05/house-garage-concepcion-del-uruguay.html" style="animation-delay:.34s"><span class="badge">Top</span><div class="bcard-icon">🏎️</div><div class="bcard-name">House Garage</div></a>
+    <a class="bcard reveal searchable" data-name="Justo José" data-tags="bar parrilla cerveza" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="animation-delay:.04s"><div class="bcard-icon">⚖️</div><div class="bcard-name">Justo José</div></a>
+    <a class="bcard reveal searchable" data-name="Bonhomia" data-tags="bar cocteles moderno" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="animation-delay:.09s"><span class="badge">Top</span><div class="bcard-icon">✨</div><div class="bcard-name">Bonhomia</div></a>
+    <a class="bcard reveal searchable" data-name="Klug Gebrau" data-tags="bar cerveza artesanal cerveceria" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" style="animation-delay:.14s"><div class="bcard-icon">🍺</div><div class="bcard-name">Klug Gebrau</div></a>
+    <a class="bcard reveal searchable" data-name="7 Colinas" data-tags="bar cerveza artesanal comida" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/danys/" style="animation-delay:.19s"><span class="badge">Top</span><div class="bcard-icon">🍻</div><div class="bcard-name">7 Colinas</div></a>
+    <a class="bcard reveal searchable" data-name="Drakkar" data-tags="bar cerveceria grill" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/drakkar/" style="animation-delay:.24s"><div class="bcard-icon">⚔️</div><div class="bcard-name">Drakkar</div></a>
+    <a class="bcard reveal searchable" data-name="Bartolo" data-tags="bar cocteles tragos" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" style="animation-delay:.29s"><span class="badge">Top</span><div class="bcard-icon">🍸</div><div class="bcard-name">Bartolo</div></a>
+    <a class="bcard reveal searchable" data-name="House Garage" data-tags="bar garage tematico" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/house-garage/" style="animation-delay:.34s"><span class="badge">Top</span><div class="bcard-icon">🏎️</div><div class="bcard-name">House Garage</div></a>
   </div>
   <p class="search-no-results" id="no-results-bares">No se encontraron bares con ese nombre.</p>
 </section>
@@ -1516,12 +1500,12 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="list-items" id="grid-panaderias">
-    <a class="litem reveal searchable" data-name="Panettone" data-tags="panaderia pasteleria facturas" href="https://uruspot.blogspot.com/2026/05/panaderia-panettone-concepcion-del.html"><span class="badge">Top</span><span class="litem-icon">🥯</span><span class="litem-name">Panettone</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="La Cuadra" data-tags="panaderia pan facturas" href="https://uruspot.blogspot.com/2026/05/panaderia-la-cuadra-concepcion-del.html" style="animation-delay:.07s"><span class="badge">Top</span><span class="litem-icon">🥖</span><span class="litem-name">La Cuadra</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Mi Viejo" data-tags="panaderia tradicional pan" href="https://uruspot.blogspot.com/2026/05/panaderia-pasteleria-panaderia-mi-viejo.html" style="animation-delay:.14s"><span class="badge">Top</span><span class="litem-icon">🍞</span><span class="litem-name">Mi Viejo</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="San Carlos" data-tags="panaderia confiteria" href="https://uruspot.blogspot.com/2026/05/panaderia-confiteria-panaderia-san.html" style="animation-delay:.21s"><span class="litem-icon">🥐</span><span class="litem-name">San Carlos</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Lo de Juan" data-tags="panaderia reposteria tortas" href="https://uruspot.blogspot.com/2026/05/panaderia-reposteria-lo-de-juan.html" style="animation-delay:.28s"><span class="litem-icon">🍪</span><span class="litem-name">Lo de Juan</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Brodë" data-tags="panaderia nuevo artesanal" href="https://uruspot.blogspot.com/2026/05/panaderia-brode-concepcion-del-uruguay.html" style="animation-delay:.35s"><span class="badge badge-gold">Nuevo</span><span class="litem-icon">🥐</span><span class="litem-name">Brodë</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Panettone" data-tags="panaderia pasteleria facturas" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panettone/"><span class="badge">Top</span><span class="litem-icon">🥯</span><span class="litem-name">Panettone</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="La Cuadra" data-tags="panaderia pan facturas" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-cuadra/" style="animation-delay:.07s"><span class="badge">Top</span><span class="litem-icon">🥖</span><span class="litem-name">La Cuadra</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Mi Viejo" data-tags="panaderia tradicional pan" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mi-viejo/" style="animation-delay:.14s"><span class="badge">Top</span><span class="litem-icon">🍞</span><span class="litem-name">Mi Viejo</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="San Carlos" data-tags="panaderia confiteria" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/italia/" style="animation-delay:.21s"><span class="litem-icon">🥐</span><span class="litem-name">San Carlos</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Lo de Juan" data-tags="panaderia reposteria tortas" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lo-de-juan/" style="animation-delay:.28s"><span class="litem-icon">🍪</span><span class="litem-name">Lo de Juan</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Brodë" data-tags="panaderia nuevo artesanal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/brode/" style="animation-delay:.35s"><span class="badge badge-gold">Nuevo</span><span class="litem-icon">🥐</span><span class="litem-name">Brodë</span><span class="litem-arrow">→</span></a>
   </div>
   <p class="search-no-results" id="no-results-panaderias">No se encontraron panaderías con ese nombre.</p>
 </section>
@@ -1534,11 +1518,11 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="list-items" id="grid-heladerias">
-    <a class="litem reveal searchable" data-name="Yelatti Artesanal" data-tags="heladeria artesanal helado" href="https://uruspot.blogspot.com/2026/05/context-httpsschema.html"><span class="badge">Top</span><span class="litem-icon">🍦</span><span class="litem-name">Yelatti Artesanal</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Cremolatti" data-tags="heladeria helado cremoso" href="https://uruspot.blogspot.com/2026/05/heladeria-cremolatti-concepcion-del.html" style="animation-delay:.07s"><span class="litem-icon">🍨</span><span class="litem-name">Cremolatti</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Heladería Dany's" data-tags="heladeria helado" href="https://uruspot.blogspot.com/2026/05/heladeria-danys-concepcion-del-uruguay.html" style="animation-delay:.14s"><span class="litem-icon">🍧</span><span class="litem-name">Heladería Dany's</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Heladería Lucero" data-tags="heladeria helado clasica" href="https://uruspot.blogspot.com/2026/05/heladeria-lucero-uru-spot-concepcion.html" style="animation-delay:.21s"><span class="litem-icon">⭐</span><span class="litem-name">Heladería Lucero</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Heladería Italia" data-tags="heladeria italiana helado artesanal" href="https://uruspot.blogspot.com/2026/05/heladeria-italia-uru-spot-context.html" style="animation-delay:.28s"><span class="badge">Top</span><span class="litem-icon">🇮🇹</span><span class="litem-name">Heladería Italia</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Yelatti Artesanal" data-tags="heladeria artesanal helado" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/yelatti-artesanal/"><span class="badge">Top</span><span class="litem-icon">🍦</span><span class="litem-name">Yelatti Artesanal</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Cremolatti" data-tags="heladeria helado cremoso" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cremolatti/" style="animation-delay:.07s"><span class="litem-icon">🍨</span><span class="litem-name">Cremolatti</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Heladería Dany's" data-tags="heladeria helado" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/danys/" style="animation-delay:.14s"><span class="litem-icon">🍧</span><span class="litem-name">Heladería Dany's</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Heladería Lucero" data-tags="heladeria helado clasica" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lucero/" style="animation-delay:.21s"><span class="litem-icon">⭐</span><span class="litem-name">Heladería Lucero</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Heladería Italia" data-tags="heladeria italiana helado artesanal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/italia/" style="animation-delay:.28s"><span class="badge">Top</span><span class="litem-icon">🇮🇹</span><span class="litem-name">Heladería Italia</span><span class="litem-arrow">→</span></a>
   </div>
   <p class="search-no-results" id="no-results-heladerias">No se encontraron heladerías con ese nombre.</p>
 </section>
@@ -1551,12 +1535,12 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="list-items" id="grid-hosterias">
-    <a class="litem reveal searchable" data-name="Casa del Árbol" data-tags="hosteria alojamiento hospedaje" href="https://uruspot.blogspot.com/2026/05/hosteria-casa-del-arbol-concepcion-del.html"><span class="badge">Top</span><span class="litem-icon">🌳</span><span class="litem-name">Casa del Árbol</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Boutique Los Aguaribay" data-tags="hosteria boutique alojamiento" href="https://uruspot.blogspot.com/2026/05/hosteria-boutique-los-aguaribay.html" style="animation-delay:.07s"><span class="badge">Top</span><span class="litem-icon">🌿</span><span class="litem-name">Boutique Los Aguaribay</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Bungalows México" data-tags="hosteria bungalow alojamiento" href="https://uruspot.blogspot.com/2026/05/hosteria-bungalows-mexico-concepcion.html" style="animation-delay:.14s"><span class="litem-icon">🏡</span><span class="litem-name">Bungalows México</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Antigua Fonda" data-tags="hosteria antigua tradicional alojamiento" href="https://uruspot.blogspot.com/2026/05/hosteria-antigua-fonda-concepcion-del.html" style="animation-delay:.21s"><span class="litem-icon">🪨</span><span class="litem-name">Antigua Fonda</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Hostería Mitre" data-tags="hosteria alojamiento hotel" href="https://uruspot.blogspot.com/2026/05/hosteria-mitre-concepcion-del-uruguay.html" style="animation-delay:.28s"><span class="litem-icon">🏛️</span><span class="litem-name">Hostería Mitre</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Hostería Posta Torreón" data-tags="hosteria posta torron alojamiento" href="https://uruspot.blogspot.com/2026/05/hosteria-posta-terreon-concepcion-del.html" style="animation-delay:.35s"><span class="litem-icon">🏰</span><span class="litem-name">Hostería Posta Torreón</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Casa del Árbol" data-tags="hosteria alojamiento hospedaje" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/casa-del-arbol/"><span class="badge">Top</span><span class="litem-icon">🌳</span><span class="litem-name">Casa del Árbol</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Boutique Los Aguaribay" data-tags="hosteria boutique alojamiento" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/los-aguaribay/" style="animation-delay:.07s"><span class="badge">Top</span><span class="litem-icon">🌿</span><span class="litem-name">Boutique Los Aguaribay</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Bungalows México" data-tags="hosteria bungalow alojamiento" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bungalows-mexico/" style="animation-delay:.14s"><span class="litem-icon">🏡</span><span class="litem-name">Bungalows México</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Antigua Fonda" data-tags="hosteria antigua tradicional alojamiento" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/antigua-fonda/" style="animation-delay:.21s"><span class="litem-icon">🪨</span><span class="litem-name">Antigua Fonda</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Hostería Mitre" data-tags="hosteria alojamiento hotel" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/hosteria-mitre/" style="animation-delay:.28s"><span class="litem-icon">🏛️</span><span class="litem-name">Hostería Mitre</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Hostería Posta Torreón" data-tags="hosteria posta torron alojamiento" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/posta-torreon/" style="animation-delay:.35s"><span class="litem-icon">🏰</span><span class="litem-name">Hostería Posta Torreón</span><span class="litem-arrow">→</span></a>
   </div>
   <p class="search-no-results" id="no-results-hosterias">No se encontraron hosterías con ese nombre.</p>
 </section>
@@ -1569,23 +1553,23 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="gym-grid" id="grid-gimnasios">
-    <a class="gcard gcard-feat reveal searchable" data-name="Gimnasio 538 Gym" data-tags="gimnasio fitness musculacion clases grupales" href="https://uruspot.blogspot.com/2026/05/gimnasio-538-concepcion-del-uruguay.html">
+    <a class="gcard gcard-feat reveal searchable" data-name="Gimnasio 538 Gym" data-tags="gimnasio fitness musculacion clases grupales" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/gimnasio-538/">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge badge-gold">Mejor puntuado</span>
       <div class="gcard-content"><div class="gcard-top"><div class="gcard-score">★ 9.1 URU SPOT</div><span class="gcard-icon" aria-hidden="true">🏋️</span></div><span class="gcard-name">Gimnasio 538 Gym</span><p class="gcard-desc">Dos sedes en la ciudad, equipamiento moderno y un equipo de profesores comprometidos. El referente del fitness local.</p><div class="pills"><span class="pill pill-rating">★ 4.8 Google</span><span class="pill pill-feat">2 Sedes</span><span class="pill pill-feat">Clases grupales</span></div></div>
     </a>
-    <a class="gcard reveal searchable" data-name="Gimnasio Muscle" data-tags="gimnasio fitness musculacion cardio" href="https://uruspot.blogspot.com/2026/05/gimnasio-muscle-concepcion-del-uruguay.html" style="animation-delay:.07s">
+    <a class="gcard reveal searchable" data-name="Gimnasio Muscle" data-tags="gimnasio fitness musculacion cardio" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/muscle-gimnasio/" style="animation-delay:.07s">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge">Top</span>
       <div class="gcard-content"><div class="gcard-top"><div class="gcard-score">★ 8.7</div><span class="gcard-icon" aria-hidden="true">💪</span></div><span class="gcard-name">Gimnasio Muscle</span><p class="gcard-desc">Instalaciones completas en Blvd. Yrigoyen 1086. Equipamiento de primera y variedad de clases para todos los niveles.</p><div class="pills"><span class="pill pill-rating">★ 4.6 Google</span><span class="pill pill-default">Blvd. Yrigoyen 1086</span></div></div>
     </a>
-    <a class="gcard reveal searchable" data-name="Gym Lucianos" data-tags="gimnasio fitness personalizado familiar" href="https://uruspot.blogspot.com/2026/05/lucianos-gym-concepcion-del-uruguay.html" style="animation-delay:.14s">
+    <a class="gcard reveal searchable" data-name="Gym Lucianos" data-tags="gimnasio fitness personalizado familiar" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lucianos-gimnasio/" style="animation-delay:.14s">
       <div class="gcard-shine" aria-hidden="true"></div>
       <div class="gcard-content"><div class="gcard-top"><div class="gcard-score">★ 8.6</div><span class="gcard-icon" aria-hidden="true">🤝</span></div><span class="gcard-name">Gym Lucianos</span><p class="gcard-desc">Trato personalizado del dueño, ambiente familiar y equipamiento completo. La opción más cercana para entrenar en serio.</p><div class="pills"><span class="pill pill-rating">★ 4.8 Google</span><span class="pill pill-default">Atención directa</span></div></div>
     </a>
-    <a class="gcard reveal searchable" data-name="CROSS CDELU" data-tags="gimnasio crossfit funcional aire libre" href="https://uruspot.blogspot.com/2026/05/cross-gimnasio-concepcion-del-uruguay.html" style="animation-delay:.21s">
+    <a class="gcard reveal searchable" data-name="CROSS CDELU" data-tags="gimnasio crossfit funcional aire libre" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cross-gimnasio/" style="animation-delay:.21s">
       <div class="gcard-shine" aria-hidden="true"></div>
       <div class="gcard-content"><div class="gcard-top"><div class="gcard-score">★ 8.4</div><span class="gcard-icon" aria-hidden="true">🌿</span></div><span class="gcard-name">CROSS CDELU</span><p class="gcard-desc">Entrenamiento funcional al aire libre con WOD variable. Comunidad excepcional y coaches que realmente se involucran.</p><div class="pills"><span class="pill pill-rating">★ 4.7 Google</span><span class="pill pill-default">Al aire libre</span><span class="pill pill-default">CrossFit</span></div></div>
     </a>
-    <a class="gcard reveal searchable" data-name="Power Gym" data-tags="gimnasio fitness musculacion entrenamiento personal" href="/powergym" style="animation-delay:.28s">
+    <a class="gcard reveal searchable" data-name="Power Gym" data-tags="gimnasio fitness musculacion entrenamiento personal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/power-gimnasio/" style="animation-delay:.28s">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge">Top</span>
       <div class="gcard-content"><div class="gcard-top"><div class="gcard-score">★ 8.7</div><span class="gcard-icon" aria-hidden="true">🏋️</span></div><span class="gcard-name">Power Gym</span><p class="gcard-desc">Instalaciones modernas en Blvd. Yrigoyen 1626. Entrenadores comprometidos y ambiente profesional para todos los niveles.</p><div class="pills"><span class="pill pill-rating">★ 4.5 Google</span><span class="pill pill-default">Blvd. Yrigoyen 1626</span></div></div>
     </a>
@@ -1676,14 +1660,11 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     }
   },{passive:true});
 
-  /* ▼ OPTIMIZACIÓN #9: IntersectionObserver ÚNICO que maneja tanto nav-active como reveal
-     — reduce overhead en móvil con 50+ elementos observados */
   var sections=document.querySelectorAll('section[id]');
   var navItems=document.querySelectorAll('.nav-item[data-section]');
   var revealEls=document.querySelectorAll('.reveal');
 
-  /* Observer para secciones de nav (rootMargin específico para activación correcta) */
-  var navH = 60; // valor fijo, sin leer el DOM
+  var navH = 60;
   var sectionObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(entry.isIntersecting){
@@ -1694,7 +1675,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   },{rootMargin:'-'+(navH+20)+'px 0px -55% 0px',threshold:0});
   sections.forEach(function(s){sectionObserver.observe(s);});
 
-  /* Observer para reveal — separado porque tiene rootMargin diferente (necesario) */
   var revealObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(!entry.isIntersecting)return;
@@ -1704,7 +1684,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
   revealEls.forEach(function(el){revealObserver.observe(el);});
 
-  /* NAV CLICK — smooth scroll */
   navItems.forEach(function(item){
     item.addEventListener('click',function(e){
       e.preventDefault();
@@ -1714,7 +1693,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     });
   });
 
-  /* CTA ghost scroll */
   var ghost=document.querySelector('.btn-ghost');
   if(ghost){
     ghost.addEventListener('click',function(e){
@@ -1725,14 +1703,12 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     });
   }
 
-  /* REDUCED MOTION */
   if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
     document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});
   }
 
   updateProgress();updateNav();
 
-  /* Fallback: revelar todo a los 800ms por si IntersectionObserver falla */
   setTimeout(function(){
     document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){el.classList.add('visible');});
   },800);
@@ -1809,8 +1785,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   searchInput.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();runSearch(this.value);}});
 
   /* ── CLIMA ── */
-  /* ▼ OPTIMIZACIÓN #3: fetch del clima disparado DESPUÉS del evento 'load'
-     en lugar de a 1200ms fijos — evita competir con el LCP en dispositivos lentos */
   var WX_LAT=-32.4825,WX_LON=-58.2372;
   var WX_URL='https://api.open-meteo.com/v1/forecast?latitude='+WX_LAT+'&longitude='+WX_LON+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,uv_index,visibility&daily=precipitation_sum&timezone=America%2FArgentina%2FBuenos_Aires&forecast_days=1';
 
@@ -1860,8 +1834,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
       .catch(renderError);
   }
 
-  /* ▼ OPTIMIZACIÓN #3: disparar DESPUÉS del evento load + 500ms de gracia
-     para no competir con LCP. Fallback con requestIdleCallback si load ya ocurrió. */
   function scheduleWeather(){
     if(window.requestIdleCallback){
       window.requestIdleCallback(function(){fetchWeather();},{ timeout:8000 });
