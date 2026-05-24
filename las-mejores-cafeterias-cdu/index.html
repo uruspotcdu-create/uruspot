@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="theme-color" content="#060605" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="Los mejores cafés en Concepción del Uruguay — Guía URU SPOT 2026. Café de especialidad, tercera ola y espacios culturales únicos." />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Mejores Cafés en CdU 2026 · URU SPOT" />
+<meta property="og:description" content="Café de especialidad, tercera ola y los espacios únicos de Concepción del Uruguay. La guía de cafés que vale la pena." />
+<meta property="og:locale" content="es_AR" />
+<meta property="og:site_name" content="URU SPOT" />
+<meta name="twitter:card" content="summary_large_image" />
+<title>Mejores Cafés en CdU 2026 · URU SPOT</title>
+
+<link rel="dns-prefetch" href="//fonts.googleapis.com" />
+<link rel="dns-prefetch" href="//fonts.gstatic.com" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/syne/v24/8vIH7w4qzmVxsWxjBZRjr0FKM_04uQ.woff2" crossorigin="anonymous" />
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/dmserifdisplay/v17/-nFnOHM81r4j6k0gjALR8uVIJjAIKXM.woff2" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Serif:ital@0;1&family=Syne:wght@600;700;800&display=swap" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Serif:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
+
+<style>
+/* ═══════════════════════════════════════
+   URU SPOT · CAFETERÍAS CdU · v2.0
+   GitHub Edition — Fully Optimized
+═══════════════════════════════════════ */
+
+:root {
+  --void:        #060605;
+  --void2:       #0d0d0b;
+  --ink:         #1a1916;
+  --parchment:   #f2ede3;
+  --parchment2:  #e8e2d5;
+  --parchment3:  #faf8f3;
+
+  --cafe:        #7b4a2d;
+  --cafe2:       #a0623c;
+  --cafe3:       #c8896a;
+  --cafe-faint:  rgba(123,74,45,0.10);
+  --cafe-glow:   rgba(123,74,45,0.40);
+
+  --verde:       #1d5c40;
+  --verde2:      #267a55;
+
+  --oro:         #c4872a;
+  --oro2:        #dfa040;
+
+  --f-display:  'DM Serif Display', serif;
+  --f-italic:   'Instrument Serif', serif;
+  --f-ui:       'Syne', sans-serif;
+  --ease:       cubic-bezier(0.23, 1, 0.32, 1);
+  --gutter:     64px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
+
+body {
+  background: var(--void);
+  color: var(--parchment);
+  font-family: var(--f-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; height: auto; }
+::selection { background: var(--cafe-faint); color: var(--parchment); }
+
+/* ── PROGRESS BAR ── */
+#progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px; width: 0%;
+  background: linear-gradient(90deg, var(--cafe), var(--cafe3), var(--cafe2));
+  background-size: 200% 100%;
+  z-index: 10000;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
+@media (min-width: 769px) {
+  #progress-bar { animation: shimmerProg 3s linear infinite; }
+}
+@keyframes shimmerProg {
+  from { background-position: 0% 50%; }
+  to   { background-position: 200% 50%; }
+}
+
+/* ── GRAIN (desktop only) ── */
+@media (min-width: 769px) {
+  #grain {
+    position: fixed; inset: -50%;
+    width: 200%; height: 200%;
+    opacity: 0.028; pointer-events: none; z-index: 9998;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.80' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    animation: grainShift 0.8s steps(1) infinite;
+    will-change: transform;
+  }
+  @keyframes grainShift {
+    0%   { transform: translate(0,0); }
+    10%  { transform: translate(-4%,-3%); }
+    20%  { transform: translate(5%,2%); }
+    30%  { transform: translate(-2%,5%); }
+    40%  { transform: translate(4%,-4%); }
+    50%  { transform: translate(-5%,1%); }
+    60%  { transform: translate(2%,4%); }
+    70%  { transform: translate(-4%,2%); }
+    80%  { transform: translate(3%,-5%); }
+    90%  { transform: translate(-1%,3%); }
+    100% { transform: translate(0,0); }
+  }
+}
+
+/* ═══════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════ */
+.topbar {
+  position: sticky; top: 0; z-index: 900;
+  background: rgba(8,8,7,0.94);
+  border-bottom: 1px solid rgba(242,237,227,0.08);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--gutter); height: 64px; gap: 24px;
+}
+@media (min-width: 769px) {
+  @supports (backdrop-filter: blur(24px)) {
+    .topbar { backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5); }
+  }
+}
+.topbar::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cafe) 25%, var(--cafe3) 50%, var(--cafe) 75%, transparent);
+  opacity: 0.25; pointer-events: none;
+}
+
+.topbar-back {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--f-ui); font-size: 10px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(242,237,227,0.38);
+  transition: color 0.3s ease; flex-shrink: 0;
+}
+.topbar-back:hover { color: var(--parchment); }
+.topbar-back-arrow { font-size: 16px; transition: transform 0.3s var(--ease); display: inline-block; }
+.topbar-back:hover .topbar-back-arrow { transform: translateX(-4px); }
+
+.topbar-logo img {
+  width: 80px;
+  filter: drop-shadow(0 2px 12px rgba(0,0,0,0.60)) brightness(1.1);
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+.topbar-logo img:hover {
+  filter: drop-shadow(0 4px 20px rgba(123,74,45,0.50)) brightness(1.25);
+  transform: scale(1.05);
+}
+
+.topbar-cat {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--cafe-faint);
+  border: 1px solid rgba(123,74,45,0.28);
+  border-radius: 2px; padding: 6px 14px;
+  font-family: var(--f-ui); font-size: 9px;
+  font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--cafe3); flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+.hero {
+  position: relative; min-height: 92svh;
+  display: flex; flex-direction: column;
+  overflow: hidden; background: var(--void);
+}
+
+.hero-mesh {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 68% 65% at 80% 10%, rgba(123,74,45,0.30) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 60% at 10% 85%, rgba(160,98,60,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 50% 48%, rgba(123,74,45,0.06) 0%, transparent 65%),
+    radial-gradient(ellipse 28% 32% at 88% 78%, rgba(139,58,36,0.12) 0%, transparent 58%),
+    linear-gradient(168deg, #080503 0%, #060605 45%, #090603 100%);
+}
+@media (min-width: 769px) {
+  .hero-mesh::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 68% 65% at 80% 10%, rgba(123,74,45,0.08) 0%, transparent 58%);
+    animation: meshPulse 22s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes meshPulse { from { opacity: 0; } to { opacity: 1; } }
+}
+
+.hero-lines { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.hero-lines::before {
+  content: '';
+  position: absolute; top: 0; right: 16%; width: 1px; height: 70%;
+  background: linear-gradient(to bottom, transparent, rgba(123,74,45,0.20) 28%, rgba(123,74,45,0.07) 78%, transparent);
+}
+.hero-lines::after {
+  content: '';
+  position: absolute; bottom: 22%; left: 0; width: 44%; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(29,92,64,0.16) 38%, rgba(29,92,64,0.05) 78%, transparent);
+}
+
+.hero-orb { position: absolute; border-radius: 50%; pointer-events: none; z-index: 1; }
+.hero-orb-1 {
+  width: 700px; height: 700px; top: -220px; right: -180px;
+  background: radial-gradient(circle, rgba(123,74,45,0.16) 0%, rgba(160,98,60,0.05) 42%, transparent 68%);
+}
+.hero-orb-2 {
+  width: 480px; height: 480px; bottom: -180px; left: -130px;
+  background: radial-gradient(circle, rgba(160,98,60,0.09) 0%, transparent 65%);
+}
+@media (min-width: 769px) {
+  .hero-orb-1 { animation: orbFloat1 16s ease-in-out infinite alternate; transform: translateZ(0); }
+  .hero-orb-2 { animation: orbFloat2 20s ease-in-out infinite alternate; transform: translateZ(0); }
+  @keyframes orbFloat1 { from { transform: translate(0,0) scale(1); } to { transform: translate(-28px,34px) scale(1.08); } }
+  @keyframes orbFloat2 { from { transform: translate(0,0) scale(1); } to { transform: translate(32px,-20px) scale(1.12); } }
+}
+
+.hero-pattern {
+  position: absolute; top: 0; right: 0;
+  width: 480px; height: 100%; z-index: 1; pointer-events: none;
+  opacity: 0.040;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(242,237,227,1) 0, rgba(242,237,227,1) 1px, transparent 0, transparent 50%),
+    repeating-linear-gradient(-45deg, rgba(242,237,227,1) 0, rgba(242,237,227,1) 1px, transparent 0, transparent 50%);
+  background-size: 26px 26px;
+  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,0.32) 0%, transparent 78%);
+  mask-image: linear-gradient(to left, rgba(0,0,0,0.32) 0%, transparent 78%);
+}
+
+.hero-inner {
+  position: relative; z-index: 4;
+  padding: 0 var(--gutter) 88px;
+  flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+}
+
+.breadcrumb {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--f-ui); font-size: 9px; font-weight: 600;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: rgba(242,237,227,0.26); margin-bottom: 30px; flex-wrap: wrap;
+}
+.breadcrumb a { transition: color 0.3s ease; }
+.breadcrumb a:hover { color: var(--cafe3); }
+.breadcrumb-sep { color: rgba(242,237,227,0.12); font-size: 12px; }
+.breadcrumb-current { color: var(--cafe3); }
+
+.hero-chip {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(123,74,45,0.10);
+  border: 1px solid rgba(123,74,45,0.30);
+  border-radius: 2px; padding: 9px 18px;
+  font-size: 8px; font-weight: 700; letter-spacing: 3.5px; text-transform: uppercase;
+  color: rgba(200,137,106,0.90); margin-bottom: 30px; width: fit-content;
+}
+@media (min-width: 769px) {
+  @supports (backdrop-filter: blur(12px)) {
+    .hero-chip { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  }
+}
+.hero-chip-dot {
+  width: 6px; height: 6px; background: var(--cafe3); border-radius: 50%; flex-shrink: 0;
+  animation: pulseLive 2.5s ease infinite;
+}
+@keyframes pulseLive {
+  0%  { box-shadow: 0 0 0 0 rgba(200,137,106,0.9); }
+  65% { box-shadow: 0 0 0 9px rgba(200,137,106,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(200,137,106,0); }
+}
+
+.hero-title {
+  font-family: var(--f-display);
+  font-size: clamp(52px, 8.5vw, 106px);
+  line-height: 0.90; letter-spacing: -2.5px;
+  color: var(--parchment); margin-bottom: 34px; display: block;
+  word-break: normal;
+}
+.hero-title .eyebrow {
+  font-family: var(--f-italic); font-style: italic; font-weight: 400;
+  font-size: clamp(13px, 1.6vw, 19px); letter-spacing: 7px;
+  color: rgba(242,237,227,0.32); display: block; margin-bottom: 16px; line-height: 1;
+}
+.hero-title .main-line { display: block; }
+.hero-title .main-line em {
+  font-style: italic;
+  background: linear-gradient(105deg,
+    rgba(242,237,227,0.95) 0%, rgba(200,137,106,0.96) 32%,
+    rgba(160,98,60,0.92) 60%, rgba(123,74,45,0.90) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; background-size: 200% 100%;
+}
+@media (min-width: 769px) {
+  .hero-title .main-line em { animation: titleShimmer 5s ease-in-out infinite alternate; }
+  @keyframes titleShimmer {
+    from { background-position: 0% 50%; }
+    to   { background-position: 100% 50%; }
+  }
+}
+
+.hero-rule { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+.hero-rule-line { height: 1px; width: 52px; background: linear-gradient(90deg, var(--cafe), transparent); flex-shrink: 0; }
+.hero-rule-dot {
+  width: 5px; height: 5px; background: var(--cafe); border-radius: 50%;
+  box-shadow: 0 0 12px rgba(123,74,45,0.8); flex-shrink: 0;
+  animation: dotGlow 2.5s ease-in-out infinite alternate;
+}
+@keyframes dotGlow {
+  from { opacity: 0.5; }
+  to   { opacity: 1; box-shadow: 0 0 22px rgba(123,74,45,1), 0 0 36px rgba(123,74,45,0.35); }
+}
+
+.hero-sub {
+  font-family: var(--f-italic); font-style: italic; font-size: 17px;
+  font-weight: 400; line-height: 1.95; color: rgba(242,237,227,0.38);
+  max-width: 540px; margin-bottom: 48px;
+}
+.hero-sub strong { font-style: normal; color: rgba(242,237,227,0.76); font-weight: 400; }
+
+.stats-strip {
+  display: flex; align-items: stretch;
+  margin-bottom: 48px; width: fit-content; max-width: 100%;
+  border: 1px solid rgba(242,237,227,0.08); border-radius: 2px;
+  overflow: hidden; background: rgba(242,237,227,0.03);
+}
+@media (min-width: 769px) {
+  @supports (backdrop-filter: blur(12px)) {
+    .stats-strip { backdrop-filter: blur(12px); }
+  }
+}
+.stat { display: flex; flex-direction: column; gap: 6px; padding: 20px 30px; cursor: default; transition: background 0.4s ease; }
+.stat:hover { background: rgba(123,74,45,0.06); }
+.stat + .stat { border-left: 1px solid rgba(242,237,227,0.08); }
+.stat-num { font-family: var(--f-display); font-size: 34px; line-height: 1; color: var(--parchment); }
+.stat-num sup { font-size: 17px; color: var(--cafe3); vertical-align: super; }
+.stat-label { font-size: 8px; letter-spacing: 3.5px; text-transform: uppercase; color: rgba(242,237,227,0.26); font-weight: 600; }
+
+.hero-ctas { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--cafe); color: var(--parchment);
+  font-family: var(--f-ui); font-size: 11px; font-weight: 800;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 17px 38px; border-radius: 2px;
+  box-shadow: 0 8px 40px rgba(123,74,45,0.44), 0 1px 0 rgba(255,255,255,0.14) inset;
+  transition: background 0.4s var(--ease), transform 0.4s var(--ease), box-shadow 0.4s ease;
+  position: relative; overflow: hidden;
+}
+.btn-primary::after {
+  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+  transition: left 0.6s var(--ease); pointer-events: none;
+}
+.btn-primary:hover { background: var(--cafe2); transform: translateY(-4px); box-shadow: 0 22px 56px rgba(123,74,45,0.58); }
+.btn-primary:hover::after { left: 145%; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--f-italic); font-style: italic; font-size: 15px;
+  color: rgba(242,237,227,0.30);
+  transition: color 0.35s ease, transform 0.35s ease;
+  border-bottom: 1px solid transparent; padding-bottom: 2px;
+}
+.btn-ghost:hover { color: rgba(242,237,227,0.72); border-bottom-color: rgba(242,237,227,0.18); transform: translateY(-2px); }
+
+.hero-fade {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 160px;
+  background: linear-gradient(to bottom, transparent, rgba(6,6,5,0.55));
+  z-index: 3; pointer-events: none;
+}
+
+/* ═══════════════════════════════════════
+   MAIN BODY
+═══════════════════════════════════════ */
+.main-body {
+  background: var(--parchment3); position: relative;
+}
+.main-body::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(123,74,45,0.04) 0%, transparent 42%),
+    radial-gradient(circle at 88% 100%, rgba(160,98,60,0.03) 0%, transparent 38%);
+}
+
+/* ── INTRO BAND ── */
+.intro-band {
+  position: relative; z-index: 1;
+  background: var(--ink); padding: 64px var(--gutter);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 48px; flex-wrap: wrap; overflow: hidden;
+}
+.intro-band::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--cafe3), var(--cafe), var(--cafe2), var(--cafe3));
+  background-size: 200% 100%;
+  animation: shimmerProg 3s linear infinite;
+}
+.intro-band::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 92% 50%, rgba(123,74,45,0.09) 0%, transparent 58%);
+  pointer-events: none;
+}
+
+.intro-text { position: relative; z-index: 1; flex: 1; min-width: 260px; }
+.intro-eyebrow {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 3.5px; text-transform: uppercase;
+  color: var(--cafe3); display: block; margin-bottom: 14px;
+}
+.intro-title {
+  font-family: var(--f-display); font-style: italic;
+  font-size: clamp(20px, 2.8vw, 28px);
+  color: var(--parchment); line-height: 1.15; margin-bottom: 14px; letter-spacing: -0.3px;
+}
+.intro-desc {
+  font-family: var(--f-italic); font-style: italic; font-size: 15px;
+  color: rgba(242,237,227,0.40); line-height: 1.85; max-width: 460px;
+}
+.intro-desc strong { font-style: normal; color: rgba(242,237,227,0.78); font-weight: 400; }
+
+.intro-meta { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 14px; flex-shrink: 0; }
+.intro-meta-item {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(242,237,227,0.04);
+  border: 1px solid rgba(242,237,227,0.08);
+  border-radius: 2px; padding: 14px 20px;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.intro-meta-item:hover { background: rgba(123,74,45,0.07); border-color: rgba(123,74,45,0.26); }
+.intro-meta-icon { font-size: 20px; flex-shrink: 0; }
+.intro-meta-label {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: rgba(242,237,227,0.26); display: block; margin-bottom: 3px;
+}
+.intro-meta-val { font-family: var(--f-display); font-size: 15px; color: var(--parchment); display: block; line-height: 1; }
+
+/* ── SECTION ── */
+.section { position: relative; z-index: 1; padding: 84px var(--gutter) 0; }
+.section:last-of-type { padding-bottom: 96px; }
+
+.section-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 48px; padding-bottom: 20px; position: relative;
+  gap: 16px; flex-wrap: wrap;
+}
+.section-header::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px; background: rgba(26,25,22,0.11);
+}
+.section-header-accent { position: absolute; bottom: -1px; left: 0; display: flex; height: 3px; }
+.section-header-accent span:nth-child(1) { display: block; width: 68px; height: 3px; background: var(--cafe); }
+.section-header-accent span:nth-child(2) { display: block; width: 26px; height: 3px; background: var(--cafe2); }
+.section-header-accent span:nth-child(3) { display: block; width: 10px; height: 3px; background: var(--parchment2); opacity: 0.38; }
+
+.section-eyebrow {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 3.5px; text-transform: uppercase;
+  color: var(--cafe); display: block; margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--f-display); font-size: clamp(20px, 2.8vw, 30px);
+  font-weight: 400; color: var(--ink); line-height: 1; letter-spacing: -0.5px;
+}
+.section-count {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--ink); color: var(--parchment);
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 8px 16px; border-radius: 2px; white-space: nowrap; flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   FEATURED CARD #1
+═══════════════════════════════════════ */
+.feat-card {
+  position: relative;
+  background: var(--ink); border-left: 5px solid var(--cafe);
+  padding: 50px 50px 42px; margin-bottom: 2px;
+  overflow: hidden; display: flex; flex-direction: column; gap: 20px;
+  text-decoration: none;
+  transition: background 0.4s ease, transform 0.4s var(--ease), box-shadow 0.4s ease;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.10);
+}
+.feat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--cafe3), var(--cafe2), var(--cafe));
+  background-size: 200% 100%; animation: shimmerProg 4s linear infinite;
+}
+.feat-card::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 65% 72% at 96% 12%, rgba(123,74,45,0.20) 0%, transparent 55%),
+    radial-gradient(ellipse 42% 52% at 4% 88%, rgba(160,98,60,0.08) 0%, transparent 55%);
+  pointer-events: none; z-index: 0;
+}
+.feat-card:hover { background: #1e1d18; transform: translateY(-4px); box-shadow: 0 28px 70px -10px rgba(0,0,0,0.38); }
+
+.feat-shine {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+  left: -100%; z-index: 1; transition: left 0.7s var(--ease); pointer-events: none;
+}
+.feat-card:hover .feat-shine { left: 100%; }
+
+.feat-inner {
+  position: relative; z-index: 2;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 30px; flex-wrap: wrap;
+}
+.feat-left { flex: 1; min-width: 220px; }
+
+.feat-badges { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.badge-gold {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--cafe); color: var(--parchment);
+  font-family: var(--f-ui); font-size: 8px; font-weight: 800;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 2px;
+  box-shadow: 0 4px 18px rgba(123,74,45,0.42);
+}
+.badge-open {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(29,92,64,0.12);
+  border: 1px solid rgba(29,92,64,0.30); border-radius: 2px;
+  color: #64d29b; font-family: var(--f-ui); font-size: 8px;
+  font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; padding: 6px 12px;
+}
+.badge-open-dot { width: 5px; height: 5px; background: #64d29b; border-radius: 50%; animation: pulseLive 2.5s ease infinite; flex-shrink: 0; }
+
+.feat-icon { font-size: 52px; line-height: 1; margin-bottom: 16px; display: block; }
+.feat-name {
+  font-family: var(--f-display); font-size: clamp(26px, 4vw, 44px);
+  line-height: 1; color: var(--parchment); letter-spacing: -1px; margin-bottom: 12px; display: block;
+}
+.feat-tagline {
+  font-family: var(--f-italic); font-style: italic; font-size: 15px;
+  color: rgba(242,237,227,0.40); line-height: 1.75; margin-bottom: 20px;
+  max-width: 460px; display: block;
+}
+
+.pills { display: flex; gap: 7px; flex-wrap: wrap; }
+.pill {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 2px; white-space: nowrap;
+}
+.pill-rating  { background: rgba(123,74,45,0.12); border: 1px solid rgba(123,74,45,0.32); color: var(--cafe3); }
+.pill-price   { background: rgba(29,92,64,0.08); border: 1px solid rgba(29,92,64,0.24); color: var(--verde2); }
+.pill-default { background: rgba(26,25,22,0.07); border: 1px solid rgba(26,25,22,0.14); color: rgba(26,25,22,0.54); }
+.pill-feat-d  { background: rgba(123,74,45,0.08); border: 1px solid rgba(123,74,45,0.20); color: rgba(200,137,106,0.80); }
+
+.feat-right {
+  display: flex; flex-direction: column; gap: 12px;
+  min-width: 210px; flex-shrink: 0;
+}
+.feat-info-item {
+  display: flex; flex-direction: column; gap: 4px;
+  background: rgba(242,237,227,0.05);
+  border: 1px solid rgba(242,237,227,0.08);
+  border-radius: 2px; padding: 13px 18px;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.feat-info-item:hover { background: rgba(123,74,45,0.07); border-color: rgba(123,74,45,0.22); }
+.feat-info-label {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase; color: rgba(242,237,227,0.26);
+}
+.feat-info-val { font-family: var(--f-display); font-size: 13px; color: rgba(242,237,227,0.78); line-height: 1.4; }
+
+/* ═══════════════════════════════════════
+   RANKING LIST #2–#6
+═══════════════════════════════════════ */
+.list-items { display: flex; flex-direction: column; gap: 2px; }
+
+.litem {
+  background: #fff; display: flex; align-items: center; gap: 0;
+  text-decoration: none; position: relative; overflow: hidden;
+  transition: background 0.35s ease, transform 0.35s var(--ease), box-shadow 0.35s ease;
+  contain: layout style;
+}
+.litem::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--cafe); transform: scaleY(0);
+  transition: transform 0.35s var(--ease); transform-origin: bottom;
+}
+.litem:hover { background: var(--parchment); transform: translateX(5px); box-shadow: -5px 0 26px -4px rgba(123,74,45,0.18); }
+.litem:hover::before { transform: scaleY(1); }
+
+.litem-rank {
+  flex-shrink: 0; width: 68px; display: flex; align-items: center;
+  justify-content: center; align-self: stretch;
+  background: rgba(26,25,22,0.04); border-right: 1px solid rgba(26,25,22,0.07);
+}
+.litem-rank-num {
+  font-family: var(--f-display); font-size: 20px;
+  color: rgba(26,25,22,0.18); line-height: 1; letter-spacing: -1px;
+  transition: color 0.35s ease;
+}
+.litem:hover .litem-rank-num, .litem.is-top .litem-rank-num { color: var(--cafe); }
+
+.litem-icon { font-size: 26px; flex-shrink: 0; padding: 0 22px; transition: transform 0.35s var(--ease); }
+.litem:hover .litem-icon { transform: scale(1.10); }
+
+.litem-body { flex: 1; min-width: 0; padding: 24px 0; display: flex; flex-direction: column; gap: 5px; }
+.litem-name { font-family: var(--f-display); font-size: 18px; color: var(--ink); letter-spacing: -0.3px; line-height: 1; }
+.litem-desc { font-family: var(--f-italic); font-style: italic; font-size: 13px; color: rgba(26,25,22,0.44); line-height: 1.55; }
+
+.litem-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; padding: 24px 26px 24px 14px; flex-shrink: 0; }
+.litem-top-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--cafe); color: var(--parchment);
+  font-family: var(--f-ui); font-size: 7px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 2px; white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(123,74,45,0.35);
+}
+.litem-arrow { font-size: 17px; color: rgba(26,25,22,0.17); transition: color 0.35s ease, transform 0.35s var(--ease); }
+.litem:hover .litem-arrow { color: var(--cafe); transform: translateX(5px); }
+
+/* ═══════════════════════════════════════
+   TIPS / CONSEJOS
+═══════════════════════════════════════ */
+.tips-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: rgba(26,25,22,0.08); border: 1px solid rgba(26,25,22,0.08); }
+
+.tip-card {
+  background: #fff; padding: 34px 28px;
+  position: relative; overflow: hidden;
+  transition: background 0.4s ease, transform 0.4s var(--ease), box-shadow 0.4s ease;
+}
+.tip-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 0; background: var(--cafe); transition: height 0.35s var(--ease);
+}
+.tip-card:hover { background: var(--parchment); transform: translateY(-5px); box-shadow: 0 18px 46px -6px rgba(26,25,22,0.11); }
+.tip-card:hover::after { height: 3px; }
+
+.tip-num {
+  font-family: var(--f-display); font-style: italic; font-size: 52px; line-height: 1;
+  color: rgba(123,74,45,0.13); display: block; margin-bottom: 10px; transition: color 0.4s ease;
+}
+.tip-card:hover .tip-num { color: rgba(123,74,45,0.26); }
+.tip-title { font-family: var(--f-display); font-size: 17px; color: var(--ink); margin-bottom: 10px; letter-spacing: -0.3px; }
+.tip-desc { font-family: var(--f-italic); font-style: italic; font-size: 14px; color: rgba(26,25,22,0.50); line-height: 1.78; }
+
+/* ═══════════════════════════════════════
+   AD BANNER
+═══════════════════════════════════════ */
+.ad-banner {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 28px; flex-wrap: wrap;
+  background: var(--ink); border-left: 5px solid var(--cafe);
+  padding: 46px 50px; margin: 0 var(--gutter); margin-top: 68px;
+  text-decoration: none; overflow: hidden;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s ease, border-left-color 0.4s ease;
+  box-shadow: 0 22px 68px -12px rgba(6,6,5,0.26);
+}
+.ad-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 55% 85% at 96% 50%, rgba(123,74,45,0.11) 0%, transparent 58%);
+  pointer-events: none;
+}
+.ad-banner:hover { transform: translateY(-3px); box-shadow: 0 30px 76px -12px rgba(6,6,5,0.42); border-left-color: var(--cafe2); }
+
+.ad-left { display: flex; align-items: center; gap: 26px; flex: 1; min-width: 0; position: relative; z-index: 1; flex-wrap: wrap; }
+.ad-icon {
+  width: 62px; height: 62px; border-radius: 3px;
+  background: rgba(123,74,45,0.10);
+  border: 1px solid rgba(123,74,45,0.24);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+  transition: background 0.4s ease, border-color 0.4s ease, transform 0.4s var(--ease);
+}
+.ad-banner:hover .ad-icon { background: rgba(123,74,45,0.18); border-color: var(--cafe2); transform: scale(1.07) rotate(-3deg); }
+.ad-title { font-family: var(--f-display); font-style: italic; font-size: 20px; color: var(--parchment); display: block; margin-bottom: 6px; }
+.ad-sub { font-family: var(--f-italic); font-style: italic; font-size: 14px; color: rgba(242,237,227,0.36); line-height: 1.68; }
+
+.ad-btn {
+  position: relative; z-index: 1; flex-shrink: 0;
+  background: var(--cafe); color: var(--parchment);
+  font-family: var(--f-ui); font-size: 10px; font-weight: 800;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 15px 34px; border-radius: 2px;
+  box-shadow: 0 6px 24px rgba(123,74,45,0.36);
+  transition: background 0.35s ease, box-shadow 0.35s ease, transform 0.35s var(--ease);
+}
+.ad-banner:hover .ad-btn { background: var(--cafe2); box-shadow: 0 12px 36px rgba(123,74,45,0.56); transform: translateY(-3px); }
+
+/* ═══════════════════════════════════════
+   TEXT BLOCK (SEO)
+═══════════════════════════════════════ */
+.text-block {
+  position: relative; z-index: 1; padding: 76px var(--gutter) 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start;
+}
+.text-block-eyebrow {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 3.5px; text-transform: uppercase;
+  color: var(--cafe); display: block; margin-bottom: 14px;
+}
+.text-block-title {
+  font-family: var(--f-display); font-size: clamp(22px, 3vw, 32px);
+  color: var(--ink); line-height: 1.1; letter-spacing: -0.5px; margin-bottom: 18px;
+}
+.text-block-body { font-family: var(--f-display); font-size: 16px; color: rgba(26,25,22,0.60); line-height: 1.85; }
+.text-block-body p + p { margin-top: 13px; }
+.text-block-body strong { color: rgba(26,25,22,0.84); font-weight: 700; }
+.text-block-rule { height: 1px; background: linear-gradient(to right, rgba(123,74,45,0.38), transparent); margin: 22px 0; width: 76px; }
+
+.text-block-right { display: flex; flex-direction: column; gap: 2px; }
+.quick-fact {
+  background: #fff; border-left: 3px solid transparent; padding: 18px 22px;
+  transition: background 0.3s ease, border-left-color 0.3s ease, transform 0.3s var(--ease);
+}
+.quick-fact:hover { background: var(--parchment); border-left-color: var(--cafe); transform: translateX(4px); }
+.quick-fact-label {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase; color: var(--cafe); display: block; margin-bottom: 5px;
+}
+.quick-fact-val { font-family: var(--f-display); font-size: 14px; color: var(--ink); line-height: 1.5; }
+
+/* ═══════════════════════════════════════
+   CTA FINAL
+═══════════════════════════════════════ */
+.cta-final {
+  position: relative; z-index: 1;
+  margin: 68px var(--gutter) 0;
+  background: var(--ink); padding: 68px 50px;
+  text-align: center; overflow: hidden;
+}
+.cta-final::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--cafe3), var(--cafe2), var(--cafe));
+  background-size: 200%; animation: shimmerProg 4s linear infinite;
+}
+.cta-final::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 65% 75% at 50% 100%, rgba(123,74,45,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.cta-final-inner { position: relative; z-index: 1; }
+.cta-final-emoji { font-size: 46px; display: block; margin-bottom: 20px; }
+.cta-final-title {
+  font-family: var(--f-display); font-style: italic;
+  font-size: clamp(22px, 3.2vw, 36px);
+  color: var(--parchment); margin-bottom: 12px; letter-spacing: -0.5px;
+}
+.cta-final-sub {
+  font-family: var(--f-italic); font-style: italic; font-size: 16px;
+  color: rgba(242,237,227,0.36); line-height: 1.68; margin-bottom: 34px;
+  max-width: 420px; margin-left: auto; margin-right: auto;
+}
+.cta-final-link {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--cafe); color: var(--parchment);
+  font-family: var(--f-ui); font-size: 11px; font-weight: 800;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 17px 46px; border-radius: 2px;
+  box-shadow: 0 8px 40px rgba(123,74,45,0.40);
+  transition: background 0.4s var(--ease), transform 0.4s var(--ease), box-shadow 0.4s ease;
+}
+.cta-final-link:hover { background: var(--cafe2); transform: translateY(-4px); box-shadow: 0 20px 54px rgba(123,74,45,0.56); }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+.footer {
+  background: var(--void); position: relative; overflow: hidden;
+  padding: 68px var(--gutter) 52px;
+  display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center;
+}
+.footer::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--verde), var(--cafe), var(--cafe2), var(--verde));
+  background-size: 200% 100%; animation: shimmerProg 4s linear infinite;
+}
+.footer::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 65% 55% at 50% 0%, rgba(123,74,45,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+.footer-logo { opacity: 0.26; transition: opacity 0.4s ease, transform 0.4s ease; position: relative; z-index: 1; }
+.footer-logo:hover { opacity: 0.50; transform: scale(1.05); }
+.footer-logo img { width: 80px; filter: brightness(1.3); }
+.footer-divider { width: 108px; height: 1px; background: linear-gradient(90deg, transparent, rgba(123,74,45,0.36), transparent); position: relative; z-index: 1; }
+.footer-nav { display: flex; gap: 26px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; }
+.footer-nav a {
+  font-family: var(--f-ui); font-size: 9px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(242,237,227,0.20); transition: color 0.3s ease;
+}
+.footer-nav a:hover { color: var(--cafe3); }
+.footer-copy { font-family: var(--f-ui); font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: rgba(242,237,227,0.14); position: relative; z-index: 1; }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.65s var(--ease), transform 0.65s var(--ease); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── FOCUS ── */
+a:focus-visible { outline: 2px solid rgba(123,74,45,0.72); outline-offset: 3px; border-radius: 2px; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — 860px
+═══════════════════════════════════════ */
+@media (max-width: 860px) {
+  :root { --gutter: 28px; }
+  .hero-title { font-size: clamp(44px, 7.5vw, 66px); letter-spacing: -1.8px; }
+  .tips-grid { grid-template-columns: 1fr 1fr; }
+  .text-block { grid-template-columns: 1fr; gap: 36px; }
+  .feat-inner { flex-direction: column; }
+  .feat-right { min-width: unset; width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .feat-info-item { flex: 1; min-width: 150px; }
+  .cta-final { padding: 52px 30px; }
+  .intro-band { padding: 46px var(--gutter); flex-direction: column; gap: 32px; }
+  .intro-meta { flex-direction: row; flex-wrap: wrap; }
+  .intro-meta-item { flex: 1; min-width: 140px; }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — 640px
+═══════════════════════════════════════ */
+@media (max-width: 640px) {
+  :root { --gutter: 18px; }
+  .hero-title { font-size: clamp(32px, 8.5vw, 46px) !important; line-height: 1.08 !important; letter-spacing: -1.2px !important; }
+  .hero-title .eyebrow { font-size: 11px; letter-spacing: 5px; }
+  .hero-sub { font-size: 15px; margin-bottom: 30px; }
+  .hero-chip { font-size: 7px; padding: 7px 13px; }
+  .stats-strip { width: 100%; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+  .stats-strip::-webkit-scrollbar { display: none; }
+  .stat { flex: 0 0 auto; padding: 15px 18px; }
+  .stat-num { font-size: 26px; }
+  .btn-ghost { display: none; }
+  .topbar { padding: 0 var(--gutter); height: 56px; }
+  .topbar-logo img { width: 66px; }
+  .topbar-cat { display: none; }
+  .section { padding: 52px var(--gutter) 0; }
+  .feat-card { padding: 28px 20px; }
+  .feat-icon { font-size: 38px; }
+  .feat-right { flex-direction: column; }
+  .tips-grid { grid-template-columns: 1fr; }
+  .litem-rank { width: 50px; }
+  .litem-rank-num { font-size: 15px; }
+  .litem-icon { padding: 0 13px; font-size: 22px; }
+  .litem-name { font-size: 15px; }
+  .litem-desc { font-size: 12px; }
+  .litem-meta { padding: 16px 14px; }
+  .ad-banner { flex-direction: column; align-items: flex-start; padding: 26px 20px; margin: 44px var(--gutter) 0; }
+  .ad-btn { align-self: stretch; text-align: center; }
+  .text-block { padding: 52px var(--gutter) 0; }
+  .cta-final { margin: 44px var(--gutter) 0; padding: 40px 20px; }
+}
+
+@media (max-width: 380px) {
+  .hero-title { font-size: 30px !important; letter-spacing: -0.8px !important; }
+  .topbar-logo img { width: 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  #grain { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar" aria-hidden="true"></div>
+<div id="grain" aria-hidden="true"></div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" role="navigation" aria-label="Navegación superior">
+  <a class="topbar-back" href="https://uruspotcdu-create.github.io/uruspot/" aria-label="Volver a URU SPOT">
+    <span class="topbar-back-arrow" aria-hidden="true">←</span>
+    URU SPOT
+  </a>
+  <a class="topbar-logo" href="https://uruspotcdu-create.github.io/uruspot/" aria-label="Inicio URU SPOT">
+    <img src="https://uruspot.pages.dev/img/logof-small.webp" alt="URU SPOT" width="80" height="101" fetchpriority="high" />
+  </a>
+  <div class="topbar-cat" aria-label="Categoría actual">
+    <span aria-hidden="true">☕</span> Cafés
+  </div>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero" role="banner">
+  <div class="hero-mesh" aria-hidden="true"></div>
+  <div class="hero-lines" aria-hidden="true"></div>
+  <div class="hero-pattern" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <a href="https://uruspotcdu-create.github.io/uruspot/">URU SPOT</a>
+      <span class="breadcrumb-sep" aria-hidden="true">·</span>
+      <a href="https://uruspotcdu-create.github.io/uruspot/">Concepción del Uruguay</a>
+      <span class="breadcrumb-sep" aria-hidden="true">·</span>
+      <span class="breadcrumb-current">Cafés</span>
+    </nav>
+
+    <div class="hero-chip" role="status">
+      <span class="hero-chip-dot" aria-hidden="true"></span>
+      Guía actualizada — Mayo 2026
+    </div>
+
+    <h1 class="hero-title">
+      <span class="eyebrow">Los mejores</span>
+      <span class="main-line"><em>Cafés</em></span>
+      <span class="main-line"><em>en CdU</em></span>
+    </h1>
+
+    <div class="hero-rule" aria-hidden="true">
+      <span class="hero-rule-line"></span>
+      <span class="hero-rule-dot"></span>
+    </div>
+
+    <p class="hero-sub">
+      Café de especialidad, tercera ola y espacios culturales únicos.<br />
+      <strong>La guía de cafés que vale la pena en Concepción del Uruguay.</strong>
+    </p>
+
+    <div class="stats-strip" role="list" aria-label="Estadísticas">
+      <div class="stat" role="listitem"><div class="stat-num">6<sup>+</sup></div><div class="stat-label">Cafés</div></div>
+      <div class="stat" role="listitem"><div class="stat-num">2026</div><div class="stat-label">Actualizado</div></div>
+      <div class="stat" role="listitem"><div class="stat-num">100<sup>%</sup></div><div class="stat-label">Local</div></div>
+    </div>
+
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#ranking" aria-label="Ver el ranking completo">☕ Ver el ranking</a>
+      <a class="btn-ghost" href="#consejos" aria-label="Leer consejos">Consejos útiles ↓</a>
+    </div>
+  </div>
+
+  <div class="hero-fade" aria-hidden="true"></div>
+</header>
+
+<!-- ═══ BODY ═══ -->
+<main class="main-body" id="main-content">
+
+  <!-- INTRO BAND -->
+  <div class="intro-band reveal">
+    <div class="intro-text">
+      <span class="intro-eyebrow">Tercera ola · CdU</span>
+      <h2 class="intro-title">El café nuestro de cada mañana,<br />con criterio</h2>
+      <p class="intro-desc">
+        En Concepción del Uruguay la cultura cafetera está creciendo. Recorrimos cada café para traerte <strong>solo los que valen la pena.</strong>
+      </p>
+    </div>
+    <div class="intro-meta" aria-label="Datos rápidos">
+      <div class="intro-meta-item">
+        <span class="intro-meta-icon" aria-hidden="true">🕐</span>
+        <div><span class="intro-meta-label">Mejor horario</span><span class="intro-meta-val">8:00 — 12:00 hs</span></div>
+      </div>
+      <div class="intro-meta-item">
+        <span class="intro-meta-icon" aria-hidden="true">📍</span>
+        <div><span class="intro-meta-label">Ciudad</span><span class="intro-meta-val">Concepción del Uruguay</span></div>
+      </div>
+      <div class="intro-meta-item">
+        <span class="intro-meta-icon" aria-hidden="true">✍️</span>
+        <div><span class="intro-meta-label">Edición</span><span class="intro-meta-val">Mayo 2026</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RANKING ══ -->
+  <section class="section" id="ranking" aria-labelledby="title-ranking">
+    <div class="section-header">
+      <div>
+        <span class="section-eyebrow">Selección URU SPOT</span>
+        <h2 class="section-title" id="title-ranking">☕ Ranking de cafés</h2>
+      </div>
+      <span class="section-count" aria-label="6 cafés">6 cafés</span>
+      <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- #1 FEATURED — Nero Café -->
+    <a class="feat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/" aria-label="Nero Café — #1 Café en CdU">
+      <div class="feat-shine" aria-hidden="true"></div>
+      <div class="feat-inner">
+        <div class="feat-left">
+          <div class="feat-badges">
+            <span class="badge-gold">🏆 #1 URU SPOT</span>
+            <span class="badge-open"><span class="badge-open-dot" aria-hidden="true"></span>Abierto hoy</span>
+          </div>
+          <span class="feat-icon" aria-hidden="true">☕</span>
+          <span class="feat-name">Nero Café</span>
+          <span class="feat-tagline">La referencia indiscutida del café de especialidad en CdU. Granos de origen, métodos de filtrado y el espresso más honesto de la ciudad. Cada taza es una declaración.</span>
+          <div class="pills">
+            <span class="pill pill-rating">★ 4.9</span>
+            <span class="pill pill-price">$$</span>
+            <span class="pill pill-feat-d">Especialidad · Filtrado · Espresso</span>
+          </div>
+        </div>
+        <div class="feat-right">
+          <div class="feat-info-item"><span class="feat-info-label">Dirección</span><span class="feat-info-val">Centro · CdU</span></div>
+          <div class="feat-info-item"><span class="feat-info-label">Horario</span><span class="feat-info-val">Lun–Sáb 8:00–20:00<br/>Dom 9:00–14:00</span></div>
+          <div class="feat-info-item"><span class="feat-info-label">Especialidad</span><span class="feat-info-val">Café de origen & métodos</span></div>
+        </div>
+      </div>
+    </a>
+
+    <!-- LIST #2–#6 -->
+    <div class="list-items" role="list" aria-label="Otros cafés recomendados">
+
+      <a class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" role="listitem" aria-label="La Ris — #2 café CdU">
+        <div class="litem-rank" aria-hidden="true"><span class="litem-rank-num">2</span></div>
+        <span class="litem-icon" aria-hidden="true">🎨</span>
+        <div class="litem-body">
+          <span class="litem-name">La Ris</span>
+          <span class="litem-desc">Café artesanal con alma cultural. El lugar donde el arte y el espresso conviven.</span>
+          <div class="pills" style="margin-top:4px"><span class="pill pill-default">Artesanal</span><span class="pill pill-price">$</span></div>
+        </div>
+        <div class="litem-meta"><span class="litem-top-badge">Top</span><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" role="listitem" aria-label="Cultura Café — #3 café CdU" style="transition-delay:0.07s">
+        <div class="litem-rank" aria-hidden="true"><span class="litem-rank-num">3</span></div>
+        <span class="litem-icon" aria-hidden="true">📚</span>
+        <div class="litem-body">
+          <span class="litem-name">Cultura Café</span>
+          <span class="litem-desc">Café cultural de referencia. Libros, música y un buen cortado en el mismo espacio.</span>
+          <div class="pills" style="margin-top:4px"><span class="pill pill-default">Cultural</span><span class="pill pill-price">$</span></div>
+        </div>
+        <div class="litem-meta"><span class="litem-top-badge">Top</span><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/london-cafe/" role="listitem" aria-label="London Café — #4 café CdU" style="transition-delay:0.14s">
+        <div class="litem-rank" aria-hidden="true"><span class="litem-rank-num">4</span></div>
+        <span class="litem-icon" aria-hidden="true">🏛️</span>
+        <div class="litem-body">
+          <span class="litem-name">London Café</span>
+          <span class="litem-desc">Clásico de la ciudad. Ambiente íntimo, café consistente, el de toda la vida.</span>
+          <div class="pills" style="margin-top:4px"><span class="pill pill-rating">★ 4.7</span><span class="pill pill-default">Clásico</span><span class="pill pill-price">$</span></div>
+        </div>
+        <div class="litem-meta"><span class="litem-top-badge">Top</span><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/helena-cafe/" role="listitem" aria-label="Helena — #5 café CdU" style="transition-delay:0.21s">
+        <div class="litem-rank" aria-hidden="true"><span class="litem-rank-num">5</span></div>
+        <span class="litem-icon" aria-hidden="true">✨</span>
+        <div class="litem-body">
+          <span class="litem-name">Helena</span>
+          <span class="litem-desc">Moderno y cuidado. Café + resto con propuesta gastronómica que acompaña.</span>
+          <div class="pills" style="margin-top:4px"><span class="pill pill-default">Moderno</span><span class="pill pill-price">$$</span></div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" role="listitem" aria-label="Bella Vista — #6 café CdU" style="transition-delay:0.28s">
+        <div class="litem-rank" aria-hidden="true"><span class="litem-rank-num">6</span></div>
+        <span class="litem-icon" aria-hidden="true">🌅</span>
+        <div class="litem-body">
+          <span class="litem-name">Bella Vista</span>
+          <span class="litem-desc">Elegancia y café en un solo lugar. Para el desayuno que se merece un marco.</span>
+          <div class="pills" style="margin-top:4px"><span class="pill pill-default">Elegante</span><span class="pill pill-price">$$</span></div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- AD BANNER -->
+  <a class="ad-banner reveal" href="mailto:uruspotcdu@gmail.com" aria-label="Publicitar tu café en URU SPOT">
+    <div class="ad-left">
+      <div class="ad-icon" aria-hidden="true">🏪</div>
+      <div>
+        <span class="ad-title">¿Tenés un café en CdU?</span>
+        <span class="ad-sub">Aparecé en la guía que está leyendo toda la ciudad. Visible, accesible y efectivo.</span>
+      </div>
+    </div>
+    <div class="ad-btn">Consultar →</div>
+  </a>
+
+  <!-- ══ CONSEJOS ══ -->
+  <section class="section" id="consejos" aria-labelledby="title-consejos">
+    <div class="section-header">
+      <div>
+        <span class="section-eyebrow">Antes de ir</span>
+        <h2 class="section-title" id="title-consejos">💡 Cómo elegir bien</h2>
+      </div>
+      <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="tips-grid">
+      <div class="tip-card reveal">
+        <span class="tip-num" aria-hidden="true">01</span>
+        <h3 class="tip-title">Pedí un espresso</h3>
+        <p class="tip-desc">El espresso es la prueba definitiva de cualquier café. Si no convence, nada del menú va a convencer. Es el filtro más rápido y honesto para evaluar la calidad del bar.</p>
+      </div>
+      <div class="tip-card reveal" style="transition-delay:0.08s">
+        <span class="tip-num" aria-hidden="true">02</span>
+        <h3 class="tip-title">Fijate en el origen</h3>
+        <p class="tip-desc">Los mejores cafés indican el origen del grano en la carta. Si no hay esa información, probablemente sea mezcla genérica. El café de especialidad siempre comunica de dónde viene.</p>
+      </div>
+      <div class="tip-card reveal" style="transition-delay:0.16s">
+        <span class="tip-num" aria-hidden="true">03</span>
+        <h3 class="tip-title">Explorá el espacio</h3>
+        <p class="tip-desc">Un buen café cuida el ambiente tanto como la taza. La luz, el sonido, los asientos: todo importa. Si el espacio invita a quedarse, es buena señal de una propuesta pensada.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TEXTO SEO ══ -->
+  <div class="text-block reveal">
+    <div>
+      <span class="text-block-eyebrow">Sobre esta guía</span>
+      <h2 class="text-block-title">Cafés en Concepción del Uruguay — la guía real</h2>
+      <div class="text-block-rule"></div>
+      <div class="text-block-body">
+        <p>Concepción del Uruguay está viviendo un momento interesante en su cultura cafetera. Nuevos espacios con propuestas de tercera ola conviven con los clásicos de siempre, creando un mapa variado y en crecimiento.</p>
+        <p><strong>Cada café fue evaluado de manera independiente</strong> en base a la calidad del producto, la consistencia, el espacio y el precio.</p>
+        <p>Si conocés un café que merezca estar en esta lista, escribinos. URU SPOT es una guía viva, actualizada con criterio.</p>
+      </div>
+    </div>
+    <div class="text-block-right">
+      <div class="quick-fact"><span class="quick-fact-label">Mejor café CdU 2026</span><span class="quick-fact-val">Nero Café — especialidad, origen, el espresso más honesto de la ciudad</span></div>
+      <div class="quick-fact"><span class="quick-fact-label">Mejor café cultural</span><span class="quick-fact-val">Cultura Café — libros, música y buen café en un solo lugar</span></div>
+      <div class="quick-fact"><span class="quick-fact-label">Mejor opción económica</span><span class="quick-fact-val">La Ris — artesanal, accesible, con identidad propia</span></div>
+      <div class="quick-fact"><span class="quick-fact-label">El clásico de siempre</span><span class="quick-fact-val">London Café — consistente, íntimo, el de toda la vida</span></div>
+      <div class="quick-fact"><span class="quick-fact-label">Para desayuno elegante</span><span class="quick-fact-val">Bella Vista — café con marco, para el fin de semana</span></div>
+    </div>
+  </div>
+
+  <!-- CTA FINAL -->
+  <div class="cta-final reveal">
+    <div class="cta-final-inner">
+      <span class="cta-final-emoji" aria-hidden="true">🗺️</span>
+      <h2 class="cta-final-title">Explorá toda la guía gastronómica de CdU</h2>
+      <p class="cta-final-sub">Restaurantes, cafés, bares, panaderías, heladerías, hosterías y más. Todo lo que vale la pena en Concepción del Uruguay, sin filtros.</p>
+      <a class="cta-final-link" href="https://uruspotcdu-create.github.io/uruspot/">Ver URU SPOT completo →</a>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer" role="contentinfo">
+  <a class="footer-logo" href="https://uruspotcdu-create.github.io/uruspot/" aria-label="URU SPOT — inicio">
+    <img src="https://uruspot.pages.dev/img/logof-small.webp" alt="URU SPOT" width="80" height="101" loading="lazy" />
+  </a>
+  <div class="footer-divider" aria-hidden="true"></div>
+  <nav class="footer-nav" aria-label="Categorías">
+    <a href="https://uruspotcdu-create.github.io/uruspot/los-mejores-restaurantes-cdu/">Restaurantes</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/">Cafés</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/los-mejores-bares-cdu/">Bares</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panettone/">Panaderías</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/yelatti-artesanal/">Heladerías</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/antigua-fonda/">Hosterías</a>
+  </nav>
+  <p class="footer-copy">URU SPOT © 2026 — Guía Gastronómica · Concepción del Uruguay</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── PROGRESS BAR ── */
+  var bar = document.getElementById('progress-bar');
+  function updateProgress() {
+    var st = window.scrollY || document.documentElement.scrollTop;
+    var dh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    bar.style.width = dh > 0 ? (st / dh * 100) + '%' : '0%';
+  }
+
+  /* ── SCROLL — rAF throttle ── */
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      requestAnimationFrame(function () { updateProgress(); ticking = false; });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  /* ── SMOOTH SCROLL ── */
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+      var offset = document.querySelector('.topbar') ? document.querySelector('.topbar').offsetHeight : 64;
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - offset - 24, behavior: 'smooth' });
+    });
+  });
+
+  /* ── SCROLL REVEAL ── */
+  var revealEls = document.querySelectorAll('.reveal');
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          requestAnimationFrame(function () { entry.target.classList.add('visible'); });
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.07, rootMargin: '0px 0px -36px 0px' });
+    revealEls.forEach(function (el) { observer.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add('visible'); });
+  }
+
+  /* ── REDUCED MOTION ── */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    revealEls.forEach(function (el) { el.classList.add('visible'); });
+  }
+
+  /* ── FALLBACK REVEAL ── */
+  setTimeout(function () {
+    document.querySelectorAll('.reveal:not(.visible)').forEach(function (el) { el.classList.add('visible'); });
+  }, 900);
+
+  updateProgress();
+}());
+</script>
+
+</body>
+</html>
