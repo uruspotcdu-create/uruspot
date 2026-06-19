@@ -2001,7 +2001,7 @@ entry.target.querySelectorAll('.stat-num').forEach(function(el){
   var sep = '<span class="htick-sep">·</span>';
   var html = '';
   // duplicar para loop infinito
-  [items, items].forEach(function(arr){
+ [items,items,items,items].forEach(function(arr){
     arr.forEach(function(it){
       html += '<span class="htick-item"><span class="htick-dot ' + it.dot + '"></span>' + it.text + '</span>' + sep;
     });
@@ -2010,7 +2010,7 @@ entry.target.querySelectorAll('.stat-num').forEach(function(el){
 
   // Animación CSS
   var style = document.createElement('style');
-  style.textContent = '@keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}#heroTickerInner{animation:tickerScroll 30s linear infinite}#heroTickerInner:hover{animation-play-state:paused}';
+  style.textContent = '#heroTickerInner{display:inline-flex;align-items:center;white-space:nowrap;will-change:transform;animation:tickerScroll 55s linear infinite}#heroTickerInner:hover{animation-play-state:paused}@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}@media(prefers-reduced-motion:reduce){#heroTickerInner{animation:none}}';
   document.head.appendChild(style);
 })();
 </script>
