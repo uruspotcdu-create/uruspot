@@ -654,6 +654,49 @@ img{display:block;max-width:100%}
 a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:2px}
   @media(max-width:860px){#servicios [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2,1fr)!important}}
 @media(max-width:480px){#servicios [style*="grid-template-columns:repeat(4"]{grid-template-columns:1fr!important}}
+  /* ── BACK TO TOP ── */
+#back-to-top{
+  position:fixed;bottom:28px;right:28px;z-index:950;
+  width:50px;height:50px;border-radius:50%;
+  background:rgba(10,10,9,.85);border:1px solid rgba(196,135,42,.30);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--oro2);font-size:18px;cursor:pointer;
+  opacity:0;visibility:hidden;
+  transform:translateY(16px) scale(.9);
+  transition:opacity .35s var(--ease),transform .35s var(--ease),border-color .35s ease,background .35s ease;
+  pointer-events:none;
+}
+@media(min-width:769px){
+  @supports(backdrop-filter:blur(10px)){
+    #back-to-top{backdrop-filter:blur(10px) saturate(140%);}
+  }
+}
+#back-to-top.visible{
+  opacity:1;visibility:visible;transform:translateY(0) scale(1);pointer-events:auto;
+}
+#back-to-top:hover{
+  background:rgba(196,135,42,.14);border-color:var(--oro2);
+  transform:translateY(-3px) scale(1.05);
+}
+#back-to-top svg{width:18px;height:18px;transition:transform .35s var(--ease);}
+#back-to-top:hover svg{transform:translateY(-2px);}
+#back-to-top .btt-ring{
+  position:absolute;inset:-1px;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--verde2),var(--oro2),var(--verde2));
+  opacity:0;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;padding:1px;
+  transition:opacity .35s ease;pointer-events:none;
+}
+#back-to-top:hover .btt-ring{opacity:1;}
+
+@media(max-width:640px){
+  #back-to-top{width:44px;height:44px;bottom:18px;right:18px;}
+  #back-to-top svg{width:16px;height:16px;}
+}
+@media(prefers-reduced-motion:reduce){
+  #back-to-top{transition:opacity .15s linear;}
+  #back-to-top.visible{transform:none;}
+}
 </style>
 <script>
 (function(){
@@ -766,7 +809,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
       lbl.style.borderColor = 'rgba(192,57,43,.22)';
       lbl.style.color = '#c0392b';
     }
-  });
+});
 
 })();
 </script>
@@ -1653,6 +1696,35 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   setInterval(fetchWeather, 10*60*1000);
 
+})();
+</script>
+  <button id="back-to-top" aria-label="Volver arriba" title="Volver arriba">
+  <span class="btt-ring" aria-hidden="true"></span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+  </svg>
+</button>
+<script>
+(function(){
+  'use strict';
+  var btt=document.getElementById('back-to-top');
+  if(!btt)return;
+
+  var ticking=false;
+  function toggle(){
+    btt.classList.toggle('visible', window.scrollY > 500);
+    ticking=false;
+  }
+  window.addEventListener('scroll',function(){
+    if(!ticking){requestAnimationFrame(toggle);ticking=true;}
+  },{passive:true});
+
+  btt.addEventListener('click',function(){
+    var reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    window.scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+  });
+
+  toggle();
 })();
 </script>
 </body>
