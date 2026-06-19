@@ -739,7 +739,10 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   white-space:nowrap;
   flex-shrink:0;
   will-change:transform;
+  animation:tickerScroll 55s linear infinite;
 }
+#heroTickerInner:hover{animation-play-state:paused}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @media(min-width:769px){@supports(backdrop-filter:blur(8px)){.hero-ticker{backdrop-filter:blur(8px)}}}
 .htick-item{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.45);display:inline-flex;align-items:center;gap:8px;padding:0 24px}
 .htick-sep{color:rgba(242,237,227,.12);font-size:14px;flex-shrink:0}
@@ -2010,9 +2013,7 @@ entry.target.querySelectorAll('.stat-num').forEach(function(el){
   inner.innerHTML = html;
 
   // Animación CSS
-  var style = document.createElement('style');
-  style.textContent = '#heroTickerInner{display:inline-flex;align-items:center;white-space:nowrap;will-change:transform;animation:tickerScroll 55s linear infinite}#heroTickerInner:hover{animation-play-state:paused}@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}@media(prefers-reduced-motion:reduce){#heroTickerInner{animation:none}}';
-  document.head.appendChild(style);
+  // animación ya en CSS — nada que inyectar
 })();
 </script>
 </body>
