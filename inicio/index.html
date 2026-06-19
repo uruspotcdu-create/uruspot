@@ -729,8 +729,9 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   border-top:1px solid rgba(242,237,227,.07);
   background:rgba(6,6,5,.75);
   overflow:hidden;
-  display:flex;
-  align-items:center;
+  display:block;
+  white-space:nowrap;
+  line-height:46px;
 }
 
 #heroTickerInner{
@@ -739,6 +740,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   white-space:nowrap;
   will-change:transform;
   animation:tickerScroll 55s linear infinite;
+  padding-left:0;
 }
 #heroTickerInner:hover{animation-play-state:paused}
 #heroTickerInner:hover{animation-play-state:paused}
@@ -749,6 +751,9 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 .htick-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .htick-green{background:#64d29b}.htick-oro{background:var(--oro2)}.htick-red{background:#e74c3c}
 @media(max-width:640px){.hero-ticker{display:none}}
+  #heroTickerInner{
+  min-width:200%;
+}
 </style>
 <script>
 (function(){
