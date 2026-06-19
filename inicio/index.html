@@ -721,8 +721,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 [data-time="noche"] .hero-mesh{background:radial-gradient(ellipse 62% 72% at 78% 12%,rgba(29,60,120,.45) 0%,transparent 60%),radial-gradient(ellipse 45% 55% at 12% 88%,rgba(80,40,140,.18) 0%,transparent 58%),linear-gradient(168deg,#04040a 0%,#060605 45%,#040408 100%)}
 .hero-ticker{position:absolute;bottom:0;left:0;right:0;z-index:6;height:44px;border-top:1px solid rgba(242,237,227,.07);background:rgba(6,6,5,.65);overflow:hidden;display:flex;align-items:center}
 @media(min-width:769px){@supports(backdrop-filter:blur(8px)){.hero-ticker{backdrop-filter:blur(8px)}}}
-.hero-ticker-inner{display:flex;align-items:center;gap:0;white-space:nowrap;animation:tickerScroll 38s linear infinite}
-@keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .hero-ticker:hover .hero-ticker-inner{animation-play-state:paused}
 .htick-item{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.45);display:inline-flex;align-items:center;gap:8px;padding:0 24px}
 .htick-sep{color:rgba(242,237,227,.12);font-size:14px;flex-shrink:0}
@@ -910,23 +908,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     </aside>
   </div>
   <canvas id="hero-particles" style="position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;" aria-hidden="true"></canvas>
-  <div class="hero-ticker" aria-label="Actividad en tiempo real" role="marquee">
-  <div class="hero-ticker-inner" id="hero-ticker-inner">
-    <span class="htick-item"><span class="htick-dot htick-green"></span>El Arca · Abierto ahora</span>
-    <span class="htick-sep">·</span>
-    <span class="htick-item"><span class="htick-dot htick-oro"></span>Nero Café · Alta demanda esta mañana</span>
-    <span class="htick-sep">·</span>
-    <span class="htick-item"><span class="htick-dot htick-green"></span>Bonhomia · Abierto ahora</span>
-    <span class="htick-sep">·</span>
-    <span class="htick-item"><span class="htick-dot htick-oro"></span>Bartolo · Trending esta noche</span>
-    <span class="htick-sep">·</span>
-    <span class="htick-item"><span class="htick-dot htick-red"></span>Yelatti Artesanal · Cerrado</span>
-    <span class="htick-sep">·</span>
-    <span class="htick-item"><span class="htick-dot htick-green"></span>7 Colinas · Abierto · Lleno</span>
-    <span class="htick-sep">·</span>
-    <span class="htick-item"><span class="htick-dot htick-oro"></span>House Garage · Top del fin de semana</span>
-    <span class="htick-sep">·</span>
-  </div>
+  <div class="hero-ticker" id="heroTicker" aria-label="Actividad en tiempo real" role="marquee">
+  <div class="hero-ticker-inner" id="heroTickerInner"></div>
 </div>
   <div class="hero-fade" aria-hidden="true"></div>
 </header>
@@ -1976,5 +1959,43 @@ entry.target.querySelectorAll('.stat-num').forEach(function(el){
 })();
 </script>
   <script src="uruspot-premium-v2.js"></script>
+  <script>
+(function(){
+  var items=[
+    {dot:'htick-green',name:'El Arca',status:'Abierto ahora'},
+    {dot:'htick-oro',name:'Nero Café',status:'Alta demanda esta mañana'},
+    {dot:'htick-green',name:'Bonhomia',status:'Abierto ahora'},
+    {dot:'htick-oro',name:'Bartolo',status:'Trending esta noche'},
+    {dot:'htick-red',name:'Yelatti Artesanal',status:'Cerrado'},
+    {dot:'htick-green',name:'7 Colinas',status:'Abierto · Lleno'},
+    {dot:'htick-oro',name:'House Garage',status:'Top del fin de semana'},
+    {dot:'htick-green',name:'Panettone',status:'Abierto · Últimos turnos'},
+    {dot:'htick-green',name:'London Café',status:'Abierto ahora'},
+    {dot:'htick-oro',name:'Klug Gebrau',status:'Nueva carta de cervezas'},
+    {dot:'htick-green',name:'Panza Verde',status:'Abierto · Especial del día'},
+    {dot:'htick-oro',name:'Faro 3260',status:'Atardecer de película hoy'},
+  ];
+  var html=items.map(function(i){
+    return '<span class="htick-item"><span class="htick-dot '+i.dot+'"></span>'+
+           '<span style="color:rgba(242,237,227,.75);font-weight:700;">'+i.name+'</span>'+
+           '&nbsp;·&nbsp;'+i.status+'</span>'+
+           '<span class="htick-sep" aria-hidden="true">✦</span>';
+  }).join('');
+  var track=document.getElementById('heroTickerInner');
+  if(!track)return;
+  track.innerHTML=html+html+html;
+  requestAnimationFrame(function(){
+    var single=track.scrollWidth/3;
+    var pos=0,paused=false;
+    var ticker=document.getElementById('heroTicker');
+    ticker.addEventListener('mouseenter',function(){paused=true;});
+    ticker.addEventListener('mouseleave',function(){paused=false;});
+    (function tick(){
+      if(!paused){pos+=0.55;if(pos>=single)pos-=single;track.style.transform='translateX('+(-pos)+'px)';}
+      requestAnimationFrame(tick);
+    })();
+  });
+})();
+</script>
 </body>
 </html>
