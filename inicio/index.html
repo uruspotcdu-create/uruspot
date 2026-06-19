@@ -1977,5 +1977,42 @@ entry.target.querySelectorAll('.stat-num').forEach(function(el){
 })();
 </script>
   <script src="uruspot-premium-v3.js"></script>
+  <script>
+(function(){
+  'use strict';
+  var inner = document.getElementById('heroTickerInner');
+  if(!inner) return;
+
+  var items = [
+    {dot:'htick-green', text:'El Arca · Abierto ahora'},
+    {dot:'htick-oro',   text:'Nero Café · Alta demanda'},
+    {dot:'htick-green', text:'Bonhomia · Abierto ahora'},
+    {dot:'htick-oro',   text:'7 Colinas · Muy visitado'},
+    {dot:'htick-green', text:'Panza Verde · Abierto ahora'},
+    {dot:'htick-red',   text:'Papa Luigi · Abre a las 19:00'},
+    {dot:'htick-oro',   text:'Panettone · Top panadería'},
+    {dot:'htick-green', text:'Justo José · Abierto ahora'},
+    {dot:'htick-oro',   text:'Yelatti Artesanal · Recomendado'},
+    {dot:'htick-green', text:'Bartolo · Abierto ahora'},
+    {dot:'htick-oro',   text:'538 Gym · Mejor puntuado'},
+    {dot:'htick-green', text:'Bella Vista · Abierto ahora'},
+  ];
+
+  var sep = '<span class="htick-sep">·</span>';
+  var html = '';
+  // duplicar para loop infinito
+  [items, items].forEach(function(arr){
+    arr.forEach(function(it){
+      html += '<span class="htick-item"><span class="htick-dot ' + it.dot + '"></span>' + it.text + '</span>' + sep;
+    });
+  });
+  inner.innerHTML = html;
+
+  // Animación CSS
+  var style = document.createElement('style');
+  style.textContent = '@keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}#heroTickerInner{animation:tickerScroll 30s linear infinite}#heroTickerInner:hover{animation-play-state:paused}';
+  document.head.appendChild(style);
+})();
+</script>
 </body>
 </html>
