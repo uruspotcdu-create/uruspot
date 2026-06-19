@@ -843,7 +843,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
 })();
 </script>
-  <link rel="stylesheet" href="uruspot-premium-v2.css">
+  <link rel="stylesheet" href="uruspot-premium-v3.css">
 </head>
 <body>
 <div id="progress-bar" aria-hidden="true"></div>
@@ -1958,44 +1958,6 @@ entry.target.querySelectorAll('.stat-num').forEach(function(el){
   });
 })();
 </script>
-  <script src="uruspot-premium-v2.js"></script>
-  <script>
-(function(){
-  var items=[
-    {dot:'htick-green',name:'El Arca',status:'Abierto ahora'},
-    {dot:'htick-oro',name:'Nero Café',status:'Alta demanda esta mañana'},
-    {dot:'htick-green',name:'Bonhomia',status:'Abierto ahora'},
-    {dot:'htick-oro',name:'Bartolo',status:'Trending esta noche'},
-    {dot:'htick-red',name:'Yelatti Artesanal',status:'Cerrado'},
-    {dot:'htick-green',name:'7 Colinas',status:'Abierto · Lleno'},
-    {dot:'htick-oro',name:'House Garage',status:'Top del fin de semana'},
-    {dot:'htick-green',name:'Panettone',status:'Abierto · Últimos turnos'},
-    {dot:'htick-green',name:'London Café',status:'Abierto ahora'},
-    {dot:'htick-oro',name:'Klug Gebrau',status:'Nueva carta de cervezas'},
-    {dot:'htick-green',name:'Panza Verde',status:'Abierto · Especial del día'},
-    {dot:'htick-oro',name:'Faro 3260',status:'Atardecer de película hoy'},
-  ];
-  var html=items.map(function(i){
-    return '<span class="htick-item"><span class="htick-dot '+i.dot+'"></span>'+
-           '<span style="color:rgba(242,237,227,.75);font-weight:700;">'+i.name+'</span>'+
-           '&nbsp;·&nbsp;'+i.status+'</span>'+
-           '<span class="htick-sep" aria-hidden="true">✦</span>';
-  }).join('');
-  var track=document.getElementById('heroTickerInner');
-  if(!track)return;
-  track.innerHTML=html+html+html;
-  requestAnimationFrame(function(){
-    var single=track.scrollWidth/3;
-    var pos=0,paused=false;
-    var ticker=document.getElementById('heroTicker');
-    ticker.addEventListener('mouseenter',function(){paused=true;});
-    ticker.addEventListener('mouseleave',function(){paused=false;});
-    (function tick(){
-      if(!paused){pos+=0.55;if(pos>=single)pos-=single;track.style.transform='translateX('+(-pos)+'px)';}
-      requestAnimationFrame(tick);
-    })();
-  });
-})();
-</script>
+  <script src="uruspot-premium-v3.js"></script>
 </body>
 </html>
