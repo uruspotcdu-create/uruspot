@@ -1560,7 +1560,1641 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
     </div>
   </details>
 </section>
+<style>
+/* ════════════════════════════════════════════════
+   SISTEMA DE DISEÑO — SECCIÓN UNIVERSITARIA v2
+   Variables propias, no dependen del sitio padre
+   ════════════════════════════════════════════════ */
+#uni-v2 {
+  --u-void:      #0c0b09;
+  --u-deep:      #141310;
+  --u-surface:   #1c1a16;
+  --u-lift:      #242119;
+  --u-cream:     #f5f0e8;
+  --u-cream2:    #ece5d8;
+  --u-cream3:    #d8d0c4;
+  --u-copper:    #b87333;
+  --u-copper2:   #d4924a;
+  --u-copper3:   #8a5520;
+  --u-moss:      #2c4a3e;
+  --u-moss2:     #3d6356;
+  --u-ink:       rgba(245,240,232,.92);
+  --u-muted:     rgba(245,240,232,.42);
+  --u-ghost:     rgba(245,240,232,.18);
+  --u-rule:      rgba(245,240,232,.09);
+  --u-ease:      cubic-bezier(0.25,0.46,0.45,0.94);
+  --u-spring:    cubic-bezier(0.34,1.56,0.64,1);
+  --u-expo:      cubic-bezier(0.16,1,0.3,1);
+  --u-gutter:    var(--gutter, 64px);
+  --f-display:   'DM Serif Display', serif;
+  --f-ui:        'Syne', sans-serif;
+  --f-italic:    'DM Serif Display', serif;
+}
 
+/* ── BASE ── */
+#uni-v2 {
+  background: var(--u-void);
+  color: var(--u-cream);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── CURSOR PREMIUM (desktop) ── */
+#uni-cursor {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--u-copper);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s linear, opacity 0.3s ease, width 0.35s var(--u-expo), height 0.35s var(--u-expo), background 0.35s ease;
+  opacity: 0;
+  mix-blend-mode: normal;
+}
+#uni-cursor.visible { opacity: 1; }
+#uni-cursor.hovering {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--u-copper);
+}
+
+/* ── GRAIN OVERLAY ── */
+#uni-v2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: .6;
+}
+
+/* ── AMBIENT GLOW ── */
+#uni-v2::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  max-width: 900px;
+  max-height: 900px;
+  background: radial-gradient(circle, rgba(184,115,51,.07) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+  animation: uAmbient 20s ease-in-out infinite alternate;
+}
+@keyframes uAmbient {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-40px, 60px) scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #uni-v2::after { animation: none; }
+}
+
+/* ── LAYOUT WRAPPER ── */
+.u-wrap {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── CAPÍTULO: BASE ── */
+.u-chapter {
+  padding: 96px var(--u-gutter);
+  position: relative;
+}
+.u-chapter + .u-chapter {
+  border-top: 1px solid var(--u-rule);
+}
+
+/* ── OBERTURA ── */
+.u-obertura {
+  padding: 120px var(--u-gutter) 100px;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.u-ob-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: uFadeUp 0.8s var(--u-expo) 0.3s forwards;
+}
+.u-ob-signal-line {
+  width: 40px;
+  height: 1px;
+  background: var(--u-copper);
+  transform-origin: left;
+  animation: uLineGrow 0.6s var(--u-expo) 0.5s both;
+}
+@keyframes uLineGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.u-ob-signal-text {
+  font-family: var(--f-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--u-copper);
+}
+.u-ob-signal-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--u-copper);
+  animation: uDotPulse 2.5s ease infinite;
+}
+@keyframes uDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.6); }
+}
+
+.u-ob-title {
+  font-family: var(--f-display);
+  font-size: clamp(52px, 8vw, 108px);
+  line-height: 0.88;
+  letter-spacing: -3px;
+  color: var(--u-cream);
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.u-ob-title-line {
+  display: block;
+  overflow: hidden;
+}
+
+.u-ob-title-line span {
+  display: block;
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.u-ob-title-line:nth-child(1) span { animation: uTitleReveal 0.9s var(--u-expo) 0.5s forwards; }
+.u-ob-title-line:nth-child(2) span { animation: uTitleReveal 0.9s var(--u-expo) 0.68s forwards; }
+.u-ob-title-line:nth-child(3) span { animation: uTitleReveal 0.9s var(--u-expo) 0.86s forwards; }
+
+@keyframes uTitleReveal {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-ob-title-line span,
+  .u-ob-signal { animation: none; opacity: 1; transform: none; }
+  .u-ob-signal-line { animation: none; }
+}
+
+.u-ob-title .u-gold {
+  font-style: italic;
+  color: var(--u-copper2);
+}
+
+.u-ob-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 48px;
+  margin-top: 64px;
+  flex-wrap: wrap;
+}
+
+.u-ob-desc {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: clamp(16px, 2vw, 20px);
+  line-height: 1.85;
+  color: var(--u-muted);
+  max-width: 560px;
+  opacity: 0;
+  animation: uFadeUp 0.8s var(--u-expo) 1.1s forwards;
+}
+.u-ob-desc em {
+  font-style: normal;
+  color: var(--u-cream);
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-ob-desc { animation: none; opacity: 1; }
+}
+
+.u-ob-faculties {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  animation: uFadeUp 0.8s var(--u-expo) 1.3s forwards;
+  flex-shrink: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-ob-faculties { animation: none; opacity: 1; }
+}
+
+.u-faculty-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--u-rule);
+  font-family: var(--f-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--u-ghost);
+  transition: color 0.35s ease;
+  cursor: default;
+}
+.u-faculty-row:first-child { border-top: 1px solid var(--u-rule); }
+.u-faculty-row:hover { color: var(--u-cream2); }
+.u-faculty-row::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--u-copper3);
+  flex-shrink: 0;
+  transition: background 0.35s ease;
+}
+.u-faculty-row:hover::before { background: var(--u-copper2); }
+
+.u-ob-scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: uFadeUp 0.8s var(--u-expo) 1.6s forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-ob-scroll-hint { animation: none; opacity: 1; }
+}
+.u-scroll-label {
+  font-family: var(--f-ui);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--u-ghost);
+}
+.u-scroll-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--u-copper), transparent);
+  animation: uScrollLine 2s ease infinite;
+  transform-origin: top;
+}
+@keyframes uScrollLine {
+  0%   { transform: scaleY(0); opacity: 0; transform-origin: top; }
+  50%  { transform: scaleY(1); opacity: 1; transform-origin: top; }
+  100% { transform: scaleY(1); opacity: 0; transform-origin: bottom; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-scroll-line { animation: none; }
+}
+
+/* ── CAPÍTULO: PRIMEROS DÍAS ── */
+.u-chapter-label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 56px;
+}
+.u-chapter-num {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--u-copper);
+  letter-spacing: 2px;
+}
+.u-chapter-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--u-rule);
+  position: relative;
+  overflow: hidden;
+}
+.u-chapter-rule::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--u-copper);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.8s var(--u-expo);
+}
+.u-chapter-rule.drawn::after { transform: scaleX(1); }
+
+.u-chapter-title {
+  font-family: var(--f-display);
+  font-size: clamp(32px, 5vw, 60px);
+  line-height: 0.92;
+  letter-spacing: -1.5px;
+  color: var(--u-cream);
+  margin-bottom: 16px;
+}
+.u-chapter-title em {
+  font-style: italic;
+  color: var(--u-copper2);
+}
+
+.u-chapter-intro {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--u-muted);
+  line-height: 1.85;
+  max-width: 600px;
+  margin-bottom: 64px;
+}
+
+/* LISTA EDITORIAL — "Primeros días" */
+.u-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.u-step {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0 40px;
+  padding: 40px 0;
+  border-bottom: 1px solid var(--u-rule);
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  transition: padding-left 0.45s var(--u-expo);
+}
+.u-step:first-child { border-top: 1px solid var(--u-rule); }
+.u-step:hover { padding-left: 12px; }
+
+.u-step-num {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 48px;
+  color: var(--u-copper3);
+  line-height: 1;
+  transition: color 0.4s ease;
+  padding-top: 4px;
+}
+.u-step:hover .u-step-num { color: var(--u-copper2); }
+
+.u-step-content { display: flex; flex-direction: column; gap: 10px; }
+
+.u-step-tag {
+  font-family: var(--f-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--u-moss2);
+}
+
+.u-step-title {
+  font-family: var(--f-display);
+  font-size: clamp(20px, 2.5vw, 28px);
+  line-height: 1.1;
+  color: var(--u-cream);
+  letter-spacing: -.3px;
+  transition: color 0.35s ease;
+}
+.u-step:hover .u-step-title { color: var(--u-cream2); }
+
+.u-step-body {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--u-muted);
+  line-height: 1.8;
+  max-width: 580px;
+}
+.u-step-body strong {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--u-cream2);
+}
+
+.u-step-arrow {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--u-ghost);
+  transition: color 0.35s ease, transform 0.45s var(--u-expo);
+}
+.u-step:hover .u-step-arrow {
+  color: var(--u-copper2);
+  transform: translateY(-50%) translateX(6px);
+}
+
+/* ── CAPÍTULO: MESA DEL ESTUDIANTE ── */
+.u-mesa {
+  background: var(--u-deep);
+  padding: 96px var(--u-gutter);
+}
+
+.u-mesa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--u-rule);
+  margin-top: 56px;
+}
+
+.u-mesa-feature {
+  grid-column: span 2;
+  background: var(--u-surface);
+  padding: 52px 52px 48px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: 220px;
+  text-decoration: none;
+  transition: background 0.5s ease;
+}
+.u-mesa-feature::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--u-copper3), var(--u-copper2), var(--u-copper3));
+  background-size: 200% 100%;
+  animation: uCopperShimmer 3s ease infinite;
+}
+@keyframes uCopperShimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: -100% 50%; }
+}
+.u-mesa-feature:hover { background: var(--u-lift); }
+.u-mesa-feature::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 90% 20%, rgba(184,115,51,.10) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.u-mf-left { position: relative; z-index: 1; }
+.u-mf-eyebrow {
+  font-family: var(--f-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--u-copper);
+  display: block;
+  margin-bottom: 14px;
+}
+.u-mf-name {
+  font-family: var(--f-display);
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 0.95;
+  color: var(--u-cream);
+  letter-spacing: -1px;
+  display: block;
+  margin-bottom: 16px;
+}
+.u-mf-desc {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--u-muted);
+  line-height: 1.8;
+  max-width: 440px;
+}
+.u-mf-right {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+.u-mf-price {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 52px;
+  line-height: 1;
+  color: var(--u-copper3);
+  letter-spacing: -2px;
+  transition: color 0.4s ease;
+}
+.u-mesa-feature:hover .u-mf-price { color: var(--u-copper2); }
+.u-mf-price-label {
+  font-family: var(--f-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--u-ghost);
+  text-align: right;
+}
+
+.u-mesa-item {
+  background: var(--u-surface);
+  padding: 36px 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  transition: background 0.4s ease, transform 0.45s var(--u-expo);
+}
+.u-mesa-item:hover {
+  background: var(--u-lift);
+  transform: translateY(-3px);
+}
+.u-mesa-item::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--u-copper);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--u-expo);
+}
+.u-mesa-item:hover::after { transform: scaleX(1); }
+
+.u-mi-tag {
+  font-family: var(--f-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--u-moss2);
+}
+.u-mi-name {
+  font-family: var(--f-display);
+  font-size: clamp(18px, 2.2vw, 24px);
+  color: var(--u-cream);
+  line-height: 1.1;
+  letter-spacing: -.2px;
+}
+.u-mi-desc {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--u-muted);
+  line-height: 1.78;
+  flex: 1;
+}
+.u-mi-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+.u-mi-price {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--u-copper3);
+  transition: color 0.35s ease;
+}
+.u-mesa-item:hover .u-mi-price { color: var(--u-copper2); }
+.u-mi-arrow {
+  font-size: 16px;
+  color: var(--u-ghost);
+  transition: transform 0.45s var(--u-expo), color 0.35s ease;
+}
+.u-mesa-item:hover .u-mi-arrow {
+  transform: translate(4px, -4px);
+  color: var(--u-copper2);
+}
+
+/* ── SECRETO (quote de conocedor) ── */
+.u-secreto {
+  background: var(--u-moss);
+  padding: 72px var(--u-gutter);
+  position: relative;
+  overflow: hidden;
+}
+.u-secreto::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 90% at 100% 50%, rgba(184,115,51,.12) 0%, transparent 55%);
+  pointer-events: none;
+}
+.u-secreto-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 64px;
+  align-items: center;
+}
+.u-secreto-left {}
+.u-secreto-label {
+  font-family: var(--f-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(184,115,51,.75);
+  display: block;
+  margin-bottom: 16px;
+}
+.u-secreto-ojo {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 64px;
+  line-height: 1;
+  color: rgba(245,240,232,.08);
+  display: block;
+  margin-top: 8px;
+}
+.u-secreto-quote {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: clamp(22px, 3.5vw, 38px);
+  line-height: 1.25;
+  color: var(--u-cream);
+  letter-spacing: -.5px;
+  position: relative;
+}
+.u-secreto-quote::before {
+  content: '"';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  font-size: 80px;
+  color: rgba(184,115,51,.25);
+  line-height: 1;
+  font-family: var(--f-display);
+}
+.u-secreto-source {
+  display: block;
+  margin-top: 24px;
+  font-family: var(--f-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(184,115,51,.55);
+}
+
+/* ── CAPÍTULO: DESPUÉS DE LAS DIEZ ── */
+.u-noche {
+  background: var(--u-void);
+}
+
+.u-noche-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 56px;
+  flex-wrap: wrap;
+}
+
+.u-noche-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.u-noche-item {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--u-rule);
+  text-decoration: none;
+  color: inherit;
+  min-height: 88px;
+  position: relative;
+  transition: background 0.4s ease;
+  overflow: hidden;
+}
+.u-noche-list > .u-noche-item:last-child { border-bottom: 1px solid var(--u-rule); }
+
+.u-noche-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--u-copper);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.4s var(--u-expo);
+}
+.u-noche-item:hover::before { transform: scaleY(1); }
+.u-noche-item:hover { background: rgba(245,240,232,.025); }
+
+.u-ni-rank {
+  width: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 32px;
+  color: rgba(184,115,51,.20);
+  flex-shrink: 0;
+  transition: color 0.4s ease;
+  border-right: 1px solid var(--u-rule);
+}
+.u-noche-item:hover .u-ni-rank { color: rgba(184,115,51,.55); }
+
+.u-ni-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 28px;
+}
+.u-ni-info { flex: 1; }
+.u-ni-tag {
+  font-family: var(--f-ui);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--u-moss2);
+  display: block;
+  margin-bottom: 5px;
+}
+.u-ni-name {
+  font-family: var(--f-display);
+  font-size: clamp(18px, 2.2vw, 24px);
+  color: var(--u-cream);
+  line-height: 1.1;
+  display: block;
+  letter-spacing: -.2px;
+}
+.u-ni-desc {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--u-muted);
+  line-height: 1.6;
+  margin-top: 5px;
+  display: block;
+}
+.u-ni-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.u-ni-price {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--u-copper3);
+}
+.u-ni-vibe {
+  font-family: var(--f-ui);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--u-ghost);
+  white-space: nowrap;
+}
+.u-ni-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 24px 0 0;
+  font-size: 18px;
+  color: var(--u-ghost);
+  flex-shrink: 0;
+  transition: transform 0.45s var(--u-expo), color 0.35s ease;
+}
+.u-noche-item:hover .u-ni-arrow {
+  transform: translateX(6px);
+  color: var(--u-copper2);
+}
+
+/* ── CAPÍTULO: SUPERVIVENCIA ── */
+.u-surv {
+  background: var(--u-surface);
+}
+
+.u-surv-intro {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: clamp(18px, 2.5vw, 26px);
+  color: var(--u-muted);
+  line-height: 1.5;
+  max-width: 700px;
+  margin-bottom: 64px;
+}
+.u-surv-intro em {
+  font-style: normal;
+  color: var(--u-cream2);
+}
+
+.u-surv-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--u-rule);
+  margin-bottom: 56px;
+}
+
+.u-surv-chip {
+  background: var(--u-deep);
+  padding: 28px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s ease;
+}
+.u-surv-chip:hover { background: var(--u-void); }
+.u-surv-chip::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--u-copper3);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--u-expo);
+}
+.u-surv-chip:hover::before { transform: scaleX(1); }
+
+.u-sc-icon { font-size: 26px; line-height: 1; }
+.u-sc-name {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--u-cream);
+  line-height: 1.15;
+}
+.u-sc-sub {
+  font-family: var(--f-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--u-ghost);
+  line-height: 1.5;
+}
+.u-sc-arrow {
+  margin-top: auto;
+  font-size: 13px;
+  color: var(--u-ghost);
+  transition: color 0.35s ease, transform 0.35s var(--u-expo);
+}
+.u-surv-chip:hover .u-sc-arrow {
+  color: var(--u-copper2);
+  transform: translate(3px, -3px);
+}
+
+/* EMERGENCIAS */
+.u-emg-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--u-rule);
+}
+
+.u-emg-btn {
+  background: rgba(192,57,43,.07);
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 20px;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.35s ease;
+}
+.u-emg-btn:hover { background: rgba(192,57,43,.14); }
+.u-emg-num {
+  font-family: var(--f-display);
+  font-size: 44px;
+  line-height: 1;
+  color: rgba(231,76,60,.80);
+  letter-spacing: -2px;
+  transition: color 0.35s ease;
+}
+.u-emg-btn:hover .u-emg-num { color: rgba(231,76,60,1); }
+.u-emg-label {
+  font-family: var(--f-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(245,240,232,.35);
+}
+.u-emg-sub {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: 11px;
+  color: rgba(245,240,232,.22);
+}
+
+/* ── CIERRE ── */
+.u-cierre {
+  background: var(--u-void);
+  padding: 96px var(--u-gutter);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.u-cierre::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--u-rule), transparent);
+}
+.u-cierre-title {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: clamp(28px, 4.5vw, 52px);
+  color: var(--u-cream);
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+  display: block;
+}
+.u-cierre-title em { color: var(--u-copper2); }
+.u-cierre-sub {
+  font-family: var(--f-italic);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--u-muted);
+  line-height: 1.85;
+  max-width: 480px;
+  margin: 0 auto 40px;
+  display: block;
+}
+.u-cierre-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--u-copper);
+  color: var(--u-void);
+  font-family: var(--f-ui);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 18px 44px;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: background 0.35s ease, transform 0.4s var(--u-expo), box-shadow 0.4s ease;
+  box-shadow: 0 8px 40px rgba(184,115,51,.30);
+}
+.u-cierre-cta:hover {
+  background: var(--u-copper2);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 60px rgba(184,115,51,.40);
+}
+.u-cierre-cta:focus-visible {
+  outline: 2px solid var(--u-copper2);
+  outline-offset: 4px;
+}
+
+/* ── REVEAL ANIMATION ── */
+@keyframes uFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.u-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--u-expo), transform 0.7s var(--u-expo);
+  transition-delay: var(--u-delay, 0ms);
+}
+.u-reveal.u-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+  .u-surv-grid { grid-template-columns: repeat(2, 1fr); }
+  .u-secreto-inner { grid-template-columns: 1fr; gap: 32px; }
+}
+
+@media (max-width: 860px) {
+  #uni-v2 { --u-gutter: 28px; }
+  .u-obertura { padding: 80px var(--u-gutter) 72px; }
+  .u-ob-bottom { flex-direction: column; gap: 36px; align-items: flex-start; }
+  .u-mesa-feature { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .u-mf-right { align-items: flex-start; }
+  .u-chapter { padding: 72px var(--u-gutter); }
+  .u-mesa { padding: 72px var(--u-gutter); }
+  .u-noche { padding: 72px var(--u-gutter); }
+  .u-surv { padding: 72px var(--u-gutter); }
+  .u-cierre { padding: 72px var(--u-gutter); }
+  .u-secreto { padding: 56px var(--u-gutter); }
+  .u-step { grid-template-columns: 56px 1fr; gap: 0 24px; }
+  .u-step-num { font-size: 36px; }
+  .u-ni-body { padding: 20px; }
+}
+
+@media (max-width: 640px) {
+  #uni-v2 { --u-gutter: 18px; }
+  .u-ob-title { letter-spacing: -1.5px; }
+  .u-obertura { min-height: 100svh; padding: 60px var(--u-gutter) 56px; }
+  .u-mesa-grid { grid-template-columns: 1fr; }
+  .u-mesa-feature { grid-column: span 1; padding: 32px 24px; }
+  .u-mf-price { font-size: 40px; }
+  .u-surv-grid { grid-template-columns: repeat(2, 1fr); }
+  .u-emg-strip { grid-template-columns: 1fr; }
+  .u-step { grid-template-columns: 1fr; gap: 10px 0; padding: 28px 0; }
+  .u-step-num { font-size: 28px; }
+  .u-step-arrow { display: none; }
+  .u-ni-rank { width: 48px; font-size: 24px; }
+  .u-ni-meta { display: none; }
+  .u-ob-scroll-hint { display: none; }
+  .u-chapter { padding: 56px var(--u-gutter); }
+  .u-mesa { padding: 56px var(--u-gutter); }
+  .u-noche { padding: 56px var(--u-gutter); }
+  .u-surv { padding: 56px var(--u-gutter); }
+  .u-cierre { padding: 56px var(--u-gutter); }
+  .u-secreto { padding: 48px var(--u-gutter); }
+}
+
+@media (max-width: 380px) {
+  .u-surv-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .u-reveal { opacity: 1; transform: none; transition: none; }
+  #uni-cursor { display: none; }
+}
+</style>
+
+<!-- CURSOR PREMIUM -->
+<div id="uni-cursor" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════════
+     SECCIÓN UNIVERSITARIA v2
+     ══════════════════════════════════════════════ -->
+<section
+  id="uni-v2"
+  role="region"
+  aria-labelledby="uni-v2-title"
+>
+  <div class="u-wrap">
+
+    <!-- ── CAPÍTULO 0: OBERTURA ── -->
+    <div class="u-obertura">
+      <div class="u-ob-signal" aria-hidden="true">
+        <span class="u-ob-signal-line"></span>
+        <span class="u-ob-signal-text">Para universitarios</span>
+        <span class="u-ob-signal-dot"></span>
+      </div>
+      <h2 class="u-ob-title" id="uni-v2-title">
+        <span class="u-ob-title-line"><span>Llegaste.</span></span>
+        <span class="u-ob-title-line"><span>Ahora <em class="u-gold">conocé</em></span></span>
+        <span class="u-ob-title-line"><span>la ciudad.</span></span>
+      </h2>
+      <div class="u-ob-bottom">
+        <p class="u-ob-desc">
+          CdU tiene <em>mucho más</em> de lo que cualquier grupo de WhatsApp te va a contar.
+          Esta guía la escribió alguien que ya vivió lo que vos estás por vivir.
+        </p>
+        <nav class="u-ob-faculties" aria-label="Facultades en Concepción del Uruguay">
+          <span class="u-faculty-row">UNER — Ingeniería</span>
+          <span class="u-faculty-row">UNER — Medicina</span>
+          <span class="u-faculty-row">UCU</span>
+          <span class="u-faculty-row">UADER — FCyT</span>
+          <span class="u-faculty-row">UADER</span>
+          <span class="u-faculty-row">Nocturna</span>
+        </nav>
+      </div>
+      <div class="u-ob-scroll-hint" aria-hidden="true">
+        <span class="u-scroll-label">Seguí leyendo</span>
+        <span class="u-scroll-line"></span>
+      </div>
+    </div>
+
+    <!-- ── CAPÍTULO 1: LOS PRIMEROS DÍAS ── -->
+    <div class="u-chapter u-reveal" id="uni-primeros">
+      <div class="u-chapter-label">
+        <span class="u-chapter-num">01</span>
+        <span class="u-chapter-rule" aria-hidden="true"></span>
+      </div>
+      <h3 class="u-chapter-title">Los primeros<br /><em>días.</em></h3>
+      <p class="u-chapter-intro">
+        Cada año en marzo llegan miles de estudiantes a CdU. Los primeros días son caóticos.
+        Esta es la secuencia que funciona.
+      </p>
+
+      <div class="u-steps" role="list">
+        <div class="u-step" role="listitem">
+          <div class="u-step-num" aria-hidden="true">01</div>
+          <div class="u-step-content">
+            <span class="u-step-tag">Lo primero que hacés</span>
+            <span class="u-step-title">Encontrá dónde vivir antes de llegar</span>
+            <p class="u-step-body">
+              No hay residencias universitarias en CdU. La búsqueda es completamente privada.
+              <strong>Los grupos de Facebook y WhatsApp de tu facultad</strong> son el mercado real —
+              buscalos antes de salir de tu ciudad de origen.
+              Pensiones, departamentos compartidos y casas de familia son las tres opciones que vas a encontrar.
+            </p>
+          </div>
+          <span class="u-step-arrow" aria-hidden="true">→</span>
+        </div>
+
+        <div class="u-step" role="listitem">
+          <div class="u-step-num" aria-hidden="true">02</div>
+          <div class="u-step-content">
+            <span class="u-step-tag">La logística del día 1</span>
+            <span class="u-step-title">Cómo llegar y cómo moverte</span>
+            <p class="u-step-body">
+              La Terminal de Ómnibus está bien conectada. Una vez en la ciudad,
+              el centro se recorre <strong>a pie o en bici</strong> — las distancias son manejables.
+              Los colectivos urbanos cubren los barrios.
+              <strong>Guardá el número de una remisería</strong> desde el primer día — no hay Uber en CdU.
+            </p>
+          </div>
+          <span class="u-step-arrow" aria-hidden="true">→</span>
+        </div>
+
+        <div class="u-step" role="listitem">
+          <div class="u-step-num" aria-hidden="true">03</div>
+          <div class="u-step-content">
+            <span class="u-step-tag">El secreto del presupuesto</span>
+            <span class="u-step-title">El menú del día es sagrado</span>
+            <p class="u-step-body">
+              La mayoría de los bodegones de CdU ofrecen menú ejecutivo de lunes a viernes al mediodía.
+              Puede ser <strong>la mitad del precio de la carta</strong>.
+              Siempre preguntá antes de abrir el menú.
+              Esta costumbre sola puede cambiar radicalmente cuánto gastás al mes.
+            </p>
+          </div>
+          <span class="u-step-arrow" aria-hidden="true">→</span>
+        </div>
+
+        <div class="u-step" role="listitem">
+          <div class="u-step-num" aria-hidden="true">04</div>
+          <div class="u-step-content">
+            <span class="u-step-tag">Lo que nadie te dice</span>
+            <span class="u-step-title">Los lunes la ciudad duerme</span>
+            <p class="u-step-body">
+              Muchos restaurantes y comercios cierran los lunes en CdU.
+              Si llegás un lunes y querés comer bien, tu lista de opciones se reduce drásticamente.
+              <strong>Sanduba, El Calderón y Panza Verde</strong> son de los pocos que mantienen horario regular.
+              Chequeá el estado "Abierto ahora" en cada tarjeta de esta guía.
+            </p>
+          </div>
+          <span class="u-step-arrow" aria-hidden="true">→</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CAPÍTULO 2: LA MESA DEL ESTUDIANTE ── -->
+    <div class="u-mesa u-reveal" style="--u-delay:100ms" id="uni-mesa">
+      <div class="u-chapter-label">
+        <span class="u-chapter-num">02</span>
+        <span class="u-chapter-rule" aria-hidden="true"></span>
+      </div>
+      <h3 class="u-chapter-title">La mesa del<br /><em>estudiante.</em></h3>
+      <p class="u-chapter-intro">
+        Los lugares que realmente frecuentan los que ya llevan un año en la ciudad.
+        No los más lindos. Los más nuestros.
+      </p>
+
+      <div class="u-mesa-grid">
+        <!-- Feature -->
+        <a class="u-mesa-feature" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" aria-label="Sanduba — el más buscado">
+          <div class="u-mf-left">
+            <span class="u-mf-eyebrow">El imprescindible</span>
+            <span class="u-mf-name">Sanduba</span>
+            <p class="u-mf-desc">
+              El lugar más buscado de CdU cuando hay que comer rápido y gastar poco.
+              Sin vueltas, sin demora, sin excusas. El Sanduba es el que siempre está.
+            </p>
+          </div>
+          <div class="u-mf-right">
+            <span class="u-mf-price">$</span>
+            <span class="u-mf-price-label">Económico</span>
+          </div>
+        </a>
+
+        <a class="u-mesa-item u-reveal" style="--u-delay:50ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" aria-label="El Calderón — comida casera">
+          <span class="u-mi-tag">Comida casera</span>
+          <span class="u-mi-name">El Calderón</span>
+          <p class="u-mi-desc">Menú del día, porción generosa, precio justo. El bodegón que todos extrañan cuando no está.</p>
+          <div class="u-mi-bottom">
+            <span class="u-mi-price">$</span>
+            <span class="u-mi-arrow">↗</span>
+          </div>
+        </a>
+
+        <a class="u-mesa-item u-reveal" style="--u-delay:100ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" aria-label="Panza Verde — saludable">
+          <span class="u-mi-tag">Saludable</span>
+          <span class="u-mi-name">Panza Verde</span>
+          <p class="u-mi-desc">Cuando querés cuidarte sin quebrarte. Ensaladas, bowls y opciones vegetarianas con precio razonable.</p>
+          <div class="u-mi-bottom">
+            <span class="u-mi-price">$$</span>
+            <span class="u-mi-arrow">↗</span>
+          </div>
+        </a>
+
+        <a class="u-mesa-item u-reveal" style="--u-delay:150ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" aria-label="Papa Luigi — pizza y pasta">
+          <span class="u-mi-tag">Italiana</span>
+          <span class="u-mi-name">Papa Luigi</span>
+          <p class="u-mi-desc">Para salir en grupo después de rendir. Pizza y pasta a precio accesible, ambiente que acompaña.</p>
+          <div class="u-mi-bottom">
+            <span class="u-mi-price">$$</span>
+            <span class="u-mi-arrow">↗</span>
+          </div>
+        </a>
+
+        <a class="u-mesa-item u-reveal" style="--u-delay:200ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/" aria-label="Nero Café — estudiar afuera">
+          <span class="u-mi-tag">Para estudiar afuera</span>
+          <span class="u-mi-name">Nero Café</span>
+          <p class="u-mi-desc">El mejor café de especialidad de CdU. WiFi estable, mesas amplias. El café que pedís a las 10 AM dura toda la mañana.</p>
+          <div class="u-mi-bottom">
+            <span class="u-mi-price">$$</span>
+            <span class="u-mi-arrow">↗</span>
+          </div>
+        </a>
+
+        <a class="u-mesa-item u-reveal" style="--u-delay:250ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" aria-label="Cultura Café — estudio silencioso">
+          <span class="u-mi-tag">Silencio garantizado</span>
+          <span class="u-mi-name">Cultura Café</span>
+          <p class="u-mi-desc">El café más tranquilo de CdU. Libros, arte, sin ruido. El lugar que buscás en época de finales.</p>
+          <div class="u-mi-bottom">
+            <span class="u-mi-price">$$</span>
+            <span class="u-mi-arrow">↗</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── SECRETO ── -->
+    <div class="u-secreto u-reveal">
+      <div class="u-secreto-inner">
+        <div class="u-secreto-left">
+          <span class="u-secreto-label">Lo que saben los que llevan un año</span>
+          <span class="u-secreto-ojo" aria-hidden="true">👁</span>
+        </div>
+        <div>
+          <blockquote class="u-secreto-quote">
+            "Preguntá siempre por el menú del día antes de abrir la carta. En CdU eso puede significar
+            la diferencia entre gastar $4.000 o $8.000 en el almuerzo."
+          </blockquote>
+          <span class="u-secreto-source">— Consejo de estudiante, tercer año</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CAPÍTULO 3: DESPUÉS DE LAS DIEZ ── -->
+    <div class="u-chapter u-noche u-reveal" style="--u-delay:80ms" id="uni-noche">
+      <div class="u-chapter-label">
+        <span class="u-chapter-num">03</span>
+        <span class="u-chapter-rule" aria-hidden="true"></span>
+      </div>
+      <div class="u-noche-header">
+        <div>
+          <h3 class="u-chapter-title">Después de<br /><em>las diez.</em></h3>
+          <p class="u-chapter-intro" style="margin-bottom:0">
+            La noche en CdU empieza tarde. Si llegás antes de las 22:30 vas a tener el lugar solo.
+            Lo cual tampoco está mal para conseguir buena mesa.
+          </p>
+        </div>
+      </div>
+
+      <div class="u-noche-list" role="list" aria-label="Bares y vida nocturna">
+        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" role="listitem" aria-label="Bonhomia — el más sofisticado">
+          <div class="u-ni-rank" aria-hidden="true">01</div>
+          <div class="u-ni-body">
+            <div class="u-ni-info">
+              <span class="u-ni-tag">Cócteles · Moderno</span>
+              <span class="u-ni-name">Bonhomia</span>
+              <span class="u-ni-desc">El bar más sofisticado de CdU. Cócteles bien hechos, sin pretensión. El clásico de los que ya conocen la ciudad.</span>
+            </div>
+            <div class="u-ni-meta">
+              <span class="u-ni-price">$$</span>
+              <span class="u-ni-vibe">Sofisticado</span>
+            </div>
+          </div>
+          <span class="u-ni-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/7-colinas/" role="listitem" aria-label="7 Colinas — el más animado">
+          <div class="u-ni-rank" aria-hidden="true">02</div>
+          <div class="u-ni-body">
+            <div class="u-ni-info">
+              <span class="u-ni-tag">Cerveza · Comida</span>
+              <span class="u-ni-name">7 Colinas</span>
+              <span class="u-ni-desc">El que siempre tiene gente. Beer y picada, ambiente que se construye solo. Uno de los más visitados de la ciudad.</span>
+            </div>
+            <div class="u-ni-meta">
+              <span class="u-ni-price">$$</span>
+              <span class="u-ni-vibe">Animado</span>
+            </div>
+          </div>
+          <span class="u-ni-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" role="listitem" aria-label="Klug Gebrau — cerveza artesanal">
+          <div class="u-ni-rank" aria-hidden="true">03</div>
+          <div class="u-ni-body">
+            <div class="u-ni-info">
+              <span class="u-ni-tag">Cervecería artesanal</span>
+              <span class="u-ni-name">Klug Gebrau</span>
+              <span class="u-ni-desc">Variedad de estilos, ambiente relajado. Ideal para grupos después de un parcial. Sin prisa, sin ruido.</span>
+            </div>
+            <div class="u-ni-meta">
+              <span class="u-ni-price">$$</span>
+              <span class="u-ni-vibe">Relajado</span>
+            </div>
+          </div>
+          <span class="u-ni-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" role="listitem" aria-label="Bartolo — cócteles creativos">
+          <div class="u-ni-rank" aria-hidden="true">04</div>
+          <div class="u-ni-body">
+            <div class="u-ni-info">
+              <span class="u-ni-tag">Tragos</span>
+              <span class="u-ni-name">Bartolo</span>
+              <span class="u-ni-desc">Cócteles creativos, mejor relación precio-calidad en tragos que Bonhomia. Más íntimo, más tranquilo.</span>
+            </div>
+            <div class="u-ni-meta">
+              <span class="u-ni-price">$$</span>
+              <span class="u-ni-vibe">Íntimo</span>
+            </div>
+          </div>
+          <span class="u-ni-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/house-garage/" role="listitem" aria-label="House Garage — bar temático">
+          <div class="u-ni-rank" aria-hidden="true">05</div>
+          <div class="u-ni-body">
+            <div class="u-ni-info">
+              <span class="u-ni-tag">Temático</span>
+              <span class="u-ni-name">House Garage</span>
+              <span class="u-ni-desc">Para cuando querés algo que no sea siempre lo mismo. Decoración original, buena onda, diferente.</span>
+            </div>
+            <div class="u-ni-meta">
+              <span class="u-ni-price">$$</span>
+              <span class="u-ni-vibe">Original</span>
+            </div>
+          </div>
+          <span class="u-ni-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" role="listitem" aria-label="Justo José — parrilla y bar">
+          <div class="u-ni-rank" aria-hidden="true">06</div>
+          <div class="u-ni-body">
+            <div class="u-ni-info">
+              <span class="u-ni-tag">Parrilla · Bar</span>
+              <span class="u-ni-name">Justo José</span>
+              <span class="u-ni-desc">El lugar que combina comida real con ambiente de bar. Abierto todos los días — el comodín del estudiante.</span>
+            </div>
+            <div class="u-ni-meta">
+              <span class="u-ni-price">$$</span>
+              <span class="u-ni-vibe">Confiable</span>
+            </div>
+          </div>
+          <span class="u-ni-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── CAPÍTULO 4: SUPERVIVENCIA ── -->
+    <div class="u-chapter u-surv u-reveal" style="--u-delay:60ms" id="uni-surv">
+      <div class="u-chapter-label">
+        <span class="u-chapter-num">04</span>
+        <span class="u-chapter-rule" aria-hidden="true"></span>
+      </div>
+      <h3 class="u-chapter-title">Kit de<br /><em>supervivencia.</em></h3>
+      <p class="u-surv-intro">
+        Todo lo que necesitás para moverte en CdU sin que nadie te tenga que explicar nada.
+        <em>Los accesos que abrís una vez y guardás para siempre.</em>
+      </p>
+
+      <div class="u-surv-grid" role="list" aria-label="Servicios útiles de la ciudad">
+        <a class="u-surv-chip" href="https://www.todoconcepcion.com/TodoConcepcion/farmacias-de-turno-disponibles-hoy/" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Farmacia de turno hoy">
+          <span class="u-sc-icon" aria-hidden="true">💊</span>
+          <span class="u-sc-name">Farmacia de turno</span>
+          <span class="u-sc-sub">Actualizado cada día · 24 hs corridas</span>
+          <span class="u-sc-arrow" aria-hidden="true">↗</span>
+        </a>
+
+        <a class="u-surv-chip" href="https://moovitapp.com/index/es-419/transporte_p%C3%BAblico-lines-Concepci%C3%B3n_del_Uruguay-5697-1351451" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Colectivos urbanos">
+          <span class="u-sc-icon" aria-hidden="true">🚌</span>
+          <span class="u-sc-name">Colectivos</span>
+          <span class="u-sc-sub">Líneas urbanas · Tiempo real</span>
+          <span class="u-sc-arrow" aria-hidden="true">↗</span>
+        </a>
+
+        <a class="u-surv-chip" href="https://www.centraldepasajes.com.ar/pasaje-micro/terminal-de-concepcion-del-uruguay.html" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Terminal de ómnibus">
+          <span class="u-sc-icon" aria-hidden="true">🚍</span>
+          <span class="u-sc-name">Terminal</span>
+          <span class="u-sc-sub">Larga distancia · Horarios</span>
+          <span class="u-sc-arrow" aria-hidden="true">↗</span>
+        </a>
+
+        <a class="u-surv-chip" href="https://www.google.com/maps/place/Hospital+Justo+Jos%C3%A9+de+Urquiza" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Hospital Urquiza">
+          <span class="u-sc-icon" aria-hidden="true">🏥</span>
+          <span class="u-sc-name">Hospital Urquiza</span>
+          <span class="u-sc-sub">Guardia 24 hs · Maps</span>
+          <span class="u-sc-arrow" aria-hidden="true">↗</span>
+        </a>
+
+        <a class="u-surv-chip" href="https://dolarito.ar" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Dólar del día">
+          <span class="u-sc-icon" aria-hidden="true">💵</span>
+          <span class="u-sc-name">Dólar del día</span>
+          <span class="u-sc-sub">Oficial · Blue · Tarjeta</span>
+          <span class="u-sc-arrow" aria-hidden="true">↗</span>
+        </a>
+
+        <a class="u-surv-chip" href="https://enersa.com.ar" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="ENERSA — cortes de luz">
+          <span class="u-sc-icon" aria-hidden="true">🔌</span>
+          <span class="u-sc-name">ENERSA</span>
+          <span class="u-sc-sub">Cortes de luz · Entre Ríos</span>
+          <span class="u-sc-arrow" aria-hidden="true">↗</span>
+        </a>
+
+        <a class="u-surv-chip" href="https://cdeluruguay.gob.ar/" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Municipio — eventos y trámites">
+          <span class="u-sc-icon" aria-hidden="true">🏛️</span>
+          <span class="u-sc-name">Municipio</span>
+          <span class="u-sc-sub">Eventos · Trámites · Agenda</span>
+          <span class="u-sc-arrow" aria-hidden="true">↗</span>
+        </a>
+
+        <a class="u-surv-chip" href="https://www.google.com/maps/search/remises+Concepcion+del+Uruguay" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Remises en CdU">
+          <span class="u-sc-icon" aria-hidden="true">🚕</span>
+          <span class="u-sc-name">Remises</span>
+          <span class="u-sc-sub">Sin Uber — guardar antes de salir</span>
+          <span class="u-sc-arrow" aria-hidden="true">↗</span>
+        </a>
+      </div>
+
+      <!-- Emergencias -->
+      <div class="u-chapter-label" style="margin-bottom:28px;">
+        <span class="u-chapter-num" style="color:rgba(192,57,43,.70);">SOS</span>
+        <span class="u-chapter-rule" aria-hidden="true"></span>
+      </div>
+      <div class="u-emg-strip" role="list" aria-label="Números de emergencia">
+        <a class="u-emg-btn" href="tel:107" role="listitem" aria-label="SAME — marcar 107">
+          <span class="u-emg-num">107</span>
+          <span class="u-emg-label">🚑 SAME</span>
+          <span class="u-emg-sub">Emergencias médicas</span>
+        </a>
+        <a class="u-emg-btn" href="tel:911" role="listitem" aria-label="Policía — marcar 911">
+          <span class="u-emg-num">911</span>
+          <span class="u-emg-label">🚓 Policía</span>
+          <span class="u-emg-sub">Seguridad</span>
+        </a>
+        <a class="u-emg-btn" href="tel:100" role="listitem" aria-label="Bomberos — marcar 100">
+          <span class="u-emg-num">100</span>
+          <span class="u-emg-label">🔥 Bomberos</span>
+          <span class="u-emg-sub">Incendio · Rescate</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── CIERRE ── -->
+    <div class="u-cierre u-reveal">
+      <span class="u-cierre-title">La guía que<br />querías tener <em>desde el primer día.</em></span>
+      <span class="u-cierre-sub">
+        55 lugares verificados, horarios en tiempo real y todo lo que vale la pena en CdU.
+        Sin publicidad. Sin mentiras.
+      </span>
+      <a class="u-cierre-cta" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/" target="_blank" rel="noopener noreferrer">
+        Ver la guía completa →
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── CURSOR PREMIUM ── */
+  var cursor = document.getElementById('uni-cursor');
+  var section = document.getElementById('uni-v2');
+  var cursorX = 0, cursorY = 0;
+  var targetX = 0, targetY = 0;
+  var rafId = null;
+
+  if (cursor && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+    section.addEventListener('mouseenter', function () {
+      cursor.classList.add('visible');
+      if (!rafId) animateCursor();
+    });
+    section.addEventListener('mouseleave', function () {
+      cursor.classList.remove('visible');
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    });
+    section.addEventListener('mousemove', function (e) {
+      targetX = e.clientX;
+      targetY = e.clientY;
+    });
+
+    var hoverables = section.querySelectorAll('a, button, .u-faculty-row');
+    hoverables.forEach(function (el) {
+      el.addEventListener('mouseenter', function () { cursor.classList.add('hovering'); });
+      el.addEventListener('mouseleave', function () { cursor.classList.remove('hovering'); });
+    });
+
+    function animateCursor() {
+      cursorX += (targetX - cursorX) * 0.12;
+      cursorY += (targetY - cursorY) * 0.12;
+      cursor.style.left = cursorX + 'px';
+      cursor.style.top  = cursorY + 'px';
+      rafId = requestAnimationFrame(animateCursor);
+    }
+  }
+
+  /* ── REVEAL CON INTERSECTION OBSERVER ── */
+  var revealEls = document.querySelectorAll('#uni-v2 .u-reveal');
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('u-visible');
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(function (el) { obs.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add('u-visible'); });
+  }
+
+  /* FALLBACK por si el observer no dispara */
+  setTimeout(function () {
+    revealEls.forEach(function (el) { el.classList.add('u-visible'); });
+  }, 1200);
+
+  /* ── CHAPTER RULE ANIMATION ── */
+  var rules = document.querySelectorAll('#uni-v2 .u-chapter-rule');
+  if ('IntersectionObserver' in window) {
+    var ruleObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('drawn');
+          ruleObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    rules.forEach(function (r) { ruleObs.observe(r); });
+  }
+
+  /* ── AÑADIR #ESTUDIANTES AL NAV del sitio (si el nav principal existe) ── */
+  var mainNav = document.getElementById('main-nav');
+  if (mainNav && !document.querySelector('.nav-item[data-section="estudiantes"]')) {
+    var divider = document.createElement('div');
+    divider.className = 'nav-divider';
+    divider.setAttribute('aria-hidden', 'true');
+    var navItem = document.createElement('a');
+    navItem.className = 'nav-item';
+    navItem.href = '#uni-v2';
+    navItem.setAttribute('data-section', 'estudiantes');
+    navItem.innerHTML = '<span class="nav-emoji" aria-hidden="true">🎓</span> Universitarios';
+    navItem.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById('uni-v2');
+      if (!target) return;
+      window.scrollTo({
+        top: target.getBoundingClientRect().top + window.scrollY - mainNav.offsetHeight - 24,
+        behavior: 'smooth'
+      });
+    });
+    mainNav.insertBefore(navItem, mainNav.querySelector('.search-icon-btn'));
+    mainNav.insertBefore(divider, navItem);
+  }
+
+})();
+</script>
 </main>
 
 <footer class="footer" role="contentinfo">
