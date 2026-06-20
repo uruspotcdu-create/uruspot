@@ -877,7 +877,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
   .glos-item-sym{font-size:15px}
   .glos-item-desc{font-size:11.5px;line-height:1.4}
   .glos-item{padding:16px 16px}
-}
+  }
+  /* ── ACCORDION CATEGORÍAS ── */
+.us-section > .section-header{cursor:pointer;user-select:none}
+.us-section > .section-header::before{content:'▾';font-size:14px;color:var(--verde);margin-right:10px;transition:transform 0.3s var(--ease);display:inline-block;order:-1}
+.us-section.acc-collapsed > .section-header::before{transform:rotate(-90deg)}
+.us-section > *:not(.section-header){max-height:10000px;overflow:hidden;transition:max-height 0.4s var(--ease),opacity 0.3s ease,margin 0.3s ease}
+.us-section.acc-collapsed > *:not(.section-header){max-height:0!important;opacity:0;margin:0!important;overflow:hidden}
 </style>
 <script>
 (function(){
@@ -2053,6 +2059,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
     });
   }
 
+  /* ====== ACCORDION CATEGORÍAS ====== */
+  ['restaurantes','cafes','bares','panaderias','heladerias','hosterias','gimnasios'].forEach(function(id){
+    var sec = document.getElementById(id);
+    if(!sec) return;
+    var hdr = sec.querySelector('.section-header');
+    if(hdr) hdr.addEventListener('click', function(){ sec.classList.toggle('acc-collapsed'); });
+  });
   /* ====== TOOLTIPS — fallback táctil en móvil ====== */
   var isTouch = window.matchMedia('(max-width:768px)').matches;
   if(isTouch){
