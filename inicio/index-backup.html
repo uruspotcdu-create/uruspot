@@ -59,6 +59,7 @@ img{display:block;max-width:100%}
   animation:rippleLive 2.5s ease-out infinite;
   pointer-events:none;will-change:transform,opacity
 }
+.rcard-open.is-unverified .rcard-open-dot::after{display:none}
 
 @keyframes dotGlow{
   from{opacity:0.5}
@@ -133,6 +134,7 @@ img{display:block;max-width:100%}
 .main-nav.scrolled{background:rgba(6,6,5,.97);box-shadow:0 4px 40px rgba(0,0,0,.50)}
 .nav-item{display:inline-flex;align-items:center;gap:8px;padding:0 24px;height:60px;font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.38);white-space:nowrap;flex-shrink:0;border-bottom:2px solid transparent;transition:color 0.3s ease,border-color 0.3s ease}
 .nav-item:hover,.nav-item.active{color:var(--parchment);border-bottom-color:var(--verde2)}
+.nav-item:focus-visible{color:var(--parchment);border-bottom-color:var(--oro2)}
 .nav-item .nav-emoji{font-size:14px;transition:transform 0.3s var(--ease)}
 .nav-item:hover .nav-emoji{transform:scale(1.2) rotate(-4deg)}
 .nav-divider{width:1px;margin:16px 0;background:rgba(242,237,227,.08);flex-shrink:0}
@@ -167,13 +169,13 @@ img{display:block;max-width:100%}
 .section-count{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--parchment);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:8px 16px;border-radius:2px;white-space:nowrap;flex-shrink:0}
 .us-section{margin-top:var(--section-gap);content-visibility:auto}
 
-#restaurantes{contain-intrinsic-size:auto 1px}
-#cafes{contain-intrinsic-size:auto 1px}
-#bares{contain-intrinsic-size:auto 1px}
-#panaderias{contain-intrinsic-size:auto 1px}
-#heladerias{contain-intrinsic-size:auto 1px}
-#hosterias{contain-intrinsic-size:auto 1px}
-#gimnasios{contain-intrinsic-size:auto 1px}
+#restaurantes{contain-intrinsic-size:auto 1400px}
+#cafes{contain-intrinsic-size:auto 900px}
+#bares{contain-intrinsic-size:auto 600px}
+#panaderias{contain-intrinsic-size:auto 700px}
+#heladerias{contain-intrinsic-size:auto 600px}
+#hosterias{contain-intrinsic-size:auto 700px}
+#gimnasios{contain-intrinsic-size:auto 900px}
 
 .uft-wrap,.ubc-wrap,.usb-wrap{contain:layout style}
 
@@ -181,10 +183,10 @@ img{display:block;max-width:100%}
 .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
 .cat-card{background:var(--ink);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:36px 32px 32px;text-decoration:none;position:relative;overflow:hidden;min-height:200px;transition:transform 0.4s var(--ease),box-shadow 0.4s ease;contain:layout style}
 .cat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(29,92,64,.25) 0%,transparent 60%);opacity:0;transition:opacity 0.4s ease}
-.cat-card:hover::before{opacity:1}
+.cat-card:hover::before,.cat-card:focus-visible::before{opacity:1}
 .cat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--verde),var(--oro));transform:scaleX(0);transform-origin:left;transition:transform 0.4s var(--ease)}
-.cat-card:hover::after{transform:scaleX(1)}
-.cat-card:hover{transform:translateY(-6px);box-shadow:0 28px 64px -10px rgba(6,6,5,.60)}
+.cat-card:hover::after,.cat-card:focus-visible::after{transform:scaleX(1)}
+.cat-card:hover,.cat-card:focus-visible{transform:translateY(-6px);box-shadow:0 28px 64px -10px rgba(6,6,5,.60)}
 .cat-card-bg{position:absolute;inset:0;opacity:.12;transition:opacity 0.4s ease,transform 0.6s var(--ease);font-size:120px;display:flex;align-items:center;justify-content:center;line-height:1;filter:blur(2px);pointer-events:none}
 .cat-card:hover .cat-card-bg{opacity:.20;transform:scale(1.08)}
 .cat-card-content{position:relative;z-index:2}
@@ -207,7 +209,7 @@ img{display:block;max-width:100%}
 .gym-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
 .gcard{background:#fff;display:flex;flex-direction:column;padding:32px 28px 28px;text-decoration:none;position:relative;overflow:hidden;min-height:180px;transition:background 0.4s var(--ease),transform 0.4s var(--ease),box-shadow 0.4s ease;contain:layout style}
 .gcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--verde);transform:scaleX(0);transform-origin:left;transition:transform 0.35s var(--ease);z-index:0}
-.gcard:hover::before{transform:scaleX(1)}
+.gcard:hover::before,.gcard:focus-visible::before{transform:scaleX(1)}
 .gcard-feat{grid-column:span 2;background:var(--ink);color:var(--parchment);padding:44px 40px 38px;min-height:220px;position:relative;overflow:hidden}
 .gcard-feat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--verde) 0%,var(--oro) 55%,var(--verde2) 100%);z-index:2;width:100%}
 .gcard-feat::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 65% 75% at 92% 18%,rgba(29,92,64,.28) 0%,transparent 58%),radial-gradient(ellipse 45% 55% at 8% 82%,rgba(196,135,42,.12) 0%,transparent 55%);pointer-events:none;z-index:1}
@@ -229,14 +231,15 @@ img{display:block;max-width:100%}
 .pill-rating{background:rgba(196,135,42,.10);border:1px solid rgba(196,135,42,.30);color:var(--oro)}
 .pill-price{background:rgba(29,92,64,.07);border:1px solid rgba(29,92,64,.22);color:var(--verde)}
 .pill-feat{background:rgba(242,237,227,.08);border:1px solid rgba(242,237,227,.18);color:rgba(242,237,227,.72)}
+.pill-sponsor{background:rgba(196,135,42,.14);border:1px solid rgba(196,135,42,.40);color:var(--oro)}
 .badge{position:absolute;top:0;right:20px;background:var(--verde);color:#fff;font-family:var(--f-ui);font-size:7px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;padding:5px 12px;border-radius:0 0 6px 6px;box-shadow:0 4px 16px rgba(29,92,64,.55);z-index:4}
 .badge-gold{background:var(--oro);box-shadow:0 4px 16px rgba(196,135,42,.55);color:var(--ink)}
 
 /* ── RESTO GRID ── */
 .resto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
-.rcard{background:#fff;display:flex;flex-direction:column;padding:32px 28px 28px;text-decoration:none;position:relative;overflow:hidden;min-height:180px;transition:background 0.4s var(--ease),transform 0.4s var(--ease),box-shadow 0.4s ease;contain:layout style}
+.rcard{background:#fff;display:flex;flex-direction:column;padding:32px 28px 28px;text-decoration:none;position:relative;overflow:hidden;min-height:180px;transition:background 0.4s var(--ease),transform 0.4s var(--ease),box-shadow 0.4s ease,opacity .3s ease;contain:layout style}
 .rcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--verde);transform:scaleX(0);transform-origin:left;transition:transform 0.35s var(--ease);z-index:0}
-.rcard:hover::before{transform:scaleX(1)}
+.rcard:hover::before,.rcard:focus-visible::before{transform:scaleX(1)}
 .rcard-feat{grid-column:span 2;background:var(--ink);color:var(--parchment);padding:44px 40px 38px;min-height:220px;position:relative;overflow:hidden}
 .rcard-popularity{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--verde),var(--oro2));transform-origin:left;transform:scaleX(0);transition:transform 0.8s var(--ease);z-index:5;border-radius:0}
 .rcard.visible .rcard-popularity{transform:scaleX(var(--pop-width,0))}
@@ -253,6 +256,7 @@ img{display:block;max-width:100%}
 .rcard-content{position:relative;z-index:2;display:flex;flex-direction:column;gap:13px;height:100%}
 .rcard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .rcard-open{display:inline-flex;align-items:center;gap:7px;background:rgba(29,92,64,.09);border:1px solid rgba(29,92,64,.25);border-radius:2px;color:var(--verde2);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:5px 10px}
+.rcard-open.is-unverified{background:rgba(26,25,22,.05);border-color:rgba(26,25,22,.14);color:rgba(26,25,22,.40)}
 .rcard-open-dot{width:5px;height:5px;background:var(--verde2);color:var(--verde2)}
 .rcard-icon{font-size:34px;line-height:1}
 .rcard-feat .rcard-icon{font-size:48px}
@@ -260,6 +264,8 @@ img{display:block;max-width:100%}
 .rcard-feat .rcard-name{color:var(--parchment);font-size:32px;letter-spacing:-.8px}
 .rcard-desc{font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(26,25,22,.52);line-height:1.75;margin:0;flex:1}
 .rcard-feat .rcard-desc{color:rgba(242,237,227,.46)}
+.rcard.mood-dim{opacity:.32;filter:saturate(.6)}
+.rcard.mood-match{box-shadow:0 0 0 2px rgba(196,135,42,.55),0 20px 48px -10px rgba(6,6,5,.30)}
 
 /* ── AD BANNER ── */
 .ad-banner{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;width:100%;box-sizing:border-box;background:var(--ink);border-left:5px solid var(--oro);padding:48px 52px;margin:90px 0;text-decoration:none;position:relative;overflow:hidden;transition:transform 0.4s var(--ease),box-shadow 0.4s ease;box-shadow:0 24px 72px -12px rgba(6,6,5,.35)}
@@ -268,6 +274,7 @@ img{display:block;max-width:100%}
 .ad-banner-left{display:flex;align-items:center;gap:28px;flex:1;min-width:0;position:relative;z-index:1;flex-wrap:wrap}
 .ad-banner-icon{width:68px;height:68px;border-radius:3px;background:rgba(196,135,42,.12);border:1px solid rgba(196,135,42,.28);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;transition:transform 0.4s var(--ease)}
 .ad-banner:hover .ad-banner-icon{transform:scale(1.06) rotate(-3deg)}
+.ad-banner-eyebrow{display:block;font-family:var(--f-ui);font-size:7px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:rgba(196,135,42,.65);margin-bottom:6px}
 .ad-banner-title{white-space:normal!important;word-break:normal!important;display:block;width:100%;font-family:var(--f-display);font-style:italic;font-size:22px;color:var(--parchment);margin-bottom:8px;letter-spacing:-.3px}
 .ad-banner-sub{font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(242,237,227,.40);line-height:1.7}
 .ad-banner-btn{position:relative;z-index:1;flex-shrink:0;background:var(--oro);color:var(--ink);font-family:var(--f-ui);font-size:10px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;padding:16px 36px;border-radius:2px;box-shadow:0 6px 24px rgba(196,135,42,.40);transition:background 0.35s ease,transform 0.35s var(--ease)}
@@ -275,7 +282,7 @@ img{display:block;max-width:100%}
 
 /* ── CAFÉ GRID ── */
 .cafe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.08);border:1px solid rgba(26,25,22,.08)}
-.ccard{position:relative;height:240px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;justify-content:flex-end;contain:layout style}
+.ccard{position:relative;height:240px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;justify-content:flex-end;contain:layout style;transition:opacity .3s ease}
 .ccard-bg{position:absolute;inset:0;transition:transform 0.65s var(--ease)}
 .ccard:hover .ccard-bg{transform:scale(1.07)}
 .ccard-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(6,6,5,.97) 0%,rgba(6,6,5,.50) 45%,rgba(6,6,5,.04) 100%);transition:opacity 0.45s ease}
@@ -285,24 +292,24 @@ img{display:block;max-width:100%}
 .ccard-label{font-family:var(--f-ui);font-size:7px;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--oro2)}
 .ccard-name{font-family:var(--f-display);font-style:italic;font-size:24px;line-height:1.05;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.90)}
 .ccard-border{position:absolute;inset:0;border:1px solid transparent;transition:border-color 0.4s ease;pointer-events:none;z-index:3}
-.ccard:hover .ccard-border{border-color:rgba(196,135,42,.40)}
+.ccard:hover .ccard-border,.ccard:focus-visible .ccard-border{border-color:rgba(196,135,42,.40)}
 .ccard-featured{grid-column:span 2;height:280px}
 .ccard-featured .ccard-name{font-size:34px}
 
 /* ── BARES ── */
 .bar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.08);border:1px solid rgba(26,25,22,.08)}
-.bcard{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:48px 20px 40px;text-align:center;text-decoration:none;position:relative;overflow:hidden;min-height:165px;transition:background 0.4s var(--ease),transform 0.4s var(--ease),box-shadow 0.4s ease;contain:layout style}
+.bcard{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:48px 20px 40px;text-align:center;text-decoration:none;position:relative;overflow:hidden;min-height:165px;transition:background 0.4s var(--ease),transform 0.4s var(--ease),box-shadow 0.4s ease,opacity .3s ease;contain:layout style}
 .bcard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:0;background:var(--verde);transition:height 0.35s var(--ease)}
-.bcard:hover{background:var(--parchment);transform:translateY(-5px);box-shadow:0 18px 44px -6px rgba(26,25,22,.14)}
-.bcard:hover::after{height:3px}
+.bcard:hover,.bcard:focus-visible{background:var(--parchment);transform:translateY(-5px);box-shadow:0 18px 44px -6px rgba(26,25,22,.14)}
+.bcard:hover::after,.bcard:focus-visible::after{height:3px}
 .bcard-icon{font-size:40px;line-height:1;transition:transform 0.4s var(--ease);position:relative;z-index:1}
 .bcard:hover .bcard-icon{transform:scale(1.15) rotate(-5deg)}
 .bcard-name{font-family:var(--f-display);font-size:15px;color:var(--ink);line-height:1.3;word-break:break-word;position:relative;z-index:1}
 
 /* ── LIST ── */
 .list-items{display:flex;flex-direction:column;gap:1px;background:rgba(26,25,22,.08);border:1px solid rgba(26,25,22,.08)}
-.litem{background:#fff;display:flex;align-items:center;gap:24px;padding:28px 32px;text-decoration:none;position:relative;overflow:hidden;border-left:4px solid transparent;transition:background 0.35s ease,border-left-color 0.35s ease,transform 0.35s var(--ease),box-shadow 0.35s ease;contain:layout style}
-.litem:hover{background:var(--parchment);border-left-color:var(--verde);transform:translateX(6px);box-shadow:-5px 0 24px -6px rgba(29,92,64,.22)}
+.litem{background:#fff;display:flex;align-items:center;gap:24px;padding:28px 32px;text-decoration:none;position:relative;overflow:hidden;border-left:4px solid transparent;transition:background 0.35s ease,border-left-color 0.35s ease,transform 0.35s var(--ease),box-shadow 0.35s ease,opacity .3s ease;contain:layout style}
+.litem:hover,.litem:focus-visible{background:var(--parchment);border-left-color:var(--verde);transform:translateX(6px);box-shadow:-5px 0 24px -6px rgba(29,92,64,.22)}
 .litem-icon{font-size:30px;flex-shrink:0;transition:transform 0.35s var(--ease)}
 .litem:hover .litem-icon{transform:scale(1.12)}
 .litem-name{font-family:var(--f-display);font-size:19px;color:var(--ink);flex:1;min-width:0;word-break:break-word;position:relative;z-index:1}
@@ -329,7 +336,7 @@ img{display:block;max-width:100%}
 .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s var(--ease),transform 0.7s var(--ease)}
 .reveal.visible{opacity:1;transform:translateY(0)}
 
-/* ── FARMACIA / EMERGENCIAS / SERVICIOS (deprioritizados, ver más abajo en el documento) ── */
+/* ── FARMACIA / EMERGENCIAS / SERVICIOS ── */
 .uft-wrap{width:100%;margin:0 0 80px 0;display:block;position:relative}
 .uft-section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;padding-bottom:20px;position:relative;gap:16px;flex-wrap:wrap}
 .uft-section-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(26,25,22,.12)}
@@ -446,7 +453,7 @@ img{display:block;max-width:100%}
 .usb-ind-icon{background:rgba(74,44,154,.14);border:1px solid rgba(74,44,154,.40)}.usb-ind-live{background:rgba(74,44,154,.12);border:1px solid rgba(74,44,154,.40);color:rgba(140,100,240,.95)}.usb-ind-dot{background:#8c64f0;color:#8c64f0}.usb-ind-cta{background:#4a2c9a;box-shadow:0 8px 40px rgba(74,44,154,.50)}.usb-ind-src{color:rgba(140,100,240,.40)}
 
 /* ── CLIMA HERO ── */
-.wx-hero{flex-shrink:0;width:280px;align-self:center;position:relative;z-index:4}
+.wx-hero{flex-shrink:0;width:240px;align-self:center;position:relative;z-index:4}
 .wx-hero-card{background:rgba(10,10,8,.90);border:1px solid rgba(242,237,227,.10);border-radius:4px;overflow:hidden;transition:border-color 0.4s ease,box-shadow 0.4s ease}
 .wx-hero-card:hover{border-color:rgba(196,135,42,.28);box-shadow:0 20px 60px rgba(0,0,0,.50)}
 @media(min-width:769px){
@@ -458,40 +465,39 @@ img{display:block;max-width:100%}
 @media(min-width:769px){
   .wx-hero-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(196,135,42,.60) 30%,rgba(242,192,96,.90) 50%,rgba(196,135,42,.60) 70%,transparent);animation:shimmerBar 3s ease infinite;pointer-events:none}
 }
-.wx-hero-body{padding:22px 24px 18px}
-.wx-hero-city{font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,.35);display:flex;align-items:center;gap:6px;margin-bottom:16px}
+.wx-hero-body{padding:18px 20px 14px}
+.wx-hero-city{font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,.35);display:flex;align-items:center;gap:6px;margin-bottom:14px}
 .wx-hero-city::before{content:'';display:block;width:5px;height:5px;border-radius:50%;background:var(--oro2);flex-shrink:0}
-.wx-hero-main{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
-.wx-hero-icon{font-size:44px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 12px rgba(0,0,0,.5));animation:wx-iconFloat 4s ease-in-out infinite alternate}
+.wx-hero-main{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.wx-hero-icon{font-size:36px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 12px rgba(0,0,0,.5));animation:wx-iconFloat 4s ease-in-out infinite alternate}
 @keyframes wx-iconFloat{from{transform:translateY(0)}to{transform:translateY(-4px)}}
 .wx-hero-temp-wrap{display:flex;flex-direction:column;gap:2px}
-.wx-hero-temp{font-family:var(--f-display);font-size:52px;line-height:1;color:var(--parchment);letter-spacing:-2px;display:flex;align-items:flex-start;min-height:62px}
-.wx-hero-temp sup{font-family:var(--f-ui);font-size:18px;font-weight:700;color:var(--oro2);margin-top:8px;letter-spacing:0}
-.wx-hero-desc{font-family:var(--f-italic);font-style:italic;font-size:13px;color:rgba(242,237,227,.55);line-height:1.3;min-height:20px}
-.wx-hero-sep{height:1px;background:rgba(242,237,227,.07);margin:14px 0}
-.wx-hero-data{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wx-hero-temp{font-family:var(--f-display);font-size:42px;line-height:1;color:var(--parchment);letter-spacing:-2px;display:flex;align-items:flex-start;min-height:50px}
+.wx-hero-temp sup{font-family:var(--f-ui);font-size:16px;font-weight:700;color:var(--oro2);margin-top:6px;letter-spacing:0}
+.wx-hero-desc{font-family:var(--f-italic);font-style:italic;font-size:12px;color:rgba(242,237,227,.55);line-height:1.3;min-height:18px}
+.wx-hero-sep{height:1px;background:rgba(242,237,227,.07);margin:12px 0}
+.wx-hero-data{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .wx-hero-datum{display:flex;flex-direction:column;gap:3px}
 .wx-hero-datum-label{font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.22)}
-.wx-hero-datum-val{font-family:var(--f-ui);font-size:13px;font-weight:700;color:rgba(242,237,227,.80);letter-spacing:.3px;min-height:22px;display:block}
-.wx-hero-footer{padding:10px 24px 14px;border-top:1px solid rgba(242,237,227,.05);display:flex;align-items:center;justify-content:space-between}
+.wx-hero-datum-val{font-family:var(--f-ui);font-size:12px;font-weight:700;color:rgba(242,237,227,.80);letter-spacing:.3px;min-height:20px;display:block}
+.wx-hero-footer{padding:8px 20px 12px;border-top:1px solid rgba(242,237,227,.05);display:flex;align-items:center;justify-content:space-between}
 .wx-hero-updated{font-family:var(--f-ui);font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.18);min-height:14px;display:block}
-.wx-hero-frase{font-family:var(--f-italic);font-style:italic;font-size:9px;color:rgba(196,135,42,.60);text-align:right;max-width:120px;line-height:1.4;min-height:14px;display:block}
+.wx-hero-frase{font-family:var(--f-italic);font-style:italic;font-size:9px;color:rgba(196,135,42,.60);text-align:right;max-width:110px;line-height:1.4;min-height:14px;display:block}
 .wx-skeleton{background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.07) 50%,rgba(255,255,255,.03) 75%);background-size:200% 100%;animation:wx-skel 1.4s linear infinite;border-radius:2px}
 @keyframes wx-skel{0%{background-position:200% 50%}100%{background-position:-200% 50%}}
-.wx-skel-temp{height:52px;width:120px;margin-bottom:8px}
+.wx-skel-temp{height:42px;width:100px;margin-bottom:6px}
 .wx-skel-desc{height:14px;width:90px}
-.wx-skel-datum{height:20px;width:60px}
-#wx-hero-temp{min-height:62px;display:flex;align-items:flex-start}
-#wx-hero-desc{min-height:20px}
-#wx-hero-feels,#wx-hero-hum,#wx-hero-wind,#wx-hero-rain{min-height:22px;display:block}
+.wx-skel-datum{height:18px;width:55px}
+#wx-hero-temp{min-height:50px;display:flex;align-items:flex-start}
+#wx-hero-desc{min-height:18px}
+#wx-hero-feels,#wx-hero-hum,#wx-hero-wind,#wx-hero-rain{min-height:20px;display:block}
 #wx-hero-updated{min-height:14px;display:block}
 #wx-hero-frase{min-height:14px;display:block}
 
 /* ====================================================================
-   BLOQUES NUEVOS — Mood Picker / Glosario / Tooltips / Breadcrumb / FAB
+   MOOD PICKER / GLOSARIO / TOOLTIPS / BREADCRUMB / FAB
    ==================================================================== */
 
-/* SELECTOR "¿QUÉ TE APETECE HOY?" */
 .mood-wrap{width:100%;margin:0 0 80px 0;display:block;position:relative}
 .mood-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;padding-bottom:20px;position:relative;gap:16px;flex-wrap:wrap}
 .mood-hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(26,25,22,.12)}
@@ -509,16 +515,20 @@ img{display:block;max-width:100%}
 .mood-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .mood-btn{background:rgba(242,237,227,.04);border:1px solid rgba(242,237,227,.12);border-radius:3px;padding:24px 18px 20px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;text-align:left;transition:background 0.3s ease,border-color 0.3s ease,transform 0.3s var(--ease);font-family:inherit;color:inherit}
 .mood-btn:hover{background:rgba(196,135,42,.08);border-color:rgba(196,135,42,.40);transform:translateY(-3px)}
+.mood-btn:focus-visible{background:rgba(196,135,42,.10);border-color:var(--oro2)}
 .mood-btn.active{background:rgba(29,92,64,.14);border-color:var(--verde2)}
 .mood-btn.suggested{box-shadow:0 0 0 1px rgba(196,135,42,.45)}
 .mood-btn-icon{font-size:26px;line-height:1}
 .mood-btn-label{font-family:var(--f-display);font-style:italic;font-size:16px;color:var(--parchment);line-height:1.2}
 .mood-btn-sub{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.30)}
 .mood-result{position:relative;z-index:1;margin-top:0;max-height:0;overflow:hidden;transition:max-height 0.5s var(--ease),margin-top 0.5s var(--ease)}
-.mood-result.open{max-height:600px;margin-top:28px}
-.mood-result-inner{border-top:1px solid rgba(242,237,227,.08);padding-top:24px;display:flex;flex-wrap:wrap;gap:10px}
+.mood-result.open{max-height:800px;margin-top:28px}
+.mood-result-inner{border-top:1px solid rgba(242,237,227,.08);padding-top:24px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.mood-result-hint{width:100%;font-family:var(--f-italic);font-style:italic;font-size:13px;color:rgba(242,237,227,.40);margin-bottom:6px}
 .mood-result-chip{display:inline-flex;align-items:center;gap:8px;background:rgba(242,237,227,.05);border:1px solid rgba(242,237,227,.14);border-radius:2px;padding:10px 16px;font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(242,237,227,.75);text-decoration:none;transition:background 0.3s ease,border-color 0.3s ease}
 .mood-result-chip:hover{background:rgba(196,135,42,.10);border-color:var(--oro2);color:var(--parchment)}
+.mood-result-clear{margin-left:auto;background:none;border:1px solid rgba(242,237,227,.18);color:rgba(242,237,227,.45);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:9px 14px;border-radius:2px;cursor:pointer;transition:border-color .25s ease,color .25s ease}
+.mood-result-clear:hover{border-color:rgba(242,237,227,.40);color:var(--parchment)}
 @media(max-width:860px){.mood-grid{grid-template-columns:repeat(2,1fr)}.mood-card{padding:30px 26px}}
 @media(max-width:640px){.mood-card{padding:26px 20px}.mood-question{font-size:20px;margin-bottom:22px}}
 
@@ -548,6 +558,7 @@ img{display:block;max-width:100%}
 /* BREADCRUMB DE SECCIÓN ACTUAL */
 .section-crumb{position:sticky;top:60px;z-index:850;background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.45);display:flex;align-items:center;gap:8px;transform:translateY(-100%);transition:transform 0.3s var(--ease);pointer-events:none}
 .section-crumb.visible{transform:translateY(0)}
+.section-crumb.search-active{display:none}
 .section-crumb-dot{width:5px;height:5px;border-radius:50%;background:var(--verde);flex-shrink:0}
 .section-crumb-current{color:var(--ink)}
 @media(max-width:640px){.section-crumb{display:none}}
@@ -651,7 +662,7 @@ img{display:block;max-width:100%}
 }
 @media(max-width:380px){.hero-title{font-size:34px;letter-spacing:-1px}.hero-logo img{width:44px}.cafe-grid{grid-template-columns:1fr}.ccard-featured{grid-column:span 1}.cat-grid{grid-template-columns:1fr}.cat-card-highlight{grid-column:span 1}.cat-card-donde{grid-column:span 1}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal{opacity:1;transform:none;transition:none}}
-a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:2px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:2px}
 @media(max-width:860px){#servicios [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2,1fr)!important}}
 @media(max-width:480px){#servicios [style*="grid-template-columns:repeat(4"]{grid-template-columns:1fr!important}}
 
@@ -739,6 +750,9 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   var TZ = 'America/Argentina/Buenos_Aires';
 
+  /* Fuente de datos de horarios. null = sin horario confirmado todavía
+     (se muestra como "Horario no confirmado" en vez de ocultarse,
+     para que el sistema sea consistente y honesto en toda la grilla). */
   var HORARIOS = {
     'el-arca':      { schedules: [{ days:[3,4,5,6,0], open:'20:00', close:'07:00' }] },
     'papa-luigi':   { schedules: [{ days:[2,3,4,5,6,0], open:'19:00', close:'00:00' }] },
@@ -771,6 +785,29 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     'danubio-azul': null,
   };
 
+  var NAME_MAP = {
+    'El Arca':       'el-arca',
+    'Papa Luigi':    'papa-luigi',
+    'Bella Vista':   'bella-vista',
+    'Justo José':    'justo-jose',
+    'Bonhomia':      'bonhomia',
+    'Panza Verde':   'panza-verde',
+    'La Ris':        'la-ris',
+    'La Gruta':      'la-gruta',
+    'Sanduba':       'sanduba',
+    'Pimienta Negra':'pimienta-negra',
+    'Parada 33':     'parada-33',
+    'Faro 3260':     'faro-3260',
+    'El Calderón':   'el-calderon',
+    'La Segunda':    'la-segunda',
+    'Dolores Costa': 'dolores-costa',
+    'La Delfina':    'la-delfina',
+    'Mamma Mía':     'mamma-mia',
+    'Garifo':        'garifo',
+    'Baco':          'baco',
+    'Danubio Azul':  'danubio-azul',
+  };
+
   function toMinutes(hhmm){
     var p = hhmm.split(':');
     return parseInt(p[0],10)*60 + parseInt(p[1],10);
@@ -798,53 +835,44 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     return false;
   }
 
-  var NAME_MAP = {
-    'El Arca':       'el-arca',
-    'Papa Luigi':    'papa-luigi',
-    'Bella Vista':   'bella-vista',
-    'Justo José':    'justo-jose',
-    'Bonhomia':      'bonhomia',
-    'Panza Verde':   'panza-verde',
-    'La Ris':        'la-ris',
-    'La Gruta':      'la-gruta',
-    'Sanduba':       'sanduba',
-    'Pimienta Negra':'pimienta-negra',
-    'Parada 33':     'parada-33',
-    'Faro 3260':     'faro-3260',
-    'El Calderón':   'el-calderon',
-    'La Segunda':    'la-segunda',
-    'Dolores Costa': 'dolores-costa',
-    'La Delfina':    'la-delfina',
-    'Mamma Mía':     'mamma-mia',
-    'Garifo':        'garifo',
-    'Baco':          'baco',
-    'Danubio Azul':  'danubio-azul',
-  };
+  function paintOpenLabels(){
+    document.querySelectorAll('.rcard.searchable').forEach(function(card){
+      var name = card.dataset.name || '';
+      var key  = NAME_MAP[name];
+      var lbl  = card.querySelector('.rcard-open');
+      if(!lbl) return;
 
-  document.querySelectorAll('.rcard.searchable').forEach(function(card){
-    var name = card.dataset.name || '';
-    var key  = NAME_MAP[name];
-    var lbl  = card.querySelector('.rcard-open');
-    if(!lbl) return;
+      if(!key || HORARIOS[key] === null){
+        lbl.classList.add('is-unverified');
+        lbl.innerHTML = '<span class="rcard-open-dot" style="width:5px;height:5px;background:rgba(26,25,22,.30);border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;"></span>Horario no confirmado';
+        lbl.style.background = '';
+        lbl.style.borderColor = '';
+        lbl.style.color = '';
+        return;
+      }
 
-    if(!key || HORARIOS[key] === null){
-      lbl.style.display = 'none';
-      return;
-    }
+      lbl.classList.remove('is-unverified');
+      var open = isOpenNow(HORARIOS[key].schedules);
+      if(open){
+        lbl.innerHTML = '<span class="rcard-open-dot" style="width:5px;height:5px;background:var(--verde2);border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;"></span>Abierto ahora';
+        lbl.style.background = 'rgba(29,92,64,.09)';
+        lbl.style.borderColor = 'rgba(29,92,64,.25)';
+        lbl.style.color = 'var(--verde2)';
+      } else {
+        lbl.innerHTML = '<span style="width:5px;height:5px;background:#c0392b;border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;"></span>Cerrado';
+        lbl.style.background = 'rgba(192,57,43,.08)';
+        lbl.style.borderColor = 'rgba(192,57,43,.22)';
+        lbl.style.color = '#c0392b';
+      }
+    });
+  }
 
-    var open = isOpenNow(HORARIOS[key].schedules);
-    if(open){
-      lbl.innerHTML = '<span class="rcard-open-dot" style="width:5px;height:5px;background:var(--verde2);border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;"></span>Abierto ahora';
-      lbl.style.background = 'rgba(29,92,64,.09)';
-      lbl.style.borderColor = 'rgba(29,92,64,.25)';
-      lbl.style.color = 'var(--verde2)';
-    } else {
-      lbl.innerHTML = '<span style="width:5px;height:5px;background:#c0392b;border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;"></span>Cerrado';
-      lbl.style.background = 'rgba(192,57,43,.08)';
-      lbl.style.borderColor = 'rgba(192,57,43,.22)';
-      lbl.style.color = '#c0392b';
-    }
-});
+  /* Pintura inicial inmediata + recalculo cada minuto para que el estado
+     "Abierto ahora / Cerrado" nunca quede desfasado en pestañas abiertas
+     largo tiempo (corrige inconsistencia de confianza del sistema). */
+  paintOpenLabels();
+  setInterval(paintOpenLabels, 60 * 1000);
+  window.__uruspotPaintOpenLabels = paintOpenLabels;
 
 })();
 </script>
@@ -937,8 +965,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   <div class="nav-divider" aria-hidden="true"></div>
   <a class="nav-item" href="#gimnasios" data-section="gimnasios"><span class="nav-emoji" aria-hidden="true">💪</span> Gimnasios</a>
   <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#ciudad" data-section="ciudad"><span class="nav-emoji" aria-hidden="true">🧭</span> Vivir en CdU</a>
-  <div class="nav-divider" aria-hidden="true"></div>
   <button class="search-icon-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">🔍</button>
 </nav>
 
@@ -966,24 +992,24 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
       <span class="mood-suggest-dot" aria-hidden="true"></span>
       <span id="mood-suggest-text">Cargando sugerencia...</span>
     </div>
-    <span class="mood-question">Elegí una opción y te mostramos justo lo que buscás.</span>
+    <span class="mood-question">Elegí una opción: filtramos la guía entera por vos, en el momento.</span>
     <div class="mood-grid" id="mood-grid" role="list">
-      <button class="mood-btn" data-mood="rapido" type="button" role="listitem">
+      <button class="mood-btn" data-mood="rapido" type="button" role="listitem" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">⚡</span>
         <span class="mood-btn-label">Algo rápido</span>
         <span class="mood-btn-sub">Sin vueltas, cerca</span>
       </button>
-      <button class="mood-btn" data-mood="barato" type="button" role="listitem">
+      <button class="mood-btn" data-mood="barato" type="button" role="listitem" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">💸</span>
         <span class="mood-btn-label">Gastar poco</span>
         <span class="mood-btn-sub">Opciones económicas</span>
       </button>
-      <button class="mood-btn" data-mood="sorpresa" type="button" role="listitem">
+      <button class="mood-btn" data-mood="sorpresa" type="button" role="listitem" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">🎲</span>
         <span class="mood-btn-label">Sorprenderme</span>
         <span class="mood-btn-sub">Lo mejor puntuado</span>
       </button>
-      <button class="mood-btn" data-mood="relax" type="button" role="listitem">
+      <button class="mood-btn" data-mood="relax" type="button" role="listitem" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">🌿</span>
         <span class="mood-btn-label">Algo tranquilo</span>
         <span class="mood-btn-sub">Café, vista, calma</span>
@@ -1005,7 +1031,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
       <div class="glos-item"><span class="glos-item-sym">$ / $$ / $$$</span><span class="glos-item-desc">Nivel de precio relativo: $ económico, $$ medio, $$$ alto. Comparativo entre los lugares de la guía, no un monto fijo.</span></div>
       <div class="glos-item"><span class="glos-item-sym">★ 4.8 Google</span><span class="glos-item-desc">Calificación promedio que deja la gente en Google Maps.</span></div>
       <div class="glos-item"><span class="glos-item-sym">★ 9.1 URU SPOT</span><span class="glos-item-desc">Nuestro propio puntaje (sobre 10), combinando instalaciones, atención y experiencia verificada in situ.</span></div>
-      <div class="glos-item"><span class="glos-item-sym">🟢 Abierto ahora</span><span class="glos-item-desc">Se calcula en tiempo real según el horario del local y la hora actual en Concepción del Uruguay.</span></div>
+      <div class="glos-item"><span class="glos-item-sym">🟢 Abierto ahora</span><span class="glos-item-desc">Se calcula en tiempo real según el horario del local y la hora actual en Concepción del Uruguay. Si el local todavía no tiene horario verificado, lo indicamos como "Horario no confirmado" en vez de no mostrar nada.</span></div>
       <div class="glos-item"><span class="glos-item-sym">Imperdible / Top</span><span class="glos-item-desc">Distintivos que destacan los lugares mejor valorados dentro de su categoría.</span></div>
       <div class="glos-item"><span class="glos-item-sym">Nuevo</span><span class="glos-item-desc">El local se incorporó recientemente — todavía no tiene historial extenso de valoraciones.</span></div>
     </div>
@@ -1063,37 +1089,37 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="resto-grid" id="grid-restaurantes">
-    <a class="rcard rcard-feat reveal searchable" data-name="El Arca" data-tags="restaurante gourmet cocina auténtica" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-arca-resto-bar/">
+    <a class="rcard rcard-feat reveal searchable" data-name="El Arca" data-tags="restaurante gourmet cocina auténtica" data-mood="sorpresa relax" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-arca-resto-bar/">
       <div class="rcard-shine" aria-hidden="true"></div><span class="badge badge-gold">Imperdible</span>
       <div class="rcard-content"><div class="rcard-top"><div class="rcard-open"><span class="rcard-open-dot" aria-hidden="true"></span>Verificando...</div><span class="rcard-icon" aria-hidden="true">🚢</span></div><span class="rcard-name">El Arca</span><p class="rcard-desc">Cocina auténtica — el clásico que siempre cumple.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
     </a>
-    <a class="rcard reveal searchable" data-name="Papa Luigi" data-tags="restaurante italiana pizza" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" style="animation-delay:.05s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍕</span><span class="rcard-name">Papa Luigi</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.7</span><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Bella Vista" data-tags="restaurante vista rio costanera" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="animation-delay:.10s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌅</span><span class="rcard-name">Bella Vista</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.8</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0">$$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Papa Luigi" data-tags="restaurante italiana pizza" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" style="animation-delay:.05s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍕</span><span class="rcard-name">Papa Luigi</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.7</span><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Bella Vista" data-tags="restaurante vista rio costanera" data-mood="relax" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="animation-delay:.10s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌅</span><span class="rcard-name">Bella Vista</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.8</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0">$$$</span></div></div></a>
     <a class="rcard rcard-ad reveal" href="mailto:uruspotcdu@gmail.com" style="animation-delay:.15s"><div class="rcard-ad-icon" aria-hidden="true">📍</div><div class="rcard-ad-title">Tu local aquí</div><div class="rcard-ad-sub">Llegá a toda Concepción del Uruguay</div></a>
-    <a class="rcard reveal searchable" data-name="Panza Verde" data-tags="restaurante saludable vegano ensaladas" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" style="animation-delay:.20s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌿</span><span class="rcard-name">Panza Verde</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.6</span><span class="pill pill-default">Saludable</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Justo José" data-tags="restaurante parrilla asado bar" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="animation-delay:.25s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">⚖️</span><span class="rcard-name">Justo José</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Bonhomia" data-tags="restaurante moderno bar cocteles" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="animation-delay:.30s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">✨</span><span class="rcard-name">Bonhomia</span><div class="pills"><span class="pill pill-default">Moderno</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Ris" data-tags="restaurante cafeteria arte" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="animation-delay:.35s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🎨</span><span class="rcard-name">La Ris</span><div class="pills"><span class="pill pill-default">Cafetería</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Gruta" data-tags="restaurante parrilla asado" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-gruta/" style="animation-delay:.40s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🔥</span><span class="rcard-name">La Gruta</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Sanduba" data-tags="restaurante rapido sandwich hamburguesa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" style="animation-delay:.45s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍔</span><span class="rcard-name">Sanduba</span><div class="pills"><span class="pill pill-default">Rápido</span><span class="pill pill-price" data-tip="Precio económico dentro de la guía" tabindex="0">$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Pimienta Negra" data-tags="restaurante fusion moderno" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pimienta-negra/" style="animation-delay:.50s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌶️</span><span class="rcard-name">Pimienta Negra</span><div class="pills"><span class="pill pill-default">Fusión</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Parada 33" data-tags="restaurante pub cerveza" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" style="animation-delay:.55s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍺</span><span class="rcard-name">Parada 33</span><div class="pills"><span class="pill pill-default">Pub</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Faro 3260" data-tags="restaurante vista rio costanera" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/faro-3260/" style="animation-delay:.60s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌊</span><span class="rcard-name">Faro 3260</span><div class="pills"><span class="pill pill-default">Vista al río</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="El Calderón" data-tags="restaurante casero almuerzo" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" style="animation-delay:.65s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍲</span><span class="rcard-name">El Calderón</span><div class="pills"><span class="pill pill-default">Casero</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Segunda" data-tags="restaurante parrilla asado carne" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" style="animation-delay:.70s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🥩</span><span class="rcard-name">La Segunda</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Dolores Costa" data-tags="restaurante costanera rio" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/dolores-costa/" style="animation-delay:.75s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌴</span><span class="rcard-name">Dolores Costa</span><div class="pills"><span class="pill pill-default">Costanera</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Delfina" data-tags="restaurante pescados mariscos" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-delfina/" style="animation-delay:.80s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🐬</span><span class="rcard-name">La Delfina</span><div class="pills"><span class="pill pill-default">Pescados</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Mamma Mía" data-tags="restaurante italiana pasta" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" style="animation-delay:.85s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍝</span><span class="rcard-name">Mamma Mía</span><div class="pills"><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Garifo" data-tags="restaurante bodegon vino" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/garifo/" style="animation-delay:.90s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍷</span><span class="rcard-name">Garifo</span><div class="pills"><span class="pill pill-default">Bodegón</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Baco" data-tags="restaurante vinos cava" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-conventillo-de-baco/" style="animation-delay:.95s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍇</span><span class="rcard-name">Baco</span><div class="pills"><span class="pill pill-default">Vinos</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Danubio Azul" data-tags="restaurante europeo aleman" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-danubio-azul/" style="animation-delay:1.0s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🇩🇪</span><span class="rcard-name">Danubio Azul</span><div class="pills"><span class="pill pill-default">Europeo</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Panza Verde" data-tags="restaurante saludable vegano ensaladas" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" style="animation-delay:.20s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌿</span><span class="rcard-name">Panza Verde</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.6</span><span class="pill pill-default">Saludable</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Justo José" data-tags="restaurante parrilla asado bar" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="animation-delay:.25s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">⚖️</span><span class="rcard-name">Justo José</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Bonhomia" data-tags="restaurante moderno bar cocteles" data-mood="sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="animation-delay:.30s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">✨</span><span class="rcard-name">Bonhomia</span><div class="pills"><span class="pill pill-default">Moderno</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Ris" data-tags="restaurante cafeteria arte" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="animation-delay:.35s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🎨</span><span class="rcard-name">La Ris</span><div class="pills"><span class="pill pill-default">Cafetería</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Gruta" data-tags="restaurante parrilla asado" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-gruta/" style="animation-delay:.40s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🔥</span><span class="rcard-name">La Gruta</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Sanduba" data-tags="restaurante rapido sandwich hamburguesa" data-mood="rapido barato" data-price="1" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" style="animation-delay:.45s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍔</span><span class="rcard-name">Sanduba</span><div class="pills"><span class="pill pill-default">Rápido</span><span class="pill pill-price" data-tip="Precio económico dentro de la guía" tabindex="0">$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Pimienta Negra" data-tags="restaurante fusion moderno" data-mood="sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pimienta-negra/" style="animation-delay:.50s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌶️</span><span class="rcard-name">Pimienta Negra</span><div class="pills"><span class="pill pill-default">Fusión</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Parada 33" data-tags="restaurante pub cerveza" data-mood="barato" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" style="animation-delay:.55s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍺</span><span class="rcard-name">Parada 33</span><div class="pills"><span class="pill pill-default">Pub</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Faro 3260" data-tags="restaurante vista rio costanera" data-mood="relax sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/faro-3260/" style="animation-delay:.60s"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌊</span><span class="rcard-name">Faro 3260</span><div class="pills"><span class="pill pill-default">Vista al río</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="El Calderón" data-tags="restaurante casero almuerzo" data-mood="rapido barato" data-price="1" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" style="animation-delay:.65s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍲</span><span class="rcard-name">El Calderón</span><div class="pills"><span class="pill pill-default">Casero</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Segunda" data-tags="restaurante parrilla asado carne" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" style="animation-delay:.70s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🥩</span><span class="rcard-name">La Segunda</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Dolores Costa" data-tags="restaurante costanera rio" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/dolores-costa/" style="animation-delay:.75s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌴</span><span class="rcard-name">Dolores Costa</span><div class="pills"><span class="pill pill-default">Costanera</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Delfina" data-tags="restaurante pescados mariscos" data-mood="sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-delfina/" style="animation-delay:.80s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🐬</span><span class="rcard-name">La Delfina</span><div class="pills"><span class="pill pill-default">Pescados</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Mamma Mía" data-tags="restaurante italiana pasta" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" style="animation-delay:.85s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍝</span><span class="rcard-name">Mamma Mía</span><div class="pills"><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Garifo" data-tags="restaurante bodegon vino" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/garifo/" style="animation-delay:.90s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍷</span><span class="rcard-name">Garifo</span><div class="pills"><span class="pill pill-default">Bodegón</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Baco" data-tags="restaurante vinos cava" data-mood="relax sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-conventillo-de-baco/" style="animation-delay:.95s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍇</span><span class="rcard-name">Baco</span><div class="pills"><span class="pill pill-default">Vinos</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Danubio Azul" data-tags="restaurante europeo aleman" data-mood="sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-danubio-azul/" style="animation-delay:1.0s"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🇩🇪</span><span class="rcard-name">Danubio Azul</span><div class="pills"><span class="pill pill-default">Europeo</span></div></div></a>
   </div>
   <p class="search-no-results" id="no-results-restaurantes">No se encontraron restaurantes con ese nombre.</p>
 </section>
 
 <!-- AD BANNER -->
 <a class="ad-banner reveal visible" href="https://docs.google.com/forms/d/e/1FAIpQLSegxM7nYfOM7tuI0HgbxwGyVMXmzlPvJexBvTUqpLJd7BA7zw/viewform" target="_blank" rel="noopener">
-  <div class="ad-banner-left"><div class="ad-banner-icon" aria-hidden="true">🏪</div><div><span class="ad-banner-title">¿Tenés un local en CdU?</span><span class="ad-banner-sub">Aparecé en la guía que está leyendo toda la ciudad. Visible, accesible y efectivo.</span></div></div>
+  <div class="ad-banner-left"><div class="ad-banner-icon" aria-hidden="true">🏪</div><div><span class="ad-banner-eyebrow">Publicidad · Espacio patrocinado</span><span class="ad-banner-title">¿Tenés un local en CdU?</span><span class="ad-banner-sub">Aparecé en la guía que está leyendo toda la ciudad. Visible, accesible y efectivo.</span></div></div>
   <div class="ad-banner-btn">Consultar →</div>
 </a>
 
@@ -1105,16 +1131,16 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="cafe-grid" id="grid-cafes">
-    <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/">
+    <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/">
       <div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=60&auto=format&fm=webp" width="400" height="280" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div>
       <div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span>
       <div class="ccard-inner"><span class="ccard-label">Especialidad</span><span class="ccard-name">Nero Café</span><div class="pills" style="margin-top:4px"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span></div></div>
     </a>
-    <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="animation-delay:.07s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
-    <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" style="animation-delay:.14s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
-    <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/london-cafe/" style="animation-delay:.21s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
-    <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/helena-cafe/" style="animation-delay:.28s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
-    <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="animation-delay:.35s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
+    <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="animation-delay:.07s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
+    <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" style="animation-delay:.14s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
+    <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/london-cafe/" style="animation-delay:.21s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
+    <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/helena-cafe/" style="animation-delay:.28s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
+    <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="animation-delay:.35s"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
   </div>
   <p class="search-no-results" id="no-results-cafes">No se encontraron cafés con ese nombre.</p>
 </section>
@@ -1127,13 +1153,13 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="bar-grid" id="grid-bares">
-    <a class="bcard reveal searchable" data-name="Justo José" data-tags="bar parrilla cerveza" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="animation-delay:.04s"><div class="bcard-icon">⚖️</div><div class="bcard-name">Justo José</div></a>
-    <a class="bcard reveal searchable" data-name="Bonhomia" data-tags="bar cocteles moderno" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="animation-delay:.09s"><span class="badge">Top</span><div class="bcard-icon">✨</div><div class="bcard-name">Bonhomia</div></a>
-    <a class="bcard reveal searchable" data-name="Klug Gebrau" data-tags="bar cerveza artesanal cerveceria" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" style="animation-delay:.14s"><div class="bcard-icon">🍺</div><div class="bcard-name">Klug Gebrau</div></a>
-    <a class="bcard reveal searchable" data-name="7 Colinas" data-tags="bar cerveza artesanal comida" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/7-colinas/" style="animation-delay:.19s"><span class="badge">Top</span><div class="bcard-icon">🍻</div><div class="bcard-name">7 Colinas</div></a>
-    <a class="bcard reveal searchable" data-name="Drakkar" data-tags="bar cerveceria grill" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/drakkar/" style="animation-delay:.24s"><div class="bcard-icon">⚔️</div><div class="bcard-name">Drakkar</div></a>
-    <a class="bcard reveal searchable" data-name="Bartolo" data-tags="bar cocteles tragos" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" style="animation-delay:.29s"><span class="badge">Top</span><div class="bcard-icon">🍸</div><div class="bcard-name">Bartolo</div></a>
-    <a class="bcard reveal searchable" data-name="House Garage" data-tags="bar garage tematico" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/house-garage/" style="animation-delay:.34s"><span class="badge">Top</span><div class="bcard-icon">🏎️</div><div class="bcard-name">House Garage</div></a>
+    <a class="bcard reveal searchable" data-name="Justo José" data-tags="bar parrilla cerveza" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="animation-delay:.04s"><div class="bcard-icon">⚖️</div><div class="bcard-name">Justo José</div></a>
+    <a class="bcard reveal searchable" data-name="Bonhomia" data-tags="bar cocteles moderno" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="animation-delay:.09s"><span class="badge">Top</span><div class="bcard-icon">✨</div><div class="bcard-name">Bonhomia</div></a>
+    <a class="bcard reveal searchable" data-name="Klug Gebrau" data-tags="bar cerveza artesanal cerveceria" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" style="animation-delay:.14s"><div class="bcard-icon">🍺</div><div class="bcard-name">Klug Gebrau</div></a>
+    <a class="bcard reveal searchable" data-name="7 Colinas" data-tags="bar cerveza artesanal comida" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/7-colinas/" style="animation-delay:.19s"><span class="badge">Top</span><div class="bcard-icon">🍻</div><div class="bcard-name">7 Colinas</div></a>
+    <a class="bcard reveal searchable" data-name="Drakkar" data-tags="bar cerveceria grill" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/drakkar/" style="animation-delay:.24s"><div class="bcard-icon">⚔️</div><div class="bcard-name">Drakkar</div></a>
+    <a class="bcard reveal searchable" data-name="Bartolo" data-tags="bar cocteles tragos" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" style="animation-delay:.29s"><span class="badge">Top</span><div class="bcard-icon">🍸</div><div class="bcard-name">Bartolo</div></a>
+    <a class="bcard reveal searchable" data-name="House Garage" data-tags="bar garage tematico" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/house-garage/" style="animation-delay:.34s"><span class="badge">Top</span><div class="bcard-icon">🏎️</div><div class="bcard-name">House Garage</div></a>
   </div>
   <p class="search-no-results" id="no-results-bares">No se encontraron bares con ese nombre.</p>
 </section>
@@ -1146,12 +1172,12 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="list-items" id="grid-panaderias">
-    <a class="litem reveal searchable" data-name="Panettone" data-tags="panaderia pasteleria facturas" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panettone/"><span class="badge">Top</span><span class="litem-icon">🥯</span><span class="litem-name">Panettone</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="La Cuadra" data-tags="panaderia pan facturas" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-cuadra/" style="animation-delay:.07s"><span class="badge">Top</span><span class="litem-icon">🥖</span><span class="litem-name">La Cuadra</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Mi Viejo" data-tags="panaderia tradicional pan" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mi-viejo/" style="animation-delay:.14s"><span class="badge">Top</span><span class="litem-icon">🍞</span><span class="litem-name">Mi Viejo</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="San Carlos" data-tags="panaderia confiteria" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/san-carlos/" style="animation-delay:.21s"><span class="litem-icon">🥐</span><span class="litem-name">San Carlos</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Lo de Juan" data-tags="panaderia reposteria tortas" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lo-de-juan/" style="animation-delay:.28s"><span class="litem-icon">🍪</span><span class="litem-name">Lo de Juan</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Brodë" data-tags="panaderia nuevo artesanal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/brode/" style="animation-delay:.35s"><span class="badge badge-gold">Nuevo</span><span class="litem-icon">🥐</span><span class="litem-name">Brodë</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Panettone" data-tags="panaderia pasteleria facturas" data-mood="rapido barato" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panettone/"><span class="badge">Top</span><span class="litem-icon">🥯</span><span class="litem-name">Panettone</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="La Cuadra" data-tags="panaderia pan facturas" data-mood="rapido barato" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-cuadra/" style="animation-delay:.07s"><span class="badge">Top</span><span class="litem-icon">🥖</span><span class="litem-name">La Cuadra</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Mi Viejo" data-tags="panaderia tradicional pan" data-mood="rapido barato" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mi-viejo/" style="animation-delay:.14s"><span class="badge">Top</span><span class="litem-icon">🍞</span><span class="litem-name">Mi Viejo</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="San Carlos" data-tags="panaderia confiteria" data-mood="rapido barato" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/san-carlos/" style="animation-delay:.21s"><span class="litem-icon">🥐</span><span class="litem-name">San Carlos</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Lo de Juan" data-tags="panaderia reposteria tortas" data-mood="rapido barato" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lo-de-juan/" style="animation-delay:.28s"><span class="litem-icon">🍪</span><span class="litem-name">Lo de Juan</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Brodë" data-tags="panaderia nuevo artesanal" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/brode/" style="animation-delay:.35s"><span class="badge badge-gold">Nuevo</span><span class="litem-icon">🥐</span><span class="litem-name">Brodë</span><span class="litem-arrow">→</span></a>
   </div>
   <p class="search-no-results" id="no-results-panaderias">No se encontraron panaderías con ese nombre.</p>
 </section>
@@ -1164,11 +1190,11 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="list-items" id="grid-heladerias">
-    <a class="litem reveal searchable" data-name="Yelatti Artesanal" data-tags="heladeria artesanal helado" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/yelatti-artesanal/"><span class="badge">Top</span><span class="litem-icon">🍦</span><span class="litem-name">Yelatti Artesanal</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Cremolatti" data-tags="heladeria helado cremoso" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cremolatti/" style="animation-delay:.07s"><span class="litem-icon">🍨</span><span class="litem-name">Cremolatti</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Heladería Dany's" data-tags="heladeria helado" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/danys/" style="animation-delay:.14s"><span class="litem-icon">🍧</span><span class="litem-name">Heladería Dany's</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Heladería Lucero" data-tags="heladeria helado clasica" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lucero/" style="animation-delay:.21s"><span class="litem-icon">⭐</span><span class="litem-name">Heladería Lucero</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Heladería Italia" data-tags="heladeria italiana helado artesanal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/italia/" style="animation-delay:.28s"><span class="badge">Top</span><span class="litem-icon">🇮🇹</span><span class="litem-name">Heladería Italia</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Yelatti Artesanal" data-tags="heladeria artesanal helado" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/yelatti-artesanal/"><span class="badge">Top</span><span class="litem-icon">🍦</span><span class="litem-name">Yelatti Artesanal</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Cremolatti" data-tags="heladeria helado cremoso" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cremolatti/" style="animation-delay:.07s"><span class="litem-icon">🍨</span><span class="litem-name">Cremolatti</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Heladería Dany's" data-tags="heladeria helado" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/danys/" style="animation-delay:.14s"><span class="litem-icon">🍧</span><span class="litem-name">Heladería Dany's</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Heladería Lucero" data-tags="heladeria helado clasica" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lucero/" style="animation-delay:.21s"><span class="litem-icon">⭐</span><span class="litem-name">Heladería Lucero</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Heladería Italia" data-tags="heladeria italiana helado artesanal" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/italia/" style="animation-delay:.28s"><span class="badge">Top</span><span class="litem-icon">🇮🇹</span><span class="litem-name">Heladería Italia</span><span class="litem-arrow">→</span></a>
   </div>
   <p class="search-no-results" id="no-results-heladerias">No se encontraron heladerías con ese nombre.</p>
 </section>
@@ -1181,12 +1207,12 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="list-items" id="grid-hosterias">
-    <a class="litem reveal searchable" data-name="Casa del Árbol" data-tags="hosteria alojamiento hospedaje" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/casa-del-arbol/"><span class="badge">Top</span><span class="litem-icon">🌳</span><span class="litem-name">Casa del Árbol</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Boutique Los Aguaribay" data-tags="hosteria boutique alojamiento" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/los-aguaribay/" style="animation-delay:.07s"><span class="badge">Top</span><span class="litem-icon">🌿</span><span class="litem-name">Boutique Los Aguaribay</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Bungalows México" data-tags="hosteria bungalow alojamiento" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bungalows-mexico/" style="animation-delay:.14s"><span class="litem-icon">🏡</span><span class="litem-name">Bungalows México</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Antigua Fonda" data-tags="hosteria antigua tradicional alojamiento" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/antigua-fonda/" style="animation-delay:.21s"><span class="litem-icon">🪨</span><span class="litem-name">Antigua Fonda</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Hostería Mitre" data-tags="hosteria alojamiento hotel" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/hoteleria-mitre/" style="animation-delay:.28s"><span class="litem-icon">🏛️</span><span class="litem-name">Hostería Mitre</span><span class="litem-arrow">→</span></a>
-    <a class="litem reveal searchable" data-name="Hostería Posta Torreón" data-tags="hosteria posta torron alojamiento" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/posta-torreon/" style="animation-delay:.35s"><span class="litem-icon">🏰</span><span class="litem-name">Hostería Posta Torreón</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Casa del Árbol" data-tags="hosteria alojamiento hospedaje" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/casa-del-arbol/"><span class="badge">Top</span><span class="litem-icon">🌳</span><span class="litem-name">Casa del Árbol</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Boutique Los Aguaribay" data-tags="hosteria boutique alojamiento" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/los-aguaribay/" style="animation-delay:.07s"><span class="badge">Top</span><span class="litem-icon">🌿</span><span class="litem-name">Boutique Los Aguaribay</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Bungalows México" data-tags="hosteria bungalow alojamiento" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bungalows-mexico/" style="animation-delay:.14s"><span class="litem-icon">🏡</span><span class="litem-name">Bungalows México</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Antigua Fonda" data-tags="hosteria antigua tradicional alojamiento" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/antigua-fonda/" style="animation-delay:.21s"><span class="litem-icon">🪨</span><span class="litem-name">Antigua Fonda</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Hostería Mitre" data-tags="hosteria alojamiento hotel" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/hoteleria-mitre/" style="animation-delay:.28s"><span class="litem-icon">🏛️</span><span class="litem-name">Hostería Mitre</span><span class="litem-arrow">→</span></a>
+    <a class="litem reveal searchable" data-name="Hostería Posta Torreón" data-tags="hosteria posta torron alojamiento" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/posta-torreon/" style="animation-delay:.35s"><span class="litem-icon">🏰</span><span class="litem-name">Hostería Posta Torreón</span><span class="litem-arrow">→</span></a>
   </div>
   <p class="search-no-results" id="no-results-hosterias">No se encontraron hosterías con ese nombre.</p>
 </section>
@@ -1199,7 +1225,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="gym-grid" id="grid-gimnasios">
-    <a class="gcard gcard-feat reveal searchable" data-name="Gimnasio 538 Gym" data-tags="gimnasio fitness musculacion clases grupales" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/gimnasio-538/">
+    <a class="gcard gcard-feat reveal searchable" data-name="Gimnasio 538 Gym" data-tags="gimnasio fitness musculacion clases grupales" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/gimnasio-538/">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge badge-gold">Mejor puntuado</span>
       <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" tabindex="0">★ 9.1 URU SPOT</div><span class="gcard-icon" aria-hidden="true">🏋️</span></div><span class="gcard-name">Gimnasio 538 Gym</span><p class="gcard-desc">Dos sedes en la ciudad, equipamiento moderno y un equipo de profesores comprometidos. El referente del fitness local.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.8 Google</span><span class="pill pill-feat">2 Sedes</span><span class="pill pill-feat">Clases grupales</span></div></div>
     </a>
@@ -1221,15 +1247,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     </a>
   </div>
   <p class="search-no-results" id="no-results-gimnasios">No se encontraron gimnasios con ese nombre.</p>
-</section>
-
-<!-- ===================== VIVIR EN CDU (deprioritizado: urgencias + servicios) ===================== -->
-<section id="ciudad" class="us-section" aria-labelledby="title-ciudad" style="margin-top:var(--section-gap);">
-  <div class="section-header">
-    <div><span class="section-eyebrow">Utilidad ciudadana</span><h2 class="section-title" id="title-ciudad">🧭 Vivir en CdU</h2></div>
-    <span class="section-count">Salud · Transporte · Info útil</span>
-    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
-  </div>
 </section>
 
 <!-- FARMACIA DE TURNO -->
@@ -1523,7 +1540,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   var navItems=document.querySelectorAll('.nav-item[data-section]');
   var revealEls=document.querySelectorAll('.reveal');
 
-  /* FIX memory leak: el indicador se crea UNA SOLA VEZ, fuera del observer */
   var navH = 60;
   var navIndicator = document.createElement('span');
   navIndicator.className = 'nav-indicator';
@@ -1539,6 +1555,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   navItems.forEach(function(ni){
     ni.addEventListener('mouseenter',function(){moveIndicator(this);});
+    ni.addEventListener('focus',function(){moveIndicator(this);});
   });
   nav.addEventListener('mouseleave',function(){
     var active = document.querySelector('.nav-item.active');
@@ -1570,7 +1587,6 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
         if(!target||target>999)return;
         var sup = el.querySelector('sup');
         var supTxt = sup ? sup.outerHTML : '';
-        var start = 0;
         var dur = 1200;
         var t0 = performance.now();
         (function tick(now){
@@ -1619,6 +1635,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   var searchInput=document.getElementById('search-input');
   var searchCloseBtn=document.getElementById('search-close-btn');
   var searchCount=document.getElementById('search-count');
+  var crumbEl=document.getElementById('section-crumb');
 
   var grids=[
     {id:'grid-restaurantes',noRes:'no-results-restaurantes'},
@@ -1633,11 +1650,13 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   function openSearch(){
     searchBarWrap.classList.add('open');
     searchToggleBtn.setAttribute('aria-expanded','true');
+    if(crumbEl) crumbEl.classList.add('search-active');
     setTimeout(function(){searchInput.focus();},350);
   }
   function closeSearch(){
     searchBarWrap.classList.remove('open');
     searchToggleBtn.setAttribute('aria-expanded','false');
+    if(crumbEl) crumbEl.classList.remove('search-active');
     searchInput.value='';
     runSearch('');
   }
@@ -1653,6 +1672,11 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   function normalize(str){
     return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'');
   }
+
+  /* Debounce: evita recomputar el filtro en cada tecla mientras el usuario
+     todavía está escribiendo, y NO mueve el scroll automáticamente debajo
+     del cursor (eso era fricción, no ayuda). */
+  var searchDebounceId = null;
 
   function runSearch(query){
     var q=normalize(query.trim());
@@ -1676,11 +1700,9 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   }
 
   searchInput.addEventListener('input',function(){
-    runSearch(this.value);
-    if(this.value.trim().length>1){
-      var first=document.querySelector('.searchable:not(.search-hidden)');
-      if(first)setTimeout(function(){first.scrollIntoView({behavior:'smooth',block:'center'});},100);
-    }
+    var val=this.value;
+    if(searchDebounceId) clearTimeout(searchDebounceId);
+    searchDebounceId=setTimeout(function(){ runSearch(val); },150);
   });
   searchInput.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();runSearch(this.value);}});
 
@@ -1706,6 +1728,8 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   }
   function fmtTime(){return new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'});}
 
+  var lastWxCode = null, lastWxTemp = null;
+
   function renderWeather(d){
     var c=d.current,wx=wxDecode(c.weather_code);
     var tmp=Math.round(c.temperature_2m),apt=Math.round(c.apparent_temperature);
@@ -1722,6 +1746,10 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     set('wx-hero-rain',prec+' mm');
     set('wx-hero-updated','Última act. '+hora);
     set('wx-hero-frase',frase.replace(/^[^\s]+\s/,''));
+    lastWxCode = c.weather_code; lastWxTemp = tmp;
+    if (typeof window.__uruspotSetSuggestion === 'function') {
+      window.__uruspotSetSuggestion();
+    }
   }
   function renderError(){
     function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
@@ -1753,13 +1781,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   setInterval(fetchWeather, 10*60*1000);
 
 
-  /* ====== MOOD PICKER ====== */
-  var moodData = {
-    rapido:   {label:'rápido y sin vueltas'},
-    barato:   {label:'opciones económicas'},
-    sorpresa: {label:'lo mejor puntuado'},
-    relax:    {label:'algo tranquilo'}
-  };
+  /* ====== MOOD PICKER — filtro REAL sobre las grillas existentes ====== */
 
   var suggestions = {
     manana:   {rapido:'Una panadería recién horneada te queda perfecta ahora.', default:'Buen momento para un café con medialunas.'},
@@ -1771,62 +1793,106 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   function setSuggestion(moodKey){
     var pack = suggestions[globalTimeMode] || suggestions.tarde;
     var txt = (moodKey && pack[moodKey]) ? pack[moodKey] : pack.default;
+    if (!moodKey && lastWxCode !== null && lastWxCode >= 61) {
+      txt = '☔ Está lloviendo en CdU — buen momento para un lugar bajo techo.';
+    } else if (!moodKey && lastWxTemp !== null && lastWxTemp >= 28) {
+      txt = '🔥 Hace calor — quizás una heladería te cae mejor que el plan original.';
+    }
     var el = document.getElementById('mood-suggest-text');
     if(el) el.textContent = txt;
   }
+  window.__uruspotSetSuggestion = setSuggestion;
   setSuggestion();
 
   var moodBtns = document.querySelectorAll('.mood-btn');
   var moodResult = document.getElementById('mood-result');
   var moodResultInner = document.getElementById('mood-result-inner');
-
-  var moodLinks = {
-    rapido:   [
-      {label:'🍞 Panaderías', href:'#panaderias'},
-      {label:'🍦 Heladerías', href:'#heladerias'},
-      {label:'🍻 Bares', href:'#bares'}
-    ],
-    barato:   [
-      {label:'🍕 Papa Luigi ($$)', href:'#restaurantes'},
-      {label:'🍔 Sanduba ($)', href:'#restaurantes'},
-      {label:'☕ Cafés en general', href:'#cafes'}
-    ],
-    sorpresa: [
-      {label:'🚢 El Arca — Imperdible', href:'#restaurantes'},
-      {label:'☕ Nero Café — Top', href:'#cafes'},
-      {label:'🏋️ Gimnasio 538 — Mejor puntuado', href:'#gimnasios'}
-    ],
-    relax:    [
-      {label:'☕ Ver todos los Cafés', href:'#cafes'},
-      {label:'🏨 Ver Hosterías', href:'#hosterias'},
-      {label:'🌅 Bella Vista (vista al río)', href:'#restaurantes'}
-    ]
+  var moodLabels = {
+    rapido:'algo rápido y sin vueltas',
+    barato:'opciones económicas',
+    sorpresa:'lo mejor puntuado de la guía',
+    relax:'algo tranquilo, con calma'
   };
 
-  /* Default inteligente: pre-resalta la opción según la hora, sin elegir por el usuario */
-  var defaultMoodByTime = {manana:'rapido',mediodia:'rapido',tarde:'relax',noche:'sorpresa'};
-  var suggested = defaultMoodByTime[globalTimeMode];
-  moodBtns.forEach(function(btn){
-    if(btn.dataset.mood === suggested) btn.classList.add('suggested');
-  });
+  /* Cada lugar etiquetado con data-mood se resalta y el resto se atenúa
+     (no se oculta del todo: el usuario sigue pudiendo ver toda la guía,
+     pero la elección queda evidenciada visualmente — esto es un filtro
+     real, no una lista fija de enlaces). */
+  function applyMoodFilter(mood){
+    var matched = [];
+    document.querySelectorAll('.searchable[data-mood]').forEach(function(card){
+      var moods = (card.dataset.mood || '').split(/\s+/);
+      var isMatch = moods.indexOf(mood) !== -1;
+      card.classList.toggle('mood-match', isMatch);
+      card.classList.toggle('mood-dim', !isMatch);
+      if (isMatch) matched.push(card);
+    });
+    /* Las tarjetas sin data-mood (gimnasios sin etiqueta, anuncios) no se atenúan */
+    document.querySelectorAll('.searchable:not([data-mood])').forEach(function(card){
+      card.classList.remove('mood-match','mood-dim');
+    });
+    return matched;
+  }
+
+  function clearMoodFilter(){
+    document.querySelectorAll('.mood-match,.mood-dim').forEach(function(card){
+      card.classList.remove('mood-match','mood-dim');
+    });
+  }
 
   moodBtns.forEach(function(btn){
     btn.addEventListener('click', function(){
       var mood = this.dataset.mood;
-      moodBtns.forEach(function(b){b.classList.remove('active');});
+      var alreadyActive = this.classList.contains('active');
+
+      moodBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+
+      if (alreadyActive) {
+        clearMoodFilter();
+        moodResult.classList.remove('open');
+        setSuggestion(null);
+        return;
+      }
+
       this.classList.add('active');
+      this.setAttribute('aria-pressed','true');
       setSuggestion(mood);
 
-      var links = moodLinks[mood] || [];
-      moodResultInner.innerHTML = links.map(function(l){
-        return '<a class="mood-result-chip" href="'+l.href+'">'+l.label+'</a>';
-      }).join('');
+      var matched = applyMoodFilter(mood);
+
+      var html = '<span class="mood-result-hint">Encontramos ' + matched.length + ' lugares para "' + moodLabels[mood] + '" — resaltados en toda la guía:</span>';
+      matched.slice(0, 8).forEach(function(card){
+        var name = card.dataset.name || '';
+        var href = card.getAttribute('href') || '#';
+        html += '<a class="mood-result-chip" href="'+href+'" target="_blank" rel="noopener">'+name+'</a>';
+      });
+      html += '<button type="button" class="mood-result-clear" id="mood-clear-btn">Quitar filtro</button>';
+      moodResultInner.innerHTML = html;
       moodResult.classList.add('open');
 
-      setTimeout(function(){
-        moodResult.scrollIntoView({behavior:'smooth', block:'nearest'});
-      }, 200);
+      var clearBtn = document.getElementById('mood-clear-btn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function(){
+          moodBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+          clearMoodFilter();
+          moodResult.classList.remove('open');
+          setSuggestion(null);
+        });
+      }
+
+      if (matched.length) {
+        setTimeout(function(){
+          matched[0].scrollIntoView({behavior:'smooth', block:'center'});
+        }, 250);
+      }
     });
+  });
+
+  /* Sugerencia por defecto según hora del día (solo informativa, no autoaplica el filtro) */
+  var defaultMoodByTime = {manana:'rapido',mediodia:'rapido',tarde:'relax',noche:'sorpresa'};
+  var suggested = defaultMoodByTime[globalTimeMode];
+  moodBtns.forEach(function(btn){
+    if(btn.dataset.mood === suggested) btn.classList.add('suggested');
   });
 
   /* ====== GLOSARIO ====== */
@@ -1851,6 +1917,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
         var toast = document.createElement('div');
         toast.className = 'pill-toast';
         toast.textContent = this.dataset.tip;
+        toast.setAttribute('role','status');
         toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--parchment);font-family:var(--f-ui);font-size:11px;padding:12px 20px;border-radius:6px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:80vw;text-align:center;';
         document.body.appendChild(toast);
         setTimeout(function(){toast.remove();}, 2200);
@@ -1864,7 +1931,7 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
   var sectionNames = {
     mood:'Empezar', categorias:'Categorías', restaurantes:'Restaurantes', cafes:'Cafés',
     bares:'Bares', panaderias:'Panaderías', heladerias:'Heladerías',
-    hosterias:'Hosterías', gimnasios:'Gimnasios', ciudad:'Vivir en CdU'
+    hosterias:'Hosterías', gimnasios:'Gimnasios',
   };
   if(crumb){
     window.addEventListener('scroll', function(){
@@ -1940,11 +2007,14 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 })();
 </script>
 
+<!-- TICKER: ahora deja de animar cuando el hero sale del viewport o la pestaña
+     está oculta, para no quemar ciclos de GPU/CPU sin que se vea nada -->
 <script>
 (function(){
   'use strict';
   var inner = document.getElementById('heroTickerInner');
   var pauseBtn = document.getElementById('htick-pause-btn');
+  var heroEl = document.querySelector('.hero');
   if(!inner) return;
 
   var items = [
@@ -1973,11 +2043,11 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
 
   var pos = 0;
   var paused = false;
+  var inViewport = true;
   var speed = 0.5;
   inner.addEventListener('mouseenter', function(){ paused = true; });
   inner.addEventListener('mouseleave', function(){ if(!manuallyPaused) paused = false; });
 
-  /* Pausa manual accesible (WCAG 2.2.2) + pausa automática si el tab está oculto */
   var manuallyPaused = false;
   if(pauseBtn){
     pauseBtn.addEventListener('click', function(){
@@ -1992,13 +2062,20 @@ a:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-r
     paused = document.hidden ? true : manuallyPaused;
   });
 
+  if (heroEl && 'IntersectionObserver' in window) {
+    var heroObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){ inViewport = entry.isIntersecting; });
+    }, { threshold: 0 });
+    heroObs.observe(heroEl);
+  }
+
   if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
     manuallyPaused = true; paused = true;
     if(pauseBtn){ pauseBtn.textContent = '▶'; pauseBtn.setAttribute('aria-pressed','true'); }
   }
 
   function tick() {
-    if (!paused) {
+    if (!paused && inViewport) {
       pos += speed;
       var half = inner.scrollWidth / 2;
       if (pos >= half) pos = 0;
