@@ -3691,7 +3691,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
     },120);
   });
 
-  searchInput.addEventListener('keydown',function(e){
+ searchInput.addEventListener('keydown',function(e){
     if(e.key==='Enter'){
       e.preventDefault();
       var q=normalize(this.value.trim());
@@ -3700,9 +3700,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
       var matches=all.filter(function(item){
         return normalize(item.name).includes(q)||normalize(item.tags).includes(q);
       });
-      if(matches.length===1){
-        window.location.href=matches[0].href;
-      } else if(matches.length>1){
+      if(matches.length>=1){
         /* Si hay varias coincidencias, scrollea a la primera */
         dropdown.style.display='none';
         var first=matches[0].el;
