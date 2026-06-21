@@ -3700,12 +3700,11 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
     dropdown.style.display='block';
   }
 
-  searchInput.addEventListener('input',function(){
+searchInput.addEventListener('input',function(){
     var val=this.value;
     var q=normalize(val.trim());
     if(searchDebounceId) clearTimeout(searchDebounceId);
     searchDebounceId=setTimeout(function(){
-      runSearch(val);
       renderDropdown(q);
     },120);
   });
