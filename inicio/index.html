@@ -13,6 +13,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/syne/v24/8vIH7w4qzmVxsWxjBZRjr0FKM_04uQ.woff2" crossorigin="anonymous" />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/dmserifdisplay/v17/-nFnOHM81r4j6k0gjALR8uVIJjAIKXM.woff2" crossorigin="anonymous" />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/dmserifdisplay/v17/-nFhOHM81r4j6k0gjALR8uVIJjAIKXM.woff2" crossorigin="anonymous" />
+  <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/instrumentserif/v1/Da21F4RNnSmqMCQyUXCGNiXA66MAzmqhGIiTj8M.woff2" crossorigin="anonymous" />
 <meta name="description" content="Dónde comer en Concepción del Uruguay — restaurantes, bares, cafés, panaderías y hosterías verificados. Horarios en tiempo real, rankings y guía local completa. URU SPOT." />
 <title>URU SPOT · Guía Local · Concepción del Uruguay</title>
 <meta property="og:type" content="website" />
@@ -26,6 +27,7 @@
 <meta property="og:site_name" content="URU SPOT" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
+  <link rel="sitemap" type="application/xml" href="/uruspot/sitemap.xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Serif:ital@0;1&family=Syne:wght@600;700;800&display=swap" media="print" onload="this.media='all'" />
@@ -171,6 +173,15 @@ img{display:block;max-width:100%}
 
 /* ── MAIN BODY ── */
 .main-body{background:var(--parchment3);padding:100px var(--gutter) 120px;position:relative}
+.main-body::after{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:120px;
+  background:linear-gradient(to bottom,var(--void),transparent);
+  pointer-events:none;
+  z-index:1;
+}
 .main-body::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 0%,rgba(29,92,64,.04) 0%,transparent 45%),radial-gradient(circle at 85% 100%,rgba(196,135,42,.04) 0%,transparent 40%);pointer-events:none}
 .section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:60px;padding-bottom:24px;position:relative;gap:16px;flex-wrap:wrap}
 .section-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(26,25,22,.12)}
@@ -318,6 +329,8 @@ img{display:block;max-width:100%}
 .bcard-icon{font-size:40px;line-height:1;transition:transform 0.4s var(--ease);position:relative;z-index:1}
 .bcard:hover .bcard-icon{transform:scale(1.15) rotate(-5deg)}
 .bcard-name{font-family:var(--f-display);font-size:15px;color:var(--ink);line-height:1.3;word-break:break-word;position:relative;z-index:1}
+  .bcard-desc{font-family:var(--f-italic);font-style:italic;font-size:12px;color:rgba(26,25,22,.45);line-height:1.5;text-align:center;max-width:140px;position:relative;z-index:1;transition:color 0.4s ease}
+.bcard:hover .bcard-desc{color:rgba(26,25,22,.70)}
   
 
 /* ── LIST ── */
@@ -347,8 +360,31 @@ img{display:block;max-width:100%}
 }
 
 /* ── REVEAL ── */
-.reveal{opacity:0;transform:translateY(24px) scale(0.98);transition:opacity 0.65s var(--ease-out-expo),transform 0.65s var(--ease-out-expo);transition-delay:var(--reveal-delay,0ms)}
-.reveal.visible{opacity:1;transform:translateY(0) scale(1)}
+.reveal{
+  opacity:0;
+  transform:translateY(24px) scale(0.98);
+  filter:blur(4px);
+  transition:
+    opacity 0.65s var(--ease-out-expo),
+    transform 0.65s var(--ease-out-expo),
+    filter 0.65s var(--ease-out-expo);
+  transition-delay:var(--reveal-delay,0ms);
+  will-change:opacity,transform,filter;
+}
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  filter:blur(0px);
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal{filter:none;transition:opacity 0.15s linear}
+  .reveal.visible{filter:none}
+}
+@media(max-width:768px){
+  /* En mobile: sin blur por performance */
+  .reveal{filter:none}
+  .reveal.visible{filter:none}
+}
 
 /* ── FARMACIA / EMERGENCIAS / SERVICIOS ── */
 .uft-wrap{width:100%;margin:0 0 80px 0;display:block;position:relative}
@@ -1022,6 +1058,33 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 
 })();
 </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "URU SPOT",
+  "description": "Guía local de restaurantes, bares, cafés, hosterías y más en Concepción del Uruguay, Entre Ríos, Argentina.",
+  "url": "https://uruspotcdu-create.github.io/uruspot/",
+  "inLanguage": "es-AR",
+  "about": {
+    "@type": "City",
+    "name": "Concepción del Uruguay",
+    "containedInPlace": {
+      "@type": "State",
+      "name": "Entre Ríos",
+      "containedInPlace": {
+        "@type": "Country",
+        "name": "Argentina"
+      }
+    }
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://uruspotcdu-create.github.io/uruspot/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Ir al contenido principal</a>
@@ -1284,11 +1347,11 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
       <div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span>
       <div class="ccard-inner"><span class="ccard-label">Especialidad</span><span class="ccard-name">Nero Café</span><div class="pills" style="margin-top:4px"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span></div></div>
     </a>
-    <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="--reveal-delay:70ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
-    <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" style="--reveal-delay:140ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
-    <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/london-cafe/" style="--reveal-delay:210ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
-    <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/helena-cafe/" style="--reveal-delay:280ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
-    <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:350ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
+    <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="--reveal-delay:70ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="La Ris — cafetería artesanal en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
+    <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" style="--reveal-delay:140ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="Cultura Café — café cultural en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
+    <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/london-cafe/" style="--reveal-delay:210ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="London Café — café clásico en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
+    <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/helena-cafe/" style="--reveal-delay:280ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="Helena — café moderno en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
+    <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:350ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" fetchpriority="low" alt="Bella Vista — café con vista en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
   </div>
   <p class="search-no-results" id="no-results-cafes">No se encontraron cafés con ese nombre.</p>
 </section>
@@ -1301,13 +1364,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="bar-grid" id="grid-bares">
-    <a class="bcard reveal searchable" data-name="Justo José" data-tags="bar parrilla cerveza" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="--reveal-delay:40ms"><div class="bcard-icon">⚖️</div><div class="bcard-name">Justo José</div></a>
-    <a class="bcard reveal searchable" data-name="Bonhomia" data-tags="bar cocteles moderno" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="--reveal-delay:90ms"><span class="badge">Top</span><div class="bcard-icon">✨</div><div class="bcard-name">Bonhomia</div></a>
-    <a class="bcard reveal searchable" data-name="Klug Gebrau" data-tags="bar cerveza artesanal cerveceria" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" style="--reveal-delay:140ms"><div class="bcard-icon">🍺</div><div class="bcard-name">Klug Gebrau</div></a>
-    <a class="bcard reveal searchable" data-name="7 Colinas" data-tags="bar cerveza artesanal comida" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/7-colinas/" style="--reveal-delay:190ms"><span class="badge">Top</span><div class="bcard-icon">🍻</div><div class="bcard-name">7 Colinas</div></a>
-    <a class="bcard reveal searchable" data-name="Drakkar" data-tags="bar cerveceria grill" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/drakkar/" style="--reveal-delay:240ms"><div class="bcard-icon">⚔️</div><div class="bcard-name">Drakkar</div></a>
-    <a class="bcard reveal searchable" data-name="Bartolo" data-tags="bar cocteles tragos" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" style="--reveal-delay:290ms"><span class="badge">Top</span><div class="bcard-icon">🍸</div><div class="bcard-name">Bartolo</div></a>
-    <a class="bcard reveal searchable" data-name="House Garage" data-tags="bar garage tematico" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/house-garage/" style="--reveal-delay:340ms"><span class="badge">Top</span><div class="bcard-icon">🏎️</div><div class="bcard-name">House Garage</div></a>
+    <a class="bcard reveal searchable" data-name="Justo José" data-tags="bar parrilla cerveza" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="--reveal-delay:40ms"><div class="bcard-icon">⚖️</div><div class="bcard-name">Justo José</div><div class="bcard-desc">Parrilla y bar, abierto todos los días</div></a>
+    <a class="bcard reveal searchable" data-name="Bonhomia" data-tags="bar cocteles moderno" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="--reveal-delay:90ms"><span class="badge">Top</span><div class="bcard-icon">✨</div><div class="bcard-name">Bonhomia</div><div class="bcard-desc">Cócteles premium, el más sofisticado</div></a>
+    <a class="bcard reveal searchable" data-name="Klug Gebrau" data-tags="bar cerveza artesanal cerveceria" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" style="--reveal-delay:140ms"><div class="bcard-icon">🍺</div><div class="bcard-name">Klug Gebrau</div><div class="bcard-desc">Cervecería artesanal, ambiente relajado</div></a>
+    <a class="bcard reveal searchable" data-name="7 Colinas" data-tags="bar cerveza artesanal comida" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/7-colinas/" style="--reveal-delay:190ms"><span class="badge">Top</span><div class="bcard-icon">🍻</div><div class="bcard-name">7 Colinas</div><div class="bcard-desc">Beer y picada, siempre con gente</div></a>
+    <a class="bcard reveal searchable" data-name="Drakkar" data-tags="bar cerveceria grill" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/drakkar/" style="--reveal-delay:240ms"><div class="bcard-icon">⚔️</div><div class="bcard-name">Drakkar</div><div class="bcard-desc">Cervecería con grill, estilo vikingo</div></a>
+    <a class="bcard reveal searchable" data-name="Bartolo" data-tags="bar cocteles tragos" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" style="--reveal-delay:290ms"><span class="badge">Top</span><div class="bcard-icon">🍸</div><div class="bcard-name">Bartolo</div><div class="bcard-desc">Tragos creativos, precio justo</div></a>
+    <a class="bcard reveal searchable" data-name="House Garage" data-tags="bar garage tematico" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/house-garage/" style="--reveal-delay:340ms"><span class="badge">Top</span><div class="bcard-icon">🏎️</div><div class="bcard-name">House Garage</div><div class="bcard-desc">Bar temático, decoración original</div></a>
   </div>
   <p class="search-no-results" id="no-results-bares">No se encontraron bares con ese nombre.</p>
 </section>
