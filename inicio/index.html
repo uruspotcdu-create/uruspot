@@ -3601,9 +3601,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
      del cursor (eso era fricción, no ayuda). */
   var searchDebounceId = null;
 
-  function runSearch(query){
+ function runSearch(query){
     var q=normalize(query.trim());
     var totalVisible=0;
+    var firstMatch=null;
     grids.forEach(function(g){
       var grid=document.getElementById(g.id);
       var noRes=document.getElementById(g.noRes);
@@ -3615,11 +3616,35 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
         var tags=normalize(item.dataset.tags||'');
         var matches=!q||name.includes(q)||tags.includes(q);
         item.classList.toggle('search-hidden',!matches);
-        if(matches){visibleInGrid++;totalVisible++;}
+        if(matches){
+          visibleInGrid++;
+          totalVisible++;
+          if(!firstMatch) firstMatch=item;
+        }
       });
+      /* Si hay resultados en esta sección, abrí el accordion si estaba colapsado */
+      if(q.length>0 && visibleInGrid>0){
+        var sec=grid.closest('.us-section');
+        if(sec && sec.classList.contains('acc-collapsed')){
+          sec.classList.remove('acc-collapsed');
+          var hdr=sec.querySelector('.section-header');
+          if(hdr) hdr.setAttribute('aria-expanded','true');
+        }
+      }
       if(noRes)noRes.classList.toggle('visible',q.length>0&&visibleInGrid===0);
     });
     searchCount.textContent=q.length>0?totalVisible+(totalVisible===1?' resultado':' resultados'):'';
+    /* Scroll a la primera coincidencia con un pequeño delay para que el DOM se actualice */
+    if(q.length>0 && firstMatch){
+      clearTimeout(window.__searchScrollId);
+      window.__searchScrollId=setTimeout(function(){
+        var navEl=document.getElementById('main-nav');
+        var searchEl=document.getElementById('search-bar-wrap');
+        var offset=(navEl?navEl.offsetHeight:60)+(searchEl?searchEl.offsetHeight:72)+16;
+        var top=firstMatch.getBoundingClientRect().top+window.scrollY-offset;
+        window.scrollTo({top:top,behavior:'smooth'});
+      },300);
+    }
   }
 
   searchInput.addEventListener('input',function(){
