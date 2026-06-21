@@ -134,11 +134,13 @@ img{display:block;max-width:100%}
 .hero-fade{position:absolute;bottom:0;left:0;right:0;height:160px;background:linear-gradient(to bottom,transparent,rgba(6,6,5,.55));z-index:3;pointer-events:none}
 
 /* ── NAV ── */
-.main-nav{position:sticky;top:0;z-index:900;background:rgba(6,6,5,.80);border-bottom:1px solid rgba(242,237,227,.06);display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:relative;transition:background 0.5s var(--ease-out-expo),box-shadow 0.5s var(--ease-out-expo)}
+.main-nav{position:sticky;top:0;z-index:900;background:rgba(6,6,5,.80);border-bottom:1px solid rgba(242,237,227,.06);display:flex;align-items:stretch;overflow-x:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:background 0.5s var(--ease-out-expo),box-shadow 0.5s var(--ease-out-expo)}
 @supports(backdrop-filter:saturate(180%) blur(20px)){
   .main-nav{backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);background:rgba(6,6,5,.55)}
 }
 .main-nav::-webkit-scrollbar{display:none}
+  .nav-scroll-area{display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:1;min-width:0}
+.nav-scroll-area::-webkit-scrollbar{display:none}
 .nav-indicator{position:absolute;bottom:0;height:2px;background:linear-gradient(90deg,var(--verde),var(--oro2));transition:left 0.4s var(--ease),width 0.4s var(--ease);pointer-events:none;z-index:10}
 .main-nav.scrolled{background:rgba(4,4,3,.88);box-shadow:0 1px 0 rgba(242,237,227,.06),0 8px 32px -4px rgba(0,0,0,.40),0 0 0 0.5px rgba(242,237,227,.04)}
 .nav-item{display:inline-flex;align-items:center;gap:8px;padding:0 24px;height:60px;font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.38);white-space:nowrap;flex-shrink:0;border-bottom:2px solid transparent;transition:color 0.3s ease,border-color 0.3s ease}
@@ -151,7 +153,8 @@ img{display:block;max-width:100%}
 /* ── BUSCADOR ── */
 .search-bar-wrap{position:sticky;top:60px;z-index:800;background:rgba(6,6,5,.97);border-bottom:1px solid rgba(242,237,227,.07);padding:0 var(--gutter);display:flex;align-items:center;gap:16px;height:0;overflow:hidden;transition:height 0.35s var(--ease)}
 .search-bar-wrap.open{height:72px}
-.search-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:none;background:none;cursor:pointer;color:rgba(242,237,227,.55);font-size:18px;flex-shrink:0;transition:color 0.3s ease;padding:0;margin-left:auto}
+.search-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:48px;height:60px;border:none;border-left:1px solid rgba(242,237,227,.08);background:rgba(6,6,5,.60);cursor:pointer;color:rgba(242,237,227,.55);font-size:18px;flex-shrink:0;transition:color 0.3s ease,background 0.3s ease;padding:0}
+.search-icon-btn:hover{color:var(--oro2);background:rgba(196,135,42,.08)}
 .search-icon-btn:hover{color:var(--oro2)}
 .search-input{flex:1;background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.14);border-radius:2px;padding:14px 20px;font-family:var(--f-ui);font-size:13px;font-weight:600;letter-spacing:.5px;color:var(--parchment);outline:none;transition:border-color 0.3s ease,background 0.3s ease,box-shadow 0.3s ease}
 .search-input::placeholder{color:rgba(242,237,227,.28);font-weight:400}
@@ -1087,24 +1090,25 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 </header>
 
 <nav class="main-nav" id="main-nav" role="navigation" aria-label="Categorías">
-  <a class="nav-item active" href="#mood" data-section="mood"><span class="nav-emoji" aria-hidden="true">✨</span> Empezar</a>
-  <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#categorias" data-section="categorias"><span class="nav-emoji" aria-hidden="true">🗺️</span> Categorías</a>
-  <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#restaurantes" data-section="restaurantes"><span class="nav-emoji" aria-hidden="true">🍽️</span> Restaurantes</a>
-  <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#cafes" data-section="cafes"><span class="nav-emoji" aria-hidden="true">☕</span> Cafés</a>
-  <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#bares" data-section="bares"><span class="nav-emoji" aria-hidden="true">🍻</span> Bares</a>
-  <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#panaderias" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🥐</span> Panaderías</a>
-  <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#heladerias" data-section="heladerias"><span class="nav-emoji" aria-hidden="true">🍦</span> Heladerías</a>
-  <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#hosterias" data-section="hosterias"><span class="nav-emoji" aria-hidden="true">🏨</span> Hosterías</a>
-  <div class="nav-divider" aria-hidden="true"></div>
-  <a class="nav-item" href="#gimnasios" data-section="gimnasios"><span class="nav-emoji" aria-hidden="true">💪</span> Gimnasios</a>
-  <div class="nav-divider" aria-hidden="true"></div>
+  <div class="nav-scroll-area">
+    <a class="nav-item active" href="#mood" data-section="mood"><span class="nav-emoji" aria-hidden="true">✨</span> Empezar</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#categorias" data-section="categorias"><span class="nav-emoji" aria-hidden="true">🗺️</span> Categorías</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#restaurantes" data-section="restaurantes"><span class="nav-emoji" aria-hidden="true">🍽️</span> Restaurantes</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#cafes" data-section="cafes"><span class="nav-emoji" aria-hidden="true">☕</span> Cafés</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#bares" data-section="bares"><span class="nav-emoji" aria-hidden="true">🍻</span> Bares</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#panaderias" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🥐</span> Panaderías</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#heladerias" data-section="heladerias"><span class="nav-emoji" aria-hidden="true">🍦</span> Heladerías</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#hosterias" data-section="hosterias"><span class="nav-emoji" aria-hidden="true">🏨</span> Hosterías</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#gimnasios" data-section="gimnasios"><span class="nav-emoji" aria-hidden="true">💪</span> Gimnasios</a>
+  </div>
   <button class="search-icon-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">🔍</button>
 </nav>
 
