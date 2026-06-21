@@ -906,10 +906,23 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 }
 
 /* ── REDUCED MOTION SAFETY ── */
+/* ── CONTENIDO COLAPSADO ── */
+.us-section > *:not(.section-header) {
+  max-height: 10000px;
+  overflow: hidden;
+  transition: max-height 0.4s var(--ease), opacity 0.3s ease, margin 0.3s ease;
+}
+.us-section.acc-collapsed > *:not(.section-header) {
+  max-height: 0 !important;
+  opacity: 0;
+  margin: 0 !important;
+  overflow: hidden;
+}
 @media(prefers-reduced-motion:reduce){
   .hero-rule-line, .footer-divider { animation: none; }
   .mood-btn, .reveal { transition-duration: 0.001ms !important; }
-}@media(max-width:480px){
+}
+  @media(max-width:480px){
   .glos-item-sym{font-size:15px}
   .glos-item-desc{font-size:11.5px;line-height:1.4}
   .glos-item{padding:16px 16px}
@@ -3158,6 +3171,8 @@ searchInput.addEventListener('input',function(){
       }
     });
   });
+  
+  
   /* ====== TOOLTIPS — fallback táctil en móvil ====== */
   var isTouch = window.matchMedia('(max-width:768px)').matches;
   if(isTouch){
