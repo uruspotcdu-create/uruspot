@@ -1631,1597 +1631,866 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
     </div>
   </details>
 </section>
-<style>
-/* ════════════════════════════════════════════════
-   SISTEMA DE DISEÑO — SECCIÓN UNIVERSITARIA v2
-   Variables propias, no dependen del sitio padre
-   ════════════════════════════════════════════════ */
-#uni-v2 {
-  --u-void:      #0c0b09;
-  --u-deep:      #141310;
-  --u-surface:   #1c1a16;
-  --u-lift:      #242119;
-  --u-cream:     #f5f0e8;
-  --u-cream2:    #ece5d8;
-  --u-cream3:    #d8d0c4;
-  --u-copper:    #b87333;
-  --u-copper2:   #d4924a;
-  --u-copper3:   #8a5520;
-  --u-moss:      #2c4a3e;
-  --u-moss2:     #3d6356;
-  --u-ink:       rgba(245,240,232,.92);
-  --u-muted:     rgba(245,240,232,.42);
-  --u-ghost:     rgba(245,240,232,.18);
-  --u-rule:      rgba(245,240,232,.09);
-  --u-ease:      cubic-bezier(0.25,0.46,0.45,0.94);
-  --u-spring:    cubic-bezier(0.34,1.56,0.64,1);
-  --u-expo:      cubic-bezier(0.16,1,0.3,1);
-  --u-gutter:    var(--gutter, 64px);
-  --f-display:   'DM Serif Display', serif;
-  --f-ui:        'Syne', sans-serif;
-  --f-italic:    'DM Serif Display', serif;
-}
+<section class="ru-section" id="uni-ruta" aria-labelledby="ru-hero-title">
 
-/* ── BASE ── */
-#uni-v2 {
-  background: var(--u-void);
-  color: var(--u-cream);
-  position: relative;
-  overflow: hidden;
-}
+<!-- ════════════ HERO ════════════ -->
+<header class="ru-hero">
+  <div class="ru-grain"></div>
+  <div class="ru-ruled"></div>
+  <div class="ru-wrap ru-hero-wrap">
 
-/* ── CURSOR PREMIUM (desktop) ── */
-#uni-cursor {
-  position: fixed;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--u-copper);
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: transform 0.08s linear, opacity 0.3s ease, width 0.35s var(--u-expo), height 0.35s var(--u-expo), background 0.35s ease;
-  opacity: 0;
-  mix-blend-mode: normal;
-}
-#uni-cursor.visible { opacity: 1; }
-#uni-cursor.hovering {
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border: 1px solid var(--u-copper);
-}
+    <div class="ru-ticket-tag" aria-hidden="true">
+      <span>Para universitarios</span>
+    </div>
 
-/* ── GRAIN OVERLAY ── */
-#uni-v2::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-  pointer-events: none;
-  z-index: 1;
-  opacity: .6;
-}
+    <h2 class="ru-hero-title" id="ru-hero-title">
+      <span class="ru-hl"><span>Llegaste.</span></span>
+      <span class="ru-hl"><span>Ahora <em>conocé</em></span></span>
+      <span class="ru-hl"><span>la ciudad.</span></span>
+    </h2>
 
-/* ── AMBIENT GLOW ── */
-#uni-v2::after {
-  content: '';
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 60vw;
-  height: 60vw;
-  max-width: 900px;
-  max-height: 900px;
-  background: radial-gradient(circle, rgba(184,115,51,.07) 0%, transparent 65%);
-  pointer-events: none;
-  z-index: 0;
-  animation: uAmbient 20s ease-in-out infinite alternate;
-}
-@keyframes uAmbient {
-  from { transform: translate(0, 0) scale(1); }
-  to   { transform: translate(-40px, 60px) scale(1.15); }
-}
-@media (prefers-reduced-motion: reduce) {
-  #uni-v2::after { animation: none; }
-}
+    <p class="ru-hero-desc">
+      CdU tiene más de lo que cualquier grupo de WhatsApp te va a contar.
+      Esta guía la escribió alguien que ya vivió lo que vos estás por vivir.
+    </p>
 
-/* ── LAYOUT WRAPPER ── */
-.u-wrap {
-  position: relative;
-  z-index: 2;
-}
-
-/* ── CAPÍTULO: BASE ── */
-.u-chapter {
-  padding: 96px var(--u-gutter);
-  position: relative;
-}
-.u-chapter + .u-chapter {
-  border-top: 1px solid var(--u-rule);
-}
-
-/* ── OBERTURA ── */
-.u-obertura {
-  padding: 120px var(--u-gutter) 100px;
-  min-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.u-ob-signal {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 48px;
-  opacity: 0;
-  transform: translateY(16px);
-  animation: uFadeUp 0.8s var(--u-expo) 0.3s forwards;
-}
-.u-ob-signal-line {
-  width: 40px;
-  height: 1px;
-  background: var(--u-copper);
-  transform-origin: left;
-  animation: uLineGrow 0.6s var(--u-expo) 0.5s both;
-}
-@keyframes uLineGrow {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-.u-ob-signal-text {
-  font-family: var(--f-ui);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--u-copper);
-}
-.u-ob-signal-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--u-copper);
-  animation: uDotPulse 2.5s ease infinite;
-}
-@keyframes uDotPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.5; transform: scale(1.6); }
-}
-
-.u-ob-title {
-  font-family: var(--f-display);
-  font-size: clamp(52px, 8vw, 108px);
-  line-height: 0.88;
-  letter-spacing: -3px;
-  color: var(--u-cream);
-  margin-bottom: 0;
-  overflow: hidden;
-}
-
-.u-ob-title-line {
-  display: block;
-  overflow: hidden;
-}
-
-.u-ob-title-line span {
-  display: block;
-  opacity: 0;
-  transform: translateY(100%);
-}
-
-.u-ob-title-line:nth-child(1) span { animation: uTitleReveal 0.9s var(--u-expo) 0.5s forwards; }
-.u-ob-title-line:nth-child(2) span { animation: uTitleReveal 0.9s var(--u-expo) 0.68s forwards; }
-.u-ob-title-line:nth-child(3) span { animation: uTitleReveal 0.9s var(--u-expo) 0.86s forwards; }
-
-@keyframes uTitleReveal {
-  from { transform: translateY(100%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .u-ob-title-line span,
-  .u-ob-signal { animation: none; opacity: 1; transform: none; }
-  .u-ob-signal-line { animation: none; }
-}
-
-.u-ob-title .u-gold {
-  font-style: italic;
-  color: var(--u-copper2);
-}
-
-.u-ob-bottom {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 48px;
-  margin-top: 64px;
-  flex-wrap: wrap;
-}
-
-.u-ob-desc {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: clamp(16px, 2vw, 20px);
-  line-height: 1.85;
-  color: var(--u-muted);
-  max-width: 560px;
-  opacity: 0;
-  animation: uFadeUp 0.8s var(--u-expo) 1.1s forwards;
-}
-.u-ob-desc em {
-  font-style: normal;
-  color: var(--u-cream);
-}
-@media (prefers-reduced-motion: reduce) {
-  .u-ob-desc { animation: none; opacity: 1; }
-}
-
-.u-ob-faculties {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  opacity: 0;
-  animation: uFadeUp 0.8s var(--u-expo) 1.3s forwards;
-  flex-shrink: 0;
-}
-@media (prefers-reduced-motion: reduce) {
-  .u-ob-faculties { animation: none; opacity: 1; }
-}
-
-.u-faculty-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--u-rule);
-  font-family: var(--f-ui);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--u-ghost);
-  transition: color 0.35s ease;
-  cursor: default;
-}
-.u-faculty-row:first-child { border-top: 1px solid var(--u-rule); }
-.u-faculty-row:hover { color: var(--u-cream2); }
-.u-faculty-row::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--u-copper3);
-  flex-shrink: 0;
-  transition: background 0.35s ease;
-}
-.u-faculty-row:hover::before { background: var(--u-copper2); }
-
-.u-ob-scroll-hint {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  opacity: 0;
-  animation: uFadeUp 0.8s var(--u-expo) 1.6s forwards;
-}
-@media (prefers-reduced-motion: reduce) {
-  .u-ob-scroll-hint { animation: none; opacity: 1; }
-}
-.u-scroll-label {
-  font-family: var(--f-ui);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--u-ghost);
-}
-.u-scroll-line {
-  width: 1px;
-  height: 48px;
-  background: linear-gradient(to bottom, var(--u-copper), transparent);
-  animation: uScrollLine 2s ease infinite;
-  transform-origin: top;
-}
-@keyframes uScrollLine {
-  0%   { transform: scaleY(0); opacity: 0; transform-origin: top; }
-  50%  { transform: scaleY(1); opacity: 1; transform-origin: top; }
-  100% { transform: scaleY(1); opacity: 0; transform-origin: bottom; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .u-scroll-line { animation: none; }
-}
-
-/* ── CAPÍTULO: PRIMEROS DÍAS ── */
-.u-chapter-label {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 56px;
-}
-.u-chapter-num {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 13px;
-  color: var(--u-copper);
-  letter-spacing: 2px;
-}
-.u-chapter-rule {
-  flex: 1;
-  height: 1px;
-  background: var(--u-rule);
-  position: relative;
-  overflow: hidden;
-}
-.u-chapter-rule::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--u-copper);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.8s var(--u-expo);
-}
-.u-chapter-rule.drawn::after { transform: scaleX(1); }
-
-.u-chapter-title {
-  font-family: var(--f-display);
-  font-size: clamp(32px, 5vw, 60px);
-  line-height: 0.92;
-  letter-spacing: -1.5px;
-  color: var(--u-cream);
-  margin-bottom: 16px;
-}
-.u-chapter-title em {
-  font-style: italic;
-  color: var(--u-copper2);
-}
-
-.u-chapter-intro {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 17px;
-  color: var(--u-muted);
-  line-height: 1.85;
-  max-width: 600px;
-  margin-bottom: 64px;
-}
-
-/* LISTA EDITORIAL — "Primeros días" */
-.u-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.u-step {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 0 40px;
-  padding: 40px 0;
-  border-bottom: 1px solid var(--u-rule);
-  position: relative;
-  text-decoration: none;
-  color: inherit;
-  transition: padding-left 0.45s var(--u-expo);
-}
-.u-step:first-child { border-top: 1px solid var(--u-rule); }
-.u-step:hover { padding-left: 12px; }
-
-.u-step-num {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 48px;
-  color: var(--u-copper3);
-  line-height: 1;
-  transition: color 0.4s ease;
-  padding-top: 4px;
-}
-.u-step:hover .u-step-num { color: var(--u-copper2); }
-
-.u-step-content { display: flex; flex-direction: column; gap: 10px; }
-
-.u-step-tag {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--u-moss2);
-}
-
-.u-step-title {
-  font-family: var(--f-display);
-  font-size: clamp(20px, 2.5vw, 28px);
-  line-height: 1.1;
-  color: var(--u-cream);
-  letter-spacing: -.3px;
-  transition: color 0.35s ease;
-}
-.u-step:hover .u-step-title { color: var(--u-cream2); }
-
-.u-step-body {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 15px;
-  color: var(--u-muted);
-  line-height: 1.8;
-  max-width: 580px;
-}
-.u-step-body strong {
-  font-style: normal;
-  font-weight: 400;
-  color: var(--u-cream2);
-}
-
-.u-step-arrow {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: var(--u-ghost);
-  transition: color 0.35s ease, transform 0.45s var(--u-expo);
-}
-.u-step:hover .u-step-arrow {
-  color: var(--u-copper2);
-  transform: translateY(-50%) translateX(6px);
-}
-
-/* ── CAPÍTULO: MESA DEL ESTUDIANTE ── */
-.u-mesa {
-  background: var(--u-deep);
-  padding: 96px var(--u-gutter);
-}
-
-.u-mesa-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--u-rule);
-  margin-top: 56px;
-}
-
-.u-mesa-feature {
-  grid-column: span 2;
-  background: var(--u-surface);
-  padding: 52px 52px 48px;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  min-height: 220px;
-  text-decoration: none;
-  transition: background 0.5s ease;
-}
-.u-mesa-feature::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--u-copper3), var(--u-copper2), var(--u-copper3));
-  background-size: 200% 100%;
-  animation: uCopperShimmer 3s ease infinite;
-}
-@keyframes uCopperShimmer {
-  0%   { background-position: 100% 50%; }
-  100% { background-position: -100% 50%; }
-}
-.u-mesa-feature:hover { background: var(--u-lift); }
-.u-mesa-feature::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 60% 80% at 90% 20%, rgba(184,115,51,.10) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-.u-mf-left { position: relative; z-index: 1; }
-.u-mf-eyebrow {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--u-copper);
-  display: block;
-  margin-bottom: 14px;
-}
-.u-mf-name {
-  font-family: var(--f-display);
-  font-size: clamp(28px, 4vw, 46px);
-  line-height: 0.95;
-  color: var(--u-cream);
-  letter-spacing: -1px;
-  display: block;
-  margin-bottom: 16px;
-}
-.u-mf-desc {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 15px;
-  color: var(--u-muted);
-  line-height: 1.8;
-  max-width: 440px;
-}
-.u-mf-right {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-}
-.u-mf-price {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 52px;
-  line-height: 1;
-  color: var(--u-copper3);
-  letter-spacing: -2px;
-  transition: color 0.4s ease;
-}
-.u-mesa-feature:hover .u-mf-price { color: var(--u-copper2); }
-.u-mf-price-label {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--u-ghost);
-  text-align: right;
-}
-
-.u-mesa-item {
-  background: var(--u-surface);
-  padding: 36px 36px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  position: relative;
-  overflow: hidden;
-  text-decoration: none;
-  transition: background 0.4s ease, transform 0.45s var(--u-expo);
-}
-.u-mesa-item:hover {
-  background: var(--u-lift);
-  transform: translateY(-3px);
-}
-.u-mesa-item::after {
-  content: '';
-  position: absolute;
-  left: 0; bottom: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--u-copper);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.45s var(--u-expo);
-}
-.u-mesa-item:hover::after { transform: scaleX(1); }
-
-.u-mi-tag {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--u-moss2);
-}
-.u-mi-name {
-  font-family: var(--f-display);
-  font-size: clamp(18px, 2.2vw, 24px);
-  color: var(--u-cream);
-  line-height: 1.1;
-  letter-spacing: -.2px;
-}
-.u-mi-desc {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 13px;
-  color: var(--u-muted);
-  line-height: 1.78;
-  flex: 1;
-}
-.u-mi-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-}
-.u-mi-price {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 22px;
-  color: var(--u-copper3);
-  transition: color 0.35s ease;
-}
-.u-mesa-item:hover .u-mi-price { color: var(--u-copper2); }
-.u-mi-arrow {
-  font-size: 16px;
-  color: var(--u-ghost);
-  transition: transform 0.45s var(--u-expo), color 0.35s ease;
-}
-.u-mesa-item:hover .u-mi-arrow {
-  transform: translate(4px, -4px);
-  color: var(--u-copper2);
-}
-
-/* ── SECRETO (quote de conocedor) ── */
-.u-secreto {
-  background: var(--u-moss);
-  padding: 72px var(--u-gutter);
-  position: relative;
-  overflow: hidden;
-}
-.u-secreto::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 70% 90% at 100% 50%, rgba(184,115,51,.12) 0%, transparent 55%);
-  pointer-events: none;
-}
-.u-secreto-inner {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 64px;
-  align-items: center;
-}
-.u-secreto-left {}
-.u-secreto-label {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: rgba(184,115,51,.75);
-  display: block;
-  margin-bottom: 16px;
-}
-.u-secreto-ojo {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 64px;
-  line-height: 1;
-  color: rgba(245,240,232,.08);
-  display: block;
-  margin-top: 8px;
-}
-.u-secreto-quote {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: clamp(22px, 3.5vw, 38px);
-  line-height: 1.25;
-  color: var(--u-cream);
-  letter-spacing: -.5px;
-  position: relative;
-}
-.u-secreto-quote::before {
-  content: '"';
-  position: absolute;
-  top: -20px;
-  left: -20px;
-  font-size: 80px;
-  color: rgba(184,115,51,.25);
-  line-height: 1;
-  font-family: var(--f-display);
-}
-.u-secreto-source {
-  display: block;
-  margin-top: 24px;
-  font-family: var(--f-ui);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(184,115,51,.55);
-}
-
-/* ── CAPÍTULO: DESPUÉS DE LAS DIEZ ── */
-.u-noche {
-  background: var(--u-void);
-}
-
-.u-noche-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  margin-bottom: 56px;
-  flex-wrap: wrap;
-}
-
-.u-noche-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.u-noche-item {
-  display: flex;
-  align-items: stretch;
-  border-top: 1px solid var(--u-rule);
-  text-decoration: none;
-  color: inherit;
-  min-height: 88px;
-  position: relative;
-  transition: background 0.4s ease;
-  overflow: hidden;
-}
-.u-noche-list > .u-noche-item:last-child { border-bottom: 1px solid var(--u-rule); }
-
-.u-noche-item::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--u-copper);
-  transform: scaleY(0);
-  transform-origin: bottom;
-  transition: transform 0.4s var(--u-expo);
-}
-.u-noche-item:hover::before { transform: scaleY(1); }
-.u-noche-item:hover { background: rgba(245,240,232,.025); }
-
-.u-ni-rank {
-  width: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 32px;
-  color: rgba(184,115,51,.20);
-  flex-shrink: 0;
-  transition: color 0.4s ease;
-  border-right: 1px solid var(--u-rule);
-}
-.u-noche-item:hover .u-ni-rank { color: rgba(184,115,51,.55); }
-
-.u-ni-body {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 24px 28px;
-}
-.u-ni-info { flex: 1; }
-.u-ni-tag {
-  font-family: var(--f-ui);
-  font-size: 7.5px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--u-moss2);
-  display: block;
-  margin-bottom: 5px;
-}
-.u-ni-name {
-  font-family: var(--f-display);
-  font-size: clamp(18px, 2.2vw, 24px);
-  color: var(--u-cream);
-  line-height: 1.1;
-  display: block;
-  letter-spacing: -.2px;
-}
-.u-ni-desc {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 13px;
-  color: var(--u-muted);
-  line-height: 1.6;
-  margin-top: 5px;
-  display: block;
-}
-.u-ni-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.u-ni-price {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 22px;
-  color: var(--u-copper3);
-}
-.u-ni-vibe {
-  font-family: var(--f-ui);
-  font-size: 7.5px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--u-ghost);
-  white-space: nowrap;
-}
-.u-ni-arrow {
-  display: flex;
-  align-items: center;
-  padding: 0 24px 0 0;
-  font-size: 18px;
-  color: var(--u-ghost);
-  flex-shrink: 0;
-  transition: transform 0.45s var(--u-expo), color 0.35s ease;
-}
-.u-noche-item:hover .u-ni-arrow {
-  transform: translateX(6px);
-  color: var(--u-copper2);
-}
-
-/* ── CAPÍTULO: SUPERVIVENCIA ── */
-.u-surv {
-  background: var(--u-surface);
-}
-
-.u-surv-intro {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: clamp(18px, 2.5vw, 26px);
-  color: var(--u-muted);
-  line-height: 1.5;
-  max-width: 700px;
-  margin-bottom: 64px;
-}
-.u-surv-intro em {
-  font-style: normal;
-  color: var(--u-cream2);
-}
-
-.u-surv-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--u-rule);
-  margin-bottom: 56px;
-}
-
-.u-surv-chip {
-  background: var(--u-deep);
-  padding: 28px 22px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  transition: background 0.4s ease;
-}
-.u-surv-chip:hover { background: var(--u-void); }
-.u-surv-chip::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: var(--u-copper3);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.5s var(--u-expo);
-}
-.u-surv-chip:hover::before { transform: scaleX(1); }
-
-.u-sc-icon { font-size: 26px; line-height: 1; }
-.u-sc-name {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 17px;
-  color: var(--u-cream);
-  line-height: 1.15;
-}
-.u-sc-sub {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--u-ghost);
-  line-height: 1.5;
-}
-.u-sc-arrow {
-  margin-top: auto;
-  font-size: 13px;
-  color: var(--u-ghost);
-  transition: color 0.35s ease, transform 0.35s var(--u-expo);
-}
-.u-surv-chip:hover .u-sc-arrow {
-  color: var(--u-copper2);
-  transform: translate(3px, -3px);
-}
-
-/* EMERGENCIAS */
-.u-emg-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--u-rule);
-}
-
-.u-emg-btn {
-  background: rgba(192,57,43,.07);
-  border: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 32px 20px;
-  text-decoration: none;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: background 0.35s ease;
-}
-.u-emg-btn:hover { background: rgba(192,57,43,.14); }
-.u-emg-num {
-  font-family: var(--f-display);
-  font-size: 44px;
-  line-height: 1;
-  color: rgba(231,76,60,.80);
-  letter-spacing: -2px;
-  transition: color 0.35s ease;
-}
-.u-emg-btn:hover .u-emg-num { color: rgba(231,76,60,1); }
-.u-emg-label {
-  font-family: var(--f-ui);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(245,240,232,.35);
-}
-.u-emg-sub {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 11px;
-  color: rgba(245,240,232,.22);
-}
-
-/* ── CIERRE ── */
-.u-cierre {
-  background: var(--u-void);
-  padding: 96px var(--u-gutter);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.u-cierre::before {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--u-rule), transparent);
-}
-.u-cierre-title {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: clamp(28px, 4.5vw, 52px);
-  color: var(--u-cream);
-  line-height: 1.1;
-  letter-spacing: -1px;
-  margin-bottom: 20px;
-  display: block;
-}
-.u-cierre-title em { color: var(--u-copper2); }
-.u-cierre-sub {
-  font-family: var(--f-italic);
-  font-style: italic;
-  font-size: 16px;
-  color: var(--u-muted);
-  line-height: 1.85;
-  max-width: 480px;
-  margin: 0 auto 40px;
-  display: block;
-}
-.u-cierre-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--u-copper);
-  color: var(--u-void);
-  font-family: var(--f-ui);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  padding: 18px 44px;
-  border-radius: 2px;
-  text-decoration: none;
-  transition: background 0.35s ease, transform 0.4s var(--u-expo), box-shadow 0.4s ease;
-  box-shadow: 0 8px 40px rgba(184,115,51,.30);
-}
-.u-cierre-cta:hover {
-  background: var(--u-copper2);
-  transform: translateY(-3px);
-  box-shadow: 0 20px 60px rgba(184,115,51,.40);
-}
-.u-cierre-cta:focus-visible {
-  outline: 2px solid var(--u-copper2);
-  outline-offset: 4px;
-}
-
-/* ── REVEAL ANIMATION ── */
-@keyframes uFadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.u-reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s var(--u-expo), transform 0.7s var(--u-expo);
-  transition-delay: var(--u-delay, 0ms);
-}
-.u-reveal.u-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── RESPONSIVE ── */
-@media (max-width: 1100px) {
-  .u-surv-grid { grid-template-columns: repeat(2, 1fr); }
-  .u-secreto-inner { grid-template-columns: 1fr; gap: 32px; }
-}
-
-@media (max-width: 860px) {
-  #uni-v2 { --u-gutter: 28px; }
-  .u-obertura { padding: 80px var(--u-gutter) 72px; }
-  .u-ob-bottom { flex-direction: column; gap: 36px; align-items: flex-start; }
-  .u-mesa-feature { flex-direction: column; align-items: flex-start; gap: 20px; }
-  .u-mf-right { align-items: flex-start; }
-  .u-chapter { padding: 72px var(--u-gutter); }
-  .u-mesa { padding: 72px var(--u-gutter); }
-  .u-noche { padding: 72px var(--u-gutter); }
-  .u-surv { padding: 72px var(--u-gutter); }
-  .u-cierre { padding: 72px var(--u-gutter); }
-  .u-secreto { padding: 56px var(--u-gutter); }
-  .u-step { grid-template-columns: 56px 1fr; gap: 0 24px; }
-  .u-step-num { font-size: 36px; }
-  .u-ni-body { padding: 20px; }
-}
-
-@media (max-width: 640px) {
-  #uni-v2 { --u-gutter: 18px; }
-  .u-ob-title { letter-spacing: -1.5px; }
-  .u-obertura { min-height: 100svh; padding: 60px var(--u-gutter) 56px; }
-  .u-mesa-grid { grid-template-columns: 1fr; }
-  .u-mesa-feature { grid-column: span 1; padding: 32px 24px; }
-  .u-mf-price { font-size: 40px; }
-  .u-surv-grid { grid-template-columns: repeat(2, 1fr); }
-  .u-emg-strip { grid-template-columns: 1fr; }
-  .u-step { grid-template-columns: 1fr; gap: 10px 0; padding: 28px 0; }
-  .u-step-num { font-size: 28px; }
-  .u-step-arrow { display: none; }
-  .u-ni-rank { width: 48px; font-size: 24px; }
-  .u-ni-meta { display: none; }
-  .u-ob-scroll-hint { display: none; }
-  .u-chapter { padding: 56px var(--u-gutter); }
-  .u-mesa { padding: 56px var(--u-gutter); }
-  .u-noche { padding: 56px var(--u-gutter); }
-  .u-surv { padding: 56px var(--u-gutter); }
-  .u-cierre { padding: 56px var(--u-gutter); }
-  .u-secreto { padding: 48px var(--u-gutter); }
-}
-
-@media (max-width: 380px) {
-  .u-surv-grid { grid-template-columns: 1fr; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .u-reveal { opacity: 1; transform: none; transition: none; }
-  #uni-cursor { display: none; }
-}
-  /* ── SKIP LINK ACCESIBILIDAD ── */
-.skip-link{
-  position:fixed;
-  top:-100%;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--verde);
-  color:#fff;
-  font-family:var(--f-ui);
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  padding:14px 28px;
-  border-radius:2px;
-  z-index:99999;
-  text-decoration:none;
-  transition:top 0.25s var(--ease);
-  white-space:nowrap;
-}
-.skip-link:focus{top:12px}
-</style>
-
-<!-- CURSOR PREMIUM -->
-<div id="uni-cursor" aria-hidden="true"></div>
-
-<!-- ══════════════════════════════════════════════
-     SECCIÓN UNIVERSITARIA v2
-     ══════════════════════════════════════════════ -->
-<section
-  id="uni-v2"
-  role="region"
-  aria-labelledby="uni-v2-title"
->
-  <div class="u-wrap">
-
-    <!-- ── CAPÍTULO 0: OBERTURA ── -->
-    <div class="u-obertura">
-      <div class="u-ob-signal" aria-hidden="true">
-        <span class="u-ob-signal-line"></span>
-        <span class="u-ob-signal-text">Para universitarios</span>
-        <span class="u-ob-signal-dot"></span>
-      </div>
-      <h2 class="u-ob-title" id="uni-v2-title">
-        <span class="u-ob-title-line"><span>Llegaste.</span></span>
-        <span class="u-ob-title-line"><span>Ahora <em class="u-gold">conocé</em></span></span>
-        <span class="u-ob-title-line"><span>la ciudad.</span></span>
-      </h2>
-      <div class="u-ob-bottom">
-        <p class="u-ob-desc">
-          CdU tiene <em>mucho más</em> de lo que cualquier grupo de WhatsApp te va a contar.
-          Esta guía la escribió alguien que ya vivió lo que vos estás por vivir.
-        </p>
-      <nav class="u-ob-faculties" aria-label="Facultades en Concepción del Uruguay">
-          <span class="u-faculty-row">UNER — Cs. de la Salud</span>
-          <span class="u-faculty-row">UTN — FRCU</span>
-          <span class="u-faculty-row">UADER — Cs. y Tecnología</span>
-          <span class="u-faculty-row">UADER — Cs. de la Gestión</span>
-          <span class="u-faculty-row">UADER — Humanidades y Artes</span>
-          <span class="u-faculty-row">UCU — Cs. Económicas</span>
-          <span class="u-faculty-row">UCU — Cs. Jurídicas</span>
-          <span class="u-faculty-row">UCU — Cs. Médicas</span>
-          <span class="u-faculty-row">UCU — Arquitectura</span>
-          <span class="u-faculty-row">UCU — Cs. Agrarias</span>
-          <span class="u-faculty-row">UCU — Comunicación y Educación</span>
-          <span class="u-faculty-row">Universidad Siglo 21 — CAU</span>
-          <span class="u-faculty-row">UCASAL — Sede CdU</span>
-        </nav>
-      </div>
-      <div class="u-ob-scroll-hint" aria-hidden="true">
-        <span class="u-scroll-label">Seguí leyendo</span>
-        <span class="u-scroll-line"></span>
+    <div class="ru-board-wrap" role="list" aria-label="Facultades en Concepción del Uruguay">
+      <span class="ru-board-label">Te esperan en —</span>
+      <div class="ru-board-track">
+        <div class="ru-board-row">
+          <span class="ru-chip" role="listitem">UNER <i>Cs. de la Salud</i></span>
+          <span class="ru-chip" role="listitem">UTN <i>FRCU</i></span>
+          <span class="ru-chip" role="listitem">UADER <i>Cs. y Tecnología</i></span>
+          <span class="ru-chip" role="listitem">UADER <i>Cs. de la Gestión</i></span>
+          <span class="ru-chip" role="listitem">UADER <i>Humanidades y Artes</i></span>
+          <span class="ru-chip" role="listitem">UCU <i>Cs. Económicas</i></span>
+          <span class="ru-chip" role="listitem">UCU <i>Cs. Jurídicas</i></span>
+          <span class="ru-chip" role="listitem">UCU <i>Cs. Médicas</i></span>
+          <span class="ru-chip" role="listitem">UCU <i>Arquitectura</i></span>
+          <span class="ru-chip" role="listitem">UCU <i>Cs. Agrarias</i></span>
+          <span class="ru-chip" role="listitem">UCU <i>Comunicación y Educación</i></span>
+          <span class="ru-chip" role="listitem">Siglo 21 <i>CAU</i></span>
+          <span class="ru-chip" role="listitem">UCASAL <i>Sede CdU</i></span>
+        </div>
+        <div class="ru-board-row" aria-hidden="true">
+          <span class="ru-chip">UNER <i>Cs. de la Salud</i></span>
+          <span class="ru-chip">UTN <i>FRCU</i></span>
+          <span class="ru-chip">UADER <i>Cs. y Tecnología</i></span>
+          <span class="ru-chip">UADER <i>Cs. de la Gestión</i></span>
+          <span class="ru-chip">UADER <i>Humanidades y Artes</i></span>
+          <span class="ru-chip">UCU <i>Cs. Económicas</i></span>
+          <span class="ru-chip">UCU <i>Cs. Jurídicas</i></span>
+          <span class="ru-chip">UCU <i>Cs. Médicas</i></span>
+          <span class="ru-chip">UCU <i>Arquitectura</i></span>
+          <span class="ru-chip">UCU <i>Cs. Agrarias</i></span>
+          <span class="ru-chip">UCU <i>Comunicación y Educación</i></span>
+          <span class="ru-chip">Siglo 21 <i>CAU</i></span>
+          <span class="ru-chip">UCASAL <i>Sede CdU</i></span>
+        </div>
       </div>
     </div>
 
-    <!-- ── CAPÍTULO 1: LOS PRIMEROS DÍAS ── -->
-    <div class="u-chapter u-reveal" id="uni-primeros">
-      <div class="u-chapter-label">
-        <span class="u-chapter-num">01</span>
-        <span class="u-chapter-rule" aria-hidden="true"></span>
-      </div>
-      <h3 class="u-chapter-title">Los primeros<br /><em>días.</em></h3>
-      <p class="u-chapter-intro">
-        Cada año en marzo llegan miles de estudiantes a CdU. Los primeros días son caóticos.
-        Esta es la secuencia que funciona.
-      </p>
+    <div class="ru-scrolldown" aria-hidden="true">
+      <span>Seguí leyendo</span>
+      <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M5 0v14M1 10l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</header>
 
-      <div class="u-steps" role="list">
-        <div class="u-step" role="listitem">
-          <div class="u-step-num" aria-hidden="true">01</div>
-          <div class="u-step-content">
-            <span class="u-step-tag">Lo primero que hacés</span>
-            <span class="u-step-title">Encontrá dónde vivir antes de llegar</span>
-            <p class="u-step-body">
+<!-- ════════════ CAPÍTULO 1 — LA RUTA DEL PRIMER DÍA ════════════ -->
+<div class="ru-chapter ru-chapter-1" id="uni-primeros">
+  <div class="ru-grain"></div>
+  <div class="ru-ruled"></div>
+  <div class="ru-wrap">
+    <div class="ru-chapter-head ru-reveal">
+      <span class="ru-stop">Parada 01</span>
+      <h3 class="ru-chapter-title">Los primeros<br><em>días.</em></h3>
+      <p class="ru-chapter-intro">
+        Cada marzo llegan miles de estudiantes a CdU. Los primeros días son caóticos.
+        Esta es la secuencia que funciona — en orden.
+      </p>
+    </div>
+
+    <div class="ru-route" data-route>
+      <div class="ru-route-track" aria-hidden="true">
+        <div class="ru-route-fill" data-route-fill></div>
+      </div>
+      <div class="ru-route-pin" data-route-pin aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9" r="2" fill="currentColor"/></svg>
+      </div>
+
+      <ol class="ru-steps">
+
+        <li class="ru-step ru-reveal">
+          <span class="ru-step-pin">01</span>
+          <div class="ru-step-card">
+            <span class="ru-step-tag">Lo primero que hacés</span>
+            <h4 class="ru-step-title">Encontrá dónde vivir antes de llegar</h4>
+            <p class="ru-step-body">
               No hay residencias universitarias en CdU. La búsqueda es completamente privada.
               <strong>Los grupos de Facebook y WhatsApp de tu facultad</strong> son el mercado real —
               buscalos antes de salir de tu ciudad de origen.
-              Pensiones, departamentos compartidos y casas de familia son las tres opciones que vas a encontrar.
+              Pensión, depto compartido o casa de familia: las tres opciones que vas a encontrar.
             </p>
           </div>
-          <span class="u-step-arrow" aria-hidden="true">→</span>
-        </div>
+        </li>
 
-        <div class="u-step" role="listitem">
-          <div class="u-step-num" aria-hidden="true">02</div>
-          <div class="u-step-content">
-            <span class="u-step-tag">La logística del día 1</span>
-            <span class="u-step-title">Cómo llegar y cómo moverte</span>
-            <p class="u-step-body">
+        <li class="ru-step ru-reveal">
+          <span class="ru-step-pin">02</span>
+          <div class="ru-step-card">
+            <span class="ru-step-tag">La logística del día 1</span>
+            <h4 class="ru-step-title">Cómo llegar y cómo moverte</h4>
+            <p class="ru-step-body">
               La Terminal de Ómnibus está bien conectada. Una vez en la ciudad,
               el centro se recorre <strong>a pie o en bici</strong> — las distancias son manejables.
               Los colectivos urbanos cubren los barrios.
-              <strong>Guardá el número de una remisería</strong> desde el primer día — no hay Uber en CdU.
+              <strong>Guardá el número de una remisería</strong> desde el primer día: no hay Uber en CdU.
             </p>
           </div>
-          <span class="u-step-arrow" aria-hidden="true">→</span>
-        </div>
+        </li>
 
-        <div class="u-step" role="listitem">
-          <div class="u-step-num" aria-hidden="true">03</div>
-          <div class="u-step-content">
-            <span class="u-step-tag">El secreto del presupuesto</span>
-            <span class="u-step-title">El menú del día es sagrado</span>
-            <p class="u-step-body">
+        <li class="ru-step ru-reveal">
+          <span class="ru-step-pin">03</span>
+          <div class="ru-step-card">
+            <span class="ru-step-tag">El secreto del presupuesto</span>
+            <h4 class="ru-step-title">El menú del día es sagrado</h4>
+            <p class="ru-step-body">
               La mayoría de los bodegones de CdU ofrecen menú ejecutivo de lunes a viernes al mediodía.
               Puede ser <strong>la mitad del precio de la carta</strong>.
-              Siempre preguntá antes de abrir el menú.
-              Esta costumbre sola puede cambiar radicalmente cuánto gastás al mes.
+              Preguntá siempre antes de abrir el menú —
+              esta costumbre sola cambia cuánto gastás al mes.
             </p>
           </div>
-          <span class="u-step-arrow" aria-hidden="true">→</span>
-        </div>
+        </li>
 
-        <div class="u-step" role="listitem">
-          <div class="u-step-num" aria-hidden="true">04</div>
-          <div class="u-step-content">
-            <span class="u-step-tag">Lo que nadie te dice</span>
-            <span class="u-step-title">Los lunes la ciudad duerme</span>
-            <p class="u-step-body">
+        <li class="ru-step ru-reveal">
+          <span class="ru-step-pin">04</span>
+          <div class="ru-step-card">
+            <span class="ru-step-tag">Lo que nadie te dice</span>
+            <h4 class="ru-step-title">Los lunes la ciudad duerme</h4>
+            <p class="ru-step-body">
               Muchos restaurantes y comercios cierran los lunes en CdU.
-              Si llegás un lunes y querés comer bien, tu lista de opciones se reduce drásticamente.
-              <strong>Sanduba, El Calderón y Panza Verde</strong> son de los pocos que mantienen horario regular.
-              Chequeá el estado "Abierto ahora" en cada tarjeta de esta guía.
+              Si llegás un lunes y querés comer bien, la lista se achica rápido.
+              <strong>Sanduba, El Calderón y Panza Verde</strong> son de los pocos que mantienen
+              horario regular. La guía completa te muestra el horario actualizado de cada lugar.
             </p>
           </div>
-          <span class="u-step-arrow" aria-hidden="true">→</span>
-        </div>
-      </div>
-    </div>
+        </li>
 
-    <!-- ── CAPÍTULO 2: LA MESA DEL ESTUDIANTE ── -->
-    <div class="u-mesa u-reveal" style="--u-delay:100ms" id="uni-mesa">
-      <div class="u-chapter-label">
-        <span class="u-chapter-num">02</span>
-        <span class="u-chapter-rule" aria-hidden="true"></span>
-      </div>
-      <h3 class="u-chapter-title">La mesa del<br /><em>estudiante.</em></h3>
-      <p class="u-chapter-intro">
-        Los lugares que realmente frecuentan los que ya llevan un año en la ciudad.
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ CAPÍTULO 2 — LA MESA DEL ESTUDIANTE ════════════ -->
+<div class="ru-chapter ru-chapter-2" id="uni-mesa">
+  <div class="ru-grain"></div>
+  <div class="ru-ruled"></div>
+  <div class="ru-wrap">
+    <div class="ru-chapter-head ru-reveal">
+      <span class="ru-stop">Parada 02</span>
+      <h3 class="ru-chapter-title">La mesa del<br><em>estudiante.</em></h3>
+      <p class="ru-chapter-intro">
+        Los lugares que de verdad frecuentan los que ya llevan un año acá.
         No los más lindos. Los más nuestros.
       </p>
-
-      <div class="u-mesa-grid">
-        <!-- Feature -->
-        <a class="u-mesa-feature" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" aria-label="Sanduba — el más buscado">
-          <div class="u-mf-left">
-            <span class="u-mf-eyebrow">El imprescindible</span>
-            <span class="u-mf-name">Sanduba</span>
-            <p class="u-mf-desc">
-              El lugar más buscado de CdU cuando hay que comer rápido y gastar poco.
-              Sin vueltas, sin demora, sin excusas. El Sanduba es el que siempre está.
-            </p>
-          </div>
-          <div class="u-mf-right">
-            <span class="u-mf-price">$</span>
-            <span class="u-mf-price-label">Económico</span>
-          </div>
-        </a>
-
-        <a class="u-mesa-item u-reveal" style="--u-delay:50ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" aria-label="El Calderón — comida casera">
-          <span class="u-mi-tag">Comida casera</span>
-          <span class="u-mi-name">El Calderón</span>
-          <p class="u-mi-desc">Menú del día, porción generosa, precio justo. El bodegón que todos extrañan cuando no está.</p>
-          <div class="u-mi-bottom">
-            <span class="u-mi-price">$</span>
-            <span class="u-mi-arrow">↗</span>
-          </div>
-        </a>
-
-        <a class="u-mesa-item u-reveal" style="--u-delay:100ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" aria-label="Panza Verde — saludable">
-          <span class="u-mi-tag">Saludable</span>
-          <span class="u-mi-name">Panza Verde</span>
-          <p class="u-mi-desc">Cuando querés cuidarte sin quebrarte. Ensaladas, bowls y opciones vegetarianas con precio razonable.</p>
-          <div class="u-mi-bottom">
-            <span class="u-mi-price">$$</span>
-            <span class="u-mi-arrow">↗</span>
-          </div>
-        </a>
-
-        <a class="u-mesa-item u-reveal" style="--u-delay:150ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" aria-label="Papa Luigi — pizza y pasta">
-          <span class="u-mi-tag">Italiana</span>
-          <span class="u-mi-name">Papa Luigi</span>
-          <p class="u-mi-desc">Para salir en grupo después de rendir. Pizza y pasta a precio accesible, ambiente que acompaña.</p>
-          <div class="u-mi-bottom">
-            <span class="u-mi-price">$$</span>
-            <span class="u-mi-arrow">↗</span>
-          </div>
-        </a>
-
-        <a class="u-mesa-item u-reveal" style="--u-delay:200ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/" aria-label="Nero Café — estudiar afuera">
-          <span class="u-mi-tag">Para estudiar afuera</span>
-          <span class="u-mi-name">Nero Café</span>
-          <p class="u-mi-desc">El mejor café de especialidad de CdU. WiFi estable, mesas amplias. El café que pedís a las 10 AM dura toda la mañana.</p>
-          <div class="u-mi-bottom">
-            <span class="u-mi-price">$$</span>
-            <span class="u-mi-arrow">↗</span>
-          </div>
-        </a>
-
-        <a class="u-mesa-item u-reveal" style="--u-delay:250ms" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" aria-label="Cultura Café — estudio silencioso">
-          <span class="u-mi-tag">Silencio garantizado</span>
-          <span class="u-mi-name">Cultura Café</span>
-          <p class="u-mi-desc">El café más tranquilo de CdU. Libros, arte, sin ruido. El lugar que buscás en época de finales.</p>
-          <div class="u-mi-bottom">
-            <span class="u-mi-price">$$</span>
-            <span class="u-mi-arrow">↗</span>
-          </div>
-        </a>
-      </div>
     </div>
 
-    <!-- ── SECRETO ── -->
-    <div class="u-secreto u-reveal">
-      <div class="u-secreto-inner">
-        <div class="u-secreto-left">
-          <span class="u-secreto-label">Lo que saben los que llevan un año</span>
-          <span class="u-secreto-ojo" aria-hidden="true">👁</span>
-        </div>
-        <div>
-          <blockquote class="u-secreto-quote">
-            "Preguntá siempre por el menú del día antes de abrir la carta. En CdU eso puede significar
-            la diferencia entre gastar $4.000 o $8.000 en el almuerzo."
-          </blockquote>
-          <span class="u-secreto-source">— Consejo de estudiante, tercer año</span>
-        </div>
+    <a class="ru-feature ru-reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" aria-label="Sanduba — el imprescindible">
+      <div class="ru-feature-board" aria-hidden="true">
+        <span>HOY</span>
+        <strong>SANDUBA</strong>
+        <span>EL QUE SIEMPRE ESTÁ</span>
       </div>
-    </div>
-
-    <!-- ── CAPÍTULO 3: DESPUÉS DE LAS DIEZ ── -->
-    <div class="u-chapter u-noche u-reveal" style="--u-delay:80ms" id="uni-noche">
-      <div class="u-chapter-label">
-        <span class="u-chapter-num">03</span>
-        <span class="u-chapter-rule" aria-hidden="true"></span>
+      <div class="ru-feature-body">
+        <span class="ru-feature-eyebrow">El imprescindible</span>
+        <span class="ru-feature-name">Sanduba</span>
+        <p class="ru-feature-desc">
+          El lugar más buscado de CdU cuando hay que comer rápido y gastar poco.
+          Sin vueltas, sin demora, sin excusas.
+        </p>
+        <span class="ru-feature-cta">Ver el local <svg width="13" height="11" viewBox="0 0 13 11" fill="none"><path d="M1 5.5h11M7.5 1l4.5 4.5L7.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </div>
-      <div class="u-noche-header">
-        <div>
-          <h3 class="u-chapter-title">Después de<br /><em>las diez.</em></h3>
-          <p class="u-chapter-intro" style="margin-bottom:0">
-            La noche en CdU empieza tarde. Si llegás antes de las 22:30 vas a tener el lugar solo.
-            Lo cual tampoco está mal para conseguir buena mesa.
-          </p>
-        </div>
-      </div>
+      <div class="ru-feature-price"><span>$</span>Económico</div>
+    </a>
 
-      <div class="u-noche-list" role="list" aria-label="Bares y vida nocturna">
-        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" role="listitem" aria-label="Bonhomia — el más sofisticado">
-          <div class="u-ni-rank" aria-hidden="true">01</div>
-          <div class="u-ni-body">
-            <div class="u-ni-info">
-              <span class="u-ni-tag">Cócteles · Moderno</span>
-              <span class="u-ni-name">Bonhomia</span>
-              <span class="u-ni-desc">El bar más sofisticado de CdU. Cócteles bien hechos, sin pretensión. El clásico de los que ya conocen la ciudad.</span>
-            </div>
-            <div class="u-ni-meta">
-              <span class="u-ni-price">$$</span>
-              <span class="u-ni-vibe">Sofisticado</span>
-            </div>
-          </div>
-          <span class="u-ni-arrow" aria-hidden="true">→</span>
-        </a>
+    <div class="ru-grid">
+      <a class="ru-ticket ru-reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" aria-label="El Calderón — comida casera">
+        <span class="ru-ticket-notch" aria-hidden="true"></span>
+        <span class="ru-ticket-tag2">Comida casera</span>
+        <span class="ru-ticket-name">El Calderón</span>
+        <p class="ru-ticket-desc">Menú del día, porción generosa, precio justo. El bodegón que todos extrañan cuando no está.</p>
+        <span class="ru-ticket-foot"><span class="ru-ticket-price">$</span><span class="ru-ticket-arrow">↗</span></span>
+      </a>
 
-        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/7-colinas/" role="listitem" aria-label="7 Colinas — el más animado">
-          <div class="u-ni-rank" aria-hidden="true">02</div>
-          <div class="u-ni-body">
-            <div class="u-ni-info">
-              <span class="u-ni-tag">Cerveza · Comida</span>
-              <span class="u-ni-name">7 Colinas</span>
-              <span class="u-ni-desc">El que siempre tiene gente. Beer y picada, ambiente que se construye solo. Uno de los más visitados de la ciudad.</span>
-            </div>
-            <div class="u-ni-meta">
-              <span class="u-ni-price">$$</span>
-              <span class="u-ni-vibe">Animado</span>
-            </div>
-          </div>
-          <span class="u-ni-arrow" aria-hidden="true">→</span>
-        </a>
+      <a class="ru-ticket ru-reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" aria-label="Panza Verde — saludable">
+        <span class="ru-ticket-notch" aria-hidden="true"></span>
+        <span class="ru-ticket-tag2">Saludable</span>
+        <span class="ru-ticket-name">Panza Verde</span>
+        <p class="ru-ticket-desc">Cuando querés cuidarte sin quebrarte. Ensaladas, bowls y opciones vegetarianas con precio razonable.</p>
+        <span class="ru-ticket-foot"><span class="ru-ticket-price">$$</span><span class="ru-ticket-arrow">↗</span></span>
+      </a>
 
-        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" role="listitem" aria-label="Klug Gebrau — cerveza artesanal">
-          <div class="u-ni-rank" aria-hidden="true">03</div>
-          <div class="u-ni-body">
-            <div class="u-ni-info">
-              <span class="u-ni-tag">Cervecería artesanal</span>
-              <span class="u-ni-name">Klug Gebrau</span>
-              <span class="u-ni-desc">Variedad de estilos, ambiente relajado. Ideal para grupos después de un parcial. Sin prisa, sin ruido.</span>
-            </div>
-            <div class="u-ni-meta">
-              <span class="u-ni-price">$$</span>
-              <span class="u-ni-vibe">Relajado</span>
-            </div>
-          </div>
-          <span class="u-ni-arrow" aria-hidden="true">→</span>
-        </a>
+      <a class="ru-ticket ru-reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" aria-label="Papa Luigi — pizza y pasta">
+        <span class="ru-ticket-notch" aria-hidden="true"></span>
+        <span class="ru-ticket-tag2">Italiana</span>
+        <span class="ru-ticket-name">Papa Luigi</span>
+        <p class="ru-ticket-desc">Para salir en grupo después de rendir. Pizza y pasta a precio accesible, ambiente que acompaña.</p>
+        <span class="ru-ticket-foot"><span class="ru-ticket-price">$$</span><span class="ru-ticket-arrow">↗</span></span>
+      </a>
 
-        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" role="listitem" aria-label="Bartolo — cócteles creativos">
-          <div class="u-ni-rank" aria-hidden="true">04</div>
-          <div class="u-ni-body">
-            <div class="u-ni-info">
-              <span class="u-ni-tag">Tragos</span>
-              <span class="u-ni-name">Bartolo</span>
-              <span class="u-ni-desc">Cócteles creativos, mejor relación precio-calidad en tragos que Bonhomia. Más íntimo, más tranquilo.</span>
-            </div>
-            <div class="u-ni-meta">
-              <span class="u-ni-price">$$</span>
-              <span class="u-ni-vibe">Íntimo</span>
-            </div>
-          </div>
-          <span class="u-ni-arrow" aria-hidden="true">→</span>
-        </a>
+      <a class="ru-ticket ru-reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/" aria-label="Nero Café — para estudiar afuera">
+        <span class="ru-ticket-notch" aria-hidden="true"></span>
+        <span class="ru-ticket-tag2">Para estudiar afuera</span>
+        <span class="ru-ticket-name">Nero Café</span>
+        <p class="ru-ticket-desc">El mejor café de especialidad de CdU. WiFi estable, mesas amplias. Un café a las 10 dura toda la mañana.</p>
+        <span class="ru-ticket-foot"><span class="ru-ticket-price">$$</span><span class="ru-ticket-arrow">↗</span></span>
+      </a>
 
-        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/house-garage/" role="listitem" aria-label="House Garage — bar temático">
-          <div class="u-ni-rank" aria-hidden="true">05</div>
-          <div class="u-ni-body">
-            <div class="u-ni-info">
-              <span class="u-ni-tag">Temático</span>
-              <span class="u-ni-name">House Garage</span>
-              <span class="u-ni-desc">Para cuando querés algo que no sea siempre lo mismo. Decoración original, buena onda, diferente.</span>
-            </div>
-            <div class="u-ni-meta">
-              <span class="u-ni-price">$$</span>
-              <span class="u-ni-vibe">Original</span>
-            </div>
-          </div>
-          <span class="u-ni-arrow" aria-hidden="true">→</span>
-        </a>
-
-        <a class="u-noche-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" role="listitem" aria-label="Justo José — parrilla y bar">
-          <div class="u-ni-rank" aria-hidden="true">06</div>
-          <div class="u-ni-body">
-            <div class="u-ni-info">
-              <span class="u-ni-tag">Parrilla · Bar</span>
-              <span class="u-ni-name">Justo José</span>
-              <span class="u-ni-desc">El lugar que combina comida real con ambiente de bar. Abierto todos los días — el comodín del estudiante.</span>
-            </div>
-            <div class="u-ni-meta">
-              <span class="u-ni-price">$$</span>
-              <span class="u-ni-vibe">Confiable</span>
-            </div>
-          </div>
-          <span class="u-ni-arrow" aria-hidden="true">→</span>
-        </a>
-      </div>
-    </div>
-
-    <div class="u-chapter u-surv u-reveal">
-      <!-- Emergencias -->
-      <div class="u-chapter-label" style="margin-bottom:28px;">
-        <span class="u-chapter-num" style="color:rgba(192,57,43,.70);">SOS</span>
-        <span class="u-chapter-rule" aria-hidden="true"></span>
-      </div>
-      <div class="u-emg-strip" role="list" aria-label="Números de emergencia">
-        <a class="u-emg-btn" href="tel:107" role="listitem" aria-label="SAME — marcar 107">
-          <span class="u-emg-num">107</span>
-          <span class="u-emg-label">🚑 SAME</span>
-          <span class="u-emg-sub">Emergencias médicas</span>
-        </a>
-        <a class="u-emg-btn" href="tel:911" role="listitem" aria-label="Policía — marcar 911">
-          <span class="u-emg-num">911</span>
-          <span class="u-emg-label">🚓 Policía</span>
-          <span class="u-emg-sub">Seguridad</span>
-        </a>
-        <a class="u-emg-btn" href="tel:100" role="listitem" aria-label="Bomberos — marcar 100">
-          <span class="u-emg-num">100</span>
-          <span class="u-emg-label">🔥 Bomberos</span>
-          <span class="u-emg-sub">Incendio · Rescate</span>
-        </a>
-      </div>
-    </div>
-    <!-- ── CIERRE ── -->
-    <div class="u-cierre u-reveal">
-      <span class="u-cierre-title">La guía que<br />querías tener <em>desde el primer día.</em></span>
-      <span class="u-cierre-sub">
-        55 lugares verificados, horarios en tiempo real y todo lo que vale la pena en CdU.
-        Sin publicidad. Sin mentiras.
-      </span>
-      <a class="u-cierre-cta" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/" target="_blank" rel="noopener noreferrer">
-        Ver la guía completa →
+      <a class="ru-ticket ru-reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" aria-label="Cultura Café — silencio garantizado">
+        <span class="ru-ticket-notch" aria-hidden="true"></span>
+        <span class="ru-ticket-tag2">Silencio garantizado</span>
+        <span class="ru-ticket-name">Cultura Café</span>
+        <p class="ru-ticket-desc">El café más tranquilo de CdU. Libros, arte, sin ruido. El lugar que buscás en época de finales.</p>
+        <span class="ru-ticket-foot"><span class="ru-ticket-price">$$</span><span class="ru-ticket-arrow">↗</span></span>
       </a>
     </div>
-
   </div>
+</div>
+
+<!-- ════════════ SECRETO — nota al margen ════════════ -->
+<figure class="ru-secreto ru-reveal">
+  <div class="ru-wrap ru-secreto-wrap">
+    <span class="ru-secreto-label">Lo que saben los que llevan un año</span>
+    <blockquote class="ru-secreto-quote">
+      <span class="ru-hl-text">Preguntá siempre por el menú del día antes de abrir la carta.</span>
+      En CdU eso puede significar la diferencia entre gastar $4.000 o $8.000 en el almuerzo.
+    </blockquote>
+    <figcaption class="ru-secreto-source">— Consejo de estudiante, tercer año</figcaption>
+  </div>
+</figure>
+
+<!-- ════════════ DUSK — transición de día a noche ════════════ -->
+<div class="ru-dusk" data-dusk aria-hidden="true">
+  <div class="ru-dusk-sky"></div>
+  <div class="ru-dusk-sun" data-dusk-sun></div>
+  <div class="ru-dusk-line"></div>
+</div>
+
+<!-- ════════════ CAPÍTULO 3 — DESPUÉS DE LAS DIEZ (noche) ════════════ -->
+<div class="ru-chapter ru-night" id="uni-noche">
+  <div class="ru-grain"></div>
+  <div class="ru-ruled"></div>
+  <div class="ru-streetlamps" aria-hidden="true"></div>
+  <div class="ru-wrap">
+    <div class="ru-chapter-head ru-reveal">
+      <span class="ru-stop">Parada 03</span>
+      <h3 class="ru-chapter-title">Después de<br><em>las diez.</em></h3>
+      <p class="ru-chapter-intro">
+        La noche en CdU empieza tarde. Antes de las 22:30 vas a tener el lugar solo —
+        lo cual tampoco está mal para conseguir buena mesa.
+      </p>
+    </div>
+
+    <ol class="ru-night-list" aria-label="Bares y vida nocturna">
+
+      <li class="ru-night-item ru-reveal">
+        <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" aria-label="Bonhomia — el más sofisticado">
+          <span class="ru-ni-rank">01</span>
+          <span class="ru-ni-info">
+            <span class="ru-ni-tag">Cócteles · Moderno</span>
+            <span class="ru-ni-name">Bonhomia</span>
+            <span class="ru-ni-desc">El bar más sofisticado de CdU. Cócteles bien hechos, sin pretensión.</span>
+          </span>
+          <span class="ru-ni-meta"><span class="ru-ni-price">$$</span><span class="ru-ni-vibe">Sofisticado</span></span>
+          <span class="ru-ni-arrow" aria-hidden="true">→</span>
+        </a>
+      </li>
+
+      <li class="ru-night-item ru-reveal">
+        <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/7-colinas/" aria-label="7 Colinas — el más animado">
+          <span class="ru-ni-rank">02</span>
+          <span class="ru-ni-info">
+            <span class="ru-ni-tag">Cerveza · Comida</span>
+            <span class="ru-ni-name">7 Colinas</span>
+            <span class="ru-ni-desc">El que siempre tiene gente. Birra y picada, ambiente que se construye solo.</span>
+          </span>
+          <span class="ru-ni-meta"><span class="ru-ni-price">$$</span><span class="ru-ni-vibe">Animado</span></span>
+          <span class="ru-ni-arrow" aria-hidden="true">→</span>
+        </a>
+      </li>
+
+      <li class="ru-night-item ru-reveal">
+        <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" aria-label="Klug Gebrau — cervecería artesanal">
+          <span class="ru-ni-rank">03</span>
+          <span class="ru-ni-info">
+            <span class="ru-ni-tag">Cervecería artesanal</span>
+            <span class="ru-ni-name">Klug Gebrau</span>
+            <span class="ru-ni-desc">Variedad de estilos, ambiente relajado. Ideal para grupos después de un parcial.</span>
+          </span>
+          <span class="ru-ni-meta"><span class="ru-ni-price">$$</span><span class="ru-ni-vibe">Relajado</span></span>
+          <span class="ru-ni-arrow" aria-hidden="true">→</span>
+        </a>
+      </li>
+
+      <li class="ru-night-item ru-reveal">
+        <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bartolo-bar/" aria-label="Bartolo — cócteles creativos">
+          <span class="ru-ni-rank">04</span>
+          <span class="ru-ni-info">
+            <span class="ru-ni-tag">Tragos</span>
+            <span class="ru-ni-name">Bartolo</span>
+            <span class="ru-ni-desc">Cócteles creativos, mejor relación precio-calidad en tragos que Bonhomia.</span>
+          </span>
+          <span class="ru-ni-meta"><span class="ru-ni-price">$$</span><span class="ru-ni-vibe">Íntimo</span></span>
+          <span class="ru-ni-arrow" aria-hidden="true">→</span>
+        </a>
+      </li>
+
+      <li class="ru-night-item ru-reveal">
+        <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/house-garage/" aria-label="House Garage — bar temático">
+          <span class="ru-ni-rank">05</span>
+          <span class="ru-ni-info">
+            <span class="ru-ni-tag">Temático</span>
+            <span class="ru-ni-name">House Garage</span>
+            <span class="ru-ni-desc">Para cuando querés algo que no sea siempre lo mismo. Decoración original, buena onda.</span>
+          </span>
+          <span class="ru-ni-meta"><span class="ru-ni-price">$$</span><span class="ru-ni-vibe">Original</span></span>
+          <span class="ru-ni-arrow" aria-hidden="true">→</span>
+        </a>
+      </li>
+
+      <li class="ru-night-item ru-reveal">
+        <a href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" aria-label="Justo José — parrilla y bar">
+          <span class="ru-ni-rank">06</span>
+          <span class="ru-ni-info">
+            <span class="ru-ni-tag">Parrilla · Bar</span>
+            <span class="ru-ni-name">Justo José</span>
+            <span class="ru-ni-desc">Combina comida real con ambiente de bar. Abierto todos los días: el comodín del estudiante.</span>
+          </span>
+          <span class="ru-ni-meta"><span class="ru-ni-price">$$</span><span class="ru-ni-vibe">Confiable</span></span>
+          <span class="ru-ni-arrow" aria-hidden="true">→</span>
+        </a>
+      </li>
+
+    </ol>
+  </div>
+</div>
+
+<!-- ════════════ SOS — siempre activo ════════════ -->
+<div class="ru-sos">
+  <div class="ru-grain"></div>
+  <div class="ru-wrap">
+    <div class="ru-sos-head ru-reveal">
+      <span class="ru-stop ru-sos-stop">Las 24 horas</span>
+      <h3 class="ru-sos-title">Por las dudas.</h3>
+    </div>
+    <div class="ru-sos-grid" role="list" aria-label="Números de emergencia">
+      <a class="ru-sos-btn ru-reveal" href="tel:107" role="listitem" aria-label="SAME — marcar 107">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 9c1-4 3-6 7-6s6 2 7 6M3 9v3a2 2 0 0 0 2 2h1v-5H4a1 1 0 0 0-1 1zM17 9v3a2 2 0 0 1-2 2h-1v-5h2a1 1 0 0 1 1 1zM10 14v2a2 2 0 0 1-2 2H7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="ru-sos-num">107</span>
+        <span class="ru-sos-label">SAME</span>
+        <span class="ru-sos-sub">Emergencias médicas</span>
+      </a>
+      <a class="ru-sos-btn ru-reveal" href="tel:911" role="listitem" aria-label="Policía — marcar 911">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2 3 5v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V5l-7-3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span class="ru-sos-num">911</span>
+        <span class="ru-sos-label">Policía</span>
+        <span class="ru-sos-sub">Seguridad</span>
+      </a>
+      <a class="ru-sos-btn ru-reveal" href="tel:100" role="listitem" aria-label="Bomberos — marcar 100">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2c1 2-2 3-2 5a2 2 0 0 0 4 0c1 1 2 3 2 5a4 4 0 1 1-8 0c0-2 1-3 1.5-4.5C8 6 9 4 10 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span class="ru-sos-num">100</span>
+        <span class="ru-sos-label">Bomberos</span>
+        <span class="ru-sos-sub">Incendio · Rescate</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ DAWN — vuelta al papel ════════════ -->
+<div class="ru-dawn" data-dawn aria-hidden="true">
+  <div class="ru-dawn-sky"></div>
+  <div class="ru-dawn-sun" data-dawn-sun></div>
+</div>
+
+<!-- ════════════ CIERRE ════════════ -->
+<div class="ru-cierre ru-reveal">
+  <div class="ru-grain"></div>
+  <div class="ru-ruled"></div>
+  <div class="ru-wrap ru-cierre-wrap">
+    <h3 class="ru-cierre-title">La guía que querías<br>tener <em>desde el primer día.</em></h3>
+    <p class="ru-cierre-sub">
+      55 lugares verificados, horarios en tiempo real y todo lo que vale la pena en CdU.
+      Sin publicidad. Sin mentiras.
+    </p>
+    <a class="ru-cta" data-magnetic href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/" target="_blank" rel="noopener noreferrer">
+      <span>Ver la guía completa</span>
+      <svg width="15" height="12" viewBox="0 0 15 12" fill="none"><path d="M1 6h13M8.5 1l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</div>
+
 </section>
 
+<style>
+.ru-section{
+  /* ---- color tokens ---- */
+  --paper:        #EBE3D2;
+  --paper-2:      #E2D8C2;
+  --paper-line:   rgba(28,43,58,.09);
+  --ink:          #1C2B3A;
+  --ink-soft:     #4C5C6C;
+  --ink-faint:    #1C2B3A66;
+  --pen-blue:     #2B4570;
+  --pen-red:      #AE3526;
+  --marker:       #F0BD3E;
+  --river:        #3C6B5B;
+
+  --night:        #0E1B27;
+  --night-2:      #0A141D;
+  --night-line:   rgba(232,212,170,.10);
+  --night-ink:    #D8DEE3;
+  --night-soft:   #8FA0AC;
+  --amber:        #E6A23C;
+  --amber-soft:   #C98B33;
+
+  /* ---- type tokens ---- */
+  --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --f-body:    'Inter', system-ui, sans-serif;
+  --f-hand:    'Caveat', cursive;
+  --f-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  display:block;
+  position:relative;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--f-body);
+  overflow:hidden;
+  isolation:isolate;
+}
+
+.ru-section *{ box-sizing:border-box; }
+.ru-section img{ max-width:100%; display:block; }
+.ru-section a{ color:inherit; text-decoration:none; }
+.ru-section ol,.ru-section ul{ list-style:none; margin:0; padding:0; }
+.ru-section h1,.ru-section h2,.ru-section h3,.ru-section h4,
+.ru-section p,.ru-section blockquote,.ru-section figure{ margin:0; }
+
+.ru-section :focus-visible{
+  outline:2px dashed var(--pen-blue);
+  outline-offset:4px;
+  border-radius:2px;
+}
+.ru-night :focus-visible{ outline-color:var(--amber); }
+
+.ru-grain{
+  position:absolute; inset:0; pointer-events:none; z-index:0;
+  opacity:.05; mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.ru-night .ru-grain{ opacity:.10; mix-blend-mode:screen; }
+
+.ru-ruled{
+  position:absolute; inset:0; pointer-events:none; z-index:0;
+  background-image:repeating-linear-gradient(
+    to bottom, transparent 0 38px, var(--paper-line) 38px 39px
+  );
+}
+
+.ru-wrap{
+  position:relative; z-index:1;
+  max-width:1180px; margin:0 auto;
+  padding:0 24px;
+}
+
+.ru-reveal{ opacity:0; transform:translateY(22px); transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+.ru-reveal.is-in{ opacity:1; transform:translateY(0); }
+@media (prefers-reduced-motion: reduce){
+  .ru-reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
+}
+
+.ru-stop{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--f-mono); font-weight:700; font-size:.72rem;
+  letter-spacing:.12em; text-transform:uppercase;
+  color:var(--pen-red);
+}
+.ru-night .ru-stop{ color:var(--amber); }
+.ru-stop::before{
+  content:""; width:7px; height:7px; border-radius:50%;
+  background:currentColor; flex:none;
+}
+
+.ru-chapter-head{ max-width:640px; }
+.ru-chapter-title{
+  font-family:var(--f-display); font-weight:800;
+  font-size:clamp(2.1rem, 4.6vw, 3.4rem);
+  line-height:1.02; letter-spacing:-.01em;
+  margin:14px 0 16px;
+}
+.ru-chapter-title em{ font-style:normal; color:var(--pen-blue); }
+.ru-night .ru-chapter-title em{ color:var(--amber); }
+.ru-chapter-intro{
+  font-size:1.02rem; line-height:1.6; color:var(--ink-soft);
+  max-width:46ch;
+}
+.ru-night .ru-chapter-intro{ color:var(--night-soft); }
+
+.ru-chapter{ position:relative; padding:96px 0; }
+
+.ru-hero{ position:relative; padding:128px 0 96px; }
+.ru-hero-wrap{ display:flex; flex-direction:column; align-items:flex-start; }
+
+.ru-ticket-tag{
+  position:relative; display:inline-flex; align-items:center;
+  padding:8px 18px;
+  font-family:var(--f-mono); font-size:.7rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--pen-red);
+  background:var(--paper-2); border:1.5px dashed var(--ink-faint);
+  border-radius:2px; transform:rotate(-2deg); margin-bottom:30px;
+}
+.ru-ticket-tag::before,.ru-ticket-tag::after{
+  content:""; position:absolute; top:50%; width:11px; height:11px;
+  background:var(--paper); border-radius:50%; transform:translateY(-50%);
+}
+.ru-ticket-tag::before{ left:-6px; } .ru-ticket-tag::after{ right:-6px; }
+
+.ru-hero-title{
+  font-family:var(--f-display); font-weight:800;
+  font-size:clamp(2.7rem, 7.2vw, 5.8rem); line-height:.97; letter-spacing:-.02em;
+  margin-bottom:28px;
+}
+.ru-hl{ display:block; overflow:hidden; }
+.ru-hl span{ display:block; animation:ru-line-in .85s cubic-bezier(.16,1,.3,1) both; }
+.ru-hl:nth-child(1) span{ animation-delay:.05s; }
+.ru-hl:nth-child(2) span{ animation-delay:.17s; }
+.ru-hl:nth-child(3) span{ animation-delay:.29s; }
+@keyframes ru-line-in{ from{ transform:translateY(112%); } to{ transform:translateY(0); } }
+.ru-hero-title em{ font-style:normal; color:var(--pen-blue); }
+
+.ru-hero-desc{ font-size:1.08rem; line-height:1.6; color:var(--ink-soft); max-width:44ch; margin-bottom:48px; }
+
+.ru-board-wrap{ width:100%; max-width:720px; }
+.ru-board-label{
+  display:block; font-family:var(--f-mono); font-size:.68rem; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:10px;
+}
+.ru-board-track{
+  position:relative; overflow:hidden; background:var(--ink); border-radius:3px; padding:14px 0;
+  -webkit-mask-image:linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  mask-image:linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+.ru-board-row{ display:flex; width:max-content; animation:ru-marquee 36s linear infinite; }
+.ru-board-track:hover .ru-board-row,.ru-board-track:focus-within .ru-board-row{ animation-play-state:paused; }
+@keyframes ru-marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+.ru-chip{
+  flex:none; font-family:var(--f-mono); font-size:.78rem; font-weight:600;
+  color:var(--amber); padding:0 22px; border-right:1px solid rgba(232,212,170,.18); white-space:nowrap;
+}
+.ru-chip i{ font-style:normal; color:rgba(216,222,227,.6); margin-left:8px; }
+
+.ru-scrolldown{
+  margin-top:56px; display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--f-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint);
+}
+.ru-scrolldown svg{ animation:ru-bob 1.7s ease-in-out infinite; }
+@keyframes ru-bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(4px); } }
+
+.ru-route{ position:relative; margin-top:52px; }
+.ru-route-track{
+  position:absolute; left:18px; top:6px; bottom:6px; width:2px;
+  background-image:repeating-linear-gradient(to bottom, var(--ink-faint) 0 6px, transparent 6px 12px);
+}
+.ru-route-fill{ position:absolute; top:0; left:0; width:100%; height:0%; background:var(--pen-blue); }
+.ru-route-pin{
+  position:absolute; left:18px; top:0%; transform:translate(-50%,-50%);
+  width:18px; height:18px; color:var(--pen-blue); z-index:2;
+}
+.ru-route-pin svg{ display:block; background:var(--paper); border-radius:50%; }
+
+.ru-steps{ display:flex; flex-direction:column; gap:22px; }
+.ru-step{ position:relative; display:grid; grid-template-columns:38px 1fr; gap:0 18px; align-items:start; }
+.ru-step-pin{
+  grid-column:1; width:38px; height:38px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--f-mono); font-weight:700; font-size:.82rem;
+  background:var(--paper); border:2px solid var(--ink); color:var(--ink);
+  position:relative; z-index:2;
+}
+.ru-step-card{
+  grid-column:2; background:var(--paper); border:1.5px solid var(--ink-faint);
+  border-radius:3px; padding:24px 26px; box-shadow:5px 5px 0 0 var(--ink-faint);
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.ru-step:nth-child(odd) .ru-step-card{ transform:rotate(-.4deg); }
+.ru-step:nth-child(even) .ru-step-card{ transform:rotate(.4deg); }
+.ru-step-card:hover{ transform:rotate(0deg) translateY(-3px); box-shadow:7px 7px 0 0 var(--pen-blue); }
+.ru-step-tag{
+  display:block; font-family:var(--f-mono); font-size:.66rem; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--pen-red); margin-bottom:10px;
+}
+.ru-step-title{ font-family:var(--f-display); font-weight:700; font-size:1.24rem; line-height:1.25; margin-bottom:10px; }
+.ru-step-body{ font-size:.95rem; line-height:1.62; color:var(--ink-soft); }
+.ru-step-body strong{ color:var(--ink); font-weight:600; }
+
+.ru-feature{
+  display:grid; grid-template-columns:1fr 1.15fr auto; align-items:stretch;
+  margin:48px 0 26px; border:1.5px solid var(--ink); border-radius:4px; overflow:hidden;
+  box-shadow:6px 6px 0 0 var(--ink); transition:transform .25s ease, box-shadow .25s ease;
+}
+.ru-feature:hover{ transform:translate(-3px,-3px); box-shadow:9px 9px 0 0 var(--pen-blue); }
+.ru-feature-board{
+  background:var(--ink); color:var(--marker); display:flex; flex-direction:column;
+  justify-content:center; gap:6px; padding:32px 28px; font-family:var(--f-hand);
+}
+.ru-feature-board span:first-child{ font-family:var(--f-mono); font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(240,189,62,.55); }
+.ru-feature-board strong{ font-size:2.5rem; line-height:1; font-weight:700; }
+.ru-feature-board span:last-child{ font-size:1.05rem; opacity:.85; }
+.ru-feature-body{ padding:32px 28px; display:flex; flex-direction:column; gap:9px; justify-content:center; background:var(--paper); }
+.ru-feature-eyebrow{ font-family:var(--f-mono); font-size:.66rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--pen-red); }
+.ru-feature-name{ font-family:var(--f-display); font-weight:800; font-size:1.65rem; }
+.ru-feature-desc{ font-size:.95rem; line-height:1.55; color:var(--ink-soft); max-width:38ch; }
+.ru-feature-cta{ display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:.86rem; color:var(--pen-blue); margin-top:4px; }
+.ru-feature-cta svg{ transition:transform .2s ease; }
+.ru-feature:hover .ru-feature-cta svg{ transform:translateX(4px); }
+.ru-feature-price{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  padding:24px 26px; background:var(--paper-2); border-left:1.5px dashed var(--ink-faint);
+  font-family:var(--f-mono); font-size:.7rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft);
+}
+.ru-feature-price span{ font-family:var(--f-display); font-size:1.55rem; font-weight:800; color:var(--ink); }
+
+.ru-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.ru-ticket{
+  position:relative; background:var(--paper); border:1.5px solid var(--ink-faint);
+  border-radius:3px; padding:26px 20px 18px; display:flex; flex-direction:column; gap:8px;
+  box-shadow:4px 4px 0 0 var(--ink-faint); transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.ru-ticket:nth-child(3n+1){ transform:rotate(-.6deg); }
+.ru-ticket:nth-child(3n+2){ transform:rotate(.5deg); }
+.ru-ticket:nth-child(3n+3){ transform:rotate(-.3deg); }
+.ru-ticket:hover{ transform:rotate(0) translateY(-4px); box-shadow:6px 6px 0 0 var(--pen-blue); border-color:var(--pen-blue); }
+.ru-ticket-notch{
+  position:absolute; top:-1.5px; left:50%; transform:translateX(-50%); width:60%; height:1.5px;
+  background-image:repeating-linear-gradient(to right, var(--ink-faint) 0 6px, transparent 6px 11px);
+}
+.ru-ticket-notch::before,.ru-ticket-notch::after{
+  content:""; position:absolute; top:-7px; width:13px; height:13px; border-radius:50%;
+  background:var(--paper); border:1.5px solid var(--ink-faint);
+}
+.ru-ticket-notch::before{ left:-6px; } .ru-ticket-notch::after{ right:-6px; }
+.ru-ticket-tag2{ font-family:var(--f-mono); font-size:.64rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--river); }
+.ru-ticket-name{ font-family:var(--f-display); font-weight:700; font-size:1.16rem; }
+.ru-ticket-desc{ font-size:.87rem; line-height:1.5; color:var(--ink-soft); flex:1; }
+.ru-ticket-foot{ display:flex; align-items:center; justify-content:space-between; padding-top:10px; border-top:1px dashed var(--ink-faint); margin-top:4px; }
+.ru-ticket-price{ font-family:var(--f-mono); font-weight:700; color:var(--ink); }
+.ru-ticket-arrow{ color:var(--pen-blue); transition:transform .2s ease; display:inline-block; }
+.ru-ticket:hover .ru-ticket-arrow{ transform:translate(3px,-3px); }
+
+.ru-secreto{ position:relative; padding:0 0 88px; }
+.ru-secreto-wrap{ max-width:740px; }
+.ru-secreto-label{
+  display:block; font-family:var(--f-mono); font-size:.66rem; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:18px;
+}
+.ru-secreto-quote{
+  font-family:var(--f-display); font-weight:600; font-size:clamp(1.3rem,2.6vw,1.85rem);
+  line-height:1.45; color:var(--ink);
+}
+.ru-hl-text{
+  background-image:linear-gradient(120deg, rgba(240,189,62,.6) 0%, rgba(240,189,62,.6) 100%);
+  background-repeat:no-repeat; background-size:0% 88%; background-position:0 78%;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+  padding:0 .06em; transition:background-size 1.1s cubic-bezier(.16,1,.3,1) .25s;
+}
+.ru-secreto.is-in .ru-hl-text{ background-size:100% 88%; }
+.ru-secreto-source{
+  display:block; margin-top:18px; font-family:var(--f-hand); font-weight:600;
+  font-size:1.35rem; color:var(--ink-soft);
+}
+
+.ru-dusk,.ru-dawn{ position:relative; height:150px; overflow:hidden; }
+.ru-dusk-sky{ position:absolute; inset:0; background:linear-gradient(to bottom, var(--paper) 0%, #C99A6A 42%, var(--night) 100%); }
+.ru-dawn-sky{ position:absolute; inset:0; background:linear-gradient(to bottom, var(--night) 0%, #C99A6A 60%, var(--paper) 100%); }
+.ru-dusk-sun,.ru-dawn-sun{
+  position:absolute; left:50%; width:44px; height:44px; border-radius:50%;
+  background:var(--amber); box-shadow:0 0 40px 6px rgba(230,162,60,.5); transform:translateX(-50%);
+  opacity:.5; transition:top 1.4s cubic-bezier(.4,0,.2,1), opacity 1.4s ease;
+}
+.ru-dusk-sun{ top:-28px; } .ru-dusk.is-in .ru-dusk-sun{ top:112px; opacity:1; }
+.ru-dawn-sun{ top:112px; } .ru-dawn.is-in .ru-dawn-sun{ top:-28px; opacity:1; }
+.ru-dusk-line{ position:absolute; left:0; right:0; bottom:0; height:1px; background:var(--night-line); }
+
+.ru-night{ background:var(--night); color:var(--night-ink); }
+.ru-streetlamps{
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(230,162,60,.16), transparent 38%),
+    radial-gradient(circle at 90% 25%, rgba(230,162,60,.10), transparent 42%);
+}
+.ru-night-list{ display:flex; flex-direction:column; margin-top:40px; border-top:1px solid var(--night-line); }
+.ru-night-item{ border-bottom:1px solid var(--night-line); }
+.ru-night-item a{
+  display:grid; grid-template-columns:40px 1fr auto 18px; align-items:center; gap:18px;
+  padding:22px 4px; transition:padding-left .25s ease, background .25s ease;
+}
+.ru-night-item a:hover,.ru-night-item a:focus-visible{ padding-left:14px; background:rgba(232,212,170,.045); }
+.ru-ni-rank{ font-family:var(--f-mono); font-weight:700; color:var(--night-soft); font-size:.88rem; }
+.ru-ni-info{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.ru-ni-tag{ font-family:var(--f-mono); font-size:.64rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); }
+.ru-ni-name{ font-family:var(--f-display); font-weight:700; font-size:1.22rem; }
+.ru-ni-desc{ font-size:.87rem; color:var(--night-soft); line-height:1.5; max-width:52ch; }
+.ru-ni-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:2px; text-align:right; }
+.ru-ni-price{ font-family:var(--f-mono); font-weight:700; }
+.ru-ni-vibe{ font-size:.68rem; color:var(--night-soft); text-transform:uppercase; letter-spacing:.06em; }
+.ru-ni-arrow{ color:var(--amber); transition:transform .2s ease; display:inline-block; }
+.ru-night-item a:hover .ru-ni-arrow{ transform:translateX(4px); }
+
+.ru-sos{ position:relative; background:var(--night-2); padding:80px 0; }
+.ru-sos-head{ margin-bottom:36px; }
+.ru-sos-stop{ color:var(--pen-red); }
+.ru-sos-title{ font-family:var(--f-display); font-weight:800; font-size:clamp(1.7rem,3.4vw,2.3rem); color:var(--night-ink); margin-top:12px; }
+.ru-sos-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.ru-sos-btn{
+  display:flex; flex-direction:column; gap:6px; padding:24px 22px;
+  border:1.5px solid rgba(193,58,46,.45); border-radius:4px; background:rgba(193,58,46,.06);
+  color:var(--night-ink); transition:transform .2s ease, background .2s ease, border-color .2s ease;
+}
+.ru-sos-btn:hover,.ru-sos-btn:focus-visible{ transform:translateY(-3px); background:rgba(193,58,46,.14); border-color:var(--pen-red); }
+.ru-sos-btn svg{ color:var(--pen-red); margin-bottom:4px; }
+.ru-sos-num{ font-family:var(--f-mono); font-weight:700; font-size:1.8rem; color:#fff; }
+.ru-sos-label{ font-weight:600; font-size:.95rem; }
+.ru-sos-sub{ font-size:.8rem; color:var(--night-soft); }
+
+.ru-cierre{ position:relative; padding:110px 0 96px; }
+.ru-cierre-wrap{ max-width:660px; }
+.ru-cierre-title{ font-family:var(--f-display); font-weight:800; font-size:clamp(2rem,4.4vw,3.05rem); line-height:1.1; margin-bottom:18px; }
+.ru-cierre-title em{ font-style:normal; color:var(--pen-blue); }
+.ru-cierre-sub{ font-size:1.02rem; line-height:1.6; color:var(--ink-soft); max-width:46ch; margin-bottom:36px; }
+.ru-cta{
+  display:inline-flex; align-items:center; gap:10px; padding:16px 28px;
+  background:var(--ink); color:var(--paper); font-weight:600; font-size:.95rem; border-radius:3px;
+  box-shadow:5px 5px 0 0 var(--pen-blue); transition:box-shadow .2s ease, background .2s ease;
+}
+.ru-cta:hover{ background:var(--pen-blue); box-shadow:5px 5px 0 0 var(--ink); }
+.ru-cta svg{ transition:transform .2s ease; }
+.ru-cta:hover svg{ transform:translateX(4px); }
+
+@media (max-width:880px){
+  .ru-grid{ grid-template-columns:repeat(2,1fr); }
+  .ru-feature{ grid-template-columns:1fr; }
+  .ru-feature-price{ border-left:none; border-top:1.5px dashed var(--ink-faint); flex-direction:row; gap:10px; padding:16px 28px; }
+}
+@media (max-width:640px){
+  .ru-wrap{ padding:0 18px; }
+  .ru-hero{ padding:92px 0 72px; }
+  .ru-chapter{ padding:64px 0; }
+  .ru-sos{ padding:64px 0; }
+  .ru-cierre{ padding:80px 0 72px; }
+  .ru-dusk,.ru-dawn{ height:96px; }
+  .ru-feature-board strong{ font-size:2rem; }
+  .ru-grid{ grid-template-columns:1fr; }
+  .ru-sos-grid{ grid-template-columns:1fr; }
+  .ru-night-item a{ grid-template-columns:30px 1fr; row-gap:8px; }
+  .ru-ni-meta{ grid-column:2; flex-direction:row; align-items:center; gap:10px; text-align:left; }
+  .ru-ni-arrow{ display:none; }
+  .ru-step{ grid-template-columns:30px 1fr; }
+  .ru-step-pin{ width:30px; height:30px; font-size:.72rem; }
+  .ru-route-track,.ru-route-pin{ left:14px; }
+  .ru-step-card{ padding:20px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .ru-hl span{ animation:none; }
+  .ru-scrolldown svg{ animation:none; }
+  .ru-board-row{ animation:none; }
+  .ru-board-track{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .ru-dusk-sun,.ru-dawn-sun,.ru-hl-text{ transition:none; }
+  .ru-dusk-sun,.ru-dawn-sun{ top:42px !important; opacity:1 !important; }
+  .ru-hl-text{ background-size:100% 88% !important; }
+}
+</style>
+
 <script>
-(function () {
-  'use strict';
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var root = document.getElementById('uni-ruta');
 
-  /* ── CURSOR PREMIUM ── */
-  var cursor = document.getElementById('uni-cursor');
-  var section = document.getElementById('uni-v2');
-  var cursorX = 0, cursorY = 0;
-  var targetX = 0, targetY = 0;
-  var rafId = null;
-
-  if (cursor && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
-    section.addEventListener('mouseenter', function () {
-      cursor.classList.add('visible');
-      if (!rafId) animateCursor();
-    });
-    section.addEventListener('mouseleave', function () {
-      cursor.classList.remove('visible');
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-    });
-    section.addEventListener('mousemove', function (e) {
-      targetX = e.clientX;
-      targetY = e.clientY;
-    });
-
-    var hoverables = section.querySelectorAll('a, button, .u-faculty-row');
-    hoverables.forEach(function (el) {
-      el.addEventListener('mouseenter', function () { cursor.classList.add('hovering'); });
-      el.addEventListener('mouseleave', function () { cursor.classList.remove('hovering'); });
-    });
-
-    function animateCursor() {
-      cursorX += (targetX - cursorX) * 0.12;
-      cursorY += (targetY - cursorY) * 0.12;
-      cursor.style.left = cursorX + 'px';
-      cursor.style.top  = cursorY + 'px';
-      rafId = requestAnimationFrame(animateCursor);
-    }
-  }
-
-  /* ── REVEAL CON INTERSECTION OBSERVER ── */
-  var revealEls = document.querySelectorAll('#uni-v2 .u-reveal');
-  if ('IntersectionObserver' in window) {
-    var obs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('u-visible');
-        obs.unobserve(entry.target);
-      });
-    }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
-    revealEls.forEach(function (el) { obs.observe(el); });
+  /* ---- generic reveal ---- */
+  var revealEls = root.querySelectorAll('.ru-reveal');
+  if(reduced || !('IntersectionObserver' in window)){
+    revealEls.forEach(function(el){ el.classList.add('is-in'); });
   } else {
-    revealEls.forEach(function (el) { el.classList.add('u-visible'); });
-  }
-
-  /* FALLBACK por si el observer no dispara */
-  setTimeout(function () {
-    revealEls.forEach(function (el) { el.classList.add('u-visible'); });
-  }, 1200);
-
-  /* ── CHAPTER RULE ANIMATION ── */
-  var rules = document.querySelectorAll('#uni-v2 .u-chapter-rule');
-  if ('IntersectionObserver' in window) {
-    var ruleObs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('drawn');
-          ruleObs.unobserve(entry.target);
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-in');
+          io.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.5 });
-    rules.forEach(function (r) { ruleObs.observe(r); });
-  }
-
-  /* ── AÑADIR #ESTUDIANTES AL NAV del sitio (si el nav principal existe) ── */
-  var mainNav = document.getElementById('main-nav');
-  if (mainNav && !document.querySelector('.nav-item[data-section="estudiantes"]')) {
-    var divider = document.createElement('div');
-    divider.className = 'nav-divider';
-    divider.setAttribute('aria-hidden', 'true');
-    var navItem = document.createElement('a');
-    navItem.className = 'nav-item';
-    navItem.href = '#uni-v2';
-    navItem.setAttribute('data-section', 'estudiantes');
-    navItem.innerHTML = '<span class="nav-emoji" aria-hidden="true">🎓</span> Universitarios';
-    navItem.addEventListener('click', function (e) {
-      e.preventDefault();
-      var target = document.getElementById('uni-v2');
-      if (!target) return;
-      window.scrollTo({
-        top: target.getBoundingClientRect().top + window.scrollY - mainNav.offsetHeight - 24,
-        behavior: 'smooth'
-      });
+    }, { threshold:.18, rootMargin:'0px 0px -8% 0px' });
+    revealEls.forEach(function(el, i){
+      el.style.transitionDelay = Math.min(i % 6, 5) * 60 + 'ms';
+      io.observe(el);
     });
-    mainNav.insertBefore(navItem, mainNav.querySelector('.search-icon-btn'));
-    mainNav.insertBefore(divider, navItem);
   }
 
+  /* ---- dusk / dawn one-shot ---- */
+  ['[data-dusk]','[data-dawn]'].forEach(function(sel){
+    var el = root.querySelector(sel);
+    if(!el) return;
+    if(reduced){ el.classList.add('is-in'); return; }
+    if('IntersectionObserver' in window){
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){ el.classList.add('is-in'); obs.unobserve(entry.target); }
+        });
+      }, { threshold:.4 });
+      obs.observe(el);
+    } else { el.classList.add('is-in'); }
+  });
+
+  /* ---- route line: scroll-linked fill + pin along chapter 1 ---- */
+  var routeEl = root.querySelector('[data-route]');
+  if(routeEl && !reduced){
+    var fillEl = root.querySelector('[data-route-fill]');
+    var pinEl = root.querySelector('[data-route-pin]');
+    var ticking = false;
+
+    function updateRoute(){
+      var rect = routeEl.getBoundingClientRect();
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var total = rect.height + vh * 0.55;
+      var passed = vh * 0.85 - rect.top;
+      var p = Math.max(0, Math.min(1, passed / total));
+      fillEl.style.height = (p * 100) + '%';
+      pinEl.style.top = (p * 100) + '%';
+      ticking = false;
+    }
+    function onScroll(){
+      if(!ticking){ requestAnimationFrame(updateRoute); ticking = true; }
+    }
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    updateRoute();
+  } else if (routeEl && reduced){
+    root.querySelector('[data-route-fill]').style.height = '100%';
+    root.querySelector('[data-route-pin]').style.top = '100%';
+  }
+
+  /* ---- magnetic CTA (desktop / fine pointer only) ---- */
+  var magnet = root.querySelector('[data-magnetic]');
+  if(magnet && !reduced && window.matchMedia('(pointer: fine)').matches){
+    var strength = 14;
+    magnet.addEventListener('mousemove', function(e){
+      var r = magnet.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      magnet.style.transform = 'translate(' + (x*strength) + 'px,' + (y*strength) + 'px)';
+    });
+    magnet.addEventListener('mouseleave', function(){
+      magnet.style.transform = 'translate(0,0)';
+    });
+  }
 })();
 </script>
 </main>
