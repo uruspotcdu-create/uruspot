@@ -3673,11 +3673,15 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 
   function getAllSearchables(){
     var all=[];
+    var seen={};
     document.querySelectorAll('.searchable[data-name]').forEach(function(el){
       var name=el.dataset.name||'';
       var href=el.getAttribute('href')||'#';
       var tags=el.dataset.tags||'';
-      if(name) all.push({name:name,href:href,tags:tags,el:el});
+      if(name && !seen[name]){
+        seen[name]=true;
+        all.push({name:name,href:href,tags:tags,el:el});
+      }
     });
     return all;
   }
@@ -3730,11 +3734,15 @@ searchInput.addEventListener('input',function(){
     if(e.key==='Escape'){dropdown.style.display='none';}
   });
 
-  document.addEventListener('click',function(e){
+ document.addEventListener('click',function(e){
     var wrap=document.getElementById('search-bar-wrap');
     if(wrap && !wrap.contains(e.target) && e.target!==dropdown && !dropdown.contains(e.target)){
       dropdown.style.display='none';
     }
+  });
+
+  searchInput.addEventListener('blur',function(){
+    setTimeout(function(){dropdown.style.display='none';},200);
   });
 
   var _origClose=closeSearch;
