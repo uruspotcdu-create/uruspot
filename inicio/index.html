@@ -3647,12 +3647,84 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
     }
   }
 
+/* ── DROPDOWN DE SUGERENCIAS ── */
+  var dropdown = document.createElement('div');
+  dropdown.id = 'search-dropdown';
+  dropdown.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:rgba(6,6,5,.98);border:1px solid rgba(242,237,227,.10);border-top:none;z-index:900;max-height:320px;overflow-y:auto;display:none;';
+  document.getElementById('search-bar-wrap').style.position = 'relative';
+  document.getElementById('search-bar-wrap').appendChild(dropdown);
+
+  function getAllSearchables(){
+    var all=[];
+    document.querySelectorAll('.searchable[data-name]').forEach(function(el){
+      var name=el.dataset.name||'';
+      var href=el.getAttribute('href')||'#';
+      var tags=el.dataset.tags||'';
+      if(name) all.push({name:name,href:href,tags:tags,el:el});
+    });
+    return all;
+  }
+
+  function renderDropdown(q){
+    if(!q){dropdown.style.display='none';dropdown.innerHTML='';return;}
+    var all=getAllSearchables();
+    var matches=all.filter(function(item){
+      return normalize(item.name).includes(q)||normalize(item.tags).includes(q);
+    });
+    if(!matches.length){dropdown.style.display='none';dropdown.innerHTML='';return;}
+    var html='';
+    matches.forEach(function(item){
+      var highlighted=item.name.replace(new RegExp('('+q.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&')+')','gi'),'<mark style="background:rgba(196,135,42,.35);color:inherit;border-radius:2px;padding:0 2px;">$1</mark>');
+      html+='<a href="'+item.href+'" style="display:flex;align-items:center;gap:12px;padding:14px 20px;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(242,237,227,.80);text-decoration:none;border-bottom:1px solid rgba(242,237,227,.06);transition:background 0.2s ease;" onmouseover="this.style.background=\'rgba(242,237,227,.06)\'" onmouseout="this.style.background=\'\'">'+highlighted+'</a>';
+    });
+    dropdown.innerHTML=html;
+    dropdown.style.display='block';
+  }
+
   searchInput.addEventListener('input',function(){
     var val=this.value;
+    var q=normalize(val.trim());
     if(searchDebounceId) clearTimeout(searchDebounceId);
-    searchDebounceId=setTimeout(function(){ runSearch(val); },150);
+    searchDebounceId=setTimeout(function(){
+      runSearch(val);
+      renderDropdown(q);
+    },120);
   });
-  searchInput.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();runSearch(this.value);}});
+
+  searchInput.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      e.preventDefault();
+      var q=normalize(this.value.trim());
+      if(!q) return;
+      var all=getAllSearchables();
+      var matches=all.filter(function(item){
+        return normalize(item.name).includes(q)||normalize(item.tags).includes(q);
+      });
+      if(matches.length===1){
+        window.location.href=matches[0].href;
+      } else if(matches.length>1){
+        /* Si hay varias coincidencias, scrollea a la primera */
+        dropdown.style.display='none';
+        var first=matches[0].el;
+        var navEl=document.getElementById('main-nav');
+        var searchEl=document.getElementById('search-bar-wrap');
+        var offset=(navEl?navEl.offsetHeight:60)+(searchEl?72:0)+16;
+        window.scrollTo({top:first.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'});
+      }
+    }
+    if(e.key==='Escape'){dropdown.style.display='none';}
+  });
+
+  /* Cerrar dropdown al clickear fuera */
+  document.addEventListener('click',function(e){
+    if(!document.getElementById('search-bar-wrap').contains(e.target)){
+      dropdown.style.display='none';
+    }
+  });
+
+  /* Cerrar dropdown al cerrar el buscador */
+  var _origClose=closeSearch;
+  closeSearch=function(){_origClose();dropdown.style.display='none';dropdown.innerHTML='';};
 
   /* ── CLIMA ── */
   var WX_LAT=-32.4825,WX_LON=-58.2372;
