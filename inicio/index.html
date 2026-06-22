@@ -64,7 +64,7 @@
    ═══════════════════════════════════════════════════════ */
 :root {
   --void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;
-  --parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;
+  --parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#e8dece;
   --ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;
   --verde-action:#1d5c40;--verde-status:#267a55;--verde-accent:#0e3326;
   --oro:#c4872a;--oro2:#dfa040;--oro3:#f2c060;
@@ -1795,6 +1795,153 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   .cv-comparsa-champ .cv-comp-name { font-size: 19px; }
   .cv-sede-stats { flex-direction: column; }
   .cv-sede-stat-div { width: 100%; height: 1px; align-self: auto; }
+}
+
+  /* ═══════════════════════════════════════════════════
+   FIX LEGIBILIDAD — fondo arena + textos más opacos
+   Aplica sobre main-body (fondo claro)
+   ═══════════════════════════════════════════════════ */
+
+/* Cards de restaurantes */
+.rcard-desc { color: rgba(26,25,22,.72) !important; }
+.rcard-feat .rcard-desc { color: rgba(242,237,227,.62) !important; }
+
+/* Cards de naturaleza */
+.nat-card-desc { color: rgba(26,25,22,.72) !important; }
+.nat-card-featured .nat-card-desc { color: rgba(242,237,227,.65) !important; }
+.nat-act-desc { color: rgba(26,25,22,.72) !important; }
+.nat-card-meta { color: rgba(26,25,22,.52) !important; }
+
+/* Cards de cómo llegar */
+.cl-body { color: rgba(26,25,22,.72) !important; }
+
+/* Cards de circuitos */
+.circ-desc { color: rgba(26,25,22,.72) !important; }
+.circ-stop { color: rgba(26,25,22,.75) !important; }
+
+/* Cards de patrimonio */
+.hp-desc { color: rgba(26,25,22,.78) !important; }
+.hp-facts dd { color: rgba(26,25,22,.85) !important; }
+.hp-facts dt { color: rgba(26,25,22,.52) !important; }
+
+/* Cards de gastronomía */
+.gr-species-desc { color: rgba(26,25,22,.72) !important; }
+.gr-prod-desc { color: rgba(26,25,22,.72) !important; }
+.gr-tip-desc { color: rgba(26,25,22,.72) !important; }
+.gr-species-nota { color: rgba(26,25,22,.55) !important; }
+
+/* Cards de deporte */
+.dep-feat-desc { color: rgba(26,25,22,.72) !important; }
+.dep-club-desc { color: rgba(26,25,22,.72) !important; }
+.dep-athlete-desc { color: rgba(26,25,22,.72) !important; }
+
+/* Cards de circuitos */
+.circ-nota { color: rgba(26,25,22,.62) !important; }
+
+/* Cards generales lista */
+.litem-name { color: rgba(26,25,22,.90) !important; }
+
+/* Gimnasios */
+.gcard-desc { color: rgba(26,25,22,.72) !important; }
+.gcard-feat .gcard-desc { color: rgba(242,237,227,.62) !important; }
+
+/* Labels y metadata (menos críticos pero se mejoran) */
+.nat-act-note { color: rgba(196,135,42,.85) !important; }
+.gr-prod-origen { color: rgba(26,25,22,.52) !important; }
+
+/* Cards de deporte atletas */
+.dep-athlete-feat .dep-athlete-desc { color: rgba(242,237,227,.65) !important; }
+
+/* Hosterías y panaderías */
+.litem { border-left-color: rgba(26,25,22,.08); }
+
+/* Bcard desc (bares) */
+.bcard-desc { color: rgba(26,25,22,.68) !important; }
+
+/* Cal eventos */
+.cal-evento-desc { color: rgba(26,25,22,.58) !important; }
+
+/* Cómo llegar tip */
+.cl-tip { color: rgba(26,25,22,.62) !important; }
+
+/* Sección universitarios (papel) */
+.ru-section { --paper: #e8dece; --paper-2: #ddd4c0; }
+  /* ═══════════════════════════════════════════════════
+   FOOTER — estilos que faltan
+   ═══════════════════════════════════════════════════ */
+.footer {
+  position: relative;
+  background: var(--void);
+  padding: 60px var(--gutter) 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  overflow: hidden;
+}
+.footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 70% at 50% 0%,
+    rgba(29,92,64,.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+.footer-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(242,237,227,.03) 0%,
+    transparent 40%
+  );
+  pointer-events: none;
+}
+.footer-logo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  opacity: .85;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.footer-logo:hover { opacity: 1; transform: scale(1.06); }
+.footer-divider {
+  width: 48px;
+  height: 1px;
+  background: rgba(242,237,227,.12);
+  position: relative;
+  z-index: 1;
+}
+.footer-stats {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.footer-stat {
+  font-family: var(--f-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(242,237,227,.40);
+}
+.footer-stat strong {
+  color: rgba(242,237,227,.75);
+  font-weight: 700;
+}
+.footer-copy {
+  position: relative;
+  z-index: 1;
+  font-family: var(--f-ui);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(242,237,227,.20);
 }
 
 
