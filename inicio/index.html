@@ -11,7 +11,7 @@
 <link rel="dns-prefetch" href="//dolarapi.com" />
 <link rel="icon" type="image/png" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<link rel="preload" as="image" href="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" fetchpriority="high" />
+<link rel="preload" as="image" href="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=60&auto=format&fm=webp" fetchpriority="low" />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/syne/v24/8vIH7w4qzmVxsWxjBZRjr0FKM_04uQ.woff2" crossorigin="anonymous" />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/dmserifdisplay/v17/-nFnOHM81r4j6k0gjALR8uVIJjAIKXM.woff2" crossorigin="anonymous" />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/instrumentserif/v1/Da21F4RNnSmqMCQyUXCGNiXA66MAzmqhGIiTj8M.woff2" crossorigin="anonymous" />
@@ -834,7 +834,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .ht-tab-active{color:#1C2E4A!important;border-bottom-color:#8B7355!important}
 .ht-tab-active .ht-tab-num{color:#1C2E4A!important}
 .ht-chapter{display:none;padding:40px 0 0;animation:ht-fade .25s ease}
-.ht-chapter-active{display:block}
+.ht-chapter-active{display:block !important}
 @keyframes ht-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .ht-chapter-header{margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid rgba(26,25,22,.10)}
 .ht-ch-eyebrow{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8B7355;margin-bottom:8px}
@@ -1282,13 +1282,26 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 #back-to-top:hover{background:rgba(196,135,42,.14);border-color:var(--oro2);transform:translateY(-3px) scale(1.05)}
 #back-to-top svg{width:18px;height:18px;transition:transform .35s var(--ease)}
 #back-to-top:hover svg{transform:translateY(-2px)}
-#back-to-top .btt-ring{position:absolute;inset:-1px;border-radius:50%;background:conic-gradient(from 0deg,var(--verde2),var(--oro2),var(--verde2));opacity:0;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;transition:opacity .35s ease;pointer-events:none}
+#back-to-top .btt-ring{position:absolute;inset:-1px;border-radius:50%;background:conic-gradient(from 0deg,var(--verde2),var(--oro2),var(--verde2));opacity:0;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:destination-out;mask-composite:exclude;padding:1px;transition:opacity .35s ease;pointer-events:none}
 #back-to-top:hover .btt-ring{opacity:1}
 @media(max-width:640px){#back-to-top{width:44px;height:44px;bottom:18px;right:18px}}
 
 /* ═══════════════ ACCORDION ═══════════════ */
-.us-section>*:not(.section-header){max-height:10000px;overflow:hidden;transition:max-height .4s var(--ease),opacity .3s ease,margin .3s ease}
-.us-section.acc-collapsed>*:not(.section-header){max-height:0!important;opacity:0;margin:0!important;overflow:hidden}
+.us-section>*:not(.section-header){
+  display:grid;
+  grid-template-rows:1fr;
+  transition:grid-template-rows .4s var(--ease),opacity .3s ease;
+  overflow:hidden;
+}
+.us-section>*:not(.section-header)>*{
+  overflow:hidden;
+  min-height:0;
+}
+.us-section.acc-collapsed>*:not(.section-header){
+  grid-template-rows:0fr;
+  opacity:0;
+  pointer-events:none;
+}
 .us-section>.section-header{cursor:pointer;user-select:none;border-radius:3px 3px 0 0;padding:18px 20px 28px;margin-left:-20px;margin-right:-20px;transition:background .35s ease,box-shadow .35s ease}
 .us-section>.section-header:hover{background:rgba(29,92,64,.04);box-shadow:inset 0 0 0 1px rgba(29,92,64,.10)}
 .us-section>.section-header::before{content:'';display:inline-flex;flex-shrink:0;order:-1;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(29,92,64,.30);background:rgba(29,92,64,.06);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3 5l4 4 4-4' stroke='%231d5c40' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;margin-right:12px;margin-bottom:4px;flex-shrink:0;transition:transform .4s cubic-bezier(.34,1.56,.64,1),background-color .3s ease,border-color .3s ease}
@@ -1298,7 +1311,14 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 /* ═══════════════ RESPONSIVE GLOBALS ═══════════════ */
 @media(max-width:1100px){:root{--gutter:40px}.resto-grid{grid-template-columns:repeat(3,1fr)}.rcard-feat{grid-column:span 2}.cat-grid{grid-template-columns:repeat(3,1fr)}.cat-card-donde{grid-column:span 3}.gym-grid{grid-template-columns:repeat(2,1fr)}.gcard-feat{grid-column:span 2}}
 @media(max-width:860px){:root{--gutter:28px;--section-gap:80px}.hero-title{font-size:clamp(48px,8vw,72px);letter-spacing:-2px}.main-body{padding:72px var(--gutter) 88px}.resto-grid{grid-template-columns:repeat(2,1fr)}.rcard-feat{grid-column:span 2}.cafe-grid{grid-template-columns:repeat(2,1fr)}.ccard-featured{grid-column:span 2}.bar-grid{grid-template-columns:repeat(3,1fr)}.cat-grid{grid-template-columns:repeat(2,1fr)}.cat-card-highlight{grid-column:span 2}.cat-card-donde{grid-column:span 2}.gym-grid{grid-template-columns:1fr}.gcard-feat{grid-column:span 1;padding:32px 26px;min-height:unset}.gcard-feat .gcard-name{font-size:24px}}
-@media(max-width:768px){.hero-orb-1,.hero-orb-2{animation:none!important}.hero-inner{flex-direction:column!important;align-items:flex-start!important;justify-content:flex-end!important;gap:28px!important}.hero-inner-left{width:100%}.wx-hero{width:100%;align-self:stretch}.ccard-bg{background-image:none!important;background:#1a1916!important}}
+@media(max-width:768px){
+  .hero .hero-inner{
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-end;
+    gap:28px;
+  }
+}
 @media(min-width:769px) and (hover:hover){.rcard,.gcard,.cat-card,.bcard,.litem{will-change:transform}}
 @media(max-width:640px){:root{--gutter:18px;--section-gap:60px}.hero-topbar{padding:20px var(--gutter);gap:10px}.hero-logo img{width:50px}.hero-inner{padding:0 var(--gutter) 44px}.hero-title{font-size:42px;letter-spacing:-1.5px;margin-bottom:26px}.hero-title .eyebrow{font-size:11px;letter-spacing:5px}.hero-sub{font-size:15px;margin-bottom:36px}.live-chip{font-size:7px;padding:8px 14px;margin-bottom:24px}.identity-strip{width:100%;overflow-x:auto;scrollbar-width:none}.identity-strip::-webkit-scrollbar{display:none}.id-stat{flex:0 0 auto;padding:16px 20px}.btn-ghost{display:none}.btn-primary{font-size:10px;padding:15px 26px}.main-nav{padding:0}.nav-item{font-size:9px;padding:0 16px;height:52px;letter-spacing:1.5px}.search-bar-wrap{padding-left:var(--gutter);padding-right:var(--gutter)}.main-body{padding:48px var(--gutter) 72px}.section-title{font-size:22px}.resto-grid{grid-template-columns:1fr}.rcard-feat{grid-column:span 1;padding:32px 26px;min-height:unset}.rcard-feat .rcard-name{font-size:24px}.rcard{min-height:unset}.cafe-grid{grid-template-columns:1fr 1fr}.ccard-featured{grid-column:span 2;height:200px}.ccard{height:170px}.ccard-name{font-size:19px}.bar-grid{grid-template-columns:repeat(2,1fr)}.bcard{padding:34px 14px 28px;gap:12px;min-height:132px}.bcard-icon{font-size:34px}.bcard-name{font-size:13px}.litem{padding:22px var(--gutter);gap:16px}.litem-name{font-size:16px}.litem-icon{font-size:26px}.ad-banner{flex-direction:column;align-items:flex-start;padding:28px 22px;margin:56px 0;gap:20px}.ad-banner-btn{align-self:stretch;text-align:center;padding:16px 24px}.ad-banner-title{font-size:18px}.footer{padding:60px var(--gutter) 48px}.cat-grid{grid-template-columns:1fr 1fr}.cat-card-highlight{grid-column:span 2}.cat-card-donde{grid-column:span 2}.cat-card{min-height:150px;padding:24px 20px 20px}.cat-card-title{font-size:18px}.gym-grid{grid-template-columns:1fr}.gcard-feat{grid-column:span 1}.gcard{min-height:unset}}
 @media(max-width:380px){.hero-title{font-size:34px;letter-spacing:-1px}.hero-logo img{width:44px}.cafe-grid{grid-template-columns:1fr}.ccard-featured{grid-column:span 1}.cat-grid{grid-template-columns:1fr}.cat-card-highlight{grid-column:span 1}.cat-card-donde{grid-column:span 1}}
@@ -1362,7 +1382,12 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
       }
     });
   }
-  paint();setInterval(paint,60000);window.__uruspotPaintOpenLabels=paint;
+window.__uruspotPaintOpenLabels=paint;
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',function(){paint();setInterval(paint,60000);});
+}else{
+  paint();setInterval(paint,60000);
+}
 })();
 </script>
 </head>
@@ -4299,14 +4324,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 }
 #back-to-top svg { width: 18px; height: 18px; transition: transform .35s var(--ease); }
 #back-to-top:hover svg { transform: translateY(-2px); }
-#back-to-top .btt-ring {
-  position: absolute;
-  inset: -1px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, var(--verde2), var(--oro2), var(--verde2));
-  opacity: 0;
+#back-to-top .btt-ring{
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
+  -webkit-mask-composite: destination-out; /* correcto para Safari */
   mask-composite: exclude;
   padding: 1px;
   transition: opacity .35s ease;
@@ -4992,7 +5012,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   </div>
   <div class="cafe-grid" id="grid-cafes">
     <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/">
-      <div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=60&auto=format&fm=webp" width="400" height="280" loading="lazy" decoding="async" alt="Nero Café — café de especialidad en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div>
+      <div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=60&auto=format&fm=webp" width="400" height="280" loading="eager" fetchpriority="high" decoding="async" alt="Nero Café — café de especialidad en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div>
       <div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span>
       <div class="ccard-inner"><span class="ccard-label">Especialidad</span><span class="ccard-name">Nero Café</span><div class="pills" style="margin-top:4px"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span></div></div>
     </a>
@@ -6498,14 +6518,28 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 @media(max-width:640px){#back-to-top{width:44px;height:44px;bottom:18px;right:18px}}
 
 /* ═══════════════ ACCORDION ═══════════════ */
-.us-section>*:not(.section-header){max-height:10000px;overflow:hidden;transition:max-height .4s var(--ease),opacity .3s ease,margin .3s ease}
-.us-section.acc-collapsed>*:not(.section-header){max-height:0!important;opacity:0;margin:0!important;overflow:hidden}
-.us-section>.section-header{cursor:pointer;user-select:none;border-radius:3px 3px 0 0;padding:18px 20px 28px;margin-left:-20px;margin-right:-20px;transition:background .35s ease,box-shadow .35s ease}
-.us-section>.section-header:hover{background:rgba(29,92,64,.04);box-shadow:inset 0 0 0 1px rgba(29,92,64,.10)}
-.us-section>.section-header::before{content:'';display:block;flex-shrink:0;order:-1;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(29,92,64,.30);background:rgba(29,92,64,.06);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3 5l4 4 4-4' stroke='%231d5c40' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;margin-right:12px;flex-shrink:0;transition:transform .4s cubic-bezier(.34,1.56,.64,1),background-color .3s ease,border-color .3s ease}
-.us-section.acc-collapsed>.section-header::before{transform:rotate(-90deg)}
+.us-section>.section-header{
+  position:relative;
+}
+.us-section>.section-header::before{
+  content:'';
+  position:absolute;
+  right:0; top:50%;
+  transform:translateY(-50%);
+  width:28px; height:28px;
+  border-radius:50%;
+  border:1.5px solid rgba(29,92,64,.30);
+  background:rgba(29,92,64,.06)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3 5l4 4 4-4' stroke='%231d5c40' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat center;
+  background-size:14px 14px;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  flex-shrink:0;
+}
+.us-section.acc-collapsed>.section-header::before{
+  transform:translateY(-50%) rotate(-90deg);
+}
 .us-section>.section-header:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:3px}
-
 /* ═══════════════ RESPONSIVE GLOBALS ═══════════════ */
 @media(max-width:1100px){:root{--gutter:40px}.resto-grid{grid-template-columns:repeat(3,1fr)}.rcard-feat{grid-column:span 2}.cat-grid{grid-template-columns:repeat(3,1fr)}.cat-card-donde{grid-column:span 3}.gym-grid{grid-template-columns:repeat(2,1fr)}.gcard-feat{grid-column:span 2}}
 @media(max-width:860px){:root{--gutter:28px;--section-gap:80px}.hero-title{font-size:clamp(48px,8vw,72px);letter-spacing:-2px}.main-body{padding:72px var(--gutter) 88px}.resto-grid{grid-template-columns:repeat(2,1fr)}.rcard-feat{grid-column:span 2}.cafe-grid{grid-template-columns:repeat(2,1fr)}.ccard-featured{grid-column:span 2}.bar-grid{grid-template-columns:repeat(3,1fr)}.cat-grid{grid-template-columns:repeat(2,1fr)}.cat-card-highlight{grid-column:span 2}.cat-card-donde{grid-column:span 2}.gym-grid{grid-template-columns:1fr}.gcard-feat{grid-column:span 1;padding:32px 26px;min-height:unset}.gcard-feat .gcard-name{font-size:24px}}
@@ -10010,6 +10044,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 <script>
 (function(){
   'use strict';
+  var _srScrollId = null;
 
   /* ── MODO TEMPORAL ── */
   var globalTimeMode = (function(){
@@ -10249,7 +10284,13 @@ a:focus-visible, button:focus-visible, input:focus-visible {
       item.classList.toggle('search-hidden',!match);
       if(match){total++;if(!first)first=item;}
       /* abrir accordion si hay match */
-      if(q&&match){var sec=item.closest('.us-section');if(sec&&sec.classList.contains('acc-collapsed')){sec.classList.remove('acc-collapsed');var hdr=sec.querySelector('.section-header');if(hdr)hdr.setAttribute('aria-expanded','true');}}
+      if(q&&match){
+  var sec=item.closest('.us-section');
+  if(sec&&sec.classList.contains('acc-collapsed')){
+    var hdr=sec.querySelector('.section-header');
+    if(hdr)hdr.click(); // usa el mismo handler que el accordion
+  }
+}
     });
     /* no-results por grid */
     ['restaurantes','cafes','bares','panaderias','heladerias','hosterias','gimnasios','patrimonio','naturaleza','historia','carnaval','deporte'].forEach(function(id){
@@ -10261,12 +10302,12 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     });
     searchCount.textContent=q?total+(total===1?' resultado':' resultados'):'';
     /* scroll diferido a primera coincidencia */
-    clearTimeout(window.__srScrollId);
+    clearTimeout(_srScrollId);
     if(q&&first){
-      window.__srScrollId=setTimeout(function(){
+      _srScrollId=setTimeout(function(){
         var off=(searchBarWrap.getBoundingClientRect().bottom||132)+8;
         window.scrollTo({top:first.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'});
-      },280);
+      },300);
     }
     /* dropdown */
     if(!q){ddHide();return;}
@@ -10397,15 +10438,15 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     fetch(WX_URL,{cache:'no-store'})
       .then(function(r){if(!r.ok)throw new Error();return r.json();})
       .then(function(d){ _lastFetchTs = Date.now(); renderWeather(d); })
-      .catch(renderError);
+.catch(function(){ _lastFetchTs = Date.now() - 4*60*1000; renderError(); });
+// Reintenta en 60s en lugar de 5min, tras un error
   }
 
-  document.addEventListener('visibilitychange', function(){
-    if(!document.hidden && Date.now() - _lastFetchTs > 5*60*1000){
+ document.addEventListener('visibilitychange', function(){
+    if(!document.hidden && Date.now() - _lastFetchTs > 4*60*1000){
       fetchWeather();
     }
   });
-
   function scheduleWeather(){
     if(window.requestIdleCallback){
       window.requestIdleCallback(function(){fetchWeather();},{ timeout:8000 });
@@ -10414,14 +10455,13 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     }
   }
 
-  if(document.readyState==='complete'){
+ if(document.readyState === 'complete' || document.readyState === 'interactive'){
     scheduleWeather();
   } else {
-    window.addEventListener('load', function(){
+    document.addEventListener('DOMContentLoaded', function(){
       scheduleWeather();
-    }, {once:true});
+    }, {once: true});
   }
-
   setInterval(function(){ fetchWeather(); }, 10*60*1000);
 
 
@@ -10546,11 +10586,16 @@ a:focus-visible, button:focus-visible, input:focus-visible {
         t.setAttribute('aria-selected', active?'true':'false');
         t.setAttribute('tabindex', active?'0':'-1');
       });
-      htPanels.forEach(function(p,i){
+     htPanels.forEach(function(p,i){
         var active = i===idx;
         p.classList.toggle('ht-chapter-active', active);
-        if(active){ p.removeAttribute('hidden'); }
-        else       { p.setAttribute('hidden',''); }
+        if(active){
+          p.removeAttribute('hidden');
+          p.style.display = '';
+        } else {
+          p.setAttribute('hidden','');
+          p.style.display = 'none';
+        }
       });
     }
 
@@ -10633,27 +10678,28 @@ var sectionNames = {
     servicios:'Servicios', 'uni-ruta':'Para universitarios',
     'bp-puerto-viejo':'Puerto Viejo',
 };
-  if(crumb){
+var crumbEl = document.getElementById('section-crumb');
+  var crumbCurrent = crumbEl ? crumbEl.querySelector('#section-crumb-current') : null;
+
+  if(crumbEl){
     window.addEventListener('scroll', function(){
-      crumb.classList.toggle('visible', window.scrollY > 400);
+      crumbEl.classList.toggle('visible', window.scrollY > 400);
     }, {passive:true});
 
     var crumbObserver = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
-        if(entry.isIntersecting){
-          var id = entry.target.getAttribute('id');
-          if(sectionNames[id] && crumbCurrent){
-            crumbCurrent.textContent = sectionNames[id];
-          }
+        if(!entry.isIntersecting || !crumbCurrent) return;
+        var id = entry.target.getAttribute('id');
+        if(id && sectionNames[id]){
+          crumbCurrent.textContent = sectionNames[id];
         }
       });
     }, {rootMargin:'-120px 0px -60% 0px', threshold:0});
 
-    document.querySelectorAll('section[id], div.mood-wrap#mood, div[id]').forEach(function(s){
+    document.querySelectorAll('section[id]').forEach(function(s){
       crumbObserver.observe(s);
     });
   }
-
   /* ====== CTA FLOTANTE "¿PERDIDO?" ====== */
   var lostFab = document.getElementById('lost-fab');
   if(lostFab){
