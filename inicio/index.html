@@ -2,8 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="theme-color" content="#060605" />
+<meta name="theme-color" content="#060605" id="theme-color-meta" />
 <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" media="print" onload="this.media='all'" />
 <link rel="dns-prefetch" href="//fonts.gstatic.com" />
 <link rel="dns-prefetch" href="//api.open-meteo.com" />
 <link rel="dns-prefetch" href="//dolarapi.com" />
@@ -64,15 +66,18 @@
   --void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;
   --parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;
   --ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;
+  --verde-action:#1d5c40;--verde-status:#267a55;--verde-accent:#0e3326;
   --oro:#c4872a;--oro2:#dfa040;--oro3:#f2c060;
-  --rojo:#c0392b;--azul:#1a5c8a;--violeta:#7b3068;
-  --f-display:'DM Serif Display',serif;
-  --f-italic:'Instrument Serif',serif;
-  --f-ui:'Syne',sans-serif;
+  --rojo:#c0392b;--rojo2:#e74c3c;--azul:#1a5c8a;--violeta:#7b3068;
+  --f-display:'DM Serif Display',Georgia,serif;
+  --f-italic:'Instrument Serif',Georgia,serif;
+  --f-ui:'Syne',system-ui,sans-serif;
   --ease:cubic-bezier(0.25,0.46,0.45,0.94);
   --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  --ease-back:cubic-bezier(0.34,1.56,0.64,1);
   --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
-  --gutter:64px;--section-gap:120px
+  --lift-sm:3px;--lift-md:5px;--lift-lg:8px;
+  --gutter:64px;--section-gap:120px;--nav-h:60px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth;font-size:16px}
@@ -870,6 +875,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 @media(max-width:480px){.ht-cards-grid{grid-template-columns:1fr}}
 
 /* ═══════════════ NAT (Naturaleza — heredado limpio) ═══════════════ */
+/* ── NAT INTRO ── */
+.nat-intro{margin-bottom:48px;position:relative}
+.nat-intro-inner{max-width:760px}
+.nat-intro-text{font-family:var(--f-italic);font-style:italic;font-size:15px;color:rgba(26,25,22,.58);line-height:1.75}
+.nat-intro-text em{font-style:normal;color:var(--verde2)}
+.nat-river-line{height:2px;margin-top:24px;background:linear-gradient(90deg,var(--verde2),rgba(26,25,22,.08))}
+
 .nat-hero-card{display:block;position:relative;overflow:hidden;text-decoration:none;margin-bottom:1px;border:1px solid rgba(26,25,22,.10);min-height:280px;transition:transform .4s var(--ease),box-shadow .4s ease}
 .nat-hero-card:hover{transform:translateY(-4px);box-shadow:0 32px 72px -10px rgba(6,6,5,.45)}
 .nat-hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0a1a12 0%,#0e2018 40%,#0a1508 100%)}
@@ -1207,6 +1219,38 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 /* ═══════════════ HISTORIA / CARNAVAL EXTRAS ═══════════════ */
 .us-section#carnaval .section-eyebrow{color:var(--oro)}
 .cv-intro{margin-bottom:36px;padding:28px 36px;background:var(--ink);border-left:5px solid var(--oro2);position:relative;overflow:hidden}
+
+/* ── CARNAVAL — clases faltantes ── */
+.cv-calendar-header{margin-bottom:24px}
+.cv-cal-eyebrow{display:block;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--oro2);margin-bottom:8px}
+.cv-cal-title{font-family:var(--f-display);font-size:clamp(20px,2.8vw,28px);color:var(--ink);letter-spacing:-.3px;margin-bottom:8px;line-height:1.1}
+.cv-cal-sub{font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(26,25,22,.50);line-height:1.6}
+.cv-comp-badge-wrap{margin-bottom:16px}
+.cv-comparsas-header{margin:40px 0 20px}
+.cv-comp-eyebrow{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--oro2);display:block;margin-bottom:8px}
+.cv-comp-title{font-family:var(--f-display);font-size:clamp(22px,2.8vw,30px);color:var(--ink);letter-spacing:-.3px;margin-bottom:6px}
+.cv-comp-intro{font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(26,25,22,.55);line-height:1.6}
+.cv-comp-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.cv-comp-tag{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:2px;background:rgba(26,25,22,.06);border:1px solid rgba(26,25,22,.14);color:rgba(26,25,22,.55)}
+.cv-sede-banner{background:var(--ink);padding:36px 40px;margin-top:32px;border-left:4px solid var(--oro2);position:relative;overflow:hidden}
+.cv-sede-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(196,135,42,.14) 0%,transparent 60%);pointer-events:none}
+.cv-sede-inner{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:32px;flex-wrap:wrap}
+.cv-sede-left{display:flex;align-items:flex-start;gap:20px;flex:1;min-width:0}
+.cv-sede-icon{font-size:36px;line-height:1;flex-shrink:0}
+.cv-sede-text{display:flex;flex-direction:column;gap:8px}
+.cv-sede-eyebrow{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,.45);display:block}
+.cv-sede-title{font-family:var(--f-display);font-style:italic;font-size:clamp(18px,2.4vw,26px);color:var(--parchment);display:block}
+.cv-sede-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:rgba(242,237,227,.48);line-height:1.75;max-width:480px}
+.cv-sede-desc strong{font-style:normal;font-weight:400;color:rgba(242,237,227,.75)}
+.cv-sede-stats{display:flex;align-items:center;gap:24px;flex-shrink:0}
+.cv-sede-stat{display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center}
+.cv-sede-stat-num{font-family:var(--f-display);font-size:30px;line-height:1;color:var(--parchment);letter-spacing:-1px}
+.cv-sede-stat-num sup{font-size:13px;color:var(--oro2);vertical-align:super}
+.cv-sede-stat-label{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.30);line-height:1.4;max-width:100px;text-align:center}
+.cv-sede-stat-div{width:1px;height:40px;background:rgba(242,237,227,.10)}
+.cv-intro-inner{position:relative;z-index:1;max-width:720px}
+.cv-intro-rule{height:3px;background:linear-gradient(90deg,var(--oro2),rgba(242,237,227,.10));margin-top:24px}
+@media(max-width:640px){.cv-sede-inner{flex-direction:column}.cv-sede-stats{flex-wrap:wrap;gap:16px}.cv-sede-stat-div{display:none}.cv-sede-banner{padding:26px 20px}}
 .cv-intro::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(196,135,42,.18) 0%,transparent 60%);pointer-events:none}
 .cv-intro-eyebrow{display:block;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(196,135,42,.65);margin-bottom:14px;position:relative;z-index:1}
 .cv-intro-text{font-family:var(--f-display);font-style:italic;font-size:clamp(17px,2.2vw,24px);color:rgba(242,237,227,.82);line-height:1.55;letter-spacing:-.3px;max-width:680px;position:relative;z-index:1}
@@ -1271,12 +1315,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 </style>
 
 <!-- HORARIOS JS (carga síncrona antes de pintar) -->
-<script>
-(function(){
-  'use strict';
-  var TZ='America/Argentina/Buenos_Aires';
-  var HORARIOS={
-    'el-arca':{schedules:[{days:[3,4,5,6,0],open:'20:00',close:'07:00'}]},
+<!-- (bloque HORARIOS duplicado eliminado — se conserva solo el primero) -->
     'papa-luigi':{schedules:[{days:[2,3,4,5,6,0],open:'19:00',close:'00:00'}]},
     'bella-vista':{schedules:[{days:[2,3,4,5,6,0],open:'08:00',close:'00:00'}]},
     'justo-jose':{schedules:[{days:[0,1,2,3,4,5,6],open:'12:00',close:'01:00'}]},
@@ -1331,30 +1370,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 
 
 
-/* ============================================================
-   URU SPOT — styles.css
-   Versión: 2.0 Premium
-   Mejoras aplicadas según auditoría completa
-   ============================================================ */
+<!-- Las variables adicionales se fusionan en el :root del primer <head> -->
+<!-- Este bloque duplicado se elimina; sus variables ya están integradas arriba -->
 
-:root {
-  --void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;
-  --parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;
-  --ink:#1a1916;
-  --verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;
-  --verde-action:#1d5c40;--verde-status:#267a55;--verde-accent:#0e3326;
-  --oro:#c4872a;--oro2:#dfa040;--oro3:#f2c060;
-  --rojo:#c0392b;--rojo2:#e74c3c;
-  --azul:#1a5c8a;--violeta:#7b3068;
-  --f-display:'DM Serif Display',Georgia,serif;
-  --f-italic:'Instrument Serif',Georgia,serif;
-  --f-ui:'Syne',system-ui,sans-serif;
-  --ease:cubic-bezier(0.25,0.46,0.45,0.94);
-  --ease-back:cubic-bezier(0.34,1.56,0.64,1);
-  --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
-  --lift-sm:3px;--lift-md:5px;--lift-lg:8px;
-  --gutter:64px;--section-gap:120px;--nav-h:60px;
-}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth;font-size:16px}
 body{background:var(--void);color:var(--parchment);font-family:var(--f-ui);-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -4515,12 +4534,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 
 
-<body>
-<a class="skip-link" href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:99999;background:var(--verde);color:#fff;padding:8px 16px;border-radius:0 0 4px 4px;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Ir al contenido principal</a>
-<div id="progress-bar" aria-hidden="true"></div>
-
-<header class="hero" role="banner">
-  <div class="hero-mesh" aria-hidden="true"></div>
+<!-- (segundo <body> duplicado eliminado — se conserva solo el primero con su contenido) -->
+<header class="hero" role="banner">  <div class="hero-mesh" aria-hidden="true"></div>
   <div class="hero-lines" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
@@ -5691,7 +5706,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     <button class="ht-tab" role="tab" aria-selected="false" aria-controls="ht-ch6" id="ht-t6" data-ht-tab="6"><span class="ht-tab-num">Cap. 6</span><span class="ht-tab-title">Identidad</span></button>
   </div>
 
-  <div class="ht-chapter ht-chapter-active" id="ht-ch1" role="tabpanel" aria-labelledby="ht-t1">
+  <div class="ht-chapter ht-chapter-active" id="ht-ch1" role="tabpanel" aria-labelledby="ht-t1" tabindex="0">
     <div class="ht-chapter-header">
       <p class="ht-ch-eyebrow">Capítulo 1 · 1783–1810</p>
       <h3 class="ht-ch-title">El Nacimiento de una Ciudad Planificada</h3>
@@ -5727,7 +5742,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     </div>
   </div>
 
-  <div class="ht-chapter" id="ht-ch2" role="tabpanel" aria-labelledby="ht-t2" hidden>
+  <div class="ht-chapter" id="ht-ch2" role="tabpanel" aria-labelledby="ht-t2" hidden tabindex="-1">
     <div class="ht-chapter-header">
       <p class="ht-ch-eyebrow">Capítulo 2 · 1813–1826</p>
       <h3 class="ht-ch-title">La Primera Capital Federal</h3>
@@ -6487,7 +6502,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .us-section.acc-collapsed>*:not(.section-header){max-height:0!important;opacity:0;margin:0!important;overflow:hidden}
 .us-section>.section-header{cursor:pointer;user-select:none;border-radius:3px 3px 0 0;padding:18px 20px 28px;margin-left:-20px;margin-right:-20px;transition:background .35s ease,box-shadow .35s ease}
 .us-section>.section-header:hover{background:rgba(29,92,64,.04);box-shadow:inset 0 0 0 1px rgba(29,92,64,.10)}
-.us-section>.section-header::before{content:'';display:inline-flex;flex-shrink:0;order:-1;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(29,92,64,.30);background:rgba(29,92,64,.06);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3 5l4 4 4-4' stroke='%231d5c40' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;margin-right:12px;margin-bottom:4px;flex-shrink:0;transition:transform .4s cubic-bezier(.34,1.56,.64,1),background-color .3s ease,border-color .3s ease}
+.us-section>.section-header::before{content:'';display:block;flex-shrink:0;order:-1;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(29,92,64,.30);background:rgba(29,92,64,.06);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3 5l4 4 4-4' stroke='%231d5c40' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;margin-right:12px;flex-shrink:0;transition:transform .4s cubic-bezier(.34,1.56,.64,1),background-color .3s ease,border-color .3s ease}
 .us-section.acc-collapsed>.section-header::before{transform:rotate(-90deg)}
 .us-section>.section-header:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:3px}
 
@@ -6563,7 +6578,16 @@ a:focus-visible, button:focus-visible, input:focus-visible {
       }
     });
   }
-  paint();setInterval(paint,60000);window.__uruspotPaintOpenLabels=paint;
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){
+      paint();
+      setInterval(paint,60000);
+    });
+  }else{
+    paint();
+    setInterval(paint,60000);
+  }
+  window.__uruspotPaintOpenLabels=paint;
 })();
 </script>
 </head>
@@ -8838,7 +8862,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 (function(){
   'use strict';
   var root = document.getElementById('bp-puerto-viejo');
-  if(!root) return;
+  /* Guard: si el módulo no está en el DOM, salir limpiamente */
+  if(!root || typeof root.querySelectorAll !== 'function') return;
 
   /* ── Reveal on scroll (propio, no toca observers globales) ── */
   var revealEls = root.querySelectorAll('.reveal-bp');
@@ -9990,7 +10015,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   var globalTimeMode = (function(){
     var h = new Date(new Date().toLocaleString('en-US',{timeZone:'America/Argentina/Buenos_Aires'})).getHours();
     var mode = h>=6&&h<12 ? 'manana' : h>=12&&h<16 ? 'mediodia' : h>=16&&h<20 ? 'tarde' : 'noche';
-    document.documentElement.setAttribute('data-time',mode);
+   document.documentElement.setAttribute('data-time',mode);
+    var _tcMap={manana:'#06080a',mediodia:'#040806',tarde:'#0a0604',noche:'#04040a'};
+    var _tcMeta=document.getElementById('theme-color-meta');
+    if(_tcMeta) _tcMeta.setAttribute('content',_tcMap[mode]||'#060605');
     return mode;
   })();
 
@@ -10362,12 +10390,21 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
     set('wx-hero-temp','—');set('wx-hero-desc','Sin conexión');set('wx-hero-icon','📡');set('wx-hero-updated','Sin conexión');
   }
+  var _lastFetchTs = 0;
+
   function fetchWeather(){
+    if(document.hidden) return;
     fetch(WX_URL,{cache:'no-store'})
       .then(function(r){if(!r.ok)throw new Error();return r.json();})
-      .then(renderWeather)
+      .then(function(d){ _lastFetchTs = Date.now(); renderWeather(d); })
       .catch(renderError);
   }
+
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden && Date.now() - _lastFetchTs > 5*60*1000){
+      fetchWeather();
+    }
+  });
 
   function scheduleWeather(){
     if(window.requestIdleCallback){
@@ -10385,7 +10422,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     }, {once:true});
   }
 
-  setInterval(fetchWeather, 10*60*1000);
+  setInterval(function(){ fetchWeather(); }, 10*60*1000);
 
 
   /* ====== MOOD PICKER — filtro REAL sobre las grillas existentes ====== */
@@ -10496,9 +10533,43 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     if(btn.dataset.mood === suggested) btn.classList.add('suggested');
   });
 
+  /* ====== TABS DE HISTORIA ====== */
+  var htTablist = document.getElementById('ht-tablist');
+  if(htTablist){
+    var htTabs   = [].slice.call(htTablist.querySelectorAll('.ht-tab'));
+    var htPanels = [].slice.call(document.querySelectorAll('.ht-chapter'));
+
+    function activateHtTab(idx){
+      htTabs.forEach(function(t,i){
+        var active = i===idx;
+        t.classList.toggle('ht-tab-active', active);
+        t.setAttribute('aria-selected', active?'true':'false');
+        t.setAttribute('tabindex', active?'0':'-1');
+      });
+      htPanels.forEach(function(p,i){
+        var active = i===idx;
+        p.classList.toggle('ht-chapter-active', active);
+        if(active){ p.removeAttribute('hidden'); }
+        else       { p.setAttribute('hidden',''); }
+      });
+    }
+
+    htTabs.forEach(function(tab, idx){
+      tab.addEventListener('click', function(){ activateHtTab(idx); });
+      tab.addEventListener('keydown', function(e){
+        if(e.key==='ArrowRight'){ e.preventDefault(); activateHtTab(Math.min(idx+1, htTabs.length-1)); htTabs[Math.min(idx+1,htTabs.length-1)].focus(); }
+        if(e.key==='ArrowLeft' ){ e.preventDefault(); activateHtTab(Math.max(idx-1, 0)); htTabs[Math.max(idx-1,0)].focus(); }
+        if(e.key==='Home'      ){ e.preventDefault(); activateHtTab(0); htTabs[0].focus(); }
+        if(e.key==='End'       ){ e.preventDefault(); activateHtTab(htTabs.length-1); htTabs[htTabs.length-1].focus(); }
+      });
+    });
+
+    /* Estado inicial: tab 0 activo, resto ocultos */
+    activateHtTab(0);
+  }
+
   /* ====== GLOSARIO ====== */
-  var glosToggle = document.getElementById('glos-toggle');
-  var glosBody = document.getElementById('glos-body');
+  var glosToggle = document.getElementById('glos-toggle');var glosBody = document.getElementById('glos-body');
   if(glosToggle && glosBody){
     glosToggle.addEventListener('click', function(){
       var isOpen = glosBody.classList.toggle('open');
@@ -10508,7 +10579,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   }
 
   /* ====== ACCORDION CATEGORÍAS ====== */
-['naturaleza','gastronomia-regional','carnaval','restaurantes','cafes','bares','panaderias','heladerias','hosterias','gimnasios','patrimonio','bp-puerto-viejo','deporte','historia'].forEach(function(id){
+['naturaleza','gastronomia-regional','carnaval','restaurantes','cafes','bares',
+ 'panaderias','hosterias','gimnasios','patrimonio','deporte','historia',
+ 'circuitos','como-llegar','servicios'].forEach(function(id){
     var sec = document.getElementById(id);
     if(!sec) return;
     var hdr = sec.querySelector('.section-header');
@@ -10549,13 +10622,15 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   }
 
   /* ====== BREADCRUMB DE SECCIÓN ====== */
-  var crumb = document.getElementById('section-crumb');
-  var crumbCurrent = document.getElementById('section-crumb-current');
 var sectionNames = {
-    naturaleza:'Naturaleza', mood:'Empezar', categorias:'Categorías', restaurantes:'Restaurantes', cafes:'Cafés',
-    bares:'Bares', panaderias:'Panaderías', heladerias:'Heladerías',
+    naturaleza:'Naturaleza', mood:'Empezar', categorias:'Categorías',
+    restaurantes:'Restaurantes', cafes:'Cafés', bares:'Bares',
+    panaderias:'Panaderías & Heladerías',
     hosterias:'Hosterías', gimnasios:'Gimnasios', patrimonio:'Patrimonio',
-    'gastronomia-regional':'Cocina del Río', carnaval:'Carnaval', deporte:'Deporte', historia:'Historia',
+    'gastronomia-regional':'Cocina del Río', carnaval:'Carnaval',
+    deporte:'Deporte', historia:'Historia',
+    circuitos:'Circuitos', 'como-llegar':'Cómo llegar',
+    servicios:'Servicios', 'uni-ruta':'Para universitarios',
     'bp-puerto-viejo':'Puerto Viejo',
 };
   if(crumb){
@@ -10574,7 +10649,7 @@ var sectionNames = {
       });
     }, {rootMargin:'-120px 0px -60% 0px', threshold:0});
 
-    document.querySelectorAll('section[id], div.mood-wrap#mood').forEach(function(s){
+    document.querySelectorAll('section[id], div.mood-wrap#mood, div[id]').forEach(function(s){
       crumbObserver.observe(s);
     });
   }
