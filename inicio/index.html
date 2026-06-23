@@ -5741,12 +5741,7 @@ var crumbEl = document.getElementById('section-crumb');
 })();
 </script>
 
-  /* ══════════════════════════════════════════════════════
-   FIX 1 — Nav arrows funcionales
-   FIX 2 — Estado abierto/cerrado real para cada rcard
-   Pegá este bloque ANTES de </body>
-══════════════════════════════════════════════════════ */
-
+  <script>
 (function () {
   'use strict';
 
@@ -5756,7 +5751,7 @@ var crumbEl = document.getElementById('section-crumb');
   var arrowR = document.getElementById('nav-arrow-right');
 
   if (scrollArea && arrowL && arrowR) {
-    var STEP = 200; // píxeles por click
+    var STEP = 200;
 
     function updateArrows() {
       var sl = scrollArea.scrollLeft;
@@ -5780,14 +5775,8 @@ var crumbEl = document.getElementById('section-crumb');
   }
 
   /* ─── FIX 2: OPEN/CLOSED STATUS ─── */
-  /*
-    Horarios reales de cada local (hora de apertura y cierre en formato 24h).
-    Si un local cierra después de medianoche, cierre > 24 (ej: cierra a las 1am = 25).
-    "null" en algún día = cerrado ese día.
-    días: 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
-  */
   var HORARIOS = {
-    'El Arca':         { open: 12, close: 24,  days: [0,2,3,4,5,6] },   // cierra lunes
+    'El Arca':         { open: 12, close: 24,  days: [0,2,3,4,5,6] },
     'Papa Luigi':      { open: 11, close: 23,  days: [0,1,2,3,4,5,6] },
     'Bella Vista':     { open: 11, close: 23,  days: [0,1,2,3,4,5,6] },
     'Panza Verde':     { open: 8,  close: 20,  days: [0,2,3,4,5,6] },
@@ -5831,57 +5820,67 @@ var crumbEl = document.getElementById('section-crumb');
 
   function isOpen(name) {
     var h = HORARIOS[name];
-    if (!h) return null; // desconocido
-
+    if (!h) return null;
     var now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-    var day = now.getDay();   // 0=Dom … 6=Sáb
+    var day = now.getDay();
     var hour = now.getHours() + now.getMinutes() / 60;
-
-    if (h.days.indexOf(day) === -1) return false; // cerrado hoy
-
-    // si cierra después de medianoche (> 24), comparamos correctamente
+    if (h.days.indexOf(day) === -1) return false;
     if (h.close > 24) {
       return hour >= h.open || hour < (h.close - 24);
     }
     return hour >= h.open && hour < h.close;
   }
 
-  /* Actualizar cada .rcard-open */
-  document.querySelectorAll('.rcard[data-name]').forEach(function (card) {
-    var name = card.dataset.name;
-    var chip = card.querySelector('.rcard-open');
-    if (!chip) return;
-
-    var status = isOpen(name);
-
-    if (status === null) {
-      // horario no cargado — mantener "Verificando..." pero cambiarlo a "Sin horario"
-      chip.classList.add('is-unverified');
-      chip.querySelector('.rcard-open-dot') && (chip.querySelector('.rcard-open-dot').style.background = 'rgba(26,25,22,.25)');
-      chip.innerHTML = chip.innerHTML.replace(/Verificando\.\.\./, 'Sin horario');
-      return;
-    }
-
-    var dot = chip.querySelector('.rcard-open-dot');
-    if (status) {
-      chip.classList.remove('is-unverified');
-      if (dot) {
-        dot.style.background = '#267a55';
-        dot.style.boxShadow = '0 0 0 3px rgba(38,122,85,.25)';
+  function applyStatus() {
+    document.querySelectorAll('.rcard[data-name]').forEach(function (card) {
+      var name = card.dataset.name;
+      var chip = card.querySelector('.rcard-open');
+      if (!chip) return;
+      var status = isOpen(name);
+      var dot = chip.querySelector('.rcard-open-dot');
+      if (status === null) {
+        chip.classList.add('is-unverified');
+        if (dot) dot.style.background = 'rgba(26,25,22,.25)';
+        // reemplaza el texto del último nodo de texto
+        var nodes = chip.childNodes;
+        for (var i = nodes.length - 1; i >= 0; i--) {
+          if (nodes[i].nodeType === 3 && nodes[i].textContent.trim()) {
+            nodes[i].textContent = ' Sin horario';
+            break;
+          }
+        }
+      } else if (status) {
+        chip.classList.remove('is-unverified');
+        if (dot) { dot.style.background = '#267a55'; dot.style.boxShadow = '0 0 0 3px rgba(38,122,85,.25)'; }
+        var nodes = chip.childNodes;
+        for (var i = nodes.length - 1; i >= 0; i--) {
+          if (nodes[i].nodeType === 3 && nodes[i].textContent.trim()) {
+            nodes[i].textContent = ' Abierto ahora';
+            break;
+          }
+        }
+      } else {
+        chip.classList.add('is-unverified');
+        if (dot) { dot.style.background = '#c0392b'; dot.style.boxShadow = 'none'; }
+        var nodes = chip.childNodes;
+        for (var i = nodes.length - 1; i >= 0; i--) {
+          if (nodes[i].nodeType === 3 && nodes[i].textContent.trim()) {
+            nodes[i].textContent = ' Cerrado ahora';
+            break;
+          }
+        }
       }
-      chip.childNodes[chip.childNodes.length - 1].textContent = ' Abierto ahora';
-    } else {
-      chip.classList.add('is-unverified');
-      if (dot) {
-        dot.style.background = '#c0392b';
-        dot.style.boxShadow = 'none';
-      }
-      chip.childNodes[chip.childNodes.length - 1].textContent = ' Cerrado ahora';
-    }
-  });
+    });
+  }
+
+  // Corre cuando el DOM ya existe
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyStatus);
+  } else {
+    applyStatus();
+  }
 
 })();
-  
-
+</script>
 </body>
 </html>
