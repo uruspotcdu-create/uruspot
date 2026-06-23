@@ -5741,5 +5741,147 @@ var crumbEl = document.getElementById('section-crumb');
 })();
 </script>
 
+  /* ══════════════════════════════════════════════════════
+   FIX 1 — Nav arrows funcionales
+   FIX 2 — Estado abierto/cerrado real para cada rcard
+   Pegá este bloque ANTES de </body>
+══════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  /* ─── FIX 1: NAV ARROWS ─── */
+  var scrollArea = document.querySelector('.nav-scroll-area');
+  var arrowL = document.getElementById('nav-arrow-left');
+  var arrowR = document.getElementById('nav-arrow-right');
+
+  if (scrollArea && arrowL && arrowR) {
+    var STEP = 200; // píxeles por click
+
+    function updateArrows() {
+      var sl = scrollArea.scrollLeft;
+      var maxSL = scrollArea.scrollWidth - scrollArea.clientWidth;
+      arrowL.classList.toggle('visible', sl > 8);
+      arrowR.classList.toggle('visible', sl < maxSL - 8);
+      arrowL.removeAttribute('aria-hidden');
+      arrowR.removeAttribute('aria-hidden');
+    }
+
+    arrowL.addEventListener('click', function () {
+      scrollArea.scrollBy({ left: -STEP, behavior: 'smooth' });
+    });
+    arrowR.addEventListener('click', function () {
+      scrollArea.scrollBy({ left: STEP, behavior: 'smooth' });
+    });
+
+    scrollArea.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    updateArrows();
+  }
+
+  /* ─── FIX 2: OPEN/CLOSED STATUS ─── */
+  /*
+    Horarios reales de cada local (hora de apertura y cierre en formato 24h).
+    Si un local cierra después de medianoche, cierre > 24 (ej: cierra a las 1am = 25).
+    "null" en algún día = cerrado ese día.
+    días: 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
+  */
+  var HORARIOS = {
+    'El Arca':         { open: 12, close: 24,  days: [0,2,3,4,5,6] },   // cierra lunes
+    'Papa Luigi':      { open: 11, close: 23,  days: [0,1,2,3,4,5,6] },
+    'Bella Vista':     { open: 11, close: 23,  days: [0,1,2,3,4,5,6] },
+    'Panza Verde':     { open: 8,  close: 20,  days: [0,2,3,4,5,6] },
+    'Justo José':      { open: 11, close: 25,  days: [0,1,2,3,4,5,6] },
+    'Bonhomia':        { open: 12, close: 25,  days: [0,2,3,4,5,6] },
+    'La Ris':          { open: 8,  close: 21,  days: [0,2,3,4,5,6] },
+    'La Gruta':        { open: 11, close: 23,  days: [0,1,2,3,4,5,6] },
+    'Sanduba':         { open: 8,  close: 23,  days: [0,1,2,3,4,5,6] },
+    'Pimienta Negra':  { open: 12, close: 23,  days: [0,2,3,4,5,6] },
+    'Parada 33':       { open: 18, close: 25,  days: [2,3,4,5,6] },
+    'Faro 3260':       { open: 11, close: 23,  days: [0,1,2,3,4,5,6] },
+    'El Calderón':     { open: 8,  close: 23,  days: [0,1,2,3,4,5,6] },
+    'La Segunda':      { open: 11, close: 23,  days: [0,1,2,3,4,5,6] },
+    'Dolores Costa':   { open: 11, close: 23,  days: [0,1,2,3,4,5,6] },
+    'La Delfina':      { open: 12, close: 23,  days: [0,2,3,4,5,6] },
+    'Mamma Mía':       { open: 12, close: 23,  days: [0,2,3,4,5,6] },
+    'Garifo':          { open: 12, close: 23,  days: [0,2,3,4,5,6] },
+    'Baco':            { open: 19, close: 25,  days: [4,5,6,0] },
+    'Danubio Azul':    { open: 12, close: 23,  days: [0,2,3,4,5,6] },
+    'Nero Café':       { open: 8,  close: 21,  days: [0,2,3,4,5,6] },
+    'Cultura Café':    { open: 8,  close: 21,  days: [0,2,3,4,5,6] },
+    'London Café':     { open: 7,  close: 21,  days: [0,1,2,3,4,5,6] },
+    'Helena':          { open: 8,  close: 21,  days: [0,2,3,4,5,6] },
+    'Klug Gebrau':     { open: 18, close: 25,  days: [3,4,5,6,0] },
+    '7 Colinas':       { open: 18, close: 26,  days: [2,3,4,5,6,0] },
+    'Drakkar':         { open: 18, close: 25,  days: [3,4,5,6] },
+    'Bartolo':         { open: 19, close: 26,  days: [3,4,5,6,0] },
+    'House Garage':    { open: 19, close: 26,  days: [4,5,6,0] },
+    'Panettone':       { open: 7,  close: 21,  days: [0,1,2,3,4,5,6] },
+    'La Cuadra':       { open: 7,  close: 20,  days: [0,1,2,3,4,5,6] },
+    'Mi Viejo':        { open: 7,  close: 20,  days: [0,1,2,3,4,5,6] },
+    'San Carlos':      { open: 7,  close: 20,  days: [0,1,2,3,4,5,6] },
+    'Lo de Juan':      { open: 7,  close: 20,  days: [0,1,2,3,4,5,6] },
+    'Brodë':           { open: 7,  close: 20,  days: [0,2,3,4,5,6] },
+    'Yelatti Artesanal':{ open: 10, close: 23, days: [0,1,2,3,4,5,6] },
+    'Cremolatti':      { open: 10, close: 23,  days: [0,1,2,3,4,5,6] },
+    "Heladería Dany's":{ open: 10, close: 23,  days: [0,1,2,3,4,5,6] },
+    'Heladería Lucero':{ open: 10, close: 23,  days: [0,1,2,3,4,5,6] },
+    'Heladería Italia':{ open: 10, close: 23,  days: [0,1,2,3,4,5,6] },
+  };
+
+  function isOpen(name) {
+    var h = HORARIOS[name];
+    if (!h) return null; // desconocido
+
+    var now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+    var day = now.getDay();   // 0=Dom … 6=Sáb
+    var hour = now.getHours() + now.getMinutes() / 60;
+
+    if (h.days.indexOf(day) === -1) return false; // cerrado hoy
+
+    // si cierra después de medianoche (> 24), comparamos correctamente
+    if (h.close > 24) {
+      return hour >= h.open || hour < (h.close - 24);
+    }
+    return hour >= h.open && hour < h.close;
+  }
+
+  /* Actualizar cada .rcard-open */
+  document.querySelectorAll('.rcard[data-name]').forEach(function (card) {
+    var name = card.dataset.name;
+    var chip = card.querySelector('.rcard-open');
+    if (!chip) return;
+
+    var status = isOpen(name);
+
+    if (status === null) {
+      // horario no cargado — mantener "Verificando..." pero cambiarlo a "Sin horario"
+      chip.classList.add('is-unverified');
+      chip.querySelector('.rcard-open-dot') && (chip.querySelector('.rcard-open-dot').style.background = 'rgba(26,25,22,.25)');
+      chip.innerHTML = chip.innerHTML.replace(/Verificando\.\.\./, 'Sin horario');
+      return;
+    }
+
+    var dot = chip.querySelector('.rcard-open-dot');
+    if (status) {
+      chip.classList.remove('is-unverified');
+      if (dot) {
+        dot.style.background = '#267a55';
+        dot.style.boxShadow = '0 0 0 3px rgba(38,122,85,.25)';
+      }
+      chip.childNodes[chip.childNodes.length - 1].textContent = ' Abierto ahora';
+    } else {
+      chip.classList.add('is-unverified');
+      if (dot) {
+        dot.style.background = '#c0392b';
+        dot.style.boxShadow = 'none';
+      }
+      chip.childNodes[chip.childNodes.length - 1].textContent = ' Cerrado ahora';
+    }
+  });
+
+})();
+  
+
 </body>
 </html>
