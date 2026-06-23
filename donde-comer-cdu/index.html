@@ -553,6 +553,384 @@ footer::before{
     <div class="odiv-line r"></div>
   </div>
 
+  <!-- ===================== VÉRTIGO TEMPORAL ===================== -->
+<section class="vt-wrap" id="vertigo-temporal" aria-labelledby="vt-heading">
+<style>
+.vt-wrap{
+  position:relative;
+  background:var(--ink);
+  overflow:hidden;
+  padding:0;
+}
+
+.vt-noise{
+  position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+
+.vt-glow{
+  position:absolute;
+  width:600px;height:600px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(184,135,42,.07) 0%,transparent 70%);
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;z-index:0;
+  transition:opacity 1s ease;
+}
+
+/* ── STICKY STAGE ── */
+.vt-stage{
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:2;
+  padding:2rem 1.5rem;
+  pointer-events:none;
+}
+
+/* scroll driver: lo que da altura al scroll */
+.vt-driver{
+  height:600vh;
+  position:relative;
+}
+
+/* ── EYEBROW ── */
+.vt-eyebrow{
+  font-family:'Outfit',sans-serif;
+  font-size:.58rem;
+  font-weight:500;
+  letter-spacing:.4em;
+  text-transform:uppercase;
+  color:rgba(184,135,42,.45);
+  margin-bottom:2.5rem;
+  opacity:0;
+  transform:translateY(10px);
+  transition:opacity .6s ease, transform .6s ease;
+}
+.vt-eyebrow.vt-show{
+  opacity:1;transform:translateY(0);
+}
+
+/* ── FRASE PRINCIPAL ── */
+.vt-phrase-wrap{
+  text-align:center;
+  max-width:860px;
+  width:100%;
+  position:relative;
+}
+
+.vt-phrase{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,6vw,5.2rem);
+  font-weight:300;
+  line-height:1.05;
+  letter-spacing:-.02em;
+  color:var(--parchment);
+  margin:0;
+  opacity:0;
+  transform:translateY(16px);
+  transition:opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
+  position:absolute;
+  top:50%;
+  left:50%;
+  translate:-50% -50%;
+  width:100%;
+}
+
+.vt-phrase.vt-active{
+  opacity:1;transform:translateY(0);
+  position:relative;
+  top:auto;left:auto;
+  translate:none;
+}
+
+.vt-phrase.vt-exiting{
+  opacity:0;transform:translateY(-16px);
+  position:absolute;
+  top:50%;left:50%;
+  translate:-50% -50%;
+}
+
+.vt-phrase em{
+  font-style:italic;
+  color:var(--gold-bright);
+}
+.vt-phrase strong{
+  font-weight:700;
+  font-style:italic;
+  background:linear-gradient(135deg,var(--gold-pale) 0%,var(--gold-bright) 50%,var(--copper) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.vt-phrase .vt-muted{
+  color:rgba(248,243,234,.28);
+  font-weight:300;
+  font-style:normal;
+}
+.vt-phrase .vt-accent{
+  display:block;
+  font-size:.6em;
+  font-family:'Outfit',sans-serif;
+  font-weight:300;
+  font-style:normal;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(184,135,42,.5);
+  margin-top:.6rem;
+  -webkit-text-fill-color:rgba(184,135,42,.5);
+  background:none;
+}
+
+/* ── PROGRESS DOTS ── */
+.vt-dots{
+  display:flex;
+  gap:.6rem;
+  margin-top:3rem;
+  opacity:0;
+  transition:opacity .6s ease;
+}
+.vt-dots.vt-show{opacity:1;}
+.vt-dot{
+  width:5px;height:5px;
+  border-radius:50%;
+  background:rgba(184,135,42,.2);
+  transition:background .4s ease, transform .4s ease;
+}
+.vt-dot.vt-dot-active{
+  background:var(--gold-bright);
+  transform:scale(1.5);
+}
+
+/* ── HINT SCROLL ── */
+.vt-hint{
+  position:absolute;
+  bottom:2.5rem;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.5rem;
+  opacity:0;
+  transition:opacity .6s ease;
+  pointer-events:none;
+}
+.vt-hint.vt-show{opacity:1;}
+.vt-hint-line{
+  width:1px;height:32px;
+  background:linear-gradient(180deg,rgba(184,135,42,.5),transparent);
+  animation:vtdrop 2s ease-in-out infinite;
+}
+@keyframes vtdrop{
+  0%,100%{transform:scaleY(1);transform-origin:top;opacity:.6}
+  50%{transform:scaleY(1.6);transform-origin:top;opacity:1}
+}
+.vt-hint-label{
+  font-family:'Outfit',sans-serif;
+  font-size:.52rem;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  color:rgba(248,243,234,.2);
+}
+
+/* ── WAVE ENTRADA ── */
+.vt-wave-top{
+  position:absolute;top:-1px;left:0;right:0;
+  height:72px;overflow:hidden;z-index:3;
+}
+.vt-wave-top svg{display:block;width:100%;height:100%;}
+
+/* ── WAVE SALIDA ── */
+.vt-wave-bot{
+  position:absolute;bottom:-1px;left:0;right:0;
+  height:72px;overflow:hidden;z-index:3;
+}
+.vt-wave-bot svg{display:block;width:100%;height:100%;}
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  .vt-phrase{transition:none!important;}
+  .vt-hint-line{animation:none!important;}
+}
+
+@media(max-width:480px){
+  .vt-phrase{font-size:clamp(1.6rem,7vw,2.4rem);}
+}
+</style>
+
+  <div class="vt-noise" aria-hidden="true"></div>
+  <div class="vt-glow" aria-hidden="true" id="vt-glow"></div>
+
+  <!-- wave entrada -->
+  <div class="vt-wave-top" aria-hidden="true">
+    <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,0 L0,34 Q180,68 360,42 Q540,16 720,42 Q900,68 1080,42 Q1260,16 1440,34 L1440,0 Z" fill="#f8f3ea"/>
+    </svg>
+  </div>
+
+  <div class="vt-driver" id="vt-driver">
+    <div class="vt-stage" id="vt-stage" role="region" aria-live="polite" aria-atomic="true">
+
+      <div class="vt-eyebrow" id="vt-eyebrow" aria-hidden="true">Concepción del Uruguay · Entre Ríos · Argentina</div>
+
+      <div class="vt-phrase-wrap" id="vt-phrase-wrap">
+        <!-- frases inyectadas por JS -->
+      </div>
+
+      <div class="vt-dots" id="vt-dots" aria-hidden="true">
+        <div class="vt-dot" data-i="0"></div>
+        <div class="vt-dot" data-i="1"></div>
+        <div class="vt-dot" data-i="2"></div>
+        <div class="vt-dot" data-i="3"></div>
+        <div class="vt-dot" data-i="4"></div>
+      </div>
+
+      <div class="vt-hint" id="vt-hint" aria-hidden="true">
+        <div class="vt-hint-line"></div>
+        <span class="vt-hint-label">seguí bajando</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- wave salida -->
+  <div class="vt-wave-bot" aria-hidden="true">
+    <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,72 L0,38 Q180,4 360,30 Q540,56 720,30 Q900,4 1080,30 Q1260,56 1440,38 L1440,72 Z" fill="#f8f3ea"/>
+    </svg>
+  </div>
+
+</section>
+
+<script>
+(function(){
+
+  var FRASES = [
+    {
+      html: 'Estás parado en la ciudad<br>donde nació<br><strong>la Argentina.</strong>',
+      sr:   'Estás parado en la ciudad donde nació la Argentina.'
+    },
+    {
+      html: 'El 1° de mayo de 1851,<br>en la plaza que está<br><em>a cuatro cuadras de acá,</em><br>Urquiza firmó el acto<br>que terminó con Rosas.',
+      sr:   'El 1° de mayo de 1851, en la plaza que está a cuatro cuadras de acá, Urquiza firmó el acto que terminó con Rosas.'
+    },
+    {
+      html: 'Dos años después,<br>ese mismo hombre<br>convocó el Congreso<br>que sancionó<br><strong>la Constitución Nacional.</strong><br><span class="vt-accent">La que rige hoy. La misma.</span>',
+      sr:   'Dos años después, ese mismo hombre convocó el Congreso que sancionó la Constitución Nacional. La que rige hoy.'
+    },
+    {
+      html: 'El colegio frente a la plaza<br>fue el <em>primer colegio laico<br>y gratuito</em> de todo el país.<br><span class="vt-accent">1849 · antes que Buenos Aires tuviera uno.</span>',
+      sr:   'El colegio frente a la plaza fue el primer colegio laico y gratuito de todo el país. 1849, antes que Buenos Aires tuviera uno.'
+    },
+    {
+      html: '<span class="vt-muted">Google Maps te muestra</span><br><em>dónde comer.</em><br><span class="vt-muted">Nadie te muestra</span><br><strong>dónde estás parado.</strong>',
+      sr:   'Google Maps te muestra dónde comer. Nadie te muestra dónde estás parado.'
+    }
+  ];
+
+  var driver   = document.getElementById('vt-driver');
+  var wrap     = document.getElementById('vt-phrase-wrap');
+  var eyebrow  = document.getElementById('vt-eyebrow');
+  var dotsEl   = document.getElementById('vt-dots');
+  var dots     = dotsEl.querySelectorAll('.vt-dot');
+  var hint     = document.getElementById('vt-hint');
+  var glow     = document.getElementById('vt-glow');
+
+  if(!driver || !wrap) return;
+
+  /* construir frases ocultas */
+  var nodes = [];
+  FRASES.forEach(function(f, i){
+    var p = document.createElement('p');
+    p.className = 'vt-phrase';
+    p.innerHTML = f.html;
+    if(i === 0) p.id = 'vt-heading';
+    wrap.appendChild(p);
+    nodes.push(p);
+  });
+
+  /* sr text separado */
+  var srText = document.createElement('p');
+  srText.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap';
+  srText.id = 'vt-sr';
+  wrap.appendChild(srText);
+
+  var current = -1;
+
+  function show(idx){
+    if(idx === current) return;
+
+    /* salida */
+    if(current >= 0 && nodes[current]){
+      nodes[current].classList.remove('vt-active');
+      nodes[current].classList.add('vt-exiting');
+      (function(n){
+        setTimeout(function(){ n.classList.remove('vt-exiting'); }, 520);
+      })(nodes[current]);
+    }
+
+    current = idx;
+
+    /* entrada */
+    if(nodes[idx]){
+      nodes[idx].classList.add('vt-active');
+      srText.textContent = FRASES[idx].sr;
+    }
+
+    /* dots */
+    dots.forEach(function(d,i){ d.classList.toggle('vt-dot-active', i === idx); });
+
+    /* glow color cambia en la última frase */
+    if(idx === FRASES.length - 1){
+      glow.style.background = 'radial-gradient(circle,rgba(184,135,42,.14) 0%,transparent 70%)';
+    } else {
+      glow.style.background = 'radial-gradient(circle,rgba(184,135,42,.07) 0%,transparent 70%)';
+    }
+  }
+
+  /* reduced motion: mostrar todo estático */
+  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
+    FRASES.forEach(function(_,i){ nodes[i].classList.add('vt-active'); nodes[i].style.position='relative'; nodes[i].style.top='auto'; nodes[i].style.left='auto'; nodes[i].style.translate='none'; nodes[i].style.marginBottom='2rem'; });
+    eyebrow.classList.add('vt-show');
+    dotsEl.classList.add('vt-show');
+    srText.textContent = FRASES.map(function(f){return f.sr;}).join(' ');
+    return;
+  }
+
+  /* scroll handler */
+  function onScroll(){
+    var rect   = driver.getBoundingClientRect();
+    var total  = driver.offsetHeight - window.innerHeight;
+    var scrolled = -rect.top;
+    var pct    = Math.max(0, Math.min(1, scrolled / total));
+
+    /* mostrar UI cuando entra */
+    var entered = pct > 0.01;
+    eyebrow.classList.toggle('vt-show', entered);
+    dotsEl.classList.toggle('vt-show', entered);
+
+    /* hint solo en la primera frase */
+    hint.classList.toggle('vt-show', pct < 0.12 && entered);
+
+    /* mapear pct → frase */
+    var step = Math.min(FRASES.length - 1, Math.floor(pct * FRASES.length));
+    show(step);
+  }
+
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+})();
+</script>
+  
+
   <!-- MAPA -->
   <div class="sec-title reveal">
     <h2>Mapa interactivo</h2>
@@ -639,8 +1017,40 @@ footer::before{
         <div class="ic-title">Siempre actualizada</div>
         <div class="ic-text">La guía se actualiza regularmente. Si un lugar cerró o abrió uno nuevo, lo reflejamos en el mapa y en el blog.</div>
       </div>
-    </div>
+   </div>
   </div>
+
+</main>
+
+<footer>
+  <p class="footer-quote">"La mejor mesa es la que encontrás cuando no la buscabas."</p>
+  <div class="footer-logo">Dónde Comer en CDU</div>
+  <div class="footer-sub">Guía Gastronómica · Concepción del Uruguay · Entre Ríos · Argentina</div>
+  <nav class="footer-links" aria-label="Navegación del sitio">
+    <a href="https://uruspot.pages.dev/">Inicio</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/los-mejores-restaurantes-cdu/">Restaurantes</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/los-mejores-bares-cdu/">Bares</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/las-mejores-cafeterias-cdu/">Cafés</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/las-mejores-panaderias-cdu/">Panaderías</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/las-mejores-heladerias-cdu/">Heladerías</a>
+    <a href="https://uruspotcdu-create.github.io/uruspot/los-mejores-gimnasios-cdu/">Gimnasios</a>
+  </nav>
+</footer>
+
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold: .1});
+  els.forEach(function(el){ io.observe(el); });
+})();
 </script>
 </body>
 </html>
