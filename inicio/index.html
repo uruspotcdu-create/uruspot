@@ -1970,6 +1970,41 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   color: rgba(242,237,227,.20);
 }
 
+  /* ── FIX NAV: overflow + flechas ── */
+.main-nav {
+  overflow-x: visible !important;
+  position: relative;
+}
+.nav-arrow {
+  display: none;
+  position: absolute;
+  top: 0; bottom: 0; width: 44px;
+  border: none; background: none;
+  cursor: pointer; z-index: 20;
+  align-items: center; justify-content: center;
+  color: rgba(242,237,227,.55);
+  font-size: 18px;
+  transition: color .2s ease, background .2s ease;
+  flex-shrink: 0;
+}
+.nav-arrow:hover {
+  color: var(--parchment);
+  background: rgba(242,237,227,.06);
+}
+.nav-arrow-left {
+  left: 0;
+  background: linear-gradient(90deg, rgba(6,6,5,.97) 60%, transparent);
+}
+.nav-arrow-right {
+  right: 60px; /* 60px = ancho del botón Buscar */
+  background: linear-gradient(270deg, rgba(6,6,5,.97) 60%, transparent);
+}
+.nav-arrow.visible { display: flex; }
+
+/* ── FIX SEPARACIÓN: más espacio antes de "Guías por categoría" ── */
+#categorias {
+  margin-top: 100px !important;
+}
 
 </style>
 
@@ -2073,6 +2108,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#deporte" data-section="deporte"><span class="nav-emoji" aria-hidden="true">🏆</span> Deporte</a>
   </div>
+  <button class="nav-arrow nav-arrow-left" id="nav-arrow-left" 
+        aria-label="Secciones anteriores" aria-hidden="true">‹</button>
+<button class="nav-arrow nav-arrow-right" id="nav-arrow-right" 
+        aria-label="Más secciones" aria-hidden="true">›</button>
   <button class="search-icon-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">🔍<span class="search-btn-label">Buscar</span></button>
 </nav>
 
