@@ -623,6 +623,7 @@ footer::before{
   max-width:860px;
   width:100%;
   position:relative;
+  min-height:clamp(200px,50vh,480px);
 }
 
 .vt-phrase{
@@ -635,19 +636,22 @@ footer::before{
   margin:0;
   opacity:0;
   transform:translateY(16px);
-  transition:opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
+  transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .5s cubic-bezier(.16,1,.3,1);
   position:absolute;
-  top:50%;
-  left:50%;
-  translate:-50% -50%;
+  top:0;left:0;
   width:100%;
+  pointer-events:none;
 }
 
 .vt-phrase.vt-active{
-  opacity:1;transform:translateY(0);
-  position:relative;
-  top:auto;left:auto;
-  translate:none;
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+
+.vt-phrase.vt-exiting{
+  opacity:0;
+  transform:translateY(-16px);
 }
 
 .vt-phrase.vt-exiting{
