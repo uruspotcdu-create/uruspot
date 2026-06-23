@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="theme-color" content="#060605" id="theme-color-meta" />
-<link rel="dns-prefetch" href="//fonts.googleapis.com" />
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" media="print" onload="this.media='all'" />
-<link rel="dns-prefetch" href="//fonts.gstatic.com" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="dns-prefetch" href="//api.open-meteo.com" />
+<link rel="dns-prefetch" href="//dolarapi.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
 <link rel="dns-prefetch" href="//dolarapi.com" />
 <link rel="icon" type="image/png" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -18,13 +19,16 @@
 <meta property="og:url" content="https://uruspot.pages.dev/" />
 <meta property="og:title" content="URU SPOT · La Guía Definitiva · Concepción del Uruguay" />
 <meta property="og:description" content="Primera capital histórica de Entre Ríos. Primer colegio laico del país. Mayor parque náutico per cápita de Argentina. La referencia definitiva." />
-<meta property="og:image" content="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
+<meta property="og:image" content="https://uruspotcdu-create.github.io/uruspot/img/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="URU SPOT — La guía definitiva de Concepción del Uruguay" />
 <meta property="og:locale" content="es_AR" />
 <meta property="og:site_name" content="URU SPOT" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="URU SPOT · La Guía Definitiva · Concepción del Uruguay" />
 <meta name="twitter:description" content="Primera capital histórica de Entre Ríos. Primer colegio laico del país. Mayor parque náutico per cápita de Argentina. La referencia definitiva." />
-<meta name="twitter:image" content="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
+<meta name="twitter:image" content="https://uruspotcdu-create.github.io/uruspot/img/og-image.png" />
 
 <script type="application/ld+json">
 {
@@ -51,11 +55,6 @@
 }
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Serif:ital@0;1&family=Syne:wght@600;700;800&display=optional" media="print" onload="this.media='all'" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Serif:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
-
 <style>
 /* ═══════════════════════════════════════════════════════
    URU SPOT v2 — DESIGN SYSTEM
@@ -65,13 +64,12 @@
   --void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;
   --parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;
   --ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;
-  --verde-action:#1d5c40;--verde-status:#267a55;--verde-accent:#0e3326;
   --oro:#B85C2A;--oro2:#D4742A;--oro3:#E8914A;
   --rojo:#c0392b;--rojo2:#e74c3c;--azul:#1a5c8a;--violeta:#7b3068;
   --copper:#C46B35;--copper2:#A0522D;--copper3:#7A3B1E;
   --amber-deep:#B8650A;--amber-mid:#CC7A20;--amber-bright:#E08830;
   --f-display:'DM Serif Display','Times New Roman',serif;
-  --f-italic:'Instrument Serif',Georgia,serif;
+ --f-italic:'DM Serif Display',Georgia,serif;
   --f-ui:'Syne',system-ui,sans-serif;
   --card-dark:#16100C;--card-dark2:#1C1410;--card-dark3:#221A14;--card-border-oro:rgba(184,92,42,.35);--card-border-oro-hover:rgba(212,116,42,.72);--card-text:rgba(248,238,224,.94);--card-text-soft:rgba(248,238,224,.62);--card-tag:rgba(248,238,224,.35);
   --ease:cubic-bezier(0.25,0.46,0.45,0.94);
@@ -403,7 +401,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .rcard{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;flex-direction:column;padding:32px 28px 28px;text-decoration:none;position:relative;overflow:hidden;min-height:180px;transition:background .4s var(--ease),transform .4s var(--ease),box-shadow .4s ease,opacity .3s ease;contain:layout style;border-radius:var(--radius-card);border:1px solid var(--card-border-oro)}
 .rcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--oro2),var(--oro));transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease);z-index:0}
 .rcard:hover::before,.rcard:focus-visible::before{transform:scaleX(1)}
-.rcard:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover);box-shadow:0 0 0 1px var(--card-border-oro-hover),0 16px 48px rgba(0,0,0,.45)}
+.rcard:not(.rcard-feat):not(.rcard-ad):hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover);transform:translateY(-4px);box-shadow:0 0 0 1px var(--card-border-oro-hover),0 20px 56px rgba(0,0,0,.55),0 0 32px -8px rgba(184,92,42,.20);transition:background .25s ease,border-color .25s ease,transform .35s var(--ease-spring),box-shadow .35s ease}
 .rcard-feat{grid-column:span 2;background:var(--ink);color:var(--parchment);padding:44px 40px 38px;min-height:220px;position:relative;overflow:hidden}
 .rcard-feat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#7A3B1E 0%,#B85C2A 35%,#E08830 65%,#D4742A 100%);z-index:2}
 .rcard-feat::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 65% 75% at 92% 18%,rgba(29,92,64,.28) 0%,transparent 58%),radial-gradient(ellipse 45% 55% at 8% 82%,rgba(196,135,42,.12) 0%,transparent 55%);pointer-events:none;z-index:1}
@@ -857,7 +855,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .ht-tab-active .ht-tab-num{color:#1C2E4A!important}
 .ht-chapter{display:none;padding:40px 0 0;animation:ht-fade .25s ease}
 .ht-chapter-active{display:block !important}
-@keyframes ht-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ht-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ht-fade-out{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-6px)}}
+.ht-chapter:not(.ht-chapter-active){animation:ht-fade-out .2s ease both;}
 .ht-chapter-header{margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid rgba(26,25,22,.10)}
 .ht-ch-eyebrow{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8B7355;margin-bottom:8px}
 .ht-ch-title{font-family:var(--f-display);font-size:clamp(1.4rem,2.8vw,2rem);color:#1C2E4A;margin-bottom:6px;line-height:1.15}
@@ -1229,13 +1228,19 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
   .live-chip      { font-size: 7px; padding: 8px 14px; margin-bottom: 20px; }
   /* M3: btn-ghost VISIBLE en mobile (corregido) */
   .btn-ghost      { display: inline-flex; font-size: 14px; }
-.btn-primary    { font-size: 11px; padding: 17px 28px; letter-spacing: 2px; }
+.hero-ctas      { flex-direction: column; align-items: stretch; gap: 16px; }
+.btn-primary    { font-size: 12px; padding: 20px 28px; letter-spacing: 2px; width: 100%; justify-content: center; border-radius: 12px; }
+.btn-ghost      { justify-content: center; font-size: 13px; }
   .stats-strip    { width: 100%; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
   .stats-strip::-webkit-scrollbar { display: none; }
   .stat           { flex: 0 0 auto; padding: 16px 20px; }
   .stat-num       { font-size: 28px; }
-  .main-nav       { padding: 0; }
-  .nav-item       { font-size: 9px; padding: 0 16px; height: 52px; letter-spacing: 1.5px; }
+  .main-nav       { padding: 0; overflow: visible; min-height: auto; }
+.nav-scroll-area { display: grid; grid-template-columns: repeat(4,1fr); overflow: visible; padding: 6px; gap: 2px; }
+.nav-item       { height: auto; flex-direction: column; gap: 3px; padding: 10px 6px; font-size: 7px; letter-spacing: 1px; border-bottom: none; border-radius: 6px; justify-content: center; align-items: center; white-space: normal; text-align: center; }
+.nav-emoji      { font-size: 20px !important; display: block; }
+.nav-divider    { display: none; }
+.main-nav::after { display: none; }
   .search-bar-wrap { padding-left: var(--gutter); padding-right: var(--gutter); }
   .main-body      { padding: 48px var(--gutter) 72px; }
   .section-title  { font-size: 22px; }
@@ -2022,7 +2027,7 @@ var n=Math.min(Math.floor(W*H/14000), maxPts);
 })();
 </script>
       <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
-      <p class="hero-sub">Primera capital histórica de Entre Ríos. Sede del primer colegio laico del país. Mayor parque náutico per cápita de Argentina.<br /><strong>La guía local completa — gastronomía, historia, naturaleza y servicios. Sin mentiras.</strong></p>
+      <p class="hero-sub">Concepción del Uruguay tiene 75 lugares verificados, historias que no aparecen en ningún otro lado, y un río que lo cambia todo.<br /><strong>Esta es la única guía que los conoce de verdad.</strong></p>
   <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="75" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares</div></div>
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="242">0</div><div class="id-stat-label">Años de historia</div></div>
@@ -2062,7 +2067,7 @@ var val = Math.round(ease * target);
 })();
 </script>
       <div class="hero-ctas">
-        <a class="btn-primary" href="#mood" role="button" id="hero-cta-primary">Explorá la guía <span aria-hidden="true">↓</span></a>
+       <a class="btn-primary" href="#mood" role="button" id="hero-cta-primary">Encontrá dónde ir hoy <span aria-hidden="true">↓</span></a>
         <a class="btn-ghost" href="#circuitos" aria-label="Elegí qué te apetece hacer hoy">¿Qué te apetece hoy? ↓</a>
       </div>
     </div>
@@ -2509,7 +2514,11 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   <div class="resto-grid" id="grid-restaurantes">
     <a class="rcard rcard-feat reveal searchable" data-name="El Arca" data-tags="restaurante gourmet cocina auténtica" data-mood="sorpresa relax" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-arca-resto-bar/">
       <div class="rcard-shine" aria-hidden="true"></div><span class="badge badge-gold">Imperdible</span>
-      <div class="rcard-content"><div class="rcard-top"><div class="rcard-open is-unverified"><span class="rcard-open-dot" aria-hidden="true"></span>Sin horario confirmado</div><span class="rcard-icon" aria-hidden="true">🚢</span></div><span class="rcard-name">El Arca</span><p class="rcard-desc">Cocina auténtica — el clásico que siempre cumple.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
+      <div class="rcard-content"><div class="rcard-top"><div class="rcard-open is-unverified"><span class="rcard-open-dot" aria-hidden="true"></span>Sin horario confirmado</div><span class="rcard-icon" aria-hidden="true">🚢</span></div><span class="rcard-name">El Arca</span><p class="rcard-desc">Cocina auténtica — el clásico que siempre cumple.</p>
+<div style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;padding:10px 0;border-top:1px solid rgba(242,237,227,.10);border-bottom:1px solid rgba(242,237,227,.10);">
+  <span style="font-family:var(--f-ui);font-size:7.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(196,135,42,.65);flex-shrink:0;">Por qué destaca</span>
+  <span style="font-family:var(--f-italic);font-style:italic;font-size:12.5px;color:rgba(242,237,227,.60);line-height:1.4;">El único con 4.9 ★ en Google de más de 200 reseñas en CdU</span>
+</div><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
     </a>
     <a class="rcard reveal searchable" data-name="Papa Luigi" data-tags="restaurante italiana pizza" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" style="--reveal-delay:50ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍕</span><span class="rcard-name">Papa Luigi</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.7</span><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Bella Vista" data-tags="restaurante vista rio costanera" data-mood="relax" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:100ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌅</span><span class="rcard-name">Bella Vista</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.8</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0">$$$</span></div></div></a>
@@ -5847,11 +5856,10 @@ function activateHtTab(idx){
         bar.style.transition = '';
       }
       p.classList.add('ht-chapter-active');
-    } else {
+   } else {
       p.classList.remove('ht-chapter-active');
-      p.setAttribute('hidden','');
-      p.style.display = 'none';
       p.removeAttribute('tabindex');
+      setTimeout(function(){ p.setAttribute('hidden',''); p.removeAttribute('style'); }, 220);
     }
   });
 }
