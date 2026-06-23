@@ -201,7 +201,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .nav-item .nav-emoji{font-size:14px;transition:transform .3s var(--ease)}
 .nav-item:hover .nav-emoji{transform:scale(1.2) rotate(-4deg)}
 .nav-divider{width:1px;margin:16px 0;background:rgba(242,237,227,.08);flex-shrink:0}
-.nav-indicator{position:absolute;bottom:0;height:2px;background:linear-gradient(90deg,#B85C2A,#E08830,#D4742A);transition:left .4s var(--ease),width .4s var(--ease);pointer-events:none;z-index:10}
+.nav-indicator{position:absolute;bottom:0;height:2px;background:linear-gradient(90deg,#B85C2A,#E08830,#D4742A);transition:left .55s cubic-bezier(.34,1.56,.64,1),width .55s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:10;will-change:left,width}
+.nav-indicator::after{content:'';position:absolute;right:-4px;top:-3px;width:8px;height:8px;background:var(--oro2);border-radius:50%;box-shadow:0 0 8px rgba(212,116,42,.9);opacity:0;transition:opacity .3s ease}
+.nav-item.active ~ * .nav-indicator::after,.main-nav:hover .nav-indicator::after{opacity:1}
 
 /* ── SEARCH ── */
 .search-bar-wrap{position:sticky;top:60px;z-index:800;background:rgba(6,6,5,.97);border-bottom:1px solid rgba(242,237,227,.07);padding:0 var(--gutter);display:flex;align-items:center;gap:16px;height:0;overflow:hidden;transition:height .35s var(--ease)}
@@ -313,9 +315,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .mood-question{position:relative;z-index:1;font-family:var(--f-display);font-style:italic;font-size:clamp(20px,2.8vw,30px);color:var(--parchment);line-height:1.15;margin-bottom:30px;display:block}
 .mood-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .mood-btn{background:rgba(242,237,227,.04);border:1px solid rgba(242,237,227,.12);border-radius:3px;padding:24px 18px 20px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;text-align:left;transition:background .3s ease,border-color .3s ease,transform .35s var(--ease-spring),box-shadow .35s var(--ease-out-expo);font-family:inherit;color:inherit}
-.mood-btn:hover{background:rgba(184,92,42,.12);border-color:rgba(212,116,42,.55);transform:translateY(-5px) scale(1.018);box-shadow:0 20px 48px rgba(0,0,0,.30),0 0 0 1px rgba(184,92,42,.35),0 0 24px -4px rgba(184,92,42,.20)}
+.mood-btn:hover{background:rgba(184,92,42,.12);border-color:rgba(212,116,42,.55);transform:translateY(-6px) scale(1.022) rotate(.3deg);box-shadow:0 20px 48px rgba(0,0,0,.30),0 0 0 1px rgba(184,92,42,.35),0 0 24px -4px rgba(184,92,42,.20)}
 .mood-btn:focus-visible{background:rgba(196,135,42,.10);border-color:var(--oro2)}
-.mood-btn.active{background:rgba(184,92,42,.16);border-color:rgba(212,116,42,.60);transform:scale(.985);box-shadow:0 0 0 2px rgba(184,92,42,.45),inset 0 1px 0 rgba(232,145,74,.12)}
+.mood-btn.active{background:rgba(184,92,42,.16);border-color:rgba(212,116,42,.60);transform:scale(.975) rotate(-.5deg);box-shadow:0 0 0 2px rgba(184,92,42,.45),inset 0 1px 0 rgba(232,145,74,.12)}
 .mood-btn.suggested{box-shadow:0 0 0 1px rgba(196,135,42,.45)}
 .mood-btn-icon{font-size:26px;line-height:1}
 .mood-btn-label{font-family:var(--f-display);font-style:italic;font-size:16px;color:var(--parchment);line-height:1.2}
@@ -850,6 +852,16 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .ht-certainty-label{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6B6B6B;white-space:nowrap}
 .ht-bar{flex:1;max-width:180px;height:6px;background:rgba(26,25,22,.12);border-radius:3px;overflow:hidden}
 .ht-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ht-cert-a),var(--ht-cert-b))}
+  .ht-bar-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--ht-cert-a),var(--ht-cert-b));
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform 1.2s cubic-bezier(.16,1,.3,1);
+}
+.ht-chapter-active .ht-bar-fill{
+  transform:scaleX(1);
+}
 .ht-certainty-val{font-family:var(--f-ui);font-size:10px;font-weight:700;color:var(--ht-cert-a)}
 .ht-hits{display:flex;flex-direction:column;gap:24px}
 .ht-hit-feat{background:#1C2E4A;border-radius:12px;padding:36px 40px;color:white;position:relative;overflow:hidden}
@@ -1285,7 +1297,25 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
   #back-to-top.visible { transform: none; }
   .hero-title, .live-chip, .hero-sub, .hero-ctas, .stats-strip, .hero-topbar { animation: none; opacity: 1; transform: none; }
 }
-
+.rcard,.gcard,.nat-card,.dep-feat-card,.dep-club-card{
+  --mx:50%;--my:50%;
+}
+.rcard::after,.gcard-feat::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(
+    200px circle at var(--mx) var(--my),
+    rgba(212,116,42,.13) 0%,
+    transparent 70%
+  );
+  opacity:0;
+  transition:opacity .4s ease;
+  pointer-events:none;
+  z-index:1;
+  border-radius:inherit;
+}
+.rcard:hover::after,.gcard-feat:hover::after{opacity:1;}
 /* ── EMBER GLOW — efecto de brillo sutil en hover de tarjetas oscuras ── */
 @media (hover: hover) and (pointer: fine) {
   .rcard:not(.rcard-feat):hover,
@@ -1427,6 +1457,36 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   background: radial-gradient(ellipse 60% 55% at 25% 70%, rgba(188,88,35,.30) 0%, transparent 60%);
   pointer-events: none;
 }
+  @keyframes steamRise{
+  0%{opacity:0;transform:translateY(0) scaleX(1);}
+  40%{opacity:.18;}
+  100%{opacity:0;transform:translateY(-28px) scaleX(1.4);}
+}
+.ccard::after{
+  content:'';
+  position:absolute;
+  bottom:55%;
+  left:50%;
+  transform:translateX(-50%);
+  width:2px;
+  height:18px;
+  background:linear-gradient(to top,rgba(255,255,255,.0),rgba(255,255,255,.28));
+  border-radius:2px;
+  filter:blur(1px);
+  animation:steamRise 3.2s ease-in-out infinite;
+  pointer-events:none;
+  z-index:5;
+  opacity:0;
+}
+.ccard:hover::after{
+  animation:steamRise 1.8s ease-in-out infinite;
+}
+.ccard:nth-child(2)::after{animation-delay:.6s}
+.ccard:nth-child(3)::after{animation-delay:1.1s}
+.ccard:nth-child(4)::after{animation-delay:.3s}
+.ccard:nth-child(5)::after{animation-delay:.9s}
+.ccard:nth-child(6)::after{animation-delay:1.4s}
+@media(prefers-reduced-motion:reduce){.ccard::after{animation:none;}}
 
 /* Hover: intensificar el glow naranja en lugar de hacer zoom de foto */
 .ccard:hover .ccard-bg {
@@ -1758,12 +1818,107 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 <body>
 <a class="skip-link" href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:99999;background:var(--verde);color:#fff;padding:8px 16px;border-radius:0 0 4px 4px;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';this.style.overflow='visible';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';this.style.overflow='hidden';">Ir al contenido principal</a>
 <div id="progress-bar" aria-hidden="true"></div>
+  <div id="custom-cursor" aria-hidden="true" style="position:fixed;top:0;left:0;z-index:99998;pointer-events:none;mix-blend-mode:exclusion;display:none">
+  <div id="cursor-dot" style="width:6px;height:6px;background:#fff;border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:transform .1s ease,opacity .2s ease"></div>
+  <div id="cursor-ring" style="width:32px;height:32px;border:1.5px solid rgba(255,255,255,.5);border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:transform .12s ease,width .25s ease,height .25s ease,opacity .2s ease"></div>
+</div>
+<script>
+(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var fine=window.matchMedia('(pointer:fine)').matches;
+  if(reduced||!fine)return;
+  var wrap=document.getElementById('custom-cursor');
+  var dot=document.getElementById('cursor-dot');
+  var ring=document.getElementById('cursor-ring');
+  if(!wrap||!dot||!ring)return;
+  document.body.style.cursor='none';
+  wrap.style.display='block';
+  var mx=0,my=0,rx=0,ry=0,raf;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;},{passive:true});
+  function tick(){
+    rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
+    dot.style.transform='translate('+mx+'px,'+my+'px) translate(-50%,-50%)';
+    ring.style.transform='translate('+rx+'px,'+ry+'px) translate(-50%,-50%)';
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+  var links=document.querySelectorAll('a,button,[role="button"]');
+  links.forEach(function(el){
+    el.style.cursor='none';
+    el.addEventListener('mouseenter',function(){
+      ring.style.width='52px';ring.style.height='52px';
+      dot.style.transform='translate('+mx+'px,'+my+'px) translate(-50%,-50%) scale(0)';
+    });
+    el.addEventListener('mouseleave',function(){
+      ring.style.width='32px';ring.style.height='32px';
+      dot.style.transform='translate('+mx+'px,'+my+'px) translate(-50%,-50%) scale(1)';
+    });
+  });
+  document.addEventListener('mouseleave',function(){wrap.style.opacity='0';});
+  document.addEventListener('mouseenter',function(){wrap.style.opacity='1';});
+})();
+</script>
 
 <header class="hero" role="banner">
   <div class="hero-mesh" aria-hidden="true"></div>
   <div class="hero-lines" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
-  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-2" aria-hidden="true"></div><canvas id="hero-particles" style="position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.7" aria-hidden="true"></canvas>
+<script>
+(function(){
+  var c=document.getElementById('hero-particles');
+  if(!c)return;
+  var ctx=c.getContext('2d');
+  var pts=[];
+  var W,H;
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced){c.style.display='none';return;}
+  function resize(){
+    W=c.width=c.offsetWidth;
+    H=c.height=c.offsetHeight;
+  }
+  function rand(a,b){return a+Math.random()*(b-a);}
+  function init(){
+    resize();
+    pts=[];
+    var n=Math.min(Math.floor(W*H/14000),55);
+    for(var i=0;i<n;i++){
+      pts.push({
+        x:rand(0,W),y:rand(0,H),
+        r:rand(.6,2.2),
+        ox:rand(0,W),oy:rand(0,H),
+        a:rand(0,Math.PI*2),
+        spd:rand(.0003,.0012),
+        rad:rand(20,110),
+        alpha:rand(.12,.55),
+        hue:rand(25,45)
+      });
+    }
+  }
+  function draw(ts){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(function(p){
+      p.a+=p.spd;
+      p.x=p.ox+Math.cos(p.a)*p.rad;
+      p.y=p.oy+Math.sin(p.a*1.3)*p.rad*.6;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='hsla('+p.hue+',80%,72%,'+p.alpha+')';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',function(){init();},{passive:true});
+  var heroEl=document.querySelector('.hero');
+  if(heroEl&&'IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(e){
+      c.style.display=e[0].isIntersecting?'':'none';
+    },{threshold:0});
+    io.observe(heroEl);
+  }
+  init();requestAnimationFrame(draw);
+})();
+</script>
   <div class="hero-topbar">
     <div class="city-tag">
       <div class="city-flag" aria-hidden="true">📍</div>
@@ -1776,14 +1931,87 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   <div class="hero-inner">
     <div class="hero-inner-left">
       <div class="live-chip" role="status" aria-live="polite"><span class="live-dot" aria-hidden="true"></span>Actualizado Mayo 2026</div>
-      <h1 class="hero-title">
-        <span class="eyebrow">Restaurantes, bares y más en</span>
-        <span class="main-line"><em>Concepción</em></span>
-        <span class="main-line"><em>del Uruguay</em></span>
-      </h1>
+      <h1 class="hero-title" id="hero-title-anim">
+  <span class="eyebrow" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span>
+  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)">Concepción</em></span>
+  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)">del Uruguay</em></span>
+</h1>
+<script>
+(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced){
+    ['hero-word-1','hero-word-2'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){el.style.opacity='1';el.style.transform='none';}
+    });
+    var ey=document.querySelector('.hero-title .eyebrow');
+    if(ey){ey.style.opacity='1';ey.style.transform='none';}
+    return;
+  }
+  function animate(){
+    var ey=document.querySelector('.hero-title .eyebrow');
+    var w1=document.getElementById('hero-word-1');
+    var w2=document.getElementById('hero-word-2');
+    if(!w1||!w2)return;
+    setTimeout(function(){
+      if(ey){ey.style.opacity='1';ey.style.transform='translateY(0)';}
+    },200);
+    function reveal(el,delay){
+      setTimeout(function(){
+        el.style.transition='opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)';
+        el.style.opacity='1';
+        el.style.transform='translateY(0)';
+      },delay);
+    }
+    reveal(w1,380);
+    reveal(w2,560);
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',animate,{once:true});
+  }else{animate();}
+})();
+</script>
       <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
       <p class="hero-sub">Primera capital histórica de Entre Ríos. Sede del primer colegio laico del país. Mayor parque náutico per cápita de Argentina.<br /><strong>La guía local completa — gastronomía, historia, naturaleza y servicios. Sin mentiras.</strong></p>
-   <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px">
+  <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="75" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares</div></div>
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="242">0</div><div class="id-stat-label">Años de historia</div></div>
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="5">0</div><div class="id-stat-label">Universidades</div></div>
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="%">0<sup>%</sup></div><div class="id-stat-label">Local</div></div>
+</div>
+<script>
+(function(){
+  var strip=document.getElementById('hero-stats-strip');
+  if(!strip)return;
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var fired=false;
+  function runCounters(){
+    if(fired)return;fired=true;
+    strip.querySelectorAll('[data-count]').forEach(function(el){
+      var target=parseInt(el.dataset.count,10);
+      var suffix=el.dataset.suffix||'';
+      var sup=el.querySelector('sup');
+      var supHTML=sup?sup.outerHTML:'';
+      if(reduced){el.innerHTML=target+supHTML;return;}
+      var dur=1600;
+      var t0=performance.now();
+      (function tick(now){
+        var p=Math.min((now-t0)/dur,1);
+        var ease=1-Math.pow(1-p,4);
+        var val=Math.round(ease*target);
+        el.innerHTML=val+supHTML;
+        if(p<1)requestAnimationFrame(tick);
+      })(t0);
+    });
+  }
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(e){
+      if(e[0].isIntersecting)runCounters();
+    },{threshold:.5});
+    io.observe(strip);
+  }else{setTimeout(runCounters,400);}
+})();
+</script>
   <div class="id-stat" role="listitem"><div class="id-stat-num">75<sup>+</sup></div><div class="id-stat-label">Lugares</div></div>
   <div class="id-stat" role="listitem"><div class="id-stat-num">242</div><div class="id-stat-label">Años de historia</div></div>
   <div class="id-stat" role="listitem"><div class="id-stat-num">5</div><div class="id-stat-label">Universidades</div></div>
@@ -1886,7 +2114,28 @@ a:focus-visible, button:focus-visible, input:focus-visible {
       <span id="mood-suggest-text">Cargando sugerencia...</span>
     </div>
     <span class="mood-question">Elegí una opción: filtramos la guía entera por vos, en el momento.</span>
-    <div class="mood-grid" id="mood-grid" role="list">
+    <div class="mood-grid" id="mood-grid" role="list"> <style>
+.mood-btn{position:relative;overflow:hidden;}
+.mood-btn::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at var(--bx,50%) var(--by,50%), rgba(255,255,255,.12) 0%, transparent 60%);
+  opacity:0;
+  transition:opacity .35s ease;
+  pointer-events:none;
+}
+.mood-btn:hover::before,.mood-btn:focus-visible::before{opacity:1;}
+</style>
+<script>
+document.querySelectorAll('.mood-btn').forEach(function(btn){
+  btn.addEventListener('mousemove',function(e){
+    var r=btn.getBoundingClientRect();
+    btn.style.setProperty('--bx',((e.clientX-r.left)/r.width*100)+'%');
+    btn.style.setProperty('--by',((e.clientY-r.top)/r.height*100)+'%');
+  });
+});
+</script>
       <button class="mood-btn" data-mood="rapido" type="button" role="listitem" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">⚡</span>
         <span class="mood-btn-label">Algo rápido</span>
@@ -1994,6 +2243,43 @@ a:focus-visible, button:focus-visible, input:focus-visible {
       <span class="circ-card-icon" aria-hidden="true">🏛️</span>
       <h3 class="circ-name">CdU en 4 horas</h3>
       <p class="circ-desc">El recorrido esencial del casco histórico. Todo a pie, sin necesidad de transporte. Ideal para quien llega el sábado al mediodía y quiere ver lo fundamental antes de la cena.</p>
+      <style>
+.circ-stops{position:relative;}
+.circ-stops::before{
+  content:'';
+  position:absolute;
+  left:9px;top:9px;bottom:9px;
+  width:2px;
+  background:linear-gradient(to bottom,var(--verde2),var(--oro2));
+  transform:scaleY(0);
+  transform-origin:top;
+  transition:transform 1.4s cubic-bezier(.16,1,.3,1);
+}
+.circ-card.is-drawn .circ-stops::before{transform:scaleY(1);}
+.circ-stop-num{
+  position:relative;z-index:2;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .4s ease;
+}
+.circ-card.is-drawn .circ-stop-num{
+  transform:scale(1);
+}
+</style>
+<script>
+(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced)return;
+  document.querySelectorAll('.circ-card').forEach(function(card){
+    if(!('IntersectionObserver' in window)){card.classList.add('is-drawn');return;}
+    var io=new IntersectionObserver(function(e){
+      if(e[0].isIntersecting){
+        card.classList.add('is-drawn');
+        io.unobserve(card);
+      }
+    },{threshold:.3});
+    io.observe(card);
+  });
+})();
+</script>
       <ol class="circ-stops" aria-label="Paradas del circuito de 4 horas">
         <li class="circ-stop"><span class="circ-stop-num">1</span><span><strong>Plaza Ramírez</strong> — 15 min. El centro geográfico y social de la ciudad. Arboleda, obelisco, vista a la Basílica.</span></li>
         <li class="circ-stop"><span class="circ-stop-num">2</span><span><strong>Basílica Inmaculada Concepción</strong> — 30 min. Mausoleo de Urquiza, inaugurada 1859. 3 de Febrero 41.</span></li>
@@ -2441,7 +2727,19 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     <div class="nat-intro-inner">
       <p class="nat-intro-text">El río Uruguay no es un telón de fondo — <em>es el centro de la ciudad.</em> A cinco minutos del casco histórico empiezan siete kilómetros de arena blanca. A veinte minutos en lancha, una isla que parece el Caribe. A lo largo del año: pesca deportiva, kayak, avistaje de aves, senderismo y termas. Esta es la guía que necesitabas.</p>
     </div>
-    <div class="nat-river-line" aria-hidden="true"></div>
+  <div class="nat-river-line" aria-hidden="true" style="height:32px;overflow:hidden;position:relative;margin-top:24px">
+  <svg viewBox="0 0 1200 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:200%;height:100%;position:absolute;left:0;top:0" aria-hidden="true">
+    <path id="wave1" d="M0,16 C150,4 300,28 450,16 C600,4 750,28 900,16 C1050,4 1200,28 1350,16 C1500,4 1650,28 1800,16 C1950,4 2100,28 2250,16 L2400,16 L2400,32 L0,32Z" fill="rgba(38,122,85,.22)"/>
+    <path id="wave2" d="M0,20 C200,8 400,28 600,20 C800,12 1000,28 1200,20 C1400,12 1600,28 1800,20 C2000,12 2200,28 2400,20 L2400,32 L0,32Z" fill="rgba(29,92,64,.14)"/>
+  </svg>
+  <style>
+    #wave1{animation:waveMove1 8s linear infinite}
+    #wave2{animation:waveMove2 12s linear infinite}
+    @keyframes waveMove1{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @keyframes waveMove2{from{transform:translateX(-10%)}to{transform:translateX(-60%)}}
+    @media(prefers-reduced-motion:reduce){#wave1,#wave2{animation:none}}
+  </style>
+</div>
   </div>
 
   <a class="nat-hero-card reveal searchable" data-name="Banco Pelay" data-tags="playa balneario rio naturaleza camping pesca kayak windsurf" data-mood="relax sorpresa" href="https://www.cdeluruguay.gob.ar" target="_blank" rel="noopener noreferrer" style="--reveal-delay:60ms" aria-label="Banco Pelay — El balneario más extenso">
@@ -3151,7 +3449,63 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   <div class="section-header">
     <div>
       <span class="section-eyebrow">Febrero 2026 · Corsódromo · Entre Ríos</span>
-      <h2 class="section-title" id="title-carnaval">🎭 Carnaval 2026</h2>
+      <h2 class="section-title" id="title-carnaval" style="position:relative;display:inline-block">
+  🎭 Carnaval 2026
+  <canvas id="confetti-canvas" aria-hidden="true" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;height:120px;pointer-events:none;z-index:10"></canvas>
+</h2>
+<script>
+(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced)return;
+  var c=document.getElementById('confetti-canvas');
+  if(!c)return;
+  var ctx=c.getContext('2d');
+  c.width=400;c.height=120;
+  var pieces=[];
+  var colors=['#7b3068','#D4742A','#E8914A','#B85C2A','#fff','#f0c040'];
+  var fired=false;
+  function burst(){
+    if(fired)return;fired=true;
+    for(var i=0;i<38;i++){
+      pieces.push({
+        x:200+((Math.random()-.5)*60),
+        y:110,
+        vx:(Math.random()-.5)*5.5,
+        vy:-(Math.random()*6+3),
+        r:Math.random()*3+1.5,
+        color:colors[Math.floor(Math.random()*colors.length)],
+        rot:Math.random()*Math.PI*2,
+        rspd:(Math.random()-.5)*.18,
+        life:1
+      });
+    }
+    requestAnimationFrame(loop);
+  }
+  function loop(){
+    ctx.clearRect(0,0,400,120);
+    var alive=false;
+    pieces.forEach(function(p){
+      p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.rot+=p.rspd;p.life-=.018;
+      if(p.life<=0)return;
+      alive=true;
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha=Math.max(0,p.life);
+      ctx.fillStyle=p.color;
+      ctx.fillRect(-p.r,-p.r*.5,p.r*2,p.r);
+      ctx.restore();
+    });
+    if(alive)requestAnimationFrame(loop);
+  }
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(e){
+      if(e[0].isIntersecting){burst();io.unobserve(e[0].target);}
+    },{threshold:.8});
+    io.observe(document.getElementById('title-carnaval'));
+  }
+})();
+</script>
     </div>
     <span class="section-count">5 noches · 5 comparsas</span>
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -4722,6 +5076,42 @@ navScrollArea.addEventListener('scroll', updateNavArrow, {passive:true});
   setTimeout(updateNavArrow, 400);
 }
 })();
+  /* ── HERO PARALLAX MAGNÉTICO ── */
+(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced||window.innerWidth<769)return;
+  var orb1=document.querySelector('.hero-orb-1');
+  var orb2=document.querySelector('.hero-orb-2');
+  var mesh=document.querySelector('.hero-mesh');
+  if(!orb1||!orb2)return;
+  var cx=0,cy=0,tx1=0,ty1=0,tx2=0,ty2=0;
+  var raf=null;
+  document.addEventListener('mousemove',function(e){
+    cx=(e.clientX/window.innerWidth-.5)*2;
+    cy=(e.clientY/window.innerHeight-.5)*2;
+  },{passive:true});
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function tick(){
+    tx1=lerp(tx1,cx*22,0.06);
+    ty1=lerp(ty1,cy*16,0.06);
+    tx2=lerp(tx2,cx*-14,0.045);
+    ty2=lerp(ty2,cy*-10,0.045);
+    orb1.style.transform='translate3d('+tx1+'px,'+ty1+'px,0)';
+    orb2.style.transform='translate3d('+tx2+'px,'+ty2+'px,0)';
+    if(mesh){
+      mesh.style.backgroundPosition=(50+cx*2)+'% '+(50+cy*2)+'%';
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  var heroSect=document.querySelector('.hero');
+  if(heroSect&&'IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(e){
+      if(e[0].isIntersecting){if(!raf)raf=requestAnimationFrame(tick);}
+      else{if(raf){cancelAnimationFrame(raf);raf=null;}}
+    },{threshold:0});
+    io.observe(heroSect);
+  }else{raf=requestAnimationFrame(tick);}
+})();
 </script>
 
 <!-- JS PRINCIPAL -->
@@ -4838,7 +5228,7 @@ navScrollArea.addEventListener('scroll', updateNavArrow, {passive:true});
   var heroTitleEms = document.querySelectorAll('.hero-title .main-line em');
 
   if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
-    var spotEls = document.querySelectorAll('.rcard-feat, .gcard-feat, .uft-card, .mood-card');
+    var spotEls = document.querySelectorAll('.rcard, .gcard, .nat-card, .dep-feat-card, .dep-club-card, .mood-card, .circ-card');
     spotEls.forEach(function(el){
       var raf = null;
       el.addEventListener('mousemove', function(e){
