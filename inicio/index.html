@@ -223,6 +223,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .search-hidden{display:none!important}
 .search-no-results{text-align:center;padding:60px 24px;font-family:var(--f-italic);font-style:italic;font-size:18px;color:rgba(26,25,22,.38);opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;height:0;overflow:hidden}
 .search-no-results.visible{opacity:1;transform:translateY(0);pointer-events:auto;height:auto;overflow:visible}
+  #search-dropdown{opacity:0;transform:translateY(-6px);transition:opacity .25s ease,transform .25s ease;pointer-events:none}
+#search-dropdown.dd-visible{opacity:1;transform:translateY(0);pointer-events:auto}
 
 /* ── SECTION CRUMB ── */
 .section-crumb{position:sticky;top:60px;z-index:850;background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.45);display:flex;align-items:center;gap:8px;transform:translateY(-100%);transition:transform .3s var(--ease);pointer-events:none}
@@ -1136,7 +1138,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .cv-comparsa{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);padding:28px 26px;display:flex;flex-direction:column;gap:14px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
 .cv-comparsa:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
 .cv-comp-name{font-family:var(--f-display);font-size:clamp(18px,2vw,24px);color:var(--card-text);letter-spacing:-.2px;line-height:1.1;font-weight:800}
-.cv-comparsa-champ .cv-comp-name{color:var(--parchment)}
+.cv-comparsa-champ .cv-comp-name{color:var(--parchment)}.cv-comparsa-champ{position:relative;overflow:hidden}
+.cv-comparsa-champ .cv-comp-shine{position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.06) 50%,transparent 100%);left:-100%;z-index:1;transition:left .7s var(--ease);pointer-events:none}
+.cv-comparsa-champ:hover .cv-comp-shine{left:100%}
 .cv-comp-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75}
 .cv-comparsa-champ .cv-comp-desc{color:rgba(242,237,227,.52)}
 .cv-comp-tag{display:inline-flex;align-items:center;padding:4px 10px;background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.14);border-radius:2px;font-family:var(--f-ui);font-size:7.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(242,237,227,.60);white-space:nowrap}
@@ -1236,7 +1240,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
   .stat-num       { font-size: 28px; }
   .main-nav       { padding: 0; overflow: visible; min-height: auto; }
 .nav-scroll-area { display: grid; grid-template-columns: repeat(4,1fr); overflow: visible; padding: 6px; gap: 2px; }
-.nav-item       { height: auto; flex-direction: column; gap: 3px; padding: 10px 6px; font-size: 7px; letter-spacing: 1px; border-bottom: none; border-radius: 6px; justify-content: center; align-items: center; white-space: normal; text-align: center; }
+.nav-item       { height: auto; flex-direction: column; gap: 3px; padding: 10px 6px; font-size: 7px; letter-spacing: 1px; border-bottom: none; border-radius: 6px; justify-content: center; align-items: center; white-space: normal; text-align: center; }.nav-item:active { transform: scale(.93); transition: transform .12s ease; }
 .nav-emoji      { font-size: 20px !important; display: block; }
 .nav-divider    { display: none; }
 .main-nav::after { display: none; }
@@ -1318,7 +1322,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
   #back-to-top.visible { transform: none; }
   .hero-title, .live-chip, .hero-sub, .hero-ctas, .stats-strip, .hero-topbar { animation: none; opacity: 1; transform: none; }
 }
-.rcard,.gcard,.nat-card,.dep-feat-card,.dep-club-card{
+.rcard,.gcard,.nat-card,.dep-feat-card,.dep-club-card,.ccard{
   --mx:50%;--my:50%;
 }
 .rcard:not(.rcard-feat):not(.rcard-ad)::after{
@@ -1339,6 +1343,22 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
   transform:translateZ(0);
 }
 .rcard:not(.rcard-feat):not(.rcard-ad):hover::after{opacity:1;}
+  .ccard-glow{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(
+    260px circle at var(--mx) var(--my),
+    rgba(232,145,74,.30) 0%,
+    transparent 70%
+  );
+  opacity:0;
+  transition:opacity .4s ease;
+  pointer-events:none;
+  z-index:2;
+  will-change:opacity;
+}
+.ccard:hover .ccard-glow{opacity:1;}
 /* ── EMBER GLOW — efecto de brillo sutil en hover de tarjetas oscuras ── */
 @media (hover: hover) and (pointer: fine) {
   .rcard:not(.rcard-feat):hover,
@@ -1683,15 +1703,14 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .hp-body {
   padding: 0 24px 24px;
   border-top: 1px solid rgba(242,237,227,.07);
-  margin-top: 0;
-  animation: hpBodyIn .35s cubic-bezier(.16,1,.3,1) both;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .45s cubic-bezier(.16,1,.3,1), opacity .35s ease, padding .45s ease;
 }
-@keyframes hpBodyIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-details:not([open]) .hp-body {
-  display: none;
+.hp-card[open] .hp-body {
+  max-height: 1000px;
+  opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
   .hp-body { animation: none; }
@@ -2567,14 +2586,14 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   <div class="cafe-grid" id="grid-cafes">
     <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/">
       <div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=60&auto=format&fm=webp" width="400" height="280" loading="lazy" decoding="async" alt="Nero Café — café de especialidad en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div>
-      <div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span>
+      <div class="ccard-overlay"></div><span class="ccard-glow" aria-hidden="true"></span><div class="ccard-border"></div><span class="badge">Top</span>
       <div class="ccard-inner"><span class="ccard-label">Especialidad</span><span class="ccard-name">Nero Café</span><div class="pills" style="margin-top:4px"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span></div></div>
     </a>
-    <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="--reveal-delay:70ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="La Ris — cafetería en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
-    <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" style="--reveal-delay:140ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="Cultura Café en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
-    <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/london-cafe/" style="--reveal-delay:210ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="London Café en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
-    <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/helena-cafe/" style="--reveal-delay:280ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="Helena café en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
-    <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:350ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="Bella Vista café en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
+    <a class="ccard reveal searchable" data-name="La Ris" data-tags="cafe artesanal cafeteria" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="--reveal-delay:70ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="La Ris — cafetería en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><span class="ccard-glow" aria-hidden="true"></span><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Artesanal</span><span class="ccard-name">La Ris</span></div></a>
+    <a class="ccard reveal searchable" data-name="Cultura Café" data-tags="cafe cultural arte libros" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cultura-cafe/" style="--reveal-delay:140ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="Cultura Café en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><span class="ccard-glow" aria-hidden="true"></span><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Cultural</span><span class="ccard-name">Cultura Café</span></div></a>
+    <a class="ccard reveal searchable" data-name="London Café" data-tags="cafe clasico tradicional" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/london-cafe/" style="--reveal-delay:210ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="London Café en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><span class="ccard-glow" aria-hidden="true"></span><div class="ccard-border"></div><span class="badge">Top</span><div class="ccard-inner"><span class="ccard-label">Clásico</span><span class="ccard-name">London Café</span></div></a>
+    <a class="ccard reveal searchable" data-name="Helena" data-tags="cafe moderno desayuno" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/helena-cafe/" style="--reveal-delay:280ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="Helena café en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><span class="ccard-glow" aria-hidden="true"></span><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Moderno</span><span class="ccard-name">Helena</span></div></a>
+    <a class="ccard reveal searchable" data-name="Bella Vista" data-tags="cafe elegante vista" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:350ms"><div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&q=60&auto=format&fm=webp" width="400" height="240" loading="lazy" decoding="async" alt="Bella Vista café en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div><div class="ccard-overlay"></div><span class="ccard-glow" aria-hidden="true"></span><div class="ccard-border"></div><div class="ccard-inner"><span class="ccard-label">Elegante</span><span class="ccard-name">Bella Vista</span></div></a>
   </div>
   <p class="search-no-results" id="no-results-cafes">No se encontraron cafés con ese nombre.</p>
 </section>
@@ -3626,7 +3645,7 @@ for(var i=0;i<confCount;i++){
   </div>
 
   <div class="cv-comparsas-grid" role="list" aria-label="Comparsas participantes Carnaval 2026">
-    <div class="cv-comparsa cv-comparsa-champ reveal" role="listitem" style="--reveal-delay:260ms">
+    <div class="cv-comparsa cv-comparsa-champ reveal" role="listitem" style="--reveal-delay:260ms"><div class="cv-comp-shine" aria-hidden="true"></div>
       <div class="cv-comp-badge-wrap"><span class="cv-comp-badge-champ">🏆 Campeona 2025</span></div>
       <div class="cv-comp-body"><span class="cv-comp-icon" aria-hidden="true">🌟</span><div class="cv-comp-text"><h4 class="cv-comp-name">Unidos do Bahía</h4><p class="cv-comp-desc">La comparsa campeona de la edición 2025 regresa a defender el título en 2026. Llega como la principal candidata a retener la corona.</p><div class="cv-comp-tags"><span class="cv-comp-tag">🏆 Campeona 2025</span><span class="cv-comp-tag">⭐ Favorita 2026</span></div></div></div>
     </div>
@@ -5059,7 +5078,7 @@ for(var i=0;i<confCount;i++){
 </script>
 </main>
 
-<footer class="footer" role="contentinfo">
+<footer class="footer reveal" role="contentinfo">
   <div class="footer-shimmer" aria-hidden="true"></div>
   <a class="footer-logo" href="https://uruspot.pages.dev/" aria-label="URU SPOT — ir al inicio">
     <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT" width="44" height="56" loading="lazy" />
@@ -5295,7 +5314,7 @@ navScrollArea.addEventListener('scroll', updateNavArrow, {passive:true});
   var heroTitleEms = document.querySelectorAll('.hero-title .main-line em');
 
   if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
-    var spotEls = document.querySelectorAll('.rcard, .gcard, .nat-card, .dep-feat-card, .dep-club-card, .mood-card, .circ-card');
+    var spotEls = document.querySelectorAll('.rcard, .gcard, .nat-card, .dep-feat-card, .dep-club-card, .mood-card, .circ-card, .ccard');
     spotEls.forEach(function(el){
       var raf = null;
       el.addEventListener('mousemove', function(e){
@@ -5498,7 +5517,7 @@ navItems.forEach(function(item){
     var r=searchBarWrap.getBoundingClientRect();
     dropdown.style.top=r.bottom+'px';
   }
-  function ddHide(){dropdown.style.display='none';dropdown.innerHTML='';}
+  function ddHide(){dropdown.classList.remove('dd-visible');setTimeout(function(){dropdown.style.display='none';dropdown.innerHTML='';},250);}
 
   function normalize(str){
     return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'');
@@ -5556,9 +5575,10 @@ navItems.forEach(function(item){
       var hl=it.name.replace(reg,'<mark style="background:rgba(196,135,42,.35);color:inherit;border-radius:2px;padding:0 2px;">$1</mark>');
       return '<a href="'+it.href+'" role="option" style="display:flex;align-items:center;gap:12px;padding:16px 24px;font-family:var(--f-ui);font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(242,237,227,.80);text-decoration:none;border-bottom:1px solid rgba(242,237,227,.06);transition:background .15s ease" onmouseover="this.style.background=\'rgba(242,237,227,.06)\'" onmouseout="this.style.background=\'\'">'+hl+'</a>';
     }).join('');
-    dropdown.innerHTML=html;
+   dropdown.innerHTML=html;
     ddPosition();
     dropdown.style.display='block';
+    requestAnimationFrame(function(){dropdown.classList.add('dd-visible');});
   }
 
   function openSearch(){
