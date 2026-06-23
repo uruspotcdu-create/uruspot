@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <link rel="preload" as="image" href="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=60&auto=format&fm=webp" fetchpriority="low" />
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/syne/v24/8vIH7w4qzmVxsWxjBZRjr0FKM_04uQ.woff2" crossorigin="anonymou
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/syne/v24/8vIH7w4qzmVxsWxjBZRjr0FKM_04uQ.woff2" crossorigin="anonymous" />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/dmserifdisplay/v17/-nFnOHM81r4j6k0gjALR8uVIJjAIKXM.woff2" crossorigin="anonymous" />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/instrumentserif/v1/Da21F4RNnSmqMCQyUXCGNiXA66MAzmqhGIiTj8M.woff2" crossorigin="anonymous" />
 <meta name="description" content="La referencia definitiva de Concepción del Uruguay — restaurantes, playas, historia, patrimonio, circuitos y más. Información verificada, horarios en tiempo real." />
@@ -570,7 +570,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .termas-spec-label{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.28)}
 .termas-spec-sub{font-family:var(--f-italic);font-style:italic;font-size:11px;color:rgba(242,237,227,.22)}
 .termas-servicios{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
-.termas-servicio{background:#fff;padding:22px 1
+.termas-servicio{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);padding:22px 18px;display:flex;flex-direction:column;gap:10px;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
+.termas-servicio:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
 .termas-servicio-icon{font-size:26px;line-height:1}
 .termas-servicio-name{font-family:var(--f-display);font-size:16px;color:var(--card-text);letter-spacing:-.1px;font-weight:800}
 .termas-servicio-desc{font-family:var(--f-italic);font-style:italic;font-size:12.5px;color:var(--card-text-soft);line-height:1.6}
@@ -3268,6 +3269,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .dep-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
 .dep-stat-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;flex-direction:column;gap:6px;padding:30px 24px;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
 .dep-stat-card:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.dep-stat-num{font-family:var(--f-display);font-size:clamp(26px,3vw,38px);line-height:1;color:var(--parchment);letter-spacing:-1.5px}
 .dep-stat-label{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(242,237,227,.55)}
 .dep-stat-sub{font-family:var(--f-italic);font-style:italic;font-size:11px;color:rgba(242,237,227,.30)}
 
@@ -3280,14 +3282,22 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .dep-feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
 .dep-feat-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:30px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
 .dep-feat-card:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.dep-feat-body{display:flex;flex-direction:column;gap:8px}
 .dep-feat-name{font-family:var(--f-display);font-size:18px;color:var(--card-text);letter-spacing:-.2px;line-height:1.15;font-weight:800}
 .dep-feat-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.7}
 .dep-feat-desc strong{font-style:normal;color:var(--card-text)}
+  .dep-feat-icon{font-size:32px;line-height:1;flex-shrink:0;transition:transform .35s var(--ease)}
+.dep-feat-card:hover .dep-feat-icon{transform:scale(1.12)}
+.dep-club-icon{font-size:32px;line-height:1;flex-shrink:0}
+.dep-athlete-icon{font-size:32px;line-height:1;flex-shrink:0}
+.dep-athlete-body{display:flex;flex-direction:column;gap:8px}
+.dep-athlete-badge{display:inline-flex;align-items:center;padding:5px 12px;background:rgba(196,135,42,.12);border:1px solid rgba(196,135,42,.35);border-radius:2px;font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2);width:fit-content}
 
 /* ── CLUBES GRID ── */
 .dep-club-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
 .dep-club-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:28px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
 .dep-club-card:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.dep-club-body{display:flex;flex-direction:column;gap:8px}
 .dep-club-tag{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2)}
 .dep-club-name{font-family:var(--f-display);font-size:18px;color:var(--card-text);letter-spacing:-.2px;font-weight:800}
 .dep-club-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.7}
@@ -5028,6 +5038,7 @@ var crumbEl = document.getElementById('section-crumb');
 
 })();
 </script>
+  
 
 <script>
 (function(){
@@ -5052,6 +5063,7 @@ var crumbEl = document.getElementById('section-crumb');
   toggle();
 })();
 </script>
+
 
 <!-- TICKER: ahora deja de animar cuando el hero sale del viewport o la pestaña
      está oculta, para no quemar ciclos de GPU/CPU sin que se vea nada -->
@@ -5132,6 +5144,5 @@ var crumbEl = document.getElementById('section-crumb');
  window.addEventListener('load', function(){ requestAnimationFrame(tick); });
 })();
 </script>
-
 </body>
 </html>
