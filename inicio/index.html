@@ -5870,5 +5870,297 @@ var crumbEl = document.getElementById('section-crumb');
 
 })();
 </script>
+  /* ═══════════════════════════════════════════════════════
+   URU SPOT — PATCH DE LEGIBILIDAD v3
+   Paleta intermedia: ni beige, ni negro puro.
+   Oscuro premium con texto siempre legible.
+   ═══════════════════════════════════════════════════════ */
+
+/* ── 1. TOKENS GLOBALES ─────────────────────────────── */
+:root {
+  --void:   #0c0e13;
+  --void2:  #111419;
+  --void3:  #161920;
+  --soil:   #1c2028;
+  /* texto principal: crema cálida, no blanco puro */
+  --parchment:  #ede8df;
+  --parchment2: #e3ddd3;
+  --parchment3: #d8d2c8;
+  /* acento verde: levemente más saturado */
+  --verde:  #1c5468;
+  --verde2: #1f6b80;
+  --verde3: #0f3240;
+  /* oro: igual, funciona bien */
+  --oro:  #b8922a;
+  --oro2: #d4a93c;
+  --oro3: #f0c84e;
+  /* auxiliares */
+  --rojo:   #a83228;
+  --rojo2:  #c94035;
+  --azul:   #1a4e7a;
+  --violeta:#5c2a6e;
+  /* ink para fondo de cards oscuras */
+  --ink: #111519;
+}
+
+/* ── 2. FONDO PRINCIPAL — gris azulado medio-oscuro ── */
+.main-body {
+  background: #141820 !important;
+}
+.main-body::after {
+  background: linear-gradient(to bottom, #141820, transparent) !important;
+}
+.main-body::before {
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(31,107,128,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 88% 75%, rgba(212,169,60,.04) 0%, transparent 55%) !important;
+}
+
+/* ── 3. SECTION TITLES — legibles sobre fondo oscuro ── */
+.section-title {
+  color: rgba(237,232,223,.94) !important;
+}
+.section-eyebrow {
+  color: rgba(212,169,60,.80) !important;
+}
+.section-count {
+  color: rgba(212,169,60,.80) !important;
+  border-color: rgba(212,169,60,.32) !important;
+}
+
+/* ── 4. RESTAURANTES — rcards sobre fondo oscuro ──── */
+.rcard {
+  background: #1c2230 !important;
+  border-color: rgba(255,255,255,.07) !important;
+}
+.rcard:hover, .rcard:focus-visible {
+  background: #222b3a !important;
+  border-color: rgba(212,169,60,.22) !important;
+}
+/* texto en rcard normales (no feat) */
+.rcard:not(.rcard-feat) .rcard-name { color: rgba(237,232,223,.95) !important; }
+.rcard:not(.rcard-feat) .rcard-desc { color: rgba(237,232,223,.62) !important; }
+
+/* pills sobre fondo oscuro */
+.rcard:not(.rcard-feat) .pill-default {
+  background: rgba(255,255,255,.08) !important;
+  border-color: rgba(255,255,255,.16) !important;
+  color: rgba(237,232,223,.75) !important;
+}
+
+/* ── 5. BARES — bcards (fondo BLANCO, texto oscuro) ── */
+/* Se mantienen blancas — no tocar color de texto */
+.bcard { background: #f5f2ec !important; }
+.bcard:hover, .bcard:focus-visible { background: #eceae3 !important; }
+.bcard-name { color: #1a1e28 !important; }
+.bcard-desc { color: rgba(26,30,40,.65) !important; }
+
+/* ── 6. LIST ITEMS (panaderías, hosterías) ───────── */
+.litem { background: #1c2230 !important; border-left-color: transparent; }
+.litem:hover, .litem:focus-visible {
+  background: #222b3a !important;
+  border-left-color: var(--verde2) !important;
+}
+.litem-name { color: rgba(237,232,223,.94) !important; }
+.litem-arrow { color: rgba(237,232,223,.35) !important; }
+.litem:hover .litem-arrow { color: var(--verde2) !important; }
+.litem:hover .litem-icon { transform: scale(1.12); }
+
+/* ── 7. GIMNASIOS — gcards blancas ───────────────── */
+.gcard:not(.gcard-feat) {
+  background: #f5f2ec !important;
+}
+.gcard:not(.gcard-feat):hover {
+  background: #eceae3 !important;
+}
+.gcard:not(.gcard-feat) .gcard-name { color: #1a1e28 !important; }
+.gcard:not(.gcard-feat) .gcard-desc { color: rgba(26,30,40,.65) !important; }
+
+/* ── 8. CIRCUITOS — circ-cards blancas ───────────── */
+.circ-card:not(.circ-card-feat) {
+  background: #f5f2ec !important;
+}
+.circ-card:not(.circ-card-feat):hover {
+  background: #eceae3 !important;
+}
+.circ-card:not(.circ-card-feat) .circ-name { color: #1a1e28 !important; }
+.circ-card:not(.circ-card-feat) .circ-desc { color: rgba(26,30,40,.65) !important; }
+.circ-card:not(.circ-card-feat) .circ-stop { color: rgba(26,30,40,.68) !important; }
+.circ-nota { color: rgba(26,30,40,.60) !important; }
+
+/* ── 9. NATURALEZA — nat-cards blancas ──────────── */
+.nat-card:not(.nat-card-featured) {
+  background: #f5f2ec !important;
+}
+.nat-card:not(.nat-card-featured):hover {
+  background: #eceae3 !important;
+}
+.nat-card:not(.nat-card-featured) .nat-card-name { color: #1a1e28 !important; }
+.nat-card:not(.nat-card-featured) .nat-card-desc { color: rgba(26,30,40,.68) !important; }
+.nat-card:not(.nat-card-featured) .nat-card-meta { color: rgba(26,30,40,.50) !important; }
+.nat-card:not(.nat-card-featured) .nat-tag-sm {
+  background: rgba(26,30,40,.06) !important;
+  border-color: rgba(26,30,40,.14) !important;
+  color: rgba(26,30,40,.60) !important;
+}
+/* actividades */
+.nat-act-card { background: #f5f2ec !important; }
+.nat-act-card:hover { background: #eceae3 !important; }
+.nat-act-card .nat-act-name { color: #1a1e28 !important; }
+.nat-act-card .nat-act-desc { color: rgba(26,30,40,.68) !important; }
+
+/* ── 10. PATRIMONIO — hp-cards blancas ──────────── */
+.hp-card:not(.hp-card-feat) { background: #f5f2ec !important; }
+.hp-card:not(.hp-card-feat)[open] { background: #ede9e0 !important; }
+.hp-card:not(.hp-card-feat) .hp-name { color: #1a1e28 !important; }
+.hp-card:not(.hp-card-feat) .hp-sub  { color: rgba(26,30,40,.50) !important; }
+.hp-card:not(.hp-card-feat) .hp-desc { color: rgba(26,30,40,.74) !important; }
+.hp-card:not(.hp-card-feat) .hp-facts dd { color: rgba(26,30,40,.80) !important; }
+.hp-card:not(.hp-card-feat) .hp-facts dt { color: rgba(26,30,40,.50) !important; }
+.hp-card:not(.hp-card-feat) .hp-chevron { color: rgba(26,30,40,.35) !important; }
+.hp-intro { color: rgba(237,232,223,.70) !important; }
+.hp-legend { border-top-color: rgba(237,232,223,.12) !important; }
+.hp-legend-item { color: rgba(237,232,223,.60) !important; }
+
+/* ── 11. GASTRONOMÍA — gr-species y gr-prod blancas */
+.gr-species-card:not(.gr-species-feat) { background: #f5f2ec !important; }
+.gr-species-card:not(.gr-species-feat):hover { background: #eceae3 !important; }
+.gr-species-card:not(.gr-species-feat) .gr-species-name { color: #1a1e28 !important; }
+.gr-species-card:not(.gr-species-feat) .gr-species-desc { color: rgba(26,30,40,.68) !important; }
+.gr-species-card:not(.gr-species-feat) .gr-species-nota { color: rgba(26,30,40,.52) !important; }
+.gr-species-header .gr-species-title { color: rgba(237,232,223,.92) !important; }
+.gr-species-header .gr-species-eyebrow { color: var(--verde2) !important; }
+
+.gr-prod-card:not(.gr-prod-feat) { background: #f5f2ec !important; }
+.gr-prod-card:not(.gr-prod-feat):hover { background: #eceae3 !important; }
+.gr-prod-card:not(.gr-prod-feat) .gr-prod-name { color: #1a1e28 !important; }
+.gr-prod-card:not(.gr-prod-feat) .gr-prod-desc { color: rgba(26,30,40,.68) !important; }
+.gr-prod-card:not(.gr-prod-feat) .gr-prod-origen { color: rgba(26,30,40,.50) !important; }
+
+.gr-tip { background: #f5f2ec !important; }
+.gr-tip:hover { background: #eceae3 !important; }
+.gr-tip-title { color: #1a1e28 !important; }
+.gr-tip-desc  { color: rgba(26,30,40,.68) !important; }
+.gr-guia-header .gr-guia-title { color: rgba(237,232,223,.92) !important; }
+.gr-separator .gr-sep-text { color: rgba(237,232,223,.40) !important; }
+.gr-separator .gr-sep-line {
+  background: linear-gradient(90deg, transparent, rgba(237,232,223,.18), transparent) !important;
+}
+
+/* ── 12. DEPORTE — cards blancas ─────────────────── */
+.dep-feat-card { background: #f5f2ec !important; }
+.dep-feat-card:hover { background: #eceae3 !important; }
+.dep-feat-name { color: #1a1e28 !important; }
+.dep-feat-desc { color: rgba(26,30,40,.68) !important; }
+
+.dep-club-card { background: #f5f2ec !important; }
+.dep-club-card:hover { background: #eceae3 !important; }
+.dep-club-name { color: #1a1e28 !important; }
+.dep-club-desc { color: rgba(26,30,40,.68) !important; }
+
+.dep-athlete-card:not(.dep-athlete-feat) { background: #f5f2ec !important; }
+.dep-athlete-card:not(.dep-athlete-feat):hover { background: #eceae3 !important; }
+.dep-athlete-card:not(.dep-athlete-feat) .dep-athlete-name { color: #1a1e28 !important; }
+.dep-athlete-card:not(.dep-athlete-feat) .dep-athlete-desc { color: rgba(26,30,40,.68) !important; }
+
+.dep-section-sub .dep-sub-title { color: rgba(237,232,223,.92) !important; }
+.dep-section-sub .dep-sub-eyebrow { color: var(--verde2) !important; }
+.dep-section-sub { border-bottom-color: rgba(237,232,223,.12) !important; }
+
+/* ── 13. CÓMO LLEGAR — cl-cards blancas ─────────── */
+.cl-card { background: #f5f2ec !important; }
+.cl-card:hover { background: #eceae3 !important; }
+.cl-title { color: #1a1e28 !important; }
+.cl-body  { color: rgba(26,30,40,.68) !important; }
+.cl-body strong { color: #1a1e28 !important; }
+.cl-tip   { color: rgba(26,30,40,.58) !important; }
+.cl-dist-city { color: rgba(26,30,40,.72) !important; }
+
+/* ── 14. CARNAVAL — comparsas blancas ───────────── */
+.cv-comparsa:not(.cv-comparsa-champ) { background: #f5f2ec !important; }
+.cv-comparsa:not(.cv-comparsa-champ):hover { background: #eceae3 !important; }
+.cv-comparsa:not(.cv-comparsa-champ) .cv-comp-name { color: #1a1e28 !important; }
+.cv-comparsa:not(.cv-comparsa-champ) .cv-comp-desc { color: rgba(26,30,40,.68) !important; }
+.cv-comparsa:not(.cv-comparsa-champ) .cv-comp-tag {
+  background: rgba(26,30,40,.06) !important;
+  border-color: rgba(26,30,40,.14) !important;
+  color: rgba(26,30,40,.60) !important;
+}
+.cv-comparsas-header .cv-comp-title { color: rgba(237,232,223,.92) !important; }
+.cv-comparsas-header .cv-comp-intro { color: rgba(237,232,223,.65) !important; }
+.cv-comparsas-header .cv-comp-intro strong { color: rgba(237,232,223,.88) !important; }
+
+/* ── 15. SERVICIOS — separadores de sección ─────── */
+.dep-disclaimer {
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(237,232,223,.55) !important;
+  border-left-color: rgba(212,169,60,.40) !important;
+}
+.dep-disclaimer strong { color: rgba(237,232,223,.80) !important; }
+
+.gr-disclaimer {
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(237,232,223,.55) !important;
+}
+.gr-disclaimer strong { color: rgba(237,232,223,.78) !important; }
+
+.circ-nota {
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(237,232,223,.55) !important;
+  border-left-color: rgba(212,169,60,.40) !important;
+}
+.circ-nota strong { color: rgba(237,232,223,.80) !important; }
+
+.nat-disclaimer {
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(237,232,223,.55) !important;
+}
+.nat-disclaimer strong { color: rgba(237,232,223,.78) !important; }
+
+/* ── 16. SEPARADORES HORIZONTALES ───────────────── */
+.section-header::after {
+  background: linear-gradient(90deg,
+    rgba(212,169,60,.40) 0%,
+    rgba(212,169,60,.07) 40%,
+    transparent 100%) !important;
+}
+
+/* ── 17. MOOD SECTION ───────────────────────────── */
+.mood-hdr::after {
+  background: rgba(237,232,223,.10) !important;
+}
+.mood-eyebrow { color: rgba(212,169,60,.80) !important; }
+.mood-title   { color: rgba(237,232,223,.94) !important; }
+
+/* ── 18. GLOSARIO ───────────────────────────────── */
+.glos-toggle {
+  background: rgba(255,255,255,.05) !important;
+  border-color: rgba(237,232,223,.14) !important;
+  color: rgba(237,232,223,.88) !important;
+}
+.glos-toggle:hover {
+  background: rgba(31,107,128,.08) !important;
+  border-color: var(--verde2) !important;
+}
+
+/* ── 19. NAV INTRO BARS dentro de secciones ─────── */
+.gr-species-header,
+.gr-guia-header,
+.dep-section-sub,
+.nat-section-sub {
+  border-bottom-color: rgba(237,232,223,.12) !important;
+}
+.nat-sub-title { color: rgba(237,232,223,.92) !important; }
+.nat-sub-eyebrow { color: var(--verde2) !important; }
+
+/* ── 20. SEARCH NO-RESULTS ──────────────────────── */
+.search-no-results { color: rgba(237,232,223,.40) !important; }
+
+/* ── 21. Subtítulos inline (panaderías / heladerías) */
+/* Los spans con font-family:var(--f-ui) que dicen "PANADERÍAS" / "HELADERÍAS" */
+[style*="color:var(--verde2)"] { color: var(--verde2) !important; }
+[style*="background:rgba(26,25,22,.10)"] {
+  background: rgba(237,232,223,.10) !important;
+}
 </body>
 </html>
