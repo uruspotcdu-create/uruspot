@@ -7,13 +7,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="dns-prefetch" href="//api.open-meteo.com" />
 <link rel="dns-prefetch" href="//dolarapi.com" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" media="print" onload="this.media='all'" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=swap" /></noscript>
-<link rel="dns-prefetch" href="//dolarapi.com" />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=optional" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=optional" />
 <link rel="icon" type="image/png" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
+<link rel="apple-touch-icon" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="description" content="La referencia definitiva de Concepción del Uruguay — restaurantes, playas, historia, patrimonio, circuitos y más. Información verificada, horarios en tiempo real." />
-<title>URU SPOT · La Guía Definitiva · Concepción del Uruguay</title>
+<meta name="description" content="Guía local verificada de Concepción del Uruguay: restaurantes, cafés, bares, naturaleza, historia y patrimonio. Horarios en tiempo real. 75 lugares." />
+<title>URU SPOT – Guía Local de Concepción del Uruguay</title>
 
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://uruspot.pages.dev/" />
@@ -31,28 +31,39 @@
 <meta name="twitter:image" content="https://uruspotcdu-create.github.io/uruspot/img/og-image.png" />
 
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "URU SPOT",
-  "description": "La referencia definitiva sobre Concepción del Uruguay, Entre Ríos, Argentina.",
-  "url": "https://uruspot.pages.dev/",
-  "inLanguage": "es-AR",
-  "about": {
-    "@type": "City",
-    "name": "Concepción del Uruguay",
-    "containedInPlace": {
-      "@type": "State",
-      "name": "Entre Ríos",
-      "containedInPlace": { "@type": "Country", "name": "Argentina" }
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "URU SPOT",
+    "description": "La referencia definitiva sobre Concepción del Uruguay, Entre Ríos, Argentina.",
+    "url": "https://uruspot.pages.dev/",
+    "inLanguage": "es-AR",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://uruspot.pages.dev/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
     }
   },
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://uruspot.pages.dev/?q={search_term_string}",
-    "query-input": "required name=search_term_string"
+  {
+    "@context": "https://schema.org",
+    "@type": "TouristDestination",
+    "name": "Concepción del Uruguay",
+    "description": "Ciudad histórica de Entre Ríos, Argentina.",
+    "url": "https://uruspot.pages.dev/",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -32.4825,
+      "longitude": -58.2372
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Concepción del Uruguay",
+      "addressRegion": "Entre Ríos",
+      "addressCountry": "AR"
+    }
   }
-}
+]
 </script>
 
 <style>
@@ -197,7 +208,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .wx-skel-datum{height:18px;width:55px}
 @keyframes wx-skel{0%{background-position:200% 50%}100%{background-position:-200% 50%}}
 /* ═══════════════ NAV ═══════════════ */
-.main-nav{position:sticky;top:0;z-index:900;border-bottom:1px solid rgba(242,237,227,.06);display:flex;align-items:stretch;overflow-x:hidden;scrollbar-width:none;transition:background .5s var(--ease-out-expo),box-shadow .5s var(--ease-out-expo);background:rgba(6,6,5,.80);min-height:60px}
+.main-nav{position:sticky;top:0;z-index:900;border-bottom:1px solid rgba(242,237,227,.06);display:flex;align-items:stretch;overflow-x:clip;scrollbar-width:none;}
 @supports(backdrop-filter:saturate(180%) blur(20px)){.main-nav{backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);background:rgba(6,6,5,.55)}}
 .main-nav::-webkit-scrollbar{display:none}
 .nav-scroll-area{display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;-webkit-overflow-scrolling:touch}
@@ -209,7 +220,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .nav-item .nav-emoji{font-size:14px;transition:transform .3s var(--ease)}
 .nav-item:hover .nav-emoji{transform:scale(1.2) rotate(-4deg)}
 .nav-divider{width:1px;margin:16px 0;background:rgba(242,237,227,.08);flex-shrink:0}
-.nav-indicator{position:absolute;bottom:8px;height:6px;background:var(--oro2);border-radius:50%;transition:left .55s cubic-bezier(.34,1.56,.64,1),width .55s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:10;will-change:left,width;box-shadow:0 0 8px rgba(212,116,42,.9),0 0 16px rgba(212,116,42,.4)}
+.nav-indicator{position:absolute;bottom:8px;height:6px;width:6px;min-width:6px;background:var(--oro2);border-radius:50%;transition:left .45s cubic-bezier(.16,1,.3,1),width .45s cubic-bezier(.16,1,.3,1);}
 .nav-indicator::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(212,116,42,.3);animation:rippleLive 2.5s ease-out infinite;opacity:0}
 .nav-item.active ~ * .nav-indicator::after,.main-nav:hover .nav-indicator::after{opacity:1}
 
@@ -811,7 +822,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .hp-intro{font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(26,25,22,.82);max-width:760px;margin-bottom:36px;line-height:1.7}
 .hp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
 @media(max-width:768px){.hp-grid{grid-template-columns:1fr}}
-.hp-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);position:relative;transition:background .3s ease,border-color .3s ease;contain:layout style;border:1px solid var(--card-border-oro)}
+.hp-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);position:relative;transition:background .3s ease,border-color .3s ease;contain:layout style;border:1px solid var(--card-border-oro);border-radius:var(--radius-card);overflow:hidden;}
 .hp-card[open]{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
 .hp-name{font-family:var(--f-display);font-size:19px;color:var(--card-text);line-height:1.2;font-weight:800}
 .hp-sub{font-family:var(--f-italic);font-style:italic;font-size:12.5px;color:var(--card-text-soft)}
@@ -1877,15 +1888,201 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .hp-card .hp-facts dd a {
   color: var(--verde2);
 }
+  /* ═══════════════════════════════════════════════════════
+   URU SPOT — MOBILE FIX PATCH v1
+   Bugs: hero cortado · contadores en 0 · nav estático · main-body overflow
+   ═══════════════════════════════════════════════════════ */
+
+/* FIX 1 + 5 + 6: overflow global y contenedores */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.hero {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+#hero-stats-strip {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#hero-stats-strip::-webkit-scrollbar { display: none; }
+
+/* FIX 1: Hero mobile */
+@media (max-width: 640px) {
+  .hero-topbar {
+    padding: 20px 16px !important;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .hero-inner {
+    padding: 0 16px 44px !important;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .hero-title {
+    font-size: clamp(34px, 10vw, 52px) !important;
+    letter-spacing: -1px !important;
+    word-break: keep-all;
+    overflow-wrap: normal;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .hero-title .main-line {
+    display: block;
+    overflow: hidden;
+  }
+
+  .identity-strip {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap !important;
+  }
+  .identity-strip::-webkit-scrollbar { display: none; }
+
+  .live-chip {
+    max-width: calc(100vw - 32px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hero-ctas {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* FIX 2: Contadores mobile */
+@media (max-width: 640px) {
+  #hero-stats-strip {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    margin-bottom: 32px;
+  }
+
+  .id-stat {
+    flex: 0 0 auto;
+    padding: 16px 20px !important;
+    min-width: 100px;
+  }
+
+  .id-stat-num {
+    font-size: clamp(22px, 7vw, 32px) !important;
+  }
+}
+
+/* FIX 3: Nav mobile scrolleable */
+@media (max-width: 640px) {
+  .nav-scroll-area {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    grid-template-columns: unset !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    align-items: stretch;
+  }
+  .nav-scroll-area::-webkit-scrollbar { display: none; }
+
+  .nav-item {
+    height: 56px !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    padding: 8px 14px !important;
+    font-size: 7px !important;
+    letter-spacing: 0.8px !important;
+    border-bottom: none !important;
+    border-radius: 0 !important;
+    justify-content: center !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    flex: 0 0 auto !important;
+    min-width: 64px !important;
+  }
+
+  .nav-item:active {
+    transform: scale(0.93);
+    transition: transform .12s ease;
+  }
+
+  .nav-emoji {
+    font-size: 18px !important;
+    display: block !important;
+  }
+
+  .nav-divider {
+    display: none !important;
+  }
+
+  .search-icon-btn {
+    flex: 0 0 auto;
+    height: 56px !important;
+    min-width: 44px;
+  }
+
+  .main-nav::after {
+    display: none !important;
+  }
+
+  .main-nav::before {
+    display: none !important;
+  }
+
+  .nav-indicator {
+    display: none !important;
+  }
+
+  .main-nav {
+    min-height: 56px !important;
+  }
+
+  #nav-scroll-right {
+    display: none !important;
+  }
+}
+
+/* FIX 5: main-body overflow mobile */
+@media (max-width: 640px) {
+  .main-body {
+    padding: 48px 16px 72px !important;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .us-section,
+  .mood-wrap,
+  .glos-wrap {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+}
 
 
-</style>
-
-<body>
+</style> 
+  <body>
+  
 <a class="skip-link" href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:99999;background:var(--verde);color:#fff;padding:8px 16px;border-radius:0 0 4px 4px;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';this.style.overflow='visible';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';this.style.overflow='hidden';">Ir al contenido principal</a>
 <div id="progress-bar" aria-hidden="true"></div>
 
-<header class="hero" role="banner">
+<header class="hero"
   <div class="hero-mesh" aria-hidden="true"></div>
   <div class="hero-lines" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
@@ -1896,7 +2093,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
       <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
     </div>
     <div class="hero-logo">
-      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local" width="80" height="101" fetchpriority="high" />
+      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local" width="80" height="101" fetchpriority="high" style="aspect-ratio:80/101;height:auto;" />
     </div>
   </div>
   <div class="hero-inner">
@@ -1975,15 +2172,15 @@ var val = Math.round(ease * target);
     });
   }
   if('IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(e){
-      if(e[0].isIntersecting)runCounters();
-    },{threshold:.5});
-    io.observe(strip);
-  }else{setTimeout(runCounters,400);}
+     var io=new IntersectionObserver(function(e){
+       if(e[0].isIntersecting)runCounters();
+     },{threshold:0.05, rootMargin:'0px 0px -5% 0px'});
+     io.observe(strip);
+   }else{setTimeout(runCounters,400);}
 })();
 </script>
       <div class="hero-ctas">
-       <a class="btn-primary" href="#mood" role="button" id="hero-cta-primary">Explorar la guía completa <span aria-hidden="true">→</span></a>
+     <a class="btn-primary" href="#mood" id="hero-cta-primary" aria-label="Explorar la guía completa de Concepción del Uruguay">Explorar la guía completa <span aria-hidden="true">→</span></a>
         <a class="btn-ghost" href="#circuitos" aria-label="Elegí qué te apetece hacer hoy">¿Qué te apetece hoy? ↓</a>
       </div>
     </div>
@@ -1995,7 +2192,7 @@ var val = Math.round(ease * target);
           <div class="wx-hero-main">
             <div class="wx-hero-icon" id="wx-hero-icon" aria-hidden="true">⏳</div>
             <div class="wx-hero-temp-wrap">
-              <div class="wx-hero-temp" id="wx-hero-temp" aria-live="polite" aria-atomic="true" aria-relevant="text"><span class="wx-skeleton wx-skel-temp" id="wx-hero-temp-skel"></span></div>
+             <div class="wx-hero-temp" id="wx-hero-temp" aria-live="polite" aria-atomic="true" aria-relevant="text"><span class="wx-skeleton wx-skel-temp" id="wx-hero-temp-skel"></span></div>
               <div class="wx-hero-desc" id="wx-hero-desc"><span class="wx-skeleton wx-skel-desc"></span></div>
             </div>
           </div>
@@ -2007,7 +2204,7 @@ var val = Math.round(ease * target);
             <div class="wx-hero-datum"><div class="wx-hero-datum-label">Lluvia hoy</div><div class="wx-hero-datum-val" id="wx-hero-rain"><span class="wx-skeleton wx-skel-datum"></span></div></div>
           </div>
         </div>
-        <div class="wx-hero-footer">
+        <div class="wx-hero-footer"><div class="sr-only" id="wx-update-announce" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
           <span class="wx-hero-updated" id="wx-hero-updated">Cargando...</span>
           <span class="wx-hero-frase" id="wx-hero-frase"></span>
         </div>
@@ -2063,8 +2260,7 @@ var val = Math.round(ease * target);
   <button class="search-close" id="search-close-btn" aria-label="Cerrar buscador">✕</button>
 </div>
 
-<main class="main-body" id="main-content">
-
+<main class="main-body" id="main-content" aria-label="Contenido principal de la guía URU SPOT">
 
 
 <!-- ===================== MOOD PICKER + GLOSARIO ===================== -->
@@ -2129,11 +2325,10 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
 </div>
 
 <div class="glos-wrap reveal" role="region" aria-label="Cómo leer esta guía">
-  <button class="glos-toggle" id="glos-toggle" type="button" aria-expanded="false">
-    📖 ¿Cómo leer esta guía? — símbolos y puntajes explicados
-    <span class="glos-toggle-arrow" aria-hidden="true">▾</span>
-  </button>
-  <div class="glos-body" id="glos-body">
+  <button class="glos-toggle" id="glos-toggle" type="button" aria-expanded="false" aria-controls="glos-body">
+  📖 ¿Cómo leer esta guía? — símbolos y puntajes explicados
+</button>
+<div class="glos-body" id="glos-body" role="region" aria-labelledby="glos-toggle">
     <div class="glos-grid">
       <div class="glos-item"><span class="glos-item-sym">$ / $$ / $$$</span><span class="glos-item-desc">Nivel de precio relativo: $ económico, $$ medio, $$$ alto. Comparativo entre los lugares de la guía, no un monto fijo.</span></div>
       <div class="glos-item"><span class="glos-item-sym">★ 4.8 Google</span><span class="glos-item-desc">Calificación promedio que deja la gente en Google Maps.</span></div>
@@ -4984,7 +5179,7 @@ for(var i=0;i<confCount;i++){
 </script>
 </main>
 
-<footer class="footer reveal" role="contentinfo">
+<footer class="footer reveal" aria-label="Pie de página de URU SPOT">
   <div class="footer-shimmer" aria-hidden="true"></div>
   <a class="footer-logo" href="https://uruspot.pages.dev/" aria-label="URU SPOT — ir al inicio">
     <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT" width="44" height="56" loading="lazy" />
@@ -5537,7 +5732,13 @@ searchInput.addEventListener('input',function(){
     var hum=Math.round(c.relative_humidity_2m),wnd=Math.round(c.wind_speed_10m);
     var prec=(c.precipitation||0).toFixed(1);
     var frase=wxPhrase(c.weather_code,tmp),hora=fmtTime();
-    function set(id,v){var el=document.getElementById(id);if(el)el.innerHTML=v;}
+    var announce = document.getElementById('wx-update-announce');
+    if(announce) announce.textContent = 'Clima actualizado: ' + tmp + ' grados, ' + wx.desc + ', humedad ' + hum + ' por ciento.';
+    var hum=Math.round(c.relative_humidity_2m),wnd=Math.round(c.wind_speed_10m);
+    var prec=(c.precipitation||0).toFixed(1);
+    var frase=wxPhrase(c.weather_code,tmp),hora=fmtTime();
+    function set(id,v){var el=document.getElementById(id);if(el)el.innerHTML=v;
+                      }
     set('wx-hero-temp',tmp+'<sup>°C</sup>');
     set('wx-hero-icon',wx.icon);
     set('wx-hero-desc',wx.desc);
@@ -5573,10 +5774,19 @@ searchInput.addEventListener('input',function(){
     });
 }
 
- document.addEventListener('visibilitychange', function(){
-    if(!document.hidden && Date.now() - _lastFetchTs > 4*60*1000){
-      fetchWeather();
+document.addEventListener('visibilitychange', function(){
+    if(!document.hidden){
+      var elapsed = Date.now() - _lastFetchTs;
+      // Si pasaron más de 2 minutos desde el último intento (exitoso o no), reintentar
+      if(elapsed > 2*60*1000){
+        fetchWeather();
+      }
     }
+  });
+
+// También reintentar si el usuario vuelve a estar online
+window.addEventListener('online', function(){
+    fetchWeather();
   });
   function scheduleWeather(){
     if(window.requestIdleCallback){
@@ -5719,7 +5929,7 @@ searchInput.addEventListener('input',function(){
     var htTabs   = [].slice.call(htTablist.querySelectorAll('.ht-tab'));
     var htPanels = [].slice.call(document.querySelectorAll('.ht-chapter'));
 
-function activateHtTab(idx){
+function activateHtTab(idx, moveFocus){
   htTabs.forEach(function(t,i){
     var active = i===idx;
     t.classList.toggle('ht-tab-active', active);
@@ -5732,16 +5942,33 @@ function activateHtTab(idx){
       p.removeAttribute('hidden');
       p.style.display = '';
       p.setAttribute('tabindex', '-1');
-      /* Resetear la barra ANTES de añadir la clase activa para que la transición ocurra */
       var bar = p.querySelector('.ht-bar-fill');
-      if(bar){
-        bar.style.transition = 'none';
-        bar.style.transform = 'scaleX(0)';
-        /* Forzar reflow para que el browser registre el estado inicial */
-        void bar.offsetWidth;
-        bar.style.transition = '';
-      }
+      if(bar){ bar.style.transition='none'; bar.style.transform='scaleX(0)'; void bar.offsetWidth; bar.style.transition=''; }
       p.classList.add('ht-chapter-active');
+    function activateHtTab(idx, moveFocus){
+  htTabs.forEach(function(t,i){
+    var active = i===idx;
+    t.classList.toggle('ht-tab-active', active);
+    t.setAttribute('aria-selected', active?'true':'false');
+    t.setAttribute('tabindex', active?'0':'-1');
+  });
+  htPanels.forEach(function(p,i){
+    var active = i===idx;
+    if(active){
+      p.removeAttribute('hidden');
+      p.style.display = '';
+      p.setAttribute('tabindex', '-1');
+      var bar = p.querySelector('.ht-bar-fill');
+      if(bar){ bar.style.transition='none'; bar.style.transform='scaleX(0)'; void bar.offsetWidth; bar.style.transition=''; }
+      p.classList.add('ht-chapter-active');
+      if(moveFocus) p.focus();
+    } else {
+      p.classList.remove('ht-chapter-active');
+      p.removeAttribute('tabindex');
+      setTimeout(function(){ p.setAttribute('hidden',''); p.removeAttribute('style'); }, 220);
+    }
+  });
+}
    } else {
       p.classList.remove('ht-chapter-active');
       p.removeAttribute('tabindex');
@@ -5883,7 +6110,6 @@ var crumbEl = document.getElementById('section-crumb');
 
 })();
 </script>
-</script>
   
 
 <script>
@@ -5989,6 +6215,89 @@ var crumbEl = document.getElementById('section-crumb');
   }
  window.addEventListener('load', function(){ requestAnimationFrame(tick); });
 })();
+</script>
+    <script>
+
+(function() {
+
+  'use strict';
+
+  
+
+  function forceCounters() {
+
+    var strip = document.getElementById('hero-stats-strip');
+
+    if (!strip) return;
+
+    var needsForce = false;
+
+    strip.querySelectorAll('[data-count]').forEach(function(el) {
+
+      if (parseInt(el.textContent.replace(/\D/g, ''), 10) === 0) needsForce = true;
+
+    });
+
+    if (!needsForce) return;
+
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    strip.querySelectorAll('[data-count]').forEach(function(el) {
+
+      var target = parseInt(el.dataset.count, 10);
+
+      var sup = el.querySelector('sup');
+
+      var supHTML = sup ? sup.outerHTML : '';
+
+      if (reduced) { el.innerHTML = target + supHTML; return; }
+
+      var dur = 1400, t0 = performance.now();
+
+      (function tick(now) {
+
+        var p = Math.min((now - t0) / dur, 1);
+
+        el.innerHTML = Math.round((1 - Math.pow(1 - p, 4)) * target) + supHTML;
+
+        if (p < 1) requestAnimationFrame(tick);
+
+      })(t0);
+
+    });
+
+  }
+
+  
+
+  setTimeout(forceCounters, 1800);
+
+  
+
+  var scrollFired = false;
+
+  window.addEventListener('scroll', function() {
+
+    if (scrollFired) return;
+
+    var strip = document.getElementById('hero-stats-strip');
+
+    if (!strip) return;
+
+    var rect = strip.getBoundingClientRect();
+
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+
+      scrollFired = true;
+
+      forceCounters();
+
+    }
+
+  }, { passive: true });
+
+})();
+
 </script>
 </body>
 </html>
