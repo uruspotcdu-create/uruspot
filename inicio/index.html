@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="no-js">
 <head>
+  <script>document.documentElement.classList.remove('no-js');</script>
 <meta charset="UTF-8" />
 <meta name="theme-color" content="#060605" id="theme-color-meta" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="dns-prefetch" href="//api.open-meteo.com" />
 <link rel="dns-prefetch" href="//dolarapi.com" />
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=optional" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&display=optional" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=Bricolage+Grotesque:wght@400;600;700;800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@600;700&display=swap" />
 <link rel="icon" type="image/png" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
 <link rel="apple-touch-icon" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="description" content="Guía local verificada de Concepción del Uruguay: restaurantes, cafés, bares, naturaleza, historia y patrimonio. Horarios en tiempo real. 75 lugares." />
 <title>URU SPOT – Guía Local de Concepción del Uruguay</title>
+  <link rel="canonical" href="https://uruspot.pages.dev/" />
 
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://uruspot.pages.dev/" />
@@ -101,12 +102,12 @@ img{display:block;max-width:100%}
 a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:2px}
   
   /* ═══════════════ FAB PERDIDO ═══════════════ */
-#lost-fab{position:fixed;bottom:24px;left:24px;z-index:8000;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#B85C2A,#D4742A);color:#fff;font-family:var(--f-ui);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:14px 22px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 12px 36px rgba(196,135,42,.50),0 4px 14px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .35s var(--ease),box-shadow .35s ease,background .3s ease;opacity:0;pointer-events:none;transform:translateY(12px)}
+#lost-fab{position:fixed;bottom:max(24px, calc(env(safe-area-inset-bottom) + 12px));left:max(24px, env(safe-area-inset-left));z-index:8000;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#B85C2A,#D4742A);color:#fff;font-family:var(--f-ui);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:14px 22px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 12px 36px rgba(196,135,42,.50),0 4px 14px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .35s var(--ease),box-shadow .35s ease,background .3s ease;opacity:0;pointer-events:none;transform:translateY(12px)}
 #lost-fab.visible{opacity:1;pointer-events:auto;transform:translateY(0)}
 #lost-fab:hover{background:linear-gradient(135deg,#D4742A,#E08830);transform:translateY(-3px);box-shadow:0 14px 40px rgba(184,92,42,.65)}
 .lost-emoji{font-size:16px;line-height:1}
 /* ═══════════════ BACK TO TOP ═══════════════ */
-#back-to-top{position:fixed;bottom:24px;right:24px;z-index:8000;width:48px;height:48px;min-width:48px;min-height:48px;border-radius:50%;background:rgba(6,6,5,.90);border:1px solid rgba(242,237,227,.14);color:rgba(242,237,227,.70);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transform:translateY(12px) scale(.85);transition:opacity .35s ease,transform .35s var(--ease),background .3s ease,border-color .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+#back-to-top{position:fixed;bottom:max(24px, calc(env(safe-area-inset-bottom) + 12px));right:max(24px, env(safe-area-inset-right));z-index:8000;width:48px;height:48px;min-width:48px;min-height:48px;border-radius:50%;background:rgba(6,6,5,.90);border:1px solid rgba(242,237,227,.14);color:rgba(242,237,227,.70);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transform:translateY(12px) scale(.85);transition:opacity .35s ease,transform .35s var(--ease),background .3s ease,border-color .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 #back-to-top.visible{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
 #back-to-top:hover{background:var(--verde);border-color:var(--verde2);color:#fff;transform:translateY(-3px) scale(1.06)}
 #back-to-top svg{width:18px;height:18px}
@@ -126,7 +127,15 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 @keyframes dotGlow{from{opacity:.5}to{opacity:1}}
 
 /* ═══════════════ HERO ═══════════════ */
-.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;overflow:hidden;background:var(--void)}
+.hero{
+  position:relative;
+  min-height:100vh;        /* fallback para navegadores sin svh */
+  min-height:100svh;       /* override para navegadores modernos */
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--void);
+}
 .hero-mesh{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 70% 80% at 82% 8%,rgba(184,92,42,.55) 0%,rgba(120,55,20,.25) 45%,transparent 68%),radial-gradient(ellipse 50% 60% at 8% 92%,rgba(184,92,42,.22) 0%,transparent 58%),radial-gradient(ellipse 40% 50% at 48% 55%,rgba(100,40,10,.12) 0%,transparent 65%),linear-gradient(168deg,#0C0806 0%,#080605 40%,#0E0A06 100%)}
 .hero-orb{position:absolute;border-radius:50%;pointer-events:none;z-index:1;contain:layout;overflow:hidden}
 .hero-orb-1{width:700px;height:700px;top:-200px;right:-180px;background:radial-gradient(circle,rgba(29,92,64,.18) 0%,rgba(29,92,64,.05) 45%,transparent 70%);animation:orbFloat1 14s ease-in-out infinite alternate}
@@ -244,9 +253,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 #search-dropdown.dd-visible{opacity:1;transform:translateY(0);pointer-events:auto}
 
 /* ── SECTION CRUMB ── */
-.section-crumb{position:sticky;top:60px;z-index:850;background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.45);display:flex;align-items:center;gap:8px;transform:translateY(-100%);transition:transform .3s var(--ease);pointer-events:none}
+.section-crumb{position:sticky;top:60px;z-index:750;background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.45);display:flex;align-items:center;gap:8px;transform:translateY(-100%);transition:transform .3s var(--ease);pointer-events:none}
 .section-crumb.visible{transform:translateY(0)}
-.section-crumb.search-active{display:none}
+.section-crumb.search-active{display:none !important; }
 .section-crumb-dot{width:5px;height:5px;border-radius:50%;background:var(--verde);flex-shrink:0}
 .section-crumb-current{color:var(--ink)}
 @media(max-width:640px){.section-crumb{display:none}}
@@ -268,8 +277,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
   gap: 16px;
   flex-wrap: wrap;
 }
-/* Eliminar la segunda declaración duplicada */
-.section-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(26,25,22,.10)}
 .section-header-accent{position:absolute;bottom:-1px;left:0;display:flex;height:4px;gap:3px}
 .section-header-accent span:nth-child(1){display:block;width:0;height:4px;background:linear-gradient(90deg,#B85C2A,#D4742A);border-radius:0 2px 2px 0;transition:width .55s cubic-bezier(.34,1.56,.64,1)}
 .section-header-accent span:nth-child(2){display:block;width:0;height:4px;background:linear-gradient(90deg,#D4742A,#E8914A);border-radius:2px;transition:width .55s cubic-bezier(.34,1.56,.64,1) .10s}
@@ -845,8 +852,31 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 /* ═══════════════ HISTORIA (tabs) ═══════════════ */
 .us-section#historia{--ht-navy:#1C2E4A;--ht-bronze:#C4A882;--ht-cert-a:#0F6B3E;--ht-cert-b:#0E5E8A;--ht-cert-c:#92400E;--ht-myth:#DC2626;--ht-cause:#B45309;--ht-live:#15803D}
 .ht-hero{background:var(--ht-navy);border-radius:12px;padding:48px 52px;position:relative;overflow:hidden;margin-bottom:1px;color:white}
-.ht-hero-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 70% at 85% 15%,rgba(196,168,130,.18) 0%,transparent 60%),linear-gradient(135deg,#1C2E4A 0%,#0e1a2e 100%).ht-hero::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(to bottom,transparent 0 38px,rgba(196,168,130,.06) 38px 39px);animation:htRuledPulse 6s ease-in-out infinite alternate;pointer-events:none;z-index:0}
-@keyframes htRuledPulse{from{opacity:0.5}to{opacity:1}}}
+.ht-hero-bg{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 70% at 85% 15%, rgba(196,168,130,.18) 0%, transparent 60%),
+    linear-gradient(135deg, #1C2E4A 0%, #0e1a2e 100%);
+}
+.ht-hero::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:repeating-linear-gradient(
+    to bottom,
+    transparent 0 38px,
+    rgba(196,168,130,.06) 38px 39px
+  );
+  animation:htRuledPulse 6s ease-in-out infinite alternate;
+  pointer-events:none;
+  z-index:0;
+}
+@keyframes htRuledPulse{
+  from{opacity:0.5}
+  to{opacity:1}
+}
 .ht-hero-content{position:relative;z-index:1}
 .ht-hero-chip{display:inline-flex;align-items:center;gap:10px;background:rgba(29,92,64,.14);border:1px solid rgba(29,92,64,.40);border-radius:2px;padding:8px 16px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(100,210,155,.90);margin-bottom:24px;width:fit-content}
 .ht-chip-dot{width:6px;height:6px;border-radius:50%;background:#64d29b;flex-shrink:0;animation:dotGlow 2.5s ease-in-out infinite alternate}
@@ -1348,6 +1378,11 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 }
 
 /* ── REDUCED MOTION ── */
+  .no-js .hero-word-noscript {
+  opacity: 1 !important;
+  transform: none !important;
+}
+  
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .001ms !important;
@@ -2082,7 +2117,7 @@ html, body {
 <a class="skip-link" href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:99999;background:var(--verde);color:#fff;padding:8px 16px;border-radius:0 0 4px 4px;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';this.style.overflow='visible';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';this.style.overflow='hidden';">Ir al contenido principal</a>
 <div id="progress-bar" aria-hidden="true"></div>
 
-<header class="hero"
+<header class="hero">
   <div class="hero-mesh" aria-hidden="true"></div>
   <div class="hero-lines" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
@@ -2101,10 +2136,11 @@ html, body {
       <div class="live-chip" role="status" aria-live="polite"><span class="live-dot" aria-hidden="true"></span>Verificado en CdU · Junio 2026</div>
       <h1 class="hero-title" id="hero-title-anim">
   <span class="eyebrow" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span>
-  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)">Concepción</em></span>
+  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span>
   <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)">del Uruguay</em></span>
 </h1>
 <script>
+  
 (function(){
   var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   if(reduced){
@@ -2147,40 +2183,11 @@ html, body {
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="5">0</div><div class="id-stat-label">Universidades activas</div></div>
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="%">0<sup>%</sup></div><div class="id-stat-label">Local</div></div>
 </div>
-<script>
-(function(){
-  var strip=document.getElementById('hero-stats-strip');
-  if(!strip)return;
-  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var fired=false;
-  function runCounters(){
-    if(fired)return;fired=true;
-    strip.querySelectorAll('[data-count]').forEach(function(el){
-      var target=parseInt(el.dataset.count,10);
-      var suffix=el.dataset.suffix||'';
-      var sup=el.querySelector('sup');
-      var supHTML=sup?sup.outerHTML:'';
-      if(reduced){el.innerHTML=target+supHTML;return;}
-var dur = 1600;
-var t0 = performance.now();
-(function tick(now){
-  var p = Math.min((now - t0) / dur, 1);
-  var ease = 1 - Math.pow(1 - p, 4);
-var val = Math.round(ease * target);
-  el.innerHTML = val + supHTML;
-})(t0);
-    });
-  }
-  if('IntersectionObserver' in window){
-     var io=new IntersectionObserver(function(e){
-       if(e[0].isIntersecting)runCounters();
-     },{threshold:0.05, rootMargin:'0px 0px -5% 0px'});
-     io.observe(strip);
-   }else{setTimeout(runCounters,400);}
-})();
-</script>
       <div class="hero-ctas">
-     <a class="btn-primary" href="#mood" id="hero-cta-primary" aria-label="Explorar la guía completa de Concepción del Uruguay">Explorar la guía completa <span aria-hidden="true">→</span></a>
+     <a class="btn-primary" href="#mood" id="hero-cta-primary">
+  Explorar la guía completa
+  <span aria-hidden="true"> →</span>
+</a>
         <a class="btn-ghost" href="#circuitos" aria-label="Elegí qué te apetece hacer hoy">¿Qué te apetece hoy? ↓</a>
       </div>
     </div>
@@ -2288,15 +2295,6 @@ var val = Math.round(ease * target);
 }
 .mood-btn:hover::before,.mood-btn:focus-visible::before{opacity:1;}
 </style>
-<script>
-document.querySelectorAll('.mood-btn').forEach(function(btn){
-  btn.addEventListener('mousemove',function(e){
-    var r=btn.getBoundingClientRect();
-    btn.style.setProperty('--bx',((e.clientX-r.left)/r.width*100)+'%');
-    btn.style.setProperty('--by',((e.clientY-r.top)/r.height*100)+'%');
-  });
-});
-</script>
       <button class="mood-btn" data-mood="rapido" type="button" role="listitem" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">⚡</span>
         <span class="mood-btn-label">Algo rápido</span>
@@ -2374,7 +2372,6 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
 .circ-stops{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
 .circ-stop{display:flex;align-items:flex-start;gap:10px;font-family:var(--f-ui);font-size:11px;color:var(--card-text-soft);line-height:1.45}
 .circ-card-feat .circ-stop{color:rgba(242,237,227,.60)}
-.circ-stop-num{width:18px;height:18px;border-radius:50%;background:var(--oro2);color:var(--ink);font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 .circ-card-feat .circ-stop-num{background:var(--oro)}
 .circ-footer{margin-top:20px;padding-top:14px;border-top:1px solid rgba(242,237,227,.08);display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:relative;z-index:1}
 .circ-card-feat .circ-footer{border-top-color:rgba(242,237,227,.08)}
@@ -2425,22 +2422,6 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   transform:scale(1);
 }
 </style>
-<script>
-(function(){
-  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(reduced)return;
-  document.querySelectorAll('.circ-card').forEach(function(card){
-    if(!('IntersectionObserver' in window)){card.classList.add('is-drawn');return;}
-    var io=new IntersectionObserver(function(e){
-      if(e[0].isIntersecting){
-        card.classList.add('is-drawn');
-        io.unobserve(card);
-      }
-    },{threshold:.3});
-    io.observe(card);
-  });
-})();
-</script>
       <ol class="circ-stops" aria-label="Paradas del circuito de 4 horas">
         <li class="circ-stop"><span class="circ-stop-num">1</span><span><strong>Plaza Ramírez</strong> — 15 min. El centro geográfico y social de la ciudad. Arboleda, obelisco, vista a la Basílica.</span></li>
         <li class="circ-stop"><span class="circ-stop-num">2</span><span><strong>Basílica Inmaculada Concepción</strong> — 30 min. Mausoleo de Urquiza, inaugurada 1859. 3 de Febrero 41.</span></li>
@@ -2678,7 +2659,19 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   </div>
   <div class="cafe-grid" id="grid-cafes">
     <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/">
-      <div class="ccard-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=60&auto=format&fm=webp" width="400" height="280" loading="lazy" decoding="async" alt="Nero Café — café de especialidad en Concepción del Uruguay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);"></div>
+      <div class="ccard-bg" aria-hidden="true"><img 
+  src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=75&auto=format&fm=webp"
+  srcset="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=70&auto=format&fm=webp 400w,
+          https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=75&auto=format&fm=webp 600w,
+          https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80&auto=format&fm=webp 800w"
+  sizes="(max-width:640px) 100vw, (max-width:860px) 50vw, 33vw"
+  width="400" height="280"
+  style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
+  loading="lazy"
+  decoding="async"
+  alt="Nero Café — café de especialidad en Concepción del Uruguay"
+/>
+      </div>
       <div class="ccard-overlay"></div><span class="ccard-glow" aria-hidden="true"></span><div class="ccard-border"></div><span class="badge">Top</span>
       <div class="ccard-inner"><span class="ccard-label">Especialidad</span><span class="ccard-name">Nero Café</span><div class="pills" style="margin-top:4px"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span></div></div>
     </a>
@@ -5635,11 +5628,32 @@ navItems.forEach(function(item){
     if(!matches.length){ddHide();return;}
     var esc=q.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&');
     var reg=new RegExp('('+esc+')','gi');
-    var html=matches.map(function(it){
-      var hl=it.name.replace(reg,'<mark style="background:rgba(196,135,42,.35);color:inherit;border-radius:2px;padding:0 2px;">$1</mark>');
-      return '<a href="'+it.href+'" role="option" style="display:flex;align-items:center;gap:12px;padding:16px 24px;font-family:var(--f-ui);font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(242,237,227,.80);text-decoration:none;border-bottom:1px solid rgba(242,237,227,.06);transition:background .15s ease" onmouseover="this.style.background=\'rgba(242,237,227,.06)\'" onmouseout="this.style.background=\'\'">'+hl+'</a>';
-    }).join('');
-   dropdown.innerHTML=html;
+ /* Limpiar dropdown anterior */
+while(dropdown.firstChild){ dropdown.removeChild(dropdown.firstChild); }
+
+matches.forEach(function(it){
+  var a = document.createElement('a');
+  a.href = it.href;
+  a.setAttribute('role', 'option');
+  a.style.cssText = 'display:flex;align-items:center;gap:12px;padding:16px 24px;font-family:var(--f-ui);font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(242,237,227,.80);text-decoration:none;border-bottom:1px solid rgba(242,237,227,.06);transition:background .15s ease';
+  a.addEventListener('mouseenter', function(){ this.style.background = 'rgba(242,237,227,.06)'; });
+  a.addEventListener('mouseleave', function(){ this.style.background = ''; });
+  /* Resaltar texto de forma segura sin innerHTML */
+  var lowerName = it.name.toLowerCase();
+  var lowerQ = q.toLowerCase();
+  var idx = lowerName.indexOf(lowerQ);
+  if(idx >= 0){
+    a.appendChild(document.createTextNode(it.name.slice(0, idx)));
+    var mark = document.createElement('mark');
+    mark.style.cssText = 'background:rgba(196,135,42,.35);color:inherit;border-radius:2px;padding:0 2px;';
+    mark.textContent = it.name.slice(idx, idx + q.length);
+    a.appendChild(mark);
+    a.appendChild(document.createTextNode(it.name.slice(idx + q.length)));
+  } else {
+    a.textContent = it.name;
+  }
+  dropdown.appendChild(a);
+});
     ddPosition();
     dropdown.style.display='block';
     requestAnimationFrame(function(){dropdown.classList.add('dd-visible');});
@@ -5737,17 +5751,26 @@ searchInput.addEventListener('input',function(){
     var hum=Math.round(c.relative_humidity_2m),wnd=Math.round(c.wind_speed_10m);
     var prec=(c.precipitation||0).toFixed(1);
     var frase=wxPhrase(c.weather_code,tmp),hora=fmtTime();
-    function set(id,v){var el=document.getElementById(id);if(el)el.innerHTML=v;
-                      }
-    set('wx-hero-temp',tmp+'<sup>°C</sup>');
-    set('wx-hero-icon',wx.icon);
-    set('wx-hero-desc',wx.desc);
-    set('wx-hero-feels',apt+'°C');
-    set('wx-hero-hum',hum+'%');
-    set('wx-hero-wind',wnd+' km/h');
-    set('wx-hero-rain',prec+' mm');
-    set('wx-hero-updated','Última act. '+hora);
-    set('wx-hero-frase',frase.replace(/^[^\s]+\s/,''));
+  function setTxt(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+function setHTML(id,v){var el=document.getElementById(id);if(el)el.innerHTML=v;}
+
+/* Para temperatura: usar elementos separados */
+var tempEl = document.getElementById('wx-hero-temp');
+if(tempEl){
+  tempEl.textContent = tmp;
+  var sup = tempEl.querySelector('sup') || document.createElement('sup');
+  sup.textContent = '°C';
+  if(!tempEl.querySelector('sup')) tempEl.appendChild(sup);
+}
+
+/* Para el resto que son texto plano: */
+setTxt('wx-hero-desc', wx.desc);
+setTxt('wx-hero-feels', apt+'°C');
+setTxt('wx-hero-hum', hum+'%');
+setTxt('wx-hero-wind', wnd+' km/h');
+setTxt('wx-hero-rain', prec+' mm');
+setTxt('wx-hero-updated', 'Última act. '+hora);
+
     lastWxCode = c.weather_code; lastWxTemp = tmp;
     if (typeof window.__uruspotSetSuggestion === 'function') {
       window.__uruspotSetSuggestion();
@@ -5759,21 +5782,40 @@ searchInput.addEventListener('input',function(){
   }
   var _lastFetchTs = 0;
 
- function fetchWeather(){
+var WX_CACHE_KEY = 'uruspot_wx_cache';
+var WX_CACHE_TTL = 9 * 60 * 1000; // 9 minutos
+
+function fetchWeather(){
   if(document.hidden) return;
-  fetch(WX_URL,{cache:'no-store'})
-    .then(function(r){if(!r.ok)throw new Error();return r.json();})
-    .then(function(d){ _lastFetchTs = Date.now(); renderWeather(d); })
+
+  /* Intentar usar caché de sessionStorage primero */
+  try {
+    var cached = sessionStorage.getItem(WX_CACHE_KEY);
+    if(cached){
+      var parsed = JSON.parse(cached);
+      if(Date.now() - parsed.ts < WX_CACHE_TTL){
+        _lastFetchTs = parsed.ts;
+        renderWeather(parsed.data);
+        return;
+      }
+    }
+  } catch(e) { /* sessionStorage no disponible, continuar con fetch */ }
+
+  fetch(WX_URL)
+    .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
+    .then(function(d){
+      _lastFetchTs = Date.now();
+      try { sessionStorage.setItem(WX_CACHE_KEY, JSON.stringify({ts: _lastFetchTs, data: d})); } catch(e){}
+      renderWeather(d);
+    })
     .catch(function(){
       _lastFetchTs = Date.now() - 4*60*1000;
       renderError();
-      /* Retry real a los 60 segundos si la pestaña sigue activa */
       setTimeout(function(){
         if(!document.hidden) fetchWeather();
       }, 60000);
     });
 }
-
 document.addEventListener('visibilitychange', function(){
     if(!document.hidden){
       var elapsed = Date.now() - _lastFetchTs;
@@ -5894,25 +5936,38 @@ window.addEventListener('online', function(){
       document.body.appendChild(_mf);
       setTimeout(function(){_mf.style.opacity='0';setTimeout(function(){_mf.remove();},580);},80);
 
-      var html = '<span class="mood-result-hint">Encontramos ' + matched.length + ' lugares para "' + moodLabels[mood] + '" — resaltados en toda la guía:</span>';
-      matched.slice(0, 8).forEach(function(card){
-        var name = card.dataset.name || '';
-        var href = card.getAttribute('href') || '#';
-        html += '<a class="mood-result-chip" href="'+href+'" target="_blank" rel="noopener">'+name+'</a>';
-      });
-      html += '<button type="button" class="mood-result-clear" id="mood-clear-btn">Quitar filtro</button>';
-      moodResultInner.innerHTML = html;
+    /* Limpiar resultados anteriores */
+while(moodResultInner.firstChild){ moodResultInner.removeChild(moodResultInner.firstChild); }
+
+var hint = document.createElement('span');
+hint.className = 'mood-result-hint';
+hint.textContent = 'Encontramos ' + matched.length + ' lugares para "' + moodLabels[mood] + '" — resaltados en toda la guía:';
+moodResultInner.appendChild(hint);
+
+matched.slice(0, 8).forEach(function(card){
+  var a = document.createElement('a');
+  a.className = 'mood-result-chip';
+  a.href = card.getAttribute('href') || '#';
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.textContent = card.dataset.name || '';
+  moodResultInner.appendChild(a);
+});
+
+var clearBtn = document.createElement('button');
+clearBtn.type = 'button';
+clearBtn.className = 'mood-result-clear';
+clearBtn.id = 'mood-clear-btn';
+clearBtn.textContent = 'Quitar filtro';
+moodResultInner.appendChild(clearBtn);
       moodResult.classList.add('open');
 
-      var clearBtn = document.getElementById('mood-clear-btn');
-      if (clearBtn) {
-        clearBtn.addEventListener('click', function(){
-          moodBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
-          clearMoodFilter();
-          moodResult.classList.remove('open');
-          setSuggestion(null);
-        });
-      }
+ clearBtn.addEventListener('click', function(){
+    moodBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+    clearMoodFilter();
+    moodResult.classList.remove('open');
+    setSuggestion(null);
+  });
     });
   });
 
@@ -5923,73 +5978,50 @@ window.addEventListener('online', function(){
     if(btn.dataset.mood === suggested) btn.classList.add('suggested');
   });
 
-  /* ====== TABS DE HISTORIA ====== */
-  var htTablist = document.getElementById('ht-tablist');
-  if(htTablist){
-    var htTabs   = [].slice.call(htTablist.querySelectorAll('.ht-tab'));
-    var htPanels = [].slice.call(document.querySelectorAll('.ht-chapter'));
+ /* ====== TABS DE HISTORIA ====== */
+var htTablist = document.getElementById('ht-tablist');
+if(htTablist){
+  var htTabs   = [].slice.call(htTablist.querySelectorAll('.ht-tab'));
+  var htPanels = [].slice.call(document.querySelectorAll('.ht-chapter'));
 
-function activateHtTab(idx, moveFocus){
-  htTabs.forEach(function(t,i){
-    var active = i===idx;
-    t.classList.toggle('ht-tab-active', active);
-    t.setAttribute('aria-selected', active?'true':'false');
-    t.setAttribute('tabindex', active?'0':'-1');
-  });
-  htPanels.forEach(function(p,i){
-    var active = i===idx;
-    if(active){
-      p.removeAttribute('hidden');
-      p.style.display = '';
-      p.setAttribute('tabindex', '-1');
-      var bar = p.querySelector('.ht-bar-fill');
-      if(bar){ bar.style.transition='none'; bar.style.transform='scaleX(0)'; void bar.offsetWidth; bar.style.transition=''; }
-      p.classList.add('ht-chapter-active');
-    function activateHtTab(idx, moveFocus){
-  htTabs.forEach(function(t,i){
-    var active = i===idx;
-    t.classList.toggle('ht-tab-active', active);
-    t.setAttribute('aria-selected', active?'true':'false');
-    t.setAttribute('tabindex', active?'0':'-1');
-  });
-  htPanels.forEach(function(p,i){
-    var active = i===idx;
-    if(active){
-      p.removeAttribute('hidden');
-      p.style.display = '';
-      p.setAttribute('tabindex', '-1');
-      var bar = p.querySelector('.ht-bar-fill');
-      if(bar){ bar.style.transition='none'; bar.style.transform='scaleX(0)'; void bar.offsetWidth; bar.style.transition=''; }
-      p.classList.add('ht-chapter-active');
-      if(moveFocus) p.focus();
-    } else {
-      p.classList.remove('ht-chapter-active');
-      p.removeAttribute('tabindex');
-      setTimeout(function(){ p.setAttribute('hidden',''); p.removeAttribute('style'); }, 220);
-    }
-  });
-}
-   } else {
-      p.classList.remove('ht-chapter-active');
-      p.removeAttribute('tabindex');
-      setTimeout(function(){ p.setAttribute('hidden',''); p.removeAttribute('style'); }, 220);
-    }
-  });
-}
-
-    htTabs.forEach(function(tab, idx){
-      tab.addEventListener('click', function(){ activateHtTab(idx); });
-      tab.addEventListener('keydown', function(e){
-        if(e.key==='ArrowRight'){ e.preventDefault(); activateHtTab(Math.min(idx+1, htTabs.length-1)); htTabs[Math.min(idx+1,htTabs.length-1)].focus(); }
-        if(e.key==='ArrowLeft' ){ e.preventDefault(); activateHtTab(Math.max(idx-1, 0)); htTabs[Math.max(idx-1,0)].focus(); }
-        if(e.key==='Home'      ){ e.preventDefault(); activateHtTab(0); htTabs[0].focus(); }
-        if(e.key==='End'       ){ e.preventDefault(); activateHtTab(htTabs.length-1); htTabs[htTabs.length-1].focus(); }
-      });
+ function activateHtTab(idx, moveFocus){
+    htTabs.forEach(function(t,i){
+      var active = i===idx;
+      t.classList.toggle('ht-tab-active', active);
+      t.setAttribute('aria-selected', active?'true':'false');
+      t.setAttribute('tabindex', active?'0':'-1');
     });
-
-    /* Estado inicial: tab 0 activo, resto ocultos */
-    activateHtTab(0);
+    htPanels.forEach(function(p,i){
+      var active = i===idx;
+      if(active){
+        p.style.display = '';
+        p.setAttribute('tabindex', '-1');
+        p.removeAttribute('aria-hidden');
+        var bar = p.querySelector('.ht-bar-fill');
+        if(bar){ bar.style.transition='none'; bar.style.transform='scaleX(0)'; void bar.offsetWidth; bar.style.transition=''; }
+        p.classList.add('ht-chapter-active');
+        if(moveFocus) p.focus();
+      } else {
+        p.classList.remove('ht-chapter-active');
+        p.removeAttribute('tabindex');
+        p.setAttribute('aria-hidden', 'true');
+        p.style.display = 'none';
+      }
+    });
   }
+
+  htTabs.forEach(function(tab, idx){
+    tab.addEventListener('click', function(){ activateHtTab(idx); });
+    tab.addEventListener('keydown', function(e){
+      if(e.key==='ArrowRight'){ e.preventDefault(); activateHtTab(Math.min(idx+1, htTabs.length-1)); htTabs[Math.min(idx+1,htTabs.length-1)].focus(); }
+      if(e.key==='ArrowLeft' ){ e.preventDefault(); activateHtTab(Math.max(idx-1, 0)); htTabs[Math.max(idx-1,0)].focus(); }
+      if(e.key==='Home'      ){ e.preventDefault(); activateHtTab(0); htTabs[0].focus(); }
+      if(e.key==='End'       ){ e.preventDefault(); activateHtTab(htTabs.length-1); htTabs[htTabs.length-1].focus(); }
+    });
+  });
+
+  activateHtTab(0);
+}
 
   /* ====== GLOSARIO ====== */
   var glosToggle = document.getElementById('glos-toggle');var glosBody = document.getElementById('glos-body');
@@ -6298,6 +6330,29 @@ var crumbEl = document.getElementById('section-crumb');
 
 })();
 
+</script>
+    <script>
+/* ── MOOD BTN MOUSEMOVE ── */
+document.querySelectorAll('.mood-btn').forEach(function(btn){
+  btn.addEventListener('mousemove', function(e){
+    var r = btn.getBoundingClientRect();
+    btn.style.setProperty('--bx', ((e.clientX - r.left) / r.width * 100) + '%');
+    btn.style.setProperty('--by', ((e.clientY - r.top) / r.height * 100) + '%');
+  });
+});
+
+/* ── CIRC CARD DRAW ANIMATION ── */
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced) return;
+  document.querySelectorAll('.circ-card').forEach(function(card){
+    if(!('IntersectionObserver' in window)){ card.classList.add('is-drawn'); return; }
+    var io = new IntersectionObserver(function(e){
+      if(e[0].isIntersecting){ card.classList.add('is-drawn'); io.unobserve(card); }
+    }, { threshold: .3 });
+    io.observe(card);
+  });
+})();
 </script>
 </body>
 </html>
