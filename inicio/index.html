@@ -5085,6 +5085,22 @@ for(var i=0;i<confCount;i++){
   .ru-dusk-sun,.ru-dawn-sun{ top:42px !important; opacity:1 !important; }
   .ru-hl-text{ background-size:100% 88% !important; }
 }
+  @media (max-width: 768px) {
+  .hero, .hero-inner, .hero-topbar, .hero-inner-left {
+    max-width: 100vw !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  .hero-title, .hero-title .main-line, .hero-title .main-line em {
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+  }
+  .identity-strip {
+    width: 100% !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+}
 </style>
 
 <script>
@@ -6303,6 +6319,8 @@ var crumbEl = document.getElementById('section-crumb');
   
 
   setTimeout(forceCounters, 1800);
+forceCounters(); 
+window.addEventListener('load', forceCounters);
 
   
 
