@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="no-js">
+<html lang="es-AR" class="no-js">
 <head>
   <script>document.documentElement.classList.remove('no-js');</script>
 <meta charset="UTF-8" />
@@ -7,11 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="dns-prefetch" href="//api.open-meteo.com" />
-<link rel="dns-prefetch" href="//dolarapi.com" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=Bricolage+Grotesque:wght@400;600;700;800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@600;700&display=swap" />
+<link rel="dns-prefetch" href="//dolarito.ar" />
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=Bricolage+Grotesque:wght@400;600;700;800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@600;700&display=swap"
+  media="print" onload="this.media='all'" />
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=Bricolage+Grotesque:wght@400;600;700;800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@600;700&display=swap" />
+</noscript>
 <link rel="icon" type="image/png" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
 <link rel="apple-touch-icon" href="https://uruspotcdu-create.github.io/uruspot/img/logof.webp" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="index, follow" />
 <meta name="description" content="Guía local verificada de Concepción del Uruguay: restaurantes, cafés, bares, naturaleza, historia y patrimonio. Horarios en tiempo real. 75 lugares." />
 <title>URU SPOT – Guía Local de Concepción del Uruguay</title>
   <link rel="canonical" href="https://uruspot.pages.dev/" />
@@ -24,6 +30,7 @@
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="URU SPOT — La guía definitiva de Concepción del Uruguay" />
+<meta property="og:image:type" content="image/png" />
 <meta property="og:locale" content="es_AR" />
 <meta property="og:site_name" content="URU SPOT" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -39,12 +46,7 @@
     "name": "URU SPOT",
     "description": "La referencia definitiva sobre Concepción del Uruguay, Entre Ríos, Argentina.",
     "url": "https://uruspot.pages.dev/",
-    "inLanguage": "es-AR",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://uruspot.pages.dev/?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
+    "inLanguage": "es-AR"
   },
   {
     "@context": "https://schema.org",
@@ -52,7 +54,7 @@
     "name": "Concepción del Uruguay",
     "description": "Ciudad histórica de Entre Ríos, Argentina.",
     "url": "https://uruspot.pages.dev/",
-    "geo": {
+  "geo": {
       "@type": "GeoCoordinates",
       "latitude": -32.4825,
       "longitude": -58.2372
@@ -62,12 +64,43 @@
       "addressLocality": "Concepción del Uruguay",
       "addressRegion": "Entre Ríos",
       "addressCountry": "AR"
+    },
+    "touristType": ["cultural tourist", "adventure tourist", "culinary tourist"],
+"hasMap": "https://www.google.com/maps/place/...",
+"photo": {
+      "@type": "ImageObject",
+      "url": "https://uruspotcdu-create.github.io/uruspot/img/og-image.png"
     }
   }
 ]
 </script>
 
 <style>
+  .skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 99999;
+  background: var(--verde);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 0 0 4px 4px;
+  font-family: var(--f-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.skip-link:focus-visible {
+  left: 0;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
 /* ═══════════════════════════════════════════════════════
    URU SPOT v2 — DESIGN SYSTEM
    ═══════════════════════════════════════════════════════ */
@@ -83,7 +116,7 @@
   --f-display:'DM Serif Display','Times New Roman',serif;
  --f-italic:'DM Serif Display',Georgia,serif;
   --f-ui:'Syne',system-ui,sans-serif;
-  --card-dark:#16100C;--card-dark2:#1C1410;--card-dark3:#221A14;--card-border-oro:rgba(184,92,42,.35);--card-border-oro-hover:rgba(212,116,42,.72);--card-text:rgba(248,238,224,.94);--card-text-soft:rgba(248,238,224,.62);--card-tag:rgba(248,238,224,.35);
+  --card-dark:#16100C;--card-dark2:#1C1410;--card-dark3:#221A14;--card-border-oro:rgba(184,92,42,.35);--card-border-oro-hover:rgba(212,116,42,.72);--card-text:rgba(248,238,224,.94);--card-text-soft:rgba(248,238,224,.82);--card-tag:rgba(248,238,224,.35);
   --ease:cubic-bezier(0.25,0.46,0.45,0.94);
 /* Spring: rebote pronunciado — para botones, modales, elementos que "saltan" */
 --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -95,11 +128,11 @@
   --gutter:64px;--section-gap:120px;--nav-h:60px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth;font-size:16px}
+html{font-size:16px}
 body{background:var(--void);color:var(--parchment);font-family:var(--f-ui);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
-a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(29,92,64,.75);outline-offset:3px;border-radius:2px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF82;outline-offset:3px;border-radius:2px}
   
   /* ═══════════════ FAB PERDIDO ═══════════════ */
 #lost-fab{position:fixed;bottom:max(24px, calc(env(safe-area-inset-bottom) + 12px));left:max(24px, env(safe-area-inset-left));z-index:8000;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#B85C2A,#D4742A);color:#fff;font-family:var(--f-ui);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:14px 22px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 12px 36px rgba(196,135,42,.50),0 4px 14px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .35s var(--ease),box-shadow .35s ease,background .3s ease;opacity:0;pointer-events:none;transform:translateY(12px)}
@@ -112,11 +145,11 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 #back-to-top:hover{background:var(--verde);border-color:var(--verde2);color:#fff;transform:translateY(-3px) scale(1.06)}
 #back-to-top svg{width:18px;height:18px}
 .btt-ring{position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(242,237,227,.10)}
-@supports(backdrop-filter:blur(8px)){#back-to-top{backdrop-filter:blur(8px);background:rgba(6,6,5,.75)}}
+@supports(backdrop-filter:blur(8px)){#back-to-top{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);background:rgba(6,6,5,.75)}}
 
 /* ── PROGRESS BAR ── */
 #progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--verde2);z-index:10000;transition:width .1s linear;box-shadow:0 0 6px rgba(38,122,85,.8)}
-#progress-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--oro3),transparent);animation:shimmerBar 3s linear infinite}
+#progress-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--oro3),transparent)will-change:transform;animation:shimmerBar 3s linear infinite}
 @keyframes shimmerBar{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 
 /* ── LIVE DOTS ── */
@@ -152,9 +185,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .hero-logo img:hover{transform:scale(1.06)}
 .hero-inner{position:relative;z-index:4;padding:0 var(--gutter) 80px;flex:1;display:flex;flex-direction:row;align-items:flex-end;justify-content:space-between;gap:48px}
 .hero-inner-left{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
-.live-chip{display:inline-flex;align-items:center;gap:10px;background:rgba(184,92,42,.12);border:1px solid rgba(184,92,42,.45);border-radius:30px;padding:9px 20px;font-size:7.5px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:rgba(232,160,100,.98);margin-bottom:32px;width:fit-content;box-shadow:0 4px 16px rgba(184,92,42,.25),0 0 0 1px rgba(184,92,42,.08)}
+.live-chip{display:inline-flex;align-items:center;gap:10px;background:rgba(184,92,42,.12);border:1px solid rgba(184,92,42,.45);border-radius:30px;padding:9px 20px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(232,160,100,.98);margin-bottom:32px;width:fit-content;box-shadow:0 4px 16px rgba(184,92,42,.25),0 0 0 1px rgba(184,92,42,.08)}
 .hero-title{font-family:var(--f-display);font-size:clamp(52px,9vw,108px);line-height:.94;letter-spacing:-1.5px;color:var(--parchment);margin-bottom:36px;display:block}
-.hero-title .eyebrow{font-family:var(--f-italic);font-style:italic;font-size:clamp(13px,1.6vw,20px);font-weight:400;letter-spacing:3px;color:rgba(242,237,227,.38);display:block;margin-bottom:18px;line-height:1}
+.hero-title .eyebrow{font-family:var(--f-italic);font-style:italic;font-size:clamp(13px,1.6vw,20px);font-weight:400;letter-spacing:1px;color:rgba(242,237,227,.38);display:block;margin-bottom:18px;line-height:1}
 .hero-title .main-line em{font-style:italic;background:linear-gradient(100deg,rgba(248,230,210,.98) 0%,rgba(212,116,42,.98) 22%,rgba(255,200,140,1) 46%,rgba(196,90,30,.95) 70%,rgba(232,145,74,.92) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:520% 100%;animation:luxuryShimmer 11s ease-in-out infinite}
 @keyframes luxuryShimmer {
   0%   { background-position: 160% 50% }
@@ -177,7 +210,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .id-stat+.id-stat{border-left:1px solid rgba(184,92,42,.20)}
 .id-stat-num{font-family:var(--f-display);font-size:clamp(26px,3vw,38px);line-height:1;color:var(--parchment);letter-spacing:-1.5px}
 .id-stat-num sup{font-size:14px;color:var(--oro3);vertical-align:super}
-.id-stat-label{font-size:7.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(232,180,140,.55);font-weight:600}
+.id-stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(232,180,140,.85);font-weight:600}
 
 .hero-ctas{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
 .btn-primary{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,#8B3A15 0%,#A84E1E 50%,#963D18 100%);color:#fff;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:18px 42px;border-radius:50px;transition:background .45s var(--ease),transform .4s var(--ease),box-shadow .4s ease;box-shadow:0 8px 40px rgba(184,92,42,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.18);animation:btnBreath 4s ease-in-out 3s infinite}
@@ -194,7 +227,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .wx-hero-bar{height:2px;background:rgba(196,135,42,.20);overflow:hidden;position:relative}
 @media(min-width:769px){.wx-hero-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(196,135,42,.60) 30%,rgba(242,192,96,.90) 50%,rgba(196,135,42,.60) 70%,transparent);animation:shimmerBar 3s ease infinite}}
 .wx-hero-body{padding:18px 20px 14px}
-.wx-hero-city{font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,.35);display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.wx-hero-city{font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.35);display:flex;align-items:center;gap:6px;margin-bottom:14px}
 .wx-hero-city::before{content:'';display:block;width:5px;height:5px;border-radius:50%;background:var(--oro2);flex-shrink:0}
 .wx-hero-main{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
 .wx-hero-icon{font-size:36px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 12px rgba(0,0,0,.5));animation:wx-iconFloat 4s ease-in-out infinite alternate}
@@ -205,7 +238,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .wx-hero-sep{height:1px;background:rgba(242,237,227,.07);margin:12px 0}
 .wx-hero-data{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .wx-hero-datum{display:flex;flex-direction:column;gap:3px}
-.wx-hero-datum-label{font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.22)}
+.wx-hero-datum-label{font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.55)}
 .wx-hero-datum-val{font-family:var(--f-ui);font-size:12px;font-weight:700;color:rgba(242,237,227,.80);min-height:20px;display:block}
 .wx-hero-footer{padding:8px 20px 12px;border-top:1px solid rgba(242,237,227,.05);display:flex;align-items:center;justify-content:space-between}
 .wx-hero-updated{font-family:var(--f-ui);font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.18);min-height:14px;display:block}
@@ -292,7 +325,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 /* ── REVEAL ── */
 .reveal{opacity:0;transform:translateY(24px) scale(.98);filter:blur(4px);transition:opacity .65s var(--ease-out-expo),transform .65s var(--ease-out-expo),filter .65s var(--ease-out-expo);transition-delay:var(--reveal-delay,0ms);will-change:opacity,transform,filter}
 .reveal.visible{opacity:1;transform:translateY(0) scale(1);filter:blur(0px)}
-@media(max-width:768px){.reveal{filter:none}.reveal.visible{filter:none}}
+@media(max-width:1024px){.reveal{filter:none}.reveal.visible{filter:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal{opacity:1;transform:none;filter:none}}
 
 /* ── PILLS ── */
@@ -305,7 +338,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .pill-price:hover{background:rgba(29,92,64,.14);box-shadow:0 0 0 1px rgba(29,92,64,.30),0 4px 12px rgba(29,92,64,.12);transform:translateY(-1px)}
 .pill-feat{background:rgba(242,237,227,.08);border:1px solid rgba(242,237,227,.18);color:rgba(242,237,227,.72)}
 .pill-sponsor{background:rgba(196,135,42,.14);border:1px solid rgba(196,135,42,.40);color:var(--oro)}
-.badge{position:absolute;top:14px;right:14px;background:var(--verde);color:#fff;font-family:var(--f-ui);font-size:6.5px;font-weight:800;letter-spacing:3px;text-transform:uppercase;padding:6px 13px;border-radius:20px;box-shadow:0 4px 14px rgba(29,92,64,.45),inset 0 1px 0 rgba(255,255,255,.15);z-index:4}
+.badge{position:absolute;top:14px;right:14px;background:var(--verde);color:#fff;font-family:var(--f-ui);font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:6px 13px;border-radius:20px;box-shadow:0 4px 14px rgba(29,92,64,.45),inset 0 1px 0 rgba(255,255,255,.15);z-index:4}
 .badge-gold{background:var(--oro);box-shadow:0 2px 12px rgba(196,135,42,.50),inset 0 1px 0 rgba(255,255,255,.20);color:var(--ink)}
 
 /* ── TOOLTIPS ── */
@@ -447,7 +480,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .rcard-open-dot{width:5px;height:5px;background:var(--verde2);border-radius:50%;flex-shrink:0}
 .rcard-icon{font-size:34px;line-height:1}
 .rcard-feat .rcard-icon{font-size:48px}
-.rcard-name{font-family:var(--f-display);font-size:22px;line-height:1.1;color:var(--card-text);letter-spacing:-.4px;display:block;word-break:break-word;font-weight:800}
+.rcard-name{font-family:var(--f-display);font-size:22px;line-height:1.1;color:var(--card-text);letter-spacing:-.4px;display:block;word-break:break-word;font-weight:400}
 .rcard-feat .rcard-name{color:var(--parchment);font-size:32px;letter-spacing:-.8px}
 .rcard-desc{font-family:var(--f-italic);font-style:italic;font-size:14px;color:var(--card-text-soft);line-height:1.75;margin:0;flex:1}
 .rcard-feat .rcard-desc{color:rgba(242,237,227,.46)}
@@ -508,7 +541,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .gcard-score{display:inline-flex;align-items:center;gap:6px;background:rgba(196,135,42,.12);border:1px solid rgba(196,135,42,.35);border-radius:2px;color:var(--oro);font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:5px 10px}
 .gcard-icon{font-size:34px;line-height:1}
 .gcard-feat .gcard-icon{font-size:48px}
-.gcard-name{font-family:var(--f-display);font-size:20px;line-height:1.1;color:var(--card-text);letter-spacing:-.3px;display:block;font-weight:800}
+.gcard-name{font-family:var(--f-display);font-size:20px;line-height:1.1;color:var(--card-text);letter-spacing:-.3px;display:block;font-weight:400}
 .gcard-feat .gcard-name{color:var(--parchment);font-size:32px;letter-spacing:-.8px}
 .gcard-desc{font-family:var(--f-italic);font-style:italic;font-size:14px;color:var(--card-text-soft);line-height:1.75;flex:1}
 .gcard-feat .gcard-desc{color:rgba(242,237,227,.46)}
@@ -1146,6 +1179,20 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .gr-tip-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75}
 .gr-disclaimer{font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.72);line-height:1.8;padding:20px 24px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:24px}
 .gr-disclaimer strong{color:rgba(26,25,22,.88)}
+
+/* ── BADGES ESPECIES Y MODOS ── */
+.gr-species-badge{display:inline-flex;align-items:center;padding:4px 10px;background:rgba(196,135,42,.12);border:1px solid rgba(196,135,42,.35);border-radius:2px;font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2);white-space:nowrap}
+.gr-badge-top{background:var(--oro);color:var(--ink);border-color:var(--oro)}
+.gr-modo{display:inline-flex;align-items:center;padding:4px 10px;background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.14);border-radius:2px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(242,237,227,.70);white-space:nowrap;margin-right:4px;margin-bottom:4px}
+.gr-species-modos{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+
+/* ── BADGES COMPARSA CAMPEONA ── */
+.cv-comp-badge-wrap{margin-bottom:12px}
+.cv-comp-badge-champ{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,rgba(196,135,42,.22),rgba(212,116,42,.18));border:1px solid rgba(196,135,42,.55);border-radius:2px;font-family:var(--f-ui);font-size:8px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--oro2)}
+.cv-comp-body{display:flex;align-items:flex-start;gap:14px;flex:1}
+.cv-comp-icon{font-size:28px;line-height:1;flex-shrink:0}
+.cv-comp-text{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
+.cv-comp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 @media(max-width:860px){.gr-hero-content{flex-direction:column;padding:32px 28px;gap:28px}.gr-fish-illustration{width:160px}.gr-species-grid{grid-template-columns:1fr}.gr-species-feat{grid-column:span 1}.gr-productos-grid{grid-template-columns:1fr 1fr}.gr-prod-feat{grid-column:span 2}.gr-inmig-inner{flex-direction:column;padding:30px 28px;gap:28px}.gr-tips-grid{grid-template-columns:1fr}.gr-intro{padding:26px 24px}}
 @media(max-width:640px){.gr-intro{padding:22px var(--gutter)}.gr-hero-content{padding:26px var(--gutter)}.gr-species-card{padding:22px 18px;gap:12px}.gr-prod-card{padding:22px 16px;gap:12px}.gr-productos-grid{grid-template-columns:1fr}.gr-prod-feat{grid-column:span 1}.gr-inmig-inner{padding:26px var(--gutter)}.gr-tip{padding:22px 18px;gap:12px}.gr-tip-num{font-size:28px}}
 
@@ -1222,6 +1269,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 .uft-wrap.priority-top { order: -1; }
 
 /* ── RESPONSIVE ── */
+@media (max-width: 1280px) {
+  :root { --gutter: 48px; }
+}
 @media (max-width: 1100px) {
   :root { --gutter: 40px; }
   .resto-grid     { grid-template-columns: repeat(3, 1fr); }
@@ -1291,7 +1341,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
   .stat           { flex: 0 0 auto; padding: 16px 20px; }
   .stat-num       { font-size: 28px; }
   .main-nav       { padding: 0; overflow: visible; min-height: auto; }
-.nav-scroll-area { display: grid; grid-template-columns: repeat(4,1fr); overflow: visible; padding: 6px; gap: 2px; }
 .nav-item       { height: auto; flex-direction: column; gap: 3px; padding: 10px 6px; font-size: 7px; letter-spacing: 1px; border-bottom: none; border-radius: 6px; justify-content: center; align-items: center; white-space: normal; text-align: center; }.nav-item:active { transform: scale(.93); transition: transform .12s ease; }
 .nav-emoji      { font-size: 20px !important; display: block; }
 .nav-divider    { display: none; }
@@ -1458,7 +1507,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid rgba(
 
 /* ── FOCUS VISIBLE ── */
 a:focus-visible, button:focus-visible, input:focus-visible {
-  outline: 2px solid rgba(29,92,64,.75);
+  outline: 2px solid #4CAF82;
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -1589,6 +1638,13 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .ccard:nth-child(5)::after{animation-delay:.9s}
 .ccard:nth-child(6)::after{animation-delay:1.4s}
 @media(prefers-reduced-motion:reduce){.ccard::after,.ccard::before{animation:none;}}
+
+@keyframes steamRise {
+  0%   { transform: translateX(-50%) translateY(0px);   opacity: 0;    }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-18px);  opacity: 0;    }
+}
 
 /* Hover: intensificar el glow naranja en lugar de hacer zoom de foto */
 .ccard:hover .ccard-bg {
@@ -2112,14 +2168,14 @@ html, body {
 
 
 </style> 
+  </head>
   <body>
   
-<a class="skip-link" href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:99999;background:var(--verde);color:#fff;padding:8px 16px;border-radius:0 0 4px 4px;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';this.style.overflow='visible';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';this.style.overflow='hidden';">Ir al contenido principal</a>
+<a class="skip-link" href="#main-content">Ir al contenido principal</a>
 <div id="progress-bar" aria-hidden="true"></div>
 
 <header class="hero">
   <div class="hero-mesh" aria-hidden="true"></div>
-  <div class="hero-lines" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
   <div class="hero-topbar">
@@ -2128,13 +2184,13 @@ html, body {
       <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
     </div>
     <div class="hero-logo">
-      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local" width="80" height="101" fetchpriority="high" style="aspect-ratio:80/101;height:auto;" />
+      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
     </div>
   </div>
   <div class="hero-inner">
     <div class="hero-inner-left">
       <div class="live-chip" role="status" aria-live="polite"><span class="live-dot" aria-hidden="true"></span>Verificado en CdU · Junio 2026</div>
-      <h1 class="hero-title" id="hero-title-anim">
+      <h1 class="hero-title" id="hero-title-anim" aria-label="Restaurantes, bares y más en Concepción del Uruguay">
   <span class="eyebrow" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span>
   <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span>
   <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)">del Uruguay</em></span>
@@ -2179,7 +2235,7 @@ html, body {
       <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país. Esta guía existe porque ninguna otra sabe lo que pasa entre los dos.<br /><strong>75 lugares verificados. Historia real. Solo CdU.</strong></p>
   <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="75" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares verificados</div></div>
-  <div class="id-stat" role="listitem" style="border-left:2px solid rgba(212,116,42,.35)"><div class="id-stat-num" data-count="242" style="color:var(--oro2);font-size:clamp(32px,4vw,48px)">0</div><div class="id-stat-label" style="font-family:var(--f-italic);font-style:italic;color:rgba(232,180,140,.70);letter-spacing:1px">Años</div></div>
+  <div class="id-stat" role="listitem" style="border-left:2px solid rgba(212,116,42,.35)"><div class="id-stat-num" data-count="243" style="color:var(--oro2);font-size:clamp(32px,4vw,48px)">0</div><div class="id-stat-label" style="font-family:var(--f-italic);font-style:italic;color:rgba(232,180,140,.70);letter-spacing:1px">Años</div></div>
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="5">0</div><div class="id-stat-label">Universidades activas</div></div>
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="%">0<sup>%</sup></div><div class="id-stat-label">Local</div></div>
 </div>
@@ -2223,34 +2279,37 @@ html, body {
 
 <nav class="main-nav" id="main-nav" role="navigation" aria-label="Categorías">
   <div class="nav-scroll-area">
- <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+ <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item active" href="#mood" data-section="mood"><span class="nav-emoji" aria-hidden="true">✨</span> Empezar</a>
-<div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+<div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#circuitos" data-section="circuitos"><span class="nav-emoji" aria-hidden="true">🗺️</span> Circuitos</a>
-  <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+  <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#restaurantes" data-section="restaurantes"><span class="nav-emoji" aria-hidden="true">🍽️</span> Restaurantes</a>
-  <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+  <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#cafes" data-section="cafes"><span class="nav-emoji" aria-hidden="true">☕</span> Cafés</a>
-  <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+  <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#bares" data-section="bares"><span class="nav-emoji" aria-hidden="true">🍻</span> Bares</a>
-<div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+<div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#panaderias" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🥐</span> Panaderías</a>
-   <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
-    <a class="nav-item" href="#heladerias" data-section="heladerias"><span class="nav-emoji" aria-hidden="true">🍦</span> Heladerías</a>
-   <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+   <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#heladerias" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🍦</span> Heladerías</a>
+   <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#hosterias" data-section="hosterias"><span class="nav-emoji" aria-hidden="true">🏨</span> Hosterías</a>
-    <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+    <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#gimnasios" data-section="gimnasios"><span class="nav-emoji" aria-hidden="true">💪</span> Gimnasios</a>
-    <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+    <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#naturaleza" data-section="naturaleza"><span class="nav-emoji" aria-hidden="true">🌊</span> Naturaleza</a>
-    <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+    <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#patrimonio" data-section="patrimonio"><span class="nav-emoji" aria-hidden="true">🏛️</span> Patrimonio</a>
-    <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+    <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#historia" data-section="historia"><span class="nav-emoji" aria-hidden="true">📜</span> Historia</a>
-    <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+    <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#carnaval" data-section="carnaval"><span class="nav-emoji" aria-hidden="true">🎭</span> Carnaval</a>
-    <div class="nav-divider" aria-hidden="true" tabindex="-1"></div>
+    <div class="nav-divider" aria-hidden="true"></div>
     <a class="nav-item" href="#deporte" data-section="deporte"><span class="nav-emoji" aria-hidden="true">🏆</span> Deporte</a>
+    <a class="nav-item" href="#veterinarias" data-section="veterinarias"><span class="nav-emoji" aria-hidden="true">🐾</span> Veterinarias</a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a class="nav-item" href="#remiserias" data-section="remiserias"><span class="nav-emoji" aria-hidden="true">🚖</span> Remiserías</a>
   </div>
   <button class="search-icon-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">🔍<span class="search-btn-label">Buscar</span></button>
   <button id="nav-scroll-right" aria-label="Ver más secciones" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to right,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 10px 0 16px;position:relative;z-index:2;transition:color .2s ease" onmouseenter="this.style.color='rgba(242,237,227,1)'" onmouseleave="this.style.color='rgba(242,237,227,.7)'">❯</button>
@@ -2282,7 +2341,7 @@ html, body {
       <span id="mood-suggest-text">Cargando sugerencia...</span>
     </div>
     <span class="mood-question">Elegí según cómo estás ahora. La guía entera se ajusta — según la hora, el clima y tus ganas.</span>
-    <div class="mood-grid" id="mood-grid" role="list"> <style>
+<div class="mood-grid" id="mood-grid" role="group" aria-label="Opciones de estado de ánimo"> <style>
 .mood-btn{position:relative;overflow:hidden;}
 .mood-btn::before{
   content:'';
@@ -2295,22 +2354,22 @@ html, body {
 }
 .mood-btn:hover::before,.mood-btn:focus-visible::before{opacity:1;}
 </style>
-      <button class="mood-btn" data-mood="rapido" type="button" role="listitem" aria-pressed="false">
+      <button class="mood-btn" data-mood="rapido" type="button" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">⚡</span>
         <span class="mood-btn-label">Algo rápido</span>
         <span class="mood-btn-sub">Sin vueltas</span>
       </button>
-      <button class="mood-btn" data-mood="barato" type="button" role="listitem" aria-pressed="false">
+      <button class="mood-btn" data-mood="barato" type="button" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">💸</span>
         <span class="mood-btn-label">Gastar poco</span>
         <span class="mood-btn-sub">Sin romper el presupuesto</span>
       </button>
-      <button class="mood-btn" data-mood="sorpresa" type="button" role="listitem" aria-pressed="false">
+      <button class="mood-btn" data-mood="sorpresa" type="button" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">🎲</span>
         <span class="mood-btn-label">Sorprenderme</span>
         <span class="mood-btn-sub">Puntaje URU SPOT verificado</span>
       </button>
-      <button class="mood-btn" data-mood="relax" type="button" role="listitem" aria-pressed="false">
+      <button class="mood-btn" data-mood="relax" type="button" aria-pressed="false">
         <span class="mood-btn-icon" aria-hidden="true">🌿</span>
         <span class="mood-btn-label">Algo tranquilo</span>
         <span class="mood-btn-sub">Para desconectarse del día</span>
@@ -2365,7 +2424,7 @@ html, body {
   .circ-card-icon{font-size:36px;line-height:1;margin-bottom:12px;transition:transform .4s var(--ease)}
   .circ-card:hover .circ-card-icon{transform:scale(1.12) rotate(-5deg)}
   .circ-card-feat .circ-card-icon{font-size:48px}
-  .circ-name{font-family:var(--f-display);font-size:clamp(18px,2vw,24px);color:var(--card-text);letter-spacing:-.3px;line-height:1.1;margin-bottom:10px;position:relative;z-index:1;font-weight:800}
+  .circ-name{font-family:var(--f-display);font-size:clamp(18px,2vw,24px);color:var(--card-text);letter-spacing:-.3px;line-height:1.1;margin-bottom:10px;position:relative;z-index:1;font-weight:400}
 .circ-card-feat .circ-name{color:var(--parchment);font-size:clamp(22px,2.5vw,30px)}
 .circ-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75;flex:1;position:relative;z-index:1;margin-bottom:16px}
 .circ-card-feat .circ-desc{color:rgba(242,237,227,.52)}
@@ -2549,6 +2608,30 @@ html, body {
     </div>
   </div>
 </section>
+  <!-- ===================== VETERINARIAS ===================== --> <section class="us-section" id="veterinarias" aria-labelledby="title-veterinarias"> <div class="section-header"> <div> <span class="section-eyebrow">Clínicas · Pet shops</span> <h2 class="section-title" id="title-veterinarias">🐾 Veterinarias y Mascotas</h2> </div> <span class="section-count">6 lugares verificados</span> <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div> </div> <div class="list-items" id="grid-veterinarias"> <a class="litem reveal searchable" data-name="Veterinaria FISIOVET" data-tags="veterinaria clinica fisioterapia rehabilitacion cirugia ecografia radiografia peluqueria canina" data-mood="relax" href="tel:+5493442498143" aria-label="Veterinaria FISIOVET, J.J. Bruno 2942, llamar al +54 9 3442 49-8143"> <span class="litem-icon" aria-hidden="true">💆</span> <span class="litem-name"> Veterinaria FISIOVET <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> J.J. Bruno 2942 · Lu-Vi 9-12:30 y 16-19:30 · Sáb 9-12:30 · Fisioterapia · Cirugía · Radiografía y Ecografía · +54 9 3442 49-8143 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dr. Vet" data-tags="veterinaria clinica cirugia" data-mood="sorpresa" href="tel:+5493442660101" style="--reveal-delay:70ms" aria-label="Clínica Veterinaria Dr. Vet, Bv. Aráoz 115, llamar al +54 9 3442 66-0101"> <span class="litem-icon" aria-hidden="true">🏥</span> <span class="litem-name"> Clínica Veterinaria Dr. Vet <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Bv. Aráoz 115 · +54 9 3442 66-0101 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Agroveterinaria 9 de Julio" data-tags="veterinaria agroveterinaria clinica farmacia grandes animales pequeños animales alimentos balanceados" data-mood="rapido" href="tel:+543442427801" style="--reveal-delay:140ms" aria-label="Agroveterinaria 9 de Julio, 9 de Julio 1016, llamar al 03442 42-7801"> <span class="litem-icon" aria-hidden="true">🌾</span> <span class="litem-name"> Agroveterinaria 9 de Julio <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> 9 de Julio 1016 · Lu-Vi 8-12 y 16-20 · Sáb y Dom cerrado · Grandes y pequeños animales · 03442 42-7801 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dres. Artusi y Bruchez" data-tags="veterinaria clinica belgrano artusi bruchez" href="tel:+543442422164" style="--reveal-delay:210ms" aria-label="Clínica Veterinaria Dres. Artusi y Bruchez, Belgrano 900, llamar al 03442 42-2164"> <span class="litem-icon" aria-hidden="true">🩺</span> <span class="litem-name"> Clínica Veterinaria Dres. Artusi y Bruchez <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Belgrano 900 · 03442 42-2164 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="ATP Veterinaria" data-tags="veterinaria clinica cirugia vacunacion farmacia alimentos pet shop mascotas" data-mood="rapido" href="tel:+543442450418" style="--reveal-delay:280ms" aria-label="ATP Veterinaria, Blvd. Hipólito Yrigoyen 949, llamar al 03442 45-0418"> <span class="litem-icon" aria-hidden="true">💉</span> <span class="litem-name"> ATP Veterinaria <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Blvd. Hipólito Yrigoyen 949 · Lu-Vi 8-20 · Cirugía · Pet shop · 03442 45-0418 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Dog Center Pet Shop" data-tags="pet shop peluqueria canina baño corte alimentos accesorios mascotas" data-mood="rapido barato" href="tel:+543442408275" style="--reveal-delay:350ms" aria-label="Dog Center Pet Shop, Sarmiento 801, llamar al 03442 40-8275"> <span class="litem-icon" aria-hidden="true">🛒</span> <span class="litem-name"> Dog Center Pet Shop <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Sarmiento 801 · Lu-Sáb desde 8:30 · Pet shop y peluquería canina · 03442 40-8275 </span> </span> <span class="litem-arrow">→</span> </a> </div> <p style="font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.50);line-height:1.8;padding:16px 22px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:1px"> ⚠️ <strong>Nota editorial:</strong> Los horarios de Dr. Vet y Dres. Artusi-Bruchez no se publican por variación entre fuentes — llamar antes de concurrir. No existe veterinaria con guardia 24 hs explícitamente verificada en CdU. </p> <p class="search-no-results" id="no-results-veterinarias">No se encontraron veterinarias con ese nombre.</p> </section>
+  
+  
+  <!-- ===================== REMISERÍAS ===================== -->
+<section class="us-section" id="remiserias" aria-labelledby="title-remiserias">
+  <div class="section-header">
+    <div><span class="section-eyebrow">Movilidad puntual · Sin apps tipo Uber</span><h2 class="section-title" id="title-remiserias">🚖 Remiserías</h2></div>
+    <span class="section-count">2 remiserías</span>
+    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+  <div class="list-items" id="grid-remiserias">
+    <a class="litem reveal searchable" data-name="Tao Remises" data-tags="remis remiseria transporte taxi 24 horas" href="tel:+543442542772" aria-label="Tao Remises — llamar al 03442 54-2772, servicio las 24 horas">
+      <span class="litem-icon" aria-hidden="true">🚖</span>
+      <span class="litem-name">Tao Remises<br><span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px">Bv. Montoneras 143 · 24 hs · 03442 54-2772</span></span>
+      <span class="litem-arrow">→</span>
+    </a>
+    <a class="litem reveal searchable" data-name="Acción Remises" data-tags="remis remiseria transporte taxi 24 horas" href="tel:+543442641200" style="--reveal-delay:70ms" aria-label="Acción Remises — llamar al 03442 64-1200, servicio las 24 horas">
+      <span class="litem-icon" aria-hidden="true">🚖</span>
+      <span class="litem-name">Acción Remises<br><span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px">Belgrano 674 · 24 hs · 03442 64-1200</span></span>
+      <span class="litem-arrow">→</span>
+    </a>
+  </div>
+  <p class="search-no-results" id="no-results-remiserias">No se encontraron remiserías con ese nombre.</p>
+</section>
 
 <!-- ===================== CATEGORÍAS ===================== -->
 <section id="categorias" aria-labelledby="title-categorias">
@@ -2659,19 +2742,20 @@ html, body {
   </div>
   <div class="cafe-grid" id="grid-cafes">
     <a class="ccard ccard-featured reveal searchable" data-name="Nero Café" data-tags="cafe especialidad espresso" data-mood="relax" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nero-cafe/">
-      <div class="ccard-bg" aria-hidden="true"><img 
-  src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=75&auto=format&fm=webp"
-  srcset="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=70&auto=format&fm=webp 400w,
-          https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=75&auto=format&fm=webp 600w,
-          https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80&auto=format&fm=webp 800w"
-  sizes="(max-width:640px) 100vw, (max-width:860px) 50vw, 33vw"
-  width="400" height="280"
-  style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
-  loading="lazy"
-  decoding="async"
-  alt="Nero Café — café de especialidad en Concepción del Uruguay"
-/>
-      </div>
+<div class="ccard-bg" aria-hidden="true">
+  <img 
+    src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=75&auto=format&fm=webp"
+    srcset="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=70&auto=format&fm=webp 400w,
+            https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=75&auto=format&fm=webp 600w,
+            https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80&auto=format&fm=webp 800w"
+    sizes="(max-width:640px) 100vw, (max-width:860px) 50vw, 33vw"
+    width="600" height="400"
+    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
+    loading="lazy"
+    decoding="async"
+    alt="Nero Café — café de especialidad en Concepción del Uruguay"
+  />
+</div>
       <div class="ccard-overlay"></div><span class="ccard-glow" aria-hidden="true"></span><div class="ccard-border"></div><span class="badge">Top</span>
       <div class="ccard-inner"><span class="ccard-label">Especialidad</span><span class="ccard-name">Nero Café</span><div class="pills" style="margin-top:4px"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.9</span></div></div>
     </a>
@@ -2721,7 +2805,7 @@ html, body {
     <a class="litem reveal searchable" data-name="Brodë" data-tags="panaderia nuevo artesanal" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/brode/" style="--reveal-delay:350ms"><span class="badge badge-gold">Nuevo</span><span class="litem-icon">🥐</span><span class="litem-name">Brodë</span><span class="litem-arrow">→</span></a>
   </div>
 
-  <div style="display:flex;align-items:center;gap:14px;margin:32px 0 18px;"><span style="font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--verde2);">🍦 HELADERÍAS</span><span style="flex:1;height:1px;background:rgba(26,25,22,.10);"></span></div>
+  <div id="heladerias" style="display:flex;align-items:center;gap:14px;margin:32px 0 18px;"><span style="font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--verde2);">🍦 HELADERÍAS</span><span style="flex:1;height:1px;background:rgba(26,25,22,.10);"></span></div>
   <div class="list-items" id="grid-heladerias">
     <a class="litem reveal searchable" data-name="Yelatti Artesanal" data-tags="heladeria artesanal helado" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/yelatti-artesanal/"><span class="badge">Top</span><span class="litem-icon">🍦</span><span class="litem-name">Yelatti Artesanal</span><span class="litem-arrow">→</span></a>
     <a class="litem reveal searchable" data-name="Cremolatti" data-tags="heladeria helado cremoso" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cremolatti/" style="--reveal-delay:70ms"><span class="litem-icon">🍨</span><span class="litem-name">Cremolatti</span><span class="litem-arrow">→</span></a>
@@ -3351,7 +3435,7 @@ html, body {
 
   <div class="section-header">
     <div>
-      <span class="section-eyebrow">Fundación · 1783–Hoy · 242 años</span>
+      <span class="section-eyebrow">Fundación · 1783–Hoy · 243 años</span>
       <h2 class="section-title" id="title-historia">📜 Historia de Concepción del Uruguay</h2>
     </div>
     <span class="section-count">6 capítulos · Fuentes verificadas</span>
@@ -3368,7 +3452,7 @@ html, body {
       <h3 class="ht-hero-title">La ciudad que <em>no sabe</em> cuándo nació</h3>
       <p class="ht-hero-sub">Concepción del Uruguay fue fundada en 1783 — pero la fecha oficial que se celebra desde hace siglos no tiene acta que la respalde. Esta es la investigación que lo confirma.</p>
       <div class="ht-hero-stats" role="list">
-        <div class="ht-stat" role="listitem"><span class="ht-stat-num">242</span><span class="ht-stat-label">años de historia</span></div>
+        <div class="ht-stat" role="listitem"><span class="ht-stat-num">243</span><span class="ht-stat-label">años de historia</span></div>
         <div class="ht-stat-div" aria-hidden="true"></div>
         <div class="ht-stat" role="listitem"><span class="ht-stat-num">6</span><span class="ht-stat-label">capítulos</span></div>
         <div class="ht-stat-div" aria-hidden="true"></div>
@@ -3585,41 +3669,40 @@ html, body {
 <!-- ===================== CARNAVAL 2026 ===================== -->
 <section class="us-section" id="carnaval" aria-labelledby="title-carnaval">
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Festival",
-    "name": "Carnaval de Concepción del Uruguay 2026",
-    "description": "El Carnaval de Concepción del Uruguay se realiza en el Predio Multieventos con cinco noches de comparsas.",
-    "location": {
-      "@type": "Place",
-      "name": "Predio Multieventos — Corsódromo",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Concepción del Uruguay",
-        "addressRegion": "Entre Ríos",
-        "addressCountry": "AR"
-      }
-    },
-    "organizer": {
-      "@type": "GovernmentOrganization",
-      "name": "Municipio de Concepción del Uruguay"
-    },
-    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-    "eventStatus": "https://schema.org/EventScheduled",
-    "startDate": "2026-02-07",
-    "endDate": "2026-02-28",
-    "inLanguage": "es-AR"
-  }
-  </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Festival",
+  "name": "Carnaval de Concepción del Uruguay 2026",
+  "description": "Carnaval histórico de Concepción del Uruguay. 5 noches, 5 comparsas, más de 50.000 asistentes por edición.",
+  "url": "https://uruspot.pages.dev/#carnaval",
+  "startDate": "2026-02-07",
+  "endDate": "2026-02-28",
+  "location": {
+    "@type": "Place",
+    "name": "Predio Multieventos — Corsódromo",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Concepción del Uruguay",
+      "addressRegion": "Entre Ríos",
+      "addressCountry": "AR"
+    }
+  },
+  "organizer": {
+    "@type": "GovernmentOrganization",
+    "name": "Municipio de Concepción del Uruguay"
+  },
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "inLanguage": "es-AR"
+}
+</script>
 
   <div class="section-header">
     <div>
       <span class="section-eyebrow">Febrero 2026 · Corsódromo · Entre Ríos</span>
-      <h2 class="section-title" id="title-carnaval" style="position:relative;display:inline-block">
-  🎭 Carnaval 2026
-  <canvas id="confetti-canvas" aria-hidden="true" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;height:120px;pointer-events:none;z-index:10"></canvas>
-</h2>
+  <h2 class="section-title" id="title-carnaval">🎭 Carnaval 2026</h2>
+<canvas id="confetti-canvas" aria-hidden="true" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;height:120px;pointer-events:none;z-index:10"></canvas>
 <script>
 (function(){
   var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -4265,7 +4348,7 @@ for(var i=0;i<confCount;i++){
 .dep-athlete-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
 .dep-athlete-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:28px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
 .dep-athlete-card:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
-.dep-athlete-name{font-family:var(--f-display);font-size:19px;color:var(--card-text);letter-spacing:-.2px;font-weight:800}
+.dep-athlete-name{font-family:var(--f-display);font-size:19px;color:var(--card-text);letter-spacing:-.2px;font-weight:400}
 .dep-athlete-feat .dep-athlete-name{font-size:24px}
 .dep-athlete-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75}
 .dep-athlete-desc strong{font-style:normal;color:var(--card-text)}
@@ -4704,7 +4787,7 @@ for(var i=0;i<confCount;i++){
   --paper:        #EBE3D2;
   --paper-2:      #E2D8C2;
   --paper-line:   rgba(28,43,58,.09);
-  --ink:          #1C2B3A;
+  --ru-ink:       #1C2B3A;
   --ink-soft:     #4C5C6C;
   --ink-faint:    #1C2B3A66;
   --pen-blue:     #2B4570;
@@ -5240,8 +5323,9 @@ if(navScrollArea && navArrow){
   if(reduced||window.innerWidth<769)return;
   var orb1=document.querySelector('.hero-orb-1');
   var orb2=document.querySelector('.hero-orb-2');
-  var mesh=document.querySelector('.hero-mesh');
   if(!orb1||!orb2)return;
+  orb1.style.animationPlayState='paused';
+  orb2.style.animationPlayState='paused';
   var cx=0,cy=0,tx1=0,ty1=0,tx2=0,ty2=0;
   var raf=null;
   document.addEventListener('mousemove',function(e){
@@ -5249,6 +5333,7 @@ if(navScrollArea && navArrow){
     cy=(e.clientY/window.innerHeight-.5)*2;
   },{passive:true});
   function lerp(a,b,t){return a+(b-a)*t;}
+var mesh=document.querySelector('.hero-mesh');
   function tick(){
     tx1=lerp(tx1,cx*22,0.06);
     ty1=lerp(ty1,cy*16,0.06);
@@ -5296,10 +5381,16 @@ if(navScrollArea && navArrow){
       tarde:   ['Buenas tardes','El mejor momento para salir'],
       noche:   ['Buenas noches','La noche empieza en CdU']
     };
-    var chip = document.querySelector('.live-chip');
+  var chip = document.querySelector('.live-chip');
     if(chip){
       var m = msgs[globalTimeMode];
-      chip.innerHTML = '<span class="live-dot" aria-hidden="true"></span>' + m[Math.floor(Math.random()*m.length)];
+      var selectedMsg = m[Math.floor(Math.random()*m.length)];
+      while(chip.firstChild){ chip.removeChild(chip.firstChild); }
+      var dotEl = document.createElement('span');
+      dotEl.className = 'live-dot';
+      dotEl.setAttribute('aria-hidden', 'true');
+      chip.appendChild(dotEl);
+      chip.appendChild(document.createTextNode(selectedMsg));
     }
     /* ── HORARIOS EN TIEMPO REAL ── */
 (function(){
@@ -5385,19 +5476,21 @@ if(navScrollArea && navArrow){
   var heroMesh = document.querySelector('.hero-mesh');
   var heroTitleEms = document.querySelectorAll('.hero-title .main-line em');
 
-  if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
     var spotEls = document.querySelectorAll('.rcard, .gcard, .nat-card, .dep-feat-card, .dep-club-card, .mood-card, .circ-card, .ccard');
     spotEls.forEach(function(el){
       var raf = null;
+      var cachedRect = null;
+      el.addEventListener('mouseenter', function(){ cachedRect = el.getBoundingClientRect(); });
       el.addEventListener('mousemove', function(e){
-        if (raf) return;
+        if (raf || !cachedRect) return;
         raf = requestAnimationFrame(function(){
-          var r = el.getBoundingClientRect();
-          el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-          el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+          el.style.setProperty('--mx', ((e.clientX - cachedRect.left) / cachedRect.width * 100) + '%');
+          el.style.setProperty('--my', ((e.clientY - cachedRect.top) / cachedRect.height * 100) + '%');
           raf = null;
         });
       });
+      el.addEventListener('mouseleave', function(){ cachedRect = null; });
     });
   }
  
@@ -5437,6 +5530,7 @@ if(navScrollArea && navArrow){
   var navH = 60;
   var navIndicator = document.createElement('span');
   navIndicator.className = 'nav-indicator';
+  navIndicator.setAttribute('aria-hidden', 'true');
   nav.appendChild(navIndicator);
 
 function moveIndicator(item){
@@ -5622,7 +5716,7 @@ navItems.forEach(function(item){
 }
     });
     /* no-results por grid */
-    ['restaurantes','cafes','bares','panaderias','heladerias','hosterias','gimnasios','patrimonio','naturaleza','historia','carnaval','deporte'].forEach(function(id){
+    ['restaurantes','cafes','bares','panaderias','heladerias','hosterias','gimnasios','patrimonio','naturaleza','historia','carnaval','deporte','veterinarias','remiserias'].forEach(function(id){
       var grid=document.getElementById('grid-'+id)||document.getElementById(id);
       var noRes=document.getElementById('no-results-'+id);
       if(!grid||!noRes)return;
@@ -5643,7 +5737,7 @@ navItems.forEach(function(item){
     var matches=getAllSearchables().filter(function(it){return normalize(it.name).includes(q)||normalize(it.tags).includes(q);});
     if(!matches.length){ddHide();return;}
     var esc=q.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&');
-    var reg=new RegExp('('+esc+')','gi');
+var reg; try{ reg=new RegExp('('+esc+')','gi'); } catch(e){ ddHide(); return; }
  /* Limpiar dropdown anterior */
 while(dropdown.firstChild){ dropdown.removeChild(dropdown.firstChild); }
 
@@ -5675,12 +5769,12 @@ matches.forEach(function(it){
     requestAnimationFrame(function(){dropdown.classList.add('dd-visible');});
   }
 
-  function openSearch(){
-    searchBarWrap.classList.add('open');
-    searchToggleBtn.setAttribute('aria-expanded','true');
-    if(crumbEl)crumbEl.classList.add('search-active');
-    setTimeout(function(){searchInput.focus();},320);
-  }
+ function openSearch(){
+  searchBarWrap.classList.add('open');
+  searchToggleBtn.setAttribute('aria-expanded','true');
+  if(crumbEl)crumbEl.classList.add('search-active');
+  searchInput.focus(); // síncrono — necesario para iOS
+}
   function closeSearch(){
     searchBarWrap.classList.remove('open');
     searchToggleBtn.setAttribute('aria-expanded','false');
@@ -5861,7 +5955,8 @@ window.addEventListener('online', function(){
       scheduleWeather();
     }, {once: true});
   }
-  setInterval(function(){ fetchWeather(); }, 10*60*1000);
+  window.__uruspotWeatherInterval = setInterval(function(){ fetchWeather(); }, 10*60*1000);
+  window.addEventListener('pagehide', function(){ clearInterval(window.__uruspotWeatherInterval); })
 
 
   /* ====== MOOD PICKER — filtro REAL sobre las grillas existentes ====== */
@@ -6009,8 +6104,9 @@ if(htTablist){
     });
     htPanels.forEach(function(p,i){
       var active = i===idx;
-      if(active){
+  if(active){
         p.style.display = '';
+        p.removeAttribute('hidden');
         p.setAttribute('tabindex', '-1');
         p.removeAttribute('aria-hidden');
         var bar = p.querySelector('.ht-bar-fill');
@@ -6052,7 +6148,7 @@ if(htTablist){
   /* ====== ACCORDION CATEGORÍAS ====== */
 ['naturaleza','gastronomia-regional','carnaval','restaurantes','cafes','bares',
  'panaderias','hosterias','gimnasios','patrimonio','deporte','historia',
- 'circuitos','como-llegar','servicios'].forEach(function(id){
+ 'circuitos','como-llegar','servicios','remiserias'].forEach(function(id){
     var sec = document.getElementById(id);
     if(!sec) return;
     var hdr = sec.querySelector('.section-header');
@@ -6102,7 +6198,8 @@ var sectionNames = {
     deporte:'Deporte', historia:'Historia',
     circuitos:'Circuitos', 'como-llegar':'Cómo llegar',
     servicios:'Servicios', 'uni-ruta':'Para universitarios',
-    'bp-puerto-viejo':'Puerto Viejo',
+    'bp-puerto-viejo':'Puerto Viejo', veterinarias:'Veterinarias y Mascotas',
+remiserias:'Remiserías',
 };
 var crumbEl = document.getElementById('section-crumb');
   var crumbCurrent = crumbEl ? crumbEl.querySelector('#section-crumb-current') : null;
@@ -6270,9 +6367,11 @@ var crumbEl = document.getElementById('section-crumb');
 
   'use strict';
 
-  
+  var countersAnimated = false;
 
   function forceCounters() {
+
+    if (countersAnimated) return;
 
     var strip = document.getElementById('hero-stats-strip');
 
@@ -6286,7 +6385,9 @@ var crumbEl = document.getElementById('section-crumb');
 
     });
 
-    if (!needsForce) return;
+    if (!needsForce) { countersAnimated = true; return; }
+
+    countersAnimated = true;
 
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -6316,13 +6417,9 @@ var crumbEl = document.getElementById('section-crumb');
 
   }
 
-  
-
   setTimeout(forceCounters, 1800);
-forceCounters(); 
-window.addEventListener('load', forceCounters);
 
-  
+  window.addEventListener('load', forceCounters);
 
   var scrollFired = false;
 
@@ -6347,7 +6444,6 @@ window.addEventListener('load', forceCounters);
   }, { passive: true });
 
 })();
-
 </script>
     <script>
 /* ── MOOD BTN MOUSEMOVE ── */
