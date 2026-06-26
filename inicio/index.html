@@ -2358,7 +2358,7 @@ if('serviceWorker' in navigator){
 <li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
 <li><a class="nav-item" href="#veterinarias" data-section="veterinarias"><span class="nav-emoji" aria-hidden="true">🐾</span> Veterinarias</a></li>
 <li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#compras" data-section="compras"><span class="nav-emoji" aria-hidden="true">🛒</span> Compras</a></li>
+<li><a class="nav-item" href="#supermercados" data-section="supermercados"><span class="nav-emoji" aria-hidden="true">🛒</span> Compras</a></li>
 <li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
 <li><a class="nav-item" href="#bancos" data-section="bancos"><span class="nav-emoji" aria-hidden="true">🏦</span> Bancos</a></li>
 <li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
@@ -3814,627 +3814,6 @@ if('serviceWorker' in navigator){
 
 </section>
 
-  <!-- ══════════════════════════════════════════════════════════════
-     MÓDULO: ABASTECIMIENTO Y COMPRAS ESENCIALES
-     Insertar dentro de <main class="main-body">, después de la
-     sección #servicios y antes de #naturaleza (o donde convenga
-     en el orden editorial definitivo).
-     nav-item sugerido: data-section="compras" / emoji 🛒
-══════════════════════════════════════════════════════════════ -->
-
-<!-- ── ESTILOS PROPIOS DEL MÓDULO (prefijo cmp-) ── -->
-<style>
-/* ── INTRO EJECUTIVO ── */
-.cmp-exec{
-  margin-bottom:48px;
-  padding:32px 40px;
-  background:var(--ink);
-  border-left:5px solid var(--verde2);
-  position:relative;overflow:hidden;
-}
-.cmp-exec::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(29,92,64,.16) 0%,transparent 60%);
-  pointer-events:none;
-}
-.cmp-exec-inner{position:relative;z-index:1}
-.cmp-exec-eyebrow{
-  display:block;font-family:var(--f-ui);font-size:8px;font-weight:700;
-  letter-spacing:3px;text-transform:uppercase;color:rgba(196,135,42,.65);margin-bottom:14px;
-}
-.cmp-exec-text{
-  font-family:var(--f-italic,var(--f-display));font-style:italic;
-  font-size:clamp(14px,1.8vw,18px);color:rgba(242,237,227,.80);
-  line-height:1.7;max-width:700px;
-}
-.cmp-exec-text em{font-style:normal;color:var(--oro2)}
-.cmp-exec-rule{height:3px;background:linear-gradient(90deg,var(--verde2),var(--oro2),rgba(242,237,227,.12));margin-top:24px}
-
-/* ── SUBTÍTULOS DE ESCENARIO ── */
-.cmp-scenario-hdr{
-  display:flex;flex-direction:column;gap:6px;
-  margin-top:64px;margin-bottom:28px;
-  padding-bottom:20px;border-bottom:1px solid rgba(26,25,22,.10);
-}
-.cmp-scenario-eyebrow{
-  font-family:var(--f-ui);font-size:8px;font-weight:700;
-  letter-spacing:3px;text-transform:uppercase;color:var(--verde2);
-}
-.cmp-scenario-title{
-  font-family:var(--f-display);font-size:clamp(20px,2.6vw,28px);
-  color:var(--ink);letter-spacing:-.3px;
-}
-
-/* ── GRILLA DE FICHAS ── */
-.cmp-grid-2{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
-  margin-bottom:2px;
-}
-.cmp-grid-3{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
-  margin-bottom:2px;
-}
-
-/* ── TARJETA BASE ── */
-.cmp-card{
-  background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
-  display:flex;flex-direction:column;gap:12px;padding:28px 24px;
-  position:relative;overflow:hidden;
-  transition:background .35s ease,border-color .35s ease;
-  border:1px solid var(--card-border-oro,rgba(184,92,42,.35));
-}
-.cmp-card:hover{
-  background:linear-gradient(160deg,var(--card-dark3,#221A14) 0%,var(--card-dark2,#1C1410) 100%);
-  border-color:var(--card-border-oro-hover,rgba(212,116,42,.72));
-}
-.cmp-card::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
-  background:linear-gradient(180deg,var(--verde2),var(--verde));
-  transform:scaleX(0);transform-origin:left;
-  transition:transform .35s var(--ease,cubic-bezier(.25,.46,.45,.94));z-index:0;
-}
-.cmp-card:hover::before{transform:scaleX(1)}
-
-/* Variante DESTACADA */
-.cmp-card-feat{
-  background:var(--ink);
-  border-color:rgba(196,135,42,.50);
-}
-.cmp-card-feat::after{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 60% 70% at 90% 10%,rgba(196,135,42,.10) 0%,transparent 60%);
-  pointer-events:none;z-index:0;
-}
-.cmp-card-feat:hover{background:#1e1e1a}
-
-/* ── INTERIOR DE TARJETA ── */
-.cmp-card-inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;height:100%}
-.cmp-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.cmp-card-icon{font-size:28px;line-height:1;flex-shrink:0;transition:transform .35s var(--ease)}
-.cmp-card:hover .cmp-card-icon{transform:scale(1.10)}
-
-.cmp-card-cat{
-  font-family:var(--f-ui);font-size:8px;font-weight:700;
-  letter-spacing:2.5px;text-transform:uppercase;color:var(--oro2);display:block;
-}
-.cmp-card-name{
-  font-family:var(--f-display);
-  font-size:clamp(16px,1.9vw,20px);
-  color:var(--card-text,rgba(248,238,224,.94));
-  letter-spacing:-.2px;line-height:1.15;font-weight:400;display:block;
-}
-.cmp-card-feat .cmp-card-name{color:var(--parchment);font-size:clamp(18px,2.2vw,22px)}
-
-.cmp-card-desc{
-  font-family:var(--f-italic,var(--f-display));font-style:italic;
-  font-size:13.5px;color:var(--card-text-soft,rgba(248,238,224,.82));
-  line-height:1.75;flex:1;
-}
-.cmp-card-feat .cmp-card-desc{color:rgba(242,237,227,.52)}
-
-/* Dirección / info clave */
-.cmp-card-addr{
-  font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:.5px;
-  color:rgba(248,238,224,.50);
-  padding-top:8px;border-top:1px solid rgba(242,237,227,.07);
-  display:flex;align-items:center;gap:6px;
-}
-.cmp-card-addr::before{content:'📍';font-size:10px;font-style:normal}
-
-/* Horario destacado */
-.cmp-horario{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:5px 12px;
-  background:rgba(29,92,64,.10);
-  border:1px solid rgba(29,92,64,.28);
-  border-radius:2px;
-  font-family:var(--f-ui);font-size:7.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--verde2,#267a55);white-space:nowrap;
-}
-.cmp-horario-warn{
-  background:rgba(196,135,42,.10);
-  border-color:rgba(196,135,42,.35);
-  color:var(--oro2);
-}
-
-/* Chips de servicio */
-.cmp-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.cmp-chip{
-  font-family:var(--f-ui);font-size:7.5px;font-weight:700;
-  letter-spacing:1px;text-transform:uppercase;
-  padding:5px 10px;border-radius:2px;white-space:nowrap;
-  background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.14);
-  color:rgba(242,237,227,.65);
-}
-.cmp-chip-verde{background:rgba(29,92,64,.10);border-color:rgba(29,92,64,.30);color:var(--verde2)}
-.cmp-chip-warn{background:rgba(192,57,43,.10);border-color:rgba(192,57,43,.35);color:rgba(231,76,60,.85)}
-
-/* ── BLOQUE KIOSCOS / CONV ── */
-.cmp-conv-banner{
-  background:linear-gradient(135deg,#0a1a12 0%,#0e1808 60%,#0a1512 100%);
-  border:1px solid rgba(29,92,64,.22);
-  position:relative;overflow:hidden;
-  padding:36px 40px;
-  margin-bottom:2px;
-}
-.cmp-conv-banner::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 60% 80% at 85% 15%,rgba(29,92,64,.35) 0%,transparent 58%);
-  pointer-events:none;
-}
-.cmp-conv-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
-.cmp-conv-kicker{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(100,210,155,.80);display:block;margin-bottom:14px}
-.cmp-conv-title{font-family:var(--f-display);font-size:clamp(18px,2.4vw,26px);color:var(--parchment);line-height:1.1;letter-spacing:-.3px;margin-bottom:12px}
-.cmp-conv-desc{font-family:var(--f-italic,var(--f-display));font-style:italic;font-size:14px;color:rgba(242,237,227,.52);line-height:1.8}
-.cmp-conv-desc strong{font-style:normal;color:var(--oro2);font-weight:400}
-.cmp-conv-list{display:flex;flex-direction:column;gap:1px;background:rgba(242,237,227,.07)}
-.cmp-conv-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px;
-  font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:.5px;
-  color:rgba(242,237,227,.72);
-  background:rgba(6,6,5,.35);
-  transition:background .25s ease;
-}
-.cmp-conv-item:hover{background:rgba(29,92,64,.12)}
-.cmp-conv-item-label{flex:1}
-.cmp-conv-item-note{font-size:10px;color:rgba(242,237,227,.35);font-weight:600;text-align:right;max-width:160px;line-height:1.4}
-
-/* ── ESCENARIOS GRID ── */
-.cmp-escenarios{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
-  margin-bottom:2px;
-}
-.cmp-escenario{
-  background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
-  display:flex;flex-direction:column;gap:10px;padding:24px 20px;
-  transition:background .35s ease,border-color .35s ease;
-  border:1px solid var(--card-border-oro,rgba(184,92,42,.35));
-}
-.cmp-escenario:hover{
-  background:linear-gradient(160deg,var(--card-dark3,#221A14) 0%,var(--card-dark2,#1C1410) 100%);
-  border-color:var(--card-border-oro-hover,rgba(212,116,42,.72));
-}
-.cmp-escenario-icon{font-size:26px;line-height:1}
-.cmp-escenario-title{
-  font-family:var(--f-display);font-size:16px;
-  color:var(--card-text,rgba(248,238,224,.94));letter-spacing:-.1px;font-weight:800;line-height:1.2;
-}
-.cmp-escenario-resp{
-  font-family:var(--f-italic,var(--f-display));font-style:italic;
-  font-size:13px;color:var(--card-text-soft,rgba(248,238,224,.82));line-height:1.65;
-}
-.cmp-escenario-note{
-  font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
-  color:var(--oro2);padding-top:6px;border-top:1px solid rgba(242,237,227,.08);
-}
-
-/* ── NOTA EDITORIAL ── */
-.cmp-editorial{
-  display:flex;align-items:flex-start;gap:14px;
-  padding:22px 26px;
-  background:rgba(26,25,22,.04);border:1px solid rgba(26,25,22,.10);
-  margin-top:2px;
-}
-.cmp-editorial-icon{font-size:20px;line-height:1;flex-shrink:0;color:rgba(26,25,22,.40)}
-.cmp-editorial-text{
-  font-family:var(--f-ui);font-size:9.5px;font-weight:600;letter-spacing:.4px;
-  color:rgba(26,25,22,.52);line-height:1.8;
-}
-.cmp-editorial-text strong{color:rgba(26,25,22,.72)}
-
-/* ── RESPONSIVE ── */
-@media(max-width:1100px){
-  .cmp-grid-3{grid-template-columns:repeat(2,1fr)}
-  .cmp-escenarios{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:860px){
-  .cmp-grid-2{grid-template-columns:1fr}
-  .cmp-grid-3{grid-template-columns:1fr}
-  .cmp-escenarios{grid-template-columns:1fr 1fr}
-  .cmp-conv-inner{grid-template-columns:1fr}
-  .cmp-exec{padding:26px 24px}
-  .cmp-conv-banner{padding:28px 24px}
-}
-@media(max-width:640px){
-  .cmp-grid-2{grid-template-columns:1fr}
-  .cmp-escenarios{grid-template-columns:1fr}
-  .cmp-card{padding:22px 18px}
-  .cmp-exec{padding:20px var(--gutter,18px)}
-  .cmp-conv-banner{padding:22px var(--gutter,18px)}
-}
-@media(prefers-reduced-motion:reduce){
-  .cmp-card,.cmp-card::before,.cmp-card-icon{transition:none}
-}
-</style>
-
-<!-- ══ SECCIÓN PRINCIPAL ══ -->
-<section class="us-section" id="compras" aria-labelledby="title-compras">
-
-  <!-- HEADER -->
-  <div class="section-header reveal">
-    <div>
-      <span class="section-eyebrow">Supermercados · Autoservicios · Kioscos · Feria</span>
-      <h2 class="section-title" id="title-compras">🛒 Abastecimiento y Compras Esenciales</h2>
-    </div>
-    <span class="section-count">Verificado · Junio 2026</span>
-    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
-  </div>
-
-  <!-- INTRO EJECUTIVO -->
-  <div class="cmp-exec reveal" style="--reveal-delay:40ms">
-    <div class="cmp-exec-inner">
-      <span class="cmp-exec-eyebrow">Lo que necesitás saber antes de salir a comprar</span>
-      <p class="cmp-exec-text">
-        Concepción del Uruguay no tiene hipermercados ni cadenas nacionales de gran formato.
-        La oferta se concentra en <em>supermercados medianos en el microcentro y las avenidas principales</em>,
-        autoservicios de barrio para compras rápidas, y kioscos en estaciones de servicio para
-        urgencias fuera de horario. Los lunes muchos comercios cierran — igual que los restaurantes.
-        Esta sección existe para que no tengas que salir de la guía para resolver lo básico.
-      </p>
-      <div class="cmp-exec-rule" aria-hidden="true"></div>
-    </div>
-  </div>
-
-  <!-- ══ ESCENARIO 1: COMPRA GRANDE ══ -->
-  <div class="cmp-scenario-hdr reveal" style="--reveal-delay:60ms">
-    <span class="cmp-scenario-eyebrow">🛍️ Compra grande — para varios días</span>
-    <h3 class="cmp-scenario-title">Supermercados en el microcentro y zonas accesibles</h3>
-  </div>
-
-  <div class="cmp-grid-2" role="list" aria-label="Supermercados verificados">
-
-    <!-- Coto / DIA / supermercado de referencia más grande -->
-    <div class="cmp-card cmp-card-feat reveal" role="listitem" style="--reveal-delay:80ms"
-         aria-label="Supermercado Mariano Max — el más completo del centro">
-      <span class="badge badge-gold">El más completo del centro</span>
-      <div class="cmp-card-inner">
-        <div class="cmp-card-top">
-          <span class="cmp-card-icon" aria-hidden="true">🏪</span>
-          <div class="cmp-chips">
-            <span class="cmp-chip cmp-chip-verde">Frutas y verduras</span>
-            <span class="cmp-chip cmp-chip-verde">Carnicería</span>
-          </div>
-        </div>
-        <span class="cmp-card-cat">Supermercado · Microcentro</span>
-        <span class="cmp-card-name">Supermercado Mariano Max</span>
-        <p class="cmp-card-desc">
-          El supermercado de mayor surtido verificado en el área del microcentro. Secciones de frescos,
-          carnicería propia, panadería, limpieza, higiene, bebidas y almacén completo. El referente
-          para la compra semanal de quien se hospeda en el centro histórico.
-        </p>
-        <div class="cmp-chips">
-          <span class="cmp-chip">Almacén completo</span>
-          <span class="cmp-chip">Limpieza</span>
-          <span class="cmp-chip">Higiene personal</span>
-          <span class="cmp-chip">Bebidas</span>
-        </div>
-        <span class="cmp-card-addr">Av. Rocamora al 800, microcentro</span>
-        <span class="cmp-horario" style="margin-top:4px">🕗 Lun–Sáb 8:00–21:00 · Dom 9:00–14:00</span>
-      </div>
-    </div>
-
-    <!-- Supermercado La Unión / zona céntrica -->
-    <div class="cmp-card reveal" role="listitem" style="--reveal-delay:110ms"
-         aria-label="Supermercado La Unión — opción alternativa de tamaño medio">
-      <div class="cmp-card-inner">
-        <div class="cmp-card-top">
-          <span class="cmp-card-icon" aria-hidden="true">🛒</span>
-          <div class="cmp-chips">
-            <span class="cmp-chip cmp-chip-verde">Verdulería</span>
-          </div>
-        </div>
-        <span class="cmp-card-cat">Supermercado · Zona céntrica</span>
-        <span class="cmp-card-name">Supermercado La Unión</span>
-        <p class="cmp-card-desc">
-          Supermercado de tamaño medio con buen surtido de almacén, frescos y bebidas.
-          Alternativa para diversificar la compra o cuando el primero está cerrado.
-          Frecuentado por estudiantes y vecinos del microcentro.
-        </p>
-        <div class="cmp-chips">
-          <span class="cmp-chip">Almacén</span>
-          <span class="cmp-chip">Bebidas</span>
-          <span class="cmp-chip">Higiene</span>
-        </div>
-        <span class="cmp-card-addr">Zona Peatonal Rocamora / adyacencias — confirmar dirección exacta en Google Maps</span>
-        <span class="cmp-horario cmp-horario-warn" style="margin-top:4px">⚠ Verificar horario antes de ir</span>
-      </div>
-    </div>
-
-    <!-- Supermercado Yapeyú -->
-    <div class="cmp-card reveal" role="listitem" style="--reveal-delay:140ms"
-         aria-label="Supermercado Yapeyú — zona Bulevar">
-      <div class="cmp-card-inner">
-        <div class="cmp-card-top">
-          <span class="cmp-card-icon" aria-hidden="true">🏬</span>
-        </div>
-        <span class="cmp-card-cat">Supermercado · Zona Bulevar</span>
-        <span class="cmp-card-name">Supermercado Yapeyú</span>
-        <p class="cmp-card-desc">
-          Supermercado sobre el Bulevar, bien ubicado para quienes se alojan en
-          la periferia norte o llegan desde Ruta 14. Surtido completo para la compra
-          semanal. Estacionamiento disponible en la zona.
-        </p>
-        <div class="cmp-chips">
-          <span class="cmp-chip">Almacén completo</span>
-          <span class="cmp-chip">Estacionamiento cercano</span>
-        </div>
-        <span class="cmp-card-addr">Bulevar Hipólito Yrigoyen, zona norte</span>
-        <span class="cmp-horario cmp-horario-warn" style="margin-top:4px">⚠ Verificar horario antes de ir</span>
-      </div>
-    </div>
-
-    <!-- Súper Chino / genérico de barrio -->
-    <div class="cmp-card reveal" role="listitem" style="--reveal-delay:170ms"
-         aria-label="Autoservicios de barrio — opciones distribuidas en la ciudad">
-      <div class="cmp-card-inner">
-        <div class="cmp-card-top">
-          <span class="cmp-card-icon" aria-hidden="true">🏘️</span>
-          <span class="cmp-chip cmp-chip-verde" style="flex-shrink:0">Toda la ciudad</span>
-        </div>
-        <span class="cmp-card-cat">Autoservicios · Distribuidos por barrios</span>
-        <span class="cmp-card-name">Autoservicios de Barrio</span>
-        <p class="cmp-card-desc">
-          CdU tiene una red densa de autoservicios y minimercados en todos los barrios.
-          No tienen cadena ni nombre único, pero son la opción más cercana para el día a día.
-          El alojamiento donde te hospedés puede orientarte sobre el más próximo —
-          es la pregunta más útil que podés hacerle a quien te recibe.
-        </p>
-        <div class="cmp-chips">
-          <span class="cmp-chip">Almacén básico</span>
-          <span class="cmp-chip">Bebidas</span>
-          <span class="cmp-chip">Fiambres</span>
-          <span class="cmp-chip">Higiene</span>
-        </div>
-        <p style="font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.4px;color:rgba(242,237,227,.40);line-height:1.65;margin-top:8px">
-          Preguntá en tu alojamiento cuál es el más cercano — es más confiable que buscarlo en Maps.
-        </p>
-      </div>
-    </div>
-
-  </div><!-- /cmp-grid-2 supermercados -->
-
-
-  <!-- ══ ESCENARIO 2: COMPRA RÁPIDA Y FRESCOS ══ -->
-  <div class="cmp-scenario-hdr reveal" style="--reveal-delay:200ms">
-    <span class="cmp-scenario-eyebrow">🥦 Compra rápida y productos frescos</span>
-    <h3 class="cmp-scenario-title">Verdulerías, carnicerías y mercados — lo que no encontrás en el súper</h3>
-  </div>
-
-  <div class="cmp-grid-3" role="list" aria-label="Comercios de frescos verificados">
-
-    <div class="cmp-card reveal" role="listitem" style="--reveal-delay:220ms"
-         aria-label="Verdulerías en el microcentro">
-      <div class="cmp-card-inner">
-        <div class="cmp-card-top">
-          <span class="cmp-card-icon" aria-hidden="true">🥬</span>
-          <span class="cmp-chip cmp-chip-verde">Frescura garantizada</span>
-        </div>
-        <span class="cmp-card-cat">Verdulerías · Microcentro y barrios</span>
-        <span class="cmp-card-name">Verdulerías locales</span>
-        <p class="cmp-card-desc">
-          Las verdulerías independientes de CdU tienen mejor rotación de producto que
-          las secciones de frescos en los súpers. Se ubican en el mercado municipal y
-          en locales a lo largo de la Av. 9 de Julio y adyacencias.
-          Mañanas tempranas (8–12 hs) es cuando llega el producto más fresco.
-        </p>
-        <span class="cmp-horario" style="margin-top:4px">🕗 Generalmente 8–12 hs · 16–20 hs</span>
-      </div>
-    </div>
-
-    <div class="cmp-card reveal" role="listitem" style="--reveal-delay:250ms"
-         aria-label="Carnicerías en el microcentro">
-      <div class="cmp-card-inner">
-        <div class="cmp-card-top">
-          <span class="cmp-card-icon" aria-hidden="true">🥩</span>
-        </div>
-        <span class="cmp-card-cat">Carnicerías · Distribuidas en la ciudad</span>
-        <span class="cmp-card-name">Carnicerías independientes</span>
-        <p class="cmp-card-desc">
-          Entre Ríos tiene tradición de carnicerías de barrio con cortes propios.
-          La calidad supera habitualmente a la carne envasada del súper.
-          Si te alojás en departamento o cabaña con parrilla, buscar
-          una carnicería local es la decisión correcta — preguntá en el alojamiento.
-        </p>
-        <span class="cmp-horario" style="margin-top:4px">🕗 Lun–Vie 8–12 y 17–20 · Sáb 8–13</span>
-      </div>
-    </div>
-
-    <div class="cmp-card reveal" role="listitem" style="--reveal-delay:280ms"
-         aria-label="Feria del Productor — productos regionales frescos">
-      <div class="cmp-card-inner">
-        <div class="cmp-card-top">
-          <span class="cmp-card-icon" aria-hidden="true">🌽</span>
-          <span class="cmp-chip cmp-chip-verde">Directo del productor</span>
-        </div>
-        <span class="cmp-card-cat">Feria · Productos regionales · Temporada</span>
-        <span class="cmp-card-name">Feria del Productor Local</span>
-        <p class="cmp-card-desc">
-          La Municipalidad de CdU organiza ferias del productor donde se consiguen
-          verduras, frutas, miel, quesos artesanales, chacinados y dulces regionales
-          directamente de los productores de la zona. El lugar más auténtico
-          para llevar algo distinto de vuelta a casa.
-        </p>
-        <span class="cmp-horario cmp-horario-warn" style="margin-top:4px">⚠ Días y lugar variables — verificar en cdeluruguay.gob.ar o redes de la Municipalidad</span>
-      </div>
-    </div>
-
-  </div><!-- /cmp-grid-3 frescos -->
-
-
-  <!-- ══ ESCENARIO 3: FUERA DE HORARIO ══ -->
-  <div class="cmp-scenario-hdr reveal" style="--reveal-delay:320ms">
-    <span class="cmp-scenario-eyebrow">🌙 Compra fuera de horario comercial</span>
-    <h3 class="cmp-scenario-title">Estaciones de servicio y kioscos — cuando todo está cerrado</h3>
-  </div>
-
-  <div class="cmp-conv-banner reveal" style="--reveal-delay:340ms" role="region" aria-label="Opciones de compra fuera de horario en CdU">
-    <div class="cmp-conv-inner">
-      <div>
-        <span class="cmp-conv-kicker">Disponible de noche y los domingos</span>
-        <h3 class="cmp-conv-title">Estaciones de servicio con minimarket</h3>
-        <p class="cmp-conv-desc">
-          Cuando los supermercados y autoservicios están cerrados — tardes de domingo,
-          noche, feriados — las <strong>estaciones de servicio con minimarket</strong>
-          son la única opción verificada con funcionamiento extendido o las 24 hs.
-          Surtido básico: bebidas, snacks, lácteos, artículos de higiene, agua.
-          No reemplazan una compra grande, pero resuelven la urgencia.
-        </p>
-        <div class="cmp-chips" style="margin-top:16px">
-          <span class="cmp-chip">Agua y bebidas</span>
-          <span class="cmp-chip">Snacks</span>
-          <span class="cmp-chip">Lácteos básicos</span>
-          <span class="cmp-chip">Higiene urgente</span>
-          <span class="cmp-chip cmp-chip-verde">Horario extendido</span>
-        </div>
-      </div>
-      <div>
-        <ul class="cmp-conv-list" aria-label="Estaciones de servicio con minimarket en CdU">
-          <li class="cmp-conv-item">
-            <span class="cmp-conv-item-label">YPF · Av. 9 de Julio</span>
-            <span class="cmp-conv-item-note">Minimarket · Zona céntrica</span>
-          </li>
-          <li class="cmp-conv-item">
-            <span class="cmp-conv-item-label">Shell · Ruta 14 Norte</span>
-            <span class="cmp-conv-item-note">Próxima al acceso a Banco Pelay</span>
-          </li>
-          <li class="cmp-conv-item">
-            <span class="cmp-conv-item-label">Axion / Puma · Accesos principales</span>
-            <span class="cmp-conv-item-note">Sobre rutas de acceso a la ciudad</span>
-          </li>
-          <li class="cmp-conv-item" style="border-top:1px solid rgba(242,237,227,.10)">
-            <span class="cmp-conv-item-label" style="color:rgba(242,237,227,.38);font-size:10px">Los precios en estaciones de servicio son más altos que en supermercados</span>
-            <span class="cmp-conv-item-note"></span>
-          </li>
-        </ul>
-        <p style="font-family:var(--f-ui);font-size:8px;font-weight:600;letter-spacing:.4px;color:rgba(242,237,227,.30);line-height:1.65;margin-top:12px">
-          Las ubicaciones exactas de todas las estaciones de CdU están en la sección
-          <strong style="color:rgba(242,237,227,.50)">Combustible</strong> de Servicios Esenciales, más arriba.
-        </p>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ══ ESCENARIO 4: COBERTURA POR SITUACIÓN ══ -->
-  <div class="cmp-scenario-hdr reveal" style="--reveal-delay:380ms">
-    <span class="cmp-scenario-eyebrow">✔ Cobertura por situación concreta</span>
-    <h3 class="cmp-scenario-title">¿Cómo resolver cada escenario?</h3>
-  </div>
-
-  <div class="cmp-escenarios" role="list" aria-label="Escenarios de compra y cómo resolverlos">
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:400ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">📦</span>
-      <h4 class="cmp-escenario-title">Compra para varios días</h4>
-      <p class="cmp-escenario-resp">Mariano Max o el autoservicio que te recomiende tu alojamiento. Mañanas de martes a viernes son el mejor momento — menos gente y producto recién repuesto.</p>
-      <span class="cmp-escenario-note">Sup. Mariano Max o equiv. del barrio</span>
-    </div>
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:420ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">⚡</span>
-      <h4 class="cmp-escenario-title">Compra rápida — menos de 10 ítems</h4>
-      <p class="cmp-escenario-resp">El autoservicio más cercano al alojamiento. Si no sabés cuál es, la primera pregunta que le hacés al anfitrión. Los kioscos de estaciones también sirven para esto.</p>
-      <span class="cmp-escenario-note">Autoservicio de barrio</span>
-    </div>
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:440ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">💰</span>
-      <h4 class="cmp-escenario-title">Compra económica</h4>
-      <p class="cmp-escenario-resp">Los supermercados medianos locales son más baratos que las cadenas nacionales en la mayoría de las categorías. Las marcas propias de los supermercados zonales suelen ser la opción más económica.</p>
-      <span class="cmp-escenario-note">Supermercado mediano local</span>
-    </div>
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:460ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">🏖️</span>
-      <h4 class="cmp-escenario-title">Compra antes del balneario</h4>
-      <p class="cmp-escenario-resp">Hacé la compra antes de salir del centro — en el balneario la oferta es cara y limitada (parador, cantina). Agua, snacks, protector solar e higiene básica: resolvé todo antes de subir al auto.</p>
-      <span class="cmp-escenario-note">Supermercado centro antes de salir</span>
-    </div>
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:480ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">🏕️</span>
-      <h4 class="cmp-escenario-title">Compra para camping</h4>
-      <p class="cmp-escenario-resp">Igual que para el balneario — la logística se hace antes de llegar al predio. Banco Pelay tiene cantina, pero los precios son de concesión. Carne y bebidas desde la ciudad son sensiblemente más baratas.</p>
-      <span class="cmp-escenario-note">Supermercado + carnicería antes de salir</span>
-    </div>
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:500ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">🌙</span>
-      <h4 class="cmp-escenario-title">Compra fuera de horario</h4>
-      <p class="cmp-escenario-resp">Estaciones de servicio YPF, Shell o Axion. Surtido básico verificado: agua, bebidas, lácteos, snacks, higiene. Los precios son más altos que en supermercados — es el costo de la disponibilidad.</p>
-      <span class="cmp-escenario-note">Estación de servicio con minimarket</span>
-    </div>
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:520ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">🏠</span>
-      <h4 class="cmp-escenario-title">Compra para departamento temporario</h4>
-      <p class="cmp-escenario-resp">Una compra grande inicial en supermercado + reposición diaria en el autoservicio del barrio. Esta combinación es la más eficiente en precio y logística para estadías de 3 o más días.</p>
-      <span class="cmp-escenario-note">Súper inicial + autoservicio de barrio</span>
-    </div>
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:540ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">🧴</span>
-      <h4 class="cmp-escenario-title">Higiene y farmacia</h4>
-      <p class="cmp-escenario-resp">Los supermercados tienen sección de higiene completa. Para medicamentos o productos de farmacia, usá el enlace de farmacia de turno en la sección Servicios Esenciales — actualizado todos los días.</p>
-      <span class="cmp-escenario-note">Supermercado o farmacia de turno</span>
-    </div>
-
-    <div class="cmp-escenario reveal" role="listitem" style="--reveal-delay:560ms">
-      <span class="cmp-escenario-icon" aria-hidden="true">🧀</span>
-      <h4 class="cmp-escenario-title">Productos regionales para llevar</h4>
-      <p class="cmp-escenario-resp">La Feria del Productor es el mejor lugar. Miel de monte, quesos artesanales, chacinados, licor de yatay y dulces caseros — cosas que no encontrás en un súper. Verificá fecha y lugar en la Municipalidad antes de ir.</p>
-      <span class="cmp-escenario-note">Feria del Productor · Municipalidad</span>
-    </div>
-
-  </div><!-- /cmp-escenarios -->
-
-
-  <!-- ══ NOTA EDITORIAL FINAL ══ -->
-  <div class="cmp-editorial reveal" style="--reveal-delay:600ms" role="note" aria-label="Nota editorial sobre esta sección">
-    <span class="cmp-editorial-icon" aria-hidden="true">ℹ</span>
-    <p class="cmp-editorial-text">
-      <strong>Por qué esta sección no tiene fichas individuales de autoservicios.</strong>
-      Los minimercados y autoservicios de barrio cambian de nombre, propietario y horario
-      con frecuencia — publicar fichas individuales generaría información desactualizada
-      rápidamente. La recomendación más confiable para encontrar el más cercano a tu
-      alojamiento es preguntarle directamente a quien te recibe. Los supermercados medianos
-      listados son establecimientos con trayectoria verificada y mayor estabilidad operativa.
-      Si encontrás un supermercado relevante que no está en la guía,
-      <a href="mailto:uruspotcdu@gmail.com" style="color:var(--verde2);text-decoration:underline;text-decoration-color:rgba(38,122,85,.35)" aria-label="Reportar un cambio por email">escribinos →</a>
-    </p>
-  </div>
-
-</section>
-<!-- ── FIN MÓDULO ABASTECIMIENTO ── -->
-
-<!-- ══════════════════════════════════════════════════════════
-     SECCIÓN: BANCOS, CAJEROS Y SERVICIOS FINANCIEROS
-     nav-item: data-section="bancos"
-     ══════════════════════════════════════════════════════════ -->
 <section class="us-section" id="bancos" aria-labelledby="title-bancos">
 
   <!-- HEADER -->
@@ -4981,6 +4360,604 @@ if('serviceWorker' in navigator){
     </a>
   </div>
   <p class="search-no-results" id="no-results-remiserias">No se encontraron remiserías con ese nombre.</p>
+</section>
+  <!-- ===================== SUPERMERCADOS Y COMPRAS ESENCIALES ===================== -->
+
+<style>
+/* ── Prefijo: sm- para no colisionar con estilos globales ── */
+.sm-exec{
+  margin-bottom:48px;padding:36px 44px;
+  background:linear-gradient(135deg,#0a1a12 0%,#111810 100%);
+  border-left:5px solid var(--verde2);
+  position:relative;overflow:hidden;
+}
+.sm-exec::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(29,92,64,.22) 0%,transparent 60%);
+  pointer-events:none;
+}
+.sm-exec-inner{position:relative;z-index:1}
+.sm-exec-eyebrow{
+  display:block;font-family:var(--f-ui);font-size:8px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:rgba(196,135,42,.65);margin-bottom:14px;
+}
+.sm-exec-text{
+  font-family:var(--f-italic,var(--f-display));font-style:italic;
+  font-size:clamp(14px,1.8vw,18px);color:rgba(242,237,227,.80);
+  line-height:1.7;max-width:720px;
+}
+.sm-exec-text em{font-style:normal;color:var(--oro2)}
+.sm-exec-rule{height:3px;background:linear-gradient(90deg,var(--verde2),var(--oro2),rgba(242,237,227,.12));margin-top:24px}
+
+/* ── Bloque de escenario ── */
+.sm-scenario-hdr{
+  display:flex;flex-direction:column;gap:6px;
+  margin-top:64px;margin-bottom:28px;
+  padding-bottom:20px;border-bottom:1px solid rgba(26,25,22,.10);
+}
+.sm-scenario-eyebrow{
+  font-family:var(--f-ui);font-size:8px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:var(--verde2);
+}
+.sm-scenario-title{
+  font-family:var(--f-display);font-size:clamp(22px,2.8vw,30px);
+  color:var(--ink);letter-spacing:-.3px;
+}
+
+/* ── Grid de tarjetas principales ── */
+.sm-grid-2{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
+  margin-bottom:2px;
+}
+.sm-grid-3{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
+  margin-bottom:2px;
+}
+
+/* ── Tarjeta base ── */
+.sm-card{
+  background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
+  display:flex;flex-direction:column;gap:14px;padding:30px 26px;
+  position:relative;overflow:hidden;
+  transition:background .35s ease,border-color .35s ease;
+  border:1px solid var(--card-border-oro,rgba(184,92,42,.35));
+}
+.sm-card:hover{
+  background:linear-gradient(160deg,var(--card-dark3,#221A14) 0%,var(--card-dark2,#1C1410) 100%);
+  border-color:var(--card-border-oro-hover,rgba(212,116,42,.72));
+}
+.sm-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--verde2),var(--verde));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .35s var(--ease,cubic-bezier(.25,.46,.45,.94));z-index:0;
+}
+.sm-card:hover::before{transform:scaleX(1)}
+
+/* Variante destacada */
+.sm-card-feat{
+  background:var(--ink);
+  border-color:rgba(196,135,42,.50);
+}
+.sm-card-feat::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 70% at 90% 10%,rgba(196,135,42,.10) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+.sm-card-feat:hover{background:#1e1e1a}
+.sm-card-feat .sm-card-name{color:var(--parchment)}
+.sm-card-feat .sm-card-desc{color:rgba(242,237,227,.52)}
+
+/* ── Contenido interior ── */
+.sm-card-inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:11px;height:100%}
+.sm-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sm-card-icon{font-size:28px;line-height:1;flex-shrink:0;transition:transform .35s var(--ease)}
+.sm-card:hover .sm-card-icon{transform:scale(1.10)}
+
+.sm-card-cat{
+  font-family:var(--f-ui);font-size:8px;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;color:var(--oro2);display:block;
+}
+.sm-card-name{
+  font-family:var(--f-display);
+  font-size:clamp(16px,1.8vw,20px);
+  color:var(--card-text,rgba(248,238,224,.94));
+  letter-spacing:-.2px;line-height:1.15;font-weight:400;display:block;
+}
+.sm-card-desc{
+  font-family:var(--f-italic,var(--f-display));font-style:italic;
+  font-size:13.5px;color:var(--card-text-soft,rgba(248,238,224,.82));
+  line-height:1.75;flex:1;
+}
+.sm-card-desc strong{font-style:normal;color:var(--card-text,rgba(248,238,224,.94))}
+
+/* Dirección / datos prácticos */
+.sm-card-addr{
+  font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:.5px;
+  color:rgba(248,238,224,.50);display:flex;align-items:flex-start;gap:6px;
+  padding-top:10px;border-top:1px solid rgba(242,237,227,.07);flex-direction:column;
+  row-gap:5px;
+}
+.sm-card-addr-line{display:flex;align-items:center;gap:6px}
+.sm-card-addr-line::before{content:'📍';font-size:10px;font-style:normal;flex-shrink:0}
+.sm-card-hours-line{display:flex;align-items:center;gap:6px;color:rgba(248,238,224,.40)}
+.sm-card-hours-line::before{content:'🕐';font-size:10px;font-style:normal;flex-shrink:0}
+
+/* Chips de perfil */
+.sm-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.sm-chip{
+  font-family:var(--f-ui);font-size:7.5px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:5px 10px;border-radius:2px;white-space:nowrap;
+  background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.14);
+  color:rgba(242,237,227,.65);
+}
+.sm-chip-verde{background:rgba(29,92,64,.10);border-color:rgba(29,92,64,.30);color:var(--verde2)}
+.sm-chip-oro{background:rgba(196,135,42,.12);border-color:rgba(196,135,42,.38);color:var(--oro2)}
+.sm-chip-warn{background:rgba(192,57,43,.10);border-color:rgba(192,57,43,.35);color:rgba(231,76,60,.85)}
+
+/* ── Banner de feria ── */
+.sm-feria-banner{
+  background:var(--ink);
+  border-top:3px solid var(--verde2);
+  position:relative;overflow:hidden;
+  padding:36px 40px;margin-bottom:2px;
+}
+.sm-feria-banner::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 55% 80% at 90% 50%,rgba(29,92,64,.18) 0%,transparent 60%);
+  pointer-events:none;
+}
+.sm-feria-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.sm-feria-left{display:flex;flex-direction:column;gap:12px}
+.sm-feria-eyebrow{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(100,210,155,.80);display:block}
+.sm-feria-title{font-family:var(--f-display);font-size:clamp(20px,2.8vw,28px);color:var(--parchment);line-height:1.1;letter-spacing:-.3px}
+.sm-feria-desc{font-family:var(--f-italic,var(--f-display));font-style:italic;font-size:14px;color:rgba(242,237,227,.52);line-height:1.8}
+.sm-feria-desc strong{font-style:normal;color:var(--oro2);font-weight:400}
+.sm-feria-specs{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(242,237,227,.07)}
+.sm-feria-spec{padding:18px 20px;background:rgba(6,6,5,.35);display:flex;flex-direction:column;gap:5px}
+.sm-feria-spec-val{font-family:var(--f-display);font-size:22px;line-height:1;color:var(--parchment);letter-spacing:-.5px}
+.sm-feria-spec-lbl{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(242,237,227,.28)}
+
+/* ── Nota editorial ── */
+.sm-editorial{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:22px 26px;
+  background:rgba(26,25,22,.04);
+  border:1px solid rgba(26,25,22,.10);
+  margin-top:2px;
+}
+.sm-editorial-icon{font-size:20px;line-height:1;flex-shrink:0;color:rgba(26,25,22,.40)}
+.sm-editorial-text{
+  font-family:var(--f-ui);font-size:9.5px;font-weight:600;letter-spacing:.4px;
+  color:rgba(26,25,22,.52);line-height:1.8;
+}
+.sm-editorial-text strong{color:rgba(26,25,22,.72)}
+.sm-editorial-link{color:var(--verde2);text-decoration:underline;text-decoration-color:rgba(38,122,85,.35)}
+
+/* ── Bloque de contexto narrativo ── */
+.sm-ctx{
+  font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;
+  color:rgba(26,25,22,.55);line-height:1.8;
+  padding:12px 18px;
+  background:rgba(26,25,22,.04);
+  border-left:3px solid rgba(196,135,42,.35);
+  margin-bottom:2px;
+}
+
+/* ── Tarjeta lista (compacta) ── */
+.sm-list{display:flex;flex-direction:column;gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:2px}
+.sm-litem{
+  background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
+  display:flex;align-items:flex-start;gap:20px;padding:24px 28px;
+  position:relative;overflow:hidden;
+  border-left:4px solid rgba(196,135,42,.22);
+  transition:background .35s ease,border-left-color .35s ease,transform .35s var(--ease);
+  border:1px solid var(--card-border-oro,rgba(184,92,42,.35));
+}
+.sm-litem:hover{
+  background:linear-gradient(160deg,var(--card-dark3,#221A14) 0%,var(--card-dark2,#1C1410) 100%);
+  border-left-color:var(--oro2);transform:translateX(6px);
+}
+.sm-litem-icon{font-size:26px;flex-shrink:0;transition:transform .35s var(--ease)}
+.sm-litem:hover .sm-litem-icon{transform:scale(1.10)}
+.sm-litem-body{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.sm-litem-cat{font-family:var(--f-ui);font-size:7.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2)}
+.sm-litem-name{font-family:var(--f-display);font-size:17px;color:var(--card-text,rgba(248,238,224,.94));letter-spacing:-.2px;font-weight:400}
+.sm-litem-desc{font-family:var(--f-italic,var(--f-display));font-style:italic;font-size:13px;color:var(--card-text-soft,rgba(248,238,224,.82));line-height:1.65}
+.sm-litem-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-top:8px;border-top:1px solid rgba(242,237,227,.07);margin-top:4px}
+.sm-litem-addr{font-family:var(--f-ui);font-size:9.5px;font-weight:600;letter-spacing:.3px;color:rgba(242,237,227,.35)}
+.sm-litem-arrow{margin-left:auto;font-size:16px;color:rgba(242,237,227,.18);flex-shrink:0;transition:color .35s ease,transform .35s var(--ease)}
+.sm-litem:hover .sm-litem-arrow{color:var(--oro2);transform:translateX(4px)}
+
+/* ── Responsive ── */
+@media(max-width:860px){
+  .sm-grid-2{grid-template-columns:1fr}
+  .sm-grid-3{grid-template-columns:1fr}
+  .sm-feria-inner{grid-template-columns:1fr}
+  .sm-exec{padding:28px 24px}
+  .sm-feria-banner{padding:28px 24px}
+}
+@media(max-width:640px){
+  .sm-card{padding:24px 18px}
+  .sm-litem{padding:20px 18px;gap:14px}
+  .sm-feria-specs{grid-template-columns:1fr}
+  .sm-exec{padding:22px var(--gutter,18px)}
+  .sm-feria-banner{padding:22px var(--gutter,18px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .sm-card,.sm-card::before,.sm-card-icon,
+  .sm-litem,.sm-litem-icon,.sm-litem-arrow{transition:none}
+}
+</style>
+
+<section class="us-section" id="supermercados" aria-labelledby="title-supermercados">
+
+  <div class="section-header reveal">
+    <div>
+      <span class="section-eyebrow">Abastecimiento · Toda la estadía</span>
+      <h2 class="section-title" id="title-supermercados">🛒 Supermercados y Compras Esenciales</h2>
+    </div>
+    <span class="section-count">6 establecimientos verificados</span>
+    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="sm-exec reveal" style="--reveal-delay:40ms">
+    <div class="sm-exec-inner">
+      <span class="sm-exec-eyebrow">Lo que necesitás saber antes de salir a comprar</span>
+      <p class="sm-exec-text">
+        Concepción del Uruguay no tiene hipermercados ni grandes cadenas nacionales de superficie.
+        La oferta se organiza en torno a <em>tres o cuatro supermercados locales bien surtidos</em>,
+        una cadena nacional minorista y un mayorista de barrio con horario partido.
+        Para una estadía corta, DÍA o Gran Rex resuelven todo.
+        Para abastecer una cabaña o prepararse para acampar, el Mayorista El Rey suma valor.
+        La feria municipal, cuando coincide en calendario, ofrece frescos directamente del productor.
+      </p>
+      <div class="sm-exec-rule" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ESCENARIO 1 — COMPRA COMPLETA
+  ══════════════════════════════════════ -->
+  <div class="sm-scenario-hdr reveal" style="--reveal-delay:60ms">
+    <span class="sm-scenario-eyebrow">🧺 Compra completa</span>
+    <h3 class="sm-scenario-title">Para abastecer toda la estadía</h3>
+  </div>
+
+  <p class="sm-ctx reveal" style="--reveal-delay:80ms">
+    Estas dos opciones resuelven una compra completa —alimentación, limpieza, bebidas— sin necesidad de ir a ningún otro lugar.
+    Están en el área central y son los establecimientos con mayor evidencia de actividad continua en la ciudad.
+  </p>
+
+  <div class="sm-grid-2" role="list" aria-label="Supermercados para compra completa">
+
+    <!-- DÍA -->
+    <div class="sm-card sm-card-feat reveal" role="listitem" style="--reveal-delay:100ms"
+         aria-label="Supermercados DÍA, Sarmiento 1552 — cadena nacional, abierto todos los días">
+      <span class="badge badge-gold">Cadena nacional</span>
+      <div class="sm-card-inner">
+        <div class="sm-card-top">
+          <span class="sm-card-icon" aria-hidden="true">🏪</span>
+          <div class="sm-chips">
+            <span class="sm-chip sm-chip-verde">Abierto todos los días</span>
+          </div>
+        </div>
+        <span class="sm-card-cat">Supermercado minorista · Centro</span>
+        <span class="sm-card-name">Supermercados DÍA</span>
+        <p class="sm-card-desc">
+          La única cadena nacional presente en la ciudad. Ofrece alimentación completa,
+          limpieza y perfumería con <strong>marca propia a precios reducidos</strong>.
+          Ubicado en el corazón del área céntrica, a pocas cuadras de los principales
+          atractivos históricos. Catálogos de ofertas semanales disponibles online.
+          El establecimiento más accesible para quien se aloja en el centro sin vehículo.
+        </p>
+        <div class="sm-chips">
+          <span class="sm-chip">Tarjetas de crédito y débito</span>
+          <span class="sm-chip">Marca propia económica</span>
+          <span class="sm-chip">Ofertas semanales</span>
+        </div>
+        <div class="sm-card-addr">
+          <span class="sm-card-addr-line">Sarmiento 1552, Concepción del Uruguay</span>
+          <span class="sm-card-hours-line">Lunes a domingo · 8:00–21:30 hs (aproximado — verificar)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRAN REX -->
+    <div class="sm-card reveal" role="listitem" style="--reveal-delay:130ms"
+         aria-label="Supermercado Gran Rex — tres sucursales en la ciudad, entrega a domicilio">
+      <span class="badge">3 sucursales</span>
+      <div class="sm-card-inner">
+        <div class="sm-card-top">
+          <span class="sm-card-icon" aria-hidden="true">🏬</span>
+          <div class="sm-chips">
+            <span class="sm-chip sm-chip-verde">Entrega a domicilio</span>
+          </div>
+        </div>
+        <span class="sm-card-cat">Supermercado local · Tres ubicaciones</span>
+        <span class="sm-card-name">Supermercado Gran Rex</span>
+        <p class="sm-card-desc">
+          El referente local por excelencia. Opera con <strong>tres sucursales simultáneas</strong>
+          en distintos puntos de la ciudad, lo que lo convierte en la opción más cercana
+          sin importar desde dónde se parta. Carnicería, verdulería, fiambres y secciones
+          de góndola completas. Acepta pagos NFC y tarjetas. Tiene servicio de entrega
+          a domicilio en el mismo día —útil si llegaste con equipaje pesado o llueve.
+        </p>
+        <div class="sm-chips">
+          <span class="sm-chip">Carnicería propia</span>
+          <span class="sm-chip">Verdulería</span>
+          <span class="sm-chip">Fiambres</span>
+          <span class="sm-chip">Pagos NFC</span>
+          <span class="sm-chip sm-chip-oro">Entrega mismo día</span>
+        </div>
+        <div class="sm-card-addr">
+          <span class="sm-card-addr-line">Juan Domingo Perón 329/330 (sucursal principal)</span>
+          <span class="sm-card-addr-line">Posadas 414 · Rivadavia 75 (otras sucursales)</span>
+          <span class="sm-card-hours-line">Horario: consultar directamente — (03442) 43-3162</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ESCENARIO 2 — COMPRA RÁPIDA / EMERGENCIA
+  ══════════════════════════════════════ -->
+  <div class="sm-scenario-hdr reveal" style="--reveal-delay:160ms">
+    <span class="sm-scenario-eyebrow">⚡ Compra rápida y abastecimiento periférico</span>
+    <h3 class="sm-scenario-title">Para reponer, completar o salir de apuros</h3>
+  </div>
+
+  <p class="sm-ctx reveal" style="--reveal-delay:180ms">
+    Estos establecimientos atienden necesidades distintas: el Supremo cubre el centro histórico
+    para quien necesita repasar lo básico sin desplazarse; el Stop resuelve una compra mayorista/minorista
+    al sur del centro; el Mayorista El Rey conviene cuando se busca cantidad o precio por volumen.
+  </p>
+
+  <div class="sm-list" role="list" aria-label="Opciones de compra rápida y abastecimiento">
+
+    <!-- SUPERMERCADO SUPREMO -->
+    <div class="sm-litem reveal" role="listitem" style="--reveal-delay:200ms"
+         aria-label="Supermercado Supremo, 3 de Febrero y Alberdi — en el centro histórico">
+      <span class="sm-litem-icon" aria-hidden="true">🏛️</span>
+      <div class="sm-litem-body">
+        <span class="sm-litem-cat">Supermercado local · Centro histórico</span>
+        <span class="sm-litem-name">Supermercado Supremo</span>
+        <p class="sm-litem-desc">
+          Ubicado en la esquina de 3 de Febrero y Alberdi, a metros de la Basílica y la Plaza Ramírez,
+          es el supermercado más cercano al casco histórico. Carnicería verificada, entrega a domicilio
+          y acceso para sillas de ruedas. Para quien se aloja en el centro y necesita reponer
+          algo puntual sin alejarse de los atractivos principales.
+        </p>
+        <div class="sm-chips" style="margin-bottom:8px">
+          <span class="sm-chip">Carnicería</span>
+          <span class="sm-chip">Entrega a domicilio</span>
+          <span class="sm-chip sm-chip-verde">Accesible silla de ruedas</span>
+          <span class="sm-chip sm-chip-warn">Horario: confirmar directamente</span>
+        </div>
+        <div class="sm-litem-foot">
+          <span class="sm-litem-addr">📍 3 de Febrero esq. Alberdi, Centro</span>
+        </div>
+      </div>
+      <span class="sm-litem-arrow" aria-hidden="true">→</span>
+    </div>
+
+    <!-- SUPERMERCADO STOP -->
+    <div class="sm-litem reveal" role="listitem" style="--reveal-delay:230ms"
+         aria-label="Supermercado Stop, JJ Bruno 2620 — minorista y mayorista">
+      <span class="sm-litem-icon" aria-hidden="true">🛍️</span>
+      <div class="sm-litem-body">
+        <span class="sm-litem-cat">Supermercado minorista y mayorista · Zona sur</span>
+        <span class="sm-litem-name">Supermercado Stop</span>
+        <p class="sm-litem-desc">
+          Establecimiento con operación tanto minorista como mayorista, especializado en
+          comestibles, panificación, bebidas, congelados, bazar, perfumería y limpieza.
+          Opción con buena cobertura de secciones para quien se hospeda fuera del microcentro
+          o necesita hacer una compra más completa al sur de la ciudad.
+        </p>
+        <div class="sm-chips" style="margin-bottom:8px">
+          <span class="sm-chip">Minorista y mayorista</span>
+          <span class="sm-chip">Congelados</span>
+          <span class="sm-chip">Bazar</span>
+          <span class="sm-chip sm-chip-warn">Horario: consultar — (03442) 43-67xx</span>
+        </div>
+        <div class="sm-litem-foot">
+          <span class="sm-litem-addr">📍 JJ Bruno 2620</span>
+        </div>
+      </div>
+      <span class="sm-litem-arrow" aria-hidden="true">→</span>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ESCENARIO 3 — CAMPING / CABAÑA / VOLUMEN
+  ══════════════════════════════════════ -->
+  <div class="sm-scenario-hdr reveal" style="--reveal-delay:260ms">
+    <span class="sm-scenario-eyebrow">🏕️ Para camping, cabañas o compras por volumen</span>
+    <h3 class="sm-scenario-title">Cuando necesitás cantidad y precio justo</h3>
+  </div>
+
+  <div class="sm-grid-2" role="list" aria-label="Mayorista para camping y abastecimiento en volumen">
+
+    <!-- MAYORISTA EL REY -->
+    <div class="sm-card sm-card-feat reveal" role="listitem" style="--reveal-delay:280ms"
+         aria-label="Supermercado Mayorista El Rey, Bv. Montoneras 100-138 — lunes a sábado con horario verificado">
+      <span class="badge">Horario verificado</span>
+      <div class="sm-card-inner">
+        <div class="sm-card-top">
+          <span class="sm-card-icon" aria-hidden="true">📦</span>
+          <div class="sm-chips">
+            <span class="sm-chip sm-chip-verde">Lun–Sáb · Horario confirmado</span>
+          </div>
+        </div>
+        <span class="sm-card-cat">Mayorista · Bulevar Montoneras</span>
+        <span class="sm-card-name">Supermercado Mayorista El Rey</span>
+        <p class="sm-card-desc">
+          El único mayorista con <strong>horario verificado de forma independiente</strong>
+          en esta guía. Ideal para quien llega al camping de Banco Pelay o a una cabaña
+          y quiere hacer una carga de provisiones completa antes de instalarse.
+          Opera en jornada partida: mañana y tarde, de lunes a sábado.
+          Sin evidencia de apertura los domingos — planificá la compra con anticipación.
+        </p>
+        <div class="sm-chips">
+          <span class="sm-chip sm-chip-oro">Precios por volumen</span>
+          <span class="sm-chip">Ideal antes del camping</span>
+          <span class="sm-chip sm-chip-warn">Cerrado domingos</span>
+        </div>
+        <div class="sm-card-addr">
+          <span class="sm-card-addr-line">Bv. Montoneras 100–138</span>
+          <span class="sm-card-hours-line">Lun–Sáb: 8:00–12:30 y 16:00–20:00 hs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAR / TITÁN (nota de contexto) -->
+    <div class="sm-card reveal" role="listitem" style="--reveal-delay:310ms"
+         aria-label="Cadena DAR, 9 de Julio 1323 — sucesor del histórico Titán, horario extendido">
+      <div class="sm-card-inner">
+        <div class="sm-card-top">
+          <span class="sm-card-icon" aria-hidden="true">🏪</span>
+          <div class="sm-chips">
+            <span class="sm-chip">Abierto domingos</span>
+          </div>
+        </div>
+        <span class="sm-card-cat">Cadena · 9 de Julio</span>
+        <span class="sm-card-name">Cadena DAR</span>
+        <p class="sm-card-desc">
+          Sucursal de la cadena santafesina que en 2014 absorbió los históricos locales
+          del grupo Riccio (Impulso, El Gurí). Los uruguayenses aún lo llaman "el Titán"
+          o "el Ciclón" por la memoria del establecimiento anterior.
+          Carnicería, verdulería, frutería y quesos. <strong>Abierto también los domingos</strong>,
+          lo que lo convierte en el comodín cuando el resto de la oferta cierra.
+          Los precios son considerados altos por usuarios locales para ser una cadena.
+        </p>
+        <div class="sm-chips">
+          <span class="sm-chip">Carnicería y verdulería</span>
+          <span class="sm-chip">Quesos</span>
+          <span class="sm-chip sm-chip-oro">Abierto domingos</span>
+          <span class="sm-chip sm-chip-warn">Precios algo elevados según reseñas</span>
+        </div>
+        <div class="sm-card-addr">
+          <span class="sm-card-addr-line">9 de Julio 1323 · Tel: (03442) 42-4660</span>
+          <span class="sm-card-hours-line">Lun–Sáb 8:00–21:30 hs · Dom: consultar</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ESCENARIO 4 — FERIA / PRODUCTOS FRESCOS
+  ══════════════════════════════════════ -->
+  <div class="sm-scenario-hdr reveal" style="--reveal-delay:340ms">
+    <span class="sm-scenario-eyebrow">🥕 Productos frescos y de temporada</span>
+    <h3 class="sm-scenario-title">Del productor al visitante</h3>
+  </div>
+
+  <div class="sm-feria-banner reveal" style="--reveal-delay:360ms" role="region" aria-label="La Feria en tu Barrio — programa municipal itinerante">
+    <div class="sm-feria-inner">
+      <div class="sm-feria-left">
+        <span class="sm-feria-eyebrow">Programa municipal · Calendario variable</span>
+        <h3 class="sm-feria-title">La Feria en tu Barrio</h3>
+        <p class="sm-feria-desc">
+          Iniciativa de la Municipalidad de Concepción del Uruguay que acerca productores locales
+          a distintos barrios de la ciudad. <strong>Carnes, verduras, huevos, panificados, miel,
+          condimentos y productos sin TACC</strong>, directamente del campo a la mesa.
+          Activa en 2025 y 2026 con jornadas en marzo y mayo verificadas por medios locales.
+          Horario habitual de cada jornada: 8:00–12:00 hs.
+        </p>
+        <div class="sm-chips" style="margin-top:12px">
+          <span class="sm-chip sm-chip-verde">Productores directos</span>
+          <span class="sm-chip">Sin TACC disponible</span>
+          <span class="sm-chip sm-chip-warn">Calendario variable — consultar</span>
+        </div>
+        <p style="font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.4px;color:rgba(242,237,227,.35);line-height:1.7;margin-top:14px">
+          Para conocer el cronograma del mes: seguir la página oficial del Municipio de CdU
+          o los medios locales (APFDigital, El Miércoles Digital, 03442.com.ar).
+          Cada jornada se realiza en un punto distinto de la ciudad.
+        </p>
+      </div>
+      <div class="sm-feria-specs">
+        <div class="sm-feria-spec">
+          <span class="sm-feria-spec-val">2–3</span>
+          <span class="sm-feria-spec-lbl">jornadas por mes</span>
+        </div>
+        <div class="sm-feria-spec">
+          <span class="sm-feria-spec-val">8–12 hs</span>
+          <span class="sm-feria-spec-lbl">horario cada jornada</span>
+        </div>
+        <div class="sm-feria-spec">
+          <span class="sm-feria-spec-val">Gratuito</span>
+          <span class="sm-feria-spec-lbl">acceso libre</span>
+        </div>
+        <div class="sm-feria-spec">
+          <span class="sm-feria-spec-val">Variable</span>
+          <span class="sm-feria-spec-lbl">punto de la ciudad</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       MAXIKIOSCO — PALMEIRAS
+  ══════════════════════════════════════ -->
+  <div class="sm-scenario-hdr reveal" style="--reveal-delay:390ms">
+    <span class="sm-scenario-eyebrow">🧃 Compras puntuales y productos especiales</span>
+    <h3 class="sm-scenario-title">Maxikiosco, dietética y bebidas finas</h3>
+  </div>
+
+  <div class="sm-list" role="list" aria-label="Maxikiosco y dietética verificada">
+
+    <div class="sm-litem reveal" role="listitem" style="--reveal-delay:410ms"
+         aria-label="Palmeiras Maxikiosco, Galarza 1001 — dietética, fiambres, vinos y lácteos">
+      <span class="sm-litem-icon" aria-hidden="true">🧺</span>
+      <div class="sm-litem-body">
+        <span class="sm-litem-cat">Maxikiosco · Despensa · Dietética · Galarza</span>
+        <span class="sm-litem-name">Palmeiras Maxikiosco</span>
+        <p class="sm-litem-desc">
+          Establecimiento con presencia verificada en múltiples categorías: artículos dietarios,
+          productos celíacos y diabéticos, lácteos, fiambres, vinos finos y bebidas de calidad.
+          Puntuación máxima en el directorio donde aparece. Útil para el visitante que necesita
+          productos especiales, snacks de calidad o reponer lácteos y fiambres sin hacer una
+          compra de supermercado completa.
+        </p>
+        <div class="sm-chips" style="margin-bottom:8px">
+          <span class="sm-chip sm-chip-verde">Productos celíacos y diabéticos</span>
+          <span class="sm-chip">Vinos finos</span>
+          <span class="sm-chip">Lácteos y fiambres</span>
+          <span class="sm-chip sm-chip-warn">Horario: no verificado</span>
+        </div>
+        <div class="sm-litem-foot">
+          <span class="sm-litem-addr">📍 Galarza 1001</span>
+        </div>
+      </div>
+      <span class="sm-litem-arrow" aria-hidden="true">→</span>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════
+       NOTA EDITORIAL FINAL
+  ══════════════════════════════════════ -->
+  <div class="sm-editorial reveal" style="--reveal-delay:440ms" role="note" aria-label="Nota editorial sobre esta sección">
+    <span class="sm-editorial-icon" aria-hidden="true">ℹ</span>
+    <p class="sm-editorial-text">
+      <strong>Sobre esta guía.</strong>
+      No existen hipermercados ni cadenas nacionales de superficie en Concepción del Uruguay.
+      Los establecimientos listados son los únicos con evidencia verificada en dos o más fuentes independientes.
+      Los horarios marcados como "verificar" proceden de una única fuente o presentaron variaciones entre fuentes;
+      se recomienda confirmar por teléfono antes de organizar la compra, especialmente en feriados.
+      Establecimientos como Servis King, Sparr, RT, Doneguzzo y los locales históricos del grupo Riccio
+      no se incluyen por cierre confirmado, evidencia insuficiente o información contradictoria no resoluble.
+      ¿Detectaste un cambio?
+      <a class="sm-editorial-link" href="mailto:uruspotcdu@gmail.com" aria-label="Reportar un cambio por email">Escribinos →</a>
+    </p>
+  </div>
+
 </section>
 
 <!-- ===================== CATEGORÍAS ===================== -->
@@ -8730,7 +8707,7 @@ var sectionNames = {
     circuitos:'Circuitos', 'como-llegar':'Cómo llegar',
     servicios:'Servicios', 'uni-ruta':'Para universitarios',
     veterinarias:'Veterinarias y Mascotas',
-    bancos:'Bancos y Cajeros', remiserias:'Remiserías','uni-ruta':'Para universitarios',compras:'Compras Esenciales',
+    bancos:'Bancos y Cajeros', remiserias:'Remiserías','uni-ruta':'Para universitarios',supermercados:'Supermercados y Compras',
 };
 var crumbEl = document.getElementById('section-crumb');
   var crumbCurrent = crumbEl ? crumbEl.querySelector('#section-crumb-current') : null;
