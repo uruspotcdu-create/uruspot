@@ -3003,6 +3003,815 @@ if('serviceWorker' in navigator){
 }
 </style>
 
+  <!-- ── ESTILOS PROPIOS DE LA SECCIÓN (prefijo aloj-) ── -->
+<style>
+/* ── INTRO EJECUTIVO ── */
+.aloj-exec{
+  margin-bottom:48px;
+  padding:32px 40px;
+  background:var(--ink);
+  border-left:5px solid var(--oro2);
+  position:relative;overflow:hidden;
+}
+.aloj-exec::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(196,135,42,.14) 0%,transparent 60%);
+  pointer-events:none;
+}
+.aloj-exec-inner{position:relative;z-index:1}
+.aloj-exec-eyebrow{
+  display:block;font-family:var(--f-ui);font-size:8px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:rgba(196,135,42,.65);margin-bottom:14px;
+}
+.aloj-exec-text{
+  font-family:var(--f-italic,var(--f-display));font-style:italic;
+  font-size:clamp(14px,1.8vw,18px);color:rgba(242,237,227,.80);
+  line-height:1.7;max-width:700px;
+}
+.aloj-exec-text em{font-style:normal;color:var(--oro2)}
+.aloj-exec-rule{height:3px;background:linear-gradient(90deg,var(--oro2),var(--verde2),rgba(242,237,227,.12));margin-top:24px}
+
+/* ── SUBSECCIÓN TÍTULO ── */
+.aloj-sub-hdr{
+  display:flex;flex-direction:column;gap:6px;
+  margin-top:64px;margin-bottom:28px;
+  padding-bottom:20px;border-bottom:1px solid rgba(26,25,22,.10);
+}
+.aloj-sub-eyebrow{
+  font-family:var(--f-ui);font-size:8px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:var(--verde2);
+}
+.aloj-sub-title{
+  font-family:var(--f-display);font-size:clamp(22px,2.8vw,30px);
+  color:var(--ink);letter-spacing:-.3px;
+}
+
+/* ── GRILLA PRINCIPAL DE FICHAS ── */
+.aloj-grid-2{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
+  margin-bottom:2px;
+}
+.aloj-grid-3{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
+  margin-bottom:2px;
+}
+
+/* ── TARJETA BASE ── */
+.aloj-card{
+  background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
+  display:flex;flex-direction:column;gap:14px;padding:30px 26px;
+  position:relative;overflow:hidden;
+  transition:background .35s ease,border-color .35s ease;
+  border:1px solid var(--card-border-oro,rgba(184,92,42,.35));
+}
+.aloj-card:hover{
+  background:linear-gradient(160deg,var(--card-dark3,#221A14) 0%,var(--card-dark2,#1C1410) 100%);
+  border-color:var(--card-border-oro-hover,rgba(212,116,42,.72));
+}
+.aloj-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--oro2),var(--oro));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .35s var(--ease,cubic-bezier(.25,.46,.45,.94));z-index:0;
+}
+.aloj-card:hover::before{transform:scaleX(1)}
+
+/* Variante DESTACADA (span 2) */
+.aloj-card-feat{
+  background:var(--ink);
+  border-color:rgba(196,135,42,.50);
+}
+.aloj-card-feat::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 70% at 90% 10%,rgba(196,135,42,.10) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+.aloj-card-feat:hover{background:#1e1e1a}
+.aloj-card-feat .aloj-card-name{color:var(--parchment);font-size:22px}
+.aloj-card-feat .aloj-card-desc{color:rgba(242,237,227,.52)}
+.aloj-card-feat .aloj-card-cat{color:rgba(196,135,42,.65)}
+.aloj-card-feat .aloj-card-addr{color:rgba(242,237,227,.55)}
+
+/* ── CONTENIDO INTERIOR ── */
+.aloj-card-inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:12px;height:100%}
+.aloj-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.aloj-card-icon{font-size:28px;line-height:1;flex-shrink:0;transition:transform .35s var(--ease)}
+.aloj-card:hover .aloj-card-icon{transform:scale(1.10)}
+
+.aloj-card-cat{
+  font-family:var(--f-ui);font-size:8px;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;color:var(--oro2);
+  display:block;
+}
+.aloj-card-name{
+  font-family:var(--f-display);
+  font-size:clamp(16px,1.8vw,20px);
+  color:var(--card-text,rgba(248,238,224,.94));
+  letter-spacing:-.2px;line-height:1.15;font-weight:400;
+  display:block;
+}
+.aloj-card-desc{
+  font-family:var(--f-italic,var(--f-display));font-style:italic;
+  font-size:13.5px;color:var(--card-text-soft,rgba(248,238,224,.82));
+  line-height:1.75;flex:1;
+}
+.aloj-card-addr{
+  font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:.5px;
+  color:rgba(248,238,224,.50);display:flex;align-items:center;gap:6px;
+  padding-top:10px;border-top:1px solid rgba(242,237,227,.07);
+}
+.aloj-card-addr::before{content:'📍';font-size:10px;font-style:normal}
+
+/* ── PILLS/CHIPS DE SERVICIO ── */
+.aloj-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.aloj-chip{
+  font-family:var(--f-ui);font-size:7.5px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:5px 10px;border-radius:2px;white-space:nowrap;
+  background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.14);
+  color:rgba(242,237,227,.65);
+}
+.aloj-chip-verde{background:rgba(29,92,64,.10);border-color:rgba(29,92,64,.30);color:var(--verde2)}
+.aloj-chip-oro{background:rgba(196,135,42,.12);border-color:rgba(196,135,42,.38);color:var(--oro2)}
+.aloj-chip-warn{background:rgba(192,57,43,.10);border-color:rgba(192,57,43,.35);color:rgba(231,76,60,.85)}
+
+/* ── ENLACE DE CONTACTO ── */
+.aloj-card-cta{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(242,237,227,.40);text-decoration:none;
+  transition:color .25s ease;padding-top:8px;
+}
+.aloj-card-cta:hover{color:var(--oro2)}
+.aloj-card-cta::before{content:'↗';font-size:11px;font-style:normal}
+
+/* ── TARJETAS COMPACTAS (hosterías/hostel) ── */
+.aloj-list{display:flex;flex-direction:column;gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:2px}
+.aloj-litem{
+  background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
+  display:flex;align-items:flex-start;gap:20px;padding:24px 28px;
+  position:relative;overflow:hidden;
+  border-left:4px solid rgba(196,135,42,.22);
+  transition:background .35s ease,border-left-color .35s ease,transform .35s var(--ease);
+  border-radius:0 var(--radius-card,6px) var(--radius-card,6px) 0;
+  border:1px solid var(--card-border-oro,rgba(184,92,42,.35));
+}
+.aloj-litem:hover{
+  background:linear-gradient(160deg,var(--card-dark3,#221A14) 0%,var(--card-dark2,#1C1410) 100%);
+  border-left-color:var(--oro2);transform:translateX(6px);
+}
+.aloj-litem-icon{font-size:26px;flex-shrink:0;transition:transform .35s var(--ease)}
+.aloj-litem:hover .aloj-litem-icon{transform:scale(1.10)}
+.aloj-litem-body{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.aloj-litem-cat{font-family:var(--f-ui);font-size:7.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2)}
+.aloj-litem-name{font-family:var(--f-display);font-size:17px;color:var(--card-text,rgba(248,238,224,.94));letter-spacing:-.2px;font-weight:400}
+.aloj-litem-desc{font-family:var(--f-italic,var(--f-display));font-style:italic;font-size:13px;color:var(--card-text-soft,rgba(248,238,224,.82));line-height:1.65}
+.aloj-litem-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-top:8px;border-top:1px solid rgba(242,237,227,.07);margin-top:4px}
+.aloj-litem-addr{font-family:var(--f-ui);font-size:9.5px;font-weight:600;letter-spacing:.3px;color:rgba(242,237,227,.35)}
+.aloj-litem-tel{
+  font-family:var(--f-ui);font-size:9.5px;font-weight:700;letter-spacing:.5px;
+  color:rgba(242,237,227,.50);text-decoration:none;transition:color .25s ease;
+}
+.aloj-litem-tel:hover{color:var(--oro2)}
+.aloj-litem-arrow{
+  margin-left:auto;font-size:16px;color:rgba(242,237,227,.18);
+  flex-shrink:0;transition:color .35s ease,transform .35s var(--ease);
+}
+.aloj-litem:hover .aloj-litem-arrow{color:var(--oro2);transform:translateX(4px)}
+
+/* ── BLOQUE CAMPING ── */
+.aloj-camping{
+  background:linear-gradient(135deg,#0a1a12 0%,#0e2018 60%,#0a1508 100%);
+  border:1px solid rgba(29,92,64,.22);
+  position:relative;overflow:hidden;
+  padding:36px 40px;
+  margin-bottom:2px;
+}
+.aloj-camping::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 85% 15%,rgba(29,92,64,.38) 0%,transparent 58%);
+  pointer-events:none;
+}
+.aloj-camping-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.aloj-camping-kicker{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(100,210,155,.80);display:block;margin-bottom:14px}
+.aloj-camping-title{font-family:var(--f-display);font-size:clamp(20px,2.8vw,28px);color:var(--parchment);line-height:1.1;letter-spacing:-.3px;margin-bottom:12px}
+.aloj-camping-desc{font-family:var(--f-italic,var(--f-display));font-style:italic;font-size:14px;color:rgba(242,237,227,.52);line-height:1.8}
+.aloj-camping-desc strong{font-style:normal;color:var(--oro2);font-weight:400}
+.aloj-camping-specs{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(242,237,227,.07)}
+.aloj-camping-spec{padding:18px 20px;background:rgba(6,6,5,.35);display:flex;flex-direction:column;gap:5px}
+.aloj-camping-spec-val{font-family:var(--f-display);font-size:22px;line-height:1;color:var(--parchment);letter-spacing:-.5px}
+.aloj-camping-spec-lbl{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(242,237,227,.28)}
+
+/* ── BLOQUE DEPTO TEMPORARIO ── */
+.aloj-depto-banner{
+  background:var(--ink);
+  border-left:5px solid var(--azul,#1a5c8a);
+  position:relative;overflow:hidden;
+  padding:32px 40px;
+  margin-bottom:2px;
+}
+.aloj-depto-banner::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 55% 80% at 95% 50%,rgba(26,92,138,.18) 0%,transparent 60%);
+  pointer-events:none;
+}
+.aloj-depto-inner{position:relative;z-index:1;max-width:760px}
+.aloj-depto-eyebrow{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(70,160,230,.65);display:block;margin-bottom:12px}
+.aloj-depto-title{font-family:var(--f-display);font-size:clamp(18px,2.4vw,26px);color:var(--parchment);letter-spacing:-.3px;line-height:1.1;margin-bottom:12px}
+.aloj-depto-text{font-family:var(--f-italic,var(--f-display));font-style:italic;font-size:14px;color:rgba(242,237,227,.50);line-height:1.8;max-width:620px}
+.aloj-depto-text strong{font-style:normal;color:rgba(242,237,227,.80);font-weight:400}
+.aloj-depto-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.aloj-depto-link{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(26,92,138,.12);border:1px solid rgba(26,92,138,.40);
+  border-radius:2px;padding:10px 18px;
+  font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(70,160,230,.90);text-decoration:none;
+  transition:background .25s ease,border-color .25s ease;
+}
+.aloj-depto-link:hover{background:rgba(26,92,138,.22);border-color:rgba(70,160,230,.55)}
+
+/* ── NOTA EDITORIAL DE CIERRE ── */
+.aloj-editorial{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:22px 26px;
+  background:rgba(26,25,22,.04);
+  border:1px solid rgba(26,25,22,.10);
+  margin-top:2px;
+}
+.aloj-editorial-icon{font-size:20px;line-height:1;flex-shrink:0;color:rgba(26,25,22,.40)}
+.aloj-editorial-text{
+  font-family:var(--f-ui);font-size:9.5px;font-weight:600;letter-spacing:.4px;
+  color:rgba(26,25,22,.52);line-height:1.8;
+}
+.aloj-editorial-text strong{color:rgba(26,25,22,.72)}
+.aloj-editorial-link{color:var(--verde2);text-decoration:underline;text-decoration-color:rgba(38,122,85,.35)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.aloj-grid-3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:860px){
+  .aloj-grid-2{grid-template-columns:1fr}
+  .aloj-grid-3{grid-template-columns:1fr}
+  .aloj-camping-inner{grid-template-columns:1fr}
+  .aloj-camping{padding:28px 24px}
+  .aloj-exec{padding:24px 26px}
+  .aloj-depto-banner{padding:24px 26px}
+}
+@media(max-width:640px){
+  .aloj-litem{padding:20px 18px;gap:14px}
+  .aloj-litem-name{font-size:15px}
+  .aloj-card{padding:24px 18px}
+  .aloj-camping-specs{grid-template-columns:1fr}
+  .aloj-exec{padding:20px var(--gutter,18px)}
+  .aloj-depto-banner{padding:20px var(--gutter,18px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .aloj-card,.aloj-card::before,.aloj-card-icon,
+  .aloj-litem,.aloj-litem-icon,.aloj-litem-arrow{transition:none}
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECCIÓN PRINCIPAL
+     ══════════════════════════════════════════════════════════ -->
+<section class="us-section" id="alojamiento" aria-labelledby="title-alojamiento">
+
+  <!-- HEADER -->
+  <div class="section-header reveal">
+    <div>
+      <span class="section-eyebrow">Centro · Afueras · Costanera · Naturaleza</span>
+      <h2 class="section-title" id="title-alojamiento">🏨 Dónde Alojarse</h2>
+    </div>
+    <span class="section-count">12 establecimientos verificados</span>
+    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+
+  <!-- INTRO EJECUTIVO -->
+  <div class="aloj-exec reveal" style="--reveal-delay:40ms">
+    <div class="aloj-exec-inner">
+      <span class="aloj-exec-eyebrow">Lo que necesitás saber antes de reservar</span>
+      <p class="aloj-exec-text">
+        Concepción del Uruguay no tiene residencias universitarias ni grandes cadenas hoteleras.
+        La oferta se concentra en <em>hoteles boutique y hosterías en el centro histórico</em>,
+        cabañas y apart hoteles en la periferia, y departamentos temporarios vía plataformas.
+        Los hoteles con más servicios están en el microcentro, a pie de los principales atractivos.
+        Si viajás en auto, las cabañas de la periferia tienen mejor precio y más espacio.
+      </p>
+      <div class="aloj-exec-rule" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- ══ BLOQUE 1: HOTELES ══ -->
+  <div class="aloj-sub-hdr reveal" style="--reveal-delay:60ms">
+    <span class="aloj-sub-eyebrow">🏩 Hoteles y Hotel Boutique</span>
+    <h3 class="aloj-sub-title">Las opciones más completas — centro e inmediaciones</h3>
+  </div>
+
+  <div class="aloj-grid-2" role="list" aria-label="Hoteles verificados">
+
+    <!-- Gran Texier — DESTACADO -->
+    <div class="aloj-card aloj-card-feat reveal" role="listitem" style="--reveal-delay:80ms"
+         aria-label="Gran Texier Hotel Casino — el hotel más completo de la ciudad">
+      <span class="badge badge-gold">El más completo</span>
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🏰</span>
+          <div class="aloj-chips">
+            <span class="aloj-chip aloj-chip-verde">Piscina</span>
+            <span class="aloj-chip aloj-chip-verde">Casino</span>
+            <span class="aloj-chip">Recepción 24 hs</span>
+          </div>
+        </div>
+        <span class="aloj-card-cat">Hotel · Centro histórico</span>
+        <span class="aloj-card-name">Gran Texier Hotel Casino</span>
+        <p class="aloj-card-desc">
+          El hotel referente de la ciudad desde 1930. Edificio histórico frente a la Peatonal Rocamora,
+          a una cuadra de Plaza Ramírez. 60 habitaciones organizadas en tres categorías: Standard,
+          Superior y Suite. Dispone de piscina de temporada en terraza, sala de juegos (casino),
+          gimnasio, terraza jardín con vista panorámica, Wi-Fi en todo el establecimiento y
+          estacionamiento gratuito propio. Desayuno incluido disponible.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Estacionamiento</span>
+          <span class="aloj-chip">Desayuno</span>
+          <span class="aloj-chip">Gimnasio</span>
+          <span class="aloj-chip aloj-chip-oro">Frente a peatonal</span>
+        </div>
+        <span class="aloj-card-addr">Eva Perón 114, Centro</span>
+        <a class="aloj-card-cta" href="https://hotelgrantexier.com.ar" target="_blank" rel="noopener noreferrer"
+           aria-label="Ver sitio oficial Gran Texier Hotel Casino">
+          hotelgrantexier.com.ar · (03442) 671460
+        </a>
+      </div>
+    </div>
+
+    <!-- Posta Torreón -->
+    <div class="aloj-card reveal" role="listitem" style="--reveal-delay:110ms"
+         aria-label="Posta Torreón — primer hotel boutique homologado de Entre Ríos">
+      <span class="badge">Hotel Boutique</span>
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🛎️</span>
+          <div class="aloj-chips">
+            <span class="aloj-chip aloj-chip-verde">Piscina climatizada</span>
+          </div>
+        </div>
+        <span class="aloj-card-cat">Hotel Boutique · Centro</span>
+        <span class="aloj-card-name">Antigua Posta del Torreón</span>
+        <p class="aloj-card-desc">
+          El primer hotel boutique homologado de la provincia de Entre Ríos, emplazado en una
+          construcción italianizante de 1873. 9 habitaciones de lujo diseñadas individualmente,
+          patio español con piscina climatizada, desayuno continental. A 4 cuadras de Plaza Ramírez,
+          a pasos de la peatonal y del núcleo bancario. Estacionamiento disponible a una cuadra
+          con cupo limitado.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Desayuno</span>
+          <span class="aloj-chip">Piscina climatizada</span>
+          <span class="aloj-chip">S.U.M.</span>
+          <span class="aloj-chip aloj-chip-warn">Sin estacionamiento en puerta</span>
+        </div>
+        <span class="aloj-card-addr">Almafuerte 799 esq. España, Centro</span>
+        <a class="aloj-card-cta" href="https://postadeltorreon.com.ar" target="_blank" rel="noopener noreferrer"
+           aria-label="Ver sitio oficial Posta Torreón">
+          postadeltorreon.com.ar · (03442) 432618
+        </a>
+      </div>
+    </div>
+
+    <!-- Lourd Mary -->
+    <div class="aloj-card reveal" role="listitem" style="--reveal-delay:140ms"
+         aria-label="Hotel Boutique Lourd Mary">
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🎨</span>
+        </div>
+        <span class="aloj-card-cat">Hotel Boutique · Centro</span>
+        <span class="aloj-card-name">Hotel Boutique Lourd Mary</span>
+        <p class="aloj-card-desc">
+          Casona de 1920 con 9 habitaciones decoradas individualmente con inspiración en artistas
+          plásticos (Dalí, Picasso, Van Gogh). Habitaciones dobles, triples, cuádruples y suite
+          para hasta 7 personas. Recepción 24 hs, desayuno continental, gimnasio y salón para
+          reuniones. Sin piscina. Sin estacionamiento propio. A 10 minutos a pie de Plaza Ramírez.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Desayuno</span>
+          <span class="aloj-chip">Gimnasio</span>
+          <span class="aloj-chip">Recepción 24 hs</span>
+          <span class="aloj-chip aloj-chip-warn">Sin mascotas</span>
+          <span class="aloj-chip aloj-chip-warn">Sin estacionamiento</span>
+        </div>
+        <span class="aloj-card-addr">Posadas 829, Centro</span>
+        <a class="aloj-card-cta" href="http://www.lourdmaryhotel.com.ar" target="_blank" rel="noopener noreferrer"
+           aria-label="Ver sitio oficial Hotel Lourd Mary">
+          lourdmaryhotel.com.ar · (03442) 421200
+        </a>
+      </div>
+    </div>
+
+    <!-- Gran Litoral -->
+    <div class="aloj-card reveal" role="listitem" style="--reveal-delay:170ms"
+         aria-label="Hotel Gran Litoral">
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🏊</span>
+          <div class="aloj-chips">
+            <span class="aloj-chip aloj-chip-verde">Admite mascotas</span>
+          </div>
+        </div>
+        <span class="aloj-card-cat">Hotel · Zona terminal de ómnibus</span>
+        <span class="aloj-card-name">Hotel Gran Litoral</span>
+        <p class="aloj-card-desc">
+          13 habitaciones con aire acondicionado, piscina al aire libre, bar/salón y desayuno
+          continental. A 600 metros de la Terminal de Ómnibus y a 1 km de Plaza Ramírez.
+          Estacionamiento privado de pago disponible en el establecimiento.
+          Perfil recomendado: viajero que llega en bus o con auto, busca precio accesible
+          y comodidades básicas confiables.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Piscina</span>
+          <span class="aloj-chip">Bar</span>
+          <span class="aloj-chip">Desayuno</span>
+          <span class="aloj-chip">Estacionamiento</span>
+          <span class="aloj-chip aloj-chip-verde">Mascotas ✓</span>
+        </div>
+        <span class="aloj-card-addr">Rocamora 1406, zona Terminal</span>
+        <a class="aloj-card-cta" href="https://www.hotelgranlitoral.com" target="_blank" rel="noopener noreferrer"
+           aria-label="Ver sitio oficial Hotel Gran Litoral">
+          hotelgranlitoral.com · (03442) 425644
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /aloj-grid-2 hoteles -->
+
+  <!-- ══ BLOQUE 2: HOSTERÍAS ══ -->
+  <div class="aloj-sub-hdr reveal" style="--reveal-delay:200ms">
+    <span class="aloj-sub-eyebrow">🏡 Hosterías</span>
+    <h3 class="aloj-sub-title">Trato personalizado — el alojamiento más cercano a la ciudad real</h3>
+  </div>
+
+  <div class="aloj-list" role="list" aria-label="Hosterías verificadas">
+
+    <!-- Antigua Fonda -->
+    <div class="aloj-litem reveal" role="listitem" style="--reveal-delay:220ms"
+         aria-label="Antigua Fonda Hostería, España 172">
+      <span class="aloj-litem-icon" aria-hidden="true">🧡</span>
+      <div class="aloj-litem-body">
+        <span class="aloj-litem-cat">Hostería · Centro histórico</span>
+        <span class="aloj-litem-name">Antigua Fonda Hostería</span>
+        <p class="aloj-litem-desc">
+          8 habitaciones en una casona de principios del 1900. Singles, dobles, triples y cuádruples.
+          Baño privado, A/C, TV satelital, Wi-Fi, servicio de desayuno, jardín y terraza. 
+          Estacionamiento limitado disponible. A 350 metros de la Basílica y a 1 km de Plaza Ramírez.
+          Una de las opciones con mejor relación ambiente histórico/precio de la ciudad.
+        </p>
+        <div class="aloj-chips" style="margin-bottom:8px">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Desayuno</span>
+          <span class="aloj-chip">Jardín</span>
+          <span class="aloj-chip">Estacionamiento</span>
+        </div>
+        <div class="aloj-litem-foot">
+          <span class="aloj-litem-addr">España 172, Centro</span>
+          <a class="aloj-litem-tel" href="tel:+5434424333734" aria-label="Llamar a Antigua Fonda: (03442) 433734">(03442) 433734</a>
+          <a class="aloj-card-cta" href="http://antiguafonda.com.ar" target="_blank" rel="noopener noreferrer"
+             aria-label="Ver sitio oficial Antigua Fonda">antiguafonda.com.ar ↗</a>
+        </div>
+      </div>
+      <span class="aloj-litem-arrow" aria-hidden="true">→</span>
+    </div>
+
+    <!-- Hostería Mitre -->
+    <div class="aloj-litem reveal" role="listitem" style="--reveal-delay:250ms"
+         aria-label="Hostería Mitre, Bartolomé Mitre 949">
+      <span class="aloj-litem-icon" aria-hidden="true">🏛️</span>
+      <div class="aloj-litem-body">
+        <span class="aloj-litem-cat">Hostería · A 10 minutos del centro</span>
+        <span class="aloj-litem-name">Hostería Mitre</span>
+        <p class="aloj-litem-desc">
+          8 habitaciones con baño privado, A/C, TV satelital, Wi-Fi, calefacción por losa radiante
+          y desayuno (7:30–10:00 hs). Cochera propia. Zona residencial tranquila, 
+          a 10 minutos a pie del microcentro. Opción confiable para quienes priorizan tranquilidad
+          y cochera segura sobre ubicación céntrica.
+        </p>
+        <div class="aloj-chips" style="margin-bottom:8px">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Desayuno</span>
+          <span class="aloj-chip">Cochera</span>
+          <span class="aloj-chip">Calefacción radiante</span>
+        </div>
+        <div class="aloj-litem-foot">
+          <span class="aloj-litem-addr">Bartolomé Mitre 949 esq. Ameghino</span>
+          <a class="aloj-litem-tel" href="tel:+5434424299754" aria-label="Llamar a Hostería Mitre: (03442) 429754">(03442) 429754</a>
+        </div>
+      </div>
+      <span class="aloj-litem-arrow" aria-hidden="true">→</span>
+    </div>
+
+  </div><!-- /aloj-list hosterías -->
+
+  <!-- ══ BLOQUE 3: APART HOTEL ══ -->
+  <div class="aloj-sub-hdr reveal" style="--reveal-delay:280ms">
+    <span class="aloj-sub-eyebrow">🏢 Apart Hotel</span>
+    <h3 class="aloj-sub-title">Independencia y cocina propia — ideal para estadías largas</h3>
+  </div>
+
+  <div class="aloj-grid-2" role="list" aria-label="Apart hoteles verificados">
+
+    <!-- Adriano Apart -->
+    <div class="aloj-card reveal" role="listitem" style="--reveal-delay:300ms"
+         aria-label="Adriano Apart Hotel, Juana Azurduy 267">
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🏗️</span>
+          <div class="aloj-chips">
+            <span class="aloj-chip aloj-chip-oro">Antigua bodega</span>
+          </div>
+        </div>
+        <span class="aloj-card-cat">Apart Hotel · Periferia norte — 3 km del centro</span>
+        <span class="aloj-card-name">Adriano Apart Hotel</span>
+        <p class="aloj-card-desc">
+          Instalado en lo que fue una antigua bodega, ofrece departamentos luminosos y espaciosos
+          con cocina equipada, zona de comedor y patio con parrilla de uso libre. Wi-Fi de primera
+          calidad según reseñas. Desayuno seco en habitación. Cochera cerrada y segura.
+          Acceso directo a Ruta 14: ideal como base para recorrer la región en auto.
+          No se admiten mascotas.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Cocina equipada</span>
+          <span class="aloj-chip">Parrilla</span>
+          <span class="aloj-chip">Cochera cerrada</span>
+          <span class="aloj-chip aloj-chip-warn">Sin mascotas</span>
+          <span class="aloj-chip aloj-chip-warn">Lejos del centro a pie</span>
+        </div>
+        <span class="aloj-card-addr">Juana Azurduy 267 (acceso Ruta 14)</span>
+        <span class="aloj-card-cta" style="cursor:default">
+          Reservas vía Booking.com y Despegar
+        </span>
+      </div>
+    </div>
+
+    <!-- Virrey Hotel -->
+    <div class="aloj-card reveal" role="listitem" style="--reveal-delay:330ms"
+         aria-label="Virrey Hotel, Bv. Sansoni 2075 — verificar disponibilidad">
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🏨</span>
+          <span class="aloj-chip aloj-chip-warn" style="flex-shrink:0">⚠ Confirmar antes</span>
+        </div>
+        <span class="aloj-card-cat">Hotel · Bulevar Sansoni — 2 km del centro</span>
+        <span class="aloj-card-name">Virrey Hotel</span>
+        <p class="aloj-card-desc">
+          Hotel de perfil económico sobre el Bulevar Sansoni, a 2 km del centro. Cochera cerrada,
+          room service 24 hs, Wi-Fi por habitación, caja de seguridad. Aparece en guías oficiales
+          pero algunos usuarios reportaron dificultad para comunicarse por teléfono.
+          Se recomienda verificar disponibilidad directamente antes de viajar.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Cochera</span>
+          <span class="aloj-chip">Caja de seguridad</span>
+        </div>
+        <span class="aloj-card-addr">Bv. Sansoni 2075</span>
+        <a class="aloj-card-cta" href="tel:+5434424400017" aria-label="Llamar al Virrey Hotel: (03442) 440017">
+          (03442) 440017 — verificar vigencia
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /aloj-grid-2 apart -->
+
+  <!-- ══ BLOQUE 4: CABAÑAS Y COMPLEJOS ══ -->
+  <div class="aloj-sub-hdr reveal" style="--reveal-delay:360ms">
+    <span class="aloj-sub-eyebrow">🌿 Cabañas y Complejos</span>
+    <h3 class="aloj-sub-title">Para familias, grupos y quienes buscan espacio y naturaleza</h3>
+  </div>
+
+  <div class="aloj-grid-3" role="list" aria-label="Cabañas y complejos verificados">
+
+    <!-- Aires del Campo -->
+    <div class="aloj-card reveal" role="listitem" style="--reveal-delay:380ms"
+         aria-label="Aires del Campo Cabañas y Hotel">
+      <span class="badge">Piscina</span>
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🌳</span>
+          <div class="aloj-chips">
+            <span class="aloj-chip aloj-chip-verde">Spa</span>
+          </div>
+        </div>
+        <span class="aloj-card-cat">Complejo cabañas + hotel · 1 km del centro</span>
+        <span class="aloj-card-name">Aires del Campo</span>
+        <p class="aloj-card-desc">
+          Complejo de 24–26 unidades con piscina al aire libre y spa. Cabañas y habitaciones
+          con A/C, minibar, microondas, jacuzzi y TV satelital. A 1 km del centro y a 600 m
+          de la Terminal de Ómnibus. Cochera en el establecimiento. Entorno verde y tranquilo.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Piscina</span>
+          <span class="aloj-chip">Spa</span>
+          <span class="aloj-chip">Cochera</span>
+          <span class="aloj-chip">Jacuzzi</span>
+        </div>
+        <span class="aloj-card-addr">Bv. Sansoni 1920</span>
+        <a class="aloj-card-cta" href="https://www.airesdelcampo.com.ar" target="_blank" rel="noopener noreferrer"
+           aria-label="Ver sitio oficial Aires del Campo">
+          airesdelcampo.com.ar · (03442) 442490
+        </a>
+      </div>
+    </div>
+
+    <!-- Fogón Criollo -->
+    <div class="aloj-card reveal" role="listitem" style="--reveal-delay:410ms"
+         aria-label="Cabañas Fogón Criollo, Alberdi 3017">
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🔥</span>
+          <div class="aloj-chips">
+            <span class="aloj-chip aloj-chip-verde">Mascotas ✓</span>
+          </div>
+        </div>
+        <span class="aloj-card-cat">Cabañas · Periferia — 4,6 km del centro</span>
+        <span class="aloj-card-name">Fogón Criollo Cabañas</span>
+        <p class="aloj-card-desc">
+          Cabañas independientes con parquet, cocina equipada con horno, TV satélite
+          y baño privado. Jardín, zona de barbacoa y entorno natural. Piscina al aire libre.
+          Para 4 y 6 personas. Acepta mascotas. Cochera. Acceso recomendado en auto.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Piscina</span>
+          <span class="aloj-chip">Parrilla</span>
+          <span class="aloj-chip">Cocina equipada</span>
+          <span class="aloj-chip aloj-chip-verde">Mascotas ✓</span>
+        </div>
+        <span class="aloj-card-addr">Alberdi 3017 (zona sur)</span>
+        <a class="aloj-card-cta" href="tel:+5434421548714" aria-label="Llamar a Fogón Criollo: (03442) 154-87148">
+          (03442) 154-87148
+        </a>
+      </div>
+    </div>
+
+    <!-- Casa del Árbol -->
+    <div class="aloj-card reveal" role="listitem" style="--reveal-delay:440ms"
+         aria-label="Casa del Árbol Hostel, 8 de Junio 1096">
+      <span class="badge">Mejor valorado</span>
+      <div class="aloj-card-inner">
+        <div class="aloj-card-top">
+          <span class="aloj-card-icon" aria-hidden="true">🌿</span>
+          <div class="aloj-chips">
+            <span class="aloj-chip aloj-chip-verde">Mascotas ✓</span>
+          </div>
+        </div>
+        <span class="aloj-card-cat">Hostel / Casa de huéspedes · 7 min del centro a pie</span>
+        <span class="aloj-card-name">Casa del Árbol Hostel</span>
+        <p class="aloj-card-desc">
+          Hostel boutique con jardín oasis en pleno centro de CdU. Habitaciones privadas y
+          compartidas con cocina compartida, patio, Wi-Fi gratuito y estacionamiento gratuito.
+          Acepta mascotas. Atención personalizada de sus dueños. Puntaje 9,6 en Booking
+          (una de las valoraciones más altas de la ciudad). A 5 cuadras del centro.
+          Solo se acepta efectivo según algunas fuentes — verificar al reservar.
+        </p>
+        <div class="aloj-chips">
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip">Jardín</span>
+          <span class="aloj-chip">Cocina compartida</span>
+          <span class="aloj-chip">Estacionamiento</span>
+          <span class="aloj-chip aloj-chip-verde">Mascotas ✓</span>
+          <span class="aloj-chip aloj-chip-warn">Verificar forma de pago</span>
+        </div>
+        <span class="aloj-card-addr">8 de Junio 1096, zona céntrica</span>
+        <a class="aloj-card-cta"
+           href="https://www.booking.com/hotel/ar/casa-del-arbol-hostel.es-ar.html"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Reservar Casa del Árbol en Booking">
+          Booking.com / Airbnb ↗
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /aloj-grid-3 cabañas -->
+
+  <!-- ══ BLOQUE 5: CAMPING ══ -->
+  <div class="aloj-sub-hdr reveal" style="--reveal-delay:470ms">
+    <span class="aloj-sub-eyebrow">⛺ Camping</span>
+    <h3 class="aloj-sub-title">Naturaleza y río — el alojamiento que no se puede replicar</h3>
+  </div>
+
+  <div class="aloj-camping reveal" style="--reveal-delay:490ms" role="region" aria-label="Camping Banco Pelay">
+    <div class="aloj-camping-inner">
+      <div>
+        <span class="aloj-camping-kicker">Camping municipal · Temporada todo el año</span>
+        <h3 class="aloj-camping-title">Balneario Camping Banco Pelay</h3>
+        <p class="aloj-camping-desc">
+          El único camping en el río Uruguay dentro de la ciudad, gestionado por la Municipalidad
+          de CdU. Está sobre la playa de <strong>7 km de arena blanca</strong>, a 5 km del centro
+          por Ruta 14 Norte. Dispone de sectores para carpas, zona de motorhomes y bungalows/dormis
+          de madera sobre la playa. Wi-Fi en todo el complejo, amarradero para lanchas, excursiones
+          de pesca y actividades recreativas. Reapertura con nueva infraestructura en temporada 2025–2026.
+        </p>
+        <div class="aloj-chips" style="margin-top:16px">
+          <span class="aloj-chip">Carpas</span>
+          <span class="aloj-chip">Motorhomes</span>
+          <span class="aloj-chip">Bungalows</span>
+          <span class="aloj-chip">Wi-Fi</span>
+          <span class="aloj-chip aloj-chip-oro">Sobre el río</span>
+          <span class="aloj-chip aloj-chip-verde">Todo el año</span>
+        </div>
+        <p style="font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.4px;color:rgba(242,237,227,.35);line-height:1.7;margin-top:14px">
+          📍 Ruta 14 Norte, 5 km del centro &nbsp;·&nbsp;
+          ☎ Turismo Municipal: (03442) 440812 · 425820 &nbsp;·&nbsp;
+          Tarifa de ingreso durante horario de cobro (8–20 hs) — verificar temporada
+        </p>
+      </div>
+      <div class="aloj-camping-specs">
+        <div class="aloj-camping-spec">
+          <span class="aloj-camping-spec-val">7 km</span>
+          <span class="aloj-camping-spec-lbl">de playa sobre el río Uruguay</span>
+        </div>
+        <div class="aloj-camping-spec">
+          <span class="aloj-camping-spec-val">Todo el año</span>
+          <span class="aloj-camping-spec-lbl">temporada abierta</span>
+        </div>
+        <div class="aloj-camping-spec">
+          <span class="aloj-camping-spec-val">5 km</span>
+          <span class="aloj-camping-spec-lbl">del microcentro en auto</span>
+        </div>
+        <div class="aloj-camping-spec">
+          <span class="aloj-camping-spec-val">3 tipos</span>
+          <span class="aloj-camping-spec-lbl">carpa · motorhome · bungalow</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BLOQUE 6: DEPARTAMENTOS TEMPORARIOS ══ -->
+  <div class="aloj-sub-hdr reveal" style="--reveal-delay:520ms">
+    <span class="aloj-sub-eyebrow">🏠 Departamentos y Alquileres Temporarios</span>
+    <h3 class="aloj-sub-title">Para grupos, familias y estadías de más de 3 días</h3>
+  </div>
+
+  <div class="aloj-depto-banner reveal" style="--reveal-delay:540ms" role="region" aria-label="Alquileres temporarios en CdU">
+    <div class="aloj-depto-inner">
+      <span class="aloj-depto-eyebrow">Oferta amplia · Mercado privado dinámico</span>
+      <h3 class="aloj-depto-title">Departamentos temporarios en CdU</h3>
+      <p class="aloj-depto-text">
+        Concepción del Uruguay tiene una oferta amplia y activa de departamentos equipados en alquiler
+        temporario, especialmente en el <strong>centro histórico y la zona de la terminal</strong>.
+        La mayoría incluye cocina completa, A/C, Wi-Fi y ropa de cama. Precios más bajos que los
+        hoteles para estadías de 3 o más días. Se consiguen vía Airbnb, Booking y grupos de Facebook
+        específicos de la ciudad. <strong>La guía no lista fichas individuales de propietarios privados</strong>
+        porque la disponibilidad varía semana a semana.
+      </p>
+      <div class="aloj-depto-links">
+        <a class="aloj-depto-link"
+           href="https://www.airbnb.com.ar/concepcion-del-uruguay-argentina/stays"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Buscar departamentos en Airbnb Concepción del Uruguay">
+          🏡 Airbnb ↗
+        </a>
+        <a class="aloj-depto-link"
+           href="https://www.booking.com/city/ar/concepcion-del-uruguay.es-ar.html"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Buscar alojamientos en Booking Concepción del Uruguay">
+          📅 Booking.com ↗
+        </a>
+        <a class="aloj-depto-link"
+           href="https://www.parairnos.com/alquileres-en-concepcion-del-uruguay"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Buscar alquileres en Parairnos Concepción del Uruguay">
+          🔍 Parairnos.com ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTA EDITORIAL FINAL ══ -->
+  <div class="aloj-editorial reveal" style="--reveal-delay:580ms" role="note" aria-label="Nota editorial sobre criterios de publicación de alojamientos">
+    <span class="aloj-editorial-icon" aria-hidden="true">ℹ</span>
+    <p class="aloj-editorial-text">
+      <strong>Criterios de publicación.</strong> Esta sección incluye únicamente
+      establecimientos verificados en dos o más fuentes independientes con dirección y contacto
+      confirmados. El Virrey Hotel se publica con advertencia por reportes de dificultad
+      de contacto telefónico. El Grumete Apart Hotel (Artigas 56) y el 3260Hostel no se
+      incluyen por evidencia insuficiente en fuentes 2024–2026.
+      Los precios y las estrellas no se publican ya que fluctúan y deben ser verificados
+      directamente con cada establecimiento.
+      ¿Encontraste un cambio o cierre? <a class="aloj-editorial-link" href="mailto:uruspotcdu@gmail.com" aria-label="Reportar un cambio por email">Escribinos →</a>
+    </p>
+  </div>
+
+</section>
+
 <!-- ══════════════════════════════════════════════════════════
      SECCIÓN: BANCOS, CAJEROS Y SERVICIOS FINANCIEROS
      nav-item: data-section="bancos"
