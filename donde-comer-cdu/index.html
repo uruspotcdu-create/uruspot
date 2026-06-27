@@ -5,11 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="La guía gastronómica más completa de Concepción del Uruguay. 55 lugares verificados: restaurantes, bares, cafeterías, panaderías y más.">
 <meta name="theme-color" content="#0c0904">
+<meta name="robots" content="index, follow">
 <title>Dónde Comer en CDU · Guía Gastronómica</title>
+<link rel="canonical" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Dónde Comer en Concepción del Uruguay",
+  "description": "La guía gastronómica más completa de Concepción del Uruguay. 55 lugares verificados.",
+  "url": "https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/",
+  "inLanguage": "es-AR",
+  "about": {
+    "@type": "City",
+    "name": "Concepción del Uruguay",
+    "addressRegion": "Entre Ríos",
+    "addressCountry": "AR"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap"></noscript>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap"></noscript>
 <style>
+  .skip-link{
+  position:absolute;top:-100%;left:1rem;
+  background:var(--ink);color:var(--parchment);
+  font-size:.85rem;font-weight:500;padding:.6rem 1.2rem;
+  border-radius:0 0 8px 8px;text-decoration:none;
+  z-index:10000;
+  transition:top .2s ease;
+}
+.skip-link:focus{top:0}
+  .sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+  
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 :root{
@@ -27,7 +64,7 @@
   --border:rgba(184,135,42,.18);
   --border-s:rgba(184,135,42,.35);
   --radius:18px;
---radius-lg:24px;
+  --radius-lg:24px;
   --oro: #b8872a;
   --oro2: #d4a843;
   --verde2: #2d6a4f;
@@ -36,19 +73,44 @@
   --f-display: 'Cormorant Garamond', serif;
   --f-italic: 'Cormorant Garamond', serif;
 }
-
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{background:var(--parchment);color:var(--ink);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-
-body::after{
-  content:'';position:fixed;inset:0;
+.grain-overlay{
+  position:fixed;inset:0;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
   pointer-events:none;z-index:9999;opacity:.5
 }
 
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--parchment);color:var(--ink);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+
+  /* ── prefers-reduced-motion: cumplimiento WCAG 2.3.3 AAA ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+.hero-bg { animation: none; opacity: 1; }
+.sh-line { animation: none; }
+.live-dot { animation: none; }
+  /* Mantener el estado final visible de los elementos del hero */
+  .eyebrow,
+  .hero-title,
+  .hero-sub,
+  .orn,
+  .hero-stats,
+  .scroll-hint { opacity: 1; transform: none; }
+  .vt-phrase2 { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
 /* ═══════════════ HERO ═══════════════ */
 .hero{
-  position:relative;min-height:100svh;
+  position:relative;
+  min-height:100vh;
+  min-height:100svh;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:max(env(safe-area-inset-top),3rem) 1.5rem 7rem;
   background:var(--ink);overflow:hidden
@@ -67,6 +129,7 @@ body::after{
   position:absolute;inset:0;
   background-image:linear-gradient(rgba(184,135,42,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(184,135,42,.03) 1px,transparent 1px);
   background-size:64px 64px;
+ -webkit-mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,black,transparent);
   mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,black,transparent)
 }
 
@@ -101,7 +164,7 @@ body::after{
 
 .hero-sub{
   font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
-  font-size:clamp(.9rem,2.2vw,1.2rem);color:rgba(248,243,234,.4);
+  font-size:clamp(.9rem,2.2vw,1.2rem);color:rgba(248,243,234,.6);
   margin-top:1.2rem;letter-spacing:.05em;
   opacity:0;animation:fadeup .7s ease forwards .45s
 }
@@ -125,7 +188,7 @@ body::after{
 .hs{flex:1;min-width:90px;padding:1.1rem .8rem;text-align:center;border-right:1px solid rgba(184,135,42,.12)}
 .hs:last-child{border-right:none}
 .hs-n{font-family:'Cormorant Garamond',serif;font-size:1.85rem;font-weight:700;color:var(--gold-bright);line-height:1}
-.hs-l{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(248,243,234,.3);margin-top:.3rem}
+.hs-l{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(248,243,234,.5);margin-top:.3rem}
 
 .scroll-hint{
   position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
@@ -133,7 +196,12 @@ body::after{
   opacity:0;animation:fadeup .6s ease forwards 1.1s;
   color:rgba(248,243,234,.22);font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;z-index:2
 }
-.sh-line{width:1px;height:36px;background:linear-gradient(180deg,rgba(184,135,42,.5),transparent);animation:shdrop 2.2s ease-in-out infinite}
+.sh-line{
+  width:1px;height:36px;
+  background:linear-gradient(180deg,rgba(184,135,42,.5),transparent);
+  transform-origin:top center;
+  animation:shdrop 2.2s ease-in-out infinite;
+}
 @keyframes shdrop{0%,100%{transform:scaleY(1);transform-origin:top}50%{transform:scaleY(1.5);transform-origin:top}}
 
 .hero-wave{position:absolute;bottom:-1px;left:0;right:0;height:72px;overflow:hidden;z-index:3}
@@ -356,8 +424,68 @@ footer::before{
   .hs{padding:.9rem .6rem}
 }
 </style>
+  <style>
+#vt-wrap{padding:0}
+.vt-inner{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:4rem 2rem;
+  text-align:center;
+  position:relative;z-index:2;
+}
+.vt-eyebrow2{
+  font-family:'Outfit',sans-serif;font-size:.58rem;font-weight:500;
+  letter-spacing:.4em;text-transform:uppercase;
+  color:rgba(184,135,42,.45);margin-bottom:2.5rem;
+}
+.vt-phrase2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,6vw,5.2rem);
+  font-weight:300;line-height:1.1;letter-spacing:-.02em;
+  color:var(--parchment);margin:0 auto 2rem;
+  max-width:860px;
+  opacity:0;transform:translateY(20px);
+  transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);
+}
+.vt-phrase2.vp-vis{opacity:1;transform:translateY(0)}
+.vt-phrase2 em{font-style:italic;color:var(--gold-bright)}
+.vt-phrase2 strong{
+  font-weight:700;font-style:italic;
+  background:linear-gradient(135deg,var(--gold-pale) 0%,var(--gold-bright) 50%,var(--copper) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.vt-phrase2 .vt-muted{color:rgba(248,243,234,.55);font-weight:300;font-style:normal}
+.vt-phrase2 .vt-accent{
+  display:block;font-size:.55em;
+  font-family:'Outfit',sans-serif;font-weight:300;font-style:normal;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(184,135,42,.5);margin-top:.6rem;
+  -webkit-text-fill-color:rgba(184,135,42,.5);background:none;
+}
+.vt-sep{
+  width:1px;height:60px;
+  background:linear-gradient(180deg,transparent,rgba(184,135,42,.3),transparent);
+  margin:0 auto;
+}
+.vt-wave-t{position:absolute;top:-1px;left:0;right:0;height:72px;overflow:hidden;z-index:3}
+.vt-wave-t svg{display:block;width:100%;height:100%}
+.vt-wave-b{position:absolute;bottom:-1px;left:0;right:0;height:72px;overflow:hidden;z-index:3}
+.vt-wave-b svg{display:block;width:100%;height:100%}
+.vt-glow2{
+  position:absolute;width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(184,135,42,.08) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;z-index:0;
+}
+@media(prefers-reduced-motion:reduce){
+  .vt-phrase2{opacity:1!important;transform:none!important;transition:none!important}
+}
+</style>
 </head>
 <body>
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Ir al contenido principal</a>
 
 <!-- ═══════════════ HERO ═══════════════ -->
 <section class="hero">
@@ -400,10 +528,10 @@ footer::before{
       <span class="eyebrow-line r" aria-hidden="true"></span>
     </div>
 
-    <h1 class="hero-title">
-      Dónde Comer<br>
-      <strong>en CDU</strong>
-    </h1>
+<h1 class="hero-title">
+  Dónde Comer en<br>
+  <strong>Concepción del Uruguay</strong>
+</h1>
 
     <p class="hero-sub">La guía gastronómica más completa de Concepción del Uruguay</p>
 
@@ -434,8 +562,7 @@ footer::before{
 </section>
 
 <!-- ═══════════════ MAIN ═══════════════ -->
-<main>
-
+<main id="main-content">
   <div class="intro-band reveal">
     <p>Una selección <strong>honesta y personal</strong> de los mejores lugares para comer, tomar algo, desayunar y alojarse en <strong>Concepción del Uruguay</strong>. Solo los que realmente valen la pena.</p>
   </div>
@@ -528,13 +655,13 @@ footer::before{
 
   <div class="hours-section reveal rd1">
     <table class="hours-table">
-      <thead>
-        <tr>
-          <th>Categoría</th>
-          <th>Días</th>
-          <th>Horario aprox.</th>
-        </tr>
-      </thead>
+ <thead>
+  <tr>
+    <th scope="col">Categoría</th>
+    <th scope="col">Días</th>
+    <th scope="col">Horario aprox.</th>
+  </tr>
+</thead>
       <tbody>
         <tr><td>🍽️ Restaurantes</td><td>Lun a Dom</td><td>12:00–15:00 · 20:00–23:30</td></tr>
         <tr><td>🍺 Bares</td><td>Mié a Dom</td><td>18:00–02:00</td></tr>
@@ -554,64 +681,7 @@ footer::before{
   </div>
 
 <!-- ===================== VÉRTIGO TEMPORAL ===================== -->
-<div id="vt-wrap" style="background:var(--ink);position:relative;overflow:hidden;">
-
-<style>
-#vt-wrap{padding:0}
-.vt-inner{
-  min-height:100vh;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:4rem 2rem;
-  text-align:center;
-  position:relative;z-index:2;
-}
-.vt-eyebrow2{
-  font-family:'Outfit',sans-serif;font-size:.58rem;font-weight:500;
-  letter-spacing:.4em;text-transform:uppercase;
-  color:rgba(184,135,42,.45);margin-bottom:2.5rem;
-}
-.vt-phrase2{
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(2rem,6vw,5.2rem);
-  font-weight:300;line-height:1.1;letter-spacing:-.02em;
-  color:var(--parchment);margin:0 auto 2rem;
-  max-width:860px;
-  opacity:0;transform:translateY(20px);
-  transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);
-}
-.vt-phrase2.vp-vis{opacity:1;transform:translateY(0)}
-.vt-phrase2 em{font-style:italic;color:var(--gold-bright)}
-.vt-phrase2 strong{
-  font-weight:700;font-style:italic;
-  background:linear-gradient(135deg,var(--gold-pale) 0%,var(--gold-bright) 50%,var(--copper) 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.vt-phrase2 .vt-muted{color:rgba(248,243,234,.28);font-weight:300;font-style:normal}
-.vt-phrase2 .vt-accent{
-  display:block;font-size:.55em;
-  font-family:'Outfit',sans-serif;font-weight:300;font-style:normal;
-  letter-spacing:.14em;text-transform:uppercase;
-  color:rgba(184,135,42,.5);margin-top:.6rem;
-  -webkit-text-fill-color:rgba(184,135,42,.5);background:none;
-}
-.vt-sep{
-  width:1px;height:60px;
-  background:linear-gradient(180deg,transparent,rgba(184,135,42,.3),transparent);
-  margin:0 auto;
-}
-.vt-wave-t{position:absolute;top:-1px;left:0;right:0;height:72px;overflow:hidden;z-index:3}
-.vt-wave-t svg{display:block;width:100%;height:100%}
-.vt-wave-b{position:absolute;bottom:-1px;left:0;right:0;height:72px;overflow:hidden;z-index:3}
-.vt-wave-b svg{display:block;width:100%;height:100%}
-.vt-glow2{
-  position:absolute;width:700px;height:700px;border-radius:50%;
-  background:radial-gradient(circle,rgba(184,135,42,.08) 0%,transparent 70%);
-  top:50%;left:50%;transform:translate(-50%,-50%);
-  pointer-events:none;z-index:0;
-}
-@media(prefers-reduced-motion:reduce){.vt-phrase2{opacity:1!important;transform:none!important;transition:none!important}}
-</style>
+<section id="vt-wrap" aria-labelledby="vt-heading" style="background:var(--ink);position:relative;overflow:hidden;">
 
 <div class="vt-wave-t" aria-hidden="true">
   <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
@@ -621,6 +691,7 @@ footer::before{
 <div class="vt-glow2" aria-hidden="true"></div>
 
 <div class="vt-inner">
+  <h2 id="vt-heading" class="sr-only">Historia de Concepción del Uruguay</h2>
   <p class="vt-eyebrow2">Concepción del Uruguay · Entre Ríos · Argentina</p>
 
   <p class="vt-phrase2" id="vtp0">
@@ -657,22 +728,8 @@ footer::before{
     <path d="M0,72 L0,38 Q180,4 360,30 Q540,56 720,30 Q900,4 1080,30 Q1260,56 1440,38 L1440,72 Z" fill="#f8f3ea"/>
   </svg>
 </div>
-</div>
-
-<script>
-(function(){
-  var phrases = document.querySelectorAll('.vt-phrase2');
-  if(!phrases.length) return;
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting) e.target.classList.add('vp-vis');
-    });
-  },{threshold:.3});
-  phrases.forEach(function(p){ io.observe(p); });
-})();
-</script>
   
-
+</section>
   <!-- MAPA -->
   <div class="sec-title reveal">
     <h2>Mapa interactivo</h2>
@@ -701,13 +758,14 @@ footer::before{
       </div>
 
       <!-- ✅ MAPA CORREGIDO — ID real de Google My Maps -->
-      <iframe
-        src="https://www.google.com/maps/d/embed?mid=1k9PKHaoWcWkr4SEjAWdBvozs12r4t18"
-        title="Mapa gastronómico interactivo de Concepción del Uruguay"
-        allowfullscreen
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+<iframe
+  src="https://www.google.com/maps/d/embed?mid=1k9PKHaoWcWkr4SEjAWdBvozs12r4t18"
+  title="Mapa gastronómico interactivo de Concepción del Uruguay"
+  allowfullscreen
+  loading="lazy"
+  fetchpriority="low"
+  referrerpolicy="no-referrer-when-downgrade">
+</iframe>
 
       <div class="map-footer" aria-hidden="true">
         <span class="mf-text">55 lugares · CDU · Entre Ríos · Argentina</span>
@@ -781,17 +839,35 @@ footer::before{
 
 <script>
 (function(){
-  var els = document.querySelectorAll('.reveal');
-  if (!els.length) return;
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if (e.isIntersecting){
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
+  'use strict';
+
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.reveal, .vt-phrase2').forEach(function(el){
+      el.classList.add('visible', 'vp-vis');
     });
-  }, {threshold: .1});
-  els.forEach(function(el){ io.observe(el); });
+    return;
+  }
+
+  var revealObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      if (el.classList.contains('vt-phrase2')) {
+        el.classList.add('vp-vis');
+      } else {
+        el.classList.add('visible');
+      }
+      revealObserver.unobserve(el);
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -5% 0px'
+  });
+
+  document.querySelectorAll('.reveal, .vt-phrase2').forEach(function(el){
+    revealObserver.observe(el);
+  });
+
 })();
 </script>
 </body>
