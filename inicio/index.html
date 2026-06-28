@@ -305,8 +305,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 #search-dropdown.dd-visible{opacity:1;transform:translateY(0);pointer-events:auto}
 
 /* ── SECTION CRUMB ── */
-.section-crumb{position:sticky;top:60px;z-index:750;background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.65);display:flex;align-items:center;gap:8px;transform:translateY(0);transition:transform .3s var(--ease);pointer-events:none}
-.section-crumb.visible{transform:translateY(0)}
+.section-crumb{position:sticky;top:60px;z-index:750;background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.65);display:flex !important;align-items:center;gap:8px;transform:none !important;transition:none;pointer-events:none;visibility:visible !important;opacity:1 !important}
+.section-crumb.visible{transform:none !important}
+.section-crumb.search-active{display:none !important}
 .section-crumb.search-active{display:none !important; }
 .section-crumb-dot{width:5px;height:5px;border-radius:50%;background:var(--verde);flex-shrink:0}
 .section-crumb-current{color:var(--ink)}
@@ -8755,9 +8756,6 @@ var crumbEl = document.getElementById('section-crumb');
 
  if(crumbEl){
     crumbEl.classList.add('visible');
-    window.addEventListener('scroll', function(){
-      /* siempre visible — solo se oculta cuando el buscador está activo */
-    }, {passive:true});
 
     var crumbObserver = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
