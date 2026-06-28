@@ -6680,8 +6680,8 @@ html, body {
 .dep-athlete-feat .dep-athlete-name{font-size:24px}
 .dep-athlete-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75}
 .dep-athlete-desc strong{font-style:normal;color:var(--card-text)}
-
-/* ── DISCLAIMER ── */
+  </style>
+  <style>
 .dep-disclaimer{font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.72);line-height:1.8;padding:20px 24px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:24px}
 .dep-disclaimer strong{color:rgba(26,25,22,.88)}
 
@@ -6704,6 +6704,8 @@ html, body {
 @media(prefers-reduced-motion:reduce){
   .dep-feat-card,.dep-club-card,.dep-athlete-card,.dep-stat-card{transition:none}
 }
+</style>
+
 <style>
   @media (max-width: 768px) {
   .hero, .hero-inner, .hero-topbar, .hero-inner-left {
@@ -8200,6 +8202,10 @@ function activateHtTab(idx, moveFocus){
       if(active){
         p.removeAttribute('hidden');
         p.removeAttribute('aria-hidden');
+        p.removeAttribute('hidden');
+        p.removeAttribute('aria-hidden');
+        p.inert = false;
+        p.setAttribute('tabindex', '-1');
         p.setAttribute('tabindex', '-1');
         var bar = p.querySelector('.ht-bar-fill');
         if(bar){
@@ -8210,11 +8216,12 @@ function activateHtTab(idx, moveFocus){
         }
         p.classList.add('ht-chapter-active');
         if(moveFocus){ p.focus(); }
-      } else {
+   } else {
         p.classList.remove('ht-chapter-active');
         p.removeAttribute('tabindex');
         p.setAttribute('hidden', '');
         p.setAttribute('aria-hidden', 'true');
+        p.inert = true;
       }
     });
   }
