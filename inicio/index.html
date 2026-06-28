@@ -2366,6 +2366,7 @@ if('serviceWorker' in navigator){
     </ul>
   </div>
   <button class="search-icon-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">🔍<span class="search-btn-label">Buscar</span></button>
+  <button id="nav-scroll-left" aria-label="Ver secciones anteriores" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to left,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 16px 0 10px;position:relative;z-index:2;transition:color .2s ease">❮</button>
   <button id="nav-scroll-right" aria-label="Ver más secciones" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to right,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 10px 0 16px;position:relative;z-index:2;transition:color .2s ease">❯</button>
 </nav>
 
@@ -5121,8 +5122,8 @@ if('serviceWorker' in navigator){
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="bar-grid" id="grid-bares">
-    <a class="bcard reveal searchable" data-name="Justo José" data-tags="bar parrilla cerveza" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="--reveal-delay:40ms"><div class="bcard-icon">⚖️</div><div class="bcard-name">Justo José</div><div class="bcard-desc">Parrilla y bar, abierto todos los días</div></a>
-    <a class="bcard reveal searchable" data-name="Bonhomia" data-tags="bar cocteles moderno" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="--reveal-delay:90ms"><span class="badge">Top</span><div class="bcard-icon">✨</div><div class="bcard-name">Bonhomia</div><div class="bcard-desc">Cócteles premium, el más sofisticado</div></a>
+    <a class="bcard reveal searchable" data-name="Justo José" data-tags="bar parrilla cerveza" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="--reveal-delay:40ms"><div class="bcard-icon">⚖️</div><div class="bcard-name">Justo José</div><div class="bcard-desc">Parrilla y bar, abierto todos los días</div></a>
+    <a class="bcard reveal searchable" data-name="Bonhomia" data-tags="bar cocteles moderno" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="--reveal-delay:90ms"><span class="badge">Top</span><div class="bcard-icon">✨</div><div class="bcard-name">Bonhomia</div><div class="bcard-desc">Cócteles premium, el más sofisticado</div></a>
     <a class="bcard reveal searchable" data-name="Klug Gebrau" data-tags="bar cerveza artesanal cerveceria" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/klug-gebrau/" style="--reveal-delay:140ms"><div class="bcard-icon">🍺</div><div class="bcard-name">Klug Gebrau</div><div class="bcard-desc">Cervecería artesanal, ambiente relajado</div></a>
     <a class="bcard reveal searchable" data-name="7 Colinas" data-tags="bar cerveza artesanal comida" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/7-colinas/" style="--reveal-delay:190ms"><span class="badge">Top</span><div class="bcard-icon">🍻</div><div class="bcard-name">7 Colinas</div><div class="bcard-desc">Beer y picada, siempre con gente</div></a>
     <a class="bcard reveal searchable" data-name="Drakkar" data-tags="bar cerveceria grill" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/drakkar/" style="--reveal-delay:240ms"><div class="bcard-icon">⚔️</div><div class="bcard-name">Drakkar</div><div class="bcard-desc">Cervecería con grill, estilo vikingo</div></a>
@@ -7742,26 +7743,31 @@ body {
 (function(){
 /* ── FLECHA SCROLL NAV ── */
 var navScrollArea = document.querySelector('.nav-scroll-area');
-var navArrow = document.getElementById('nav-scroll-right');
-if(navScrollArea && navArrow){
-  function updateNavArrow(){
+var navArrowRight = document.getElementById('nav-scroll-right');
+var navArrowLeft  = document.getElementById('nav-scroll-left');
+if(navScrollArea && navArrowRight){
+  function updateNavArrows(){
     var canScroll = navScrollArea.scrollWidth > navScrollArea.clientWidth + 4;
-    var atEnd = navScrollArea.scrollLeft + navScrollArea.clientWidth >= navScrollArea.scrollWidth - 8;
-    navArrow.style.display = (canScroll && !atEnd) ? 'flex' : 'none';
+    var atStart   = navScrollArea.scrollLeft < 8;
+    var atEnd     = navScrollArea.scrollLeft + navScrollArea.clientWidth >= navScrollArea.scrollWidth - 8;
+    navArrowRight.style.display = (canScroll && !atEnd)   ? 'flex' : 'none';
+    if(navArrowLeft) navArrowLeft.style.display  = (canScroll && !atStart) ? 'flex' : 'none';
   }
-  navArrow.addEventListener('click', function(){
+  navArrowRight.addEventListener('click', function(){
     navScrollArea.scrollBy({left: 180, behavior:'smooth'});
   });
-  /* Hover handlers movidos desde inline HTML */
-  navArrow.addEventListener('mouseenter', function(){
-    this.style.color = 'rgba(242,237,227,1)';
-  });
-  navArrow.addEventListener('mouseleave', function(){
-    this.style.color = 'rgba(242,237,227,.7)';
-  });
-  navScrollArea.addEventListener('scroll', updateNavArrow, {passive:true});
-  window.addEventListener('resize', updateNavArrow);
-  setTimeout(updateNavArrow, 400);
+  navArrowRight.addEventListener('mouseenter', function(){ this.style.color = 'rgba(242,237,227,1)'; });
+  navArrowRight.addEventListener('mouseleave', function(){ this.style.color = 'rgba(242,237,227,.7)'; });
+  if(navArrowLeft){
+    navArrowLeft.addEventListener('click', function(){
+      navScrollArea.scrollBy({left: -180, behavior:'smooth'});
+    });
+    navArrowLeft.addEventListener('mouseenter', function(){ this.style.color = 'rgba(242,237,227,1)'; });
+    navArrowLeft.addEventListener('mouseleave', function(){ this.style.color = 'rgba(242,237,227,.7)'; });
+  }
+  navScrollArea.addEventListener('scroll', updateNavArrows, {passive:true});
+  window.addEventListener('resize', updateNavArrows);
+  setTimeout(updateNavArrows, 400);
 }
 })();
 </script>
