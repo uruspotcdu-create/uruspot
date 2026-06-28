@@ -8182,14 +8182,8 @@ navItems.forEach(function(item){
       noRes.classList.toggle('visible',q.length>0&&vis===0);
     });
     searchCount.textContent=q?total+(total===1?' resultado':' resultados'):'';
-    /* scroll diferido a primera coincidencia */
+ /* scroll solo al presionar Enter o hacer clic — no automático */
     clearTimeout(_srScrollId);
-    if(q&&first){
-      _srScrollId=setTimeout(function(){
-        var off=(searchBarWrap.getBoundingClientRect().bottom||132)+8;
-        window.scrollTo({top:first.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'});
-      },300);
-    }
     /* dropdown */
     if(!q){ddHide();return;}
     var matches=getAllSearchables().filter(function(it){return normalize(it.name).includes(q)||normalize(it.tags).includes(q);});
