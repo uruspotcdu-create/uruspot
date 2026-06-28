@@ -8262,9 +8262,18 @@ if(idx >= 0){
     if(e.key==='Escape'){closeSearch();}
   });
 
-  document.addEventListener('click',function(e){
+document.addEventListener('click',function(e){
     if(!searchBarWrap.contains(e.target)&&!dropdown.contains(e.target))ddHide();
   });
+
+  var _searchScrollTimer = null;
+  window.addEventListener('scroll', function(){
+    if(!searchBarWrap.classList.contains('open')) return;
+    clearTimeout(_searchScrollTimer);
+    _searchScrollTimer = setTimeout(function(){
+      closeSearch();
+    }, 120);
+  }, {passive:true});
 
   searchInput.addEventListener('blur',function(){setTimeout(function(){if(!dropdown.contains(document.activeElement))ddHide();},200);});
 
