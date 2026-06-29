@@ -2503,6 +2503,10 @@ html, body {
   z-index: 3;
   pointer-events: none;
 }
+<div class="hero-caustic hero-caustic-1" aria-hidden="true"></div>
+<div class="hero-caustic hero-caustic-2" aria-hidden="true"></div>
+<div class="hero-caustic hero-caustic-3" aria-hidden="true"></div>
+<div class="hero-caustic hero-caustic-4" aria-hidden="true"></div>
 .hc-particle {
   position: absolute;
   left: var(--hcp-x);
@@ -4010,6 +4014,149 @@ body {
     </aside>
   </div>
   <div class="hero-fade" aria-hidden="true"></div>
+  <canvas id="hero-water-canvas" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0.18;mix-blend-mode:screen;"></canvas>
+
+<style>
+/* Caustics light patches — luz refractada bajo agua */
+@keyframes causticsMove {
+  0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity:0.6; }
+  25%  { transform: translate(18px,-12px) scale(1.08) rotate(2deg); opacity:1; }
+  50%  { transform: translate(-10px,-22px) scale(0.95) rotate(-1deg); opacity:0.7; }
+  75%  { transform: translate(8px,-8px) scale(1.04) rotate(1.5deg); opacity:0.9; }
+  100% { transform: translate(0,0) scale(1) rotate(0deg); opacity:0.6; }
+}
+
+.hero-caustic {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: screen;
+  filter: blur(28px);
+  will-change: transform, opacity;
+}
+
+.hero-caustic-1 {
+  width: 320px; height: 180px;
+  top: 15%; left: 22%;
+  background: radial-gradient(ellipse at center, rgba(10,255,239,0.28) 0%, transparent 70%);
+  animation: causticsMove 9s ease-in-out infinite;
+}
+.hero-caustic-2 {
+  width: 200px; height: 280px;
+  top: 35%; right: 18%;
+  background: radial-gradient(ellipse at center, rgba(10,200,220,0.18) 0%, transparent 70%);
+  animation: causticsMove 13s ease-in-out infinite reverse;
+  animation-delay: -4s;
+}
+.hero-caustic-3 {
+  width: 260px; height: 140px;
+  bottom: 25%; left: 48%;
+  background: radial-gradient(ellipse at center, rgba(232,160,48,0.14) 0%, transparent 70%);
+  animation: causticsMove 11s ease-in-out infinite;
+  animation-delay: -7s;
+}
+.hero-caustic-4 {
+  width: 180px; height: 220px;
+  top: 8%; left: 60%;
+  background: radial-gradient(ellipse at center, rgba(10,255,239,0.16) 0%, transparent 70%);
+  animation: causticsMove 16s ease-in-out infinite reverse;
+  animation-delay: -2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-caustic { animation: none !important; }
+}
+@media (max-width: 768px) {
+  .hero-caustic { filter: blur(20px); opacity: 0.7; }
+  .hero-caustic-1, .hero-caustic-3 { display: none; }
+}
+</style>
+
+<script>
+/* Efecto de refracción canvas — caustics procedurales livianos */
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var canvas = document.getElementById('hero-water-canvas');
+  if(!canvas || reduced) return;
+
+  var ctx = canvas.getContext('2d');
+  var W, H, animId;
+  var ripples = [];
+
+  function resize(){
+    W = canvas.offsetWidth;
+    H = canvas.offsetHeight;
+    canvas.width  = W;
+    canvas.height = H;
+  }
+
+  function addRipple(){
+    ripples.push({
+      x: Math.random() * W,
+      y: Math.random() * H * 0.7,
+      r: 0,
+      maxR: 60 + Math.random() * 120,
+      alpha: 0.18 + Math.random() * 0.12,
+      speed: 0.4 + Math.random() * 0.6
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ripples = ripples.filter(function(rp){
+      rp.r += rp.speed;
+      var life = 1 - rp.r / rp.maxR;
+      if(life <= 0) return false;
+      ctx.beginPath();
+      ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(10,255,239,' + (rp.alpha * life) + ')';
+      ctx.lineWidth = 1 + life * 1.5;
+      ctx.stroke();
+
+      /* Segundo anillo más grande */
+      if(rp.r > rp.maxR * 0.3){
+        ctx.beginPath();
+        ctx.arc(rp.x, rp.y, rp.r * 1.4, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(10,200,220,' + (rp.alpha * life * 0.4) + ')';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+      return true;
+    });
+    animId = requestAnimationFrame(draw);
+  }
+
+  var rippleInterval;
+  function start(){
+    resize();
+    rippleInterval = setInterval(addRipple, 900);
+    draw();
+  }
+
+  /* Solo animar cuando el hero es visible */
+  var heroEl = document.querySelector('.hero');
+  if(heroEl && 'IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(e){
+      if(e[0].isIntersecting){
+        start();
+        io.unobserve(heroEl);
+      }
+    }, {threshold:0.1});
+    io.observe(heroEl);
+  } else { start(); }
+
+  window.addEventListener('resize', function(){
+    clearTimeout(window._heroCanvasResizeT);
+    window._heroCanvasResizeT = setTimeout(resize, 250);
+  }, {passive:true});
+
+  window.addEventListener('pagehide', function(){
+    clearInterval(rippleInterval);
+    if(animId) cancelAnimationFrame(animId);
+  }, {once:true});
+})();
+</script>
 </header>
 
 <nav class="main-nav" id="main-nav" aria-label="Categorías">
@@ -4059,6 +4206,128 @@ body {
   <button class="search-icon-btn" id="search-toggle-btn" type="button" aria-label="Buscar en la guía" aria-expanded="false" aria-controls="search-bar-wrap">🔍<span class="search-btn-label">Buscar</span></button>
   <button id="nav-scroll-left" aria-label="Ver secciones anteriores" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to left,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 16px 0 10px;position:relative;z-index:2;transition:color .2s ease">❮</button>
   <button id="nav-scroll-right" aria-label="Ver más secciones" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to right,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 10px 0 16px;position:relative;z-index:2;transition:color .2s ease">❯</button>
+<div id="nav-light-trail" aria-hidden="true" style="position:absolute;height:2px;bottom:0;left:0;width:0;background:linear-gradient(90deg,transparent,rgba(10,255,239,0.8),transparent);pointer-events:none;z-index:10;transition:none;filter:blur(1px);"></div>
+
+<style>
+/* El indicador actual se convierte en cápsula líquida */
+.nav-indicator {
+  height: 2px !important;
+  border-radius: 2px !important;
+  background: linear-gradient(90deg, transparent, rgba(10,255,239,0.9), rgba(10,255,239,0.9), transparent) !important;
+  box-shadow: 0 0 8px rgba(10,255,239,0.6), 0 0 20px rgba(10,255,239,0.3) !important;
+  bottom: 0 !important;
+  transition: left 0.55s cubic-bezier(0.34,1.2,0.64,1), width 0.55s cubic-bezier(0.34,1.2,0.64,1) !important;
+}
+
+/* Glow vertical en nav-item al hacer hover — columna de luz */
+@keyframes navItemPulse {
+  0%,100% { opacity: 0; }
+  50%      { opacity: 1; }
+}
+.nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 0;
+  background: linear-gradient(to top, rgba(10,255,239,0.6), transparent);
+  transition: height 0.3s ease;
+  pointer-events: none;
+}
+.nav-item:hover::after,
+.nav-item.active::after {
+  height: 20px;
+}
+
+/* Scanline efecto en el nav — referencia a monitor retro */
+.main-nav::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(10,255,239,0.08) 30%, rgba(10,255,239,0.08) 70%, transparent);
+  top: var(--nav-scan-y, 100%);
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.main-nav:hover::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-indicator { transition: none !important; }
+  .nav-item::after { display: none; }
+  .main-nav::before { display: none; }
+}
+</style>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced) return;
+  var navEl   = document.querySelector('.main-nav');
+  var trail   = document.getElementById('nav-light-trail');
+  if(!navEl || !trail) return;
+
+  /* Trail de luz que sigue el mouse horizontalmente por el nav */
+  if(window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    var trailX = 0, trailTX = 0, trailRaf;
+
+    navEl.addEventListener('mouseenter', function(){
+      trail.style.opacity = '1';
+      if(!trailRaf) trailRaf = requestAnimationFrame(animTrail);
+    });
+    navEl.addEventListener('mouseleave', function(){
+      trail.style.opacity = '0';
+      if(trailRaf){ cancelAnimationFrame(trailRaf); trailRaf = null; }
+    });
+    navEl.addEventListener('mousemove', function(e){
+      var rect = navEl.getBoundingClientRect();
+      trailTX = e.clientX - rect.left;
+      /* Scanline Y */
+      navEl.style.setProperty('--nav-scan-y', (e.clientY - rect.top) + 'px');
+    });
+
+    function animTrail(){
+      trailX += (trailTX - trailX) * 0.12;
+      trail.style.left   = (trailX - 60) + 'px';
+      trail.style.width  = '120px';
+      trailRaf = requestAnimationFrame(animTrail);
+    }
+  }
+
+  /* Efecto "spring stretch" del indicador al saltar entre items lejanos */
+  var indicator = navEl.querySelector('.nav-indicator');
+  if(!indicator) return;
+
+  var prevLeft = null;
+  var prevWidth = 6;
+  var stretchObserver = new MutationObserver(function(){
+    var curLeft = parseFloat(indicator.style.left) || 0;
+    if(prevLeft !== null){
+      var dist = Math.abs(curLeft - prevLeft);
+      if(dist > 80){
+        var stretch = Math.min(dist * 0.18, 60);
+        indicator.style.width = (prevWidth + stretch) + 'px';
+        setTimeout(function(){
+          indicator.style.width = prevWidth + 'px';
+        }, 200);
+      }
+    }
+    prevLeft = curLeft;
+  });
+  stretchObserver.observe(indicator, {attributes:true, attributeFilter:['style']});
+
+  window.addEventListener('pagehide', function(){
+    stretchObserver.disconnect();
+  }, {once:true});
+})();
+</script>
 </nav>
 
 <div class="section-crumb" id="section-crumb" aria-live="polite" aria-atomic="true">
@@ -4073,6 +4342,187 @@ body {
 </div>
 
 <main class="main-body" id="main-content" aria-label="Contenido principal de la guía URU SPOT">
+  <style>
+/* Tilt 3D perspectivo en todas las rcards */
+.rcard-3d-wrap {
+  perspective: 1000px;
+}
+
+/* El reflejo de brillo que sigue al mouse — mejorado */
+.rcard-tilt-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at var(--shine-x, 50%) var(--shine-y, 50%),
+    rgba(255,255,255,0.08) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.rcard:hover .rcard-tilt-shine {
+  opacity: 1;
+}
+
+/* Badge pulsante "nuevo activity" en rcard-feat */
+@keyframes activityPulse {
+  0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(10,255,239,0.4); }
+  50%     { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(10,255,239,0); }
+}
+.rcard-feat .badge-gold {
+  animation: activityPulse 3s ease-in-out 4s infinite;
+}
+
+/* Número de visualizaciones "vivo" */
+.rcard-live-views {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(6,6,5,0.75);
+  border: 1px solid rgba(10,255,239,0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-family: var(--f-ui, 'Syne', sans-serif);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(10,255,239,0.8);
+  backdrop-filter: blur(6px);
+  z-index: 4;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+.rcard:hover .rcard-live-views {
+  opacity: 1;
+  transform: translateY(0);
+}
+.rcard-live-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(10,255,239,0.9);
+  animation: dotGlow 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* Efecto de "sello de calidad" rotante en badge gold */
+@keyframes sealRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.badge-gold::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 20px;
+  background: conic-gradient(
+    rgba(196,135,42,0) 0deg,
+    rgba(196,135,42,0.3) 60deg,
+    rgba(232,160,48,0.5) 120deg,
+    rgba(196,135,42,0.3) 180deg,
+    rgba(196,135,42,0) 240deg,
+    rgba(232,160,48,0.2) 300deg,
+    rgba(196,135,42,0) 360deg
+  );
+  animation: sealRotate 4s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rcard-3d-wrap { perspective: none; }
+  .rcard-live-views { display: none; }
+  .badge-gold::before { animation: none; }
+  .rcard-feat .badge-gold { animation: none; }
+}
+</style>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var isFine  = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if(reduced || !isFine) return;
+
+  /* Tilt 3D perspectivo + shine reactivo al mouse */
+  document.querySelectorAll('.rcard:not(.rcard-ad)').forEach(function(card){
+    var shine = document.createElement('div');
+    shine.className = 'rcard-tilt-shine';
+    card.appendChild(shine);
+
+    /* Contador vivo */
+    var baseViews = 3 + Math.floor(Math.random() * 12);
+    var views = baseViews;
+    var viewBadge = document.createElement('span');
+    viewBadge.className = 'rcard-live-views';
+    var dot = document.createElement('span');
+    dot.className = 'rcard-live-dot';
+    dot.setAttribute('aria-hidden','true');
+    var txt = document.createTextNode(views + ' mirando');
+    viewBadge.appendChild(dot);
+    viewBadge.appendChild(txt);
+    card.appendChild(viewBadge);
+
+    var tiltRaf, shineRaf;
+    var rotX = 0, rotY = 0, tRX = 0, tRY = 0;
+    var shX = 50, shY = 50, tSX = 50, tSY = 50;
+
+    card.addEventListener('mouseenter', function(){
+      /* Simular alguien más "viendo" */
+      if(Math.random() > 0.5){
+        views = baseViews + 1;
+        txt.textContent = views + ' mirando';
+      }
+      card.style.transition = 'none';
+      if(!tiltRaf) tiltRaf = requestAnimationFrame(animTilt);
+    });
+
+    card.addEventListener('mousemove', function(e){
+      var rect = card.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width;
+      var y = (e.clientY - rect.top)  / rect.height;
+      tRX = (y - 0.5) * -8;
+      tRY = (x - 0.5) * 8;
+      tSX = x * 100;
+      tSY = y * 100;
+    });
+
+    card.addEventListener('mouseleave', function(){
+      tRX = 0; tRY = 0;
+      tSX = 50; tSY = 50;
+      views = baseViews;
+      txt.textContent = views + ' mirando';
+      setTimeout(function(){
+        card.style.transition = '';
+        card.style.transform  = '';
+        if(tiltRaf){ cancelAnimationFrame(tiltRaf); tiltRaf = null; }
+      }, 350);
+    });
+
+    function animTilt(){
+      rotX += (tRX - rotX) * 0.1;
+      rotY += (tRY - rotY) * 0.1;
+      shX  += (tSX - shX)  * 0.12;
+      shY  += (tSY - shY)  * 0.12;
+
+      card.style.transform = 'perspective(800px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateZ(2px)';
+      shine.style.setProperty('--shine-x', shX + '%');
+      shine.style.setProperty('--shine-y', shY + '%');
+
+      tiltRaf = requestAnimationFrame(animTilt);
+    }
+  });
+})();
+</script>
 
 
 <!-- ===================== MOOD PICKER + GLOSARIO ===================== -->
@@ -6892,6 +7342,161 @@ body {
     </a>
   </div>
   <p class="search-no-results" id="no-results-gimnasios">No se encontraron gimnasios con ese nombre.</p>
+  <style>
+/* Heartbeat line en el borde superior del gcard-feat */
+@keyframes heartbeatLine {
+  0%   { d: path('M0,10 L20,10 L25,2 L30,18 L35,2 L40,18 L45,10 L200,10'); }
+  100% { d: path('M0,10 L60,10 L65,2 L70,18 L75,2 L80,18 L85,10 L200,10'); }
+}
+
+.gcard-feat-heartbeat {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: visible;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes ecgMove {
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.gcard-feat-ecg {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  height: 24px;
+  width: 200%;
+  opacity: 0.85;
+  animation: ecgMove 2.8s linear infinite;
+}
+
+/* Score badge pulsante como corazón */
+@keyframes scoreHeartbeat {
+  0%,80%,100% { transform: scale(1); }
+  14%         { transform: scale(1.15); }
+  28%         { transform: scale(1); }
+  42%         { transform: scale(1.08); }
+}
+.gcard-feat .gcard-score {
+  animation: scoreHeartbeat 1.4s ease-in-out 3s infinite !important;
+}
+
+/* Barra de "energía" en tarjetas de gimnasio normales */
+.gcard-energy-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--verde2), rgba(10,255,239,0.8));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.2s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: none;
+  z-index: 3;
+}
+.gcard.is-energy-visible .gcard-energy-bar {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gcard-feat-ecg { animation: none; }
+  .gcard-feat .gcard-score { animation: none !important; }
+  .gcard-energy-bar { transform: scaleX(1); }
+}
+</style>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var gymSection = document.getElementById('gimnasios');
+  if(!gymSection) return;
+
+  /* ECG line en gcard-feat */
+  var featCard = gymSection.querySelector('.gcard-feat');
+  if(featCard){
+    var hbWrap = document.createElement('div');
+    hbWrap.className = 'gcard-feat-heartbeat';
+    hbWrap.setAttribute('aria-hidden','true');
+
+    /* SVG con línea de ECG que se repite */
+    var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 400 20');
+    svg.setAttribute('preserveAspectRatio','none');
+    svg.className = 'gcard-feat-ecg';
+    svg.style.cssText = 'position:absolute;top:-8px;left:0;height:20px;';
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    /* Patrón ECG repetido */
+    var d = 'M0,10 ';
+    for(var i = 0; i < 4; i++){
+      var offset = i * 100;
+      d += 'L' + (offset+15) + ',10 ';
+      d += 'L' + (offset+20) + ',2 ';
+      d += 'L' + (offset+25) + ',18 ';
+      d += 'L' + (offset+30) + ',2 ';
+      d += 'L' + (offset+35) + ',18 ';
+      d += 'L' + (offset+40) + ',10 ';
+      d += 'L' + (offset+100) + ',10 ';
+    }
+    path.setAttribute('d', d);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke','url(#ecgGrad)');
+    path.setAttribute('stroke-width','1.5');
+    path.setAttribute('stroke-linecap','round');
+    path.setAttribute('stroke-linejoin','round');
+
+    var defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    var grad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    grad.setAttribute('id','ecgGrad');
+    grad.setAttribute('x1','0%'); grad.setAttribute('y1','0%');
+    grad.setAttribute('x2','100%'); grad.setAttribute('y2','0%');
+    var stop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    stop1.setAttribute('offset','0%'); stop1.setAttribute('stop-color','rgba(10,255,239,0)');
+    var stop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    stop2.setAttribute('offset','30%'); stop2.setAttribute('stop-color','rgba(10,255,239,0.9)');
+    var stop3 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    stop3.setAttribute('offset','70%'); stop3.setAttribute('stop-color','rgba(10,255,239,0.9)');
+    var stop4 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    stop4.setAttribute('offset','100%'); stop4.setAttribute('stop-color','rgba(10,255,239,0)');
+
+    grad.appendChild(stop1); grad.appendChild(stop2);
+    grad.appendChild(stop3); grad.appendChild(stop4);
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+    svg.appendChild(path);
+    hbWrap.appendChild(svg);
+    featCard.appendChild(hbWrap);
+  }
+
+  /* Energy bars en gcards normales */
+  gymSection.querySelectorAll('.gcard:not(.gcard-feat)').forEach(function(card){
+    var bar = document.createElement('div');
+    bar.className = 'gcard-energy-bar';
+    bar.setAttribute('aria-hidden','true');
+    card.style.position = 'relative';
+    card.appendChild(bar);
+  });
+
+  /* Activar barras al entrar en viewport */
+  if('IntersectionObserver' in window){
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-energy-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.4});
+    gymSection.querySelectorAll('.gcard:not(.gcard-feat)').forEach(function(c){ obs.observe(c); });
+  }
+})();
+</script>
 </section>
 
 
@@ -7471,6 +8076,190 @@ body {
     <span class="hp-legend-item"><span class="hp-status hp-o">Fuente oficial</span> confirmado en sitio institucional/gubernamental</span>
     <span class="hp-legend-item"><span class="hp-status hp-nv">No verificado</span> fuente única, contradictoria o desactualizada</span>
   </div>
+  <style>
+/* Partículas de polvo histórico sobre la sección patrimonio */
+@keyframes dustFloat {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  10%  { opacity: var(--dust-alpha, 0.4); }
+  90%  { opacity: var(--dust-alpha, 0.4); }
+  100% { transform: translateY(-80px) translateX(var(--dust-dx, 15px)) rotate(180deg); opacity: 0; }
+}
+
+.patrimonio-dust {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: dustFloat var(--dust-dur, 8s) ease-in-out var(--dust-del, 0s) infinite;
+  background: radial-gradient(circle, rgba(196,135,42,0.6) 0%, transparent 70%);
+  will-change: transform, opacity;
+}
+
+/* Efecto clip-path "pergamino desplegándose" al abrir details */
+@keyframes parchmentReveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0.3;
+  }
+  to {
+    clip-path: inset(0 0 0% 0);
+    opacity: 1;
+  }
+}
+
+.hp-card[open] .hp-body {
+  animation: parchmentReveal 0.5s cubic-bezier(0.16,1,0.3,1) both !important;
+}
+
+/* Línea "sello de cera" que aparece al abrir una card */
+@keyframes sealDraw {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+.hp-card[open]::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(196,135,42,0.8) 20%,
+    rgba(232,160,48,1) 50%,
+    rgba(196,135,42,0.8) 80%,
+    transparent 100%
+  );
+  animation: sealDraw 0.6s cubic-bezier(0.34,1.2,0.64,1) both;
+  transform-origin: left;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: 0 0 8px rgba(196,135,42,0.5);
+}
+
+/* Shimmer de "antiguedad" en la tarjeta activa */
+@keyframes parchmentShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.hp-card[open] .hp-summary {
+  background: linear-gradient(
+    105deg,
+    rgba(242,237,227,0) 0%,
+    rgba(196,135,42,0.06) 40%,
+    rgba(242,237,227,0.04) 60%,
+    rgba(242,237,227,0) 100%
+  );
+  background-size: 300% 100%;
+  animation: parchmentShimmer 2s ease-in-out 0.3s 1 both;
+}
+
+/* Número de año flotante decorativo */
+.hp-card .hp-year-watermark {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-family: var(--f-display, 'DM Serif Display', serif);
+  font-size: 56px;
+  line-height: 1;
+  color: rgba(196,135,42,0.06);
+  letter-spacing: -2px;
+  pointer-events: none;
+  z-index: 0;
+  transition: color 0.4s ease;
+  user-select: none;
+}
+.hp-card[open] .hp-year-watermark {
+  color: rgba(196,135,42,0.10);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-card[open] .hp-body { animation: none !important; }
+  .hp-card[open]::before { animation: none; }
+  .patrimonio-dust { animation: none; opacity: 0; }
+  .hp-card[open] .hp-summary { animation: none; }
+}
+</style>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var section = document.getElementById('patrimonio');
+  if(!section) return;
+
+  /* Inyectar partículas de polvo dorado */
+  if(!reduced){
+    section.style.position = 'relative';
+    section.style.overflow = 'hidden';
+
+    for(var i = 0; i < 12; i++){
+      var dust = document.createElement('span');
+      dust.className = 'patrimonio-dust';
+      var size = 1 + Math.random() * 3;
+      dust.style.cssText = [
+        'width:' + size + 'px',
+        'height:' + size + 'px',
+        'left:' + (5 + Math.random() * 90) + '%',
+        'top:' + (10 + Math.random() * 80) + '%',
+        '--dust-dur:' + (6 + Math.random() * 10) + 's',
+        '--dust-del:-' + (Math.random() * 8) + 's',
+        '--dust-dx:' + ((Math.random() - 0.5) * 40) + 'px',
+        '--dust-alpha:' + (0.2 + Math.random() * 0.3)
+      ].join(';');
+      section.appendChild(dust);
+    }
+  }
+
+  /* Añadir marcas de agua de año en cada card */
+  var yearMap = {
+    'Palacio San José':          '1857',
+    'Basílica Inmaculada':       '1859',
+    'Museo Casa de Delio':       '1793',
+    'Museo Andrés García':       '1900',
+    'Culturas Aborígenes':       '',
+    'Colegio Superior':          '1849',
+    'Palacio Santa Cándida':     '1847',
+    'Faro Stella Maris':         '1949',
+    'Plaza General':             '1783',
+    'Peatonal Rocamora':         '1856',
+    'Cine Teatro San Martín':    '',
+    'Museo de Dibujo':           '',
+    'Sala Evocativa':            '',
+    'Hipódromo':                 '',
+    'Barrio Puerto Viejo':       '1619',
+  };
+
+  document.querySelectorAll('.hp-card').forEach(function(card){
+    var nameEl = card.querySelector('.hp-name');
+    if(!nameEl) return;
+    var name = nameEl.textContent.trim();
+
+    /* Buscar año en el mapa usando coincidencia parcial */
+    var year = '';
+    Object.keys(yearMap).forEach(function(key){
+      if(name.includes(key)) year = yearMap[key];
+    });
+
+    if(year){
+      var wm = document.createElement('span');
+      wm.className = 'hp-year-watermark';
+      wm.textContent = year;
+      wm.setAttribute('aria-hidden', 'true');
+      card.appendChild(wm);
+    }
+
+    /* Sonido visual — pequeño "thud" al abrir */
+    if(!reduced){
+      card.addEventListener('toggle', function(){
+        if(card.open){
+          card.style.transform = 'scale(1.005)';
+          setTimeout(function(){ card.style.transform = ''; card.style.transition = 'transform 0.4s cubic-bezier(0.34,1.2,0.64,1)'; }, 10);
+          setTimeout(function(){ card.style.transition = ''; }, 450);
+        }
+      });
+    }
+  });
+})();
+</script>
 </section>
 
     <!-- ===================== CARNAVAL 2026 ===================== -->
@@ -7898,6 +8687,240 @@ if(alive){rafId=requestAnimationFrame(loop);}
   <p class="search-no-results" id="no-results-historia">No se encontraron resultados para ese término.</p>
 </section>
 
+  <style>
+/* Transición tipo "página pasando" entre capítulos históricos */
+@keyframes pageFlipIn {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) rotateY(-15deg) translateX(-40px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1200px) rotateY(0deg) translateX(0);
+    filter: blur(0);
+  }
+}
+@keyframes pageFlipOut {
+  from {
+    opacity: 1;
+    transform: perspective(1200px) rotateY(0deg) translateX(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: perspective(1200px) rotateY(15deg) translateX(40px);
+    filter: blur(2px);
+  }
+}
+
+.ht-chapter-active.page-flip-in {
+  animation: pageFlipIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.ht-chapter.page-flip-out {
+  animation: pageFlipOut 0.35s cubic-bezier(0.77,0,0.175,1) both;
+  pointer-events: none;
+}
+
+/* Cursor pluma de escribir sobre la sección historia */
+#historia-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99998;
+  font-size: 20px;
+  transform: translate(-4px, -18px) rotate(-20deg);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  will-change: transform;
+}
+
+/* Trazo de tinta que el cursor deja */
+.historia-ink-trail {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99997;
+  border-radius: 50%;
+  background: rgba(196,135,42,0.4);
+  transform: translate(-50%,-50%) scale(0);
+  animation: inkTrailFade 0.8s ease-out forwards;
+}
+@keyframes inkTrailFade {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.6; }
+  30%  { transform: translate(-50%,-50%) scale(1); }
+  100% { transform: translate(-50%,-50%) scale(1.5); opacity: 0; }
+}
+
+/* Efecto de "sello de lacre" en las stats del hero histórico */
+@keyframes selloAppear {
+  0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+  60%  { transform: scale(1.12) rotate(3deg); }
+  80%  { transform: scale(0.97) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.ht-stat.is-revealed {
+  animation: selloAppear 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* Número contando hacia arriba en stats historia */
+.ht-stat-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Progress de lectura del capítulo activo */
+.ht-reading-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(196,135,42,0.8), rgba(232,160,48,1));
+  transition: width 0.1s linear;
+  pointer-events: none;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 6px rgba(196,135,42,0.5);
+}
+.ht-tabs-wrap {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ht-chapter-active.page-flip-in { animation: none; }
+  .ht-chapter.page-flip-out { animation: none; }
+  #historia-cursor { display: none; }
+  .historia-ink-trail { display: none; }
+  .ht-stat.is-revealed { animation: none; }
+}
+</style>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var historiaSection = document.getElementById('historia');
+  if(!historiaSection) return;
+
+  /* Barra de progreso de lectura del capítulo */
+  var tabsWrap = historiaSection.querySelector('.ht-tabs-wrap');
+  if(tabsWrap){
+    var progBar = document.createElement('div');
+    progBar.className = 'ht-reading-progress';
+    tabsWrap.appendChild(progBar);
+
+    var chapterEl = historiaSection.querySelector('.ht-chapter-active');
+    function updateProgress(){
+      if(!chapterEl) return;
+      var rect = chapterEl.getBoundingClientRect();
+      var total = rect.height;
+      var visible = Math.max(0, window.innerHeight - Math.max(0, rect.top));
+      progBar.style.width = Math.min(100, (visible / total * 100)) + '%';
+    }
+    window.addEventListener('scroll', updateProgress, {passive:true});
+
+    /* Actualizar referencia al capítulo cuando cambia tab */
+    var tablist = historiaSection.querySelector('.ht-tabs-wrap');
+    if(tablist){
+      tablist.addEventListener('click', function(){
+        setTimeout(function(){
+          chapterEl = historiaSection.querySelector('.ht-chapter-active');
+          updateProgress();
+        }, 100);
+      });
+    }
+  }
+
+  /* Animación page-flip al cambiar de tab */
+  if(!reduced){
+    var tabs = historiaSection.querySelectorAll('.ht-tab');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click', function(){
+        var panels = historiaSection.querySelectorAll('.ht-chapter');
+        panels.forEach(function(p){
+          if(p.classList.contains('ht-chapter-active') && !p.classList.contains('page-flip-out')){
+            p.classList.add('page-flip-out');
+            setTimeout(function(){ p.classList.remove('page-flip-out'); }, 360);
+          }
+        });
+        setTimeout(function(){
+          var active = historiaSection.querySelector('.ht-chapter-active');
+          if(active){
+            active.classList.add('page-flip-in');
+            setTimeout(function(){ active.classList.remove('page-flip-in'); }, 520);
+          }
+        }, 200);
+      });
+    });
+  }
+
+  /* Cursor pluma dentro de la sección historia */
+  if(!reduced && window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    var penCursor = document.createElement('div');
+    penCursor.id = 'historia-cursor';
+    penCursor.textContent = '🖊️';
+    penCursor.setAttribute('aria-hidden','true');
+    document.body.appendChild(penCursor);
+
+    var penX = 0, penY = 0, pTX = 0, pTY = 0, penRaf;
+    var inkTimeout;
+
+    historiaSection.addEventListener('mouseenter', function(){
+      penCursor.style.opacity = '1';
+      if(!penRaf) penRaf = requestAnimationFrame(animPen);
+    });
+    historiaSection.addEventListener('mouseleave', function(){
+      penCursor.style.opacity = '0';
+      if(penRaf){ cancelAnimationFrame(penRaf); penRaf = null; }
+    });
+    historiaSection.addEventListener('mousemove', function(e){
+      pTX = e.clientX; pTY = e.clientY;
+
+      /* Trail de tinta intermitente */
+      clearTimeout(inkTimeout);
+      inkTimeout = setTimeout(function(){
+        var trail = document.createElement('div');
+        trail.className = 'historia-ink-trail';
+        trail.style.cssText = 'left:' + pTX + 'px;top:' + pTY + 'px;width:4px;height:4px;';
+        document.body.appendChild(trail);
+        trail.addEventListener('animationend', function(){ trail.remove(); },{once:true});
+      }, 80);
+    });
+
+    function animPen(){
+      penX += (pTX - penX) * 0.08;
+      penY += (pTY - penY) * 0.08;
+      penCursor.style.left = penX + 'px';
+      penCursor.style.top  = penY + 'px';
+      penRaf = requestAnimationFrame(animPen);
+    }
+
+    window.addEventListener('pagehide', function(){
+      if(penRaf){ cancelAnimationFrame(penRaf); }
+      clearTimeout(inkTimeout);
+    }, {once:true});
+  }
+
+  /* Stats del hero historia — revelar con animación de sello */
+  if(!reduced){
+    var statsEls = historiaSection.querySelectorAll('.ht-stat');
+    var statsRevealed = false;
+    var heroEl = historiaSection.querySelector('.ht-hero');
+    if(heroEl && 'IntersectionObserver' in window){
+      var statsObs = new IntersectionObserver(function(entries){
+        if(entries[0].isIntersecting && !statsRevealed){
+          statsRevealed = true;
+          statsEls.forEach(function(el, i){
+            setTimeout(function(){
+              el.classList.add('is-revealed');
+            }, i * 120);
+          });
+          statsObs.unobserve(heroEl);
+        }
+      }, {threshold:0.5});
+      statsObs.observe(heroEl);
+    }
+  }
+})();
+</script>
 
   <!-- ===================== DEPORTE E IDENTIDAD URUGUAYENSE ===================== -->
 <section class="us-section" id="deporte" aria-labelledby="title-deporte">
@@ -8993,6 +10016,177 @@ if(alive){rafId=requestAnimationFrame(loop);}
   </div>
   <p class="footer-copy">URU SPOT © 2026 — Guía Local · Concepción del Uruguay</p>
 <p class="footer-copy" style="margin-top:6px;font-size:8px;letter-spacing:1px;">Información verificada: junio 2026 · Próxima revisión: diciembre 2026</p>
+  <canvas id="footer-tide-canvas" aria-hidden="true" style="position:absolute;bottom:0;left:0;width:100%;height:140px;pointer-events:none;z-index:0;opacity:0.35;"></canvas>
+
+<style>
+/* Estrellitas sobre el logo en el footer */
+@keyframes starTwinkle {
+  0%,100% { opacity: 0; transform: scale(0) translate(var(--sx,0px), var(--sy,0px)); }
+  50%     { opacity: 1; transform: scale(1) translate(var(--sx,0px), var(--sy,0px)); }
+}
+.footer-star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(10,255,239,0.9);
+  box-shadow: 0 0 4px rgba(10,255,239,0.8);
+  pointer-events: none;
+  animation: starTwinkle var(--star-dur, 2s) ease-in-out var(--star-del, 0s) infinite;
+}
+
+/* Footer logo wrapper para posicionar estrellas */
+.footer-logo-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+/* Texto de año con efecto de "escritura a mano" */
+@keyframes typeIn {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+.footer-copy-animated {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  animation: typeIn 1.2s cubic-bezier(0.16,1,0.3,1) 0.8s both;
+  display: inline-block;
+}
+
+/* Footer hover — levitar el logo */
+.footer-logo:hover img {
+  transform: translateY(-6px) scale(1.08) rotate(-2deg) !important;
+  filter: drop-shadow(0 0 24px rgba(10,255,239,0.55)) drop-shadow(0 0 48px rgba(10,255,239,0.25)) brightness(1.20) !important;
+}
+
+/* Olas de texto en footer-stats */
+@keyframes waveText {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-3px); }
+}
+.footer-stats .footer-stat:nth-child(1) { animation: waveText 2.5s ease-in-out 0s infinite; }
+.footer-stats .footer-stat:nth-child(2) { animation: waveText 2.5s ease-in-out 0.3s infinite; }
+.footer-stats .footer-stat:nth-child(3) { animation: waveText 2.5s ease-in-out 0.6s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-star { animation: none; opacity: 0; }
+  .footer-copy-animated { animation: none; width: 100%; }
+  .footer-stats .footer-stat { animation: none; }
+  #footer-tide-canvas { display: none; }
+}
+</style>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var footer = document.querySelector('.footer');
+  if(!footer) return;
+
+  footer.style.position = 'relative';
+  footer.style.overflow = 'hidden';
+
+  /* Canvas de marea bioluminiscente */
+  var canvas = document.getElementById('footer-tide-canvas');
+  if(canvas && !reduced){
+    var ctx = canvas.getContext('2d');
+    var W, H, animId;
+    var waves = [
+      { y: 0.7, speed: 0.008, amp: 18, phase: 0, color: 'rgba(10,255,239,0.25)' },
+      { y: 0.8, speed: 0.012, amp: 12, phase: Math.PI * 0.6, color: 'rgba(10,200,220,0.18)' },
+      { y: 0.9, speed: 0.006, amp: 8,  phase: Math.PI * 1.2, color: 'rgba(232,160,48,0.12)' }
+    ];
+
+    function resize(){
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width  = W;
+      canvas.height = H;
+    }
+
+    var t = 0;
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      waves.forEach(function(wave){
+        wave.phase += wave.speed;
+        var baseY = H * wave.y;
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        for(var x = 0; x <= W; x += 3){
+          var y = baseY + Math.sin(x * 0.012 + wave.phase) * wave.amp + Math.sin(x * 0.008 - wave.phase * 0.7) * wave.amp * 0.5;
+          if(x === 0) ctx.lineTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.lineTo(W, H);
+        ctx.closePath();
+        ctx.fillStyle = wave.color;
+        ctx.fill();
+      });
+      t++;
+      animId = requestAnimationFrame(draw);
+    }
+
+    /* Solo animar cuando el footer es visible */
+    var started = false;
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(e){
+        if(e[0].isIntersecting && !started){
+          started = true;
+          resize();
+          draw();
+          io.unobserve(footer);
+        }
+      }, {threshold:0.1});
+      io.observe(footer);
+    }
+
+    window.addEventListener('resize', function(){
+      clearTimeout(window._footerResizeT);
+      window._footerResizeT = setTimeout(resize, 200);
+    }, {passive:true});
+
+    window.addEventListener('pagehide', function(){
+      if(animId) cancelAnimationFrame(animId);
+    }, {once:true});
+  }
+
+  /* Estrellas sobre el logo */
+  if(!reduced){
+    var logoEl = footer.querySelector('.footer-logo');
+    if(logoEl){
+      var wrap = document.createElement('span');
+      wrap.className = 'footer-logo-wrap';
+      logoEl.parentNode.insertBefore(wrap, logoEl);
+      wrap.appendChild(logoEl);
+
+      for(var i = 0; i < 8; i++){
+        var star = document.createElement('span');
+        star.className = 'footer-star';
+        var angle = (i / 8) * Math.PI * 2;
+        var radius = 30 + Math.random() * 20;
+        star.style.cssText = [
+          'left:' + (50 + Math.cos(angle) * radius) + '%',
+          'top:'  + (50 + Math.sin(angle) * radius) + '%',
+          '--sx:' + (Math.random() * 6 - 3) + 'px',
+          '--sy:' + (Math.random() * 6 - 3) + 'px',
+          '--star-dur:' + (1.5 + Math.random() * 2) + 's',
+          '--star-del:-' + (Math.random() * 2) + 's'
+        ].join(';');
+        wrap.appendChild(star);
+      }
+    }
+  }
+
+  /* Animación de escritura en el footer-copy */
+  if(!reduced){
+    var copyEls = footer.querySelectorAll('.footer-copy');
+    copyEls.forEach(function(el){
+      el.classList.add('footer-copy-animated');
+    });
+  }
+})();
+</script>
 </footer>
 
 <button id="lost-fab" type="button" aria-label="¿Perdido? Te ayudo a elegir qué hacer en Concepción del Uruguay">
@@ -10249,6 +11443,175 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
       if(e[0].isIntersecting){ card.classList.add('is-drawn'); io.unobserve(card); }
     }, { threshold: .3 });
     io.observe(card);
+  });
+})();
+</script>
+    <style>
+/* Ink drop ripple al click en mood-btn */
+@keyframes inkDrop {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.8; }
+  80%  { opacity: 0.3; }
+  100% { transform: translate(-50%,-50%) scale(4); opacity: 0; }
+}
+.mood-ink-drop {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(10,255,239,0.35) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 10;
+  animation: inkDrop 0.65s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+
+/* Glow orbital en mood-card cuando hay selección activa */
+@keyframes moodCardOrbit {
+  0%   { transform: rotate(0deg) translateX(8px); }
+  100% { transform: rotate(360deg) translateX(8px); }
+}
+.mood-card.has-selection::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 6px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(10,255,239,0.15) 60deg,
+    rgba(232,160,48,0.15) 120deg,
+    transparent 180deg,
+    rgba(10,255,239,0.08) 240deg,
+    transparent 360deg
+  );
+  animation: moodCardOrbit 6s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Indicador de cantidad de resultados — badge animado */
+@keyframes badgePop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  70%  { transform: scale(1.15) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.mood-match-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  background: var(--bio-glow, #0AFFEF);
+  color: #020B12;
+  border-radius: 10px;
+  font-family: var(--f-ui, 'Syne', sans-serif);
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  animation: badgePop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 0 12px rgba(10,255,239,0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mood-ink-drop { animation: none; }
+  .mood-card.has-selection::after { animation: none; }
+  .mood-match-badge { animation: none; }
+}
+</style>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var cursor  = document.getElementById('mood-cursor');
+  var moodCard = document.querySelector('.mood-card');
+  if(!moodCard) return;
+
+  /* Cursor magnético custom dentro del mood-card */
+  if(!reduced && cursor && window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    var cx = 0, cy = 0, tx = 0, ty = 0, rafC;
+
+    moodCard.addEventListener('mouseenter', function(){
+      cursor.style.opacity = '1';
+      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+      if(!rafC) rafC = requestAnimationFrame(trackCursor);
+    });
+
+    moodCard.addEventListener('mouseleave', function(){
+      cursor.style.opacity = '0';
+      cursor.style.transform = 'translate(-50%,-50%) scale(0)';
+      if(rafC){ cancelAnimationFrame(rafC); rafC = null; }
+    });
+
+    moodCard.addEventListener('mousemove', function(e){
+      tx = e.clientX; ty = e.clientY;
+    });
+
+    function trackCursor(){
+      cx += (tx - cx) * 0.14;
+      cy += (ty - cy) * 0.14;
+      cursor.style.left = cx + 'px';
+      cursor.style.top  = cy + 'px';
+      rafC = requestAnimationFrame(trackCursor);
+    }
+
+    /* Cambiar tamaño cursor cuando hover sobre botón */
+    document.querySelectorAll('.mood-btn').forEach(function(btn){
+      btn.addEventListener('mouseenter', function(){
+        cursor.style.width  = '60px';
+        cursor.style.height = '60px';
+        cursor.style.borderColor = 'rgba(232,160,48,0.8)';
+      });
+      btn.addEventListener('mouseleave', function(){
+        cursor.style.width  = '40px';
+        cursor.style.height = '40px';
+        cursor.style.borderColor = 'rgba(10,255,239,0.6)';
+      });
+    });
+  }
+
+  /* Ink drop al click */
+  if(!reduced){
+    document.querySelectorAll('.mood-btn').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        var rect = btn.getBoundingClientRect();
+        var drop = document.createElement('span');
+        drop.className = 'mood-ink-drop';
+        drop.style.left = (e.clientX - rect.left) + 'px';
+        drop.style.top  = (e.clientY - rect.top)  + 'px';
+        btn.appendChild(drop);
+        drop.addEventListener('animationend', function(){ drop.remove(); }, {once:true});
+      });
+    });
+  }
+
+  /* Has-selection class en mood-card y badge en botones */
+  document.querySelectorAll('.mood-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      moodCard.classList.toggle('has-selection', this.classList.contains('active'));
+
+      /* Remover badges anteriores */
+      document.querySelectorAll('.mood-match-badge').forEach(function(b){ b.remove(); });
+
+      if(this.classList.contains('active')){
+        var mood = this.dataset.mood;
+        var count = document.querySelectorAll('.searchable[data-mood*="' + mood + '"]').length;
+        if(count > 0 && !reduced){
+          var badge = document.createElement('span');
+          badge.className = 'mood-match-badge';
+          badge.textContent = count;
+          badge.setAttribute('aria-label', count + ' resultados');
+          this.style.position = 'relative';
+          this.appendChild(badge);
+        }
+      } else {
+        moodCard.classList.remove('has-selection');
+      }
+    });
   });
 })();
 </script>
