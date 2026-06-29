@@ -21,7 +21,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="https://uruspotcdu-create.github.io/uruspot/img/logof-32.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="https://uruspotcdu-create.github.io/uruspot/img/logof-192.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="https://uruspotcdu-create.github.io/uruspot/img/logof-180.png" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 <meta name="description" content="Guía local verificada de Concepción del Uruguay, Entre Ríos. Restaurantes, cafés, bares, naturaleza, historia, patrimonio, emergencias y servicios. Horarios en tiempo real. 75 lugares verificados — junio 2026." />
 <title>URU SPOT – Guía Local de Concepción del Uruguay</title>
 <link rel="canonical" href="https://uruspot.pages.dev/" />
@@ -1721,14 +1721,14 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 /* Layout interior del summary */
 .hp-summary {
-  display: flex !important;
-  align-items: flex-start !important;
-  gap: 14px !important;
-  padding: 22px 24px !important;
-  cursor: pointer !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  position: relative !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 /* Texto dentro del summary */
@@ -2178,7 +2178,7 @@ html, body {
   <body>
   
 <a class="skip-link" href="#main-content">Ir al contenido principal</a>
-<div id="progress-bar" aria-hidden="true"></div>
+<div id="progress-bar" aria-hidden="true" role="presentation"></div>
 
 <header class="hero">
   <div class="hero-mesh" aria-hidden="true"></div>
@@ -2186,12 +2186,12 @@ html, body {
   <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
   <div class="hero-topbar">
     <div class="city-tag">
-      <div class="city-flag" aria-hidden="true">📍</div>
+      <div class="city-flag" aria-hidden="true" role="presentation">📍</div>
       <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
     </div>
-    <div class="hero-logo">
-      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
-    </div>
+<a class="hero-logo" href="/" aria-label="URU SPOT — Ir al inicio">
+      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local de Concepción del Uruguay" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
+    </a>
   </div>
   <div class="hero-inner">
     <div class="hero-inner-left">
@@ -2278,8 +2278,8 @@ html, body {
           </div>
         </div>
        <div class="wx-hero-footer">
-          <span class="wx-hero-updated" id="wx-hero-updated">Cargando...</span>
-          <span class="wx-hero-frase" id="wx-hero-frase"></span>
+          <span class="wx-hero-updated" id="wx-hero-updated" aria-live="polite" aria-atomic="true">Cargando...</span>
+          <span class="wx-hero-frase" id="wx-hero-frase" aria-live="polite" aria-atomic="true"></span>
         </div>
       </div>
     </aside>
@@ -2287,7 +2287,7 @@ html, body {
   <div class="hero-fade" aria-hidden="true"></div>
 </header>
 
-<nav class="main-nav" id="main-nav" role="navigation" aria-label="Categorías">
+<nav class="main-nav" id="main-nav" aria-label="Categorías">
 <div class="nav-scroll-area">
     <ul role="list" style="display:contents;list-style:none;margin:0;padding:0;">
       
@@ -2331,7 +2331,7 @@ html, body {
 <li><a class="nav-item" href="#remiserias" data-section="remiserias"><span class="nav-emoji" aria-hidden="true">🚖</span> Remiserías</a></li>
     </ul>
   </div>
-  <button class="search-icon-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">🔍<span class="search-btn-label">Buscar</span></button>
+  <button class="search-icon-btn" id="search-toggle-btn" type="button" aria-label="Buscar en la guía" aria-expanded="false" aria-controls="search-bar-wrap">🔍<span class="search-btn-label">Buscar</span></button>
   <button id="nav-scroll-left" aria-label="Ver secciones anteriores" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to left,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 16px 0 10px;position:relative;z-index:2;transition:color .2s ease">❮</button>
   <button id="nav-scroll-right" aria-label="Ver más secciones" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to right,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 10px 0 16px;position:relative;z-index:2;transition:color .2s ease">❯</button>
 </nav>
@@ -2344,7 +2344,7 @@ html, body {
 <div class="search-bar-wrap" id="search-bar-wrap" role="search" aria-label="Buscar lugares en URU SPOT" inert>
   <input class="search-input" id="search-input" type="search" placeholder="Buscá un lugar... ej: parrilla, café, Nero, La Ris..." autocomplete="off" aria-label="Buscar lugares" aria-autocomplete="list" aria-haspopup="listbox" />
   <span class="search-count" id="search-count" aria-live="polite"></span>
-  <button class="search-close" id="search-close-btn" aria-label="Cerrar buscador">✕</button>
+  <button class="search-close" id="search-close-btn" type="button" aria-label="Cerrar buscador"><span aria-hidden="true">✕</span></button>
 </div>
 
 <main class="main-body" id="main-content" aria-label="Contenido principal de la guía URU SPOT">
@@ -5045,12 +5045,7 @@ html, body {
 
   <div class="glos-wrap reveal" role="region" aria-label="Cómo leer esta guía">
 
-  <button class="glos-toggle" id="glos-toggle" type="button" aria-expanded="false" aria-controls="glos-body">
-
-  📖 ¿Cómo leer esta guía? — símbolos y puntajes explicados
-
-</button>
-
+<button class="glos-toggle" id="glos-toggle" type="button" aria-expanded="false" aria-controls="glos-body">📖 ¿Cómo leer esta guía? — símbolos y puntajes explicados</button>
 <div class="glos-body" id="glos-body" role="region" aria-labelledby="glos-toggle">
 
     <div class="glos-grid">
@@ -5797,7 +5792,7 @@ html, body {
     <span class="section-count">5 noches · 5 comparsas</span>
 <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
-<canvas id="confetti-canvas" aria-hidden="true" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;max-width:100vw;height:120px;pointer-events:none;z-index:10"></canvas>
+<canvas id="confetti-canvas" aria-hidden="true" role="presentation" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;max-width:100vw;height:120px;pointer-events:none;z-index:10"></canvas>
 <script>
 (function(){
   var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -7278,11 +7273,10 @@ if(alive){rafId=requestAnimationFrame(loop);}
 <p class="footer-copy" style="margin-top:6px;font-size:8px;letter-spacing:1px;">Información verificada: junio 2026 · Próxima revisión: diciembre 2026</p>
 </footer>
 
-<button id="lost-fab" type="button" aria-label="Te ayudo a elegir">
+<button id="lost-fab" type="button" aria-label="¿Perdido? Te ayudo a elegir qué hacer en Concepción del Uruguay">
   <span class="lost-emoji" aria-hidden="true">🧭</span> ¿Perdido? Tocá acá
 </button>
-
-<button id="back-to-top" aria-label="Volver arriba" title="Volver arriba">
+<button id="back-to-top" type="button" aria-label="Volver arriba" title="Volver arriba">
   <span class="btt-ring" aria-hidden="true"></span>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
@@ -7805,18 +7799,21 @@ if(idx >= 0){
 function openSearch(){
   searchBarWrap.classList.add('open');
   searchBarWrap.removeAttribute('inert');
+  searchBarWrap.inert = false;
   searchToggleBtn.setAttribute('aria-expanded','true');
   if(crumbEl)crumbEl.classList.add('search-active');
-  searchInput.focus(); // síncrono — necesario para iOS
+  searchInput.focus();
 }
-  function closeSearch(){
+function closeSearch(){
     searchBarWrap.classList.remove('open');
     searchToggleBtn.setAttribute('aria-expanded','false');
     if(crumbEl)crumbEl.classList.remove('search-active');
     searchInput.value='';
+    searchCount.textContent='';
     runSearch('');
     ddHide();
     searchBarWrap.setAttribute('inert','');
+    searchBarWrap.inert = true;
   }
 
   searchToggleBtn.addEventListener('click',function(){searchBarWrap.classList.contains('open')?closeSearch():openSearch();});
@@ -7867,13 +7864,11 @@ document.addEventListener('click',function(e){
     if(!searchBarWrap.contains(e.target)&&!dropdown.contains(e.target))ddHide();
   });
 
-  var _searchScrollTimer = null;
+var _searchScrollTimer = null;
   window.addEventListener('scroll', function(){
     if(!searchBarWrap.classList.contains('open')) return;
     clearTimeout(_searchScrollTimer);
-    _searchScrollTimer = setTimeout(function(){
-      closeSearch();
-    }, 120);
+    _searchScrollTimer = setTimeout(closeSearch, 120);
   }, {passive:true});
 
   searchInput.addEventListener('blur',function(){setTimeout(function(){if(!dropdown.contains(document.activeElement))ddHide();},200);});
@@ -7921,9 +7916,10 @@ function setTxt(id,v){var el=document.getElementById(id);if(el)el.textContent=v;
 /* Para temperatura: usar elementos separados */
 var tempEl = document.getElementById('wx-hero-temp');
 if(tempEl && tempChanged){
-  var sup = tempEl.querySelector('sup') || document.createElement('sup');
+  var sup = document.createElement('sup');
   sup.textContent = '°C';
-  tempEl.textContent = tmp;
+  while(tempEl.firstChild){ tempEl.removeChild(tempEl.firstChild); }
+  tempEl.appendChild(document.createTextNode(tmp));
   tempEl.appendChild(sup);
 }
 
