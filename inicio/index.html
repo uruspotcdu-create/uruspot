@@ -5792,7 +5792,7 @@ html, body {
     <span class="section-count">5 noches · 5 comparsas</span>
 <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
-<canvas id="confetti-canvas" aria-hidden="true" role="presentation" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;max-width:100vw;height:120px;pointer-events:none;z-index:10"></canvas>
+<canvas id="confetti-canvas" aria-hidden="true" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;max-width:100vw;height:120px;pointer-events:none;z-index:10"></canvas>
 <script>
 (function(){
   var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -6910,8 +6910,8 @@ if(alive){rafId=requestAnimationFrame(loop);}
       <span class="ru-hl"><span>la ciudad.</span></span>
     </h2>
     <p class="ru-hero-desc">CdU tiene más de lo que cualquier grupo de WhatsApp te va a contar. Esta guía la escribió alguien que ya vivió lo que vos estás por vivir.</p>
-    <div class="ru-board-wrap" role="list" aria-label="Facultades en Concepción del Uruguay">
-      <span class="ru-board-label">Te esperan en —</span>
+  <div class="ru-board-wrap" aria-label="Facultades en Concepción del Uruguay">
+      <span class="ru-board-label" id="ru-board-label">Te esperan en —</span>
       <div class="ru-board-track" aria-label="Facultades disponibles" role="region" aria-live="off">
         <div class="ru-board-row" aria-hidden="true">
           <span class="ru-chip">UNER <i>Cs. de la Salud</i></span>
@@ -7064,13 +7064,13 @@ if(alive){rafId=requestAnimationFrame(loop);}
 </div>
 
 <figure class="ru-secreto ru-reveal">
+  <figcaption class="ru-secreto-source">— Consejo de estudiante, tercer año</figcaption>
   <div class="ru-wrap ru-secreto-wrap">
     <span class="ru-secreto-label">Lo que saben los que llevan un año</span>
     <blockquote class="ru-secreto-quote">
       <span class="ru-hl-text">Preguntá siempre por el menú del día antes de abrir la carta.</span>
       En CdU eso puede significar la diferencia entre gastar $4.000 u $8.000 en el almuerzo.
     </blockquote>
-    <figcaption class="ru-secreto-source">— Consejo de estudiante, tercer año</figcaption>
   </div>
 </figure>
 
@@ -7527,22 +7527,32 @@ if(window.innerWidth > 768 && sy < 700){
   var navItems=document.querySelectorAll('.nav-item[data-section]');
   var revealEls=document.querySelectorAll('.reveal');
 
- var navIndicator = document.createElement('span');
+var navIndicator = document.createElement('span');
   navIndicator.className = 'nav-indicator';
   navIndicator.setAttribute('aria-hidden', 'true');
   nav.appendChild(navIndicator);
 
+  var _navRect = null;
+  var _navRectDirty = true;
+  function _invalidateNavRect(){ _navRectDirty = true; }
+
 function moveIndicator(item){
-    if(!item)return;
-    var navRect = nav.getBoundingClientRect();
+    if(!item) return;
+    if(_navRectDirty){
+      _navRect = nav.getBoundingClientRect();
+      _navRectDirty = false;
+    }
     var itemRect = item.getBoundingClientRect();
-    var centerOffset = (itemRect.width - 6) / 2;
-    navIndicator.style.left = (itemRect.left - navRect.left + centerOffset) + 'px';
-    navIndicator.style.width = '6px';
+    var left = itemRect.left - _navRect.left + (itemRect.width - 6) / 2;
+    requestAnimationFrame(function(){
+      navIndicator.style.left = left + 'px';
+      navIndicator.style.width = '6px';
+    });
   }
- var firstActive = document.querySelector('.nav-item.active');
+  var firstActive = document.querySelector('.nav-item.active');
   if(firstActive) moveIndicator(firstActive);
   window.addEventListener('resize', function(){
+    _invalidateNavRect();
     var active = document.querySelector('.nav-item.active');
     if(active) moveIndicator(active);
   }, {passive:true});
@@ -7550,15 +7560,17 @@ function moveIndicator(item){
 var navScrollAreaEl = document.querySelector('.nav-scroll-area');
   if(navScrollAreaEl){
     var navScrollTicking = false;
-    navScrollAreaEl.addEventListener('scroll', function(){
+    var _cachedActiveNavItem = document.querySelector('.nav-item.active');
+    function _navScrollHandler(){
       if(navScrollTicking) return;
       navScrollTicking = true;
+      _invalidateNavRect();
       requestAnimationFrame(function(){
-        var active = document.querySelector('.nav-item.active');
-        if(active) moveIndicator(active);
+        if(_cachedActiveNavItem) moveIndicator(_cachedActiveNavItem);
         navScrollTicking = false;
       });
-    }, {passive:true});
+    }
+    navScrollAreaEl.addEventListener('scroll', _navScrollHandler, {passive:true});
   }
 
   navItems.forEach(function(ni){
@@ -7799,7 +7811,7 @@ if(idx >= 0){
 function openSearch(){
   searchBarWrap.classList.add('open');
   searchBarWrap.removeAttribute('inert');
-  searchBarWrap.inert = false;
+  if('inert' in HTMLElement.prototype){ searchBarWrap.inert = false; }
   searchToggleBtn.setAttribute('aria-expanded','true');
   if(crumbEl)crumbEl.classList.add('search-active');
   searchInput.focus();
@@ -7813,7 +7825,7 @@ function closeSearch(){
     runSearch('');
     ddHide();
     searchBarWrap.setAttribute('inert','');
-    searchBarWrap.inert = true;
+    if('inert' in HTMLElement.prototype){ searchBarWrap.inert = true; }
   }
 
   searchToggleBtn.addEventListener('click',function(){searchBarWrap.classList.contains('open')?closeSearch():openSearch();});
@@ -7949,58 +7961,32 @@ lastWxCode = c.weather_code; lastWxTemp = tmp;
 var WX_CACHE_KEY = 'uruspot_wx_cache';
 var WX_CACHE_TTL = 9 * 60 * 1000; // 9 minutos
 
-var _wxFetchInProgress = false;
+var _wxFetchPromise = null;
 function fetchWeather(){
   if(document.hidden) return;
-  if(_wxFetchInProgress) return;
+  if(_wxFetchPromise) return;
 
-  /* Intentar usar caché de sessionStorage primero */
-  try {
-    var cached = sessionStorage.getItem(WX_CACHE_KEY);
-    if(cached){
-      var parsed = JSON.parse(cached);
-      if(Date.now() - parsed.ts < WX_CACHE_TTL){
-        _lastFetchTs = parsed.ts;
-        renderWeather(parsed.data);
-        return;
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var fetchOptions = controller ? { signal: controller.signal } : {};
+
+  _wxFetchPromise = fetch(WX_URL, fetchOptions)
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(d){
+      if(!d || !d.current || typeof d.current.temperature_2m !== 'number' || typeof d.current.weather_code !== 'number'){
+        throw new Error('Invalid weather data');
       }
-    }
-  } catch(e) { /* sessionStorage no disponible, continuar con fetch */ }
-
-  /* Cancelar fetch anterior si existe */
-  if(_wxAbortController){
-    try { _wxAbortController.abort(); } catch(e){}
-  }
-
-  if(typeof AbortController !== 'undefined'){
-    _wxAbortController = new AbortController();
-  } else {
-    _wxAbortController = null;
-  }
-
-  var fetchOptions = _wxAbortController ? { signal: _wxAbortController.signal } : {};
-
-_wxFetchInProgress = true;
-  fetch(WX_URL, fetchOptions)
-    .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
- .then(function(d){
-      _wxAbortController = null;
-      _wxFetchInProgress = false;
       _lastFetchTs = Date.now();
       try { sessionStorage.setItem(WX_CACHE_KEY, JSON.stringify({ts: _lastFetchTs, data: d})); } catch(e){}
       renderWeather(d);
     })
-.catch(function(err){
-      _wxAbortController = null;
-      _wxFetchInProgress = false;
+    .catch(function(err){
       if(err && err.name === 'AbortError') return;
       _lastFetchTs = Date.now() - 4*60*1000;
       try { sessionStorage.removeItem(WX_CACHE_KEY); } catch(e){}
       renderError();
-      setTimeout(function(){
-        if(!document.hidden) fetchWeather();
-      }, 60000);
-    });
+      setTimeout(function(){ if(!document.hidden) fetchWeather(); }, 60000);
+    })
+    .finally(function(){ _wxFetchPromise = null; });
 }
 document.addEventListener('visibilitychange', function(){
     if(!document.hidden){
@@ -8044,15 +8030,15 @@ window.__uruspotWeatherInterval = setInterval(function(){ fetchWeather(); }, 10*
     }
   }, {once:true});
 
-  window.addEventListener('pageshow', function(e){
+function _handlePageShow(e){
     if(e.persisted){
-      /* La página fue restaurada desde bfcache — reinstalar el intervalo */
       if(window.__uruspotWeatherInterval) clearInterval(window.__uruspotWeatherInterval);
       window.__uruspotWeatherInterval = setInterval(function(){ fetchWeather(); }, 10*60*1000);
       fetchWeather();
     }
-  });
-
+  }
+  window.removeEventListener('pageshow', _handlePageShow);
+  window.addEventListener('pageshow', _handlePageShow);
 
   /* ====== MOOD PICKER — filtro REAL sobre las grillas existentes ====== */
 
