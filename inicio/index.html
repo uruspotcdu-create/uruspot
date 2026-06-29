@@ -293,7 +293,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .search-close:hover{color:var(--parchment)}
 .search-count{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.28);white-space:nowrap;flex-shrink:0;min-width:80px;text-align:right}
 .search-hidden{display:none!important}
-.search-no-results{text-align:center;padding:60px 24px;font-family:var(--f-italic);font-style:italic;font-size:18px;color:rgba(26,25,22,.38);opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;height:0;overflow:hidden}
+.search-no-results{text-align:center;padding:60px 24px;font-family:var(--f-italic);font-style:italic;font-size:18px;color:rgba(26,25,22,.72);opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;height:0;overflow:hidden}
 .search-no-results.visible{opacity:1;transform:translateY(0);pointer-events:auto;height:auto;overflow:visible}
 #search-dropdown{opacity:0;transform:translateY(-6px);transition:opacity .25s ease,transform .25s ease;pointer-events:none}
 #search-dropdown.dd-visible{opacity:1;transform:translateY(0);pointer-events:auto}
@@ -1850,26 +1850,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   border-top: none;
   padding-top: 0;
 }
-
-/* UNA SOLA declaración, sin !important: */
-.hp-facts dt {
-  font-family: var(--f-ui);
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
-  color: rgba(242, 237, 227, .62);
-  line-height: 1.6;
-  padding-top: 2px;
-}
-.hp-facts dd {
-  font-family: var(--f-ui);
-  font-size: 12.5px;
-  color: rgba(242, 237, 227, .76);
-  line-height: 1.6;
-  margin: 0;
-}
-/* Eliminar el bloque .hp-card .hp-facts dt { color: ... !important } del patch */
 .hp-facts dd a {
   color: var(--verde2);
   text-decoration: underline;
@@ -2714,9 +2694,6 @@ html, body {
   transition:transform .35s var(--ease);z-index:0;
 }
 .fin-card:hover::before{transform:scaleX(1)}
-
-/* ── VARIANTE BANCO: acento vertical verde ── */
-.fin-card-bank::before{background:linear-gradient(180deg,var(--verde2),var(--verde))}
 
 /* ── VARIANTE ATM: acento vertical oro ── */
 .fin-card-atm::before{background:linear-gradient(180deg,var(--oro2),var(--oro))}
@@ -4973,24 +4950,24 @@ html, body {
 <div style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;padding:10px 0;border-top:1px solid rgba(242,237,227,.10);border-bottom:1px solid rgba(242,237,227,.10);">
   <span style="font-family:var(--f-ui);font-size:7.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(196,135,42,.65);flex-shrink:0;">Por qué destaca</span>
   <span style="font-family:var(--f-italic);font-style:italic;font-size:12.5px;color:rgba(242,237,227,.60);line-height:1.4;">El único con 4.9 ★ en Google de más de 200 reseñas en CdU</span>
-</div><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0" role="img" aria-label="Calificación 4.9 sobre 5 en Google Maps">★ 4.9</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0" role="img" aria-label="Precio alto dentro de la guía ($$$)">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
+</div><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" aria-label="Calificación 4.9 sobre 5 en Google Maps">★ 4.9</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" aria-label="Precio alto dentro de la guía ($$$)">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
     </a>
-    <a class="rcard reveal searchable" data-name="Papa Luigi" data-tags="restaurante italiana pizza" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" style="--reveal-delay:50ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍕</span><span class="rcard-name">Papa Luigi</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0" role="img" aria-label="Calificación 4.7 sobre 5 en Google Maps">★ 4.7</span><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Bella Vista" data-tags="restaurante vista rio costanera" data-mood="relax" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:100ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌅</span><span class="rcard-name">Bella Vista</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0" role="img" aria-label="Calificación 4.8 sobre 5 en Google Maps">★ 4.8</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0" role="img" aria-label="Precio alto dentro de la guía ($$$)">$$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Papa Luigi" data-tags="restaurante italiana pizza" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" style="--reveal-delay:50ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍕</span><span class="rcard-name">Papa Luigi</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0" role="img" aria-label="Calificación 4.7 sobre 5 en Google Maps">★ 4.7</span><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Bella Vista" data-tags="restaurante vista rio costanera" data-mood="relax" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:100ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌅</span><span class="rcard-name">Bella Vista</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" aria-label="Calificación 4.8 sobre 5 en Google Maps">★ 4.8</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" aria-label="Precio alto dentro de la guía ($$$)">$$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Panza Verde" data-tags="restaurante saludable vegano ensaladas" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" style="--reveal-delay:200ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌿</span><span class="rcard-name">Panza Verde</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.6</span><span class="pill pill-default">Saludable</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Justo José" data-tags="restaurante parrilla asado bar" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="--reveal-delay:250ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">⚖️</span><span class="rcard-name">Justo José</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Justo José" data-tags="restaurante parrilla asado bar" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="--reveal-delay:250ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">⚖️</span><span class="rcard-name">Justo José</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Bonhomia" data-tags="restaurante moderno bar cocteles" data-mood="sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="--reveal-delay:300ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">✨</span><span class="rcard-name">Bonhomia</span><div class="pills"><span class="pill pill-default">Moderno</span></div></div></a>
     <a class="rcard reveal searchable" data-name="La Ris" data-tags="restaurante cafeteria arte" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="--reveal-delay:350ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🎨</span><span class="rcard-name">La Ris</span><div class="pills"><span class="pill pill-default">Cafetería</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Gruta" data-tags="restaurante parrilla asado" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-gruta/" style="--reveal-delay:400ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🔥</span><span class="rcard-name">La Gruta</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Sanduba" data-tags="restaurante rapido sandwich hamburguesa" data-mood="rapido barato" data-price="1" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" style="--reveal-delay:450ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍔</span><span class="rcard-name">Sanduba</span><div class="pills"><span class="pill pill-default">Rápido</span><span class="pill pill-price" data-tip="Precio económico dentro de la guía" tabindex="0" role="img" aria-label="Precio económico dentro de la guía ($)">$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Gruta" data-tags="restaurante parrilla asado" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-gruta/" style="--reveal-delay:400ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🔥</span><span class="rcard-name">La Gruta</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Sanduba" data-tags="restaurante rapido sandwich hamburguesa" data-mood="rapido barato" data-price="1" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" style="--reveal-delay:450ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍔</span><span class="rcard-name">Sanduba</span><div class="pills"><span class="pill pill-default">Rápido</span><span class="pill pill-price" data-tip="Precio económico dentro de la guía" aria-label="Precio económico dentro de la guía ($)">$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Pimienta Negra" data-tags="restaurante fusion moderno" data-mood="sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pimienta-negra/" style="--reveal-delay:500ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌶️</span><span class="rcard-name">Pimienta Negra</span><div class="pills"><span class="pill pill-default">Fusión</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Parada 33" data-tags="restaurante pub cerveza" data-mood="barato" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" style="--reveal-delay:550ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍺</span><span class="rcard-name">Parada 33</span><div class="pills"><span class="pill pill-default">Pub</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Parada 33" data-tags="restaurante pub cerveza" data-mood="barato" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" style="--reveal-delay:550ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍺</span><span class="rcard-name">Parada 33</span><div class="pills"><span class="pill pill-default">Pub</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Faro 3260" data-tags="restaurante vista rio costanera" data-mood="relax sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/faro-3260/" style="--reveal-delay:600ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌊</span><span class="rcard-name">Faro 3260</span><div class="pills"><span class="pill pill-default">Vista al río</span></div></div></a>
     <a class="rcard reveal searchable" data-name="El Calderón" data-tags="restaurante casero almuerzo" data-mood="rapido barato" data-price="1" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" style="--reveal-delay:650ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍲</span><span class="rcard-name">El Calderón</span><div class="pills"><span class="pill pill-default">Casero</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Segunda" data-tags="restaurante parrilla asado carne" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" style="--reveal-delay:700ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🥩</span><span class="rcard-name">La Segunda</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Segunda" data-tags="restaurante parrilla asado carne" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" style="--reveal-delay:700ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🥩</span><span class="rcard-name">La Segunda</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Dolores Costa" data-tags="restaurante costanera rio" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/dolores-costa/" style="--reveal-delay:750ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌴</span><span class="rcard-name">Dolores Costa</span><div class="pills"><span class="pill pill-default">Costanera</span></div></div></a>
     <a class="rcard reveal searchable" data-name="La Delfina" data-tags="restaurante pescados mariscos" data-mood="sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-delfina/" style="--reveal-delay:800ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🐬</span><span class="rcard-name">La Delfina</span><div class="pills"><span class="pill pill-default">Pescados</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Mamma Mía" data-tags="restaurante italiana pasta" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" style="--reveal-delay:850ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍝</span><span class="rcard-name">Mamma Mía</span><div class="pills"><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Mamma Mía" data-tags="restaurante italiana pasta" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" style="--reveal-delay:850ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍝</span><span class="rcard-name">Mamma Mía</span><div class="pills"><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Garifo" data-tags="restaurante bodegon vino" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/garifo/" style="--reveal-delay:900ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍷</span><span class="rcard-name">Garifo</span><div class="pills"><span class="pill pill-default">Bodegón</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Baco" data-tags="restaurante vinos cava" data-mood="relax sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-conventillo-de-baco/" style="--reveal-delay:950ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍇</span><span class="rcard-name">Baco</span><div class="pills"><span class="pill pill-default">Vinos</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Danubio Azul" data-tags="restaurante europeo aleman" data-mood="sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-danubio-azul/" style="--reveal-delay:1000ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🇩🇪</span><span class="rcard-name">Danubio Azul</span><div class="pills"><span class="pill pill-default">Europeo</span></div></div></a>
@@ -5067,7 +5044,7 @@ html, body {
   </div>
 
 </div>
-  <a class="ad-banner reveal visible" href="https://docs.google.com/forms/d/e/1FAIpQLSegxM7nYfOM7tuI0HgbxwGyVMXmzlPvJexBvTUqpLJd7BA7zw/viewform" target="_blank" rel="noopener">
+  <a class="ad-banner reveal" href="https://docs.google.com/forms/d/e/1FAIpQLSegxM7nYfOM7tuI0HgbxwGyVMXmzlPvJexBvTUqpLJd7BA7zw/viewform" target="_blank" rel="noopener">
 
   <div class="ad-banner-left"><div class="ad-banner-icon" aria-hidden="true">🏪</div><div><span class="ad-banner-eyebrow">Publicidad · Espacio patrocinado</span><span class="ad-banner-title">¿Tenés un local en CdU?</span><span class="ad-banner-sub">Aparecé en la guía que está leyendo toda la ciudad. Visible, accesible y efectivo.</span></div></div>
 
@@ -5151,11 +5128,11 @@ html, body {
   <div class="gym-grid" id="grid-gimnasios">
     <a class="gcard gcard-feat reveal searchable" data-name="Gimnasio 538 Gym" data-tags="gimnasio fitness musculacion clases grupales" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/gimnasio-538/">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge badge-gold">Mejor puntuado</span>
-      <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" tabindex="0" role="img" aria-label="Puntaje URU SPOT: 9.1 sobre 10, verificado in situ">★ 9.1 URU SPOT</div><span class="gcard-icon" aria-hidden="true">🏋️</span></div><span class="gcard-name">Gimnasio 538 Gym</span><p class="gcard-desc">Dos sedes en la ciudad, equipamiento moderno y un equipo de profesores comprometidos. El referente del fitness local.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.8 Google</span><span class="pill pill-feat">2 Sedes</span><span class="pill pill-feat">Clases grupales</span></div></div>
+      <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" aria-label="Puntaje URU SPOT: 9.1 sobre 10, verificado in situ">★ 9.1 URU SPOT</div><span class="gcard-icon" aria-hidden="true">🏋️</span></div><span class="gcard-name">Gimnasio 538 Gym</span><p class="gcard-desc">Dos sedes en la ciudad, equipamiento moderno y un equipo de profesores comprometidos. El referente del fitness local.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.8 Google</span><span class="pill pill-feat">2 Sedes</span><span class="pill pill-feat">Clases grupales</span></div></div>
     </a>
     <a class="gcard reveal searchable" data-name="Gimnasio Muscle" data-tags="gimnasio fitness musculacion cardio" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/muscle-gimnasio/" style="--reveal-delay:70ms">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge">Top</span>
-      <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" tabindex="0" role="img" aria-label="Puntaje URU SPOT: 8.7 sobre 10, verificado in situ">★ 8.7</div><span class="gcard-icon" aria-hidden="true">💪</span></div><span class="gcard-name">Gimnasio Muscle</span><p class="gcard-desc">Instalaciones completas en Blvd. Yrigoyen 1086. Equipamiento de primera y variedad de clases para todos los niveles.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.6 Google</span><span class="pill pill-default">Blvd. Yrigoyen 1086</span></div></div>
+      <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" aria-label="Puntaje URU SPOT: 8.7 sobre 10, verificado in situ">★ 8.7</div><span class="gcard-icon" aria-hidden="true">💪</span></div><span class="gcard-name">Gimnasio Muscle</span><p class="gcard-desc">Instalaciones completas en Blvd. Yrigoyen 1086. Equipamiento de primera y variedad de clases para todos los niveles.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.6 Google</span><span class="pill pill-default">Blvd. Yrigoyen 1086</span></div></div>
     </a>
     <a class="gcard reveal searchable" data-name="Gym Lucianos" data-tags="gimnasio fitness personalizado familiar" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lucianos-gimnasio/" style="--reveal-delay:140ms">
       <div class="gcard-shine" aria-hidden="true"></div>
@@ -7753,6 +7730,9 @@ function ddHide(){
           var hdr=sec.querySelector('.section-header');
           if(hdr) hdr.click();
         }
+        if(item.tagName==='DETAILS'&&!item.open){
+          item.open=true;
+        }
       }
     });
     /* no-results por grid */
@@ -7966,8 +7946,8 @@ function fetchWeather(){
   if(document.hidden) return;
   if(_wxFetchPromise) return;
 
-  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  var fetchOptions = controller ? { signal: controller.signal } : {};
+  _wxAbortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var fetchOptions = _wxAbortController ? { signal: _wxAbortController.signal } : {};
 
   _wxFetchPromise = fetch(WX_URL, fetchOptions)
     .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -7986,7 +7966,7 @@ function fetchWeather(){
       renderError();
       setTimeout(function(){ if(!document.hidden) fetchWeather(); }, 60000);
     })
-    .finally(function(){ _wxFetchPromise = null; });
+    .finally(function(){ _wxFetchPromise = null; _wxAbortController = null; });
 }
 document.addEventListener('visibilitychange', function(){
     if(!document.hidden){
