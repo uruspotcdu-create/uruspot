@@ -2590,6 +2590,21 @@ html, body {
   }
 }
 
+  /* ── GRILLA DE RÍO — nueva capa decorativa del hero ── */
+.hero-river-grid{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(196,98,26,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,98,26,.025) 1px, transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 65% 75% at 60% 40%, black 20%, transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse 65% 75% at 60% 40%, black 20%, transparent 80%);
+  animation:riverGridDrift 22s ease-in-out infinite alternate;
+}
+@keyframes riverGridDrift{
+  from{background-position:0 0, 0 0;}
+  to{background-position:8px 8px, 8px 8px;}
+}
 
 </style>
   </head>
@@ -2602,12 +2617,16 @@ html, body {
   <div class="hero-mesh" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+
+  <!-- NUEVO: grilla de río sutil -->
+  <div class="hero-river-grid" aria-hidden="true"></div>
+
   <div class="hero-topbar">
     <div class="city-tag">
       <div class="city-flag" aria-hidden="true" role="presentation">📍</div>
       <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
     </div>
-<a class="hero-logo" href="/" aria-label="URU SPOT — Ir al inicio">
+    <a class="hero-logo" href="/" aria-label="URU SPOT — Ir al inicio">
       <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local de Concepción del Uruguay" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
     </a>
   </div>
