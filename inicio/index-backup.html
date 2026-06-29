@@ -774,8 +774,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .us-section{margin-top:var(--section-gap);padding-top:24px}
 
 /* ── REVEAL ── */
-.reveal{opacity:0;transform:translateY(24px) scale(.98);filter:blur(4px);transition:opacity .65s var(--ease-out-expo),transform .65s var(--ease-out-expo),filter .65s var(--ease-out-expo);transition-delay:var(--reveal-delay,0ms);will-change:opacity,transform,filter}
-.reveal.visible{opacity:1;transform:translateY(0) scale(1);filter:blur(0px)}
+.reveal{opacity:0;transform:translateY(28px) scale(.97);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1);transition-delay:var(--reveal-delay,0ms)} .reveal.visible{opacity:1;transform:translateY(0) scale(1)}
 @media(max-width:1024px){.reveal{filter:none}.reveal.visible{filter:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal{opacity:1;transform:none;filter:none}}
 
@@ -1764,10 +1763,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   .search-nav-wrap { display: none; }
   .search-icon-btn { display: inline-flex; }
 }
-@media (min-width: 769px) and (hover: hover) {
-  .rcard:hover, .gcard:hover, .cat-card:hover, .bcard:hover, .litem:hover { will-change: transform; }
-  .rcard, .gcard, .cat-card, .bcard, .litem { will-change: auto; }
-}
+@media (min-width: 769px) and (hover: hover) { .rcard, .gcard, .cat-card, .bcard, .litem { will-change: auto; } }
 @media (min-width: 769px) {
   .hero-orb-1, .hero-orb-2 { transform: translateZ(0); }
 }
@@ -3915,61 +3911,7 @@ body {
   <div class="hero-inner">
     <div class="hero-inner-left">
       <div class="live-chip" role="status" aria-live="polite"><span class="live-dot" aria-hidden="true"></span>Verificado en CdU · Junio 2026</div>
-<h1 class="hero-title" id="hero-title-anim" aria-label="Restaurantes, bares y más en Concepción del Uruguay">
-  <span class="eyebrow hero-word-noscript" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span>
-  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span>
-  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span>
-</h1>
-<script>
-(function(){
-  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(reduced){
-    ['hero-word-1','hero-word-2'].forEach(function(id){
-      var el=document.getElementById(id);
-      if(el){el.style.opacity='1';el.style.transform='none';el.style.filter='none';}
-    });
-    var ey=document.querySelector('.hero-title .eyebrow');
-    if(ey){ey.style.opacity='1';ey.style.transform='none';}
-    return;
-  }
-  function animate(){
-    var ey=document.querySelector('.hero-title .eyebrow');
-    var w1=document.getElementById('hero-word-1');
-    var w2=document.getElementById('hero-word-2');
-    if(!w1||!w2)return;
-    /* Eyebrow */
-    setTimeout(function(){
-      if(ey){
-        void ey.offsetWidth;
-        ey.style.transition='opacity .8s ease .1s, transform .8s cubic-bezier(.16,1,.3,1) .1s';
-        ey.style.opacity='1';
-        ey.style.transform='translateY(0)';
-      }
-    },150);
-    /* Palabras emergen desde abajo como luz del agua */
-    function revealWater(el,delay){
-      /* Estado inicial: sumergido */
-      el.style.transform='translateY(110%) scale(0.92)';
-      el.style.filter='blur(8px)';
-      el.style.opacity='0';
-      setTimeout(function(){
-        el.style.transition=
-          'opacity 1.1s cubic-bezier(.16,1,.3,1),' +
-          'transform 1.1s cubic-bezier(.16,1,.3,1),' +
-          'filter 1.0s cubic-bezier(.16,1,.3,1)';
-        el.style.opacity='1';
-        el.style.transform='translateY(0) scale(1)';
-        el.style.filter='blur(0)';
-      },delay);
-    }
-    revealWater(w1,360);
-    revealWater(w2,520);
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',animate,{once:true});
-  }else{animate();}
-})();
-</script>
+<h1 class="hero-title" id="hero-title-anim" aria-label="Restaurantes, bares y más en Concepción del Uruguay"> <span class="eyebrow hero-word-noscript" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span> <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span> <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span> </h1> <script> (function(){ var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches; if(reduced){ ['hero-word-1','hero-word-2'].forEach(function(id){ var el=document.getElementById(id); if(el){el.style.opacity='1';el.style.transform='none';el.style.filter='none';} }); var ey=document.querySelector('.hero-title .eyebrow'); if(ey){ey.style.opacity='1';ey.style.transform='none';} return; } function animate(){ var ey=document.querySelector('.hero-title .eyebrow'); var w1=document.getElementById('hero-word-1'); var w2=document.getElementById('hero-word-2'); if(!w1||!w2)return; setTimeout(function(){ if(ey){ void ey.offsetWidth; ey.style.transition='opacity .8s ease .1s, transform .8s cubic-bezier(.16,1,.3,1) .1s'; ey.style.opacity='1'; ey.style.transform='translateY(0)'; } },150); function revealWater(el,delay){ el.style.transform='translateY(110%) scale(0.92)'; el.style.filter='blur(8px)'; el.style.opacity='0'; setTimeout(function(){ el.style.transition= 'opacity 1.1s cubic-bezier(.16,1,.3,1),' + 'transform 1.1s cubic-bezier(.16,1,.3,1),' + 'filter 1.0s cubic-bezier(.16,1,.3,1)'; el.style.opacity='1'; el.style.transform='translateY(0) scale(1)'; el.style.filter='blur(0)'; },delay); } revealWater(w1,360); revealWater(w2,520); /* WOW MOMENT — Apple scroll reveal en H1 */ var heroTitle=document.getElementById('hero-title-anim'); if(heroTitle&&'IntersectionObserver' in window){ var wowFired=false; var wowObs=new IntersectionObserver(function(entries){ entries.forEach(function(entry){ if(entry.isIntersecting&&!wowFired){ wowFired=true; var t=entry.target; t.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1), filter .4s ease'; t.style.transform='scale(1.04)'; t.style.filter='brightness(1.12)'; setTimeout(function(){ t.style.transform='scale(1)'; t.style.filter='brightness(1)'; setTimeout(function(){t.style.transition='';t.style.filter='';},420); },380); wowObs.unobserve(t); } }); },{threshold:0.7}); wowObs.observe(heroTitle); } } if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',animate,{once:true}); }else{animate();} })(); </script>
       <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
       <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país.<br /><strong>100+ lugares verificados. Solo Concepción del Uruguay.</strong></p>
   <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
@@ -10394,23 +10336,7 @@ var mesh=document.querySelector('.hero-mesh');
   var heroMesh = document.querySelector('.hero-mesh');
   var heroTitleEms = document.querySelectorAll('.hero-title .main-line em');
 
-if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
-    var spotEls = document.querySelectorAll('.rcard, .gcard, .nat-card, .dep-feat-card, .dep-club-card, .mood-card, .circ-card, .ccard');
-    spotEls.forEach(function(el){
-      var raf = null;
-      var cachedRect = null;
-      el.addEventListener('mouseenter', function(){ cachedRect = el.getBoundingClientRect(); });
-      el.addEventListener('mousemove', function(e){
-        if (raf || !cachedRect) return;
-        raf = requestAnimationFrame(function(){
-          el.style.setProperty('--mx', ((e.clientX - cachedRect.left) / cachedRect.width * 100) + '%');
-          el.style.setProperty('--my', ((e.clientY - cachedRect.top) / cachedRect.height * 100) + '%');
-          raf = null;
-        });
-      });
-      el.addEventListener('mouseleave', function(){ cachedRect = null; });
-    });
-  }
+if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) { var spotEls = document.querySelectorAll('.rcard, .gcard, .nat-card, .dep-feat-card, .dep-club-card, .mood-card, .circ-card, .ccard'); spotEls.forEach(function(el){ var raf = null; var cachedRect = null; el.addEventListener('mouseenter', function(){ cachedRect = el.getBoundingClientRect(); el.style.willChange = 'transform'; }); el.addEventListener('mousemove', function(e){ if (raf || !cachedRect) return; raf = requestAnimationFrame(function(){ el.style.setProperty('--mx', ((e.clientX - cachedRect.left) / cachedRect.width * 100) + '%'); el.style.setProperty('--my', ((e.clientY - cachedRect.top) / cachedRect.height * 100) + '%'); raf = null; }); }); el.addEventListener('mouseleave', function(){ cachedRect = null; el.style.willChange = 'auto'; }); }); }
  
   window.addEventListener('scroll',function(){
     if(!ticking){
@@ -10546,12 +10472,7 @@ var id=entry.target.getAttribute('id');
     },250);
   },{passive:true});
 
-  var revealObserver=new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(!entry.isIntersecting)return;
-      requestAnimationFrame(function(){entry.target.classList.add('visible');});
-      revealObserver.unobserve(entry.target);
-      entry.target.querySelectorAll('.stat-num').forEach(function(el){
+  var revealObserver=new IntersectionObserver(function(entries){ entries.forEach(function(entry){ if(!entry.isIntersecting)return; requestAnimationFrame(function(){ entry.target.classList.add('visible'); /* WOW MOMENT — pico cinemático en section-title al entrar */ var titleEl=entry.target.querySelector('.section-title,.nat-hero-title,.gr-hero-title,.dep-hero-title'); if(titleEl&&!titleEl._wowDone){ titleEl._wowDone=true; titleEl.style.transition='transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s ease'; titleEl.style.transform='scale(1.03) translateY(-4px)'; setTimeout(function(){ titleEl.style.transform='scale(1) translateY(0)'; setTimeout(function(){titleEl.style.transition='';},360); },300); } }); revealObserver.unobserve(entry.target); entry.target.querySelectorAll('.stat-num').forEach(function(el){
         var txt = el.textContent.replace(/\D/g,'');
         var target = parseInt(txt,10);
         if(!target||target>999)return;
