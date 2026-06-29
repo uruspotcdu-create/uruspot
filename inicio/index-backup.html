@@ -4077,14 +4077,17 @@ body {
   }
 
   /* Solo animar cuando el hero es visible */
-  var heroEl = document.querySelector('.hero');
+var heroEl = document.querySelector('.hero');
   if(heroEl && 'IntersectionObserver' in window){
     var io = new IntersectionObserver(function(e){
       if(e[0].isIntersecting){
-        start();
-        io.unobserve(heroEl);
+        if(!rippleInterval) start();
+      } else {
+        clearInterval(rippleInterval);
+        rippleInterval = null;
+        if(animId){ cancelAnimationFrame(animId); animId = null; }
       }
-    }, {threshold:0.1});
+    }, {threshold:0.05});
     io.observe(heroEl);
   } else { start(); }
 
@@ -10070,16 +10073,14 @@ if(alive){rafId=requestAnimationFrame(loop);}
     }
 
     /* Solo animar cuando el footer es visible */
-    var started = false;
-    if('IntersectionObserver' in window){
+if('IntersectionObserver' in window){
       var io = new IntersectionObserver(function(e){
-        if(e[0].isIntersecting && !started){
-          started = true;
-          resize();
-          draw();
-          io.unobserve(footer);
+        if(e[0].isIntersecting){
+          if(!animId){ resize(); draw(); }
+        } else {
+          if(animId){ cancelAnimationFrame(animId); animId = null; }
         }
-      }, {threshold:0.1});
+      }, {threshold:0.05});
       io.observe(footer);
     }
 
@@ -10338,26 +10339,39 @@ var mesh=document.querySelector('.hero-mesh');
 
 if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) { var spotEls = document.querySelectorAll('.rcard, .gcard, .nat-card, .dep-feat-card, .dep-club-card, .mood-card, .circ-card, .ccard'); spotEls.forEach(function(el){ var raf = null; var cachedRect = null; el.addEventListener('mouseenter', function(){ cachedRect = el.getBoundingClientRect(); el.style.willChange = 'transform'; }); el.addEventListener('mousemove', function(e){ if (raf || !cachedRect) return; raf = requestAnimationFrame(function(){ el.style.setProperty('--mx', ((e.clientX - cachedRect.left) / cachedRect.width * 100) + '%'); el.style.setProperty('--my', ((e.clientY - cachedRect.top) / cachedRect.height * 100) + '%'); raf = null; }); }); el.addEventListener('mouseleave', function(){ cachedRect = null; el.style.willChange = 'auto'; }); }); }
  
-  window.addEventListener('scroll',function(){
+var _heroVisible = true;
+(function(){
+  if('IntersectionObserver' in window){
+    var heroEl = document.querySelector('.hero');
+    if(heroEl){
+      new IntersectionObserver(function(entries){
+        _heroVisible = entries[0].isIntersecting;
+      },{threshold:0}).observe(heroEl);
+    }
+  }
+})();
+
+window.addEventListener('scroll',function(){
     if(!ticking){
       requestAnimationFrame(function(){
         updateProgress();
         updateNav();
-        var sy = window.scrollY;
-        if(heroMesh){
-          var intensity = Math.min(sy / 400, 1);
-          heroMesh.style.opacity = 1 - intensity * 0.35;
-        }
-if(window.innerWidth > 768 && sy < 700){
-        if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
-        if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
-      }
-        if(heroTitleEms.length && sy < 500){
-          var t = sy / 500;
-          var ls = -4 + t * 2;
-          heroTitleEms.forEach(function(em){
-            em.style.letterSpacing = ls + 'px';
-          });
+        if(_heroVisible){
+          var sy = window.scrollY;
+          if(heroMesh){
+            heroMesh.style.opacity = 1 - Math.min(sy / 400, 1) * 0.35;
+          }
+          if(window.innerWidth > 768 && sy < 700){
+            if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
+            if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
+          }
+          if(heroTitleEms.length && sy < 500){
+            var t = sy / 500;
+            var ls = -4 + t * 2;
+            heroTitleEms.forEach(function(em){
+              em.style.letterSpacing = ls + 'px';
+            });
+          }
         }
         ticking=false;
       });
@@ -10462,14 +10476,14 @@ var id=entry.target.getAttribute('id');
   var sectionObserver=createSectionObserver();
   sections.forEach(function(s){sectionObserver.observe(s);});
 
-  var _soResizeTimer=null;
+var _soResizeTimer=null;
   window.addEventListener('resize',function(){
     clearTimeout(_soResizeTimer);
     _soResizeTimer=setTimeout(function(){
-      sectionObserver.disconnect();
-      sectionObserver=createSectionObserver();
-      sections.forEach(function(s){sectionObserver.observe(s);});
-    },250);
+      _invalidateNavRect();
+      var active = document.querySelector('.nav-item.active');
+      if(active) moveIndicator(active);
+    },300);
   },{passive:true});
 
   var revealObserver=new IntersectionObserver(function(entries){ entries.forEach(function(entry){ if(!entry.isIntersecting)return; requestAnimationFrame(function(){ entry.target.classList.add('visible'); /* WOW MOMENT — pico cinemático en section-title al entrar */ var titleEl=entry.target.querySelector('.section-title,.nat-hero-title,.gr-hero-title,.dep-hero-title'); if(titleEl&&!titleEl._wowDone){ titleEl._wowDone=true; titleEl.style.transition='transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s ease'; titleEl.style.transform='scale(1.03) translateY(-4px)'; setTimeout(function(){ titleEl.style.transform='scale(1) translateY(0)'; setTimeout(function(){titleEl.style.transition='';},360); },300); } }); revealObserver.unobserve(entry.target); entry.target.querySelectorAll('.stat-num').forEach(function(el){
@@ -10571,19 +10585,22 @@ var _ddHideTimer = null;
     return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'');
   }
 
+var _searchablesCache = null;
   function getAllSearchables(){
+    if(_searchablesCache) return _searchablesCache;
     var all=[],seen={};
     document.querySelectorAll('.searchable[data-name]').forEach(function(el){
       var name=el.dataset.name||'';
       if(name&&!seen[name]){seen[name]=1;all.push({name:name,href:el.getAttribute('href')||'#',tags:el.dataset.tags||'',el:el});}
     });
+    _searchablesCache = all;
     return all;
   }
 
-  function runSearch(raw){
+function runSearch(raw){
     var q=normalize(raw.trim());
     var total=0,first=null;
-    document.querySelectorAll('.searchable').forEach(function(item){
+    _getSearchableCards().forEach(function(item){
       var match=!q||normalize(item.dataset.name||'').includes(q)||normalize(item.dataset.tags||'').includes(q);
       item.classList.toggle('search-hidden',!match);
       if(match){total++;if(!first)first=item;}
@@ -10869,12 +10886,17 @@ window.addEventListener('online', function(){
     }
   }
 
- if(document.readyState === 'complete' || document.readyState === 'interactive'){
-    scheduleWeather();
+function _deferWeather(){
+    if(window.requestIdleCallback){
+      window.requestIdleCallback(function(){ fetchWeather(); },{ timeout:12000 });
+    } else {
+      setTimeout(fetchWeather, 3500);
+    }
+  }
+  if(document.readyState === 'complete'){
+    _deferWeather();
   } else {
-    document.addEventListener('DOMContentLoaded', function(){
-      scheduleWeather();
-    }, {once: true});
+    window.addEventListener('load', _deferWeather, {once:true});
   }
 window.__uruspotWeatherInterval = setInterval(function(){ fetchWeather(); }, 10*60*1000);
 
@@ -10933,25 +10955,31 @@ function _handlePageShow(e){
      (no se oculta del todo: el usuario sigue pudiendo ver toda la guía,
      pero la elección queda evidenciada visualmente — esto es un filtro
      real, no una lista fija de enlaces). */
+var _allSearchableCards = null;
+  function _getSearchableCards(){
+    if(!_allSearchableCards) _allSearchableCards = [].slice.call(document.querySelectorAll('.searchable'));
+    return _allSearchableCards;
+  }
+
   function applyMoodFilter(mood){
     var matched = [];
-    document.querySelectorAll('.searchable[data-mood]').forEach(function(card){
-      var moods = (card.dataset.mood || '').split(/\s+/);
-      var isMatch = moods.indexOf(mood) !== -1;
-      card.classList.toggle('mood-match', isMatch);
-      card.classList.toggle('mood-dim', !isMatch);
-      if (isMatch) matched.push(card);
-    });
- /* Cards sin data-mood se atenúan igual que las que no coinciden */
-    document.querySelectorAll('.searchable:not([data-mood])').forEach(function(card){
-      card.classList.remove('mood-match');
-      card.classList.add('mood-dim');
+    _getSearchableCards().forEach(function(card){
+      var hasMood = card.dataset.mood;
+      var isMatch = hasMood && (card.dataset.mood.split(/\s+/).indexOf(mood) !== -1);
+      if(isMatch){
+        card.classList.add('mood-match');
+        card.classList.remove('mood-dim');
+        matched.push(card);
+      } else {
+        card.classList.remove('mood-match');
+        card.classList.add('mood-dim');
+      }
     });
     return matched;
   }
 
-function clearMoodFilter(){
-    document.querySelectorAll('.searchable').forEach(function(card){
+  function clearMoodFilter(){
+    _getSearchableCards().forEach(function(card){
       card.classList.remove('mood-match','mood-dim');
     });
   }
@@ -11347,13 +11375,20 @@ function forceCounters(){
     <script>
 /* ── MOOD BTN MOUSEMOVE ── */
 document.querySelectorAll('.mood-btn').forEach(function(btn){
+  var _moodRaf = null;
+  var _moodRect = null;
+  btn.addEventListener('mouseenter', function(){ _moodRect = btn.getBoundingClientRect(); });
+  btn.addEventListener('mouseleave', function(){ _moodRect = null; });
   btn.addEventListener('mousemove', function(e){
-    var r = btn.getBoundingClientRect();
-    btn.style.setProperty('--bx', ((e.clientX - r.left) / r.width * 100) + '%');
-    btn.style.setProperty('--by', ((e.clientY - r.top) / r.height * 100) + '%');
+    if(_moodRaf || !_moodRect) return;
+    var cx = e.clientX, cy = e.clientY;
+    _moodRaf = requestAnimationFrame(function(){
+      btn.style.setProperty('--bx', ((cx - _moodRect.left) / _moodRect.width * 100) + '%');
+      btn.style.setProperty('--by', ((cy - _moodRect.top) / _moodRect.height * 100) + '%');
+      _moodRaf = null;
+    });
   });
 });
-
 /* ── CIRC CARD DRAW ANIMATION ── */
 (function(){
   var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
