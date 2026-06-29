@@ -9,18 +9,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="dns-prefetch" href="//api.open-meteo.com" />
 <link rel="dns-prefetch" href="//dolarito.ar" />
+<link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+<link rel="dns-prefetch" href="//images.unsplash.com" />
 <link rel="preload" as="image" href="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" fetchpriority="high" type="image/webp" />
 <link rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@600;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600&display=swap"
   media="print" onload="this.media='all'" />
 <noscript>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600&display=swap" />
 </noscript>
 <link rel="icon" type="image/png" sizes="32x32" href="https://uruspotcdu-create.github.io/uruspot/img/logof-32.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="https://uruspotcdu-create.github.io/uruspot/img/logof-192.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="https://uruspotcdu-create.github.io/uruspot/img/logof-180.png" />
-  <meta name="robots" content="index, follow" />
-<meta name="description" content="Guía local verificada de Concepción del Uruguay, Entre Ríos. Restaurantes, cafés, bares, naturaleza, historia, patrimonio, emergencias y servicios. Horarios en tiempo real. 75 lugares verificados — junio 2026." />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+<meta name="description" content="Guía local verificada de Concepción del Uruguay, Entre Ríos. Restaurantes, cafés, bares, naturaleza, historia, patrimonio, emergencias y servicios. Horarios en tiempo real. 100+ lugares verificados — junio 2026." />
 <title>URU SPOT – Guía Local de Concepción del Uruguay</title>
 <link rel="canonical" href="https://uruspot.pages.dev/" />
 <link rel="manifest" href="/manifest.json" />
@@ -53,16 +55,8 @@
     "@type": "WebSite",
     "name": "URU SPOT",
     "description": "La referencia definitiva sobre Concepción del Uruguay, Entre Ríos, Argentina.",
-   "url": "https://uruspot.pages.dev/",
-"inLanguage": "es-AR",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://uruspot.pages.dev/?q={search_term_string}"
-      },
-      "query-input": "required name=search_term_string"
-    }
+"url": "https://uruspot.pages.dev/",
+"inLanguage": "es-AR"
   },
   {
     "@context": "https://schema.org",
@@ -123,7 +117,7 @@
 :root {
   --radius-card: 6px;
   --void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;
-  --parchment:#FFD0A0;--parchment2:#FFC890;--parchment3:#FFE4BF;
+  --parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;
   --ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;
   --oro:#B85C2A;--oro2:#D4742A;--oro3:#E8914A;
   --rojo:#c0392b;--rojo2:#e74c3c;--azul:#1a5c8a;--violeta:#7b3068;
@@ -299,22 +293,21 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .search-close:hover{color:var(--parchment)}
 .search-count{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.28);white-space:nowrap;flex-shrink:0;min-width:80px;text-align:right}
 .search-hidden{display:none!important}
-.search-no-results{text-align:center;padding:60px 24px;font-family:var(--f-italic);font-style:italic;font-size:18px;color:rgba(26,25,22,.38);opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;height:0;overflow:hidden}
+.search-no-results{text-align:center;padding:60px 24px;font-family:var(--f-italic);font-style:italic;font-size:18px;color:rgba(26,25,22,.72);opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;height:0;overflow:hidden}
 .search-no-results.visible{opacity:1;transform:translateY(0);pointer-events:auto;height:auto;overflow:visible}
-  #search-dropdown{opacity:0;transform:translateY(-6px);transition:opacity .25s ease,transform .25s ease;pointer-events:none}
+#search-dropdown{opacity:0;transform:translateY(-6px);transition:opacity .25s ease,transform .25s ease;pointer-events:none}
 #search-dropdown.dd-visible{opacity:1;transform:translateY(0);pointer-events:auto}
 
 /* ── SECTION CRUMB ── */
 .section-crumb{position:sticky;top:60px;z-index:750;background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.65);display:flex !important;align-items:center;gap:8px;transform:none !important;transition:none;pointer-events:none;visibility:visible !important;opacity:1 !important}
 .section-crumb.visible{transform:none !important}
 .section-crumb.search-active{display:none !important}
-.section-crumb.search-active{display:none !important; }
 .section-crumb-dot{width:5px;height:5px;border-radius:50%;background:var(--verde);flex-shrink:0}
 .section-crumb-current{color:var(--ink)}
 @media(max-width:640px){.section-crumb{font-size:8px;padding:8px var(--gutter)}}
 
 /* ═══════════════ MAIN BODY ═══════════════ */
-.main-body{background:#FFD9A8;padding:100px var(--gutter) 120px;position:relative}
+.main-body{background:var(--parchment3);padding:100px var(--gutter) 120px;position:relative}
 .main-body::after{content:'';position:absolute;top:0;left:0;right:0;height:120px;background:linear-gradient(to bottom,var(--void),transparent);pointer-events:none;z-index:1}
 .main-body::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 0%,rgba(29,92,64,.04) 0%,transparent 45%),radial-gradient(circle at 85% 100%,rgba(196,135,42,.04) 0%,transparent 40%);pointer-events:none}
 
@@ -506,7 +499,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .rcard-feat .rcard-desc{color:rgba(242,237,227,.46)}
 .rcard.mood-dim{opacity:.32;filter:saturate(.6);pointer-events:none;}
 .rcard.mood-match{box-shadow:0 0 0 2px rgba(196,135,42,.55),0 20px 48px -10px rgba(6,6,5,.30);}
-.rcard.mood-match{box-shadow:0 0 0 2px rgba(196,135,42,.55),0 20px 48px -10px rgba(6,6,5,.30)}
 
 /* ── CAFÉ GRID ── */
 .cafe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.08);border:1px solid rgba(26,25,22,.08)}
@@ -567,6 +559,31 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .gcard-feat .gcard-desc{color:rgba(242,237,227,.46)}
 
 /* ═══════════════ URGENCIAS (módulo unificado) ═══════════════ */
+.urgencias-wrap{background:var(--ink);border:1px solid rgba(242,237,227,.08);position:relative;overflow:hidden;margin-bottom:1px}
+.urgencias-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 80% at 95% 50%,rgba(192,57,43,.14) 0%,transparent 58%),radial-gradient(ellipse 40% 60% at 5% 50%,rgba(196,135,42,.06) 0%,transparent 55%);pointer-events:none}
+.urgencias-topbar{height:3px;width:100%;background:#5c0e08;overflow:hidden;flex-shrink:0;position:relative}
+@media(min-width:769px){.urgencias-topbar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#5c0e08,#c0392b 20%,#e74c3c 45%,#c0392b 70%,#5c0e08);animation:shimmerBar 4s linear infinite}}
+.urgencias-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr 1fr 1px 1fr 1px 1fr 1px 1fr;align-items:stretch}
+.urgencias-left{grid-column:1/4;padding:36px 40px;display:flex;flex-direction:column;gap:16px}
+.urgencias-div{background:rgba(242,237,227,.07)}
+.urgencias-nums{grid-column:5/-1;display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr}
+.urgencias-num{padding:24px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:background .3s ease}
+.urgencias-num:hover{background:rgba(242,237,227,.04)}
+.urgencias-num-big{font-family:var(--f-display);font-size:42px;line-height:1;color:var(--parchment);letter-spacing:-1.5px}
+.urgencias-num-label{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,.65)}
+.urgencias-num-sub{font-family:var(--f-italic);font-style:italic;font-size:11px;color:rgba(242,237,227,.20)}
+.urgencias-live{display:inline-flex;align-items:center;gap:10px;background:rgba(192,57,43,.10);border:1px solid rgba(192,57,43,.32);border-radius:2px;padding:7px 16px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(231,76,60,.90);width:fit-content}
+.urgencias-live-dot{width:6px;height:6px;border-radius:50%;background:#e74c3c;flex-shrink:0}
+.urgencias-title{font-family:var(--f-display);font-style:italic;font-size:clamp(20px,2.6vw,28px);color:var(--parchment);line-height:1.1}
+.urgencias-sub{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:rgba(242,237,227,.42);line-height:1.75}
+.urgencias-farmacia{display:inline-flex;align-items:center;gap:12px;background:var(--rojo);color:#fff;font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px 28px;border-radius:2px;text-decoration:none;width:fit-content;transition:background .35s ease,transform .35s var(--ease)}
+.urgencias-farmacia:hover{background:#992d22;transform:translateY(-3px)}
+.urgencias-dolar{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(242,237,227,.05);border-top:1px solid rgba(242,237,227,.07)}
+.urgencias-dolar-chip{display:flex;flex-direction:column;gap:8px;padding:20px 24px}
+.urgencias-dolar-type{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,.30)}
+.urgencias-dolar-val{font-family:var(--f-display);font-size:30px;line-height:1;color:var(--parchment);letter-spacing:-1px}
+.urgencias-dolar-val span{font-size:14px;color:rgba(242,237,227,.45)}
+.urgencias-dolar-sub{font-family:var(--f-italic);font-style:italic;font-size:11px;color:rgba(242,237,227,.22)}
 @media(max-width:860px){.urgencias-grid{grid-template-columns:1fr}.urgencias-left{padding:28px var(--gutter)}.urgencias-nums{grid-column:span 1;grid-template-columns:repeat(3,1fr)}}
 @media(max-width:640px){.urgencias-left{padding:24px var(--gutter)}.urgencias-nums{grid-template-columns:1fr}.urgencias-dolar{grid-template-columns:1fr}}
 
@@ -611,11 +628,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .footer{background:var(--void);border-top:1px solid rgba(242,237,227,.08);padding:60px var(--gutter) 48px;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;position:relative;overflow:hidden}
 .footer-shimmer{position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,var(--oro2),transparent);opacity:.75}
 .footer-logo{display:flex;align-items:center;justify-content:center;transition:transform .4s var(--ease);opacity:.8}
-.footer-stat{font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.70)}
-.footer-stat strong{color:rgba(242,237,227,.88);font-weight:700}
-.footer-copy{font-family:var(--f-ui);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.68)}
-.footer-logo{display:flex;align-items:center;justify-content:center;transition:transform .4s var(--ease);opacity:.72}
 .footer-logo:hover{transform:scale(1.06);opacity:1}
+.footer-divider{width:40px;height:1px;background:rgba(242,237,227,.12)}
+.footer-stats{display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center}
+.footer-stat{font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.35)}
 .footer-stat strong{color:rgba(242,237,227,.65);font-weight:700}
 .footer-copy{font-family:var(--f-ui);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.18)}.ad-banner{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;width:100%;background:var(--ink);border-left:5px solid var(--oro);border-radius:0 12px 12px 0;padding:48px 52px;margin:90px 0;text-decoration:none;position:relative;overflow:hidden;transition:transform .4s var(--ease),box-shadow .4s ease;box-shadow:0 24px 72px -12px rgba(6,6,5,.35)}
 .ad-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 85% at 92% 50%,rgba(29,92,64,.18) 0%,transparent 58%),radial-gradient(ellipse 40% 65% at 4% 50%,rgba(196,135,42,.08) 0%,transparent 55%);pointer-events:none}
@@ -682,6 +698,25 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 @media(max-width:640px){.peatonal-grid{grid-template-columns:1fr}.peatonal-tl-items{gap:20px}}
 
 /* ═══════════════ EL CLÁSICO ═══════════════ */
+.clasico-wrap{background:var(--ink);position:relative;overflow:hidden}
+.clasico-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 0%,rgba(29,92,64,.22) 0%,transparent 55%);pointer-events:none}
+.clasico-topbar{height:4px;background:linear-gradient(90deg,#1a4a28,var(--verde2),#c0392b,#992d22);position:relative;overflow:hidden}
+.clasico-inner{position:relative;z-index:1;padding:52px}
+.clasico-header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:32px;margin-bottom:48px}
+.clasico-club{display:flex;flex-direction:column;gap:8px}
+.clasico-club-2{text-align:right}
+.clasico-club-name{font-family:var(--f-display);font-style:italic;font-size:clamp(22px,3vw,32px);color:var(--parchment);letter-spacing:-.3px}
+.clasico-club-sub{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,.30)}
+.clasico-club-icon{font-size:40px;line-height:1}
+.clasico-vs{font-family:var(--f-display);font-size:48px;color:rgba(242,237,227,.12);text-align:center;letter-spacing:-2px;line-height:1}
+.clasico-body{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.clasico-section-title{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,.30);margin-bottom:16px;display:block}
+.clasico-text{font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(242,237,227,.52);line-height:1.85}
+.clasico-text strong{font-style:normal;color:rgba(242,237,227,.80);font-weight:400}
+.clasico-stats{display:flex;flex-direction:column;gap:1px;background:rgba(242,237,227,.07)}
+.clasico-stat{padding:16px 20px;background:rgba(6,6,5,.35);display:flex;justify-content:space-between;align-items:center}
+.clasico-stat-label{font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.30)}
+.clasico-stat-val{font-family:var(--f-display);font-size:18px;color:var(--parchment);letter-spacing:-.3px}
 @media(max-width:860px){.clasico-inner{padding:32px 28px}.clasico-body{grid-template-columns:1fr}.clasico-header{grid-template-columns:1fr auto 1fr}}
 @media(max-width:640px){.clasico-header{grid-template-columns:1fr;text-align:center}.clasico-club-2{text-align:center}.clasico-vs{font-size:32px;padding:8px 0}}
 
@@ -708,18 +743,86 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 @media(max-width:640px){.nautico-right{grid-template-columns:1fr}}
 
 /* ═══════════════ PERSONAJES HISTÓRICOS ═══════════════ */
+.personaje-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
+.personaje-card{background:var(--ink);padding:36px 32px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;transition:background .35s ease}
+.personaje-card:hover{background:#1e1e1a}
+.personaje-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 70% at 90% 10%,rgba(196,135,42,.12) 0%,transparent 60%);pointer-events:none}
+.personaje-inner{position:relative;z-index:1}
+.personaje-badge{display:inline-flex;align-items:center;padding:5px 12px;background:rgba(196,135,42,.12);border:1px solid rgba(196,135,42,.35);border-radius:2px;font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2);margin-bottom:16px;width:fit-content}
+.personaje-year{font-family:var(--f-display);font-size:48px;line-height:1;color:rgba(242,237,227,.08);letter-spacing:-2px;position:absolute;top:0;right:0}
+.personaje-name{font-family:var(--f-display);font-size:clamp(22px,2.8vw,30px);color:var(--parchment);letter-spacing:-.3px;line-height:1.1;margin-bottom:4px}
+.personaje-role{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2);margin-bottom:16px;display:block}
+.personaje-text{font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(242,237,227,.52);line-height:1.85}
+.personaje-text strong{font-style:normal;color:rgba(242,237,227,.80);font-weight:400}
+.personaje-detail{background:rgba(196,135,42,.06);border-left:3px solid rgba(196,135,42,.35);padding:14px 16px;margin-top:8px;font-family:var(--f-ui);font-size:10px;font-weight:600;color:rgba(242,237,227,.55);line-height:1.6}
 
 /* ═══════════════ COLECTIVIDAD JUDÍA ═══════════════ */
+.colectividad-wrap{background:var(--ink);border-top:3px solid var(--oro);position:relative;overflow:hidden}
+.colectividad-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 90% 20%,rgba(123,48,104,.18) 0%,transparent 60%);pointer-events:none}
+.colectividad-inner{position:relative;z-index:1;padding:52px}
+.colectividad-header{display:flex;align-items:flex-start;gap:24px;margin-bottom:40px;flex-wrap:wrap}
+.colectividad-kicker{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(195,110,180,.75);display:block;margin-bottom:12px}
+.colectividad-title{font-family:var(--f-display);font-size:clamp(22px,3vw,34px);color:var(--parchment);letter-spacing:-.3px;line-height:1.1;margin-bottom:12px}
+.colectividad-sub{font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(242,237,227,.48);line-height:1.8;max-width:580px}
+.colectividad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(242,237,227,.06)}
+.colectividad-stop{padding:24px 22px;background:rgba(6,6,5,.35);display:flex;flex-direction:column;gap:10px;transition:background .35s ease}
+.colectividad-stop:hover{background:rgba(123,48,104,.12)}
+.colectividad-stop-num{font-family:var(--f-display);font-size:32px;color:rgba(195,110,180,.25);letter-spacing:-1px;line-height:1}
+.colectividad-stop-name{font-family:var(--f-display);font-style:italic;font-size:17px;color:var(--parchment);line-height:1.2}
+.colectividad-stop-desc{font-family:var(--f-ui);font-size:9px;font-weight:600;color:rgba(242,237,227,.32);letter-spacing:.5px;line-height:1.6}
+.colectividad-nota{padding:16px 52px 28px;font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.28);line-height:1.75;position:relative;z-index:1;border-top:1px solid rgba(242,237,227,.07)}
 @media(max-width:860px){.colectividad-inner{padding:32px 28px}.colectividad-grid{grid-template-columns:1fr}.colectividad-nota{padding:16px 28px 24px}}
 
 /* ═══════════════ ECONOMÍA LOCAL ═══════════════ */
+.economia-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
+.economia-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);padding:28px 24px;display:flex;flex-direction:column;gap:12px;transition:background .35s ease,border-color .35s ease;position:relative;overflow:hidden;border:1px solid var(--card-border-oro)}
+.economia-card:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.economia-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--verde2);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+.economia-card:hover::before{transform:scaleX(1)}
+.economia-card-feat{grid-column:span 2;background:var(--ink)}
+.economia-card-feat:hover{background:#1e1e1a}
+.economia-card-feat .economia-card-title{color:var(--parchment)}
+.economia-card-feat .economia-card-desc{color:rgba(242,237,227,.50)}
+.economia-card-feat .economia-card-tag{color:rgba(242,237,227,.30)}
+.economia-icon{font-size:30px;line-height:1;transition:transform .35s var(--ease)}
+.economia-card:hover .economia-icon{transform:scale(1.10)}
+.economia-card-tag{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--oro2)}
+.economia-card-title{font-family:var(--f-display);font-size:18px;color:var(--card-text);letter-spacing:-.2px;line-height:1.2;font-weight:800}
+.economia-card-feat .economia-card-title{font-size:24px}
+.economia-card-desc{font-family:var(--f-italic);font-style:italic;font-size:13px;color:var(--card-text-soft);line-height:1.75}
 @media(max-width:860px){.economia-grid{grid-template-columns:1fr}.economia-card-feat{grid-column:span 1}}
 
 /* ═══════════════ BARRIOS ═══════════════ */
+.barrios-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
+.barrio-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);padding:32px 28px;display:flex;flex-direction:column;gap:14px;transition:background .35s ease,border-color .35s ease;position:relative;overflow:hidden;border:1px solid var(--card-border-oro)}
+.barrio-card:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.barrio-card-feat{grid-column:span 2;background:var(--ink);flex-direction:row;gap:32px;align-items:flex-start}
+.barrio-card-feat:hover{background:#1e1e1a}
+.barrio-card-feat .barrio-name{color:var(--parchment)}
+.barrio-card-feat .barrio-desc{color:rgba(242,237,227,.50)}
+.barrio-card-feat .barrio-tag{color:rgba(242,237,227,.28)}
+.barrio-tag{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2)}
+.barrio-name{font-family:var(--f-display);font-size:clamp(18px,2.4vw,24px);color:var(--card-text);letter-spacing:-.3px;line-height:1.1;font-weight:800}
+.barrio-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75;flex:1}
+.barrio-highlights{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.barrio-hl{font-family:var(--f-ui);font-size:7.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;background:rgba(242,237,227,.06);border:1px solid rgba(242,237,227,.14);border-radius:2px;color:rgba(242,237,227,.55)}
 .barrio-card-feat .barrio-hl{background:rgba(242,237,227,.06);border-color:rgba(242,237,227,.14);color:rgba(242,237,227,.55)}
 @media(max-width:640px){.barrios-grid{grid-template-columns:1fr}.barrio-card-feat{flex-direction:column;grid-column:span 1}}
 
 /* ═══════════════ CALENDARIO ═══════════════ */
+.cal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
+.cal-card{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);padding:26px 22px;display:flex;flex-direction:column;gap:10px;transition:background .35s ease,border-color .35s ease;position:relative;border:1px solid var(--card-border-oro)}
+.cal-card:hover{background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.cal-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+.cal-card-jan::after,.cal-card-feb::after{background:linear-gradient(90deg,#c0392b,#e74c3c)}
+.cal-card-mar::after,.cal-card-abr::after,.cal-card-may::after{background:linear-gradient(90deg,var(--verde),var(--verde2))}
+.cal-card-jun::after,.cal-card-jul::after,.cal-card-ago::after{background:linear-gradient(90deg,#1a5c8a,#46a0e6)}
+.cal-card-sep::after,.cal-card-oct::after,.cal-card-nov::after,.cal-card-dic::after{background:linear-gradient(90deg,var(--oro),var(--oro2))}
+.cal-card:hover::after{transform:scaleX(1)}
+.cal-mes{font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--card-tag)}
+.cal-evento-name{font-family:var(--f-display);font-size:14px;color:var(--card-text);letter-spacing:-.1px;line-height:1.2;font-weight:800}
+.cal-evento-desc{font-family:var(--f-ui);font-size:8px;font-weight:600;color:var(--card-text-soft);letter-spacing:.5px;line-height:1.5}
+.cal-vacio{font-family:var(--f-italic);font-style:italic;font-size:12px;color:var(--card-tag)}
 @media(max-width:860px){.cal-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.cal-grid{grid-template-columns:1fr}}
 
@@ -777,10 +880,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .hp-sub{font-family:var(--f-italic);font-style:italic;font-size:12.5px;color:var(--card-text-soft)}
 .hp-chevron{font-size:13px;color:rgba(242,237,227,.30);transition:transform .3s var(--ease);flex-shrink:0}
 .hp-desc{font-family:var(--f-italic);font-style:italic;font-size:14.5px;line-height:1.75;color:var(--card-text-soft);margin-bottom:20px}
-.hp-facts>div{display:grid;grid-template-columns:140px 1fr;gap:14px;align-items:start;padding-top:10px;border-top:1px solid rgba(242,237,227,.08)}
-.hp-facts>div:first-child{border-top:none;padding-top:0}
 .hp-card-feat .hp-facts>div{border-top:1px solid rgba(242,237,227,.08)}
-.hp-facts dd a{color:var(--oro2);text-decoration:underline;text-decoration-color:rgba(196,135,42,.35)}
 .hp-empty{font-style:italic;color:rgba(242,237,227,.28)!important}
 .hp-card-feat .hp-empty{color:rgba(242,237,227,.35)!important}
 .hp-status{display:inline-flex;align-items:center;font-family:var(--f-ui);font-size:7px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;padding:3px 8px;border-radius:2px;margin-left:8px;white-space:nowrap}
@@ -1234,7 +1334,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   .hero-orb-1, .hero-orb-2 { transform: translateZ(0); }
 }
 @media (max-width: 640px) {
-  :root { --gutter: 18px; --section-gap: 60px; }
+  :root { --gutter: 16px; --section-gap: 60px; }
   .hero-topbar    { padding: 20px var(--gutter); gap: 10px; }
   .hero-logo img  { width: 50px; }
   .hero-inner     { padding: 0 var(--gutter) 44px; }
@@ -1329,12 +1429,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   .cat-card-highlight { grid-column: span 1; }
   .cat-card-donde { grid-column: span 1; }
   .mood-grid      { grid-template-columns: 1fr; }
-}
-@media (max-width: 860px) {
-  #servicios [style*="grid-template-columns:repeat(4"] { grid-template-columns: repeat(2, 1fr) !important; }
-}
-@media (max-width: 480px) {
-  #servicios [style*="grid-template-columns:repeat(4"] { grid-template-columns: 1fr !important; }
 }
 
 /* ── REDUCED MOTION ── */
@@ -1440,6 +1534,24 @@ a:focus-visible, button:focus-visible, input:focus-visible {
    Original: rgba(242,237,227,.35) y rgba(242,237,227,.18)
    ────────────────────────────────────────────────────── */
 
+.footer-stat {
+  color: rgba(242, 237, 227, .70) !important;
+}
+.footer-stat strong {
+  color: rgba(242, 237, 227, .88) !important;
+}
+
+.footer-copy {
+  color: rgba(242, 237, 227, .68) !important;
+}
+
+/* El logo del footer también estaba muy tenue */
+.footer-logo {
+  opacity: 0.72 !important;
+}
+.footer-logo:hover {
+  opacity: 1 !important;
+}
 
 /* ──────────────────────────────────────────────────────
    FIX 3 — CAFÉS: reemplazar fotografías por gradiente
@@ -1609,14 +1721,14 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 /* Layout interior del summary */
 .hp-summary {
-  display: flex !important;
-  align-items: flex-start !important;
-  gap: 14px !important;
-  padding: 22px 24px !important;
-  cursor: pointer !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  position: relative !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 /* Texto dentro del summary */
@@ -1738,26 +1850,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   border-top: none;
   padding-top: 0;
 }
-
-/* UNA SOLA declaración, sin !important: */
-.hp-facts dt {
-  font-family: var(--f-ui);
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
-  color: rgba(242, 237, 227, .62);
-  line-height: 1.6;
-  padding-top: 2px;
-}
-.hp-facts dd {
-  font-family: var(--f-ui);
-  font-size: 12.5px;
-  color: rgba(242, 237, 227, .76);
-  line-height: 1.6;
-  margin: 0;
-}
-/* Eliminar el bloque .hp-card .hp-facts dt { color: ... !important } del patch */
 .hp-facts dd a {
   color: var(--verde2);
   text-decoration: underline;
@@ -1870,19 +1962,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .acc-collapsed > *:not(.section-header) {
   visibility: hidden;
 }
-.acc-collapsed.is-animating > *:not(.section-header) {
-  display: none;
-}
-  /* Fix adicional: hp-facts colores coherentes con fondo oscuro */
-.hp-card .hp-facts dt {
-  color: rgba(242, 237, 227, .62);
-}
-.hp-card .hp-facts dd {
-  color: rgba(242, 237, 227, .82);
-}
-.hp-card .hp-facts dd a {
-  color: var(--verde2);
-}
   /* ═══════════════════════════════════════════════════════
    URU SPOT — MOBILE FIX PATCH v1
    Bugs: hero cortado · contadores en 0 · nav estático · main-body overflow
@@ -1979,6 +2058,13 @@ html, body {
   }
 }
 
+/* FIX 2b: Forzar clase visible en contadores del hero para que el
+   revealObserver los detecte con el selector correcto */
+#hero-stats-strip .id-stat {
+  /* Los contadores usan .id-stat-num, no .stat-num — el forceCounters
+     script los anima por [data-count], esto es solo documentación CSS */
+}
+
 /* FIX 3: Nav mobile scrolleable */
 @media (max-width: 640px) {
   .nav-scroll-area {
@@ -2033,11 +2119,7 @@ html, body {
     min-width: 44px;
   }
 
-  .main-nav::after {
-    display: none !important;
-  }
-
-  .main-nav::before {
+.main-nav::after {
     display: none !important;
   }
 
@@ -2056,8 +2138,8 @@ html, body {
 
 /* FIX 5: main-body overflow mobile */
 @media (max-width: 640px) {
-  .main-body {
-    padding: 48px 16px 72px !important;
+.main-body {
+    padding: 48px var(--gutter) 72px;
     box-sizing: border-box;
     overflow-x: hidden;
   }
@@ -2070,22 +2152,13 @@ html, body {
   }
 }
 
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  
-</style> 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap" media="print" onload="this.media='all'" />
-  <script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/sw.js').catch(function(){});
-  });
-}
-</script>
+
+</style>
   </head>
   <body>
   
 <a class="skip-link" href="#main-content">Ir al contenido principal</a>
-<div id="progress-bar" aria-hidden="true"></div>
+<div id="progress-bar" aria-hidden="true" role="presentation"></div>
 
 <header class="hero">
   <div class="hero-mesh" aria-hidden="true"></div>
@@ -2093,12 +2166,12 @@ if('serviceWorker' in navigator){
   <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
   <div class="hero-topbar">
     <div class="city-tag">
-      <div class="city-flag" aria-hidden="true">📍</div>
+      <div class="city-flag" aria-hidden="true" role="presentation">📍</div>
       <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
     </div>
-    <div class="hero-logo">
-      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
-    </div>
+<a class="hero-logo" href="/" aria-label="URU SPOT — Ir al inicio">
+      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local de Concepción del Uruguay" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
+    </a>
   </div>
   <div class="hero-inner">
     <div class="hero-inner-left">
@@ -2149,9 +2222,9 @@ if('serviceWorker' in navigator){
 })();
 </script>
       <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
-      <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país. Esta guía existe porque ninguna otra sabe lo que pasa entre los dos.<br /><strong>75 lugares verificados. Historia real. Solo CdU.</strong></p>
+      <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país. Esta guía existe porque ninguna otra sabe lo que pasa entre los dos.<br /><strong>100+ lugares verificados. Historia real. Solo CdU.</strong></p>
   <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
-  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="75" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares verificados</div></div>
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares verificados</div></div>
   <div class="id-stat" role="listitem" style="border-left:2px solid rgba(212,116,42,.35)"><div class="id-stat-num" data-count="243" style="color:var(--oro2);font-size:clamp(32px,4vw,48px)">0</div><div class="id-stat-label" style="font-family:var(--f-italic);font-style:italic;color:rgba(232,180,140,.70);letter-spacing:1px">Años</div></div>
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="5">0</div><div class="id-stat-label">Universidades activas</div></div>
   <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="%">0<sup>%</sup></div><div class="id-stat-label">Local</div></div>
@@ -2184,9 +2257,9 @@ if('serviceWorker' in navigator){
             <div class="wx-hero-datum"><div class="wx-hero-datum-label">Lluvia hoy</div><div class="wx-hero-datum-val" id="wx-hero-rain"><span class="wx-skeleton wx-skel-datum"></span></div></div>
           </div>
         </div>
-        <div class="sr-only" id="wx-update-announce" aria-live="polite" aria-atomic="true" aria-relevant="text"></div>
-          <span class="wx-hero-updated" id="wx-hero-updated">Cargando...</span>
-          <span class="wx-hero-frase" id="wx-hero-frase"></span>
+       <div class="wx-hero-footer">
+          <span class="wx-hero-updated" id="wx-hero-updated" aria-live="polite" aria-atomic="true">Cargando...</span>
+          <span class="wx-hero-frase" id="wx-hero-frase" aria-live="polite" aria-atomic="true"></span>
         </div>
       </div>
     </aside>
@@ -2211,7 +2284,7 @@ if('serviceWorker' in navigator){
 <li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
 <li><a class="nav-item" href="#panaderias" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🥐</span> Panaderías</a></li>
 <li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#heladerias" data-section="heladerias"><span class="nav-emoji" aria-hidden="true">🍦</span> Heladerías</a></li>
+<li><a class="nav-item" href="#heladerias-anchor" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🍦</span> Heladerías</a></li>
 <li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
 <li><a class="nav-item" href="#hosterias" data-section="hosterias"><span class="nav-emoji" aria-hidden="true">🏨</span> Hosterías</a></li>
 <li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
@@ -2238,20 +2311,20 @@ if('serviceWorker' in navigator){
 <li><a class="nav-item" href="#remiserias" data-section="remiserias"><span class="nav-emoji" aria-hidden="true">🚖</span> Remiserías</a></li>
     </ul>
   </div>
-  <button class="search-icon-btn" id="search-toggle-btn" aria-label="Buscar en la guía" aria-expanded="false">🔍<span class="search-btn-label">Buscar</span></button>
+  <button class="search-icon-btn" id="search-toggle-btn" type="button" aria-label="Buscar en la guía" aria-expanded="false" aria-controls="search-bar-wrap">🔍<span class="search-btn-label">Buscar</span></button>
   <button id="nav-scroll-left" aria-label="Ver secciones anteriores" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to left,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 16px 0 10px;position:relative;z-index:2;transition:color .2s ease">❮</button>
   <button id="nav-scroll-right" aria-label="Ver más secciones" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to right,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 10px 0 16px;position:relative;z-index:2;transition:color .2s ease">❯</button>
 </nav>
 
-<div class="section-crumb" id="section-crumb">
+<div class="section-crumb" id="section-crumb" aria-live="polite" aria-atomic="true">
   <span class="section-crumb-dot" aria-hidden="true"></span>
   Estás viendo: <span class="section-crumb-current" id="section-crumb-current">Empezar</span>
 </div>
 
-<div class="search-bar-wrap" id="search-bar-wrap" role="search" aria-label="Buscar lugares en URU SPOT">
+<div class="search-bar-wrap" id="search-bar-wrap" role="search" aria-label="Buscar lugares en URU SPOT" inert>
   <input class="search-input" id="search-input" type="search" placeholder="Buscá un lugar... ej: parrilla, café, Nero, La Ris..." autocomplete="off" aria-label="Buscar lugares" aria-autocomplete="list" aria-haspopup="listbox" />
   <span class="search-count" id="search-count" aria-live="polite"></span>
-  <button class="search-close" id="search-close-btn" aria-label="Cerrar buscador">✕</button>
+  <button class="search-close" id="search-close-btn" type="button" aria-label="Cerrar buscador"><span aria-hidden="true">✕</span></button>
 </div>
 
 <main class="main-body" id="main-content" aria-label="Contenido principal de la guía URU SPOT">
@@ -2621,9 +2694,6 @@ if('serviceWorker' in navigator){
   transition:transform .35s var(--ease);z-index:0;
 }
 .fin-card:hover::before{transform:scaleX(1)}
-
-/* ── VARIANTE BANCO: acento vertical verde ── */
-.fin-card-bank::before{background:linear-gradient(180deg,var(--verde2),var(--verde))}
 
 /* ── VARIANTE ATM: acento vertical oro ── */
 .fin-card-atm::before{background:linear-gradient(180deg,var(--oro2),var(--oro))}
@@ -3672,7 +3742,7 @@ if('serviceWorker' in navigator){
 
 </section>
   <!-- ===================== VETERINARIAS ===================== --> 
-  <section class="us-section" id="veterinarias" aria-labelledby="title-veterinarias"> <div class="section-header"> <div> <span class="section-eyebrow">Clínicas · Pet shops</span> <h2 class="section-title" id="title-veterinarias">🐾 Veterinarias y Mascotas</h2> </div> <span class="section-count">6 lugares verificados</span> <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div> </div> <div class="list-items" id="grid-veterinarias"> <a class="litem reveal searchable" data-name="Veterinaria FISIOVET" data-tags="veterinaria clinica fisioterapia rehabilitacion cirugia ecografia radiografia peluqueria canina" href="tel:+5493442498143" aria-label="Veterinaria FISIOVET, J.J. Bruno 2942, llamar al +54 9 3442 49-8143"> <span class="litem-icon" aria-hidden="true">💆</span> <span class="litem-name"> Veterinaria FISIOVET <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> J.J. Bruno 2942 · Lu-Vi 9-12:30 y 16-19:30 · Sáb 9-12:30 · Fisioterapia · Cirugía · Radiografía y Ecografía · +54 9 3442 49-8143 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dr. Vet" data-tags="veterinaria clinica cirugia" href="tel:+5493442660101" style="--reveal-delay:70ms" aria-label="Clínica Veterinaria Dr. Vet, Bv. Aráoz 115, llamar al +54 9 3442 66-0101"> <span class="litem-icon" aria-hidden="true">🏥</span> <span class="litem-name"> Clínica Veterinaria Dr. Vet <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Bv. Aráoz 115 · +54 9 3442 66-0101 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Agroveterinaria 9 de Julio" data-tags="veterinaria agroveterinaria clinica farmacia grandes animales pequeños animales alimentos balanceados" href="tel:+543442427801" style="--reveal-delay:140ms" aria-label="Agroveterinaria 9 de Julio, 9 de Julio 1016, llamar al 03442 42-7801"> <span class="litem-icon" aria-hidden="true">🌾</span> <span class="litem-name"> Agroveterinaria 9 de Julio <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> 9 de Julio 1016 · Lu-Vi 8-12 y 16-20 · Sáb y Dom cerrado · Grandes y pequeños animales · 03442 42-7801 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dres. Artusi y Bruchez" data-tags="veterinaria clinica belgrano artusi bruchez" href="tel:+543442422164" style="--reveal-delay:210ms" aria-label="Clínica Veterinaria Dres. Artusi y Bruchez, Belgrano 900, llamar al 03442 42-2164"> <span class="litem-icon" aria-hidden="true">🩺</span> <span class="litem-name"> Clínica Veterinaria Dres. Artusi y Bruchez <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Belgrano 900 · 03442 42-2164 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="ATP Veterinaria" data-tags="veterinaria clinica cirugia vacunacion farmacia alimentos pet shop mascotas" href="tel:+543442450418" style="--reveal-delay:280ms" aria-label="ATP Veterinaria, Blvd. Hipólito Yrigoyen 949, llamar al 03442 45-0418"> <span class="litem-icon" aria-hidden="true">💉</span> <span class="litem-name"> ATP Veterinaria <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Blvd. Hipólito Yrigoyen 949 · Lu-Vi 8-20 · Cirugía · Pet shop · 03442 45-0418 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Dog Center Pet Shop" data-tags="pet shop peluqueria canina baño corte alimentos accesorios mascotas" href="tel:+543442408275" style="--reveal-delay:350ms" aria-label="Dog Center Pet Shop, Sarmiento 801, llamar al 03442 40-8275"> <span class="litem-icon" aria-hidden="true">🛒</span> <span class="litem-name"> Dog Center Pet Shop <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Sarmiento 801 · Lu-Sáb desde 8:30 · Pet shop y peluquería canina · 03442 40-8275 </span> </span> <span class="litem-arrow">→</span> </a> </div> <p style="font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.50);line-height:1.8;padding:16px 22px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:1px"> ⚠️ <strong>Nota editorial:</strong> Los horarios de Dr. Vet y Dres. Artusi-Bruchez no se publican por variación entre fuentes — llamar antes de concurrir. No existe veterinaria con guardia 24 hs explícitamente verificada en CdU. </p> <p class="search-no-results" id="no-results-veterinarias">No se encontraron veterinarias con ese nombre.</p> </section>
+  <section class="us-section" id="veterinarias" aria-labelledby="title-veterinarias"> <div class="section-header"> <div> <span class="section-eyebrow">Clínicas · Pet shops</span> <h2 class="section-title" id="title-veterinarias">🐾 Veterinarias y Mascotas</h2> </div> <span class="section-count">6 lugares verificados</span> <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div> </div> <div class="list-items" id="grid-veterinarias"> <a class="litem reveal searchable" data-name="Veterinaria FISIOVET" data-tags="veterinaria clinica fisioterapia rehabilitacion cirugia ecografia radiografia peluqueria canina" href="tel:+5493442498143" aria-label="Veterinaria FISIOVET, J.J. Bruno 2942, llamar al +54 9 3442 49-8143"> <span class="litem-icon" aria-hidden="true">💆</span> <span class="litem-name"> Veterinaria FISIOVET <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> J.J. Bruno 2942 · Lu-Vi 9-12:30 y 16-19:30 · Sáb 9-12:30 · Fisioterapia · Cirugía · Radiografía y Ecografía · +54 9 3442 49-8143 </span> </span> <span class="litem-arrow" aria-hidden="true">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dr. Vet" data-tags="veterinaria clinica cirugia" href="tel:+5493442660101" style="--reveal-delay:70ms" aria-label="Clínica Veterinaria Dr. Vet, Bv. Aráoz 115, llamar al +54 9 3442 66-0101"> <span class="litem-icon" aria-hidden="true">🏥</span> <span class="litem-name"> Clínica Veterinaria Dr. Vet <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Bv. Aráoz 115 · +54 9 3442 66-0101 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Agroveterinaria 9 de Julio" data-tags="veterinaria agroveterinaria clinica farmacia grandes animales pequeños animales alimentos balanceados" href="tel:+543442427801" style="--reveal-delay:140ms" aria-label="Agroveterinaria 9 de Julio, 9 de Julio 1016, llamar al 03442 42-7801"> <span class="litem-icon" aria-hidden="true">🌾</span> <span class="litem-name"> Agroveterinaria 9 de Julio <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> 9 de Julio 1016 · Lu-Vi 8-12 y 16-20 · Sáb y Dom cerrado · Grandes y pequeños animales · 03442 42-7801 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dres. Artusi y Bruchez" data-tags="veterinaria clinica belgrano artusi bruchez" href="tel:+543442422164" style="--reveal-delay:210ms" aria-label="Clínica Veterinaria Dres. Artusi y Bruchez, Belgrano 900, llamar al 03442 42-2164"> <span class="litem-icon" aria-hidden="true">🩺</span> <span class="litem-name"> Clínica Veterinaria Dres. Artusi y Bruchez <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Belgrano 900 · 03442 42-2164 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="ATP Veterinaria" data-tags="veterinaria clinica cirugia vacunacion farmacia alimentos pet shop mascotas" href="tel:+543442450418" style="--reveal-delay:280ms" aria-label="ATP Veterinaria, Blvd. Hipólito Yrigoyen 949, llamar al 03442 45-0418"> <span class="litem-icon" aria-hidden="true">💉</span> <span class="litem-name"> ATP Veterinaria <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Blvd. Hipólito Yrigoyen 949 · Lu-Vi 8-20 · Cirugía · Pet shop · 03442 45-0418 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Dog Center Pet Shop" data-tags="pet shop peluqueria canina baño corte alimentos accesorios mascotas" href="tel:+543442408275" style="--reveal-delay:350ms" aria-label="Dog Center Pet Shop, Sarmiento 801, llamar al 03442 40-8275"> <span class="litem-icon" aria-hidden="true">🛒</span> <span class="litem-name"> Dog Center Pet Shop <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Sarmiento 801 · Lu-Sáb desde 8:30 · Pet shop y peluquería canina · 03442 40-8275 </span> </span> <span class="litem-arrow">→</span> </a> </div> <p style="font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.50);line-height:1.8;padding:16px 22px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:1px"> ⚠️ <strong>Nota editorial:</strong> Los horarios de Dr. Vet y Dres. Artusi-Bruchez no se publican por variación entre fuentes — llamar antes de concurrir. No existe veterinaria con guardia 24 hs explícitamente verificada en CdU. </p> <p class="search-no-results" id="no-results-veterinarias">No se encontraron veterinarias con ese nombre.</p> </section>
   
   
   <!-- ===================== REMISERÍAS ===================== -->
@@ -4858,7 +4928,7 @@ if('serviceWorker' in navigator){
     </a>
     <a class="cat-card cat-card-donde reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/" style="--reveal-delay:490ms">
       <div class="cat-card-bg" aria-hidden="true">🗺️</div><div class="cat-card-arrow" aria-hidden="true">↗</div>
-      <div class="cat-card-content"><span class="cat-card-emoji">🗺️</span><span class="cat-card-title">Dónde Comer en CDU</span><span class="cat-card-sub">Guía completa · 75 lugares verificados · Mapa interactivo</span></div>
+      <div class="cat-card-content"><span class="cat-card-emoji">🗺️</span><span class="cat-card-title">Dónde Comer en CDU</span><span class="cat-card-sub">Guía completa · +100 lugares verificados · Mapa interactivo</span></div>
     </a>
   </div>
 </section>
@@ -4880,24 +4950,24 @@ if('serviceWorker' in navigator){
 <div style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;padding:10px 0;border-top:1px solid rgba(242,237,227,.10);border-bottom:1px solid rgba(242,237,227,.10);">
   <span style="font-family:var(--f-ui);font-size:7.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(196,135,42,.65);flex-shrink:0;">Por qué destaca</span>
   <span style="font-family:var(--f-italic);font-style:italic;font-size:12.5px;color:rgba(242,237,227,.60);line-height:1.4;">El único con 4.9 ★ en Google de más de 200 reseñas en CdU</span>
-</div><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0" role="img" aria-label="Calificación 4.9 sobre 5 en Google Maps">★ 4.9</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0" role="img" aria-label="Precio alto dentro de la guía ($$$)">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
+</div><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" aria-label="Calificación 4.9 sobre 5 en Google Maps">★ 4.9</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" aria-label="Precio alto dentro de la guía ($$$)">$$$</span><span class="pill pill-feat">Gourmet</span></div></div>
     </a>
-    <a class="rcard reveal searchable" data-name="Papa Luigi" data-tags="restaurante italiana pizza" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" style="--reveal-delay:50ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍕</span><span class="rcard-name">Papa Luigi</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0" role="img" aria-label="Calificación 4.7 sobre 5 en Google Maps">★ 4.7</span><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Bella Vista" data-tags="restaurante vista rio costanera" data-mood="relax" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:100ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌅</span><span class="rcard-name">Bella Vista</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0" role="img" aria-label="Calificación 4.8 sobre 5 en Google Maps">★ 4.8</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" tabindex="0" role="img" aria-label="Precio alto dentro de la guía ($$$)">$$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Papa Luigi" data-tags="restaurante italiana pizza" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" style="--reveal-delay:50ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍕</span><span class="rcard-name">Papa Luigi</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0" role="img" aria-label="Calificación 4.7 sobre 5 en Google Maps">★ 4.7</span><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Bella Vista" data-tags="restaurante vista rio costanera" data-mood="relax" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" style="--reveal-delay:100ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌅</span><span class="rcard-name">Bella Vista</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" aria-label="Calificación 4.8 sobre 5 en Google Maps">★ 4.8</span><span class="pill pill-price" data-tip="Precio alto dentro de la guía" aria-label="Precio alto dentro de la guía ($$$)">$$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Panza Verde" data-tags="restaurante saludable vegano ensaladas" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" style="--reveal-delay:200ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌿</span><span class="rcard-name">Panza Verde</span><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.6</span><span class="pill pill-default">Saludable</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Justo José" data-tags="restaurante parrilla asado bar" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="--reveal-delay:250ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">⚖️</span><span class="rcard-name">Justo José</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Justo José" data-tags="restaurante parrilla asado bar" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-josé/" style="--reveal-delay:250ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">⚖️</span><span class="rcard-name">Justo José</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Bonhomia" data-tags="restaurante moderno bar cocteles" data-mood="sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" style="--reveal-delay:300ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">✨</span><span class="rcard-name">Bonhomia</span><div class="pills"><span class="pill pill-default">Moderno</span></div></div></a>
     <a class="rcard reveal searchable" data-name="La Ris" data-tags="restaurante cafeteria arte" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" style="--reveal-delay:350ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🎨</span><span class="rcard-name">La Ris</span><div class="pills"><span class="pill pill-default">Cafetería</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Gruta" data-tags="restaurante parrilla asado" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-gruta/" style="--reveal-delay:400ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🔥</span><span class="rcard-name">La Gruta</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Sanduba" data-tags="restaurante rapido sandwich hamburguesa" data-mood="rapido barato" data-price="1" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" style="--reveal-delay:450ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍔</span><span class="rcard-name">Sanduba</span><div class="pills"><span class="pill pill-default">Rápido</span><span class="pill pill-price" data-tip="Precio económico dentro de la guía" tabindex="0" role="img" aria-label="Precio económico dentro de la guía ($)">$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Gruta" data-tags="restaurante parrilla asado" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-gruta/" style="--reveal-delay:400ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🔥</span><span class="rcard-name">La Gruta</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Sanduba" data-tags="restaurante rapido sandwich hamburguesa" data-mood="rapido barato" data-price="1" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" style="--reveal-delay:450ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍔</span><span class="rcard-name">Sanduba</span><div class="pills"><span class="pill pill-default">Rápido</span><span class="pill pill-price" data-tip="Precio económico dentro de la guía" aria-label="Precio económico dentro de la guía ($)">$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Pimienta Negra" data-tags="restaurante fusion moderno" data-mood="sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pimienta-negra/" style="--reveal-delay:500ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌶️</span><span class="rcard-name">Pimienta Negra</span><div class="pills"><span class="pill pill-default">Fusión</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Parada 33" data-tags="restaurante pub cerveza" data-mood="barato" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" style="--reveal-delay:550ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍺</span><span class="rcard-name">Parada 33</span><div class="pills"><span class="pill pill-default">Pub</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Parada 33" data-tags="restaurante pub cerveza" data-mood="barato" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" style="--reveal-delay:550ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍺</span><span class="rcard-name">Parada 33</span><div class="pills"><span class="pill pill-default">Pub</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Faro 3260" data-tags="restaurante vista rio costanera" data-mood="relax sorpresa" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/faro-3260/" style="--reveal-delay:600ms"><div class="rcard-shine" aria-hidden="true"></div><span class="badge">Top</span><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌊</span><span class="rcard-name">Faro 3260</span><div class="pills"><span class="pill pill-default">Vista al río</span></div></div></a>
     <a class="rcard reveal searchable" data-name="El Calderón" data-tags="restaurante casero almuerzo" data-mood="rapido barato" data-price="1" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" style="--reveal-delay:650ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍲</span><span class="rcard-name">El Calderón</span><div class="pills"><span class="pill pill-default">Casero</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="La Segunda" data-tags="restaurante parrilla asado carne" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" style="--reveal-delay:700ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🥩</span><span class="rcard-name">La Segunda</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="La Segunda" data-tags="restaurante parrilla asado carne" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" style="--reveal-delay:700ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🥩</span><span class="rcard-name">La Segunda</span><div class="pills"><span class="pill pill-default">Parrilla</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Dolores Costa" data-tags="restaurante costanera rio" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/dolores-costa/" style="--reveal-delay:750ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🌴</span><span class="rcard-name">Dolores Costa</span><div class="pills"><span class="pill pill-default">Costanera</span></div></div></a>
     <a class="rcard reveal searchable" data-name="La Delfina" data-tags="restaurante pescados mariscos" data-mood="sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-delfina/" style="--reveal-delay:800ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🐬</span><span class="rcard-name">La Delfina</span><div class="pills"><span class="pill pill-default">Pescados</span></div></div></a>
-    <a class="rcard reveal searchable" data-name="Mamma Mía" data-tags="restaurante italiana pasta" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" style="--reveal-delay:850ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍝</span><span class="rcard-name">Mamma Mía</span><div class="pills"><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" tabindex="0" role="img" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
+    <a class="rcard reveal searchable" data-name="Mamma Mía" data-tags="restaurante italiana pasta" data-mood="rapido" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" style="--reveal-delay:850ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍝</span><span class="rcard-name">Mamma Mía</span><div class="pills"><span class="pill pill-default">Italiana</span><span class="pill pill-price" data-tip="Precio medio dentro de la guía" aria-label="Precio medio dentro de la guía ($$)">$$</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Garifo" data-tags="restaurante bodegon vino" data-mood="relax" data-price="2" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/garifo/" style="--reveal-delay:900ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍷</span><span class="rcard-name">Garifo</span><div class="pills"><span class="pill pill-default">Bodegón</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Baco" data-tags="restaurante vinos cava" data-mood="relax sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-conventillo-de-baco/" style="--reveal-delay:950ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🍇</span><span class="rcard-name">Baco</span><div class="pills"><span class="pill pill-default">Vinos</span></div></div></a>
     <a class="rcard reveal searchable" data-name="Danubio Azul" data-tags="restaurante europeo aleman" data-mood="sorpresa" data-price="3" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-danubio-azul/" style="--reveal-delay:1000ms"><div class="rcard-shine" aria-hidden="true"></div><div class="rcard-content"><span class="rcard-icon" aria-hidden="true">🇩🇪</span><span class="rcard-name">Danubio Azul</span><div class="pills"><span class="pill pill-default">Europeo</span></div></div></a>
@@ -4952,12 +5022,7 @@ if('serviceWorker' in navigator){
 
   <div class="glos-wrap reveal" role="region" aria-label="Cómo leer esta guía">
 
-  <button class="glos-toggle" id="glos-toggle" type="button" aria-expanded="false" aria-controls="glos-body">
-
-  📖 ¿Cómo leer esta guía? — símbolos y puntajes explicados
-
-</button>
-
+<button class="glos-toggle" id="glos-toggle" type="button" aria-expanded="false" aria-controls="glos-body">📖 ¿Cómo leer esta guía? — símbolos y puntajes explicados</button>
 <div class="glos-body" id="glos-body" role="region" aria-labelledby="glos-toggle">
 
     <div class="glos-grid">
@@ -4979,7 +5044,7 @@ if('serviceWorker' in navigator){
   </div>
 
 </div>
-  <a class="ad-banner reveal visible" href="https://docs.google.com/forms/d/e/1FAIpQLSegxM7nYfOM7tuI0HgbxwGyVMXmzlPvJexBvTUqpLJd7BA7zw/viewform" target="_blank" rel="noopener">
+  <a class="ad-banner reveal" href="https://docs.google.com/forms/d/e/1FAIpQLSegxM7nYfOM7tuI0HgbxwGyVMXmzlPvJexBvTUqpLJd7BA7zw/viewform" target="_blank" rel="noopener">
 
   <div class="ad-banner-left"><div class="ad-banner-icon" aria-hidden="true">🏪</div><div><span class="ad-banner-eyebrow">Publicidad · Espacio patrocinado</span><span class="ad-banner-title">¿Tenés un local en CdU?</span><span class="ad-banner-sub">Aparecé en la guía que está leyendo toda la ciudad. Visible, accesible y efectivo.</span></div></div>
 
@@ -5024,7 +5089,7 @@ if('serviceWorker' in navigator){
     <a class="litem reveal searchable" data-name="Brodë" data-tags="panaderia nuevo artesanal" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/brode/" style="--reveal-delay:350ms"><span class="badge badge-gold">Nuevo</span><span class="litem-icon">🥐</span><span class="litem-name">Brodë</span><span class="litem-arrow">→</span></a>
   </div>
 
-<section id="heladerias" style="display:flex;align-items:center;gap:14px;margin:32px 0 18px;"><span style="font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--verde2);">🍦 HELADERÍAS</span><span style="flex:1;height:1px;background:rgba(26,25,22,.10);"></span></div>
+  <div id="heladerias-anchor" style="display:flex;align-items:center;gap:14px;margin:32px 0 18px;"><span style="font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--verde2);">🍦 HELADERÍAS</span><span style="flex:1;height:1px;background:rgba(26,25,22,.10);"></span></div>
   <div class="list-items" id="grid-heladerias">
     <a class="litem reveal searchable" data-name="Yelatti Artesanal" data-tags="heladeria artesanal helado" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/yelatti-artesanal/"><span class="badge">Top</span><span class="litem-icon">🍦</span><span class="litem-name">Yelatti Artesanal</span><span class="litem-arrow">→</span></a>
     <a class="litem reveal searchable" data-name="Cremolatti" data-tags="heladeria helado cremoso" data-mood="rapido" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/cremolatti/" style="--reveal-delay:70ms"><span class="litem-icon">🍨</span><span class="litem-name">Cremolatti</span><span class="litem-arrow">→</span></a>
@@ -5063,11 +5128,11 @@ if('serviceWorker' in navigator){
   <div class="gym-grid" id="grid-gimnasios">
     <a class="gcard gcard-feat reveal searchable" data-name="Gimnasio 538 Gym" data-tags="gimnasio fitness musculacion clases grupales" data-mood="sorpresa" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/gimnasio-538/">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge badge-gold">Mejor puntuado</span>
-      <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" tabindex="0" role="img" aria-label="Puntaje URU SPOT: 9.1 sobre 10, verificado in situ">★ 9.1 URU SPOT</div><span class="gcard-icon" aria-hidden="true">🏋️</span></div><span class="gcard-name">Gimnasio 538 Gym</span><p class="gcard-desc">Dos sedes en la ciudad, equipamiento moderno y un equipo de profesores comprometidos. El referente del fitness local.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.8 Google</span><span class="pill pill-feat">2 Sedes</span><span class="pill pill-feat">Clases grupales</span></div></div>
+      <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" aria-label="Puntaje URU SPOT: 9.1 sobre 10, verificado in situ">★ 9.1 URU SPOT</div><span class="gcard-icon" aria-hidden="true">🏋️</span></div><span class="gcard-name">Gimnasio 538 Gym</span><p class="gcard-desc">Dos sedes en la ciudad, equipamiento moderno y un equipo de profesores comprometidos. El referente del fitness local.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.8 Google</span><span class="pill pill-feat">2 Sedes</span><span class="pill pill-feat">Clases grupales</span></div></div>
     </a>
     <a class="gcard reveal searchable" data-name="Gimnasio Muscle" data-tags="gimnasio fitness musculacion cardio" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/muscle-gimnasio/" style="--reveal-delay:70ms">
       <div class="gcard-shine" aria-hidden="true"></div><span class="badge">Top</span>
-      <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" tabindex="0" role="img" aria-label="Puntaje URU SPOT: 8.7 sobre 10, verificado in situ">★ 8.7</div><span class="gcard-icon" aria-hidden="true">💪</span></div><span class="gcard-name">Gimnasio Muscle</span><p class="gcard-desc">Instalaciones completas en Blvd. Yrigoyen 1086. Equipamiento de primera y variedad de clases para todos los niveles.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.6 Google</span><span class="pill pill-default">Blvd. Yrigoyen 1086</span></div></div>
+      <div class="gcard-content"><div class="gcard-top"><div class="gcard-score" data-tip="Puntaje propio sobre 10, verificado in situ" aria-label="Puntaje URU SPOT: 8.7 sobre 10, verificado in situ">★ 8.7</div><span class="gcard-icon" aria-hidden="true">💪</span></div><span class="gcard-name">Gimnasio Muscle</span><p class="gcard-desc">Instalaciones completas en Blvd. Yrigoyen 1086. Equipamiento de primera y variedad de clases para todos los niveles.</p><div class="pills"><span class="pill pill-rating" data-tip="Calificación promedio en Google Maps" tabindex="0">★ 4.6 Google</span><span class="pill pill-default">Blvd. Yrigoyen 1086</span></div></div>
     </a>
     <a class="gcard reveal searchable" data-name="Gym Lucianos" data-tags="gimnasio fitness personalizado familiar" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/lucianos-gimnasio/" style="--reveal-delay:140ms">
       <div class="gcard-shine" aria-hidden="true"></div>
@@ -5110,7 +5175,7 @@ if('serviceWorker' in navigator){
   .svc-body{font-family:var(--f-italic);font-style:italic;font-size:13px;color:rgba(242,237,227,.45);line-height:1.7}
   .svc-body strong{font-style:normal;color:rgba(242,237,227,.75);font-weight:400}
   .svc-cta{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.35);margin-top:4px;transition:color .3s ease}
-  .svc-emg-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.05);padding:0 28px 28px}
+  .svc-emg-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.04);padding:0 28px 28px}
   .svc-emg-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:22px 12px;text-decoration:none;transition:background .35s ease;border-radius:2px}
   .svc-emg-chip:hover{background:rgba(255,255,255,.04)}
   .svc-emg-num{font-family:var(--f-display);font-size:44px;line-height:1;color:var(--parchment);letter-spacing:-2px}
@@ -5139,7 +5204,7 @@ if('serviceWorker' in navigator){
   <span class="svc-icon" aria-hidden="true">🚨</span>
   <span class="svc-title">Emergencias — marcado directo</span>
   <p class="svc-body">Disponibles las <strong>24 hs</strong>, sin costo, desde cualquier celular.</p>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.04);margin:4px -28px 0;padding:0">
+  <div class="svc-emg-row" style="margin:4px -28px 0">
     <a class="svc-emg-chip" href="tel:107" aria-label="Emergencias médicas — marcar 107"><div class="svc-emg-num" style="color:#e74c3c">107</div><div class="svc-emg-label">🚑 Médica</div></a>
         <a class="svc-emg-chip" href="tel:101" aria-label="Policía Comando Radioeléctrico — marcar 101"><div class="svc-emg-num" style="color:#e74c3c">101</div><div class="svc-emg-label">🚓 Policía</div></a>
         <a class="svc-emg-chip" href="tel:100" aria-label="Bomberos Voluntarios — marcar 100"><div class="svc-emg-num" style="color:#e74c3c">100</div><div class="svc-emg-label">🔥 Bomberos</div></a>
@@ -5665,7 +5730,7 @@ if('serviceWorker' in navigator){
 </section>
 
     <!-- ===================== CARNAVAL 2026 ===================== -->
-<section class="us-section" id="carnaval" aria-labelledby="title-carnaval" style="position:relative;">
+<section class="us-section" id="carnaval" aria-labelledby="title-carnaval" style="position:relative;overflow:hidden;">
 
 <script type="application/ld+json">
 {
@@ -5704,7 +5769,7 @@ if('serviceWorker' in navigator){
     <span class="section-count">5 noches · 5 comparsas</span>
 <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
-<canvas id="confetti-canvas" aria-hidden="true" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;height:120px;pointer-events:none;z-index:10"></canvas>
+<canvas id="confetti-canvas" aria-hidden="true" style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;max-width:100vw;height:120px;pointer-events:none;z-index:10"></canvas>
 <script>
 (function(){
   var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -5743,8 +5808,8 @@ if('serviceWorker' in navigator){
       ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;
       ctx.fillRect(-p.r,-p.r*.5,p.r*2,p.r);ctx.restore();
     });
-    if(alive){rafId=requestAnimationFrame(loop);}
-    else{rafId=null;}
+if(alive){rafId=requestAnimationFrame(loop);}
+    else{rafId=null;if(c&&c.parentNode){c.parentNode.removeChild(c);}}
   }
   function cleanup(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
   window.addEventListener('pagehide',cleanup,{once:true});
@@ -6362,7 +6427,7 @@ if('serviceWorker' in navigator){
       </div>
       <div class="gr-hero-right" aria-hidden="true">
         <div class="gr-fish-illustration">
-          <svg viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none">
+          <svg viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" fill="none">
             <ellipse cx="100" cy="60" rx="75" ry="36" fill="rgba(196,135,42,.22)" stroke="rgba(196,135,42,.55)" stroke-width="1.2"/>
             <path d="M170 60 L200 36 L205 60 L200 84 Z" fill="rgba(196,135,42,.18)" stroke="rgba(196,135,42,.45)" stroke-width="1.2"/>
             <path d="M85 25 Q100 10 120 22 L115 27 Q102 18 88 30 Z" fill="rgba(196,135,42,.25)" stroke="rgba(196,135,42,.40)" stroke-width="1"/>
@@ -6586,8 +6651,8 @@ if('serviceWorker' in navigator){
 .dep-athlete-feat .dep-athlete-name{font-size:24px}
 .dep-athlete-desc{font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75}
 .dep-athlete-desc strong{font-style:normal;color:var(--card-text)}
-
-/* ── DISCLAIMER ── */
+  </style>
+  <style>
 .dep-disclaimer{font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.72);line-height:1.8;padding:20px 24px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:24px}
 .dep-disclaimer strong{color:rgba(26,25,22,.88)}
 
@@ -6610,400 +6675,9 @@ if('serviceWorker' in navigator){
 @media(prefers-reduced-motion:reduce){
   .dep-feat-card,.dep-club-card,.dep-athlete-card,.dep-stat-card{transition:none}
 }
-  <style>
-.ru-section{
-  /* ---- color tokens (prefijo ru- para no colisionar con globales) ---- */
-  --paper:        #EBE3D2;
-  --paper-2:      #E2D8C2;
-  --paper-line:   rgba(28,43,58,.09);
-  --ink:          #1C2B3A;
-  --ink-soft:     #4C5C6C;
-  --ink-faint:    #1C2B3A66;
-  --pen-blue:     #2B4570;
-  --pen-red:      #AE3526;
-  --marker:       #F0BD3E;
-  --river:        #3C6B5B;
+</style>
 
-  --night:        #0E1B27;
-  --night-2:      #0A141D;
-  --night-line:   rgba(232,212,170,.10);
-  --night-ink:    #D8DEE3;
-  --night-soft:   #8FA0AC;
-  --amber:        #E6A23C;
-  --amber-soft:   #C98B33;
-
-  /* ---- type tokens (prefijo ru- para no sobreescribir globales) ---- */
-  --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
-  --f-body:    'Inter', system-ui, sans-serif;
-  --f-hand:    'Caveat', cursive;
-  --f-mono:    'JetBrains Mono', ui-monospace, monospace;
-
-display:block;
-  position:relative;
-  background:var(--paper);
-  color:var(--ink);
-  font-family:var(--f-body);
-  overflow:hidden;
-  isolation:isolate;
-  margin-left:0;
-  margin-right:0;
-  width:100%;
-}
-.ru-section::before{
-  content:'';
-  display:block;
-  height:80px;
-  background:linear-gradient(to bottom,var(--void),var(--paper));
-  position:relative;
-  z-index:1;
-  margin-left:0;
-  margin-right:0;
-}
-
-.ru-section *{ box-sizing:border-box; }
-.ru-section img{ max-width:100%; display:block; }
-.ru-section a{ color:inherit; text-decoration:none; }
-.ru-section ol,.ru-section ul{ list-style:none; margin:0; padding:0; }
-.ru-section h1,.ru-section h2,.ru-section h3,.ru-section h4,
-.ru-section p,.ru-section blockquote,.ru-section figure{ margin:0; }
-
-.ru-section :focus-visible{
-  outline:2px dashed var(--pen-blue);
-  outline-offset:4px;
-  border-radius:2px;
-}
-.ru-night :focus-visible{ outline-color:var(--amber); }
-
-.ru-grain{
-  position:absolute; inset:0; pointer-events:none; z-index:0;
-  opacity:.05; mix-blend-mode:multiply;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-.ru-night .ru-grain{ opacity:.10; mix-blend-mode:screen; }
-
-.ru-ruled{
-  position:absolute; inset:0; pointer-events:none; z-index:0;
-  background-image:repeating-linear-gradient(
-    to bottom, transparent 0 38px, var(--paper-line) 38px 39px
-  );
-}
-
-.ru-wrap{
-  position:relative; z-index:1;
-  max-width:1180px; margin:0 auto;
-  padding:0 24px;
-  width:100%;
-  box-sizing:border-box;
-}
-
-.ru-reveal{ opacity:0; transform:translateY(22px); transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
-.ru-reveal.is-in{ opacity:1; transform:translateY(0); }
-@media (prefers-reduced-motion: reduce){
-  .ru-reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
-}
-
-.ru-stop{
-  display:inline-flex; align-items:center; gap:8px;
-  font-family:var(--f-mono); font-weight:700; font-size:.72rem;
-  letter-spacing:.12em; text-transform:uppercase;
-  color:var(--pen-red);
-}
-.ru-night .ru-stop{ color:var(--amber); }
-.ru-stop::before{
-  content:""; width:7px; height:7px; border-radius:50%;
-  background:currentColor; flex:none;
-}
-
-.ru-chapter-head{ max-width:640px; }
-.ru-chapter-title{
-  font-family:var(--f-display); font-weight:800;
-  font-size:clamp(2.1rem, 4.6vw, 3.4rem);
-  line-height:1.02; letter-spacing:-.01em;
-  margin:14px 0 16px;
-}
-.ru-chapter-title em{ font-style:normal; color:var(--pen-blue); }
-.ru-night .ru-chapter-title em{ color:var(--amber); }
-.ru-chapter-intro{
-  font-size:1.02rem; line-height:1.6; color:var(--ink-soft);
-  max-width:46ch;
-}
-.ru-night .ru-chapter-intro{ color:var(--night-soft); }
-
-.ru-chapter{ position:relative; padding:96px 0; }
-
-.ru-hero{ position:relative; padding:128px 0 96px; }
-.ru-hero-wrap{ display:flex; flex-direction:column; align-items:flex-start; }
-
-.ru-ticket-tag{
-  position:relative; display:inline-flex; align-items:center;
-  padding:8px 18px;
-  font-family:var(--f-mono); font-size:.7rem; font-weight:700;
-  letter-spacing:.14em; text-transform:uppercase; color:var(--pen-red);
-  background:var(--paper-2); border:1.5px dashed var(--ink-faint);
-  border-radius:2px; transform:rotate(-2deg); margin-bottom:30px;
-}
-.ru-ticket-tag::before,.ru-ticket-tag::after{
-  content:""; position:absolute; top:50%; width:11px; height:11px;
-  background:var(--paper); border-radius:50%; transform:translateY(-50%);
-}
-.ru-ticket-tag::before{ left:-6px; } .ru-ticket-tag::after{ right:-6px; }
-
-.ru-hero-title{
-  font-family:var(--f-display); font-weight:800;
-  font-size:clamp(2.7rem, 7.2vw, 5.8rem); line-height:.97; letter-spacing:-.02em;
-  margin-bottom:28px;
-}
-.ru-hl{ display:block; overflow:hidden; }
-.ru-hl span{ display:block; animation:ru-line-in .85s cubic-bezier(.16,1,.3,1) both; }
-.ru-hl:nth-child(1) span{ animation-delay:.05s; }
-.ru-hl:nth-child(2) span{ animation-delay:.17s; }
-.ru-hl:nth-child(3) span{ animation-delay:.29s; }
-@keyframes ru-line-in{ from{ transform:translateY(112%); } to{ transform:translateY(0); } }
-.ru-hero-title em{ font-style:normal; color:var(--pen-blue); }
-
-.ru-hero-desc{ font-size:1.08rem; line-height:1.6; color:var(--ink-soft); max-width:44ch; margin-bottom:48px; }
-
-.ru-board-wrap{ width:100%; max-width:720px; }
-.ru-board-label{
-  display:block; font-family:var(--f-mono); font-size:.68rem; font-weight:600;
-  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:10px;
-}
-.ru-board-track{
-  position:relative; overflow:hidden; background:var(--ink); border-radius:3px; padding:14px 0;
-  width:100%;
-  -webkit-mask-image:linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-  mask-image:linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-}
-.ru-board-row{ display:flex; width:max-content; animation:ru-marquee 36s linear infinite; white-space:nowrap; }
-.ru-board-track:hover .ru-board-row,.ru-board-track:focus-within .ru-board-row{ animation-play-state:paused; }
-@keyframes ru-marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
-.ru-chip{
-  flex:none; font-family:var(--f-mono); font-size:.78rem; font-weight:600;
-  color:var(--amber); padding:0 22px; border-right:1px solid rgba(232,212,170,.18); white-space:nowrap;
-}
-.ru-chip i{ font-style:normal; color:rgba(216,222,227,.6); margin-left:8px; }
-
-.ru-scrolldown{
-  margin-top:56px; display:inline-flex; align-items:center; gap:8px;
-  font-family:var(--f-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint);
-}
-.ru-scrolldown svg{ animation:ru-bob 1.7s ease-in-out infinite; }
-@keyframes ru-bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(4px); } }
-
-.ru-route{ position:relative; margin-top:52px; }
-.ru-route-track{
-  position:absolute; left:18px; top:6px; bottom:6px; width:2px;
-  background-image:repeating-linear-gradient(to bottom, var(--ink-faint) 0 6px, transparent 6px 12px);
-}
-.ru-route-fill{ position:absolute; top:0; left:0; width:100%; height:0%; background:var(--pen-blue); }
-.ru-route-pin{
-  position:absolute; left:18px; top:0%; transform:translate(-50%,-50%);
-  width:18px; height:18px; color:var(--pen-blue); z-index:2;
-}
-.ru-route-pin svg{ display:block; background:var(--paper); border-radius:50%; }
-
-.ru-steps{ display:flex; flex-direction:column; gap:22px; }
-.ru-step{ position:relative; display:grid; grid-template-columns:38px 1fr; gap:0 18px; align-items:start; }
-.ru-step-pin{
-  grid-column:1; width:38px; height:38px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--f-mono); font-weight:700; font-size:.82rem;
-  background:var(--paper); border:2px solid var(--ink); color:var(--ink);
-  position:relative; z-index:2;
-}
-.ru-step-card{
-  grid-column:2; background:var(--paper); border:1.5px solid var(--ink-faint);
-  border-radius:3px; padding:24px 26px; box-shadow:5px 5px 0 0 var(--ink-faint);
-  transition:transform .25s ease, box-shadow .25s ease;
-}
-.ru-step:nth-child(odd) .ru-step-card{ transform:rotate(-.4deg); }
-.ru-step:nth-child(even) .ru-step-card{ transform:rotate(.4deg); }
-.ru-step-card:hover{ transform:rotate(0deg) translateY(-3px); box-shadow:7px 7px 0 0 var(--pen-blue); }
-.ru-step-tag{
-  display:block; font-family:var(--f-mono); font-size:.66rem; font-weight:600;
-  letter-spacing:.1em; text-transform:uppercase; color:var(--pen-red); margin-bottom:10px;
-}
-.ru-step-title{ font-family:var(--f-display); font-weight:700; font-size:1.24rem; line-height:1.25; margin-bottom:10px; }
-.ru-step-body{ font-size:.95rem; line-height:1.62; color:var(--ink-soft); }
-.ru-step-body strong{ color:var(--ink); font-weight:600; }
-
-.ru-feature{
-  display:grid; grid-template-columns:1fr 1.15fr auto; align-items:stretch;
-  margin:48px 0 26px; border:1.5px solid var(--ink); border-radius:4px; overflow:hidden;
-  box-shadow:6px 6px 0 0 var(--ink); transition:transform .25s ease, box-shadow .25s ease;
-}
-.ru-feature:hover{ transform:translate(-3px,-3px); box-shadow:9px 9px 0 0 var(--pen-blue); }
-.ru-feature-board{
-  background:var(--ink); color:var(--marker); display:flex; flex-direction:column;
-  justify-content:center; gap:6px; padding:32px 28px; font-family:var(--f-hand);
-}
-.ru-feature-board span:first-child{ font-family:var(--f-mono); font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(240,189,62,.55); }
-.ru-feature-board strong{ font-size:2.5rem; line-height:1; font-weight:700; }
-.ru-feature-board span:last-child{ font-size:1.05rem; opacity:.85; }
-.ru-feature-body{ padding:32px 28px; display:flex; flex-direction:column; gap:9px; justify-content:center; background:var(--paper); }
-.ru-feature-eyebrow{ font-family:var(--f-mono); font-size:.66rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--pen-red); }
-.ru-feature-name{ font-family:var(--f-display); font-weight:800; font-size:1.65rem; }
-.ru-feature-desc{ font-size:.95rem; line-height:1.55; color:var(--ink-soft); max-width:38ch; }
-.ru-feature-cta{ display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:.86rem; color:var(--pen-blue); margin-top:4px; }
-.ru-feature-cta svg{ transition:transform .2s ease; }
-.ru-feature:hover .ru-feature-cta svg{ transform:translateX(4px); }
-.ru-feature-price{
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-  padding:24px 26px; background:var(--paper-2); border-left:1.5px dashed var(--ink-faint);
-  font-family:var(--f-mono); font-size:.7rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft);
-}
-.ru-feature-price span{ font-family:var(--f-display); font-size:1.55rem; font-weight:800; color:var(--ink); }
-
-.ru-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
-.ru-ticket{
-  position:relative; background:var(--paper); border:1.5px solid var(--ink-faint);
-  border-radius:3px; padding:26px 20px 18px; display:flex; flex-direction:column; gap:8px;
-  box-shadow:4px 4px 0 0 var(--ink-faint); transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-}
-.ru-ticket:nth-child(3n+1){ transform:rotate(-.6deg); }
-.ru-ticket:nth-child(3n+2){ transform:rotate(.5deg); }
-.ru-ticket:nth-child(3n+3){ transform:rotate(-.3deg); }
-.ru-ticket:hover{ transform:rotate(0) translateY(-4px); box-shadow:6px 6px 0 0 var(--pen-blue); border-color:var(--pen-blue); }
-.ru-ticket-notch{
-  position:absolute; top:-1.5px; left:50%; transform:translateX(-50%); width:60%; height:1.5px;
-  background-image:repeating-linear-gradient(to right, var(--ink-faint) 0 6px, transparent 6px 11px);
-}
-.ru-ticket-notch::before,.ru-ticket-notch::after{
-  content:""; position:absolute; top:-7px; width:13px; height:13px; border-radius:50%;
-  background:var(--paper); border:1.5px solid var(--ink-faint);
-}
-.ru-ticket-notch::before{ left:-6px; } .ru-ticket-notch::after{ right:-6px; }
-.ru-ticket-tag2{ font-family:var(--f-mono); font-size:.64rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--river); }
-.ru-ticket-name{ font-family:var(--f-display); font-weight:700; font-size:1.16rem; }
-.ru-ticket-desc{ font-size:.87rem; line-height:1.5; color:var(--ink-soft); flex:1; }
-.ru-ticket-foot{ display:flex; align-items:center; justify-content:space-between; padding-top:10px; border-top:1px dashed var(--ink-faint); margin-top:4px; }
-.ru-ticket-price{ font-family:var(--f-mono); font-weight:700; color:var(--ink); }
-.ru-ticket-arrow{ color:var(--pen-blue); transition:transform .2s ease; display:inline-block; }
-.ru-ticket:hover .ru-ticket-arrow{ transform:translate(3px,-3px); }
-
-.ru-secreto{ position:relative; padding:0 0 88px; }
-.ru-secreto-wrap{ max-width:740px; }
-.ru-secreto-label{
-  display:block; font-family:var(--f-mono); font-size:.66rem; font-weight:600;
-  letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:18px;
-}
-.ru-secreto-quote{
-  font-family:var(--f-display); font-weight:600; font-size:clamp(1.3rem,2.6vw,1.85rem);
-  line-height:1.45; color:var(--ink);
-}
-.ru-hl-text{
-  background-image:linear-gradient(120deg, rgba(240,189,62,.6) 0%, rgba(240,189,62,.6) 100%);
-  background-repeat:no-repeat; background-size:0% 88%; background-position:0 78%;
-  -webkit-box-decoration-break:clone; box-decoration-break:clone;
-  padding:0 .06em; transition:background-size 1.1s cubic-bezier(.16,1,.3,1) .25s;
-}
-.ru-secreto.is-in .ru-hl-text{ background-size:100% 88%; }
-.ru-secreto-source{
-  display:block; margin-top:18px; font-family:var(--f-hand); font-weight:600;
-  font-size:1.35rem; color:var(--ink-soft);
-}
-
-.ru-dusk,.ru-dawn{ position:relative; height:150px; overflow:hidden; }
-.ru-dusk-sky{ position:absolute; inset:0; background:linear-gradient(to bottom, var(--paper) 0%, #C99A6A 42%, var(--night) 100%); }
-.ru-dawn-sky{ position:absolute; inset:0; background:linear-gradient(to bottom, var(--night) 0%, #C99A6A 60%, var(--paper) 100%); }
-.ru-dusk-sun,.ru-dawn-sun{
-  position:absolute; left:50%; width:44px; height:44px; border-radius:50%;
-  background:var(--amber); box-shadow:0 0 40px 6px rgba(230,162,60,.5); transform:translateX(-50%);
-  opacity:.5; transition:top 1.4s cubic-bezier(.4,0,.2,1), opacity 1.4s ease;
-}
-.ru-dusk-sun{ top:-28px; } .ru-dusk.is-in .ru-dusk-sun{ top:112px; opacity:1; }
-.ru-dawn-sun{ top:112px; } .ru-dawn.is-in .ru-dawn-sun{ top:-28px; opacity:1; }
-.ru-dusk-line{ position:absolute; left:0; right:0; bottom:0; height:1px; background:var(--night-line); }
-
-.ru-night{ background:var(--night); color:var(--night-ink); }
-.ru-streetlamps{
-  position:absolute; inset:0; pointer-events:none;
-  background:
-    radial-gradient(circle at 10% 0%, rgba(230,162,60,.16), transparent 38%),
-    radial-gradient(circle at 90% 25%, rgba(230,162,60,.10), transparent 42%);
-}
-.ru-night-list{ display:flex; flex-direction:column; margin-top:40px; border-top:1px solid var(--night-line); }
-.ru-night-item{ border-bottom:1px solid var(--night-line); }
-.ru-night-item a{
-  display:grid; grid-template-columns:40px 1fr auto 18px; align-items:center; gap:18px;
-  padding:22px 4px; transition:padding-left .25s ease, background .25s ease;
-}
-.ru-night-item a:hover,.ru-night-item a:focus-visible{ padding-left:14px; background:rgba(232,212,170,.045); }
-.ru-ni-rank{ font-family:var(--f-mono); font-weight:700; color:var(--night-soft); font-size:.88rem; }
-.ru-ni-info{ display:flex; flex-direction:column; gap:4px; min-width:0; }
-.ru-ni-tag{ font-family:var(--f-mono); font-size:.64rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); }
-.ru-ni-name{ font-family:var(--f-display); font-weight:700; font-size:1.22rem; }
-.ru-ni-desc{ font-size:.87rem; color:var(--night-soft); line-height:1.5; max-width:52ch; }
-.ru-ni-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:2px; text-align:right; }
-.ru-ni-price{ font-family:var(--f-mono); font-weight:700; }
-.ru-ni-vibe{ font-size:.68rem; color:var(--night-soft); text-transform:uppercase; letter-spacing:.06em; }
-.ru-ni-arrow{ color:var(--amber); transition:transform .2s ease; display:inline-block; }
-.ru-night-item a:hover .ru-ni-arrow{ transform:translateX(4px); }
-
-.ru-sos{ position:relative; background:var(--night-2); padding:80px 0; }
-.ru-sos-head{ margin-bottom:36px; }
-.ru-sos-stop{ color:var(--pen-red); }
-.ru-sos-title{ font-family:var(--f-display); font-weight:800; font-size:clamp(1.7rem,3.4vw,2.3rem); color:var(--night-ink); margin-top:12px; }
-.ru-sos-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-.ru-sos-btn{
-  display:flex; flex-direction:column; gap:6px; padding:24px 22px;
-  border:1.5px solid rgba(193,58,46,.45); border-radius:4px; background:rgba(193,58,46,.06);
-  color:var(--night-ink); transition:transform .2s ease, background .2s ease, border-color .2s ease;
-}
-.ru-sos-btn:hover,.ru-sos-btn:focus-visible{ transform:translateY(-3px); background:rgba(193,58,46,.14); border-color:var(--pen-red); }
-.ru-sos-btn svg{ color:var(--pen-red); margin-bottom:4px; }
-.ru-sos-num{ font-family:var(--f-mono); font-weight:700; font-size:1.8rem; color:#fff; }
-.ru-sos-label{ font-weight:600; font-size:.95rem; }
-.ru-sos-sub{ font-size:.8rem; color:var(--night-soft); }
-
-.ru-cierre{ position:relative; padding:110px 0 96px; }
-.ru-cierre-wrap{ max-width:660px; }
-.ru-cierre-title{ font-family:var(--f-display); font-weight:800; font-size:clamp(2rem,4.4vw,3.05rem); line-height:1.1; margin-bottom:18px; }
-.ru-cierre-title em{ font-style:normal; color:var(--pen-blue); }
-.ru-cierre-sub{ font-size:1.02rem; line-height:1.6; color:var(--ink-soft); max-width:46ch; margin-bottom:36px; }
-.ru-cta{
-  display:inline-flex; align-items:center; gap:10px; padding:16px 28px;
-  background:#1C2B3A; color:#F5EFE3; font-weight:700; font-size:.95rem; border-radius:3px;
-  box-shadow:5px 5px 0 0 #2B4570; transition:box-shadow .2s ease, background .2s ease;
-  border:1.5px solid rgba(245,239,227,.25);
-}
-.ru-cta:hover{ background:#2B4570; color:#FFFFFF; box-shadow:5px 5px 0 0 #1C2B3A; }
-.ru-cta:hover{ background:var(--pen-blue); box-shadow:5px 5px 0 0 var(--ink); }
-.ru-cta svg{ transition:transform .2s ease; }
-.ru-cta:hover svg{ transform:translateX(4px); }
-
-@media (max-width:880px){
-  .ru-grid{ grid-template-columns:repeat(2,1fr); }
-  .ru-feature{ grid-template-columns:1fr; }
-  .ru-feature-price{ border-left:none; border-top:1.5px dashed var(--ink-faint); flex-direction:row; gap:10px; padding:16px 28px; }
-}
-@media (max-width:640px){
-  .ru-wrap{ padding:0 18px; }
-  .ru-hero{ padding:92px 0 72px; }
-  .ru-chapter{ padding:64px 0; }
-  .ru-sos{ padding:64px 0; }
-  .ru-cierre{ padding:80px 0 72px; }
-  .ru-dusk,.ru-dawn{ height:96px; }
-  .ru-feature-board strong{ font-size:2rem; }
-  .ru-grid{ grid-template-columns:1fr; }
-  .ru-sos-grid{ grid-template-columns:1fr; }
-  .ru-night-item a{ grid-template-columns:30px 1fr; row-gap:8px; }
-  .ru-ni-meta{ grid-column:2; flex-direction:row; align-items:center; gap:10px; text-align:left; }
-  .ru-ni-arrow{ display:none; }
-  .ru-step{ grid-template-columns:30px 1fr; }
-  .ru-step-pin{ width:30px; height:30px; font-size:.72rem; }
-  .ru-route-track,.ru-route-pin{ left:14px; }
-  .ru-step-card{ padding:20px; }
-}
-@media (prefers-reduced-motion: reduce){
-  .ru-hl span{ animation:none; }
-  .ru-scrolldown svg{ animation:none; }
-  .ru-board-row{ animation:none; }
-  .ru-board-track{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .ru-dusk-sun,.ru-dawn-sun,.ru-hl-text{ transition:none; }
-  .ru-dusk-sun,.ru-dawn-sun{ top:42px !important; opacity:1 !important; }
-  .ru-hl-text{ background-size:100% 88% !important; }
-}
+<style>
   @media (max-width: 768px) {
   .hero, .hero-inner, .hero-topbar, .hero-inner-left {
     max-width: 100vw !important;
@@ -7025,7 +6699,7 @@ display:block;
   <!-- ===================== PARA UNIVERSITARIOS ===================== -->
 <style>
 .ru-section{
-  --paper:#FFE4BF;--paper-2:#FFC890;--paper-line:rgba(28,43,58,.09);
+  --paper:#EBE3D2;--paper-2:#E2D8C2;--paper-line:rgba(28,43,58,.09);
   --ink:#1C2B3A;--ink-soft:#4C5C6C;--ink-faint:#1C2B3A66;
   --pen-blue:#2B4570;--pen-red:#AE3526;--marker:#F0BD3E;--river:#3C6B5B;
   --night:#0E1B27;--night-2:#0A141D;--night-line:rgba(232,212,170,.10);
@@ -7213,8 +6887,8 @@ display:block;
       <span class="ru-hl"><span>la ciudad.</span></span>
     </h2>
     <p class="ru-hero-desc">CdU tiene más de lo que cualquier grupo de WhatsApp te va a contar. Esta guía la escribió alguien que ya vivió lo que vos estás por vivir.</p>
-    <div class="ru-board-wrap" role="list" aria-label="Facultades en Concepción del Uruguay">
-      <span class="ru-board-label">Te esperan en —</span>
+  <div class="ru-board-wrap" aria-label="Facultades en Concepción del Uruguay">
+      <span class="ru-board-label" id="ru-board-label">Te esperan en —</span>
       <div class="ru-board-track" aria-label="Facultades disponibles" role="region" aria-live="off">
         <div class="ru-board-row" aria-hidden="true">
           <span class="ru-chip">UNER <i>Cs. de la Salud</i></span>
@@ -7367,13 +7041,13 @@ display:block;
 </div>
 
 <figure class="ru-secreto ru-reveal">
+  <figcaption class="ru-secreto-source">— Consejo de estudiante, tercer año</figcaption>
   <div class="ru-wrap ru-secreto-wrap">
     <span class="ru-secreto-label">Lo que saben los que llevan un año</span>
     <blockquote class="ru-secreto-quote">
       <span class="ru-hl-text">Preguntá siempre por el menú del día antes de abrir la carta.</span>
       En CdU eso puede significar la diferencia entre gastar $4.000 u $8.000 en el almuerzo.
     </blockquote>
-    <figcaption class="ru-secreto-source">— Consejo de estudiante, tercer año</figcaption>
   </div>
 </figure>
 
@@ -7480,7 +7154,7 @@ display:block;
   <div class="ru-ruled"></div>
   <div class="ru-wrap ru-cierre-wrap">
     <h3 class="ru-cierre-title">La guía que querías<br>tener <em>desde el primer día.</em></h3>
-    <p class="ru-cierre-sub">75 lugares verificados, horarios en tiempo real y todo lo que vale la pena en CdU. Sin mentiras.</p>
+    <p class="ru-cierre-sub">+100 lugares verificados, horarios en tiempo real y todo lo que vale la pena en CdU. Sin mentiras.</p>
     <a class="ru-cta" data-magnetic href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/" target="_blank" rel="noopener noreferrer">
       <span>Ver la guía completa</span>
       <svg width="15" height="12" viewBox="0 0 15 12" fill="none"><path d="M1 6h13M8.5 1l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -7568,7 +7242,7 @@ display:block;
   </a>
   <div class="footer-divider" aria-hidden="true"></div>
   <div class="footer-stats">
-    <span class="footer-stat"><strong>75</strong> Lugares</span>
+    <span class="footer-stat"><strong>+100</strong> Lugares</span>
     <span class="footer-stat"><strong>7</strong> Categorías</span>
     <span class="footer-stat"><strong>Junio</strong> 2026</span>
   </div>
@@ -7576,11 +7250,10 @@ display:block;
 <p class="footer-copy" style="margin-top:6px;font-size:8px;letter-spacing:1px;">Información verificada: junio 2026 · Próxima revisión: diciembre 2026</p>
 </footer>
 
-<button id="lost-fab" type="button" aria-label="Te ayudo a elegir">
+<button id="lost-fab" type="button" aria-label="¿Perdido? Te ayudo a elegir qué hacer en Concepción del Uruguay">
   <span class="lost-emoji" aria-hidden="true">🧭</span> ¿Perdido? Tocá acá
 </button>
-
-<button id="back-to-top" aria-label="Volver arriba" title="Volver arriba">
+<button id="back-to-top" type="button" aria-label="Volver arriba" title="Volver arriba">
   <span class="btt-ring" aria-hidden="true"></span>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
@@ -7664,38 +7337,10 @@ var mesh=document.querySelector('.hero-mesh');
 <script>
 (function(){
 'use strict';
-var _wxAbortController = null;
-var srDebId = null;
-
-var SECTIONS = [
-  { id: 'mood',               emoji: '✨', label: 'Empezar',           nav: true,  accordion: false, search: false },
-  { id: 'circuitos',          emoji: '🗺️', label: 'Circuitos',         nav: true,  accordion: true,  search: false },
-  { id: 'como-llegar',        emoji: '🧭', label: 'Cómo Llegar',       nav: false, accordion: true,  search: false },
-  { id: 'alojamiento',        emoji: '🏨', label: 'Alojamiento',        nav: false, accordion: false, search: false },
-  { id: 'restaurantes',       emoji: '🍽️', label: 'Restaurantes',      nav: true,  accordion: true,  search: true,  gridId: 'grid-restaurantes',  noResultsId: 'no-results-restaurantes' },
-  { id: 'cafes',              emoji: '☕', label: 'Cafés',             nav: true,  accordion: true,  search: true,  gridId: 'grid-cafes',         noResultsId: 'no-results-cafes' },
-  { id: 'bares',              emoji: '🍻', label: 'Bares',             nav: true,  accordion: true,  search: true,  gridId: 'grid-bares',         noResultsId: 'no-results-bares' },
-  { id: 'panaderias',         emoji: '🥐', label: 'Panaderías',        nav: true,  accordion: true,  search: true,  gridId: 'grid-panaderias',    noResultsId: 'no-results-panaderias' },
-  { id: 'heladerias',         emoji: '🍦', label: 'Heladerías',        nav: true,  accordion: false, search: true,  gridId: 'grid-heladerias',    noResultsId: 'no-results-panaderias' },
-  { id: 'hosterias',          emoji: '🏨', label: 'Hosterías',         nav: true,  accordion: true,  search: true,  gridId: 'grid-hosterias',     noResultsId: 'no-results-hosterias' },
-  { id: 'gimnasios',          emoji: '💪', label: 'Gimnasios',         nav: true,  accordion: true,  search: true,  gridId: 'grid-gimnasios',     noResultsId: 'no-results-gimnasios' },
-  { id: 'uni-ruta',           emoji: '🎓', label: 'Universitarios',    nav: true,  accordion: false, search: false },
-  { id: 'naturaleza',         emoji: '🌊', label: 'Naturaleza',        nav: true,  accordion: true,  search: true,  gridId: null,                 noResultsId: 'no-results-naturaleza' },
-  { id: 'patrimonio',         emoji: '🏛️', label: 'Patrimonio',        nav: true,  accordion: true,  search: true,  gridId: 'grid-patrimonio',    noResultsId: 'no-results-patrimonio' },
-  { id: 'historia',           emoji: '📜', label: 'Historia',          nav: true,  accordion: true,  search: true,  gridId: null,                 noResultsId: 'no-results-historia' },
-  { id: 'carnaval',           emoji: '🎭', label: 'Carnaval',          nav: true,  accordion: true,  search: true,  gridId: null,                 noResultsId: 'no-results-carnaval' },
-  { id: 'deporte',            emoji: '🏆', label: 'Deporte',           nav: true,  accordion: true,  search: true,  gridId: null,                 noResultsId: 'no-results-deporte' },
-  { id: 'gastronomia-regional', emoji: '🐟', label: 'Cocina del Río', nav: false, accordion: true,  search: false },
-  { id: 'servicios',          emoji: '🔧', label: 'Servicios',         nav: false, accordion: true,  search: false },
-  { id: 'veterinarias',       emoji: '🐾', label: 'Veterinarias',      nav: true,  accordion: false, search: true,  gridId: 'grid-veterinarias',  noResultsId: 'no-results-veterinarias' },
-  { id: 'supermercados',      emoji: '🛒', label: 'Compras',           nav: true,  accordion: false, search: false },
-  { id: 'bancos',             emoji: '🏦', label: 'Bancos',            nav: true,  accordion: false, search: false },
-  { id: 'remiserias',         emoji: '🚖', label: 'Remiserías',        nav: true,  accordion: false, search: true,  gridId: 'grid-remiserias',    noResultsId: 'no-results-remiserias' },
-];
-
-// Derivados de SECTIONS — fuente única de verdad
-var sectionNames = {};
-SECTIONS.forEach(function(s){ sectionNames[s.id] = s.label; });
+  var _wxAbortController = null;
+  var srDebId = null;
+  var _cachedOrb1 = document.querySelector('.hero-orb-1');
+  var _cachedOrb2 = document.querySelector('.hero-orb-2');
 
   /* ── MODO TEMPORAL ── */
   var globalTimeMode = (function(){
@@ -7838,12 +7483,10 @@ if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
           var intensity = Math.min(sy / 400, 1);
           heroMesh.style.opacity = 1 - intensity * 0.35;
         }
-        if(window.innerWidth > 768 && sy < 700){
-          var orb1 = document.querySelector('.hero-orb-1');
-          var orb2 = document.querySelector('.hero-orb-2');
-          if(orb1) orb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
-          if(orb2) orb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
-        }
+if(window.innerWidth > 768 && sy < 700){
+        if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
+        if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
+      }
         if(heroTitleEms.length && sy < 500){
           var t = sy / 500;
           var ls = -4 + t * 2;
@@ -7861,33 +7504,50 @@ if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
   var navItems=document.querySelectorAll('.nav-item[data-section]');
   var revealEls=document.querySelectorAll('.reveal');
 
-  var navH = 60;
-  var navIndicator = document.createElement('span');
+var navIndicator = document.createElement('span');
   navIndicator.className = 'nav-indicator';
   navIndicator.setAttribute('aria-hidden', 'true');
   nav.appendChild(navIndicator);
 
+  var _navRect = null;
+  var _navRectDirty = true;
+  function _invalidateNavRect(){ _navRectDirty = true; }
+
 function moveIndicator(item){
-    if(!item)return;
-    var navRect = nav.getBoundingClientRect();
+    if(!item) return;
+    if(_navRectDirty){
+      _navRect = nav.getBoundingClientRect();
+      _navRectDirty = false;
+    }
     var itemRect = item.getBoundingClientRect();
-    var centerOffset = (itemRect.width - 6) / 2;
-    navIndicator.style.left = (itemRect.left - navRect.left + centerOffset) + 'px';
-    navIndicator.style.width = '6px';
+    var left = itemRect.left - _navRect.left + (itemRect.width - 6) / 2;
+    requestAnimationFrame(function(){
+      navIndicator.style.left = left + 'px';
+      navIndicator.style.width = '6px';
+    });
   }
- var firstActive = document.querySelector('.nav-item.active');
+  var firstActive = document.querySelector('.nav-item.active');
   if(firstActive) moveIndicator(firstActive);
   window.addEventListener('resize', function(){
+    _invalidateNavRect();
     var active = document.querySelector('.nav-item.active');
     if(active) moveIndicator(active);
   }, {passive:true});
   /* Scroll del nav actualiza el indicador */
-  var navScrollAreaEl = document.querySelector('.nav-scroll-area');
+var navScrollAreaEl = document.querySelector('.nav-scroll-area');
   if(navScrollAreaEl){
-    navScrollAreaEl.addEventListener('scroll', function(){
-      var active = document.querySelector('.nav-item.active');
-      if(active) moveIndicator(active);
-    }, {passive:true});
+    var navScrollTicking = false;
+    var _cachedActiveNavItem = document.querySelector('.nav-item.active');
+    function _navScrollHandler(){
+      if(navScrollTicking) return;
+      navScrollTicking = true;
+      _invalidateNavRect();
+      requestAnimationFrame(function(){
+        if(_cachedActiveNavItem) moveIndicator(_cachedActiveNavItem);
+        navScrollTicking = false;
+      });
+    }
+    navScrollAreaEl.addEventListener('scroll', _navScrollHandler, {passive:true});
   }
 
   navItems.forEach(function(ni){
@@ -7915,19 +7575,37 @@ function moveIndicator(item){
     });
   }
 
-  var sectionObserver=new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(entry.isIntersecting){
-        var id=entry.target.getAttribute('id');
-        navItems.forEach(function(item){
-          var isActive = item.dataset.section===id;
-          item.classList.toggle('active',isActive);
-          if(isActive) moveIndicator(item);
-        });
-      }
-    });
-  },{rootMargin:'-'+(navH+20)+'px 0px -55% 0px',threshold:0});
+function createSectionObserver(){
+    return new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+var id=entry.target.getAttribute('id');
+          navItems.forEach(function(item){
+            var isActive = item.dataset.section===id;
+            item.classList.toggle('active',isActive);
+            if(isActive){
+              moveIndicator(item);
+              item.setAttribute('aria-current','location');
+            } else {
+              item.removeAttribute('aria-current');
+            }
+          });
+        }
+      });
+    },{rootMargin:'-'+(nav.offsetHeight+20)+'px 0px -55% 0px',threshold:0});
+  }
+  var sectionObserver=createSectionObserver();
   sections.forEach(function(s){sectionObserver.observe(s);});
+
+  var _soResizeTimer=null;
+  window.addEventListener('resize',function(){
+    clearTimeout(_soResizeTimer);
+    _soResizeTimer=setTimeout(function(){
+      sectionObserver.disconnect();
+      sectionObserver=createSectionObserver();
+      sections.forEach(function(s){sectionObserver.observe(s);});
+    },250);
+  },{passive:true});
 
   var revealObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
@@ -8019,8 +7697,11 @@ navItems.forEach(function(item){
     var r=searchBarWrap.getBoundingClientRect();
     dropdown.style.top=r.bottom+'px';
   }
-  function ddHide(){dropdown.classList.remove('dd-visible');setTimeout(function(){dropdown.style.display='none';dropdown.innerHTML='';},250);}
-
+function ddHide(){
+    dropdown.classList.remove('dd-visible');
+    searchInput.removeAttribute('aria-activedescendant');
+    setTimeout(function(){dropdown.style.display='none';while(dropdown.firstChild){dropdown.removeChild(dropdown.firstChild);}},250);
+  }
   function normalize(str){
     return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'');
   }
@@ -8041,26 +7722,36 @@ navItems.forEach(function(item){
       var match=!q||normalize(item.dataset.name||'').includes(q)||normalize(item.dataset.tags||'').includes(q);
       item.classList.toggle('search-hidden',!match);
       if(match){total++;if(!first)first=item;}
-      /* abrir accordion si hay match */
+/* abrir accordion si hay match — registrar apertura automática */
       if(q&&match){
-  var sec=item.closest('.us-section');
-  if(sec&&sec.classList.contains('acc-collapsed')){
-    var hdr=sec.querySelector('.section-header');
-    if(hdr)hdr.click(); // usa el mismo handler que el accordion
-  }
-}
+        var sec=item.closest('.us-section');
+        if(sec&&sec.classList.contains('acc-collapsed')){
+          sec.classList.add('acc-was-auto-opened');
+          var hdr=sec.querySelector('.section-header');
+          if(hdr) hdr.click();
+        }
+        if(item.tagName==='DETAILS'&&!item.open){
+          item.open=true;
+        }
+      }
     });
     /* no-results por grid */
-SECTIONS.filter(function(s){ return s.search; }).forEach(function(s){
-  var grid = s.gridId ? document.getElementById(s.gridId) : document.getElementById(s.id);
-  var noRes = s.noResultsId ? document.getElementById(s.noResultsId) : null;
-  if(!noRes) return;
-  var count = grid
-    ? grid.querySelectorAll('.searchable:not(.search-hidden)').length
-    : document.querySelectorAll('#' + s.id + ' .searchable:not(.search-hidden)').length;
-  noRes.classList.toggle('visible', q.length > 0 && count === 0);
-});
-    searchCount.textContent=q?total+(total===1?' resultado':' resultados'):'';
+    ['restaurantes','cafes','bares','panaderias','heladerias','hosterias','gimnasios','patrimonio','naturaleza','historia','carnaval','deporte','veterinarias','remiserias'].forEach(function(id){
+      var grid=document.getElementById('grid-'+id)||document.getElementById(id);
+      var noRes=document.getElementById('no-results-'+id);
+      if(!grid||!noRes)return;
+      var vis=grid.querySelectorAll('.searchable:not(.search-hidden)').length;
+      noRes.classList.toggle('visible',q.length>0&&vis===0);
+    });
+   searchCount.textContent=q?total+(total===1?' resultado':' resultados'):'';
+    /* recolapsar secciones que fueron abiertas por búsqueda si q queda vacío */
+    if(!q){
+      document.querySelectorAll('.us-section.acc-was-auto-opened').forEach(function(sec){
+        var hdr=sec.querySelector('.section-header');
+        if(hdr){ hdr.click(); }
+        sec.classList.remove('acc-was-auto-opened');
+      });
+    }
     /* dropdown */
     if(!q){ddHide();return;}
     var matches=getAllSearchables().filter(function(it){return normalize(it.name).includes(q)||normalize(it.tags).includes(q);});
@@ -8069,9 +7760,11 @@ SECTIONS.filter(function(s){ return s.search; }).forEach(function(s){
 while(dropdown.firstChild){ dropdown.removeChild(dropdown.firstChild); }
 
 matches.forEach(function(it){
-  var a = document.createElement('a');
+ var a = document.createElement('a');
   a.href = it.href;
+  a.id = 'dd-option-' + (matches.indexOf(it));
   a.setAttribute('role', 'option');
+  a.setAttribute('aria-selected', 'false');
   a.style.cssText = 'display:flex;align-items:center;gap:12px;padding:16px 24px;font-family:var(--f-ui);font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(242,237,227,.80);text-decoration:none;border-bottom:1px solid rgba(242,237,227,.06);transition:background .15s ease';
   a.addEventListener('mouseenter', function(){ this.style.background = 'rgba(242,237,227,.06)'; });
   a.addEventListener('mouseleave', function(){ this.style.background = ''; });
@@ -8095,19 +7788,24 @@ if(idx >= 0){
     requestAnimationFrame(function(){dropdown.classList.add('dd-visible');});
   }
 
- function openSearch(){
+function openSearch(){
   searchBarWrap.classList.add('open');
+  searchBarWrap.removeAttribute('inert');
+  if('inert' in HTMLElement.prototype){ searchBarWrap.inert = false; }
   searchToggleBtn.setAttribute('aria-expanded','true');
   if(crumbEl)crumbEl.classList.add('search-active');
-  searchInput.focus(); // síncrono — necesario para iOS
+  searchInput.focus();
 }
-  function closeSearch(){
+function closeSearch(){
     searchBarWrap.classList.remove('open');
     searchToggleBtn.setAttribute('aria-expanded','false');
     if(crumbEl)crumbEl.classList.remove('search-active');
     searchInput.value='';
+    searchCount.textContent='';
     runSearch('');
     ddHide();
+    searchBarWrap.setAttribute('inert','');
+    if('inert' in HTMLElement.prototype){ searchBarWrap.inert = true; }
   }
 
   searchToggleBtn.addEventListener('click',function(){searchBarWrap.classList.contains('open')?closeSearch():openSearch();});
@@ -8117,25 +7815,40 @@ if(idx >= 0){
     var val=this.value;
     srDebId=setTimeout(function(){runSearch(val);ddPosition();},140);
   });
-  searchInput.addEventListener('keydown',function(e){
+searchInput.addEventListener('keydown',function(e){
     if(e.key==='Enter'){
       e.preventDefault();
       ddHide();
       runSearch(this.value);
     }
-    if(e.key==='Escape'){closeSearch();}
+    if(e.key==='Escape'){e.stopPropagation();closeSearch();}
     if(e.key==='ArrowDown'){
         e.preventDefault();
-        var first=dropdown.querySelector('a');
-        if(first)first.focus();
+        var first=dropdown.querySelector('[role="option"]');
+        if(first){ first.focus(); searchInput.setAttribute('aria-activedescendant', first.id || ''); }
     }
   });
 
-  dropdown.addEventListener('keydown',function(e){
-    var items=[].slice.call(dropdown.querySelectorAll('a'));
+dropdown.addEventListener('keydown',function(e){
+    var items=[].slice.call(dropdown.querySelectorAll('[role="option"]'));
     var idx=items.indexOf(document.activeElement);
-    if(e.key==='ArrowDown'){e.preventDefault();if(items[idx+1])items[idx+1].focus();}
-    if(e.key==='ArrowUp'){e.preventDefault();if(idx>0)items[idx-1].focus();else searchInput.focus();}
+    if(e.key==='ArrowDown'){
+      e.preventDefault();
+      if(items[idx+1]){
+        items[idx+1].focus();
+        searchInput.setAttribute('aria-activedescendant', items[idx+1].id || '');
+      }
+    }
+    if(e.key==='ArrowUp'){
+      e.preventDefault();
+      if(idx>0){
+        items[idx-1].focus();
+        searchInput.setAttribute('aria-activedescendant', items[idx-1].id || '');
+      } else {
+        searchInput.focus();
+        searchInput.removeAttribute('aria-activedescendant');
+      }
+    }
     if(e.key==='Escape'){closeSearch();}
   });
 
@@ -8143,13 +7856,11 @@ document.addEventListener('click',function(e){
     if(!searchBarWrap.contains(e.target)&&!dropdown.contains(e.target))ddHide();
   });
 
-  var _searchScrollTimer = null;
+var _searchScrollTimer = null;
   window.addEventListener('scroll', function(){
     if(!searchBarWrap.classList.contains('open')) return;
     clearTimeout(_searchScrollTimer);
-    _searchScrollTimer = setTimeout(function(){
-      closeSearch();
-    }, 120);
+    _searchScrollTimer = setTimeout(closeSearch, 120);
   }, {passive:true});
 
   searchInput.addEventListener('blur',function(){setTimeout(function(){if(!dropdown.contains(document.activeElement))ddHide();},200);});
@@ -8182,24 +7893,26 @@ document.addEventListener('click',function(e){
   function fmtTime(){return new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'});}
 
 var lastWxCode = null, lastWxTemp = null;
+/* lastWxCode se usa para la frase contextual del weather widget y para
+   la sugerencia del mood picker. Se lee en wxPhrase() y en setSuggestion(). */
 
 function renderWeather(d){
     var c=d.current,wx=wxDecode(c.weather_code);
     var tmp=Math.round(c.temperature_2m),apt=Math.round(c.apparent_temperature);
+    var tempChanged = (lastWxTemp === null || lastWxTemp !== tmp);
     var hum=Math.round(c.relative_humidity_2m),wnd=Math.round(c.wind_speed_10m);
     var prec=(c.precipitation||0).toFixed(1);
-    var hora=fmtTime();
-    var announce = document.getElementById('wx-update-announce');
-    if(announce) announce.textContent = 'Clima actualizado: ' + tmp + ' grados, ' + wx.desc + ', humedad ' + hum + ' por ciento.';
+ var hora=fmtTime();
 function setTxt(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
 
 /* Para temperatura: usar elementos separados */
 var tempEl = document.getElementById('wx-hero-temp');
-if(tempEl){
-  tempEl.textContent = tmp;
-  var sup = tempEl.querySelector('sup') || document.createElement('sup');
+if(tempEl && tempChanged){
+  var sup = document.createElement('sup');
   sup.textContent = '°C';
-  if(!tempEl.querySelector('sup')) tempEl.appendChild(sup);
+  while(tempEl.firstChild){ tempEl.removeChild(tempEl.firstChild); }
+  tempEl.appendChild(document.createTextNode(tmp));
+  tempEl.appendChild(sup);
 }
 
 /* Para el resto que son texto plano: */
@@ -8214,9 +7927,9 @@ if(iconEl) iconEl.textContent=wx.icon;
 var fraseEl=document.getElementById('wx-hero-frase');
 if(fraseEl) fraseEl.textContent=wxPhrase(c.weather_code,tmp);
 
-    lastWxCode = c.weather_code; lastWxTemp = tmp;
+lastWxCode = c.weather_code; lastWxTemp = tmp;
     if (typeof window.__uruspotSetSuggestion === 'function') {
-      window.__uruspotSetSuggestion();
+      window.__uruspotSetSuggestion(null);
     }
   }
   function renderError(){
@@ -8228,57 +7941,32 @@ if(fraseEl) fraseEl.textContent=wxPhrase(c.weather_code,tmp);
 var WX_CACHE_KEY = 'uruspot_wx_cache';
 var WX_CACHE_TTL = 9 * 60 * 1000; // 9 minutos
 
-var _wxFetchInProgress = false;
+var _wxFetchPromise = null;
 function fetchWeather(){
   if(document.hidden) return;
-  if(_wxFetchInProgress) return;
+  if(_wxFetchPromise) return;
 
-  /* Intentar usar caché de sessionStorage primero */
-  try {
-    var cached = sessionStorage.getItem(WX_CACHE_KEY);
-    if(cached){
-      var parsed = JSON.parse(cached);
-      if(Date.now() - parsed.ts < WX_CACHE_TTL){
-        _lastFetchTs = parsed.ts;
-        renderWeather(parsed.data);
-        return;
-      }
-    }
-  } catch(e) { /* sessionStorage no disponible, continuar con fetch */ }
-
-  /* Cancelar fetch anterior si existe */
-  if(_wxAbortController){
-    try { _wxAbortController.abort(); } catch(e){}
-  }
-
-  if(typeof AbortController !== 'undefined'){
-    _wxAbortController = new AbortController();
-  } else {
-    _wxAbortController = null;
-  }
-
+  _wxAbortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
   var fetchOptions = _wxAbortController ? { signal: _wxAbortController.signal } : {};
 
-_wxFetchInProgress = true;
-  fetch(WX_URL, fetchOptions)
-    .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
- .then(function(d){
-      _wxAbortController = null;
-      _wxFetchInProgress = false;
+  _wxFetchPromise = fetch(WX_URL, fetchOptions)
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(d){
+      if(!d || !d.current || typeof d.current.temperature_2m !== 'number' || typeof d.current.weather_code !== 'number'){
+        throw new Error('Invalid weather data');
+      }
       _lastFetchTs = Date.now();
       try { sessionStorage.setItem(WX_CACHE_KEY, JSON.stringify({ts: _lastFetchTs, data: d})); } catch(e){}
       renderWeather(d);
     })
- .catch(function(err){
-      _wxAbortController = null;
-      _wxFetchInProgress = false;
+    .catch(function(err){
       if(err && err.name === 'AbortError') return;
       _lastFetchTs = Date.now() - 4*60*1000;
+      try { sessionStorage.removeItem(WX_CACHE_KEY); } catch(e){}
       renderError();
-      setTimeout(function(){
-        if(!document.hidden) fetchWeather();
-      }, 60000);
-    });
+      setTimeout(function(){ if(!document.hidden) fetchWeather(); }, 60000);
+    })
+    .finally(function(){ _wxFetchPromise = null; _wxAbortController = null; });
 }
 document.addEventListener('visibilitychange', function(){
     if(!document.hidden){
@@ -8309,17 +7997,28 @@ window.addEventListener('online', function(){
       scheduleWeather();
     }, {once: true});
   }
-var wxIntervalId = setInterval(function(){ fetchWeather(); }, 10*60*1000);
-window.addEventListener('pagehide', function(){
-  clearInterval(wxIntervalId);
-    clearTimeout(_srScrollId);
+window.__uruspotWeatherInterval = setInterval(function(){ fetchWeather(); }, 10*60*1000);
+
+  window.addEventListener('pagehide', function(){
+    clearInterval(window.__uruspotWeatherInterval);
+    window.__uruspotWeatherInterval = null;
     clearTimeout(srDebId);
+    clearTimeout(_searchScrollTimer);
     if(_wxAbortController){
       try { _wxAbortController.abort(); } catch(e){}
       _wxAbortController = null;
     }
   }, {once:true});
 
+function _handlePageShow(e){
+    if(e.persisted){
+      if(window.__uruspotWeatherInterval) clearInterval(window.__uruspotWeatherInterval);
+      window.__uruspotWeatherInterval = setInterval(function(){ fetchWeather(); }, 10*60*1000);
+      fetchWeather();
+    }
+  }
+  window.removeEventListener('pageshow', _handlePageShow);
+  window.addEventListener('pageshow', _handlePageShow);
 
   /* ====== MOOD PICKER — filtro REAL sobre las grillas existentes ====== */
 
@@ -8387,7 +8086,9 @@ window.addEventListener('pagehide', function(){
 
       moodBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
 
-      if (alreadyActive) {
+ if (alreadyActive) {
+        this.classList.remove('active');
+        this.setAttribute('aria-pressed', 'false');
         clearMoodFilter();
         moodResult.classList.remove('open');
         setSuggestion(null);
@@ -8464,11 +8165,12 @@ function activateHtTab(idx, moveFocus){
       t.setAttribute('aria-selected', active ? 'true' : 'false');
       t.setAttribute('tabindex', active ? '0' : '-1');
     });
-    htPanels.forEach(function(p,i){
+htPanels.forEach(function(p,i){
       var active = i===idx;
       if(active){
         p.removeAttribute('hidden');
         p.removeAttribute('aria-hidden');
+        p.inert = false;
         p.setAttribute('tabindex', '-1');
         var bar = p.querySelector('.ht-bar-fill');
         if(bar){
@@ -8484,6 +8186,7 @@ function activateHtTab(idx, moveFocus){
         p.removeAttribute('tabindex');
         p.setAttribute('hidden', '');
         p.setAttribute('aria-hidden', 'true');
+        p.inert = true;
       }
     });
   }
@@ -8521,7 +8224,10 @@ htTabs.forEach(function(tab, idx){
 (function(){
   var supportsInert = 'inert' in HTMLElement.prototype;
 
-SECTIONS.filter(function(s){ return s.accordion; }).map(function(s){ return s.id; }).forEach(function(id){
+  ['naturaleza','gastronomia-regional','carnaval','restaurantes','cafes','bares',
+   'panaderias','hosterias','gimnasios','patrimonio','deporte','historia',
+   'circuitos','como-llegar','servicios','remiserias'].forEach(function(id){
+    var sec = document.getElementById(id);
     if(!sec) return;
     var hdr = sec.querySelector('.section-header');
     if(!hdr) return;
@@ -8531,30 +8237,32 @@ SECTIONS.filter(function(s){ return s.accordion; }).map(function(s){ return s.id
       return [].slice.call(section.children).filter(function(el){ return el !== header; });
     }
 
-    function applyCollapsed(section, header, collapsed){
+function applyCollapsed(section, header, collapsed){
       section.classList.toggle('acc-collapsed', collapsed);
       header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
 
-      var content = getCollapsibleContent(section, header);
+var content = getCollapsibleContent(section, header);
       if(supportsInert){
         content.forEach(function(el){ el.inert = collapsed; });
       } else {
-        /* Fallback para navegadores sin inert: tabindex -1 en focusables */
         content.forEach(function(el){
-          var focusables = el.querySelectorAll('a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
-          focusables.forEach(function(f){
-            if(collapsed){
+          if(collapsed){
+            el.setAttribute('aria-hidden','true');
+            var focusables = el.querySelectorAll('a,button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])');
+            focusables.forEach(function(f){
               f.dataset.prevTabindex = f.getAttribute('tabindex') || '';
               f.setAttribute('tabindex','-1');
-              f.setAttribute('aria-hidden','true');
-            } else {
+            });
+          } else {
+            el.removeAttribute('aria-hidden');
+            var focusables = el.querySelectorAll('[data-prevtabindex]');
+            focusables.forEach(function(f){
               var prev = f.dataset.prevTabindex;
               if(prev === ''){ f.removeAttribute('tabindex'); }
               else { f.setAttribute('tabindex', prev); }
-              f.removeAttribute('aria-hidden');
               delete f.dataset.prevTabindex;
-            }
-          });
+            });
+          }
         });
       }
     }
@@ -8594,6 +8302,54 @@ SECTIONS.filter(function(s){ return s.accordion; }).map(function(s){ return s.id
         document.body.appendChild(toast);
         setTimeout(function(){toast.remove();}, 2200);
       });
+    });
+  }
+
+  /* ====== BREADCRUMB DE SECCIÓN ====== */
+var sectionNames = {
+    mood:                  'Empezar',
+    circuitos:             'Circuitos Turísticos',
+    'como-llegar':         'Cómo llegar y moverse',
+    alojamiento:           'Dónde Alojarse',
+    veterinarias:          'Veterinarias y Mascotas',
+    remiserias:            'Remiserías',
+    supermercados:         'Supermercados y Compras',
+    bancos:                'Bancos y Cajeros',
+    categorias:            'Guías por Categoría',
+    restaurantes:          'Restaurantes',
+    cafes:                 'Cafés',
+    bares:                 'Bares',
+    panaderias:            'Panaderías y Heladerías',
+    heladerias:            'Heladerías',
+    hosterias:             'Hosterías',
+    gimnasios:             'Gimnasios',
+    servicios:             'Información Esencial',
+    naturaleza:            'Naturaleza y Playas',
+    patrimonio:            'Historia y Patrimonio',
+    historia:              'Historia de CdU',
+    carnaval:              'Carnaval 2026',
+    deporte:               'Deporte e Identidad',
+    'gastronomia-regional':'Cocina del Río',
+    'uni-ruta':            'Para Universitarios',
+};
+var crumbEl = document.getElementById('section-crumb');
+  var crumbCurrent = crumbEl ? crumbEl.querySelector('#section-crumb-current') : null;
+
+ if(crumbEl){
+    crumbEl.classList.add('visible');
+
+    var crumbObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(!entry.isIntersecting || !crumbCurrent) return;
+        var id = entry.target.getAttribute('id');
+        if(id && sectionNames[id]){
+          crumbCurrent.textContent = sectionNames[id];
+        }
+      });
+    }, {rootMargin:'-120px 0px -60% 0px', threshold:0});
+
+    document.querySelectorAll('section[id]').forEach(function(s){
+      crumbObserver.observe(s);
     });
   }
 /* ====== CTA FLOTANTE "¿PERDIDO?" ====== */
@@ -8680,7 +8436,7 @@ SECTIONS.filter(function(s){ return s.accordion; }).map(function(s){ return s.id
     })(t0);
   }
 
-  function forceCounters(){
+function forceCounters(){
     if(countersAnimated) return;
     var strip = document.getElementById('hero-stats-strip');
     if(!strip) return;
@@ -8694,8 +8450,8 @@ SECTIONS.filter(function(s){ return s.accordion; }).map(function(s){ return s.id
     els.forEach(animateCounter);
   }
 
-  /* Un solo disparo tardío como red de seguridad */
-  setTimeout(forceCounters, 2500);
+  /* Disparo a 800ms — suficiente para que el DOM esté listo sin el delay de 2.5s */
+  setTimeout(forceCounters, 800);
 
   /* Si el strip ya está visible al hacer scroll (no al inicio) */
   if('IntersectionObserver' in window){
