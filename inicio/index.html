@@ -112,30 +112,64 @@
   overflow: visible;
 }
 /* ═══════════════════════════════════════════════════════
-   URU SPOT v2 — DESIGN SYSTEM
+   URU SPOT v3 — DESIGN SYSTEM "RÍO DE NOCHE"
+   Dirección artística: la ciudad entre el río y la historia.
+   Temperatura visual: ámbar profundo, verde musgo, void cálido.
    ═══════════════════════════════════════════════════════ */
 :root {
-  --radius-card: 6px;
-  --void:#060605;--void2:#0d0d0b;--void3:#151513;--soil:#1c1b17;
-  --parchment:#f2ede3;--parchment2:#e8e2d5;--parchment3:#faf8f3;
-  --ink:#1a1916;--verde:#1d5c40;--verde2:#267a55;--verde3:#0e3326;
-  --oro:#B85C2A;--oro2:#D4742A;--oro3:#E8914A;
-  --rojo:#c0392b;--rojo2:#e74c3c;--azul:#1a5c8a;--violeta:#7b3068;
-  --copper:#C46B35;--copper2:#A0522D;--copper3:#7A3B1E;
-  --amber-deep:#B8650A;--amber-mid:#CC7A20;--amber-bright:#E08830;
-  --f-display:'DM Serif Display','Times New Roman',serif;
- --f-italic:'DM Serif Display',Georgia,serif;
-  --f-ui:'Syne',system-ui,sans-serif;
-  --card-dark:#16100C;--card-dark2:#1C1410;--card-dark3:#221A14;--card-border-oro:rgba(184,92,42,.35);--card-border-oro-hover:rgba(212,116,42,.72);--card-text:rgba(248,238,224,.94);--card-text-soft:rgba(248,238,224,.82);--card-tag:rgba(248,238,224,.58);
-  --ease:cubic-bezier(0.25,0.46,0.45,0.94);
-/* Spring: rebote pronunciado — para botones, modales, elementos que "saltan" */
---ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --radius-card: 8px;
 
-/* Back: salida con retroceso suave — para menús, tooltips, elementos que "se asientan" */
---ease-back: cubic-bezier(0.36, 0, 0.66, -0.56);
+  /* ── VOID PALETTE — fondos nocturnos cálidos ── */
+  --void:#08070A;--void2:#0E0C10;--void3:#141218;--soil:#1C1A1F;
+
+  /* ── PERGAMINO — textos y superficies claras ── */
+  --parchment:#F5EED8;--parchment2:#EBE2C8;--parchment3:#FBF8F0;
+
+  /* ── INK — texto sobre claro ── */
+  --ink:#1A1715;
+
+  /* ── VERDE MUSGO — naturaleza, salud, verificado ── */
+  --verde:#1E5C38;--verde2:#267A4D;--verde3:#0D3320;
+
+  /* ── ORO / ÁMBAR — identidad principal, interacción ── */
+  --oro:#C4621A;--oro2:#E07828;--oro3:#F09040;
+
+  /* ── COLORES ESPECIALES ── */
+  --rojo:#C03428;--rojo2:#E04438;--azul:#1A5C8C;--violeta:#7B3068;
+  --copper:#C46830;--copper2:#A04E28;--copper3:#7A3818;
+  --amber-deep:#B8640A;--amber-mid:#CC7818;--amber-bright:#E08828;
+
+  /* ── SISTEMA DE TARJETAS ── */
+  --card-dark:#100D14;--card-dark2:#18141C;--card-dark3:#201A24;
+  --card-border-oro:rgba(196,98,26,.32);
+  --card-border-oro-hover:rgba(224,120,40,.68);
+  --card-text:rgba(245,238,216,.95);
+  --card-text-soft:rgba(245,238,216,.80);
+  --card-tag:rgba(245,238,216,.55);
+
+  /* ── TIPOGRAFÍA ── */
+  --f-display:'DM Serif Display','Times New Roman',serif;
+  --f-italic:'DM Serif Display',Georgia,serif;
+  --f-ui:'Syne',system-ui,sans-serif;
+
+  /* ── EASING PREMIUM ── */
+  --ease:cubic-bezier(0.25,0.46,0.45,0.94);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  --ease-back:cubic-bezier(0.36,0,0.66,-0.56);
   --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
-  --lift-sm:3px;--lift-md:5px;--lift-lg:8px;
+  --ease-silk:cubic-bezier(0.22,1,0.36,1);
+
+  /* ── ESPACIADO ── */
+  --lift-sm:3px;--lift-md:6px;--lift-lg:10px;
   --gutter:64px;--section-gap:120px;--nav-h:60px;
+
+  /* ── GLASSMORPHISM VARS ── */
+  --glass-bg:rgba(8,7,10,.72);
+  --glass-border:rgba(245,238,216,.10);
+  --glass-blur:saturate(180%) blur(20px);
+
+  /* ── ANIMACIÓN DURATIONS ── */
+  --dur-fast:150ms;--dur-base:300ms;--dur-slow:600ms;--dur-epic:1200ms;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{font-size:16px}
@@ -162,73 +196,477 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 #progress-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--oro3),transparent);will-change:transform;animation:shimmerBar 3s linear infinite}
 @keyframes shimmerBar{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 
-/* ── LIVE DOTS ── */
-@keyframes rippleLive{0%{transform:scale(.4);opacity:.8}65%,100%{transform:scale(2.6);opacity:0}}
-.live-dot{position:relative;border-radius:50%;flex-shrink:0}
-.live-dot::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:2px solid currentColor;opacity:0;animation:rippleLive 2s ease-out infinite;pointer-events:none;will-change:transform,opacity}
-.live-dot::before{content:'';position:absolute;inset:-9px;border-radius:50%;border:1px solid currentColor;opacity:0;animation:rippleLive 2s ease-out infinite .7s;pointer-events:none}
-@keyframes dotGlow{from{opacity:.5}to{opacity:1}}
+/* ── LIVE DOTS — nuevo sistema con halo triple ── */
+@keyframes rippleLive{
+  0%{transform:scale(.4);opacity:.9}
+  60%{opacity:.4}
+  100%{transform:scale(2.8);opacity:0}
+}
+@keyframes dotGlow{
+  0%{opacity:.45;box-shadow:0 0 0 0 currentColor}
+  50%{opacity:1;box-shadow:0 0 8px 2px currentColor}
+  100%{opacity:.45;box-shadow:0 0 0 0 currentColor}
+}
+.live-dot{
+  position:relative;border-radius:50%;flex-shrink:0;
+  animation:dotGlow 2.8s ease-in-out infinite;
+}
+.live-dot::after{
+  content:'';position:absolute;inset:-5px;border-radius:50%;
+  border:1.5px solid currentColor;opacity:0;
+  animation:rippleLive 2.2s ease-out infinite;
+  pointer-events:none;will-change:transform,opacity;
+}
+.live-dot::before{
+  content:'';position:absolute;inset:-10px;border-radius:50%;
+  border:1px solid currentColor;opacity:0;
+  animation:rippleLive 2.2s ease-out infinite .75s;
+  pointer-events:none;
+}
 
-/* ═══════════════ HERO ═══════════════ */
+/* ── NUEVO: AURORA SHIMMER — efecto de luz sobre gradientes ── */
+@keyframes auroraShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* ── NUEVO: FLOAT SUAVE — para elementos que respiran ── */
+@keyframes floatBreath{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  33%{transform:translateY(-6px) rotate(.4deg)}
+  66%{transform:translateY(-3px) rotate(-.3deg)}
+}
+
+/* ── NUEVO: ENTRADA CON BLUR — para chips y badges ── */
+@keyframes blurIn{
+  from{opacity:0;filter:blur(8px);transform:scale(.94)}
+  to{opacity:1;filter:blur(0);transform:scale(1)}
+}
+
+/* ── NUEVO: SLIDE UP PREMIUM ── */
+@keyframes slideUpPremium{
+  from{opacity:0;transform:translateY(32px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* ── SHIMMER BAR (original, mejorado) ── */
+@keyframes shimmerBar{
+  from{transform:translateX(-100%)}
+  to{transform:translateX(100%)}
+}
+
+/* ── NUEVO: PARTICLE DRIFT — para partículas decorativas ── */
+@keyframes particleDrift{
+  0%{transform:translateY(0) translateX(0) scale(1);opacity:.7}
+  25%{transform:translateY(-18px) translateX(8px) scale(1.1);opacity:1}
+  50%{transform:translateY(-8px) translateX(-6px) scale(.95);opacity:.6}
+  75%{transform:translateY(-22px) translateX(4px) scale(1.05);opacity:.9}
+  100%{transform:translateY(0) translateX(0) scale(1);opacity:.7}
+}
+
+/* ── NUEVO: GLOW PULSE para bordes activos ── */
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(196,98,26,0),0 0 0 0 rgba(196,98,26,0)}
+  50%{box-shadow:0 0 0 4px rgba(196,98,26,.18),0 0 20px -4px rgba(196,98,26,.35)}
+}
+
+/* ── NUEVO: RULEEXPAND con bounce ── */
+@keyframes ruleExpand{
+  from{transform:scaleX(0);opacity:0}
+  80%{transform:scaleX(1.05)}
+  to{transform:scaleX(1);opacity:1}
+}
+/* ═══════════════ HERO v3 — RÍO DE NOCHE ═══════════════ */
+
+/* ── HERO CONTAINER ── */
 .hero{
   position:relative;
-  min-height:100vh;        /* fallback para navegadores sin svh */
-  min-height:100svh;       /* override para navegadores modernos */
+  min-height:100vh;
+  min-height:100svh;
   display:flex;
   flex-direction:column;
   overflow:hidden;
   background:var(--void);
+  /* Textura sutil de ruido digital */
+  isolation:isolate;
 }
-.hero-mesh{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 70% 80% at 82% 8%,rgba(184,92,42,.55) 0%,rgba(120,55,20,.25) 45%,transparent 68%),radial-gradient(ellipse 50% 60% at 8% 92%,rgba(184,92,42,.22) 0%,transparent 58%),radial-gradient(ellipse 40% 50% at 48% 55%,rgba(100,40,10,.12) 0%,transparent 65%),linear-gradient(168deg,#0C0806 0%,#080605 40%,#0E0A06 100%)}
-.hero-orb{position:absolute;border-radius:50%;pointer-events:none;z-index:1;contain:layout;overflow:hidden}
-.hero-orb-1{width:700px;height:700px;top:-200px;right:-180px;background:radial-gradient(circle,rgba(29,92,64,.18) 0%,rgba(29,92,64,.05) 45%,transparent 70%);animation:orbFloat1 14s ease-in-out infinite alternate}
-.hero-orb-2{width:500px;height:500px;bottom:-180px;left:-140px;background:radial-gradient(circle,rgba(196,135,42,.10) 0%,transparent 65%);animation:orbFloat2 18s ease-in-out infinite alternate}
-@keyframes orbFloat1{from{transform:translate(0,0) scale(1)}to{transform:translate(-25px,30px) scale(1.08)}}
-@keyframes orbFloat2{from{transform:translate(0,0) scale(1)}to{transform:translate(30px,-20px) scale(1.12)}}
-.hero-topbar{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:36px var(--gutter);flex-shrink:0}
-.city-tag{display:inline-flex;align-items:center;gap:12px;background:rgba(242,237,227,.09);border:1px solid rgba(242,237,227,.16);border-radius:30px;padding:8px 20px 8px 8px}
-@media(min-width:769px){@supports(backdrop-filter:blur(4px)){.city-tag{backdrop-filter:blur(4px)}}}
-.city-flag{width:32px;height:32px;border-radius:2px;background:linear-gradient(135deg,var(--verde),var(--oro));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.city-name{font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,.90);display:block;line-height:1}
-.city-sub{font-size:8px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(242,237,227,.60);display:block;margin-top:3px}
-.hero-logo img{width:80px;height:auto;filter:drop-shadow(0 4px 20px rgba(0,0,0,.75)) brightness(1.15);transition:transform .5s var(--ease)}
-.hero-logo img:hover{transform:scale(1.06)}
-.hero-inner{position:relative;z-index:4;padding:0 var(--gutter) 80px;flex:1;display:flex;flex-direction:row;align-items:flex-end;justify-content:space-between;gap:48px}
-.hero-inner-left{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
-.live-chip{display:inline-flex;align-items:center;gap:10px;background:rgba(184,92,42,.12);border:1px solid rgba(184,92,42,.45);border-radius:30px;padding:9px 20px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(232,160,100,.98);margin-bottom:32px;width:fit-content;box-shadow:0 4px 16px rgba(184,92,42,.25),0 0 0 1px rgba(184,92,42,.08)}
-.hero-title{font-family:var(--f-display);font-size:clamp(52px,9vw,108px);line-height:.94;letter-spacing:-1.5px;color:var(--parchment);margin-bottom:36px;display:block}
-.hero-title .eyebrow{font-family:var(--f-italic);font-style:italic;font-size:clamp(13px,1.6vw,20px);font-weight:400;letter-spacing:1px;color:rgba(242,237,227,.38);display:block;margin-bottom:18px;line-height:1}
-.hero-title .main-line em{font-style:italic;background:linear-gradient(100deg,rgba(248,230,210,.98) 0%,rgba(212,116,42,.98) 22%,rgba(255,200,140,1) 46%,rgba(196,90,30,.95) 70%,rgba(232,145,74,.92) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:520% 100%;animation:luxuryShimmer 11s ease-in-out infinite}
-@keyframes luxuryShimmer {
-  0%   { background-position: 160% 50% }
-  55%  { background-position: 30%  50% }
-  75%  { background-position: 10%  50% }
-  100% { background-position: 160% 50% }
-}
-.hero-rule{display:flex;align-items:center;gap:14px;margin-bottom:28px}
-.hero-rule-line{height:1px;width:56px;background:linear-gradient(90deg,var(--oro2),transparent);flex-shrink:0;animation:ruleExpand 1.2s var(--ease-out-expo) forwards}
-.hero-rule-dot{width:5px;height:5px;background:var(--oro2);border-radius:50%;animation:dotGlow 2.5s ease-in-out infinite alternate}
-@keyframes ruleExpand{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
-.hero-sub{font-family:var(--f-italic);font-style:italic;font-size:18px;line-height:1.75;color:rgba(242,237,227,.88);max-width:520px;margin-bottom:40px}
-.hero-sub strong{font-style:normal;color:rgba(242,237,227,.82);font-weight:400}
 
-/* ── IDENTITY STRIP ── */
-.identity-strip{display:flex;align-items:stretch;margin-bottom:44px;width:fit-content;max-width:100%;border:1px solid rgba(184,92,42,.28);border-radius:10px;overflow:hidden;background:rgba(184,92,42,.08);box-shadow:0 8px 32px rgba(0,0,0,.35),0 0 0 1px rgba(184,92,42,.12),inset 0 1px 0 rgba(232,145,74,.10)}
-@media(min-width:769px){@supports(backdrop-filter:blur(12px)){.identity-strip{backdrop-filter:blur(12px)}}}
-.id-stat{display:flex;flex-direction:column;gap:7px;padding:20px 28px;transition:background .4s ease;cursor:default}
-.id-stat:hover{background:rgba(184,92,42,.12)}
-.id-stat+.id-stat{border-left:1px solid rgba(184,92,42,.20)}
-.id-stat-num{font-family:var(--f-display);font-size:clamp(26px,3vw,38px);line-height:1;color:var(--parchment);letter-spacing:-1.5px}
+/* ── FONDO ATMOSFÉRICO — capas de luz del río ── */
+.hero-mesh{
+  position:absolute;inset:0;z-index:0;
+  background:
+    /* Farol principal — esquina superior derecha, naranja-ámbar cálido */
+    radial-gradient(ellipse 65% 70% at 88% 5%,
+      rgba(196,98,26,.62) 0%,
+      rgba(150,65,18,.30) 38%,
+      transparent 65%),
+    /* Farol secundario — esquina inferior izquierda, verde río */
+    radial-gradient(ellipse 55% 65% at 5% 95%,
+      rgba(30,92,56,.28) 0%,
+      rgba(20,60,38,.12) 42%,
+      transparent 62%),
+    /* Neblina central — profundidad */
+    radial-gradient(ellipse 80% 40% at 50% 60%,
+      rgba(28,20,35,.35) 0%,
+      transparent 70%),
+    /* Gradiente base — oscuro cálido */
+    linear-gradient(162deg,
+      #0A0810 0%,
+      #070608 30%,
+      #0C0A0E 65%,
+      #060509 100%);
+  transition:background-position .5s ease;
+}
+
+/* ── ORBS DE LUZ — respiran como agua ── */
+.hero-orb{
+  position:absolute;border-radius:50%;
+  pointer-events:none;z-index:1;
+  contain:layout;filter:blur(0);
+  will-change:transform;
+}
+
+/* Orb principal — luz ámbar grande */
+.hero-orb-1{
+  width:780px;height:780px;
+  top:-220px;right:-200px;
+  background:radial-gradient(circle at 35% 35%,
+    rgba(196,98,26,.22) 0%,
+    rgba(196,98,26,.08) 40%,
+    rgba(30,92,56,.06) 65%,
+    transparent 72%);
+  animation:orbFloat1 16s ease-in-out infinite alternate;
+}
+
+/* Orb secundario — verde musgo profundo */
+.hero-orb-2{
+  width:560px;height:560px;
+  bottom:-200px;left:-160px;
+  background:radial-gradient(circle at 60% 60%,
+    rgba(30,92,56,.16) 0%,
+    rgba(196,98,26,.06) 50%,
+    transparent 70%);
+  animation:orbFloat2 22s ease-in-out infinite alternate;
+}
+
+/* ── Orb terciario — nebulosa interior nueva ── */
+.hero-orb::before{
+  display:none;
+}
+
+@keyframes orbFloat1{
+  from{transform:translate(0,0) scale(1) rotate(0deg)}
+  to{transform:translate(-30px,38px) scale(1.10) rotate(3deg)}
+}
+@keyframes orbFloat2{
+  from{transform:translate(0,0) scale(1) rotate(0deg)}
+  to{transform:translate(36px,-24px) scale(1.14) rotate(-2deg)}
+}
+
+/* ── PARTÍCULAS DECORATIVAS — puntos de luz del río ── */
+.hero::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 22%,rgba(196,98,26,.55) 50%,transparent 50%),
+    radial-gradient(1px 1px at 74% 18%,rgba(196,98,26,.40) 50%,transparent 50%),
+    radial-gradient(1.5px 1.5px at 56% 42%,rgba(245,238,216,.18) 50%,transparent 50%),
+    radial-gradient(1px 1px at 32% 68%,rgba(196,98,26,.30) 50%,transparent 50%),
+    radial-gradient(2px 2px at 88% 72%,rgba(30,92,56,.45) 50%,transparent 50%),
+    radial-gradient(1px 1px at 12% 85%,rgba(245,238,216,.15) 50%,transparent 50%),
+    radial-gradient(1.5px 1.5px at 65% 80%,rgba(196,98,26,.35) 50%,transparent 50%),
+    radial-gradient(1px 1px at 44% 10%,rgba(245,238,216,.20) 50%,transparent 50%),
+    radial-gradient(2px 2px at 91% 38%,rgba(196,98,26,.22) 50%,transparent 50%),
+    radial-gradient(1px 1px at 8% 55%,rgba(30,92,56,.30) 50%,transparent 50%);
+  animation:particleDrift 28s ease-in-out infinite;
+  opacity:1;
+}
+
+/* ── TOPBAR ── */
+.hero-topbar{
+  position:relative;z-index:5;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:32px var(--gutter);
+  flex-shrink:0;
+  animation:slideUpPremium .8s var(--ease-out-expo) both;
+}
+
+/* ── CITY TAG — cápsula con glass ── */
+.city-tag{
+  display:inline-flex;align-items:center;gap:12px;
+  background:rgba(8,7,10,.65);
+  border:1px solid rgba(245,238,216,.14);
+  border-radius:50px;
+  padding:8px 20px 8px 8px;
+  backdrop-filter:blur(12px) saturate(140%);
+  -webkit-backdrop-filter:blur(12px) saturate(140%);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,.40),
+    inset 0 1px 0 rgba(245,238,216,.08),
+    0 0 0 1px rgba(196,98,26,.08);
+  transition:border-color .35s ease,box-shadow .35s ease;
+}
+.city-tag:hover{
+  border-color:rgba(245,238,216,.22);
+  box-shadow:0 4px 28px rgba(0,0,0,.45),inset 0 1px 0 rgba(245,238,216,.10);
+}
+
+.city-flag{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--verde) 0%,var(--oro) 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+  box-shadow:0 2px 10px rgba(196,98,26,.40);
+}
+.city-name{
+  font-family:var(--f-ui);font-size:10px;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(245,238,216,.88);display:block;line-height:1;
+}
+.city-sub{
+  font-size:8px;letter-spacing:1.8px;text-transform:uppercase;
+  color:rgba(245,238,216,.48);display:block;margin-top:3px;
+}
+
+/* ── LOGO ── */
+.hero-logo img{
+  width:76px;height:auto;
+  filter:drop-shadow(0 0 24px rgba(196,98,26,.50)) brightness(1.12);
+  transition:transform .6s var(--ease),filter .6s ease;
+}
+.hero-logo img:hover{
+  transform:scale(1.08) rotate(-2deg);
+  filter:drop-shadow(0 0 32px rgba(196,98,26,.70)) brightness(1.20);
+}
+
+/* ── HERO INNER — layout principal ── */
+.hero-inner{
+  position:relative;z-index:4;
+  padding:0 var(--gutter) 88px;
+  flex:1;display:flex;
+  flex-direction:row;align-items:flex-end;
+  justify-content:space-between;gap:48px;
+}
+.hero-inner-left{
+  flex:1;min-width:0;
+  display:flex;flex-direction:column;justify-content:flex-end;
+}
+
+/* ── LIVE CHIP — con entrada animada ── */
+.live-chip{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,
+    rgba(196,98,26,.16) 0%,
+    rgba(196,98,26,.10) 100%);
+  border:1px solid rgba(196,98,26,.50);
+  border-radius:50px;
+  padding:10px 22px;
+  font-size:10px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;
+  color:rgba(240,168,80,.98);
+  margin-bottom:32px;
+  width:fit-content;
+  box-shadow:
+    0 4px 20px rgba(196,98,26,.22),
+    0 0 0 1px rgba(196,98,26,.08),
+    inset 0 1px 0 rgba(240,168,80,.10);
+  animation:blurIn .9s var(--ease-out-expo) .3s both;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+/* ── HERO TITLE — tipografía display premium ── */
+.hero-title{
+  font-family:var(--f-display);
+  font-size:clamp(52px,9vw,108px);
+  line-height:.93;
+  letter-spacing:-2px;
+  color:var(--parchment);
+  margin-bottom:36px;
+  display:block;
+}
+.hero-title .eyebrow{
+  font-family:var(--f-italic);font-style:italic;
+  font-size:clamp(13px,1.6vw,20px);font-weight:400;
+  letter-spacing:1px;
+  color:rgba(245,238,216,.36);
+  display:block;margin-bottom:20px;line-height:1;
+}
+
+/* ── EM SHIMMER — aurora dorada ── */
+.hero-title .main-line em{
+  font-style:italic;
+  background:linear-gradient(105deg,
+    rgba(248,232,210,.98) 0%,
+    rgba(224,120,40,.98) 18%,
+    rgba(248,218,160,.99) 38%,
+    rgba(196,90,28,.96) 58%,
+    rgba(240,144,64,.94) 75%,
+    rgba(248,232,210,.98) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;background-size:600% 100%;
+  animation:luxuryShimmer 14s ease-in-out infinite;
+  will-change:background-position;
+}
+@keyframes luxuryShimmer{
+  0%{background-position:170% 50%}
+  45%{background-position:40% 50%}
+  70%{background-position:15% 50%}
+  100%{background-position:170% 50%}
+}
+
+/* ── RULE DECORATIVA ── */
+.hero-rule{
+  display:flex;align-items:center;gap:14px;margin-bottom:30px;
+}
+.hero-rule-line{
+  height:1px;width:56px;
+  background:linear-gradient(90deg,var(--oro2),transparent);
+  flex-shrink:0;
+  animation:ruleExpand 1.4s var(--ease-out-expo) .5s both;
+  transform-origin:left;
+}
+.hero-rule-dot{
+  width:5px;height:5px;
+  background:var(--oro2);
+  border-radius:50%;
+  box-shadow:0 0 8px var(--oro2);
+  animation:dotGlow 2.8s ease-in-out infinite;
+}
+
+/* ── HERO SUBTITLE ── */
+.hero-sub{
+  font-family:var(--f-italic);font-style:italic;
+  font-size:18px;line-height:1.80;
+  color:rgba(245,238,216,.85);
+  max-width:530px;margin-bottom:42px;
+}
+.hero-sub strong{
+  font-style:normal;color:rgba(245,238,216,.80);font-weight:400;
+}
+
+/* ── IDENTITY STRIP v3 — contador de métricas premium ── */
+.identity-strip{
+  display:flex;align-items:stretch;
+  margin-bottom:44px;
+  width:fit-content;max-width:100%;
+  border:1px solid rgba(196,98,26,.26);
+  border-radius:12px;overflow:hidden;
+  background:rgba(8,7,10,.72);
+  box-shadow:
+    0 12px 40px rgba(0,0,0,.45),
+    0 0 0 1px rgba(196,98,26,.10),
+    inset 0 1px 0 rgba(245,238,216,.06),
+    inset 0 -1px 0 rgba(0,0,0,.30);
+  backdrop-filter:blur(16px) saturate(140%);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);
+}
+.id-stat{
+  display:flex;flex-direction:column;gap:8px;
+  padding:22px 30px;
+  transition:background .4s ease,transform .3s var(--ease-spring);
+  cursor:default;position:relative;
+  overflow:hidden;
+}
+.id-stat::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(196,98,26,.14),transparent);
+  opacity:0;transition:opacity .4s ease;
+}
+.id-stat:hover::before{opacity:1}
+.id-stat:hover{transform:translateY(-2px)}
+.id-stat+.id-stat{border-left:1px solid rgba(196,98,26,.18)}
+.id-stat-num{
+  font-family:var(--f-display);
+  font-size:clamp(28px,3vw,40px);
+  line-height:1;color:var(--parchment);
+  letter-spacing:-1.5px;
+  text-shadow:0 2px 20px rgba(196,98,26,.30);
+}
 .id-stat-num sup{font-size:14px;color:var(--oro3);vertical-align:super}
-.id-stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(232,180,140,.85);font-weight:600}
+.id-stat-label{
+  font-size:9px;letter-spacing:2px;
+  text-transform:uppercase;
+  color:rgba(240,168,80,.80);font-weight:700;
+}
 
-.hero-ctas{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
-.btn-primary{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,#8B3A15 0%,#A84E1E 50%,#963D18 100%);color:#fff;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:18px 42px;border-radius:50px;transition:background .45s var(--ease),transform .4s var(--ease),box-shadow .4s ease;box-shadow:0 8px 40px rgba(184,92,42,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.18);animation:btnBreath 4s ease-in-out 3s infinite}
-.btn-primary:hover{background:linear-gradient(135deg,#CC7220 0%,#E08830 50%,#D4742A 100%);transform:translateY(-5px);box-shadow:0 28px 64px rgba(184,92,42,.70),0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.22);animation:none}
-@keyframes btnBreath{0%{box-shadow:0 8px 40px rgba(184,92,42,.55),0 2px 8px rgba(0,0,0,.3)}15%{box-shadow:0 8px 52px rgba(184,92,42,.85),0 2px 8px rgba(0,0,0,.3),0 0 0 10px rgba(184,92,42,.10)}100%{box-shadow:0 8px 40px rgba(184,92,42,.55),0 2px 8px rgba(0,0,0,.3)}}
-.btn-ghost{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-italic);font-style:italic;font-size:15px;color:rgba(242,237,227,.55);transition:color .35s ease;border-bottom:1px solid rgba(242,237,227,.25);padding-bottom:2px}
-.btn-ghost:hover{color:rgba(242,237,227,.80);border-bottom-color:rgba(242,237,227,.22)}
-.hero-fade{position:absolute;bottom:0;left:0;right:0;height:160px;background:linear-gradient(to bottom,transparent,rgba(6,6,5,.55));z-index:3;pointer-events:none}
+/* ── CTAs ── */
+.hero-ctas{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+
+/* Botón primario — joya visual */
+.btn-primary{
+  display:inline-flex;align-items:center;gap:12px;
+  background:linear-gradient(140deg,
+    #7A3010 0%,
+    #C46018 45%,
+    #A84A14 100%);
+  color:#fff;
+  font-family:var(--f-ui);font-size:11px;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;
+  padding:19px 44px;border-radius:50px;
+  transition:
+    background .5s var(--ease),
+    transform .4s var(--ease-spring),
+    box-shadow .4s ease;
+  box-shadow:
+    0 8px 32px rgba(196,98,26,.52),
+    0 2px 8px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -1px 0 rgba(0,0,0,.18);
+  animation:btnBreath 4.5s ease-in-out 4s infinite;
+  position:relative;overflow:hidden;
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.10) 50%,transparent 100%);
+  transform:translateX(-100%);
+  transition:transform .6s ease;
+}
+.btn-primary:hover::before{transform:translateX(100%)}
+.btn-primary:hover{
+  background:linear-gradient(140deg,#C06018 0%,#E07826 45%,#CC6E20 100%);
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:
+    0 24px 60px rgba(196,98,26,.68),
+    0 6px 18px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 -1px 0 rgba(0,0,0,.18);
+  animation:none;
+}
+@keyframes btnBreath{
+  0%,100%{box-shadow:0 8px 32px rgba(196,98,26,.52),0 2px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.20)}
+  40%{box-shadow:0 10px 48px rgba(196,98,26,.80),0 2px 8px rgba(0,0,0,.35),0 0 0 12px rgba(196,98,26,.08),inset 0 1px 0 rgba(255,255,255,.22)}
+}
+
+/* Botón ghost — elegante y sutil */
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--f-italic);font-style:italic;font-size:15px;
+  color:rgba(245,238,216,.50);
+  transition:color .35s ease,gap .3s ease;
+  border-bottom:1px solid rgba(245,238,216,.20);
+  padding-bottom:3px;
+}
+.btn-ghost:hover{
+  color:rgba(245,238,216,.85);
+  border-bottom-color:rgba(245,238,216,.40);
+  gap:12px;
+}
+
+/* ── FADE INFERIOR DEL HERO ── */
+.hero-fade{
+  position:absolute;bottom:0;left:0;right:0;
+  height:200px;
+  background:linear-gradient(to bottom,
+    transparent 0%,
+    rgba(8,7,10,.30) 50%,
+    rgba(8,7,10,.75) 100%);
+  z-index:3;pointer-events:none;
+}
 
 /* ── WEATHER WIDGET ── */
 .wx-hero{flex-shrink:0;width:240px;align-self:center;position:relative;z-index:4}
