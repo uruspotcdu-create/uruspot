@@ -499,7 +499,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .rcard-feat .rcard-desc{color:rgba(242,237,227,.46)}
 .rcard.mood-dim{opacity:.32;filter:saturate(.6);pointer-events:none;}
 .rcard.mood-match{box-shadow:0 0 0 2px rgba(196,135,42,.55),0 20px 48px -10px rgba(6,6,5,.30);}
-.rcard.mood-match{box-shadow:0 0 0 2px rgba(196,135,42,.55),0 20px 48px -10px rgba(6,6,5,.30)}
 
 /* ── CAFÉ GRID ── */
 .cafe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.08);border:1px solid rgba(26,25,22,.08)}
@@ -1335,7 +1334,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   .hero-orb-1, .hero-orb-2 { transform: translateZ(0); }
 }
 @media (max-width: 640px) {
-  :root { --gutter: 18px; --section-gap: 60px; }
+  :root { --gutter: 16px; --section-gap: 60px; }
   .hero-topbar    { padding: 20px var(--gutter); gap: 10px; }
   .hero-logo img  { width: 50px; }
   .hero-inner     { padding: 0 var(--gutter) 44px; }
@@ -2159,8 +2158,8 @@ html, body {
 
 /* FIX 5: main-body overflow mobile */
 @media (max-width: 640px) {
-  .main-body {
-    padding: 48px 16px 72px !important;
+.main-body {
+    padding: 48px var(--gutter) 72px;
     box-sizing: border-box;
     overflow-x: hidden;
   }
@@ -2337,7 +2336,7 @@ html, body {
   <button id="nav-scroll-right" aria-label="Ver más secciones" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to right,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 10px 0 16px;position:relative;z-index:2;transition:color .2s ease">❯</button>
 </nav>
 
-<div class="section-crumb" id="section-crumb">
+<div class="section-crumb" id="section-crumb" aria-live="polite" aria-atomic="true">
   <span class="section-crumb-dot" aria-hidden="true"></span>
   Estás viendo: <span class="section-crumb-current" id="section-crumb-current">Empezar</span>
 </div>
@@ -3766,7 +3765,7 @@ html, body {
 
 </section>
   <!-- ===================== VETERINARIAS ===================== --> 
-  <section class="us-section" id="veterinarias" aria-labelledby="title-veterinarias"> <div class="section-header"> <div> <span class="section-eyebrow">Clínicas · Pet shops</span> <h2 class="section-title" id="title-veterinarias">🐾 Veterinarias y Mascotas</h2> </div> <span class="section-count">6 lugares verificados</span> <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div> </div> <div class="list-items" id="grid-veterinarias"> <a class="litem reveal searchable" data-name="Veterinaria FISIOVET" data-tags="veterinaria clinica fisioterapia rehabilitacion cirugia ecografia radiografia peluqueria canina" href="tel:+5493442498143" aria-label="Veterinaria FISIOVET, J.J. Bruno 2942, llamar al +54 9 3442 49-8143"> <span class="litem-icon" aria-hidden="true">💆</span> <span class="litem-name"> Veterinaria FISIOVET <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> J.J. Bruno 2942 · Lu-Vi 9-12:30 y 16-19:30 · Sáb 9-12:30 · Fisioterapia · Cirugía · Radiografía y Ecografía · +54 9 3442 49-8143 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dr. Vet" data-tags="veterinaria clinica cirugia" href="tel:+5493442660101" style="--reveal-delay:70ms" aria-label="Clínica Veterinaria Dr. Vet, Bv. Aráoz 115, llamar al +54 9 3442 66-0101"> <span class="litem-icon" aria-hidden="true">🏥</span> <span class="litem-name"> Clínica Veterinaria Dr. Vet <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Bv. Aráoz 115 · +54 9 3442 66-0101 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Agroveterinaria 9 de Julio" data-tags="veterinaria agroveterinaria clinica farmacia grandes animales pequeños animales alimentos balanceados" href="tel:+543442427801" style="--reveal-delay:140ms" aria-label="Agroveterinaria 9 de Julio, 9 de Julio 1016, llamar al 03442 42-7801"> <span class="litem-icon" aria-hidden="true">🌾</span> <span class="litem-name"> Agroveterinaria 9 de Julio <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> 9 de Julio 1016 · Lu-Vi 8-12 y 16-20 · Sáb y Dom cerrado · Grandes y pequeños animales · 03442 42-7801 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dres. Artusi y Bruchez" data-tags="veterinaria clinica belgrano artusi bruchez" href="tel:+543442422164" style="--reveal-delay:210ms" aria-label="Clínica Veterinaria Dres. Artusi y Bruchez, Belgrano 900, llamar al 03442 42-2164"> <span class="litem-icon" aria-hidden="true">🩺</span> <span class="litem-name"> Clínica Veterinaria Dres. Artusi y Bruchez <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Belgrano 900 · 03442 42-2164 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="ATP Veterinaria" data-tags="veterinaria clinica cirugia vacunacion farmacia alimentos pet shop mascotas" href="tel:+543442450418" style="--reveal-delay:280ms" aria-label="ATP Veterinaria, Blvd. Hipólito Yrigoyen 949, llamar al 03442 45-0418"> <span class="litem-icon" aria-hidden="true">💉</span> <span class="litem-name"> ATP Veterinaria <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Blvd. Hipólito Yrigoyen 949 · Lu-Vi 8-20 · Cirugía · Pet shop · 03442 45-0418 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Dog Center Pet Shop" data-tags="pet shop peluqueria canina baño corte alimentos accesorios mascotas" href="tel:+543442408275" style="--reveal-delay:350ms" aria-label="Dog Center Pet Shop, Sarmiento 801, llamar al 03442 40-8275"> <span class="litem-icon" aria-hidden="true">🛒</span> <span class="litem-name"> Dog Center Pet Shop <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Sarmiento 801 · Lu-Sáb desde 8:30 · Pet shop y peluquería canina · 03442 40-8275 </span> </span> <span class="litem-arrow">→</span> </a> </div> <p style="font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.50);line-height:1.8;padding:16px 22px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:1px"> ⚠️ <strong>Nota editorial:</strong> Los horarios de Dr. Vet y Dres. Artusi-Bruchez no se publican por variación entre fuentes — llamar antes de concurrir. No existe veterinaria con guardia 24 hs explícitamente verificada en CdU. </p> <p class="search-no-results" id="no-results-veterinarias">No se encontraron veterinarias con ese nombre.</p> </section>
+  <section class="us-section" id="veterinarias" aria-labelledby="title-veterinarias"> <div class="section-header"> <div> <span class="section-eyebrow">Clínicas · Pet shops</span> <h2 class="section-title" id="title-veterinarias">🐾 Veterinarias y Mascotas</h2> </div> <span class="section-count">6 lugares verificados</span> <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div> </div> <div class="list-items" id="grid-veterinarias"> <a class="litem reveal searchable" data-name="Veterinaria FISIOVET" data-tags="veterinaria clinica fisioterapia rehabilitacion cirugia ecografia radiografia peluqueria canina" href="tel:+5493442498143" aria-label="Veterinaria FISIOVET, J.J. Bruno 2942, llamar al +54 9 3442 49-8143"> <span class="litem-icon" aria-hidden="true">💆</span> <span class="litem-name"> Veterinaria FISIOVET <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> J.J. Bruno 2942 · Lu-Vi 9-12:30 y 16-19:30 · Sáb 9-12:30 · Fisioterapia · Cirugía · Radiografía y Ecografía · +54 9 3442 49-8143 </span> </span> <span class="litem-arrow" aria-hidden="true">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dr. Vet" data-tags="veterinaria clinica cirugia" href="tel:+5493442660101" style="--reveal-delay:70ms" aria-label="Clínica Veterinaria Dr. Vet, Bv. Aráoz 115, llamar al +54 9 3442 66-0101"> <span class="litem-icon" aria-hidden="true">🏥</span> <span class="litem-name"> Clínica Veterinaria Dr. Vet <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Bv. Aráoz 115 · +54 9 3442 66-0101 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Agroveterinaria 9 de Julio" data-tags="veterinaria agroveterinaria clinica farmacia grandes animales pequeños animales alimentos balanceados" href="tel:+543442427801" style="--reveal-delay:140ms" aria-label="Agroveterinaria 9 de Julio, 9 de Julio 1016, llamar al 03442 42-7801"> <span class="litem-icon" aria-hidden="true">🌾</span> <span class="litem-name"> Agroveterinaria 9 de Julio <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> 9 de Julio 1016 · Lu-Vi 8-12 y 16-20 · Sáb y Dom cerrado · Grandes y pequeños animales · 03442 42-7801 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Clínica Veterinaria Dres. Artusi y Bruchez" data-tags="veterinaria clinica belgrano artusi bruchez" href="tel:+543442422164" style="--reveal-delay:210ms" aria-label="Clínica Veterinaria Dres. Artusi y Bruchez, Belgrano 900, llamar al 03442 42-2164"> <span class="litem-icon" aria-hidden="true">🩺</span> <span class="litem-name"> Clínica Veterinaria Dres. Artusi y Bruchez <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Belgrano 900 · 03442 42-2164 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="ATP Veterinaria" data-tags="veterinaria clinica cirugia vacunacion farmacia alimentos pet shop mascotas" href="tel:+543442450418" style="--reveal-delay:280ms" aria-label="ATP Veterinaria, Blvd. Hipólito Yrigoyen 949, llamar al 03442 45-0418"> <span class="litem-icon" aria-hidden="true">💉</span> <span class="litem-name"> ATP Veterinaria <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Blvd. Hipólito Yrigoyen 949 · Lu-Vi 8-20 · Cirugía · Pet shop · 03442 45-0418 </span> </span> <span class="litem-arrow">→</span> </a> <a class="litem reveal searchable" data-name="Dog Center Pet Shop" data-tags="pet shop peluqueria canina baño corte alimentos accesorios mascotas" href="tel:+543442408275" style="--reveal-delay:350ms" aria-label="Dog Center Pet Shop, Sarmiento 801, llamar al 03442 40-8275"> <span class="litem-icon" aria-hidden="true">🛒</span> <span class="litem-name"> Dog Center Pet Shop <span style="font-family:var(--f-ui);font-size:10px;font-weight:600;letter-spacing:.5px;color:rgba(242,237,227,.40);display:block;margin-top:4px"> Sarmiento 801 · Lu-Sáb desde 8:30 · Pet shop y peluquería canina · 03442 40-8275 </span> </span> <span class="litem-arrow">→</span> </a> </div> <p style="font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.50);line-height:1.8;padding:16px 22px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:1px"> ⚠️ <strong>Nota editorial:</strong> Los horarios de Dr. Vet y Dres. Artusi-Bruchez no se publican por variación entre fuentes — llamar antes de concurrir. No existe veterinaria con guardia 24 hs explícitamente verificada en CdU. </p> <p class="search-no-results" id="no-results-veterinarias">No se encontraron veterinarias con ese nombre.</p> </section>
   
   
   <!-- ===================== REMISERÍAS ===================== -->
@@ -5837,8 +5836,8 @@ html, body {
       ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;
       ctx.fillRect(-p.r,-p.r*.5,p.r*2,p.r);ctx.restore();
     });
-    if(alive){rafId=requestAnimationFrame(loop);}
-    else{rafId=null;}
+if(alive){rafId=requestAnimationFrame(loop);}
+    else{rafId=null;if(c&&c.parentNode){c.parentNode.removeChild(c);}}
   }
   function cleanup(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
   window.addEventListener('pagehide',cleanup,{once:true});
@@ -7369,6 +7368,8 @@ var mesh=document.querySelector('.hero-mesh');
 'use strict';
   var _wxAbortController = null;
   var srDebId = null;
+  var _cachedOrb1 = document.querySelector('.hero-orb-1');
+  var _cachedOrb2 = document.querySelector('.hero-orb-2');
 
   /* ── MODO TEMPORAL ── */
   var globalTimeMode = (function(){
@@ -7511,12 +7512,10 @@ if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
           var intensity = Math.min(sy / 400, 1);
           heroMesh.style.opacity = 1 - intensity * 0.35;
         }
-        if(window.innerWidth > 768 && sy < 700){
-          var orb1 = document.querySelector('.hero-orb-1');
-          var orb2 = document.querySelector('.hero-orb-2');
-          if(orb1) orb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
-          if(orb2) orb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
-        }
+if(window.innerWidth > 768 && sy < 700){
+        if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
+        if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
+      }
         if(heroTitleEms.length && sy < 500){
           var t = sy / 500;
           var ls = -4 + t * 2;
@@ -7597,11 +7596,16 @@ function createSectionObserver(){
     return new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         if(entry.isIntersecting){
-          var id=entry.target.getAttribute('id');
+var id=entry.target.getAttribute('id');
           navItems.forEach(function(item){
             var isActive = item.dataset.section===id;
             item.classList.toggle('active',isActive);
-            if(isActive) moveIndicator(item);
+            if(isActive){
+              moveIndicator(item);
+              item.setAttribute('aria-current','location');
+            } else {
+              item.removeAttribute('aria-current');
+            }
           });
         }
       });
@@ -8120,7 +8124,9 @@ window.__uruspotWeatherInterval = setInterval(function(){ fetchWeather(); }, 10*
 
       moodBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
 
-      if (alreadyActive) {
+ if (alreadyActive) {
+        this.classList.remove('active');
+        this.setAttribute('aria-pressed', 'false');
         clearMoodFilter();
         moodResult.classList.remove('open');
         setSuggestion(null);
@@ -8197,15 +8203,12 @@ function activateHtTab(idx, moveFocus){
       t.setAttribute('aria-selected', active ? 'true' : 'false');
       t.setAttribute('tabindex', active ? '0' : '-1');
     });
-    htPanels.forEach(function(p,i){
+htPanels.forEach(function(p,i){
       var active = i===idx;
       if(active){
         p.removeAttribute('hidden');
         p.removeAttribute('aria-hidden');
-        p.removeAttribute('hidden');
-        p.removeAttribute('aria-hidden');
         p.inert = false;
-        p.setAttribute('tabindex', '-1');
         p.setAttribute('tabindex', '-1');
         var bar = p.querySelector('.ht-bar-fill');
         if(bar){
@@ -8216,7 +8219,7 @@ function activateHtTab(idx, moveFocus){
         }
         p.classList.add('ht-chapter-active');
         if(moveFocus){ p.focus(); }
-   } else {
+      } else {
         p.classList.remove('ht-chapter-active');
         p.removeAttribute('tabindex');
         p.setAttribute('hidden', '');
@@ -8276,26 +8279,28 @@ function applyCollapsed(section, header, collapsed){
       section.classList.toggle('acc-collapsed', collapsed);
       header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
 
-      var content = getCollapsibleContent(section, header);
+var content = getCollapsibleContent(section, header);
       if(supportsInert){
         content.forEach(function(el){ el.inert = collapsed; });
       } else {
-        /* Fallback para navegadores sin inert: tabindex -1 en focusables */
         content.forEach(function(el){
-          var focusables = el.querySelectorAll('a,button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])');
-          focusables.forEach(function(f){
-            if(collapsed){
+          if(collapsed){
+            el.setAttribute('aria-hidden','true');
+            var focusables = el.querySelectorAll('a,button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])');
+            focusables.forEach(function(f){
               f.dataset.prevTabindex = f.getAttribute('tabindex') || '';
               f.setAttribute('tabindex','-1');
-              f.setAttribute('aria-hidden','true');
-            } else {
+            });
+          } else {
+            el.removeAttribute('aria-hidden');
+            var focusables = el.querySelectorAll('[data-prevtabindex]');
+            focusables.forEach(function(f){
               var prev = f.dataset.prevTabindex;
               if(prev === ''){ f.removeAttribute('tabindex'); }
               else { f.setAttribute('tabindex', prev); }
-              f.removeAttribute('aria-hidden');
               delete f.dataset.prevTabindex;
-            }
-          });
+            });
+          }
         });
       }
     }
