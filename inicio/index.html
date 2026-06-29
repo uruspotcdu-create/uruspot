@@ -13,7 +13,7 @@
 <link rel="dns-prefetch" href="//images.unsplash.com" />
 <link rel="preload" as="image" href="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" fetchpriority="high" type="image/webp" />
 <link rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+  href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
   media="print" onload="this.media='all'" />
 <noscript>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600&display=swap" />
@@ -2495,7 +2495,35 @@ html, body {
     font-size: clamp(22px, 7vw, 32px) !important;
   }
 }
-
+/* ── CORRIENTE SUBMARINA ── */
+.hero-current {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.hc-particle {
+  position: absolute;
+  left: var(--hcp-x);
+  top: var(--hcp-y);
+  width: var(--hcp-size);
+  height: var(--hcp-size);
+  border-radius: 50%;
+  background: rgba(10,255,239,0.80);
+  box-shadow: 0 0 6px rgba(10,255,239,0.90), 0 0 12px rgba(10,255,239,0.40);
+  animation: particleFloat var(--hcp-dur) ease-in-out var(--hcp-del) infinite;
+}
+@keyframes particleFloat {
+  0%   { transform: translate(0,0) scale(1); opacity: 0; }
+  10%  { opacity: 0.8; }
+  30%  { transform: translate(-18px,-25px) scale(1.2); opacity: 1; }
+  55%  { transform: translate(12px,-45px) scale(0.85); opacity: 0.6; }
+  80%  { transform: translate(-8px,-70px) scale(1.1); opacity: 0.9; }
+  100% { transform: translate(5px,-95px) scale(0.7); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hc-particle { animation: none; opacity: 0; }
+}
 /* FIX 2b: Forzar clase visible en contadores del hero para que el
    revealObserver los detecte con el selector correcto */
 #hero-stats-strip .id-stat {
@@ -2605,6 +2633,1245 @@ html, body {
   from{background-position:0 0, 0 0;}
   to{background-position:8px 8px, 8px 8px;}
 }
+  /* ── IMPORTAR NUEVA TIPOGRAFÍA DISPLAY ── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+/* ── NUEVOS TOKENS DE DISEÑO ── */
+:root {
+  /* Paleta bioluminiscente */
+  --bio-deep:     #020B12;
+  --bio-dark:     #050F18;
+  --bio-mid:      #071525;
+  --bio-surface:  #0A1E30;
+  --bio-glow:     #0AFFEF;
+  --bio-glow2:    #05D9C8;
+  --bio-amber:    #E8A030;
+  --bio-amber2:   #F5C060;
+  --bio-river:    #0A4A6E;
+  --bio-foam:     rgba(10,255,239,0.06);
+  
+  /* Fuentes rediseñadas */
+  --f-display:    'Playfair Display', 'DM Serif Display', Georgia, serif;
+  --f-italic:     'Playfair Display', 'DM Serif Display', Georgia, serif;
+  --f-ui:         'Space Grotesk', 'Syne', system-ui, sans-serif;
+  
+  /* Easing cinematográfico */
+  --ease-river:   cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-tide:    cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease-depth:   cubic-bezier(0.77, 0, 0.175, 1);
+  
+  /* Sombras con luz desde abajo */
+  --glow-teal:    0 0 40px rgba(10,255,239,0.15), 0 0 80px rgba(10,255,239,0.08);
+  --glow-amber:   0 0 40px rgba(232,160,48,0.20), 0 0 80px rgba(232,160,48,0.10);
+  --glow-deep:    0 40px 80px rgba(2,11,18,0.80), 0 8px 20px rgba(2,11,18,0.60);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CUERPO — fondo oceánico profundo
+   ═══════════════════════════════════════════════════════ */
+body {
+  background: var(--bio-deep);
+  font-family: var(--f-ui);
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO — nueva dirección visual completa
+   ═══════════════════════════════════════════════════════ */
+
+.hero {
+  background: var(--bio-deep);
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+}
+
+/* Fondo oceánico multicapa */
+.hero-mesh {
+  background:
+    /* Reflejo lunar en el río — arriba */
+    radial-gradient(ellipse 50% 35% at 72% 0%,
+      rgba(10,255,239,0.22) 0%,
+      rgba(5,217,200,0.10) 40%,
+      transparent 70%),
+    /* Luz ámbar — calor de la ciudad */
+    radial-gradient(ellipse 40% 50% at 18% 95%,
+      rgba(232,160,48,0.18) 0%,
+      rgba(180,100,20,0.08) 45%,
+      transparent 68%),
+    /* Profundidad del río — centro */
+    radial-gradient(ellipse 90% 60% at 50% 100%,
+      rgba(10,30,48,0.90) 0%,
+      transparent 60%),
+    /* Gradiente base oceánico */
+    linear-gradient(168deg,
+      #020B12 0%,
+      #030D18 25%,
+      #050F1E 55%,
+      #020A14 80%,
+      #010810 100%);
+  transition: none;
+  will-change: transform;
+}
+
+/* ── NUEVA TEXTURA: ONDAS DE AGUA SUPERFICIALES ── */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    /* Red de ondas bioluminiscentes */
+    repeating-linear-gradient(
+      85deg,
+      transparent 0px,
+      transparent 120px,
+      rgba(10,255,239,0.018) 121px,
+      rgba(10,255,239,0.018) 122px
+    ),
+    repeating-linear-gradient(
+      175deg,
+      transparent 0px,
+      transparent 180px,
+      rgba(10,255,239,0.012) 181px,
+      rgba(10,255,239,0.012) 182px
+    );
+  animation: waterRippleShift 25s ease-in-out infinite alternate;
+  opacity: 0.7;
+}
+
+@keyframes waterRippleShift {
+  0%   { transform: skewX(0deg)  skewY(0deg)  scale(1);    opacity: 0.7; }
+  33%  { transform: skewX(.4deg) skewY(.1deg) scale(1.02); opacity: 0.9; }
+  66%  { transform: skewX(-.3deg) skewY(.2deg) scale(0.99); opacity: 0.6; }
+  100% { transform: skewX(.2deg) skewY(-.1deg) scale(1.01); opacity: 0.8; }
+}
+
+/* ── ORBS REDISEÑADOS — medusas bioluminiscentes ── */
+.hero-orb {
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  will-change: transform;
+  contain: layout;
+  mix-blend-mode: screen;
+}
+
+.hero-orb-1 {
+  width: 900px;
+  height: 900px;
+  top: -350px;
+  right: -250px;
+  background: radial-gradient(circle at 38% 42%,
+    rgba(10,255,239,0.13) 0%,
+    rgba(5,180,200,0.07) 35%,
+    rgba(0,60,120,0.05) 60%,
+    transparent 72%);
+  animation: orbPulse1 20s ease-in-out infinite alternate;
+  filter: blur(1px);
+}
+
+.hero-orb-2 {
+  width: 700px;
+  height: 700px;
+  bottom: -250px;
+  left: -180px;
+  background: radial-gradient(circle at 55% 52%,
+    rgba(232,160,48,0.12) 0%,
+    rgba(180,80,20,0.06) 45%,
+    rgba(10,255,239,0.04) 65%,
+    transparent 75%);
+  animation: orbPulse2 26s ease-in-out infinite alternate;
+  filter: blur(2px);
+}
+
+@keyframes orbPulse1 {
+  0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity: 0.9; }
+  30%  { transform: translate(-25px,40px) scale(1.08) rotate(2deg); opacity: 1; }
+  70%  { transform: translate(15px,-20px) scale(0.95) rotate(-1deg); opacity: 0.75; }
+  100% { transform: translate(-40px,60px) scale(1.12) rotate(3deg); opacity: 0.95; }
+}
+
+@keyframes orbPulse2 {
+  0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity: 0.8; }
+  40%  { transform: translate(30px,-35px) scale(1.10) rotate(-2deg); opacity: 1; }
+  80%  { transform: translate(-20px,25px) scale(0.92) rotate(1deg); opacity: 0.7; }
+  100% { transform: translate(45px,-50px) scale(1.15) rotate(-3deg); opacity: 0.9; }
+}
+
+/* ── NUEVO ELEMENTO: SUPERFICIE DEL RÍO — línea horizontal de luz ── */
+.hero-river-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  /* Eliminamos la grid y la reemplazamos con ondas de luz del río */
+  background: none;
+  overflow: hidden;
+}
+
+.hero-river-grid::before {
+  content: '';
+  position: absolute;
+  left: -100%;
+  right: -100%;
+  bottom: 30%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    transparent 15%,
+    rgba(10,255,239,0.35) 35%,
+    rgba(10,255,239,0.65) 50%,
+    rgba(10,255,239,0.35) 65%,
+    transparent 85%,
+    transparent 100%);
+  animation: riverLineSlide 8s ease-in-out infinite alternate;
+  filter: blur(0.5px);
+}
+
+.hero-river-grid::after {
+  content: '';
+  position: absolute;
+  left: -100%;
+  right: -100%;
+  bottom: calc(30% - 80px);
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    transparent 25%,
+    rgba(10,255,239,0.15) 45%,
+    rgba(10,255,239,0.25) 50%,
+    rgba(10,255,239,0.15) 55%,
+    transparent 75%,
+    transparent 100%);
+  animation: riverLineSlide 11s ease-in-out infinite alternate-reverse;
+  opacity: 0.6;
+}
+
+@keyframes riverLineSlide {
+  0%   { transform: translateX(0%) scaleX(0.7); opacity: 0.6; }
+  50%  { transform: translateX(8%) scaleX(1.0); opacity: 1.0; }
+  100% { transform: translateX(-5%) scaleX(0.85); opacity: 0.7; }
+}
+
+/* ── PARTÍCULAS — plancton bioluminiscente ── */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 28%, rgba(10,255,239,0.70) 50%, transparent 50%),
+    radial-gradient(1px 1px at 85% 15%, rgba(10,255,239,0.50) 50%, transparent 50%),
+    radial-gradient(2px 2px at 45% 60%, rgba(232,160,48,0.45) 50%, transparent 50%),
+    radial-gradient(1px 1px at 28% 78%, rgba(10,255,239,0.35) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 68% 85%, rgba(10,255,239,0.55) 50%, transparent 50%),
+    radial-gradient(1px 1px at 8% 50%, rgba(232,160,48,0.30) 50%, transparent 50%),
+    radial-gradient(2px 2px at 92% 65%, rgba(10,255,239,0.40) 50%, transparent 50%),
+    radial-gradient(1px 1px at 55% 8%, rgba(232,160,48,0.35) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 38% 42%, rgba(10,255,239,0.25) 50%, transparent 50%),
+    radial-gradient(1px 1px at 75% 35%, rgba(232,160,48,0.20) 50%, transparent 50%),
+    radial-gradient(2px 2px at 22% 12%, rgba(10,255,239,0.60) 50%, transparent 50%),
+    radial-gradient(1px 1px at 62% 22%, rgba(10,255,239,0.30) 50%, transparent 50%);
+  animation: planktonDrift 35s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+@keyframes planktonDrift {
+  0%   { transform: translate(0, 0) scale(1); }
+  20%  { transform: translate(-15px,-25px) scale(1.05); }
+  40%  { transform: translate(20px,-10px) scale(0.96); }
+  60%  { transform: translate(-8px,18px) scale(1.08); }
+  80%  { transform: translate(12px,-30px) scale(0.98); }
+  100% { transform: translate(-5px,5px) scale(1.02); }
+}
+
+/* ── TOPBAR REDISEÑADA ── */
+.hero-topbar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px var(--gutter);
+  flex-shrink: 0;
+  animation: slideUpPremium .9s var(--ease-river) both;
+  /* Línea inferior sutil */
+  border-bottom: 1px solid rgba(10,255,239,0.08);
+}
+
+/* ── CITY TAG REDISEÑADO ── */
+.city-tag {
+  background: rgba(2,11,18,0.75);
+  border: 1px solid rgba(10,255,239,0.22);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.50),
+    inset 0 1px 0 rgba(10,255,239,0.10),
+    0 0 20px rgba(10,255,239,0.06);
+  transition: border-color .4s ease, box-shadow .4s ease;
+}
+
+.city-tag:hover {
+  border-color: rgba(10,255,239,0.45);
+  box-shadow:
+    0 4px 28px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(10,255,239,0.14),
+    0 0 30px rgba(10,255,239,0.12);
+}
+
+.city-flag {
+  background: linear-gradient(135deg,
+    rgba(10,255,239,0.25) 0%,
+    rgba(5,180,200,0.15) 50%,
+    rgba(232,160,48,0.20) 100%);
+  border: 1px solid rgba(10,255,239,0.30);
+  box-shadow: 0 0 12px rgba(10,255,239,0.25);
+}
+
+.city-name {
+  color: rgba(10,255,239,0.90);
+  letter-spacing: 3px;
+}
+.city-sub {
+  color: rgba(10,255,239,0.45);
+  letter-spacing: 2px;
+}
+
+/* ── LOGO REDISEÑADO ── */
+.hero-logo img {
+  filter: 
+    drop-shadow(0 0 16px rgba(10,255,239,0.35))
+    drop-shadow(0 0 32px rgba(10,255,239,0.15))
+    brightness(1.10);
+  transition: transform .7s var(--ease-tide), filter .7s ease;
+}
+
+.hero-logo img:hover {
+  transform: scale(1.10) rotate(-3deg);
+  filter:
+    drop-shadow(0 0 24px rgba(10,255,239,0.55))
+    drop-shadow(0 0 48px rgba(10,255,239,0.25))
+    brightness(1.20);
+}
+
+/* ── LIVE CHIP REDISEÑADO ── */
+.live-chip {
+  background: linear-gradient(135deg,
+    rgba(10,255,239,0.12) 0%,
+    rgba(5,180,200,0.07) 100%);
+  border: 1px solid rgba(10,255,239,0.40);
+  color: rgba(10,255,239,0.95);
+  box-shadow:
+    0 4px 20px rgba(10,255,239,0.12),
+    inset 0 1px 0 rgba(10,255,239,0.12);
+  letter-spacing: 2.5px;
+}
+
+/* ── TÍTULO HERO — nuevo tratamiento tipográfico ── */
+.hero-title {
+  font-family: var(--f-display);
+  letter-spacing: -3px;
+  line-height: .90;
+}
+
+/* Nueva animación del shimmer — luz submarina */
+.hero-title .main-line em {
+  background: linear-gradient(105deg,
+    rgba(255,250,235,0.99) 0%,
+    rgba(10,255,239,0.99) 15%,
+    rgba(255,220,140,0.98) 32%,
+    rgba(10,200,200,0.96) 50%,
+    rgba(255,210,100,0.97) 67%,
+    rgba(10,255,239,0.98) 80%,
+    rgba(255,250,235,0.99) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 700% 100%;
+  animation: bioShimmer 10s ease-in-out infinite;
+  will-change: background-position;
+}
+
+@keyframes bioShimmer {
+  0%   { background-position: 200% 50%; }
+  40%  { background-position: 50% 50%; }
+  65%  { background-position: 20% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ── HERO SUBTITLE ── */
+.hero-sub {
+  color: rgba(200,230,235,0.78);
+}
+
+/* ── IDENTITY STRIP — nuevo aspecto ── */
+.identity-strip {
+  background: rgba(2,11,18,0.80);
+  border: 1px solid rgba(10,255,239,0.18);
+  box-shadow:
+    0 16px 48px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(10,255,239,0.06),
+    inset 0 1px 0 rgba(10,255,239,0.10),
+    inset 0 -1px 0 rgba(0,0,0,0.30);
+}
+
+.id-stat + .id-stat {
+  border-left-color: rgba(10,255,239,0.15);
+}
+
+.id-stat-num {
+  color: rgba(220,245,248,0.97);
+  text-shadow: 0 0 20px rgba(10,255,239,0.25);
+}
+
+.id-stat-num sup {
+  color: var(--bio-glow);
+}
+
+.id-stat-label {
+  color: rgba(10,255,239,0.70);
+}
+
+/* ── BOTÓN PRIMARIO REDISEÑADO — cristal líquido ── */
+.btn-primary {
+  background: linear-gradient(140deg,
+    rgba(2,60,70,0.95) 0%,
+    rgba(4,120,130,0.90) 45%,
+    rgba(3,90,100,0.95) 100%);
+  border: 1px solid rgba(10,255,239,0.45);
+  box-shadow:
+    0 8px 32px rgba(10,255,239,0.20),
+    0 2px 8px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(10,255,239,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.25);
+  color: rgba(220,255,253,0.98);
+  letter-spacing: 2.5px;
+  font-weight: 700;
+  animation: btnTidePulse 5s ease-in-out 5s infinite;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(140deg,
+    rgba(4,90,105,0.98) 0%,
+    rgba(6,160,175,0.95) 45%,
+    rgba(5,130,145,0.98) 100%);
+  border-color: rgba(10,255,239,0.70);
+  box-shadow:
+    0 20px 60px rgba(10,255,239,0.35),
+    0 6px 20px rgba(0,0,0,0.40),
+    inset 0 1px 0 rgba(10,255,239,0.35),
+    0 0 0 4px rgba(10,255,239,0.08);
+  transform: translateY(-7px) scale(1.025);
+  color: #fff;
+  animation: none;
+}
+
+@keyframes btnTidePulse {
+  0%,100% {
+    box-shadow: 0 8px 32px rgba(10,255,239,0.20), 0 2px 8px rgba(0,0,0,0.45), inset 0 1px 0 rgba(10,255,239,0.25);
+  }
+  50% {
+    box-shadow: 0 10px 50px rgba(10,255,239,0.40), 0 2px 8px rgba(0,0,0,0.45), 0 0 0 12px rgba(10,255,239,0.06), inset 0 1px 0 rgba(10,255,239,0.30);
+  }
+}
+
+/* ── HERO RULE ── */
+.hero-rule-line {
+  background: linear-gradient(90deg, rgba(10,255,239,0.55), transparent);
+}
+.hero-rule-dot {
+  background: var(--bio-glow);
+  box-shadow: 0 0 10px var(--bio-glow);
+}
+
+/* ── FADE INFERIOR ── */
+.hero-fade {
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(2,11,18,0.40) 55%,
+    rgba(2,11,18,0.85) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVBAR — cristal bioluminiscente
+   ═══════════════════════════════════════════════════════ */
+
+.main-nav {
+  background: rgba(2,11,18,0.70) !important;
+  border-bottom: 1px solid rgba(10,255,239,0.10) !important;
+  backdrop-filter: saturate(200%) blur(24px) !important;
+  -webkit-backdrop-filter: saturate(200%) blur(24px) !important;
+}
+
+.main-nav.scrolled {
+  background: rgba(2,11,18,0.92) !important;
+  box-shadow:
+    0 1px 0 rgba(10,255,239,0.10),
+    0 8px 40px rgba(0,0,0,0.50) !important;
+}
+
+.nav-item {
+  color: rgba(180,220,225,0.65);
+  font-family: var(--f-ui);
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  font-size: 9px;
+  transition: color .3s ease, text-shadow .3s ease;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: rgba(10,255,239,0.95);
+  text-shadow: 0 0 20px rgba(10,255,239,0.55);
+}
+
+.nav-indicator {
+  background: var(--bio-glow);
+  box-shadow:
+    0 0 10px var(--bio-glow),
+    0 0 20px rgba(10,255,239,0.40);
+}
+
+.search-icon-btn:hover {
+  color: var(--bio-glow);
+  background: rgba(10,255,239,0.06);
+}
+
+/* ── SECTION CRUMB ── */
+.section-crumb {
+  background: rgba(230,245,248,0.97) !important;
+  border-bottom: 1px solid rgba(10,150,160,0.12) !important;
+}
+.section-crumb-dot {
+  background: var(--bio-river);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BARRA DE PROGRESO — marea subiendo
+   ═══════════════════════════════════════════════════════ */
+
+#progress-bar {
+  background: linear-gradient(90deg, var(--bio-river), var(--bio-glow));
+  box-shadow: 0 0 8px rgba(10,255,239,0.80);
+}
+
+#progress-bar::after {
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255,255,255,0.50),
+    transparent);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN BODY — superficie iluminada
+   ═══════════════════════════════════════════════════════ */
+
+.main-body {
+  background: #F0EBE0;
+  position: relative;
+}
+
+.main-body::after {
+  background: linear-gradient(to bottom, var(--bio-deep), transparent);
+}
+
+.main-body::before {
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(10,150,160,0.05) 0%, transparent 45%),
+    radial-gradient(circle at 90% 100%, rgba(232,160,48,0.05) 0%, transparent 40%);
+}
+
+/* ── SECTION HEADERS ── */
+.section-eyebrow {
+  color: var(--bio-river);
+  letter-spacing: 4px;
+  font-weight: 700;
+}
+
+.section-title {
+  font-family: var(--f-display);
+  letter-spacing: -.5px;
+}
+
+.section-header-accent span:nth-child(1) {
+  background: linear-gradient(90deg, var(--bio-river), #2A90A0);
+}
+.section-header-accent span:nth-child(2) {
+  background: linear-gradient(90deg, #2A90A0, #4AB0C0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TARJETAS OSCURAS — reflejos submarinos
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  --card-dark:   #050F18;
+  --card-dark2:  #070D1C;
+  --card-dark3:  #0A1525;
+  --card-border-oro:       rgba(10,180,200,0.22);
+  --card-border-oro-hover: rgba(10,255,239,0.52);
+  --card-text:       rgba(220,245,248,0.96);
+  --card-text-soft:  rgba(180,220,228,0.82);
+  --card-tag:        rgba(10,255,239,0.55);
+}
+
+/* RCARD — tarjetas de restaurantes */
+.rcard {
+  border-radius: var(--radius-card);
+  background: linear-gradient(160deg,
+    #050F18 0%,
+    #070D1C 100%);
+  border-color: rgba(10,180,200,0.22);
+  transition:
+    background .4s var(--ease-river),
+    transform .45s var(--ease-tide),
+    box-shadow .45s ease,
+    border-color .35s ease,
+    opacity .3s ease;
+}
+
+.rcard:not(.rcard-feat):not(.rcard-ad):hover {
+  background: linear-gradient(160deg, #0A1525 0%, #07121E 100%);
+  border-color: rgba(10,255,239,0.50);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow:
+    0 0 0 1px rgba(10,255,239,0.45),
+    0 24px 60px rgba(2,11,18,0.65),
+    0 0 40px rgba(10,255,239,0.10),
+    var(--glow-teal);
+}
+
+.rcard::before {
+  background: linear-gradient(180deg,
+    rgba(10,255,239,0.60),
+    rgba(5,180,200,0.40));
+}
+
+/* RCARD FEAT */
+.rcard-feat {
+  background: var(--bio-deep);
+}
+
+.rcard-feat::before {
+  background: linear-gradient(90deg,
+    rgba(10,60,80,0.90) 0%,
+    rgba(10,180,200,0.70) 40%,
+    rgba(5,255,220,0.60) 70%,
+    rgba(10,180,200,0.55) 100%);
+}
+
+.rcard-feat::after {
+  background: radial-gradient(ellipse 65% 75% at 90% 15%,
+    rgba(10,255,239,0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 55% at 8% 82%,
+    rgba(232,160,48,0.08) 0%, transparent 55%);
+}
+
+/* Glow spot hover */
+.rcard:not(.rcard-feat):not(.rcard-ad)::after {
+  background: radial-gradient(
+    300px circle at var(--mx,50%) var(--my,50%),
+    rgba(10,255,239,0.15) 0%,
+    transparent 70%
+  );
+}
+
+/* BCARD */
+.bcard {
+  background: linear-gradient(160deg, #050F18 0%, #070D1C 100%);
+  border-color: rgba(10,180,200,0.20);
+}
+
+.bcard::after {
+  background: linear-gradient(90deg,
+    rgba(10,180,200,0.60),
+    var(--bio-glow));
+}
+
+.bcard:hover {
+  background: linear-gradient(160deg, #0A1525 0%, #070D1C 100%);
+  border-color: rgba(10,255,239,0.50);
+  transform: translateY(-5px);
+  box-shadow:
+    0 0 0 1px rgba(10,255,239,0.40),
+    0 20px 50px rgba(2,11,18,0.60),
+    var(--glow-teal);
+}
+
+/* CCARD — cafés */
+.ccard {
+  border-radius: var(--radius-card);
+}
+
+.ccard:hover .ccard-bg {
+  transform: scale(1.06);
+}
+
+.ccard-overlay {
+  background: linear-gradient(to top,
+    rgba(2,11,18,0.97) 0%,
+    rgba(2,11,18,0.50) 42%,
+    rgba(2,11,18,0.06) 100%) !important;
+}
+
+.ccard-glow {
+  background: radial-gradient(
+    280px circle at var(--mx,50%) var(--my,50%),
+    rgba(10,255,239,0.25) 0%,
+    transparent 70%
+  );
+}
+
+/* LITEM */
+.litem {
+  background: linear-gradient(160deg, #050F18 0%, #070D1C 100%);
+  border-left-color: rgba(10,180,200,0.25);
+}
+
+.litem:hover {
+  background: linear-gradient(160deg, #0A1525 0%, #070D1C 100%);
+  border-left-color: var(--bio-glow);
+  transform: translateX(10px);
+  box-shadow:
+    -10px 0 40px rgba(10,255,239,0.15),
+    -1px 0 0 0 rgba(10,255,239,0.50);
+}
+
+.litem-arrow {
+  color: rgba(10,255,239,0.22);
+}
+
+.litem:hover .litem-arrow {
+  color: var(--bio-glow);
+  transform: translateX(8px);
+}
+
+/* GCARD — gimnasios */
+.gcard {
+  background: linear-gradient(160deg, #050F18 0%, #070D1C 100%);
+  border-color: rgba(10,180,200,0.20);
+}
+
+.gcard::before {
+  background: linear-gradient(180deg,
+    rgba(10,255,239,0.60),
+    rgba(5,180,200,0.40));
+}
+
+.gcard:hover {
+  border-color: rgba(10,255,239,0.48);
+}
+
+/* ── CATS ── */
+.cat-card::after {
+  background: linear-gradient(90deg,
+    rgba(10,180,200,0.70),
+    var(--bio-glow));
+}
+
+.cat-card:hover {
+  transform: translateY(-9px) scale(1.010);
+  box-shadow:
+    0 32px 80px rgba(2,11,18,0.75),
+    0 0 0 1px rgba(10,255,239,0.12),
+    var(--glow-teal);
+}
+
+/* ── NAT CARDS ── */
+.nat-card {
+  background: linear-gradient(160deg, #050F18 0%, #070D1C 100%);
+  border-color: rgba(10,180,200,0.20);
+}
+
+.nat-card:hover {
+  border-color: rgba(10,255,239,0.48);
+  box-shadow:
+    0 0 0 1px rgba(10,255,239,0.42),
+    0 22px 52px rgba(2,11,18,0.60),
+    var(--glow-teal);
+}
+
+/* ── HP CARDS (patrimonio) ── */
+.hp-card {
+  background: linear-gradient(160deg, #050F18 0%, #070D1C 100%);
+  border-color: rgba(10,180,200,0.20);
+}
+
+.hp-card[open] {
+  border-color: rgba(10,255,239,0.45);
+  background: linear-gradient(160deg, #0A1525 0%, #070D1C 100%);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PILLS Y BADGES — bioluminiscentes
+   ═══════════════════════════════════════════════════════ */
+
+.pill-rating {
+  background: rgba(10,180,200,0.14);
+  border-color: rgba(10,255,239,0.42);
+  color: var(--bio-glow);
+}
+
+.pill-rating:hover {
+  background: rgba(10,180,200,0.24);
+  box-shadow:
+    0 0 0 1px rgba(10,255,239,0.50),
+    0 4px 14px rgba(10,255,239,0.18);
+}
+
+.pill-price {
+  background: rgba(10,74,110,0.14);
+  border-color: rgba(10,180,200,0.28);
+  color: var(--bio-glow2);
+}
+
+.badge {
+  background: var(--bio-river);
+  box-shadow: 0 4px 16px rgba(10,150,180,0.40), inset 0 1px 0 rgba(10,255,239,0.25);
+}
+
+.badge-gold {
+  background: linear-gradient(135deg, var(--bio-amber), var(--bio-amber2));
+  color: #0A1E30;
+  box-shadow: 0 2px 14px rgba(232,160,48,0.45), inset 0 1px 0 rgba(255,240,200,0.30);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REVEAL — nueva animación de entrada con profundidad
+   ═══════════════════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(0.978);
+  filter: blur(5px);
+  transition:
+    opacity .75s var(--ease-river),
+    transform .75s var(--ease-river),
+    filter .75s var(--ease-river);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIVE DOTS — bioluminiscentes
+   ═══════════════════════════════════════════════════════ */
+
+.live-dot {
+  color: var(--bio-glow);
+  animation: bioDotGlow 3s ease-in-out infinite;
+}
+
+@keyframes bioDotGlow {
+  0%, 100% {
+    opacity: .45;
+    box-shadow: 0 0 0 0 rgba(10,255,239,0);
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      0 0 8px 3px rgba(10,255,239,0.60),
+      0 0 20px 5px rgba(10,255,239,0.25);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   IDENTITY BLOCK — abismo oceánico
+   ═══════════════════════════════════════════════════════ */
+
+.identity-block {
+  background: var(--bio-deep);
+}
+
+.identity-block::before {
+  background:
+    radial-gradient(ellipse 65% 85% at 85% 15%,
+      rgba(10,255,239,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 65% at 5% 85%,
+      rgba(232,160,48,0.10) 0%, transparent 55%);
+}
+
+.identity-headline em {
+  color: var(--bio-glow);
+}
+
+.identity-fact:hover {
+  background: rgba(10,255,239,0.06);
+}
+
+.identity-fact-num sup {
+  color: var(--bio-glow);
+}
+
+.identity-cta:hover {
+  color: var(--bio-glow);
+  border-color: var(--bio-glow);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MOOD CARD — profundidad oscura con neon
+   ═══════════════════════════════════════════════════════ */
+
+.mood-card {
+  background: linear-gradient(145deg, #050D16 0%, #070F1C 50%, #050C16 100%);
+  border: 1px solid rgba(10,180,200,0.22);
+  box-shadow:
+    0 24px 72px rgba(2,11,18,0.65),
+    0 0 0 1px rgba(10,255,239,0.07),
+    inset 0 1px 0 rgba(10,255,239,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.35);
+}
+
+.mood-card::before {
+  background:
+    radial-gradient(ellipse 65% 90% at 95% 5%,
+      rgba(10,255,239,0.14) 0%,
+      rgba(10,180,200,0.06) 45%, transparent 68%),
+    radial-gradient(ellipse 45% 70% at 5% 95%,
+      rgba(232,160,48,0.10) 0%, transparent 58%);
+}
+
+.mood-btn:hover {
+  background: rgba(10,255,239,0.08);
+  border-color: rgba(10,255,239,0.50);
+  box-shadow:
+    0 20px 48px rgba(2,11,18,0.35),
+    0 0 0 1px rgba(10,255,239,0.42),
+    var(--glow-teal);
+}
+
+.mood-btn.active {
+  background: rgba(10,255,239,0.10);
+  border-color: rgba(10,255,239,0.60);
+  box-shadow:
+    0 0 0 2px rgba(10,255,239,0.40),
+    inset 0 1px 0 rgba(10,255,239,0.14);
+  outline-color: rgba(10,255,239,0.70);
+}
+
+/* ═══════════════════════════════════════════════════════
+   URGENCIAS — rojo sobre profundidad
+   ═══════════════════════════════════════════════════════ */
+
+.urgencias-wrap {
+  background: var(--bio-deep);
+}
+
+.urgencias-topbar::after {
+  background: linear-gradient(90deg, #5c0e08, #c0392b 20%, #e74c3c 45%, #c0392b 70%, #5c0e08);
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAT HERO — verde río + bioluminiscencia
+   ═══════════════════════════════════════════════════════ */
+
+.nat-hero-card {
+  border: 1px solid rgba(10,180,200,0.15);
+}
+
+.nat-hero-card:hover {
+  box-shadow: 0 32px 72px rgba(2,11,18,0.50), var(--glow-teal);
+}
+
+/* ═══════════════════════════════════════════════════════
+   AD BANNER
+   ═══════════════════════════════════════════════════════ */
+
+.ad-banner {
+  background: var(--bio-deep);
+  border-left-color: var(--bio-amber);
+}
+
+.ad-banner-btn {
+  background: var(--bio-amber);
+  color: var(--bio-deep);
+}
+
+.ad-banner:hover .ad-banner-btn {
+  background: var(--bio-amber2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER — abismo final
+   ═══════════════════════════════════════════════════════ */
+
+.footer {
+  background: var(--bio-deep);
+  border-top: 1px solid rgba(10,255,239,0.08);
+}
+
+.footer-shimmer {
+  background: linear-gradient(90deg, transparent, var(--bio-glow), transparent);
+  opacity: .65;
+}
+
+.footer-stat {
+  color: rgba(180,220,228,0.70) !important;
+}
+.footer-stat strong {
+  color: rgba(10,255,239,0.85) !important;
+}
+.footer-copy {
+  color: rgba(180,220,228,0.55) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOST FAB + BACK TO TOP
+   ═══════════════════════════════════════════════════════ */
+
+#lost-fab {
+  background: linear-gradient(135deg,
+    rgba(10,150,160,0.95),
+    rgba(5,200,200,0.90));
+  border: 1px solid rgba(10,255,239,0.50);
+  box-shadow:
+    0 12px 36px rgba(10,255,239,0.30),
+    0 4px 14px rgba(0,0,0,0.40),
+    inset 0 1px 0 rgba(255,255,255,0.20);
+  color: #020B12;
+}
+
+#lost-fab:hover {
+  background: linear-gradient(135deg,
+    rgba(10,200,210,0.98),
+    rgba(5,240,240,0.95));
+  box-shadow:
+    0 14px 40px rgba(10,255,239,0.50),
+    0 4px 14px rgba(0,0,0,0.40);
+}
+
+#back-to-top {
+  background: rgba(2,11,18,0.90);
+  border-color: rgba(10,255,239,0.18);
+  color: rgba(10,255,239,0.65);
+}
+
+#back-to-top:hover {
+  background: rgba(10,80,100,0.90);
+  border-color: var(--bio-glow);
+  color: var(--bio-glow);
+  box-shadow: var(--glow-teal);
+}
+
+/* ═══════════════════════════════════════════════════════
+   EMBER GLOW OVERRIDE — aura bioluminiscente
+   ═══════════════════════════════════════════════════════ */
+
+@media (hover: hover) and (pointer: fine) {
+  .rcard:not(.rcard-feat):hover,
+  .bcard:hover,
+  .litem:hover,
+  .gcard:not(.gcard-feat):hover,
+  .nat-card:not(.nat-card-featured):hover,
+  .circ-card:hover,
+  .cl-card:hover,
+  .dep-feat-card:hover,
+  .dep-club-card:hover,
+  .dep-athlete-card:not(.dep-athlete-feat):hover,
+  .gr-tip:hover,
+  .gr-prod-card:not(.gr-prod-feat):hover,
+  .gr-species-card:not(.gr-species-feat):hover,
+  .cv-comparsa:not(.cv-comparsa-champ):hover,
+  .fin-card:hover,
+  .aloj-card:not(.aloj-card-feat):hover,
+  .sm-card:hover {
+    box-shadow:
+      0 0 0 1px rgba(10,255,239,0.42),
+      0 0 36px rgba(10,255,239,0.14),
+      0 22px 60px rgba(2,11,18,0.60);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECCIONES EXTRAS CON FONDO OSCURO
+   ═══════════════════════════════════════════════════════ */
+
+.llegar-card,
+.llegar-modo,
+.cl-card,
+.termas-spec,
+.peatonal-card,
+.clasico-stat,
+.nautico-stat,
+.colectividad-stop,
+.economia-card,
+.barrio-card,
+.cal-card,
+.uni-card,
+.uni-consejo,
+.fin-card,
+.aloj-card,
+.aloj-litem,
+.sm-card,
+.sm-litem {
+  background: linear-gradient(160deg, #050F18 0%, #070D1C 100%);
+  border-color: rgba(10,180,200,0.20);
+}
+
+.llegar-card:hover,
+.cl-card:hover,
+.termas-spec:hover,
+.peatonal-card:hover,
+.nautico-stat:hover,
+.colectividad-stop:hover,
+.economia-card:hover,
+.barrio-card:hover,
+.cal-card:hover,
+.uni-card:hover,
+.uni-consejo:hover,
+.fin-card:hover,
+.aloj-card:hover,
+.sm-card:hover {
+  border-color: rgba(10,255,239,0.42);
+  background: linear-gradient(160deg, #0A1525 0%, #070D1C 100%);
+}
+
+/* ═══════════════════════════════════════════════════════
+   HISTORIA TABS — estética papel mojado
+   ═══════════════════════════════════════════════════════ */
+
+.ht-tab-active {
+  border-bottom-color: var(--bio-glow) !important;
+  color: #1C2E4A !important;
+}
+
+.ht-tab:hover {
+  border-bottom-color: rgba(10,180,200,0.35) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SEARCH
+   ═══════════════════════════════════════════════════════ */
+
+.search-input:focus {
+  border-color: rgba(10,255,239,0.60);
+  box-shadow:
+    0 0 0 3px rgba(10,255,239,0.10),
+    0 0 0 1px rgba(10,255,239,0.35);
+}
+
+/* ═══════════════════════════════════════════════════════
+   DETALLES HOVERING CARDS — todos los demás
+   ═══════════════════════════════════════════════════════ */
+
+.servicio-card:hover,
+.svc-card:hover,
+.svc-more-card:hover {
+  background: rgba(10,30,45,0.95);
+}
+
+.urgencias-num:hover,
+.llegar-modo:hover,
+.colectividad-stop:hover {
+  background: rgba(10,255,239,0.05);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CIRCUITO CARDS
+   ═══════════════════════════════════════════════════════ */
+
+.circ-card {
+  background: linear-gradient(160deg, #050F18 0%, #070D1C 100%);
+  border-color: rgba(10,180,200,0.20);
+}
+
+.circ-card:hover {
+  background: linear-gradient(160deg, #0A1525 0%, #070D1C 100%);
+  border-color: rgba(10,255,239,0.48);
+  box-shadow:
+    0 0 0 1px rgba(10,255,239,0.40),
+    0 22px 52px rgba(2,11,18,0.60),
+    var(--glow-teal);
+}
+
+.circ-duration {
+  background: rgba(10,180,200,0.12);
+  border-color: rgba(10,255,239,0.35);
+  color: var(--bio-glow);
+}
+
+/* ═══════════════════════════════════════════════════════
+   WEATHER WIDGET — panel oceánico
+   ═══════════════════════════════════════════════════════ */
+
+.wx-hero-card {
+  background: rgba(2,11,18,0.92);
+  border-color: rgba(10,255,239,0.16);
+  box-shadow:
+    0 32px 72px rgba(2,11,18,0.65),
+    0 0 0 1px rgba(10,255,239,0.08),
+    inset 0 1px 0 rgba(10,255,239,0.10);
+}
+
+.wx-hero-bar::after {
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(10,255,239,0.65) 30%,
+    rgba(10,255,239,0.90) 50%,
+    rgba(10,255,239,0.65) 70%,
+    transparent);
+}
+
+.wx-hero-city::before {
+  background: var(--bio-glow);
+  box-shadow: 0 0 8px var(--bio-glow);
+}
+
+.wx-hero-temp {
+  color: rgba(220,245,248,0.97);
+  text-shadow: 0 0 30px rgba(10,255,239,0.20);
+}
+
+.wx-hero-temp sup {
+  color: var(--bio-glow);
+}
+
+.wx-hero-datum-label {
+  color: rgba(10,255,239,0.65);
+}
+
+.wx-hero-datum-val {
+  color: rgba(200,235,240,0.88);
+}
+
+.wx-hero-updated {
+  color: rgba(10,255,239,0.55);
+}
+
+.wx-hero-frase {
+  color: rgba(232,160,48,0.65);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PARTÍCULAS ADICIONALES — corriente submarina
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes currentFlow {
+  0%   { transform: translateX(-30px) translateY(0); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateX(30px) translateY(-10px); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   FIN — REDUCCIÓN DE MOVIMIENTO
+   ═══════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::before,
+  .hero::after,
+  .hero-river-grid::before,
+  .hero-river-grid::after,
+  .hero-orb-1,
+  .hero-orb-2 {
+    animation: none !important;
+  }
+}
 
 </style>
   </head>
@@ -2618,8 +3885,18 @@ html, body {
   <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
 
-  <!-- NUEVO: grilla de río sutil -->
+<!-- Superficie del río bioluminiscente -->
   <div class="hero-river-grid" aria-hidden="true"></div>
+  
+  <!-- Corriente submarina — partículas de luz en movimiento -->
+  <div class="hero-current" aria-hidden="true">
+    <span class="hc-particle" style="--hcp-x:15%;--hcp-y:45%;--hcp-dur:18s;--hcp-del:0s;--hcp-size:3px"></span>
+    <span class="hc-particle" style="--hcp-x:32%;--hcp-y:38%;--hcp-dur:22s;--hcp-del:3s;--hcp-size:2px"></span>
+    <span class="hc-particle" style="--hcp-x:58%;--hcp-y:52%;--hcp-dur:15s;--hcp-del:6s;--hcp-size:4px"></span>
+    <span class="hc-particle" style="--hcp-x:75%;--hcp-y:40%;--hcp-dur:20s;--hcp-del:9s;--hcp-size:2px"></span>
+    <span class="hc-particle" style="--hcp-x:88%;--hcp-y:48%;--hcp-dur:25s;--hcp-del:2s;--hcp-size:3px"></span>
+    <span class="hc-particle" style="--hcp-x:42%;--hcp-y:62%;--hcp-dur:19s;--hcp-del:7s;--hcp-size:2px"></span>
+  </div>
 
   <div class="hero-topbar">
     <div class="city-tag">
@@ -2639,13 +3916,12 @@ html, body {
   <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span>
 </h1>
 <script>
-  
 (function(){
   var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   if(reduced){
     ['hero-word-1','hero-word-2'].forEach(function(id){
       var el=document.getElementById(id);
-      if(el){el.style.opacity='1';el.style.transform='none';}
+      if(el){el.style.opacity='1';el.style.transform='none';el.style.filter='none';}
     });
     var ey=document.querySelector('.hero-title .eyebrow');
     if(ey){ey.style.opacity='1';ey.style.transform='none';}
@@ -2656,22 +3932,33 @@ html, body {
     var w1=document.getElementById('hero-word-1');
     var w2=document.getElementById('hero-word-2');
     if(!w1||!w2)return;
-   setTimeout(function(){
+    /* Eyebrow */
+    setTimeout(function(){
       if(ey){
         void ey.offsetWidth;
+        ey.style.transition='opacity .8s ease .1s, transform .8s cubic-bezier(.16,1,.3,1) .1s';
         ey.style.opacity='1';
         ey.style.transform='translateY(0)';
       }
-    },200);
-    function reveal(el,delay){
+    },150);
+    /* Palabras emergen desde abajo como luz del agua */
+    function revealWater(el,delay){
+      /* Estado inicial: sumergido */
+      el.style.transform='translateY(110%) scale(0.92)';
+      el.style.filter='blur(8px)';
+      el.style.opacity='0';
       setTimeout(function(){
-        el.style.transition='opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)';
+        el.style.transition=
+          'opacity 1.1s cubic-bezier(.16,1,.3,1),' +
+          'transform 1.1s cubic-bezier(.16,1,.3,1),' +
+          'filter 1.0s cubic-bezier(.16,1,.3,1)';
         el.style.opacity='1';
-        el.style.transform='translateY(0)';
+        el.style.transform='translateY(0) scale(1)';
+        el.style.filter='blur(0)';
       },delay);
     }
-    reveal(w1,380);
-    reveal(w2,560);
+    revealWater(w1,360);
+    revealWater(w2,520);
   }
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded',animate,{once:true});
