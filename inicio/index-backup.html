@@ -118,7 +118,6 @@
    ═══════════════════════════════════════════════════════ */
 :root {
   --radius-card: 8px;
-
   /* ── VOID PALETTE — fondos nocturnos cálidos ── */
   --void:#08070A;--void2:#0E0C10;--void3:#141218;--soil:#1C1A1F;
 
@@ -151,7 +150,6 @@
   --f-display:'DM Serif Display','Times New Roman',serif;
   --f-italic:'DM Serif Display',Georgia,serif;
   --f-ui:'Syne',system-ui,sans-serif;
-
   /* ── EASING PREMIUM ── */
   --ease:cubic-bezier(0.25,0.46,0.45,0.94);
   --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
@@ -193,8 +191,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 
 /* ── PROGRESS BAR ── */
 #progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--verde2);z-index:10000;transition:width .1s linear;box-shadow:0 0 6px rgba(38,122,85,.8)}
-#progress-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--oro3),transparent);animation:shimmerBar 3s linear infinite;animation-play-state:paused}
-#progress-bar.active::after{animation-play-state:running}
+#progress-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--oro3),transparent);will-change:transform;animation:shimmerBar 3s linear infinite}
 @keyframes shimmerBar{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 
 /* ── LIVE DOTS — nuevo sistema con halo triple ── */
@@ -370,23 +367,21 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   content:'';
   position:absolute;
   inset:0;
-  z-index:3;
+  z-index:2;
   pointer-events:none;
   background-image:
-    radial-gradient(1.5px 1.5px at 12% 28%,rgba(10,255,239,0.70) 50%,transparent 50%),
-    radial-gradient(1px 1px at 85% 15%,rgba(10,255,239,0.50) 50%,transparent 50%),
-    radial-gradient(2px 2px at 45% 60%,rgba(232,160,48,0.45) 50%,transparent 50%),
-    radial-gradient(1px 1px at 28% 78%,rgba(10,255,239,0.35) 50%,transparent 50%),
-    radial-gradient(1.5px 1.5px at 68% 85%,rgba(10,255,239,0.55) 50%,transparent 50%),
-    radial-gradient(1px 1px at 8% 50%,rgba(232,160,48,0.30) 50%,transparent 50%),
-    radial-gradient(2px 2px at 92% 65%,rgba(10,255,239,0.40) 50%,transparent 50%),
-    radial-gradient(1px 1px at 55% 8%,rgba(232,160,48,0.35) 50%,transparent 50%),
-    radial-gradient(1.5px 1.5px at 38% 42%,rgba(10,255,239,0.25) 50%,transparent 50%),
-    radial-gradient(1px 1px at 75% 35%,rgba(232,160,48,0.20) 50%,transparent 50%),
-    radial-gradient(2px 2px at 22% 12%,rgba(10,255,239,0.60) 50%,transparent 50%),
-    radial-gradient(1px 1px at 62% 22%,rgba(10,255,239,0.30) 50%,transparent 50%);
-  opacity:0.75;
-  will-change:auto;
+    radial-gradient(1.5px 1.5px at 18% 22%,rgba(196,98,26,.55) 50%,transparent 50%),
+    radial-gradient(1px 1px at 74% 18%,rgba(196,98,26,.40) 50%,transparent 50%),
+    radial-gradient(1.5px 1.5px at 56% 42%,rgba(245,238,216,.18) 50%,transparent 50%),
+    radial-gradient(1px 1px at 32% 68%,rgba(196,98,26,.30) 50%,transparent 50%),
+    radial-gradient(2px 2px at 88% 72%,rgba(30,92,56,.45) 50%,transparent 50%),
+    radial-gradient(1px 1px at 12% 85%,rgba(245,238,216,.15) 50%,transparent 50%),
+    radial-gradient(1.5px 1.5px at 65% 80%,rgba(196,98,26,.35) 50%,transparent 50%),
+    radial-gradient(1px 1px at 44% 10%,rgba(245,238,216,.20) 50%,transparent 50%),
+    radial-gradient(2px 2px at 91% 38%,rgba(196,98,26,.22) 50%,transparent 50%),
+    radial-gradient(1px 1px at 8% 55%,rgba(30,92,56,.30) 50%,transparent 50%);
+  animation:particleDrift 28s ease-in-out infinite;
+  opacity:1;
 }
 
 /* ── TOPBAR ── */
@@ -641,8 +636,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   animation:none;
 }
 @keyframes btnBreath{
-  0%,100%{opacity:1}
-  40%{opacity:0.90}
+  0%,100%{box-shadow:0 8px 32px rgba(196,98,26,.52),0 2px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.20)}
+  40%{box-shadow:0 10px 48px rgba(196,98,26,.80),0 2px 8px rgba(0,0,0,.35),0 0 0 12px rgba(196,98,26,.08),inset 0 1px 0 rgba(255,255,255,.22)}
 }
 
 /* Botón ghost — elegante y sutil */
@@ -703,14 +698,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 /* ═══════════════ NAV ═══════════════ */
 .main-nav{position:sticky;top:0;z-index:900;border-bottom:1px solid rgba(242,237,227,.06);display:flex;align-items:stretch;overflow-x:hidden;scrollbar-width:none;}
 @supports(overflow:clip){.main-nav{overflow-x:clip;}}
-@media(min-width:769px){
-  @supports(backdrop-filter:saturate(180%) blur(20px)){
-    .main-nav{backdrop-filter:saturate(160%) blur(16px);-webkit-backdrop-filter:saturate(160%) blur(16px);background:rgba(6,6,5,.60)}
-  }
-}
-@media(max-width:768px){
-  .main-nav{background:rgba(4,4,3,.95)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-}
+@supports(backdrop-filter:saturate(180%) blur(20px)){.main-nav{backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);background:rgba(6,6,5,.55)}}
 .main-nav::-webkit-scrollbar{display:none}
 .nav-scroll-area{display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;-webkit-overflow-scrolling:touch}
 .nav-scroll-area::-webkit-scrollbar{display:none} 
@@ -784,8 +772,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .us-section{margin-top:var(--section-gap);padding-top:24px}
 
 /* ── REVEAL ── */
-.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s var(--ease-out-expo),transform .6s var(--ease-out-expo);transition-delay:var(--reveal-delay,0ms);will-change:opacity,transform}
-.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal{opacity:0;transform:translateY(24px) scale(.98);filter:blur(4px);transition:opacity .65s var(--ease-out-expo),transform .65s var(--ease-out-expo),filter .65s var(--ease-out-expo);transition-delay:var(--reveal-delay,0ms);will-change:opacity,transform,filter}
+.reveal.visible{opacity:1;transform:translateY(0) scale(1);filter:blur(0px)}
+@media(max-width:1024px){.reveal{filter:none}.reveal.visible{filter:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal{opacity:1;transform:none;filter:none}}
 
 /* ── PILLS ── */
@@ -960,7 +949,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .ccard-border{position:absolute;inset:0;border:1px solid transparent;transition:border-color .4s ease;pointer-events:none;z-index:3}
 .ccard:hover .ccard-border,.ccard:focus-visible .ccard-border{border-color:rgba(196,135,42,.40)}
 .ccard-featured{grid-column:span 2;height:280px;border-top:3px solid var(--oro2)}
-.ccard{contain:layout style paint;}
 .ccard-featured .ccard-name{font-size:34px}
 
 /* ── BAR GRID ── */
@@ -1774,7 +1762,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   .search-nav-wrap { display: none; }
   .search-icon-btn { display: inline-flex; }
 }
-@media (min-width: 769px) and (hover: hover) { .rcard, .gcard, .cat-card, .bcard, .litem { will-change: auto; } }
+@media (min-width: 769px) and (hover: hover) {
+  .rcard:hover, .gcard:hover, .cat-card:hover, .bcard:hover, .litem:hover { will-change: transform; }
+  .rcard, .gcard, .cat-card, .bcard, .litem { will-change: auto; }
+}
 @media (min-width: 769px) {
   .hero-orb-1, .hero-orb-2 { transform: translateZ(0); }
 }
@@ -2048,21 +2039,54 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   background: radial-gradient(ellipse 60% 55% at 25% 70%, rgba(188,88,35,.30) 0%, transparent 60%);
   pointer-events: none;
 }
-@media(min-width:769px) and (hover:hover){
-  .ccard::after{
-    content:'';position:absolute;top:12px;left:50%;
-    transform:translateX(-50%);width:3px;height:22px;
-    background:linear-gradient(to top,rgba(255,255,255,0),rgba(255,255,255,.28));
-    border-radius:2px;filter:blur(1.5px);
-    animation:steamRise 3.2s ease-in-out infinite;
-    pointer-events:none;z-index:5;opacity:0;transition:opacity .4s ease;
-  }
-  .ccard:hover::after{opacity:0.4;}
-  .ccard::before{display:none;}
+.ccard::after{
+  content:'';
+  position:absolute;
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+  width:3px;
+  height:22px;
+  background:linear-gradient(to top,rgba(255,255,255,.0),rgba(255,255,255,.32));
+  border-radius:2px;
+  filter:blur(1.5px);
+  animation:steamRise 3.2s ease-in-out infinite;
+  pointer-events:none;
+  z-index:5;
+  opacity:0.18;
+  transition:opacity .4s ease;
 }
-@media(max-width:768px){
-  .ccard::after,.ccard::before{display:none;}
+.ccard:hover::after{
+  animation:steamRise 1.8s ease-in-out infinite;
+  opacity:0.45;
 }
+.ccard::before{
+  content:'';
+  position:absolute;
+  top:16px;
+  left:calc(50% + 6px);
+  transform:translateX(-50%);
+  width:2px;
+  height:14px;
+  background:linear-gradient(to top,rgba(255,255,255,.0),rgba(255,255,255,.18));
+  border-radius:2px;
+  filter:blur(1px);
+  animation:steamRise 3.2s ease-in-out infinite .9s;
+  pointer-events:none;
+  z-index:5;
+  opacity:0.12;
+  transition:opacity .4s ease;
+}
+.ccard:hover::before{
+  animation:steamRise 1.8s ease-in-out infinite .45s;
+  opacity:0.35;
+}
+.ccard:nth-child(2)::after{animation-delay:.6s}
+.ccard:nth-child(3)::after{animation-delay:1.1s}
+.ccard:nth-child(4)::after{animation-delay:.3s}
+.ccard:nth-child(5)::after{animation-delay:.9s}
+.ccard:nth-child(6)::after{animation-delay:1.4s}
+@media(prefers-reduced-motion:reduce){.ccard::after,.ccard::before{animation:none;}}
 
 @keyframes steamRise {
   0%   { transform: translateX(-50%) translateY(0px);   opacity: 0;    }
@@ -2218,18 +2242,16 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 /* Contenido expandido */
 .hp-body {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  overflow: hidden;
-  transition: grid-template-rows .42s cubic-bezier(.16,1,.3,1), opacity .35s ease;
-  padding: 0 24px;
-}
-.hp-body > * { min-height: 0; overflow: hidden; }
-.hp-card[open] .hp-body {
-  grid-template-rows: 1fr;
-  opacity: 1;
   padding: 0 24px 24px;
+  border-top: 1px solid rgba(242,237,227,.07);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .45s cubic-bezier(.16,1,.3,1), opacity .35s ease, padding .45s ease;
+}
+.hp-card[open] .hp-body {
+  max-height: 1000px;
+  opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
   .hp-body { animation: none; }
@@ -2479,10 +2501,6 @@ html, body {
   z-index: 3;
   pointer-events: none;
 }
-<div class="hero-caustic hero-caustic-1" aria-hidden="true"></div>
-<div class="hero-caustic hero-caustic-2" aria-hidden="true"></div>
-<div class="hero-caustic hero-caustic-3" aria-hidden="true"></div>
-<div class="hero-caustic hero-caustic-4" aria-hidden="true"></div>
 .hc-particle {
   position: absolute;
   left: var(--hcp-x);
@@ -2734,13 +2752,9 @@ body {
   border-radius: 50%;
   pointer-events: none;
   z-index: 2;
-  contain: layout paint;
-}
-@media(min-width:769px){
-  .hero-orb { mix-blend-mode: screen; will-change: transform; }
-}
-@media(max-width:768px){
-  .hero-orb { mix-blend-mode: normal; will-change: auto; }
+  will-change: transform;
+  contain: layout;
+  mix-blend-mode: screen;
 }
 
 .hero-orb-1 {
@@ -3054,8 +3068,12 @@ body {
 }
 
 @keyframes btnTidePulse {
-  0%,100% { opacity: 1; }
-  50%     { opacity: 0.88; }
+  0%,100% {
+    box-shadow: 0 8px 32px rgba(10,255,239,0.20), 0 2px 8px rgba(0,0,0,0.45), inset 0 1px 0 rgba(10,255,239,0.25);
+  }
+  50% {
+    box-shadow: 0 10px 50px rgba(10,255,239,0.40), 0 2px 8px rgba(0,0,0,0.45), 0 0 0 12px rgba(10,255,239,0.06), inset 0 1px 0 rgba(10,255,239,0.30);
+  }
 }
 
 /* ── HERO RULE ── */
@@ -3425,17 +3443,20 @@ body {
 
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(28px) scale(0.978);
+  filter: blur(5px);
   transition:
-    opacity .7s var(--ease-river),
-    transform .7s var(--ease-river);
-  will-change: opacity, transform;
+    opacity .75s var(--ease-river),
+    transform .75s var(--ease-river),
+    filter .75s var(--ease-river);
 }
 
 .reveal.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+  filter: blur(0);
 }
+
 /* ═══════════════════════════════════════════════════════
    LIVE DOTS — bioluminiscentes
    ═══════════════════════════════════════════════════════ */
@@ -3852,89 +3873,6 @@ body {
 }
 
 </style>
-  <style>
-/* FIX P4 — GPU layer budget */
-@media (max-width: 768px) {
-  .hero-orb-1,
-  .hero-orb-2 {
-    filter: none !important;
-    mix-blend-mode: normal !important;
-    will-change: auto !important;
-  }
-  .hero-caustic {
-    display: none !important;
-  }
-  .hero-river-grid::before,
-  .hero-river-grid::after {
-    animation: none !important;
-  }
-  /* Reducir layers en tarjetas — solo on hover */
-  .rcard, .gcard, .bcard, .cat-card, .litem, .ccard,
-  .nat-card, .dep-feat-card, .dep-club-card {
-    will-change: auto;
-  }
-  .rcard:hover, .gcard:hover, .bcard:hover,
-  .nat-card:hover, .dep-feat-card:hover {
-    will-change: transform;
-  }
-}
-
-/* Desktop: limitar blur a un solo orb */
-@media (min-width: 769px) {
-  .hero-orb-1 { filter: blur(0.5px); }
-  .hero-orb-2 { filter: blur(1px); }
-  .hero-caustic { filter: blur(20px); } /* reducido de 28px */
-}
-
-/* Plancton: reducir a opacity-only en vez de transform complejo */
-@media (max-width: 768px) {
-  .hero::before {
-    animation: none !important;
-  }
-}
-</style>
-  <style>
-/* ── BADGE SIZE FIX — mobile ── */
-.badge {
-  font-size: 8px !important;
-  padding: 4px 9px !important;
-  letter-spacing: 1.5px !important;
-  border-radius: 14px !important;
-  top: 10px !important;
-  right: 10px !important;
-}
-
-@media (max-width: 640px) {
-  .badge {
-    font-size: 7px !important;
-    padding: 3px 8px !important;
-    letter-spacing: 1.2px !important;
-    top: 8px !important;
-    right: 8px !important;
-    max-width: calc(100% - 16px) !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-}
-</style>
-  <style>
-/* BADGE SIZE FIX — mobile */
-@media (max-width: 768px) {
-  .badge {
-    font-size: 7px !important;
-    padding: 3px 8px !important;
-    letter-spacing: 1.2px !important;
-    border-radius: 12px !important;
-    top: 8px !important;
-    right: 8px !important;
-    max-width: calc(100% - 16px) !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-}
-</style>
   </head>
   <body>
   
@@ -3971,7 +3909,61 @@ body {
   <div class="hero-inner">
     <div class="hero-inner-left">
       <div class="live-chip" role="status" aria-live="polite"><span class="live-dot" aria-hidden="true"></span>Verificado en CdU · Junio 2026</div>
-<h1 class="hero-title" id="hero-title-anim" aria-label="Restaurantes, bares y más en Concepción del Uruguay"> <span class="eyebrow hero-word-noscript" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span> <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span> <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span> </h1> <script> (function(){ var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches; if(reduced){ ['hero-word-1','hero-word-2'].forEach(function(id){ var el=document.getElementById(id); if(el){el.style.opacity='1';el.style.transform='none';el.style.filter='none';} }); var ey=document.querySelector('.hero-title .eyebrow'); if(ey){ey.style.opacity='1';ey.style.transform='none';} return; } function animate(){ var ey=document.querySelector('.hero-title .eyebrow'); var w1=document.getElementById('hero-word-1'); var w2=document.getElementById('hero-word-2'); if(!w1||!w2)return; setTimeout(function(){ if(ey){ void ey.offsetWidth; ey.style.transition='opacity .8s ease .1s, transform .8s cubic-bezier(.16,1,.3,1) .1s'; ey.style.opacity='1'; ey.style.transform='translateY(0)'; } },150); function revealWater(el,delay){ el.style.transform='translateY(110%) scale(0.92)'; el.style.filter='blur(8px)'; el.style.opacity='0'; setTimeout(function(){ el.style.transition= 'opacity 1.1s cubic-bezier(.16,1,.3,1),' + 'transform 1.1s cubic-bezier(.16,1,.3,1),' + 'filter 1.0s cubic-bezier(.16,1,.3,1)'; el.style.opacity='1'; el.style.transform='translateY(0) scale(1)'; el.style.filter='blur(0)'; },delay); } revealWater(w1,360); revealWater(w2,520); /* WOW MOMENT — Apple scroll reveal en H1 */ var heroTitle=document.getElementById('hero-title-anim'); if(heroTitle&&'IntersectionObserver' in window){ var wowFired=false; var wowObs=new IntersectionObserver(function(entries){ entries.forEach(function(entry){ if(entry.isIntersecting&&!wowFired){ wowFired=true; var t=entry.target; t.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1), filter .4s ease'; t.style.transform='scale(1.04)'; t.style.filter='brightness(1.12)'; setTimeout(function(){ t.style.transform='scale(1)'; t.style.filter='brightness(1)'; setTimeout(function(){t.style.transition='';t.style.filter='';},420); },380); wowObs.unobserve(t); } }); },{threshold:0.7}); wowObs.observe(heroTitle); } } if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',animate,{once:true}); }else{animate();} })(); </script>
+<h1 class="hero-title" id="hero-title-anim" aria-label="Restaurantes, bares y más en Concepción del Uruguay">
+  <span class="eyebrow hero-word-noscript" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span>
+  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span>
+  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span>
+</h1>
+<script>
+(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced){
+    ['hero-word-1','hero-word-2'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){el.style.opacity='1';el.style.transform='none';el.style.filter='none';}
+    });
+    var ey=document.querySelector('.hero-title .eyebrow');
+    if(ey){ey.style.opacity='1';ey.style.transform='none';}
+    return;
+  }
+  function animate(){
+    var ey=document.querySelector('.hero-title .eyebrow');
+    var w1=document.getElementById('hero-word-1');
+    var w2=document.getElementById('hero-word-2');
+    if(!w1||!w2)return;
+    /* Eyebrow */
+    setTimeout(function(){
+      if(ey){
+        void ey.offsetWidth;
+        ey.style.transition='opacity .8s ease .1s, transform .8s cubic-bezier(.16,1,.3,1) .1s';
+        ey.style.opacity='1';
+        ey.style.transform='translateY(0)';
+      }
+    },150);
+    /* Palabras emergen desde abajo como luz del agua */
+    function revealWater(el,delay){
+      /* Estado inicial: sumergido */
+      el.style.transform='translateY(110%) scale(0.92)';
+      el.style.filter='blur(8px)';
+      el.style.opacity='0';
+      setTimeout(function(){
+        el.style.transition=
+          'opacity 1.1s cubic-bezier(.16,1,.3,1),' +
+          'transform 1.1s cubic-bezier(.16,1,.3,1),' +
+          'filter 1.0s cubic-bezier(.16,1,.3,1)';
+        el.style.opacity='1';
+        el.style.transform='translateY(0) scale(1)';
+        el.style.filter='blur(0)';
+      },delay);
+    }
+    revealWater(w1,360);
+    revealWater(w2,520);
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',animate,{once:true});
+  }else{animate();}
+})();
+</script>
       <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
       <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país.<br /><strong>100+ lugares verificados. Solo Concepción del Uruguay.</strong></p>
   <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
@@ -4080,22 +4072,20 @@ body {
 (function(){
   var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   var canvas = document.getElementById('hero-water-canvas');
-  if (!canvas || reduced) return;
+  if(!canvas || reduced) return;
 
   var ctx = canvas.getContext('2d');
-  var W, H, animId, rippleInterval;
+  var W, H, animId;
   var ripples = [];
-  var isVisible = false;
 
-  function resize() {
+  function resize(){
     W = canvas.offsetWidth;
     H = canvas.offsetHeight;
-    canvas.width = W;
+    canvas.width  = W;
     canvas.height = H;
   }
 
-  function addRipple() {
-    if (ripples.length > 12) return; // cap
+  function addRipple(){
     ripples.push({
       x: Math.random() * W,
       y: Math.random() * H * 0.7,
@@ -4106,55 +4096,59 @@ body {
     });
   }
 
-  function draw() {
-    if (!isVisible) { animId = null; return; }
-    ctx.clearRect(0, 0, W, H);
-    var alive = false;
-    for (var i = ripples.length - 1; i >= 0; i--) {
-      var rp = ripples[i];
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ripples = ripples.filter(function(rp){
       rp.r += rp.speed;
       var life = 1 - rp.r / rp.maxR;
-      if (life <= 0) { ripples.splice(i, 1); continue; }
-      alive = true;
+      if(life <= 0) return false;
       ctx.beginPath();
-      ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(10,255,239,' + (rp.alpha * life).toFixed(3) + ')';
+      ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(10,255,239,' + (rp.alpha * life) + ')';
       ctx.lineWidth = 1 + life * 1.5;
       ctx.stroke();
-    }
+
+      /* Segundo anillo más grande */
+      if(rp.r > rp.maxR * 0.3){
+        ctx.beginPath();
+        ctx.arc(rp.x, rp.y, rp.r * 1.4, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(10,200,220,' + (rp.alpha * life * 0.4) + ')';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+      return true;
+    });
     animId = requestAnimationFrame(draw);
   }
 
-  function start() {
-    if (!W) resize();
-    if (!rippleInterval) rippleInterval = setInterval(addRipple, 1100);
-    if (!animId) animId = requestAnimationFrame(draw);
+  var rippleInterval;
+  function start(){
+    resize();
+    rippleInterval = setInterval(addRipple, 900);
+    draw();
   }
 
-  function stop() {
-    clearInterval(rippleInterval);
-    rippleInterval = null;
-    if (animId) { cancelAnimationFrame(animId); animId = null; }
-  }
-
+  /* Solo animar cuando el hero es visible */
   var heroEl = document.querySelector('.hero');
-  if (heroEl && 'IntersectionObserver' in window) {
-    new IntersectionObserver(function(e) {
-      isVisible = e[0].isIntersecting;
-      isVisible ? start() : stop();
-    }, {threshold: 0.05}).observe(heroEl);
-  } else {
-    isVisible = true;
-    start();
-  }
+  if(heroEl && 'IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(e){
+      if(e[0].isIntersecting){
+        start();
+        io.unobserve(heroEl);
+      }
+    }, {threshold:0.1});
+    io.observe(heroEl);
+  } else { start(); }
 
-  var resizeT;
-  window.addEventListener('resize', function() {
-    clearTimeout(resizeT);
-    resizeT = setTimeout(resize, 250);
-  }, {passive: true});
+  window.addEventListener('resize', function(){
+    clearTimeout(window._heroCanvasResizeT);
+    window._heroCanvasResizeT = setTimeout(resize, 250);
+  }, {passive:true});
 
-  window.addEventListener('pagehide', stop, {once: true});
+  window.addEventListener('pagehide', function(){
+    clearInterval(rippleInterval);
+    if(animId) cancelAnimationFrame(animId);
+  }, {once:true});
 })();
 </script>
 </header>
@@ -4852,19 +4846,19 @@ body {
   border-left:3px solid rgba(196,135,42,.35);
   margin-bottom:2px;
 }
-
 /* ── GRIDS ── */
-.fin-grid-atm{
-  display:grid;grid-template-columns:repeat(3,1fr);
+.fin-grid-atm,.fin-grid-banks,.fin-grid-wu{
+  display:grid;
   gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
   margin-bottom:2px;
 }
-.fin-grid-banks{
+.fin-grid-atm{grid-template-columns:repeat(3,1fr)}
+.fin-grid-banks{grid-template-columns:repeat(4,1fr)}
+.fin-grid-wu{grid-template-columns:repeat(2,1fr)}
   display:grid;grid-template-columns:repeat(4,1fr);
   gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
   margin-bottom:2px;
 }
-.fin-grid-wu{
   display:grid;grid-template-columns:repeat(2,1fr);
   gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
   margin-bottom:2px;
@@ -4893,8 +4887,6 @@ body {
 /* ── VARIANTE ATM: acento vertical oro ── */
 .fin-card-atm::before{background:linear-gradient(180deg,var(--oro2),var(--oro))}
 
-/* ── VARIANTE WU: acento violeta ── */
-.fin-card-wu::before{background:linear-gradient(180deg,#c9a227,#e6b800)}
 
 /* ── VARIANTE BERSA: tratamiento especial ── */
 .fin-card-bersa{
@@ -5026,30 +5018,6 @@ body {
   transition:color .25s ease,transform .25s ease;
 }
 .fin-wu-item:hover .fin-wu-item-arrow{color:var(--oro2);transform:translateX(3px)}
-
-/* ── TARJETA RAPIPAGO ── */
-.fin-card-rapi{
-  display:flex;align-items:flex-start;gap:18px;
-  background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
-  border:1px solid var(--card-border-oro,rgba(184,92,42,.35));
-  padding:26px 24px;position:relative;overflow:hidden;
-  transition:background .35s ease,border-color .35s ease;
-}
-.fin-card-rapi:hover{
-  background:linear-gradient(160deg,var(--card-dark3,#221A14) 0%,var(--card-dark2,#1C1410) 100%);
-  border-color:var(--card-border-oro-hover,rgba(212,116,42,.72));
-}
-.fin-card-rapi-icon{font-size:28px;line-height:1;flex-shrink:0}
-.fin-card-rapi-body{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
-.fin-card-rapi-name{
-  font-family:var(--f-display,'DM Serif Display',serif);
-  font-size:18px;color:var(--card-text,rgba(248,238,224,.94));letter-spacing:-.2px;
-}
-.fin-card-rapi-addr{
-  font-family:var(--f-ui,'Syne',sans-serif);
-  font-size:13px;font-weight:700;letter-spacing:.3px;
-  color:rgba(248,238,224,.80);
-}
 
 /* ── NOTA EDITORIAL DE CIERRE ── */
 .fin-editorial{
@@ -6603,67 +6571,59 @@ body {
     <!-- GRILLA CAJEROS: 4 sin advertencia + 1 con advertencia operativa + 1 con advertencia estructural -->
     <div class="fin-grid-atm" role="list" aria-label="Cajeros automáticos verificados">
 
-      <!-- Banco Nación — sin badge -->
-      <div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:100ms" aria-label="Cajero Banco Nación, España 49">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏧</span>
-          </div>
-          <span class="fin-card-name">Cajero Banco Nación</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Nacion+Concepcion+del+Uruguay+España+49"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: España 49, Concepción del Uruguay">
-            España 49 →
-          </a>
+<!-- Banco Nación — sin badge -->
+<div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:100ms" aria-label="Cajero Banco Nación, España 49">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏧</span>
+    <span class="fin-card-name">Cajero Banco Nación</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Nacion+Concepcion+del+Uruguay+España+49"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: España 49, Concepción del Uruguay">
+      España 49 →
+    </a>
         </div>
       </div>
 
-      <!-- Banco Macro — sin badge -->
-      <div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:130ms" aria-label="Cajero Banco Macro, Alem 12 esq. 9 de Julio">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏧</span>
-          </div>
-          <span class="fin-card-name">Cajero Banco Macro</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Macro+Concepcion+del+Uruguay+Alem+12"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: Alem 12 esq. 9 de Julio">
-            Alem 12 esq. 9 de Julio →
-          </a>
+<!-- Banco Macro — sin badge -->
+<div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:130ms" aria-label="Cajero Banco Macro, Alem 12 esq. 9 de Julio">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏧</span>
+    <span class="fin-card-name">Cajero Banco Macro</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Macro+Concepcion+del+Uruguay+Alem+12"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: Alem 12 esq. 9 de Julio">
+      Alem 12 esq. 9 de Julio →
+    </a>
         </div>
       </div>
 
-      <!-- Banco Credicoop — sin badge -->
-      <div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:160ms" aria-label="Cajero Banco Credicoop, 9 de Julio 800-848">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏧</span>
-          </div>
-          <span class="fin-card-name">Cajero Banco Credicoop</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Credicoop+Concepcion+del+Uruguay+9+de+Julio"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 9 de Julio 800-848">
-            9 de Julio 800–848 →
-          </a>
+<!-- Banco Credicoop — sin badge -->
+<div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:160ms" aria-label="Cajero Banco Credicoop, 9 de Julio 800-848">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏧</span>
+    <span class="fin-card-name">Cajero Banco Credicoop</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Credicoop+Concepcion+del+Uruguay+9+de+Julio"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 9 de Julio 800-848">
+      9 de Julio 800–848 →
+    </a>
         </div>
       </div>
 
-      <!-- Banco Galicia — sin badge -->
-      <div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:190ms" aria-label="Cajero Banco Galicia, 8 de Junio 800">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏧</span>
-          </div>
-          <span class="fin-card-name">Cajero Banco Galicia</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Galicia+Concepcion+del+Uruguay+8+de+Junio+800"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 8 de Junio 800">
-            8 de Junio 800 →
-          </a>
+<!-- Banco Galicia — sin badge -->
+<div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:190ms" aria-label="Cajero Banco Galicia, 8 de Junio 800">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏧</span>
+    <span class="fin-card-name">Cajero Banco Galicia</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Galicia+Concepcion+del+Uruguay+8+de+Junio+800"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 8 de Junio 800">
+      8 de Junio 800 →
+    </a>
         </div>
       </div>
 
@@ -6736,107 +6696,93 @@ body {
     <div class="fin-grid-banks" role="list" aria-label="Sucursales bancarias verificadas">
 
       <!-- 1. Banco Nación -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:320ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco de la Nación Argentina</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Nacion+Argentina+Concepcion+del+Uruguay+España+49"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: España 49">España 49 →</a>
-          <a class="fin-card-tel" href="tel:8106664444" aria-label="Llamar al Banco Nación: 810-666-4444">810-666-4444</a>
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:320ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco de la Nación Argentina</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Nacion+Argentina+Concepcion+del+Uruguay+España+49"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: España 49">España 49 →</a>
+    <a class="fin-card-tel" href="tel:8106664444" aria-label="Llamar al Banco Nación: 810-666-4444">810-666-4444</a>
         </div>
       </div>
 
       <!-- 2. Banco Macro -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:340ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Macro</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Macro+Concepcion+del+Uruguay+Alem+12"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: Leandro N. Alem 12 esq. 9 de Julio">Leandro N. Alem 12 esq. 9 de Julio →</a>
-          <a class="fin-card-tel" href="tel:344245-0919" aria-label="Llamar al Banco Macro: 3442 45-0919">3442 45-0919</a>
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:340ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Macro</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Macro+Concepcion+del+Uruguay+Alem+12"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: Leandro N. Alem 12 esq. 9 de Julio">Leandro N. Alem 12 esq. 9 de Julio →</a>
+    <a class="fin-card-tel" href="tel:344245-0919" aria-label="Llamar al Banco Macro: 3442 45-0919">3442 45-0919</a>
         </div>
       </div>
 
-      <!-- 3. Banco Patagonia -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:360ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Patagonia</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Patagonia+Concepcion+del+Uruguay+9+de+Julio+829"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 9 de Julio 829">9 de Julio 829 →</a>
-          <a class="fin-card-tel" href="tel:344242-8691" aria-label="Llamar al Banco Patagonia: 3442 42-8691">3442 42-8691</a>
+<!-- 3. Banco Patagonia -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:360ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Patagonia</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Patagonia+Concepcion+del+Uruguay+9+de+Julio+829"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 9 de Julio 829">9 de Julio 829 →</a>
+    <a class="fin-card-tel" href="tel:344242-8691" aria-label="Llamar al Banco Patagonia: 3442 42-8691">3442 42-8691</a>
         </div>
       </div>
 
-      <!-- 4. BBVA -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:380ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">BBVA</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/BBVA+Concepcion+del+Uruguay+9+de+Julio+876"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 9 de Julio 876">9 de Julio 876 →</a>
-          <a class="fin-card-tel" href="tel:344243-2559" aria-label="Llamar a BBVA: 3442 43-2559">3442 43-2559</a>
+<!-- 4. BBVA -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:380ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">BBVA</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/BBVA+Concepcion+del+Uruguay+9+de+Julio+876"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 9 de Julio 876">9 de Julio 876 →</a>
+    <a class="fin-card-tel" href="tel:344243-2559" aria-label="Llamar a BBVA: 3442 43-2559">3442 43-2559</a>
         </div>
       </div>
 
-      <!-- 5. Banco Santander -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:400ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Santander</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Santander+Concepcion+del+Uruguay+Juan+Domingo+Peron+34"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: Juan D. Perón 34">Juan D. Perón 34 →</a>
-          <a class="fin-card-tel" href="tel:344242-3344" aria-label="Llamar al Banco Santander: 3442 42-3344">3442 42-3344</a>
+ <!-- 5. Banco Santander -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:400ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Santander</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Santander+Concepcion+del+Uruguay+Juan+Domingo+Peron+34"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: Juan D. Perón 34">Juan D. Perón 34 →</a>
+    <a class="fin-card-tel" href="tel:344242-3344" aria-label="Llamar al Banco Santander: 3442 42-3344">3442 42-3344</a>
         </div>
       </div>
 
-      <!-- 6. Banco Galicia -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:420ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Galicia</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Galicia+Concepcion+del+Uruguay+8+de+Junio+800"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 8 de Junio 800">8 de Junio 800 →</a>
-          <a class="fin-card-tel" href="tel:8107773333" aria-label="Llamar al Banco Galicia: 810-777-3333">810-777-3333</a>
+<!-- 6. Banco Galicia -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:420ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Galicia</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Galicia+Concepcion+del+Uruguay+8+de+Junio+800"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 8 de Junio 800">8 de Junio 800 →</a>
+    <a class="fin-card-tel" href="tel:8107773333" aria-label="Llamar al Banco Galicia: 810-777-3333">810-777-3333</a>
         </div>
       </div>
 
-      <!-- 7. Banco Credicoop -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:440ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Credicoop</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Credicoop+Concepcion+del+Uruguay+9+de+Julio+835"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 9 de Julio 835">9 de Julio 835 →</a>
-          <a class="fin-card-tel" href="tel:344243-2332" aria-label="Llamar al Banco Credicoop: 3442 43-2332">3442 43-2332</a>
+ <!-- 7. Banco Credicoop -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:440ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Credicoop</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Credicoop+Concepcion+del+Uruguay+9+de+Julio+835"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 9 de Julio 835">9 de Julio 835 →</a>
+    <a class="fin-card-tel" href="tel:344243-2332" aria-label="Llamar al Banco Credicoop: 3442 43-2332">3442 43-2332</a>
         </div>
       </div>
 
@@ -6856,18 +6802,13 @@ body {
              aria-label="Ver en mapa: Gral. Galarza 700">Gral. Galarza 700 →</a>
           <a class="fin-card-tel" href="tel:344242-3396" aria-label="Llamar a BERSA: 3442 42-3396">3442 42-3396</a>
           <!-- Nota expandible -->
-          <button
-            class="fin-note-bersa-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="fin-bersa-note-bank"
-            onclick="(function(btn){
-              var body=document.getElementById('fin-bersa-note-bank');
-              var open=body.classList.toggle('open');
-              btn.setAttribute('aria-expanded',open?'true':'false');
-              btn.textContent=open?'▲ Ocultar nota editorial':'▼ Leer nota editorial';
-            })(this)"
-          >▼ Leer nota editorial</button>
+<button
+  class="fin-note-bersa-toggle"
+  type="button"
+  aria-expanded="false"
+  aria-controls="fin-bersa-note-bank"
+  data-fin-toggle="fin-bersa-note-bank"
+>▼ Leer nota editorial</button>
           <div class="fin-note-bersa-body" id="fin-bersa-note-bank" aria-live="polite">
             <p class="fin-note">
               <strong>Nota editorial:</strong> Existen otras direcciones asociadas a esta entidad en la ciudad
@@ -6979,6 +6920,22 @@ body {
       <a class="fin-editorial-link" href="mailto:uruspotcdu@gmail.com" aria-label="Reportar un cambio por email">escribinos acá →</a>
     </p>
   </div>
+
+  <script>
+  (function(){
+    var section = document.getElementById('bancos');
+    if(!section) return;
+    section.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-fin-toggle]');
+      if(!btn || !section.contains(btn)) return;
+      var body = document.getElementById(btn.dataset.finToggle);
+      if(!body) return;
+      var open = body.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? '▲ Ocultar nota editorial' : '▼ Leer nota editorial';
+    });
+  })();
+  </script>
 
 </section>
   
@@ -10128,14 +10085,16 @@ if(alive){rafId=requestAnimationFrame(loop);}
     }
 
     /* Solo animar cuando el footer es visible */
-if('IntersectionObserver' in window){
+    var started = false;
+    if('IntersectionObserver' in window){
       var io = new IntersectionObserver(function(e){
-        if(e[0].isIntersecting){
-          if(!animId){ resize(); draw(); }
-        } else {
-          if(animId){ cancelAnimationFrame(animId); animId = null; }
+        if(e[0].isIntersecting && !started){
+          started = true;
+          resize();
+          draw();
+          io.unobserve(footer);
         }
-      }, {threshold:0.05});
+      }, {threshold:0.1});
       io.observe(footer);
     }
 
@@ -10378,128 +10337,58 @@ var mesh=document.querySelector('.hero-mesh');
 
   /* PROGRESS BAR */
   var bar=document.getElementById('progress-bar');
-var _barActive = false;
   function updateProgress(){
     var st=window.scrollY||document.documentElement.scrollTop;
     var dh=document.documentElement.scrollHeight-document.documentElement.clientHeight;
-    var pct = dh>0?(st/dh*100):0;
-    bar.style.width=pct+'%';
-    var shouldActive = pct > 1 && pct < 99;
-    if(shouldActive !== _barActive){
-      _barActive = shouldActive;
-      bar.classList.toggle('active', shouldActive);
-    }
+    bar.style.width=dh>0?(st/dh*100)+'%':'0%';
   }
 
   /* NAV SCROLLED */
   var nav=document.getElementById('main-nav');
   function updateNav(){nav.classList.toggle('scrolled',window.scrollY>60);}
 
-(function(){
-  'use strict';
-  var bar = document.getElementById('progress-bar');
-  var nav = document.getElementById('main-nav');
+  var ticking=false;
   var heroMesh = document.querySelector('.hero-mesh');
   var heroTitleEms = document.querySelectorAll('.hero-title .main-line em');
-  var orb1 = document.querySelector('.hero-orb-1');
-  var orb2 = document.querySelector('.hero-orb-2');
 
-  var ticking = false;
-  var lastSY = 0;
-  var heroVisible = true;
-
-  // Hero visibility
-  if ('IntersectionObserver' in window) {
-    var heroEl = document.querySelector('.hero');
-    if (heroEl) {
-      new IntersectionObserver(function(e) {
-        heroVisible = e[0].isIntersecting;
-      }, {threshold: 0}).observe(heroEl);
-    }
+if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+    var spotEls = document.querySelectorAll('.rcard, .gcard, .nat-card, .dep-feat-card, .dep-club-card, .mood-card, .circ-card, .ccard');
+    spotEls.forEach(function(el){
+      var raf = null;
+      var cachedRect = null;
+      el.addEventListener('mouseenter', function(){ cachedRect = el.getBoundingClientRect(); });
+      el.addEventListener('mousemove', function(e){
+        if (raf || !cachedRect) return;
+        raf = requestAnimationFrame(function(){
+          el.style.setProperty('--mx', ((e.clientX - cachedRect.left) / cachedRect.width * 100) + '%');
+          el.style.setProperty('--my', ((e.clientY - cachedRect.top) / cachedRect.height * 100) + '%');
+          raf = null;
+        });
+      });
+      el.addEventListener('mouseleave', function(){ cachedRect = null; });
+    });
   }
-
-  function onScroll() {
-    lastSY = window.scrollY;
-    if (!ticking) {
-      requestAnimationFrame(frame);
-      ticking = true;
-    }
-  }
-
-  function frame() {
-    var sy = lastSY;
-    var dh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    bar.style.width = dh > 0 ? (sy / dh * 100) + '%' : '0%';
-    nav.classList.toggle('scrolled', sy > 60);
-
-    if (heroVisible && sy < 700) {
-      if (heroMesh) heroMesh.style.opacity = 1 - Math.min(sy / 400, 1) * 0.35;
-      if (window.innerWidth > 768) {
-        if (orb1) orb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
-        if (orb2) orb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
-      }
-      if (heroTitleEms.length && sy < 500) {
-        var ls = -4 + (sy / 500) * 2;
-        for (var i = 0; i < heroTitleEms.length; i++) {
-          heroTitleEms[i].style.letterSpacing = ls + 'px';
-        }
-      }
-    }
-    ticking = false;
-  }
-
-  window.addEventListener('scroll', onScroll, {passive: true});
-
-  // SPOTLIGHT — delegado en el contenedor, un solo listener
-  var isFine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
-  if (isFine) {
-    var SPOTLIGHT_SELECTOR = '.rcard:not(.rcard-ad), .gcard, .nat-card, .dep-feat-card, .dep-club-card, .ccard';
-    var activeSpotEl = null;
-    var spotRaf = null;
-    var spotX = 0, spotY = 0;
-
-    function spotFrame() {
-      if (!activeSpotEl) { spotRaf = null; return; }
-      var rect = activeSpotEl.getBoundingClientRect();
-      var mx = ((spotX - rect.left) / rect.width * 100).toFixed(1);
-      var my = ((spotY - rect.top) / rect.height * 100).toFixed(1);
-      activeSpotEl.style.setProperty('--mx', mx + '%');
-      activeSpotEl.style.setProperty('--my', my + '%');
-      spotRaf = null;
-    }
-
-    document.addEventListener('mousemove', function(e) {
-      var el = e.target.closest(SPOTLIGHT_SELECTOR);
-      activeSpotEl = el || null;
-      if (!activeSpotEl) return;
-      spotX = e.clientX;
-      spotY = e.clientY;
-      if (!spotRaf) spotRaf = requestAnimationFrame(spotFrame);
-    }, {passive: true});
-  }
-})();
-
-window.addEventListener('scroll',function(){
+ 
+  window.addEventListener('scroll',function(){
     if(!ticking){
       requestAnimationFrame(function(){
         updateProgress();
         updateNav();
-        if(_heroVisible){
-          var sy = window.scrollY;
-          if(heroMesh){
-            heroMesh.style.opacity = 1 - Math.min(sy / 400, 1) * 0.35;
-          }
-          if(window.innerWidth > 768 && sy < 700){
-            if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
-            if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
-          }
-          if(heroTitleEms.length && sy < 500){
-            var t = sy / 500;
-            var ls = -4 + t * 2;
-            heroTitleEms.forEach(function(em){
-              em.style.letterSpacing = ls + 'px';
-            });
-          }
+        var sy = window.scrollY;
+        if(heroMesh){
+          var intensity = Math.min(sy / 400, 1);
+          heroMesh.style.opacity = 1 - intensity * 0.35;
+        }
+if(window.innerWidth > 768 && sy < 700){
+        if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
+        if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
+      }
+        if(heroTitleEms.length && sy < 500){
+          var t = sy / 500;
+          var ls = -4 + t * 2;
+          heroTitleEms.forEach(function(em){
+            em.style.letterSpacing = ls + 'px';
+          });
         }
         ticking=false;
       });
@@ -10604,17 +10493,22 @@ var id=entry.target.getAttribute('id');
   var sectionObserver=createSectionObserver();
   sections.forEach(function(s){sectionObserver.observe(s);});
 
-var _soResizeTimer=null;
+  var _soResizeTimer=null;
   window.addEventListener('resize',function(){
     clearTimeout(_soResizeTimer);
     _soResizeTimer=setTimeout(function(){
-      _invalidateNavRect();
-      var active = document.querySelector('.nav-item.active');
-      if(active) moveIndicator(active);
-    },300);
+      sectionObserver.disconnect();
+      sectionObserver=createSectionObserver();
+      sections.forEach(function(s){sectionObserver.observe(s);});
+    },250);
   },{passive:true});
 
-  var revealObserver=new IntersectionObserver(function(entries){ entries.forEach(function(entry){ if(!entry.isIntersecting)return; requestAnimationFrame(function(){ entry.target.classList.add('visible'); /* WOW MOMENT — pico cinemático en section-title al entrar */ var titleEl=entry.target.querySelector('.section-title,.nat-hero-title,.gr-hero-title,.dep-hero-title'); if(titleEl&&!titleEl._wowDone){ titleEl._wowDone=true; titleEl.style.transition='transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s ease'; titleEl.style.transform='scale(1.03) translateY(-4px)'; setTimeout(function(){ titleEl.style.transform='scale(1) translateY(0)'; setTimeout(function(){titleEl.style.transition='';},360); },300); } }); revealObserver.unobserve(entry.target); entry.target.querySelectorAll('.stat-num').forEach(function(el){
+  var revealObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(!entry.isIntersecting)return;
+      requestAnimationFrame(function(){entry.target.classList.add('visible');});
+      revealObserver.unobserve(entry.target);
+      entry.target.querySelectorAll('.stat-num').forEach(function(el){
         var txt = el.textContent.replace(/\D/g,'');
         var target = parseInt(txt,10);
         if(!target||target>999)return;
@@ -10713,22 +10607,19 @@ var _ddHideTimer = null;
     return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'');
   }
 
-var _searchablesCache = null;
   function getAllSearchables(){
-    if(_searchablesCache) return _searchablesCache;
     var all=[],seen={};
     document.querySelectorAll('.searchable[data-name]').forEach(function(el){
       var name=el.dataset.name||'';
       if(name&&!seen[name]){seen[name]=1;all.push({name:name,href:el.getAttribute('href')||'#',tags:el.dataset.tags||'',el:el});}
     });
-    _searchablesCache = all;
     return all;
   }
 
-function runSearch(raw){
+  function runSearch(raw){
     var q=normalize(raw.trim());
     var total=0,first=null;
-    _getSearchableCards().forEach(function(item){
+    document.querySelectorAll('.searchable').forEach(function(item){
       var match=!q||normalize(item.dataset.name||'').includes(q)||normalize(item.dataset.tags||'').includes(q);
       item.classList.toggle('search-hidden',!match);
       if(match){total++;if(!first)first=item;}
@@ -11014,17 +10905,12 @@ window.addEventListener('online', function(){
     }
   }
 
-function _deferWeather(){
-    if(window.requestIdleCallback){
-      window.requestIdleCallback(function(){ fetchWeather(); },{ timeout:12000 });
-    } else {
-      setTimeout(fetchWeather, 3500);
-    }
-  }
-  if(document.readyState === 'complete'){
-    _deferWeather();
+ if(document.readyState === 'complete' || document.readyState === 'interactive'){
+    scheduleWeather();
   } else {
-    window.addEventListener('load', _deferWeather, {once:true});
+    document.addEventListener('DOMContentLoaded', function(){
+      scheduleWeather();
+    }, {once: true});
   }
 window.__uruspotWeatherInterval = setInterval(function(){ fetchWeather(); }, 10*60*1000);
 
@@ -11083,31 +10969,25 @@ function _handlePageShow(e){
      (no se oculta del todo: el usuario sigue pudiendo ver toda la guía,
      pero la elección queda evidenciada visualmente — esto es un filtro
      real, no una lista fija de enlaces). */
-var _allSearchableCards = null;
-  function _getSearchableCards(){
-    if(!_allSearchableCards) _allSearchableCards = [].slice.call(document.querySelectorAll('.searchable'));
-    return _allSearchableCards;
-  }
-
   function applyMoodFilter(mood){
     var matched = [];
-    _getSearchableCards().forEach(function(card){
-      var hasMood = card.dataset.mood;
-      var isMatch = hasMood && (card.dataset.mood.split(/\s+/).indexOf(mood) !== -1);
-      if(isMatch){
-        card.classList.add('mood-match');
-        card.classList.remove('mood-dim');
-        matched.push(card);
-      } else {
-        card.classList.remove('mood-match');
-        card.classList.add('mood-dim');
-      }
+    document.querySelectorAll('.searchable[data-mood]').forEach(function(card){
+      var moods = (card.dataset.mood || '').split(/\s+/);
+      var isMatch = moods.indexOf(mood) !== -1;
+      card.classList.toggle('mood-match', isMatch);
+      card.classList.toggle('mood-dim', !isMatch);
+      if (isMatch) matched.push(card);
+    });
+ /* Cards sin data-mood se atenúan igual que las que no coinciden */
+    document.querySelectorAll('.searchable:not([data-mood])').forEach(function(card){
+      card.classList.remove('mood-match');
+      card.classList.add('mood-dim');
     });
     return matched;
   }
 
-  function clearMoodFilter(){
-    _getSearchableCards().forEach(function(card){
+function clearMoodFilter(){
+    document.querySelectorAll('.searchable').forEach(function(card){
       card.classList.remove('mood-match','mood-dim');
     });
   }
@@ -11503,20 +11383,13 @@ function forceCounters(){
     <script>
 /* ── MOOD BTN MOUSEMOVE ── */
 document.querySelectorAll('.mood-btn').forEach(function(btn){
-  var _moodRaf = null;
-  var _moodRect = null;
-  btn.addEventListener('mouseenter', function(){ _moodRect = btn.getBoundingClientRect(); });
-  btn.addEventListener('mouseleave', function(){ _moodRect = null; });
   btn.addEventListener('mousemove', function(e){
-    if(_moodRaf || !_moodRect) return;
-    var cx = e.clientX, cy = e.clientY;
-    _moodRaf = requestAnimationFrame(function(){
-      btn.style.setProperty('--bx', ((cx - _moodRect.left) / _moodRect.width * 100) + '%');
-      btn.style.setProperty('--by', ((cy - _moodRect.top) / _moodRect.height * 100) + '%');
-      _moodRaf = null;
-    });
+    var r = btn.getBoundingClientRect();
+    btn.style.setProperty('--bx', ((e.clientX - r.left) / r.width * 100) + '%');
+    btn.style.setProperty('--by', ((e.clientY - r.top) / r.height * 100) + '%');
   });
 });
+
 /* ── CIRC CARD DRAW ANIMATION ── */
 (function(){
   var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
