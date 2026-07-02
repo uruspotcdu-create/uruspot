@@ -176,13 +176,14 @@ a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF82;outline-offset:3px;border-radius:2px}
 .main-body a:focus-visible,.main-body button:focus-visible,.main-body input:focus-visible{outline:2px solid #1d5c40;outline-offset:3px;border-radius:2px}
-  /* ═══════════════ FAB PERDIDO ═══════════════ */
-#lost-fab{position:fixed;bottom:max(24px, calc(env(safe-area-inset-bottom) + 12px));left:max(24px, env(safe-area-inset-left));z-index:8000;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#B85C2A,#D4742A);color:#fff;font-family:var(--f-ui);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:14px 22px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 12px 36px rgba(196,135,42,.50),0 4px 14px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .35s var(--ease),box-shadow .35s ease,background .3s ease;opacity:0;pointer-events:none;transform:translateY(12px)}
+/* ═══════════════ FAB PERDIDO ═══════════════ */
+#lost-fab{position:fixed;bottom:max(24px, calc(env(safe-area-inset-bottom) + 12px));left:max(24px, env(safe-area-inset-left));z-index:var(--z-fixed-ui);display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#B85C2A,#D4742A);color:#fff;font-family:var(--f-ui);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:14px 22px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 12px 36px rgba(196,135,42,.50),0 4px 14px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .35s var(--ease),box-shadow .35s ease,background .3s ease;opacity:0;pointer-events:none;transform:translateY(12px)}
 #lost-fab.visible{opacity:1;pointer-events:auto;transform:translateY(0)}
 #lost-fab:hover{background:linear-gradient(135deg,#D4742A,#E08830);transform:translateY(-3px);box-shadow:0 14px 40px rgba(184,92,42,.65)}
 .lost-emoji{font-size:16px;line-height:1}
+/* Nota: repintado cian de este componente vive en el bloque bioluminiscente (#lost-fab más abajo) — no se toca. */
 /* ═══════════════ BACK TO TOP ═══════════════ */
-#back-to-top{position:fixed;bottom:max(24px, calc(env(safe-area-inset-bottom) + 12px));right:max(24px, env(safe-area-inset-right));z-index:8000;width:48px;height:48px;min-width:48px;min-height:48px;border-radius:50%;background:rgba(6,6,5,.90);border:1px solid rgba(242,237,227,.14);color:rgba(242,237,227,.70);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transform:translateY(12px) scale(.85);transition:opacity .35s ease,transform .35s var(--ease),background .3s ease,border-color .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+#back-to-top{position:fixed;bottom:max(24px, calc(env(safe-area-inset-bottom) + 12px));right:max(24px, env(safe-area-inset-right));z-index:var(--z-fixed-ui);width:48px;height:48px;min-width:48px;min-height:48px;border-radius:50%;background:rgba(6,6,5,.90);border:1px solid rgba(242,237,227,.14);color:rgba(242,237,227,.70);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transform:translateY(12px) scale(.85);transition:opacity .35s ease,transform .35s var(--ease),background .3s ease,border-color .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 #back-to-top.visible{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
 #back-to-top:hover{background:var(--verde);border-color:var(--verde2);color:#fff;transform:translateY(-3px) scale(1.06)}
 #back-to-top svg{width:18px;height:18px}
@@ -190,11 +191,11 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 @supports(backdrop-filter:blur(8px)){#back-to-top{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);background:rgba(6,6,5,.75)}}
 
 /* ── PROGRESS BAR ── */
-#progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--verde2);z-index:10000;transition:width .1s linear;box-shadow:0 0 6px rgba(38,122,85,.8)}
+#progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--verde2);z-index:var(--z-progress);transition:width .1s linear;box-shadow:0 0 6px rgba(38,122,85,.8)}
 #progress-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--oro3),transparent);will-change:transform;animation:shimmerBar 3s linear infinite}
 @keyframes shimmerBar{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 
-/* ── LIVE DOTS — nuevo sistema con halo triple ── */
+/* ── LIVE DOTS — halo triple ── */
 @keyframes rippleLive{
   0%{transform:scale(.4);opacity:.9}
   60%{opacity:.4}
@@ -221,7 +222,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   animation:rippleLive 2.2s ease-out infinite .75s;
   pointer-events:none;
 }
-
 /* ── NUEVO: AURORA SHIMMER — efecto de luz sobre gradientes ── */
 @keyframes auroraShift{
   0%{background-position:0% 50%}
@@ -246,12 +246,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 @keyframes slideUpPremium{
   from{opacity:0;transform:translateY(32px) scale(.97)}
   to{opacity:1;transform:translateY(0) scale(1)}
-}
-
-/* ── SHIMMER BAR (original, mejorado) ── */
-@keyframes shimmerBar{
-  from{transform:translateX(-100%)}
-  to{transform:translateX(100%)}
 }
 
 /* ── NUEVO: PARTICLE DRIFT — para partículas decorativas ── */
@@ -351,15 +345,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 /* ── Orb terciario — nebulosa interior nueva ── */
 .hero-orb::before{
   display:none;
-}
-
-@keyframes orbFloat1{
-  from{transform:translate(0,0) scale(1) rotate(0deg)}
-  to{transform:translate(-30px,38px) scale(1.10) rotate(3deg)}
-}
-@keyframes orbFloat2{
-  from{transform:translate(0,0) scale(1) rotate(0deg)}
-  to{transform:translate(36px,-24px) scale(1.14) rotate(-2deg)}
 }
 
 /* ── PARTÍCULAS DECORATIVAS — puntos de luz del río ── */
@@ -696,7 +681,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .wx-skel-datum{height:18px;width:55px}
 @keyframes wx-skel{0%{background-position:200% 50%}100%{background-position:-200% 50%}}
 /* ═══════════════ NAV ═══════════════ */
-.main-nav{position:sticky;top:0;z-index:900;border-bottom:1px solid rgba(242,237,227,.06);display:flex;align-items:stretch;overflow-x:hidden;scrollbar-width:none;}
+.main-nav{position:sticky;top:0;z-index:var(--z-nav);border-bottom:1px solid rgba(242,237,227,.06);display:flex;align-items:stretch;overflow-x:hidden;scrollbar-width:none;}
 @supports(overflow:clip){.main-nav{overflow-x:clip;}}
 @supports(backdrop-filter:saturate(180%) blur(20px)){.main-nav{backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);background:rgba(6,6,5,.55)}}
 .main-nav::-webkit-scrollbar{display:none}
@@ -716,7 +701,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .nav-item.active ~ * .nav-indicator::after,.main-nav:hover .nav-indicator::after{opacity:1}
 
 /* ── SEARCH ── */
-.search-bar-wrap{position:sticky;top:60px;z-index:800;background:rgba(6,6,5,.97);border-bottom:1px solid rgba(242,237,227,.07);padding:0 var(--gutter);display:flex;align-items:center;gap:16px;height:0;overflow:hidden;transition:height .35s var(--ease)}
+.search-bar-wrap{position:sticky;top:var(--nav-h);z-index:var(--z-search);background:rgba(6,6,5,.97);border-bottom:1px solid rgba(242,237,227,.07);padding:0 var(--gutter);display:flex;align-items:center;gap:16px;height:0;overflow:hidden;transition:height .35s var(--ease)}
 .search-bar-wrap.open{height:72px}
 .search-icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:60px;border:none;border-left:1px solid rgba(242,237,227,.08);background:rgba(6,6,5,.60);cursor:pointer;color:rgba(242,237,227,.55);font-size:18px;flex-shrink:0;transition:color .3s ease,background .3s ease;padding:0 18px;white-space:nowrap}
 .search-icon-btn:hover{color:var(--oro2);background:rgba(196,135,42,.08)}
@@ -735,7 +720,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 #search-dropdown.dd-visible{opacity:1;transform:translateY(0);pointer-events:auto}
 
 /* ── SECTION CRUMB ── */
-.section-crumb{position:sticky;top:60px;z-index:750;background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.65);display:flex !important;align-items:center;gap:8px;transform:none !important;transition:none;pointer-events:none;visibility:visible !important;opacity:1 !important}
+.section-crumb{position:sticky;top:var(--nav-h);z-index:var(--z-crumb);background:rgba(242,237,227,.97);border-bottom:1px solid rgba(26,25,22,.08);padding:10px var(--gutter);font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(26,25,22,.65);display:flex !important;align-items:center;gap:8px;transform:none !important;transition:none;pointer-events:none;visibility:visible !important;opacity:1 !important}
 .section-crumb.visible{transform:none !important}
 .section-crumb.search-active{display:none !important}
 .section-crumb-dot{width:5px;height:5px;border-radius:50%;background:var(--verde);flex-shrink:0}
@@ -775,7 +760,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .reveal{opacity:0;transform:translateY(24px) scale(.98);filter:blur(4px);transition:opacity .65s var(--ease-out-expo),transform .65s var(--ease-out-expo),filter .65s var(--ease-out-expo);transition-delay:var(--reveal-delay,0ms);will-change:opacity,transform,filter}
 .reveal.visible{opacity:1;transform:translateY(0) scale(1);filter:blur(0px)}
 @media(max-width:1024px){.reveal{filter:none}.reveal.visible{filter:none}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.reveal{opacity:1;transform:none;filter:none}}
 
 /* ── PILLS ── */
 .pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
@@ -906,7 +890,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 
 /* ═══════════════ RESTO / CAFÉ GRIDS (heredados y depurados) ═══════════════ */
 .resto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;row-gap:2px;background:rgba(26,25,22,.14);border:1px solid rgba(26,25,22,.14)}
-.rcard{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;flex-direction:column;padding:32px 28px 28px;text-decoration:none;position:relative;overflow:hidden;min-height:180px;transition:background .4s var(--ease),transform .4s var(--ease),box-shadow .4s ease,opacity .3s ease;contain:layout style;border-radius:var(--radius-card);border:1px solid var(--card-border-oro)}
+.card-base,.rcard{background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);border-radius:var(--radius-card);border:1px solid var(--card-border-oro)}
+.rcard{display:flex;flex-direction:column;padding:32px 28px 28px;text-decoration:none;position:relative;overflow:hidden;min-height:180px;transition:background .4s var(--ease),transform .4s var(--ease),box-shadow .4s ease,opacity .3s ease;contain:layout style}
 .rcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--oro2),var(--oro));transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease);z-index:0}
 .rcard:hover::before,.rcard:focus-visible::before{transform:scaleX(1)}
 .rcard:has(.badge-gold)::before{transform:scaleX(0.35);opacity:0.4}
@@ -1921,7 +1906,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   will-change:opacity;
 }
 .ccard:hover .ccard-glow{opacity:1;}
-  /* ── CORRIENTE SUBMARINA ── */ .hero-current {   position: absolute;   inset: 0;   z-index: 3;   pointer-events: none; } .hc-particle {   position: absolute;   left: var(--hcp-x);   top: var(--hcp-y);   width: var(--hcp-size);   height: var(--hcp-size);   border-radius: 50%;   background: rgba(10,255,239,0.80);   box-shadow: 0 0 6px rgba(10,255,239,0.90), 0 0 12px rgba(10,255,239,0.40);   animation: particleFloat var(--hcp-dur) ease-in-out var(--hcp-del) infinite; } @keyframes particleFloat {   0%   { transform: translate(0,0) scale(1); opacity: 0; }   10%  { opacity: 0.8; }   30%  { transform: translate(-18px,-25px) scale(1.2); opacity: 1; }   55%  { transform: translate(12px,-45px) scale(0.85); opacity: 0.6; }   80%  { transform: translate(-8px,-70px) scale(1.1); opacity: 0.9; }   100% { transform: translate(5px,-95px) scale(0.7); opacity: 0; } } @media (prefers-reduced-motion: reduce) {   .hc-particle { animation: none; opacity: 0; } }
 /* ── EMBER GLOW — efecto de brillo sutil en hover de tarjetas oscuras ── */
 @media (hover: hover) and (pointer: fine) {
   .rcard:not(.rcard-feat):hover,
@@ -1947,19 +1931,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   }
 }
 
-/* ── FOCUS VISIBLE ── */
-a:focus-visible, button:focus-visible, input:focus-visible {
-  outline: 2px solid #4CAF82;
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-.main-body a:focus-visible,
-.main-body button:focus-visible,
-.main-body input:focus-visible {
-  outline: 2px solid #1d5c40;
-  outline-offset: 3px;
-  border-radius: 2px;
-}
+/* ── FOCUS VISIBLE (consolidado) ── */
 
   /* ═══════════════════════════════════════════════════════
    URU SPOT — FIXES PATCH
@@ -2494,7 +2466,7 @@ html, body {
     font-size: clamp(22px, 7vw, 32px) !important;
   }
 }
-/* ── CORRIENTE SUBMARINA ── */
+/* ── CORRIENTE SUBMARINA — capa decorativa del hero (única definición) ── */
 .hero-current {
   position: absolute;
   inset: 0;
@@ -2659,12 +2631,24 @@ html, body {
   --ease-tide:    cubic-bezier(0.34, 1.4, 0.64, 1);
   --ease-depth:   cubic-bezier(0.77, 0, 0.175, 1);
   
-  /* Sombras con luz desde abajo */
+/* Sombras con luz desde abajo */
   --glow-teal:    0 0 40px rgba(10,255,239,0.15), 0 0 80px rgba(10,255,239,0.08);
   --glow-amber:   0 0 40px rgba(232,160,48,0.20), 0 0 80px rgba(232,160,48,0.10);
   --glow-deep:    0 40px 80px rgba(2,11,18,0.80), 0 8px 20px rgba(2,11,18,0.60);
-}
 
+  /* Tarjetas oscuras — activo */
+  --card-dark:   #050F18;
+  --card-dark2:  #070D1C;
+  --card-dark3:  #0A1525;
+  --card-border-oro:       rgba(10,180,200,0.22);
+  --card-border-oro-hover: rgba(10,255,239,0.52);
+  --card-text:       rgba(220,245,248,0.96);
+  --card-text-soft:  rgba(180,220,228,0.82);
+  --card-tag:        rgba(10,255,239,0.55);
+
+  /* Escala z-index */
+  --z-crumb:750;--z-search:800;--z-nav:900;--z-fixed-ui:8000;--z-dropdown:9999;--z-progress:10000;
+}
 /* ═══════════════════════════════════════════════════════
    CUERPO — fondo oceánico profundo
    ═══════════════════════════════════════════════════════ */
@@ -3205,16 +3189,6 @@ body {
    TARJETAS OSCURAS — reflejos submarinos
    ═══════════════════════════════════════════════════════ */
 
-:root {
-  --card-dark:   #050F18;
-  --card-dark2:  #070D1C;
-  --card-dark3:  #0A1525;
-  --card-border-oro:       rgba(10,180,200,0.22);
-  --card-border-oro-hover: rgba(10,255,239,0.52);
-  --card-text:       rgba(220,245,248,0.96);
-  --card-text-soft:  rgba(180,220,228,0.82);
-  --card-tag:        rgba(10,255,239,0.55);
-}
 
 /* RCARD — tarjetas de restaurantes */
 .rcard {
@@ -4855,15 +4829,6 @@ body {
 .fin-grid-atm{grid-template-columns:repeat(3,1fr)}
 .fin-grid-banks{grid-template-columns:repeat(4,1fr)}
 .fin-grid-wu{grid-template-columns:repeat(2,1fr)}
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
-  margin-bottom:2px;
-}
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
-  margin-bottom:2px;
-}
-
 /* ── TARJETA BASE ── */
 .fin-card{
   background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
@@ -9320,7 +9285,7 @@ if(alive){rafId=requestAnimationFrame(loop);}
 .dep-intro-rule{height:3px;background:linear-gradient(90deg,var(--verde2),var(--oro2),rgba(242,237,227,.12));margin-top:28px}
 
 /* ── HERO NÁUTICO ── */
-.dep-hero{position:relative;overflow:hidden;margin-bottom:1px;min-height:240px;background:linear-gradient(135deg,#0b1a26 0%,#0e2018 60%,#0a1420 100%);padding:48px 52px}
+.dep-hero{position:relative;overflow:hidden;margin-bottom:1px;min-height:240px;background:linear-gradient(135deg,#0b1a26 0%,#0e2018 60%,#0a1420 100%);padding:48px 52px;border-radius:var(--radius-card)}
 .dep-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 65% 80% at 85% 15%,rgba(26,92,138,.40) 0%,transparent 58%),radial-gradient(ellipse 40% 60% at 5% 85%,rgba(29,92,64,.20) 0%,transparent 55%)}
 .dep-hero-content{position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;max-width:760px}
 .dep-hero-chip{display:inline-flex;align-items:center;gap:10px;background:rgba(26,92,138,.14);border:1px solid rgba(26,92,138,.40);border-radius:2px;padding:8px 16px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(70,160,230,.95);width:fit-content}
