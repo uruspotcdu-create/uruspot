@@ -117,7 +117,9 @@
    Temperatura visual: ámbar profundo, verde musgo, void cálido.
    ═══════════════════════════════════════════════════════ */
 :root {
+  /* ── ESTRUCTURA / RADIOS ── */
   --radius-card: 8px;
+
   /* ── VOID PALETTE — fondos nocturnos cálidos ── */
   --void:#08070A;--void2:#0E0C10;--void3:#141218;--soil:#1C1A1F;
 
@@ -138,24 +140,39 @@
   --copper:#C46830;--copper2:#A04E28;--copper3:#7A3818;
   --amber-deep:#B8640A;--amber-mid:#CC7818;--amber-bright:#E08828;
 
-  /* ── SISTEMA DE TARJETAS ── */
-  --card-dark:#100D14;--card-dark2:#18141C;--card-dark3:#201A24;
-  --card-border-oro:rgba(196,98,26,.32);
-  --card-border-oro-hover:rgba(224,120,40,.68);
-  --card-text:rgba(245,238,216,.95);
-  --card-text-soft:rgba(245,238,216,.80);
-  --card-tag:rgba(245,238,216,.55);
+  /* ── PALETA BIOLUMINISCENTE (activa sobre tarjetas/hero) ── */
+  --bio-deep:#020B12;--bio-dark:#050F18;--bio-mid:#071525;--bio-surface:#0A1E30;
+  --bio-glow:#0AFFEF;--bio-glow2:#05D9C8;--bio-amber:#E8A030;--bio-amber2:#F5C060;
+  --bio-river:#0A4A6E;--bio-foam:rgba(10,255,239,0.06);
 
-  /* ── TIPOGRAFÍA ── */
-  --f-display:'DM Serif Display','Times New Roman',serif;
-  --f-italic:'DM Serif Display',Georgia,serif;
-  --f-ui:'Syne',system-ui,sans-serif;
+  /* ── SISTEMA DE TARJETAS (valor final activo: paleta bioluminiscente) ── */
+  --card-dark:#050F18;--card-dark2:#070D1C;--card-dark3:#0A1525;
+  --card-border-oro:rgba(10,180,200,.22);
+  --card-border-oro-hover:rgba(10,255,239,.52);
+  --card-text:rgba(220,245,248,.96);
+  --card-text-soft:rgba(180,220,228,.82);
+  --card-tag:rgba(10,255,239,.55);
+
+  /* ── TIPOGRAFÍA (valor final activo) ── */
+  --f-display:'Playfair Display','DM Serif Display',Georgia,serif;
+  --f-italic:'Playfair Display','DM Serif Display',Georgia,serif;
+  --f-ui:'Space Grotesk','Syne',system-ui,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,monospace;
+
   /* ── EASING PREMIUM ── */
   --ease:cubic-bezier(0.25,0.46,0.45,0.94);
   --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
   --ease-back:cubic-bezier(0.36,0,0.66,-0.56);
   --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
   --ease-silk:cubic-bezier(0.22,1,0.36,1);
+  --ease-river:cubic-bezier(0.19,1,0.22,1);
+  --ease-tide:cubic-bezier(0.34,1.4,0.64,1);
+  --ease-depth:cubic-bezier(0.77,0,0.175,1);
+
+  /* ── SOMBRAS DE GLOW ── */
+  --glow-teal:0 0 40px rgba(10,255,239,.15),0 0 80px rgba(10,255,239,.08);
+  --glow-amber:0 0 40px rgba(232,160,48,.20),0 0 80px rgba(232,160,48,.10);
+  --glow-deep:0 40px 80px rgba(2,11,18,.80),0 8px 20px rgba(2,11,18,.60);
 
   /* ── ESPACIADO ── */
   --lift-sm:3px;--lift-md:6px;--lift-lg:10px;
@@ -168,6 +185,9 @@
 
   /* ── ANIMACIÓN DURATIONS ── */
   --dur-fast:150ms;--dur-base:300ms;--dur-slow:600ms;--dur-epic:1200ms;
+
+  /* ── ESCALA Z-INDEX (unificada) ── */
+  --z-crumb:750;--z-search:800;--z-nav:900;--z-fixed-ui:8000;--z-dropdown:9999;--z-progress:10000;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{font-size:16px}
@@ -2605,50 +2625,8 @@ html, body {
   to{background-position:8px 8px, 8px 8px;}
 }
   /* ── IMPORTAR NUEVA TIPOGRAFÍA DISPLAY ── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-/* ── NUEVOS TOKENS DE DISEÑO ── */
-:root {
-  /* Paleta bioluminiscente */
-  --bio-deep:     #020B12;
-  --bio-dark:     #050F18;
-  --bio-mid:      #071525;
-  --bio-surface:  #0A1E30;
-  --bio-glow:     #0AFFEF;
-  --bio-glow2:    #05D9C8;
-  --bio-amber:    #E8A030;
-  --bio-amber2:   #F5C060;
-  --bio-river:    #0A4A6E;
-  --bio-foam:     rgba(10,255,239,0.06);
-  
-  /* Fuentes rediseñadas */
-  --f-display:    'Playfair Display', 'DM Serif Display', Georgia, serif;
-  --f-italic:     'Playfair Display', 'DM Serif Display', Georgia, serif;
-  --f-ui:         'Space Grotesk', 'Syne', system-ui, sans-serif;
-  
-  /* Easing cinematográfico */
-  --ease-river:   cubic-bezier(0.19, 1, 0.22, 1);
-  --ease-tide:    cubic-bezier(0.34, 1.4, 0.64, 1);
-  --ease-depth:   cubic-bezier(0.77, 0, 0.175, 1);
-  
-/* Sombras con luz desde abajo */
-  --glow-teal:    0 0 40px rgba(10,255,239,0.15), 0 0 80px rgba(10,255,239,0.08);
-  --glow-amber:   0 0 40px rgba(232,160,48,0.20), 0 0 80px rgba(232,160,48,0.10);
-  --glow-deep:    0 40px 80px rgba(2,11,18,0.80), 0 8px 20px rgba(2,11,18,0.60);
-
-  /* Tarjetas oscuras — activo */
-  --card-dark:   #050F18;
-  --card-dark2:  #070D1C;
-  --card-dark3:  #0A1525;
-  --card-border-oro:       rgba(10,180,200,0.22);
-  --card-border-oro-hover: rgba(10,255,239,0.52);
-  --card-text:       rgba(220,245,248,0.96);
-  --card-text-soft:  rgba(180,220,228,0.82);
-  --card-tag:        rgba(10,255,239,0.55);
-
-  /* Escala z-index */
-  --z-crumb:750;--z-search:800;--z-nav:900;--z-fixed-ui:8000;--z-dropdown:9999;--z-progress:10000;
-}
+/* ── TOKENS BIOLUMINISCENTES CONSOLIDADOS EN EL :root PRINCIPAL ── */
 /* ═══════════════════════════════════════════════════════
    CUERPO — fondo oceánico profundo
    ═══════════════════════════════════════════════════════ */
