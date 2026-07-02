@@ -299,151 +299,171 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   display:flex;
   flex-direction:column;
   overflow:hidden;
-  background:var(--void);
-  /* Textura sutil de ruido digital */
+  background:var(--bio-deep);
   isolation:isolate;
 }
-
-/* ── FONDO ATMOSFÉRICO — capas de luz del río ── */
+/* ── FONDO ATMOSFÉRICO — oceánico bioluminiscente (valor final único) ── */
 .hero-mesh{
   position:absolute;inset:0;z-index:0;
   background:
-    /* Farol principal — esquina superior derecha, naranja-ámbar cálido */
-    radial-gradient(ellipse 65% 70% at 88% 5%,
-      rgba(196,98,26,.62) 0%,
-      rgba(150,65,18,.30) 38%,
-      transparent 65%),
-    /* Farol secundario — esquina inferior izquierda, verde río */
-    radial-gradient(ellipse 55% 65% at 5% 95%,
-      rgba(30,92,56,.28) 0%,
-      rgba(20,60,38,.12) 42%,
-      transparent 62%),
-    /* Neblina central — profundidad */
-    radial-gradient(ellipse 80% 40% at 50% 60%,
-      rgba(28,20,35,.35) 0%,
+    radial-gradient(ellipse 50% 35% at 72% 0%,
+      rgba(10,255,239,0.22) 0%,
+      rgba(5,217,200,0.10) 40%,
       transparent 70%),
-    /* Gradiente base — oscuro cálido */
-    linear-gradient(162deg,
-      #0A0810 0%,
-      #070608 30%,
-      #0C0A0E 65%,
-      #060509 100%);
-  transition:background-position .5s ease;
-}
-
-/* ── ORBS DE LUZ — respiran como agua ── */
-.hero-orb{
-  position:absolute;border-radius:50%;
-  pointer-events:none;z-index:1;
-  contain:layout;filter:blur(0);
+    radial-gradient(ellipse 40% 50% at 18% 95%,
+      rgba(232,160,48,0.18) 0%,
+      rgba(180,100,20,0.08) 45%,
+      transparent 68%),
+    radial-gradient(ellipse 90% 60% at 50% 100%,
+      rgba(10,30,48,0.90) 0%,
+      transparent 60%),
+    linear-gradient(168deg,
+      #020B12 0%,
+      #030D18 25%,
+      #050F1E 55%,
+      #020A14 80%,
+      #010810 100%);
+  transition:none;
   will-change:transform;
 }
 
-/* Orb principal — luz ámbar grande */
+/* ── ORBS DE LUZ — medusas bioluminiscentes (valor final único) ── */
+.hero-orb{
+  border-radius:50%;
+  pointer-events:none;z-index:2;
+  will-change:transform;contain:layout;
+  mix-blend-mode:screen;
+}
+
 .hero-orb-1{
-  width:780px;height:780px;
-  top:-220px;right:-200px;
-  background:radial-gradient(circle at 35% 35%,
-    rgba(196,98,26,.22) 0%,
-    rgba(196,98,26,.08) 40%,
-    rgba(30,92,56,.06) 65%,
+  width:900px;height:900px;
+  top:-350px;right:-250px;
+  background:radial-gradient(circle at 38% 42%,
+    rgba(10,255,239,0.13) 0%,
+    rgba(5,180,200,0.07) 35%,
+    rgba(0,60,120,0.05) 60%,
     transparent 72%);
-  animation:orbFloat1 16s ease-in-out infinite alternate;
+  animation:orbPulse1 20s ease-in-out infinite alternate;
+  filter:blur(1px);
 }
 
-/* Orb secundario — verde musgo profundo */
 .hero-orb-2{
-  width:560px;height:560px;
-  bottom:-200px;left:-160px;
-  background:radial-gradient(circle at 60% 60%,
-    rgba(30,92,56,.16) 0%,
-    rgba(196,98,26,.06) 50%,
-    transparent 70%);
-  animation:orbFloat2 22s ease-in-out infinite alternate;
+  width:700px;height:700px;
+  bottom:-250px;left:-180px;
+  background:radial-gradient(circle at 55% 52%,
+    rgba(232,160,48,0.12) 0%,
+    rgba(180,80,20,0.06) 45%,
+    rgba(10,255,239,0.04) 65%,
+    transparent 75%);
+  animation:orbPulse2 26s ease-in-out infinite alternate;
+  filter:blur(2px);
 }
 
-/* ── Orb terciario — nebulosa interior nueva ── */
-.hero-orb::before{
-  display:none;
+@keyframes orbPulse1{
+  0%{transform:translate(0,0) scale(1) rotate(0deg);opacity:.9}
+  30%{transform:translate(-25px,40px) scale(1.08) rotate(2deg);opacity:1}
+  70%{transform:translate(15px,-20px) scale(.95) rotate(-1deg);opacity:.75}
+  100%{transform:translate(-40px,60px) scale(1.12) rotate(3deg);opacity:.95}
+}
+@keyframes orbPulse2{
+  0%{transform:translate(0,0) scale(1) rotate(0deg);opacity:.8}
+  40%{transform:translate(30px,-35px) scale(1.10) rotate(-2deg);opacity:1}
+  80%{transform:translate(-20px,25px) scale(.92) rotate(1deg);opacity:.7}
+  100%{transform:translate(45px,-50px) scale(1.15) rotate(-3deg);opacity:.9}
 }
 
-/* ── PARTÍCULAS DECORATIVAS — puntos de luz del río ── */
+/* ── PARTÍCULAS — plancton bioluminiscente (valor final único) ── */
 .hero::before{
   content:'';
   position:absolute;
   inset:0;
-  z-index:2;
+  z-index:3;
   pointer-events:none;
   background-image:
-    radial-gradient(1.5px 1.5px at 18% 22%,rgba(196,98,26,.55) 50%,transparent 50%),
-    radial-gradient(1px 1px at 74% 18%,rgba(196,98,26,.40) 50%,transparent 50%),
-    radial-gradient(1.5px 1.5px at 56% 42%,rgba(245,238,216,.18) 50%,transparent 50%),
-    radial-gradient(1px 1px at 32% 68%,rgba(196,98,26,.30) 50%,transparent 50%),
-    radial-gradient(2px 2px at 88% 72%,rgba(30,92,56,.45) 50%,transparent 50%),
-    radial-gradient(1px 1px at 12% 85%,rgba(245,238,216,.15) 50%,transparent 50%),
-    radial-gradient(1.5px 1.5px at 65% 80%,rgba(196,98,26,.35) 50%,transparent 50%),
-    radial-gradient(1px 1px at 44% 10%,rgba(245,238,216,.20) 50%,transparent 50%),
-    radial-gradient(2px 2px at 91% 38%,rgba(196,98,26,.22) 50%,transparent 50%),
-    radial-gradient(1px 1px at 8% 55%,rgba(30,92,56,.30) 50%,transparent 50%);
-  animation:particleDrift 28s ease-in-out infinite;
-  opacity:1;
+    radial-gradient(1.5px 1.5px at 12% 28%, rgba(10,255,239,0.70) 50%, transparent 50%),
+    radial-gradient(1px 1px at 85% 15%, rgba(10,255,239,0.50) 50%, transparent 50%),
+    radial-gradient(2px 2px at 45% 60%, rgba(232,160,48,0.45) 50%, transparent 50%),
+    radial-gradient(1px 1px at 28% 78%, rgba(10,255,239,0.35) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 68% 85%, rgba(10,255,239,0.55) 50%, transparent 50%),
+    radial-gradient(1px 1px at 8% 50%, rgba(232,160,48,0.30) 50%, transparent 50%),
+    radial-gradient(2px 2px at 92% 65%, rgba(10,255,239,0.40) 50%, transparent 50%),
+    radial-gradient(1px 1px at 55% 8%, rgba(232,160,48,0.35) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 38% 42%, rgba(10,255,239,0.25) 50%, transparent 50%),
+    radial-gradient(1px 1px at 75% 35%, rgba(232,160,48,0.20) 50%, transparent 50%),
+    radial-gradient(2px 2px at 22% 12%, rgba(10,255,239,0.60) 50%, transparent 50%),
+    radial-gradient(1px 1px at 62% 22%, rgba(10,255,239,0.30) 50%, transparent 50%);
+  animation:planktonDrift 35s ease-in-out infinite;
+  opacity:.8;
 }
 
-/* ── TOPBAR ── */
+/* ═══════════════ TOPBAR (valor final único) ── */
 .hero-topbar{
   position:relative;z-index:5;
   display:flex;align-items:center;justify-content:space-between;
-  padding:32px var(--gutter);
+  padding:28px var(--gutter);
   flex-shrink:0;
-  animation:slideUpPremium .8s var(--ease-out-expo) both;
+  animation:slideUpPremium .9s var(--ease-river) both;
+  border-bottom:1px solid rgba(10,255,239,0.08);
 }
 
 /* ── CITY TAG — cápsula con glass ── */
 .city-tag{
   display:inline-flex;align-items:center;gap:12px;
-  background:rgba(8,7,10,.65);
-  border:1px solid rgba(245,238,216,.14);
+  background:rgba(2,11,18,0.75);
+  border:1px solid rgba(10,255,239,0.22);
   border-radius:50px;
   padding:8px 20px 8px 8px;
   backdrop-filter:blur(12px) saturate(140%);
   -webkit-backdrop-filter:blur(12px) saturate(140%);
   box-shadow:
-    0 4px 24px rgba(0,0,0,.40),
-    inset 0 1px 0 rgba(245,238,216,.08),
-    0 0 0 1px rgba(196,98,26,.08);
-  transition:border-color .35s ease,box-shadow .35s ease;
+    0 4px 24px rgba(0,0,0,0.50),
+    inset 0 1px 0 rgba(10,255,239,0.10),
+    0 0 20px rgba(10,255,239,0.06);
+  transition:border-color .4s ease,box-shadow .4s ease;
 }
 .city-tag:hover{
-  border-color:rgba(245,238,216,.22);
-  box-shadow:0 4px 28px rgba(0,0,0,.45),inset 0 1px 0 rgba(245,238,216,.10);
+  border-color:rgba(10,255,239,0.45);
+  box-shadow:
+    0 4px 28px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(10,255,239,0.14),
+    0 0 30px rgba(10,255,239,0.12);
 }
 
 .city-flag{
   width:32px;height:32px;border-radius:50%;
-  background:linear-gradient(135deg,var(--verde) 0%,var(--oro) 100%);
+  background:linear-gradient(135deg,
+    rgba(10,255,239,0.25) 0%,
+    rgba(5,180,200,0.15) 50%,
+    rgba(232,160,48,0.20) 100%);
+  border:1px solid rgba(10,255,239,0.30);
   display:flex;align-items:center;justify-content:center;
   font-size:13px;flex-shrink:0;
-  box-shadow:0 2px 10px rgba(196,98,26,.40);
+  box-shadow:0 0 12px rgba(10,255,239,0.25);
 }
 .city-name{
   font-family:var(--f-ui);font-size:10px;font-weight:700;
-  letter-spacing:2.5px;text-transform:uppercase;
-  color:rgba(245,238,216,.88);display:block;line-height:1;
+  letter-spacing:3px;text-transform:uppercase;
+  color:rgba(10,255,239,0.90);display:block;line-height:1;
 }
 .city-sub{
-  font-size:8px;letter-spacing:1.8px;text-transform:uppercase;
-  color:rgba(245,238,216,.48);display:block;margin-top:3px;
+  font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(10,255,239,0.45);display:block;margin-top:3px;
 }
-
 /* ── LOGO ── */
 .hero-logo img{
   width:76px;height:auto;
-  filter:drop-shadow(0 0 24px rgba(196,98,26,.50)) brightness(1.12);
-  transition:transform .6s var(--ease),filter .6s ease;
+  filter:
+    drop-shadow(0 0 16px rgba(10,255,239,0.35))
+    drop-shadow(0 0 32px rgba(10,255,239,0.15))
+    brightness(1.10);
+  transition:transform .7s var(--ease-tide),filter .7s ease;
 }
 .hero-logo img:hover{
-  transform:scale(1.08) rotate(-2deg);
-  filter:drop-shadow(0 0 32px rgba(196,98,26,.70)) brightness(1.20);
+  transform:scale(1.10) rotate(-3deg);
+  filter:
+    drop-shadow(0 0 24px rgba(10,255,239,0.55))
+    drop-shadow(0 0 48px rgba(10,255,239,0.25))
+    brightness(1.20);
 }
 
 /* ── HERO INNER — layout principal ── */
@@ -463,31 +483,30 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 .live-chip{
   display:inline-flex;align-items:center;gap:10px;
   background:linear-gradient(135deg,
-    rgba(196,98,26,.16) 0%,
-    rgba(196,98,26,.10) 100%);
-  border:1px solid rgba(196,98,26,.50);
+    rgba(10,255,239,0.12) 0%,
+    rgba(5,180,200,0.07) 100%);
+  border:1px solid rgba(10,255,239,0.40);
   border-radius:50px;
   padding:10px 22px;
-  font-size:10px;font-weight:700;letter-spacing:2px;
+  font-size:10px;font-weight:700;letter-spacing:2.5px;
   text-transform:uppercase;
-  color:rgba(240,168,80,.98);
+  color:rgba(10,255,239,0.95);
   margin-bottom:32px;
   width:fit-content;
   box-shadow:
-    0 4px 20px rgba(196,98,26,.22),
-    0 0 0 1px rgba(196,98,26,.08),
-    inset 0 1px 0 rgba(240,168,80,.10);
+    0 4px 20px rgba(10,255,239,0.12),
+    inset 0 1px 0 rgba(10,255,239,0.12);
   animation:blurIn .9s var(--ease-out-expo) .3s both;
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
 }
 
-/* ── HERO TITLE — tipografía display premium ── */
+/* ── HERO TITLE — tipografía display premium (valor final único) ── */
 .hero-title{
   font-family:var(--f-display);
   font-size:clamp(52px,9vw,108px);
-  line-height:.93;
-  letter-spacing:-2px;
+  line-height:.90;
+  letter-spacing:-3px;
   color:var(--parchment);
   margin-bottom:36px;
   display:block;
@@ -500,47 +519,47 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   display:block;margin-bottom:20px;line-height:1;
 }
 
-/* ── EM SHIMMER — aurora dorada ── */
+/* ── EM SHIMMER — luz submarina (valor final único) ── */
 .hero-title .main-line em{
   font-style:italic;
   background:linear-gradient(105deg,
-    rgba(248,232,210,.98) 0%,
-    rgba(224,120,40,.98) 18%,
-    rgba(248,218,160,.99) 38%,
-    rgba(196,90,28,.96) 58%,
-    rgba(240,144,64,.94) 75%,
-    rgba(248,232,210,.98) 100%);
+    rgba(255,250,235,0.99) 0%,
+    rgba(10,255,239,0.99) 15%,
+    rgba(255,220,140,0.98) 32%,
+    rgba(10,200,200,0.96) 50%,
+    rgba(255,210,100,0.97) 67%,
+    rgba(10,255,239,0.98) 80%,
+    rgba(255,250,235,0.99) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;background-size:600% 100%;
-  animation:luxuryShimmer 14s ease-in-out infinite;
+  background-clip:text;background-size:700% 100%;
+  animation:bioShimmer 10s ease-in-out infinite;
   will-change:background-position;
 }
-@keyframes luxuryShimmer{
-  0%{background-position:170% 50%}
-  45%{background-position:40% 50%}
-  70%{background-position:15% 50%}
-  100%{background-position:170% 50%}
+@keyframes bioShimmer{
+  0%{background-position:200% 50%}
+  40%{background-position:50% 50%}
+  65%{background-position:20% 50%}
+  100%{background-position:200% 50%}
 }
 
-/* ── RULE DECORATIVA ── */
+/* ── RULE DECORATIVA (valor final único) ── */
 .hero-rule{
   display:flex;align-items:center;gap:14px;margin-bottom:30px;
 }
 .hero-rule-line{
   height:1px;width:56px;
-  background:linear-gradient(90deg,var(--oro2),transparent);
+  background:linear-gradient(90deg,rgba(10,255,239,0.55),transparent);
   flex-shrink:0;
   animation:ruleExpand 1.4s var(--ease-out-expo) .5s both;
   transform-origin:left;
 }
 .hero-rule-dot{
   width:5px;height:5px;
-  background:var(--oro2);
+  background:var(--bio-glow);
   border-radius:50%;
-  box-shadow:0 0 8px var(--oro2);
+  box-shadow:0 0 10px var(--bio-glow);
   animation:dotGlow 2.8s ease-in-out infinite;
 }
-
 /* ── HERO SUBTITLE ── */
 .hero-sub{
   font-family:var(--f-italic);font-style:italic;
@@ -600,27 +619,28 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 /* ── CTAs ── */
 .hero-ctas{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
 
-/* Botón primario — joya visual */
+/* Botón primario — cristal líquido (valor final único) */
 .btn-primary{
   display:inline-flex;align-items:center;gap:12px;
   background:linear-gradient(140deg,
-    #7A3010 0%,
-    #C46018 45%,
-    #A84A14 100%);
-  color:#fff;
+    rgba(2,60,70,0.95) 0%,
+    rgba(4,120,130,0.90) 45%,
+    rgba(3,90,100,0.95) 100%);
+  color:rgba(220,255,253,0.98);
   font-family:var(--f-ui);font-size:11px;font-weight:700;
   letter-spacing:2.5px;text-transform:uppercase;
   padding:19px 44px;border-radius:50px;
+  border:1px solid rgba(10,255,239,0.45);
   transition:
     background .5s var(--ease),
     transform .4s var(--ease-spring),
     box-shadow .4s ease;
   box-shadow:
-    0 8px 32px rgba(196,98,26,.52),
-    0 2px 8px rgba(0,0,0,.35),
-    inset 0 1px 0 rgba(255,255,255,.20),
-    inset 0 -1px 0 rgba(0,0,0,.18);
-  animation:btnBreath 4.5s ease-in-out 4s infinite;
+    0 8px 32px rgba(10,255,239,0.20),
+    0 2px 8px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(10,255,239,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.25);
+  animation:btnTidePulse 5s ease-in-out 5s infinite;
   position:relative;overflow:hidden;
 }
 .btn-primary::before{
@@ -631,20 +651,24 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 }
 .btn-primary:hover::before{transform:translateX(100%)}
 .btn-primary:hover{
-  background:linear-gradient(140deg,#C06018 0%,#E07826 45%,#CC6E20 100%);
-  transform:translateY(-6px) scale(1.02);
+  background:linear-gradient(140deg,
+    rgba(4,90,105,0.98) 0%,
+    rgba(6,160,175,0.95) 45%,
+    rgba(5,130,145,0.98) 100%);
+  border-color:rgba(10,255,239,0.70);
+  transform:translateY(-7px) scale(1.025);
   box-shadow:
-    0 24px 60px rgba(196,98,26,.68),
-    0 6px 18px rgba(0,0,0,.30),
-    inset 0 1px 0 rgba(255,255,255,.24),
-    inset 0 -1px 0 rgba(0,0,0,.18);
+    0 20px 60px rgba(10,255,239,0.35),
+    0 6px 20px rgba(0,0,0,0.40),
+    inset 0 1px 0 rgba(10,255,239,0.35),
+    0 0 0 4px rgba(10,255,239,0.08);
+  color:#fff;
   animation:none;
 }
-@keyframes btnBreath{
-  0%,100%{box-shadow:0 8px 32px rgba(196,98,26,.52),0 2px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.20)}
-  40%{box-shadow:0 10px 48px rgba(196,98,26,.80),0 2px 8px rgba(0,0,0,.35),0 0 0 12px rgba(196,98,26,.08),inset 0 1px 0 rgba(255,255,255,.22)}
+@keyframes btnTidePulse{
+  0%,100%{box-shadow:0 8px 32px rgba(10,255,239,0.20),0 2px 8px rgba(0,0,0,0.45),inset 0 1px 0 rgba(10,255,239,0.25)}
+  50%{box-shadow:0 10px 50px rgba(10,255,239,0.40),0 2px 8px rgba(0,0,0,0.45),0 0 0 12px rgba(10,255,239,0.06),inset 0 1px 0 rgba(10,255,239,0.30)}
 }
-
 /* Botón ghost — elegante y sutil */
 .btn-ghost{
   display:inline-flex;align-items:center;gap:8px;
@@ -660,14 +684,14 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   gap:12px;
 }
 
-/* ── FADE INFERIOR DEL HERO ── */
+/* ── FADE INFERIOR DEL HERO (valor final único) ── */
 .hero-fade{
   position:absolute;bottom:0;left:0;right:0;
   height:200px;
   background:linear-gradient(to bottom,
     transparent 0%,
-    rgba(8,7,10,.30) 50%,
-    rgba(8,7,10,.75) 100%);
+    rgba(2,11,18,0.40) 55%,
+    rgba(2,11,18,0.85) 100%);
   z-index:3;pointer-events:none;
 }
 
@@ -2609,20 +2633,39 @@ html, body {
   }
 }
 
-  /* ── GRILLA DE RÍO — nueva capa decorativa del hero ── */
+/* ── SUPERFICIE DEL RÍO — líneas de luz bioluminiscentes (valor final único) ── */
 .hero-river-grid{
   position:absolute;inset:0;z-index:2;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(196,98,26,.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(196,98,26,.025) 1px, transparent 1px);
-  background-size:80px 80px;
-  mask-image:radial-gradient(ellipse 65% 75% at 60% 40%, black 20%, transparent 80%);
-  -webkit-mask-image:radial-gradient(ellipse 65% 75% at 60% 40%, black 20%, transparent 80%);
-  animation:riverGridDrift 22s ease-in-out infinite alternate;
+  overflow:hidden;
 }
-@keyframes riverGridDrift{
-  from{background-position:0 0, 0 0;}
-  to{background-position:8px 8px, 8px 8px;}
+.hero-river-grid::before{
+  content:'';
+  position:absolute;left:-100%;right:-100%;bottom:30%;height:1px;
+  background:linear-gradient(90deg,
+    transparent 0%,transparent 15%,
+    rgba(10,255,239,0.35) 35%,
+    rgba(10,255,239,0.65) 50%,
+    rgba(10,255,239,0.35) 65%,
+    transparent 85%,transparent 100%);
+  animation:riverLineSlide 8s ease-in-out infinite alternate;
+  filter:blur(0.5px);
+}
+.hero-river-grid::after{
+  content:'';
+  position:absolute;left:-100%;right:-100%;bottom:calc(30% - 80px);height:1px;
+  background:linear-gradient(90deg,
+    transparent 0%,transparent 25%,
+    rgba(10,255,239,0.15) 45%,
+    rgba(10,255,239,0.25) 50%,
+    rgba(10,255,239,0.15) 55%,
+    transparent 75%,transparent 100%);
+  animation:riverLineSlide 11s ease-in-out infinite alternate-reverse;
+  opacity:.6;
+}
+@keyframes riverLineSlide{
+  0%{transform:translateX(0%) scaleX(.7);opacity:.6}
+  50%{transform:translateX(8%) scaleX(1);opacity:1}
+  100%{transform:translateX(-5%) scaleX(.85);opacity:.7}
 }
   /* ── IMPORTAR NUEVA TIPOGRAFÍA DISPLAY ── */
 
@@ -2633,46 +2676,6 @@ html, body {
 body {
   background: var(--bio-deep);
   font-family: var(--f-ui);
-}
-
-/* ═══════════════════════════════════════════════════════
-   HERO — nueva dirección visual completa
-   ═══════════════════════════════════════════════════════ */
-
-.hero {
-  background: var(--bio-deep);
-  min-height: 100vh;
-  overflow: hidden;
-  position: relative;
-  isolation: isolate;
-}
-
-/* Fondo oceánico multicapa */
-.hero-mesh {
-  background:
-    /* Reflejo lunar en el río — arriba */
-    radial-gradient(ellipse 50% 35% at 72% 0%,
-      rgba(10,255,239,0.22) 0%,
-      rgba(5,217,200,0.10) 40%,
-      transparent 70%),
-    /* Luz ámbar — calor de la ciudad */
-    radial-gradient(ellipse 40% 50% at 18% 95%,
-      rgba(232,160,48,0.18) 0%,
-      rgba(180,100,20,0.08) 45%,
-      transparent 68%),
-    /* Profundidad del río — centro */
-    radial-gradient(ellipse 90% 60% at 50% 100%,
-      rgba(10,30,48,0.90) 0%,
-      transparent 60%),
-    /* Gradiente base oceánico */
-    linear-gradient(168deg,
-      #020B12 0%,
-      #030D18 25%,
-      #050F1E 55%,
-      #020A14 80%,
-      #010810 100%);
-  transition: none;
-  will-change: transform;
 }
 
 /* ── NUEVA TEXTURA: ONDAS DE AGUA SUPERFICIALES ── */
@@ -2709,137 +2712,9 @@ body {
   100% { transform: skewX(.2deg) skewY(-.1deg) scale(1.01); opacity: 0.8; }
 }
 
-/* ── ORBS REDISEÑADOS — medusas bioluminiscentes ── */
-.hero-orb {
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 2;
-  will-change: transform;
-  contain: layout;
-  mix-blend-mode: screen;
-}
+/* ── .hero-river-grid — consolidado más arriba ── */
 
-.hero-orb-1 {
-  width: 900px;
-  height: 900px;
-  top: -350px;
-  right: -250px;
-  background: radial-gradient(circle at 38% 42%,
-    rgba(10,255,239,0.13) 0%,
-    rgba(5,180,200,0.07) 35%,
-    rgba(0,60,120,0.05) 60%,
-    transparent 72%);
-  animation: orbPulse1 20s ease-in-out infinite alternate;
-  filter: blur(1px);
-}
-
-.hero-orb-2 {
-  width: 700px;
-  height: 700px;
-  bottom: -250px;
-  left: -180px;
-  background: radial-gradient(circle at 55% 52%,
-    rgba(232,160,48,0.12) 0%,
-    rgba(180,80,20,0.06) 45%,
-    rgba(10,255,239,0.04) 65%,
-    transparent 75%);
-  animation: orbPulse2 26s ease-in-out infinite alternate;
-  filter: blur(2px);
-}
-
-@keyframes orbPulse1 {
-  0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity: 0.9; }
-  30%  { transform: translate(-25px,40px) scale(1.08) rotate(2deg); opacity: 1; }
-  70%  { transform: translate(15px,-20px) scale(0.95) rotate(-1deg); opacity: 0.75; }
-  100% { transform: translate(-40px,60px) scale(1.12) rotate(3deg); opacity: 0.95; }
-}
-
-@keyframes orbPulse2 {
-  0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity: 0.8; }
-  40%  { transform: translate(30px,-35px) scale(1.10) rotate(-2deg); opacity: 1; }
-  80%  { transform: translate(-20px,25px) scale(0.92) rotate(1deg); opacity: 0.7; }
-  100% { transform: translate(45px,-50px) scale(1.15) rotate(-3deg); opacity: 0.9; }
-}
-
-/* ── NUEVO ELEMENTO: SUPERFICIE DEL RÍO — línea horizontal de luz ── */
-.hero-river-grid {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  /* Eliminamos la grid y la reemplazamos con ondas de luz del río */
-  background: none;
-  overflow: hidden;
-}
-
-.hero-river-grid::before {
-  content: '';
-  position: absolute;
-  left: -100%;
-  right: -100%;
-  bottom: 30%;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    transparent 15%,
-    rgba(10,255,239,0.35) 35%,
-    rgba(10,255,239,0.65) 50%,
-    rgba(10,255,239,0.35) 65%,
-    transparent 85%,
-    transparent 100%);
-  animation: riverLineSlide 8s ease-in-out infinite alternate;
-  filter: blur(0.5px);
-}
-
-.hero-river-grid::after {
-  content: '';
-  position: absolute;
-  left: -100%;
-  right: -100%;
-  bottom: calc(30% - 80px);
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    transparent 25%,
-    rgba(10,255,239,0.15) 45%,
-    rgba(10,255,239,0.25) 50%,
-    rgba(10,255,239,0.15) 55%,
-    transparent 75%,
-    transparent 100%);
-  animation: riverLineSlide 11s ease-in-out infinite alternate-reverse;
-  opacity: 0.6;
-}
-
-@keyframes riverLineSlide {
-  0%   { transform: translateX(0%) scaleX(0.7); opacity: 0.6; }
-  50%  { transform: translateX(8%) scaleX(1.0); opacity: 1.0; }
-  100% { transform: translateX(-5%) scaleX(0.85); opacity: 0.7; }
-}
-
-/* ── PARTÍCULAS — plancton bioluminiscente ── */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background-image:
-    radial-gradient(1.5px 1.5px at 12% 28%, rgba(10,255,239,0.70) 50%, transparent 50%),
-    radial-gradient(1px 1px at 85% 15%, rgba(10,255,239,0.50) 50%, transparent 50%),
-    radial-gradient(2px 2px at 45% 60%, rgba(232,160,48,0.45) 50%, transparent 50%),
-    radial-gradient(1px 1px at 28% 78%, rgba(10,255,239,0.35) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 68% 85%, rgba(10,255,239,0.55) 50%, transparent 50%),
-    radial-gradient(1px 1px at 8% 50%, rgba(232,160,48,0.30) 50%, transparent 50%),
-    radial-gradient(2px 2px at 92% 65%, rgba(10,255,239,0.40) 50%, transparent 50%),
-    radial-gradient(1px 1px at 55% 8%, rgba(232,160,48,0.35) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 38% 42%, rgba(10,255,239,0.25) 50%, transparent 50%),
-    radial-gradient(1px 1px at 75% 35%, rgba(232,160,48,0.20) 50%, transparent 50%),
-    radial-gradient(2px 2px at 22% 12%, rgba(10,255,239,0.60) 50%, transparent 50%),
-    radial-gradient(1px 1px at 62% 22%, rgba(10,255,239,0.30) 50%, transparent 50%);
-  animation: planktonDrift 35s ease-in-out infinite;
-  opacity: 0.8;
-}
-
+/* ── .hero::before (partículas) — consolidado más arriba; se conserva solo el keyframe planktonDrift ── */
 @keyframes planktonDrift {
   0%   { transform: translate(0, 0) scale(1); }
   20%  { transform: translate(-15px,-25px) scale(1.05); }
@@ -2849,93 +2724,7 @@ body {
   100% { transform: translate(-5px,5px) scale(1.02); }
 }
 
-/* ── TOPBAR REDISEÑADA ── */
-.hero-topbar {
-  position: relative;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 28px var(--gutter);
-  flex-shrink: 0;
-  animation: slideUpPremium .9s var(--ease-river) both;
-  /* Línea inferior sutil */
-  border-bottom: 1px solid rgba(10,255,239,0.08);
-}
-
-/* ── CITY TAG REDISEÑADO ── */
-.city-tag {
-  background: rgba(2,11,18,0.75);
-  border: 1px solid rgba(10,255,239,0.22);
-  box-shadow:
-    0 4px 24px rgba(0,0,0,0.50),
-    inset 0 1px 0 rgba(10,255,239,0.10),
-    0 0 20px rgba(10,255,239,0.06);
-  transition: border-color .4s ease, box-shadow .4s ease;
-}
-
-.city-tag:hover {
-  border-color: rgba(10,255,239,0.45);
-  box-shadow:
-    0 4px 28px rgba(0,0,0,0.55),
-    inset 0 1px 0 rgba(10,255,239,0.14),
-    0 0 30px rgba(10,255,239,0.12);
-}
-
-.city-flag {
-  background: linear-gradient(135deg,
-    rgba(10,255,239,0.25) 0%,
-    rgba(5,180,200,0.15) 50%,
-    rgba(232,160,48,0.20) 100%);
-  border: 1px solid rgba(10,255,239,0.30);
-  box-shadow: 0 0 12px rgba(10,255,239,0.25);
-}
-
-.city-name {
-  color: rgba(10,255,239,0.90);
-  letter-spacing: 3px;
-}
-.city-sub {
-  color: rgba(10,255,239,0.45);
-  letter-spacing: 2px;
-}
-
-/* ── LOGO REDISEÑADO ── */
-.hero-logo img {
-  filter: 
-    drop-shadow(0 0 16px rgba(10,255,239,0.35))
-    drop-shadow(0 0 32px rgba(10,255,239,0.15))
-    brightness(1.10);
-  transition: transform .7s var(--ease-tide), filter .7s ease;
-}
-
-.hero-logo img:hover {
-  transform: scale(1.10) rotate(-3deg);
-  filter:
-    drop-shadow(0 0 24px rgba(10,255,239,0.55))
-    drop-shadow(0 0 48px rgba(10,255,239,0.25))
-    brightness(1.20);
-}
-
-/* ── LIVE CHIP REDISEÑADO ── */
-.live-chip {
-  background: linear-gradient(135deg,
-    rgba(10,255,239,0.12) 0%,
-    rgba(5,180,200,0.07) 100%);
-  border: 1px solid rgba(10,255,239,0.40);
-  color: rgba(10,255,239,0.95);
-  box-shadow:
-    0 4px 20px rgba(10,255,239,0.12),
-    inset 0 1px 0 rgba(10,255,239,0.12);
-  letter-spacing: 2.5px;
-}
-
-/* ── TÍTULO HERO — nuevo tratamiento tipográfico ── */
-.hero-title {
-  font-family: var(--f-display);
-  letter-spacing: -3px;
-  line-height: .90;
-}
+/* ── TOPBAR / CITY TAG / LOGO / LIVE CHIP / HERO TITLE — consolidados más arriba ── */
 
 /* Nueva animación del shimmer — luz submarina */
 .hero-title .main-line em {
@@ -3038,23 +2827,7 @@ body {
   }
 }
 
-/* ── HERO RULE ── */
-.hero-rule-line {
-  background: linear-gradient(90deg, rgba(10,255,239,0.55), transparent);
-}
-.hero-rule-dot {
-  background: var(--bio-glow);
-  box-shadow: 0 0 10px var(--bio-glow);
-}
-
-/* ── FADE INFERIOR ── */
-.hero-fade {
-  background: linear-gradient(to bottom,
-    transparent 0%,
-    rgba(2,11,18,0.40) 55%,
-    rgba(2,11,18,0.85) 100%);
-}
-
+/* ── HERO RULE / FADE — consolidados más arriba ── */
 /* ═══════════════════════════════════════════════════════
    NAVBAR — cristal bioluminiscente
    ═══════════════════════════════════════════════════════ */
