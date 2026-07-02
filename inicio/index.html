@@ -242,19 +242,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
   animation:rippleLive 2.2s ease-out infinite .75s;
   pointer-events:none;
 }
-/* ── NUEVO: AURORA SHIMMER — efecto de luz sobre gradientes ── */
-@keyframes auroraShift{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
-}
-
-/* ── NUEVO: FLOAT SUAVE — para elementos que respiran ── */
-@keyframes floatBreath{
-  0%,100%{transform:translateY(0) rotate(0deg)}
-  33%{transform:translateY(-6px) rotate(.4deg)}
-  66%{transform:translateY(-3px) rotate(-.3deg)}
-}
 
 /* ── NUEVO: ENTRADA CON BLUR — para chips y badges ── */
 @keyframes blurIn{
@@ -266,21 +253,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #4CAF
 @keyframes slideUpPremium{
   from{opacity:0;transform:translateY(32px) scale(.97)}
   to{opacity:1;transform:translateY(0) scale(1)}
-}
-
-/* ── NUEVO: PARTICLE DRIFT — para partículas decorativas ── */
-@keyframes particleDrift{
-  0%{transform:translateY(0) translateX(0) scale(1);opacity:.7}
-  25%{transform:translateY(-18px) translateX(8px) scale(1.1);opacity:1}
-  50%{transform:translateY(-8px) translateX(-6px) scale(.95);opacity:.6}
-  75%{transform:translateY(-22px) translateX(4px) scale(1.05);opacity:.9}
-  100%{transform:translateY(0) translateX(0) scale(1);opacity:.7}
-}
-
-/* ── NUEVO: GLOW PULSE para bordes activos ── */
-@keyframes glowPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(196,98,26,0),0 0 0 0 rgba(196,98,26,0)}
-  50%{box-shadow:0 0 0 4px rgba(196,98,26,.18),0 0 20px -4px rgba(196,98,26,.35)}
 }
 
 /* ── NUEVO: RULEEXPAND con bounce ── */
@@ -2787,15 +2759,6 @@ body {
   animation: none;
 }
 
-@keyframes btnTidePulse {
-  0%,100% {
-    box-shadow: 0 8px 32px rgba(10,255,239,0.20), 0 2px 8px rgba(0,0,0,0.45), inset 0 1px 0 rgba(10,255,239,0.25);
-  }
-  50% {
-    box-shadow: 0 10px 50px rgba(10,255,239,0.40), 0 2px 8px rgba(0,0,0,0.45), 0 0 0 12px rgba(10,255,239,0.06), inset 0 1px 0 rgba(10,255,239,0.30);
-  }
-}
-
 /* ── HERO RULE / FADE — consolidados más arriba ── */
 /* ═══════════════════════════════════════════════════════
    NAVBAR — cristal bioluminiscente
@@ -3538,17 +3501,6 @@ body {
 
 .wx-hero-frase {
   color: rgba(232,160,48,0.65);
-}
-
-/* ═══════════════════════════════════════════════════════
-   PARTÍCULAS ADICIONALES — corriente submarina
-   ═══════════════════════════════════════════════════════ */
-
-@keyframes currentFlow {
-  0%   { transform: translateX(-30px) translateY(0); opacity: 0; }
-  15%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { transform: translateX(30px) translateY(-10px); opacity: 0; }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -6965,11 +6917,6 @@ body {
   </div>
   <p class="search-no-results" id="no-results-gimnasios">No se encontraron gimnasios con ese nombre.</p>
   <style>
-/* Heartbeat line en el borde superior del gcard-feat */
-@keyframes heartbeatLine {
-  0%   { d: path('M0,10 L20,10 L25,2 L30,18 L35,2 L40,18 L45,10 L200,10'); }
-  100% { d: path('M0,10 L60,10 L65,2 L70,18 L75,2 L80,18 L85,10 L200,10'); }
-}
 
 .gcard-feat-heartbeat {
   position: absolute;
