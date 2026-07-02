@@ -4846,19 +4846,19 @@ body {
   border-left:3px solid rgba(196,135,42,.35);
   margin-bottom:2px;
 }
-
 /* ── GRIDS ── */
-.fin-grid-atm{
-  display:grid;grid-template-columns:repeat(3,1fr);
+.fin-grid-atm,.fin-grid-banks,.fin-grid-wu{
+  display:grid;
   gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
   margin-bottom:2px;
 }
-.fin-grid-banks{
+.fin-grid-atm{grid-template-columns:repeat(3,1fr)}
+.fin-grid-banks{grid-template-columns:repeat(4,1fr)}
+.fin-grid-wu{grid-template-columns:repeat(2,1fr)}
   display:grid;grid-template-columns:repeat(4,1fr);
   gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
   margin-bottom:2px;
 }
-.fin-grid-wu{
   display:grid;grid-template-columns:repeat(2,1fr);
   gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
   margin-bottom:2px;
@@ -4887,8 +4887,6 @@ body {
 /* ── VARIANTE ATM: acento vertical oro ── */
 .fin-card-atm::before{background:linear-gradient(180deg,var(--oro2),var(--oro))}
 
-/* ── VARIANTE WU: acento violeta ── */
-.fin-card-wu::before{background:linear-gradient(180deg,#c9a227,#e6b800)}
 
 /* ── VARIANTE BERSA: tratamiento especial ── */
 .fin-card-bersa{
@@ -5020,30 +5018,6 @@ body {
   transition:color .25s ease,transform .25s ease;
 }
 .fin-wu-item:hover .fin-wu-item-arrow{color:var(--oro2);transform:translateX(3px)}
-
-/* ── TARJETA RAPIPAGO ── */
-.fin-card-rapi{
-  display:flex;align-items:flex-start;gap:18px;
-  background:linear-gradient(160deg,var(--card-dark,#16100C) 0%,var(--card-dark2,#1C1410) 100%);
-  border:1px solid var(--card-border-oro,rgba(184,92,42,.35));
-  padding:26px 24px;position:relative;overflow:hidden;
-  transition:background .35s ease,border-color .35s ease;
-}
-.fin-card-rapi:hover{
-  background:linear-gradient(160deg,var(--card-dark3,#221A14) 0%,var(--card-dark2,#1C1410) 100%);
-  border-color:var(--card-border-oro-hover,rgba(212,116,42,.72));
-}
-.fin-card-rapi-icon{font-size:28px;line-height:1;flex-shrink:0}
-.fin-card-rapi-body{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
-.fin-card-rapi-name{
-  font-family:var(--f-display,'DM Serif Display',serif);
-  font-size:18px;color:var(--card-text,rgba(248,238,224,.94));letter-spacing:-.2px;
-}
-.fin-card-rapi-addr{
-  font-family:var(--f-ui,'Syne',sans-serif);
-  font-size:13px;font-weight:700;letter-spacing:.3px;
-  color:rgba(248,238,224,.80);
-}
 
 /* ── NOTA EDITORIAL DE CIERRE ── */
 .fin-editorial{
@@ -6597,67 +6571,59 @@ body {
     <!-- GRILLA CAJEROS: 4 sin advertencia + 1 con advertencia operativa + 1 con advertencia estructural -->
     <div class="fin-grid-atm" role="list" aria-label="Cajeros automáticos verificados">
 
-      <!-- Banco Nación — sin badge -->
-      <div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:100ms" aria-label="Cajero Banco Nación, España 49">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏧</span>
-          </div>
-          <span class="fin-card-name">Cajero Banco Nación</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Nacion+Concepcion+del+Uruguay+España+49"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: España 49, Concepción del Uruguay">
-            España 49 →
-          </a>
+<!-- Banco Nación — sin badge -->
+<div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:100ms" aria-label="Cajero Banco Nación, España 49">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏧</span>
+    <span class="fin-card-name">Cajero Banco Nación</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Nacion+Concepcion+del+Uruguay+España+49"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: España 49, Concepción del Uruguay">
+      España 49 →
+    </a>
         </div>
       </div>
 
-      <!-- Banco Macro — sin badge -->
-      <div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:130ms" aria-label="Cajero Banco Macro, Alem 12 esq. 9 de Julio">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏧</span>
-          </div>
-          <span class="fin-card-name">Cajero Banco Macro</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Macro+Concepcion+del+Uruguay+Alem+12"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: Alem 12 esq. 9 de Julio">
-            Alem 12 esq. 9 de Julio →
-          </a>
+<!-- Banco Macro — sin badge -->
+<div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:130ms" aria-label="Cajero Banco Macro, Alem 12 esq. 9 de Julio">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏧</span>
+    <span class="fin-card-name">Cajero Banco Macro</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Macro+Concepcion+del+Uruguay+Alem+12"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: Alem 12 esq. 9 de Julio">
+      Alem 12 esq. 9 de Julio →
+    </a>
         </div>
       </div>
 
-      <!-- Banco Credicoop — sin badge -->
-      <div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:160ms" aria-label="Cajero Banco Credicoop, 9 de Julio 800-848">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏧</span>
-          </div>
-          <span class="fin-card-name">Cajero Banco Credicoop</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Credicoop+Concepcion+del+Uruguay+9+de+Julio"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 9 de Julio 800-848">
-            9 de Julio 800–848 →
-          </a>
+<!-- Banco Credicoop — sin badge -->
+<div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:160ms" aria-label="Cajero Banco Credicoop, 9 de Julio 800-848">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏧</span>
+    <span class="fin-card-name">Cajero Banco Credicoop</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Credicoop+Concepcion+del+Uruguay+9+de+Julio"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 9 de Julio 800-848">
+      9 de Julio 800–848 →
+    </a>
         </div>
       </div>
 
-      <!-- Banco Galicia — sin badge -->
-      <div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:190ms" aria-label="Cajero Banco Galicia, 8 de Junio 800">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏧</span>
-          </div>
-          <span class="fin-card-name">Cajero Banco Galicia</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Galicia+Concepcion+del+Uruguay+8+de+Junio+800"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 8 de Junio 800">
-            8 de Junio 800 →
-          </a>
+<!-- Banco Galicia — sin badge -->
+<div class="fin-card fin-card-atm reveal" role="listitem" style="--reveal-delay:190ms" aria-label="Cajero Banco Galicia, 8 de Junio 800">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏧</span>
+    <span class="fin-card-name">Cajero Banco Galicia</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Galicia+Concepcion+del+Uruguay+8+de+Junio+800"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 8 de Junio 800">
+      8 de Junio 800 →
+    </a>
         </div>
       </div>
 
@@ -6730,107 +6696,93 @@ body {
     <div class="fin-grid-banks" role="list" aria-label="Sucursales bancarias verificadas">
 
       <!-- 1. Banco Nación -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:320ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco de la Nación Argentina</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Nacion+Argentina+Concepcion+del+Uruguay+España+49"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: España 49">España 49 →</a>
-          <a class="fin-card-tel" href="tel:8106664444" aria-label="Llamar al Banco Nación: 810-666-4444">810-666-4444</a>
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:320ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco de la Nación Argentina</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Nacion+Argentina+Concepcion+del+Uruguay+España+49"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: España 49">España 49 →</a>
+    <a class="fin-card-tel" href="tel:8106664444" aria-label="Llamar al Banco Nación: 810-666-4444">810-666-4444</a>
         </div>
       </div>
 
       <!-- 2. Banco Macro -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:340ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Macro</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Macro+Concepcion+del+Uruguay+Alem+12"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: Leandro N. Alem 12 esq. 9 de Julio">Leandro N. Alem 12 esq. 9 de Julio →</a>
-          <a class="fin-card-tel" href="tel:344245-0919" aria-label="Llamar al Banco Macro: 3442 45-0919">3442 45-0919</a>
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:340ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Macro</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Macro+Concepcion+del+Uruguay+Alem+12"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: Leandro N. Alem 12 esq. 9 de Julio">Leandro N. Alem 12 esq. 9 de Julio →</a>
+    <a class="fin-card-tel" href="tel:344245-0919" aria-label="Llamar al Banco Macro: 3442 45-0919">3442 45-0919</a>
         </div>
       </div>
 
-      <!-- 3. Banco Patagonia -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:360ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Patagonia</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Patagonia+Concepcion+del+Uruguay+9+de+Julio+829"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 9 de Julio 829">9 de Julio 829 →</a>
-          <a class="fin-card-tel" href="tel:344242-8691" aria-label="Llamar al Banco Patagonia: 3442 42-8691">3442 42-8691</a>
+<!-- 3. Banco Patagonia -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:360ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Patagonia</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Patagonia+Concepcion+del+Uruguay+9+de+Julio+829"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 9 de Julio 829">9 de Julio 829 →</a>
+    <a class="fin-card-tel" href="tel:344242-8691" aria-label="Llamar al Banco Patagonia: 3442 42-8691">3442 42-8691</a>
         </div>
       </div>
 
-      <!-- 4. BBVA -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:380ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">BBVA</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/BBVA+Concepcion+del+Uruguay+9+de+Julio+876"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 9 de Julio 876">9 de Julio 876 →</a>
-          <a class="fin-card-tel" href="tel:344243-2559" aria-label="Llamar a BBVA: 3442 43-2559">3442 43-2559</a>
+<!-- 4. BBVA -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:380ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">BBVA</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/BBVA+Concepcion+del+Uruguay+9+de+Julio+876"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 9 de Julio 876">9 de Julio 876 →</a>
+    <a class="fin-card-tel" href="tel:344243-2559" aria-label="Llamar a BBVA: 3442 43-2559">3442 43-2559</a>
         </div>
       </div>
 
-      <!-- 5. Banco Santander -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:400ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Santander</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Santander+Concepcion+del+Uruguay+Juan+Domingo+Peron+34"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: Juan D. Perón 34">Juan D. Perón 34 →</a>
-          <a class="fin-card-tel" href="tel:344242-3344" aria-label="Llamar al Banco Santander: 3442 42-3344">3442 42-3344</a>
+ <!-- 5. Banco Santander -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:400ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Santander</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Santander+Concepcion+del+Uruguay+Juan+Domingo+Peron+34"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: Juan D. Perón 34">Juan D. Perón 34 →</a>
+    <a class="fin-card-tel" href="tel:344242-3344" aria-label="Llamar al Banco Santander: 3442 42-3344">3442 42-3344</a>
         </div>
       </div>
 
-      <!-- 6. Banco Galicia -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:420ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Galicia</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Galicia+Concepcion+del+Uruguay+8+de+Junio+800"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 8 de Junio 800">8 de Junio 800 →</a>
-          <a class="fin-card-tel" href="tel:8107773333" aria-label="Llamar al Banco Galicia: 810-777-3333">810-777-3333</a>
+<!-- 6. Banco Galicia -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:420ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Galicia</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Galicia+Concepcion+del+Uruguay+8+de+Junio+800"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 8 de Junio 800">8 de Junio 800 →</a>
+    <a class="fin-card-tel" href="tel:8107773333" aria-label="Llamar al Banco Galicia: 810-777-3333">810-777-3333</a>
         </div>
       </div>
 
-      <!-- 7. Banco Credicoop -->
-      <div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:440ms">
-        <div class="fin-card-inner">
-          <div class="fin-card-top">
-            <span class="fin-card-icon" aria-hidden="true">🏦</span>
-          </div>
-          <span class="fin-card-name">Banco Credicoop</span>
-          <a class="fin-card-address"
-             href="https://www.google.com/maps/search/Banco+Credicoop+Concepcion+del+Uruguay+9+de+Julio+835"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Ver en mapa: 9 de Julio 835">9 de Julio 835 →</a>
-          <a class="fin-card-tel" href="tel:344243-2332" aria-label="Llamar al Banco Credicoop: 3442 43-2332">3442 43-2332</a>
+ <!-- 7. Banco Credicoop -->
+<div class="fin-card fin-card-bank reveal" role="listitem" style="--reveal-delay:440ms">
+  <div class="fin-card-inner">
+    <span class="fin-card-icon" aria-hidden="true">🏦</span>
+    <span class="fin-card-name">Banco Credicoop</span>
+    <a class="fin-card-address"
+       href="https://www.google.com/maps/search/Banco+Credicoop+Concepcion+del+Uruguay+9+de+Julio+835"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Ver en mapa: 9 de Julio 835">9 de Julio 835 →</a>
+    <a class="fin-card-tel" href="tel:344243-2332" aria-label="Llamar al Banco Credicoop: 3442 43-2332">3442 43-2332</a>
         </div>
       </div>
 
@@ -6850,18 +6802,13 @@ body {
              aria-label="Ver en mapa: Gral. Galarza 700">Gral. Galarza 700 →</a>
           <a class="fin-card-tel" href="tel:344242-3396" aria-label="Llamar a BERSA: 3442 42-3396">3442 42-3396</a>
           <!-- Nota expandible -->
-          <button
-            class="fin-note-bersa-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="fin-bersa-note-bank"
-            onclick="(function(btn){
-              var body=document.getElementById('fin-bersa-note-bank');
-              var open=body.classList.toggle('open');
-              btn.setAttribute('aria-expanded',open?'true':'false');
-              btn.textContent=open?'▲ Ocultar nota editorial':'▼ Leer nota editorial';
-            })(this)"
-          >▼ Leer nota editorial</button>
+<button
+  class="fin-note-bersa-toggle"
+  type="button"
+  aria-expanded="false"
+  aria-controls="fin-bersa-note-bank"
+  data-fin-toggle="fin-bersa-note-bank"
+>▼ Leer nota editorial</button>
           <div class="fin-note-bersa-body" id="fin-bersa-note-bank" aria-live="polite">
             <p class="fin-note">
               <strong>Nota editorial:</strong> Existen otras direcciones asociadas a esta entidad en la ciudad
@@ -6973,6 +6920,22 @@ body {
       <a class="fin-editorial-link" href="mailto:uruspotcdu@gmail.com" aria-label="Reportar un cambio por email">escribinos acá →</a>
     </p>
   </div>
+
+  <script>
+  (function(){
+    var section = document.getElementById('bancos');
+    if(!section) return;
+    section.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-fin-toggle]');
+      if(!btn || !section.contains(btn)) return;
+      var body = document.getElementById(btn.dataset.finToggle);
+      if(!body) return;
+      var open = body.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? '▲ Ocultar nota editorial' : '▼ Leer nota editorial';
+    });
+  })();
+  </script>
 
 </section>
   
