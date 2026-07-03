@@ -3031,6 +3031,7 @@ body {
 </style>
   </head>
   <body>
+  <div id="mood-cursor" aria-hidden="true"></div>
   
 <a class="skip-link" href="#main-content">Ir al contenido principal</a>
 <div id="progress-bar" aria-hidden="true" role="presentation"></div>
@@ -3670,7 +3671,6 @@ body {
     <div class="mood-hdr-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
   <div class="mood-card">
-    <div id="mood-cursor" aria-hidden="true"></div>
     <div class="mood-suggest" id="mood-suggest-chip" role="status" aria-live="polite">
       <span class="mood-suggest-dot" aria-hidden="true"></span>
       <span id="mood-suggest-text">Cargando sugerencia...</span>
@@ -10408,8 +10408,9 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   #mood-cursor { display: none; }
 }
 @media (hover: hover) and (pointer: fine) {
-  .mood-card, .mood-card * { cursor: none; }
+  body, body * { cursor: none; }
 }
+
 /* Glow orbital en mood-card cuando hay selección activa */
 @keyframes ac-orbit {
   0%   { transform: rotate(0deg) translateX(8px); }
@@ -10474,10 +10475,6 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   'use strict';
   var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   var cursor  = document.getElementById('mood-cursor');
-  var moodCard = document.querySelector('.mood-card');
-  if(!moodCard) return;
-
-  /* Cursor magnético custom dentro del mood-card */
   if(!reduced && cursor && window._usAnim.fine){
     var cx = 0, cy = 0, tx = 0, ty = 0;
     var cursorLoop = window._usAnim.rafLoop(function(){
@@ -10487,20 +10484,19 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
       cursor.style.top  = cy + 'px';
     });
 
-    moodCard.addEventListener('mouseenter', function(){
-      cursor.style.opacity = '1';
-      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
-      cursorLoop.start();
+    document.addEventListener('mousemove', function(e){
+      tx = e.clientX; ty = e.clientY;
+      if(cursor.style.opacity !== '1'){
+        cursor.style.opacity = '1';
+        cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+        cursorLoop.start();
+      }
     });
 
-    moodCard.addEventListener('mouseleave', function(){
+    document.addEventListener('mouseleave', function(){
       cursor.style.opacity = '0';
       cursor.style.transform = 'translate(-50%,-50%) scale(0)';
       cursorLoop.stop();
-    });
-
-    moodCard.addEventListener('mousemove', function(e){
-      tx = e.clientX; ty = e.clientY;
     });
 
     /* Cambiar tamaño cursor cuando hover sobre botón */
@@ -10517,6 +10513,8 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
       });
     });
   }
+  var moodCard = document.querySelector('.mood-card');
+  if(!moodCard) return;
 
   /* Ink drop al click */
   if(!reduced){
