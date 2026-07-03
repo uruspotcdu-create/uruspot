@@ -3678,12 +3678,34 @@ body {
 <script>
 /* Efecto de refracción canvas — caustics procedurales livianos */
 (function(){
-  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  window._usAnim = window._usAnim || {
+    reduced: window.matchMedia('(prefers-reduced-motion:reduce)').matches,
+    fine: window.matchMedia('(hover:hover) and (pointer:fine)').matches,
+    lerp: function(a,b,t){ return a+(b-a)*t; },
+    rafLoop: function(step){
+      var raf = null;
+      function frame(){ step(); raf = requestAnimationFrame(frame); }
+      return {
+        start: function(){ if(!raf) raf = requestAnimationFrame(frame); },
+        stop: function(){ if(raf){ cancelAnimationFrame(raf); raf = null; } }
+      };
+    },
+    spawnParticles: function(container, count, className, styleFn){
+      for(var i = 0; i < count; i++){
+        var el = document.createElement('span');
+        el.className = className;
+        el.style.cssText = styleFn(i);
+        container.appendChild(el);
+      }
+    }
+  };
+
+  var reduced = window._usAnim.reduced;
   var canvas = document.getElementById('hero-water-canvas');
   if(!canvas || reduced) return;
 
   var ctx = canvas.getContext('2d');
-  var W, H, animId;
+  var W, H;
   var ripples = [];
 
   function resize(){
@@ -3726,14 +3748,14 @@ body {
       }
       return true;
     });
-    animId = requestAnimationFrame(draw);
   }
 
+  var loop = window._usAnim.rafLoop(draw);
   var rippleInterval;
   function start(){
     resize();
     rippleInterval = setInterval(addRipple, 900);
-    draw();
+    loop.start();
   }
 
   /* Solo animar cuando el hero es visible */
@@ -3755,7 +3777,7 @@ body {
 
   window.addEventListener('pagehide', function(){
     clearInterval(rippleInterval);
-    if(animId) cancelAnimationFrame(animId);
+    loop.stop();
   }, {once:true});
 })();
 </script>
@@ -3871,63 +3893,78 @@ body {
 (function(){
   'use strict';
   var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(reduced) return;
-  var navEl   = document.querySelector('.main-nav');
-  var trail   = document.getElementById('nav-light-trail');
-  if(!navEl || !trail) return;
+  var section = document.getElementById('patrimonio');
+  if(!section) return;
 
-  /* Trail de luz que sigue el mouse horizontalmente por el nav */
-  if(window.matchMedia('(hover:hover) and (pointer:fine)').matches){
-    var trailX = 0, trailTX = 0, trailRaf;
+  /* Inyectar partículas de polvo dorado */
+  if(!reduced){
+    section.style.position = 'relative';
+    section.style.overflow = 'hidden';
 
-    navEl.addEventListener('mouseenter', function(){
-      trail.style.opacity = '1';
-      if(!trailRaf) trailRaf = requestAnimationFrame(animTrail);
+    window._usAnim.spawnParticles(section, 12, 'patrimonio-dust', function(){
+      var size = 1 + Math.random() * 3;
+      return [
+        'width:' + size + 'px',
+        'height:' + size + 'px',
+        'left:' + (5 + Math.random() * 90) + '%',
+        'top:' + (10 + Math.random() * 80) + '%',
+        '--dust-dur:' + (6 + Math.random() * 10) + 's',
+        '--dust-del:-' + (Math.random() * 8) + 's',
+        '--dust-dx:' + ((Math.random() - 0.5) * 40) + 'px',
+        '--dust-alpha:' + (0.2 + Math.random() * 0.3)
+      ].join(';');
     });
-    navEl.addEventListener('mouseleave', function(){
-      trail.style.opacity = '0';
-      if(trailRaf){ cancelAnimationFrame(trailRaf); trailRaf = null; }
-    });
-    navEl.addEventListener('mousemove', function(e){
-      var rect = navEl.getBoundingClientRect();
-      trailTX = e.clientX - rect.left;
-      /* Scanline Y */
-      navEl.style.setProperty('--nav-scan-y', (e.clientY - rect.top) + 'px');
-    });
-
-    function animTrail(){
-      trailX += (trailTX - trailX) * 0.12;
-      trail.style.left   = (trailX - 60) + 'px';
-      trail.style.width  = '120px';
-      trailRaf = requestAnimationFrame(animTrail);
-    }
   }
 
-  /* Efecto "spring stretch" del indicador al saltar entre items lejanos */
-  var indicator = navEl.querySelector('.nav-indicator');
-  if(!indicator) return;
+  /* Añadir marcas de agua de año en cada card */
+  var yearMap = {
+    'Palacio San José':          '1857',
+    'Basílica Inmaculada':       '1859',
+    'Museo Casa de Delio':       '1793',
+    'Museo Andrés García':       '1900',
+    'Culturas Aborígenes':       '',
+    'Colegio Superior':          '1849',
+    'Palacio Santa Cándida':     '1847',
+    'Faro Stella Maris':         '1949',
+    'Plaza General':             '1783',
+    'Peatonal Rocamora':         '1856',
+    'Cine Teatro San Martín':    '',
+    'Museo de Dibujo':           '',
+    'Sala Evocativa':            '',
+    'Hipódromo':                 '',
+    'Barrio Puerto Viejo':       '1619',
+  };
 
-  var prevLeft = null;
-  var prevWidth = 6;
-  var stretchObserver = new MutationObserver(function(){
-    var curLeft = parseFloat(indicator.style.left) || 0;
-    if(prevLeft !== null){
-      var dist = Math.abs(curLeft - prevLeft);
-      if(dist > 80){
-        var stretch = Math.min(dist * 0.18, 60);
-        indicator.style.width = (prevWidth + stretch) + 'px';
-        setTimeout(function(){
-          indicator.style.width = prevWidth + 'px';
-        }, 200);
-      }
+  document.querySelectorAll('.hp-card').forEach(function(card){
+    var nameEl = card.querySelector('.hp-name');
+    if(!nameEl) return;
+    var name = nameEl.textContent.trim();
+
+    /* Buscar año en el mapa usando coincidencia parcial */
+    var year = '';
+    Object.keys(yearMap).forEach(function(key){
+      if(name.includes(key)) year = yearMap[key];
+    });
+
+    if(year){
+      var wm = document.createElement('span');
+      wm.className = 'hp-year-watermark';
+      wm.textContent = year;
+      wm.setAttribute('aria-hidden', 'true');
+      card.appendChild(wm);
     }
-    prevLeft = curLeft;
-  });
-  stretchObserver.observe(indicator, {attributes:true, attributeFilter:['style']});
 
-  window.addEventListener('pagehide', function(){
-    stretchObserver.disconnect();
-  }, {once:true});
+    /* Sonido visual — pequeño "thud" al abrir */
+    if(!reduced){
+      card.addEventListener('toggle', function(){
+        if(card.open){
+          card.style.transform = 'scale(1.005)';
+          setTimeout(function(){ card.style.transform = ''; card.style.transition = 'transform 0.4s cubic-bezier(0.34,1.2,0.64,1)'; }, 10);
+          setTimeout(function(){ card.style.transition = ''; }, 450);
+        }
+      });
+    }
+  });
 })();
 </script>
 </nav>
@@ -9617,7 +9654,7 @@ if(alive){rafId=requestAnimationFrame(loop);}
   var canvas = document.getElementById('footer-tide-canvas');
   if(canvas && !reduced){
     var ctx = canvas.getContext('2d');
-    var W, H, animId;
+    var W, H;
     var waves = [
       { y: 0.7, speed: 0.008, amp: 18, phase: 0, color: 'rgba(10,255,239,0.25)' },
       { y: 0.8, speed: 0.012, amp: 12, phase: Math.PI * 0.6, color: 'rgba(10,200,220,0.18)' },
@@ -9632,7 +9669,7 @@ if(alive){rafId=requestAnimationFrame(loop);}
     }
 
     var t = 0;
-    function draw(){
+    var loop = window._usAnim.rafLoop(function(){
       ctx.clearRect(0,0,W,H);
       waves.forEach(function(wave){
         wave.phase += wave.speed;
@@ -9650,8 +9687,7 @@ if(alive){rafId=requestAnimationFrame(loop);}
         ctx.fill();
       });
       t++;
-      animId = requestAnimationFrame(draw);
-    }
+    });
 
     /* Solo animar cuando el footer es visible */
     var started = false;
@@ -9660,7 +9696,7 @@ if(alive){rafId=requestAnimationFrame(loop);}
         if(e[0].isIntersecting && !started){
           started = true;
           resize();
-          draw();
+          loop.start();
           io.unobserve(footer);
         }
       }, {threshold:0.1});
@@ -9673,7 +9709,7 @@ if(alive){rafId=requestAnimationFrame(loop);}
     }, {passive:true});
 
     window.addEventListener('pagehide', function(){
-      if(animId) cancelAnimationFrame(animId);
+      loop.stop();
     }, {once:true});
   }
 
@@ -9686,12 +9722,10 @@ if(alive){rafId=requestAnimationFrame(loop);}
       logoEl.parentNode.insertBefore(wrap, logoEl);
       wrap.appendChild(logoEl);
 
-      for(var i = 0; i < 8; i++){
-        var star = document.createElement('span');
-        star.className = 'footer-star';
+      window._usAnim.spawnParticles(wrap, 8, 'footer-star', function(i){
         var angle = (i / 8) * Math.PI * 2;
         var radius = 30 + Math.random() * 20;
-        star.style.cssText = [
+        return [
           'left:' + (50 + Math.cos(angle) * radius) + '%',
           'top:'  + (50 + Math.sin(angle) * radius) + '%',
           '--sx:' + (Math.random() * 6 - 3) + 'px',
@@ -9699,8 +9733,7 @@ if(alive){rafId=requestAnimationFrame(loop);}
           '--star-dur:' + (1.5 + Math.random() * 2) + 's',
           '--star-del:-' + (Math.random() * 2) + 's'
         ].join(';');
-        wrap.appendChild(star);
-      }
+      });
     }
   }
 
@@ -9760,7 +9793,7 @@ if(navScrollArea && navArrowRight){
 <script>
   /* ── HERO PARALLAX MAGNÉTICO ── */
 (function(){
-  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var reduced=window._usAnim.reduced;
   if(reduced||window.innerWidth<769)return;
   var orb1=document.querySelector('.hero-orb-1');
   var orb2=document.querySelector('.hero-orb-2');
@@ -9768,14 +9801,13 @@ if(navScrollArea && navArrowRight){
   orb1.style.animationPlayState='paused';
   orb2.style.animationPlayState='paused';
   var cx=0,cy=0,tx1=0,ty1=0,tx2=0,ty2=0;
-  var raf=null;
   document.addEventListener('mousemove',function(e){
     cx=(e.clientX/window.innerWidth-.5)*2;
     cy=(e.clientY/window.innerHeight-.5)*2;
   },{passive:true});
-  function lerp(a,b,t){return a+(b-a)*t;}
+  var lerp=window._usAnim.lerp;
 var mesh=document.querySelector('.hero-mesh');
-  function tick(){
+  var loop=window._usAnim.rafLoop(function(){
     tx1=lerp(tx1,cx*22,0.06);
     ty1=lerp(ty1,cy*16,0.06);
     tx2=lerp(tx2,cx*-14,0.045);
@@ -9785,16 +9817,15 @@ var mesh=document.querySelector('.hero-mesh');
     if(mesh){
       mesh.style.backgroundPosition=(50+cx*2)+'% '+(50+cy*2)+'%';
     }
-    raf=requestAnimationFrame(tick);
-  }
+  });
   var heroSect=document.querySelector('.hero');
   if(heroSect&&'IntersectionObserver' in window){
     var io=new IntersectionObserver(function(e){
-      if(e[0].isIntersecting){if(!raf)raf=requestAnimationFrame(tick);}
-      else{if(raf){cancelAnimationFrame(raf);raf=null;}}
+      if(e[0].isIntersecting){loop.start();}
+      else{loop.stop();}
     },{threshold:0});
     io.observe(heroSect);
-  }else{raf=requestAnimationFrame(tick);}
+  }else{loop.start();}
 })();
 </script>
 
@@ -11058,32 +11089,30 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   if(!moodCard) return;
 
   /* Cursor magnético custom dentro del mood-card */
-  if(!reduced && cursor && window.matchMedia('(hover:hover) and (pointer:fine)').matches){
-    var cx = 0, cy = 0, tx = 0, ty = 0, rafC;
+  if(!reduced && cursor && window._usAnim.fine){
+    var cx = 0, cy = 0, tx = 0, ty = 0;
+    var cursorLoop = window._usAnim.rafLoop(function(){
+      cx = window._usAnim.lerp(cx, tx, 0.14);
+      cy = window._usAnim.lerp(cy, ty, 0.14);
+      cursor.style.left = cx + 'px';
+      cursor.style.top  = cy + 'px';
+    });
 
     moodCard.addEventListener('mouseenter', function(){
       cursor.style.opacity = '1';
       cursor.style.transform = 'translate(-50%,-50%) scale(1)';
-      if(!rafC) rafC = requestAnimationFrame(trackCursor);
+      cursorLoop.start();
     });
 
     moodCard.addEventListener('mouseleave', function(){
       cursor.style.opacity = '0';
       cursor.style.transform = 'translate(-50%,-50%) scale(0)';
-      if(rafC){ cancelAnimationFrame(rafC); rafC = null; }
+      cursorLoop.stop();
     });
 
     moodCard.addEventListener('mousemove', function(e){
       tx = e.clientX; ty = e.clientY;
     });
-
-    function trackCursor(){
-      cx += (tx - cx) * 0.14;
-      cy += (ty - cy) * 0.14;
-      cursor.style.left = cx + 'px';
-      cursor.style.top  = cy + 'px';
-      rafC = requestAnimationFrame(trackCursor);
-    }
 
     /* Cambiar tamaño cursor cuando hover sobre botón */
     document.querySelectorAll('.mood-btn').forEach(function(btn){
