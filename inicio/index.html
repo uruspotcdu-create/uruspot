@@ -86,6 +86,18 @@
 </script>
 
 <style>
+  /* ===== Red de seguridad centralizada para prefers-reduced-motion =====
+     Complementa (no reemplaza) las reglas puntuales ya existentes en el
+     documento: si algún componente nuevo olvida su propio guard, esta regla
+     universal igual desactiva animaciones/transiciones para quienes lo piden. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
   .skip-link {
   position: absolute;
   left: -9999px;
@@ -3022,226 +3034,12 @@ body {
   }
 }
 
-</style>
-  <style>
+/* ===== CSS consolidado desde bloques de estilo dispersos en el body (optimizacion de rendimiento) ===== */
+/* --- bloque originalmente en linea 3026-3030 --- */
 @media (max-width: 768px){
   * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 }
-</style>
-  </head>
-  <body>
-  <div id="mood-cursor" aria-hidden="true"></div>
-  
-<a class="skip-link" href="#main-content">Ir al contenido principal</a>
-<div id="progress-bar" aria-hidden="true" role="presentation"></div>
-
-<header class="hero">
-  <div class="hero-mesh" aria-hidden="true"></div>
-  <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
-  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
-
-<!-- Superficie del río bioluminiscente -->
-  <div class="hero-river-grid" aria-hidden="true"></div>
-  
-  <!-- Corriente submarina — partículas de luz en movimiento -->
-  <div class="hero-current" aria-hidden="true">
-    <span class="hc-particle" style="--hcp-x:15%;--hcp-y:45%;--hcp-dur:18s;--hcp-del:0s;--hcp-size:3px"></span>
-    <span class="hc-particle" style="--hcp-x:32%;--hcp-y:38%;--hcp-dur:22s;--hcp-del:3s;--hcp-size:2px"></span>
-    <span class="hc-particle" style="--hcp-x:58%;--hcp-y:52%;--hcp-dur:15s;--hcp-del:6s;--hcp-size:4px"></span>
-    <span class="hc-particle" style="--hcp-x:75%;--hcp-y:40%;--hcp-dur:20s;--hcp-del:9s;--hcp-size:2px"></span>
-    <span class="hc-particle" style="--hcp-x:88%;--hcp-y:48%;--hcp-dur:25s;--hcp-del:2s;--hcp-size:3px"></span>
-    <span class="hc-particle" style="--hcp-x:42%;--hcp-y:62%;--hcp-dur:19s;--hcp-del:7s;--hcp-size:2px"></span>
-  </div>
-
-  <div class="hero-topbar">
-    <div class="city-tag">
-      <div class="city-flag" aria-hidden="true" role="presentation">📍</div>
-      <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
-    </div>
-    <a class="hero-logo" href="/" aria-label="URU SPOT — Ir al inicio">
-      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local de Concepción del Uruguay" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
-    </a>
-  </div>
-  <div class="hero-inner">
-    <div class="hero-inner-left">
-      <div class="live-chip" role="status" aria-live="polite"><span class="live-dot" aria-hidden="true"></span>Verificado en CdU · Junio 2026</div>
-<h1 class="hero-title" id="hero-title-anim" aria-label="Restaurantes, bares y más en Concepción del Uruguay">
-  <span class="eyebrow hero-word-noscript" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span>
-  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span>
-  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span>
-</h1>
-      <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
-      <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país.<br /><strong>100+ lugares verificados. Solo Concepción del Uruguay.</strong></p>
-  <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
-  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares verificados</div></div>
-  <div class="id-stat" role="listitem" style="border-left:2px solid rgba(212,116,42,.35)"><div class="id-stat-num" data-count="243" style="color:var(--oro2);font-size:clamp(32px,4vw,48px)">0</div><div class="id-stat-label" style="font-family:var(--f-italic);font-style:italic;color:rgba(232,180,140,.70);letter-spacing:1px">Años</div></div>
-  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="5">0</div><div class="id-stat-label">Universidades activas</div></div>
-  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="%">0<sup>%</sup></div><div class="id-stat-label">Local</div></div>
-</div>
-      <div class="hero-ctas">
-     <a class="btn-primary" href="#mood" id="hero-cta-primary">
-  Explorar la guía completa
-  <span aria-hidden="true"> →</span>
-</a>
-        <a class="btn-ghost" href="#circuitos" aria-label="Elegí qué te apetece hacer hoy">¿Qué te apetece hoy? ↓</a>
-      </div>
-    </div>
-    <aside class="wx-hero" aria-label="Clima actual en Concepción del Uruguay">
-      <div class="wx-hero-card">
-        <div class="wx-hero-bar" aria-hidden="true"></div>
-        <div class="wx-hero-body">
-          <div class="wx-hero-city">Concepción del Uruguay · En vivo</div>
-          <div class="wx-hero-main">
-            <div class="wx-hero-icon" id="wx-hero-icon" aria-hidden="true">⏳</div>
-            <div class="wx-hero-temp-wrap">
-             <div class="wx-hero-temp" id="wx-hero-temp" aria-live="polite" aria-atomic="true" aria-relevant="text"><span class="wx-skeleton wx-skel-temp" id="wx-hero-temp-skel"></span></div>
-              <div class="wx-hero-desc" id="wx-hero-desc"><span class="wx-skeleton wx-skel-desc"></span></div>
-            </div>
-          </div>
-          <div class="wx-hero-sep" aria-hidden="true"></div>
-          <div class="wx-hero-data">
-            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Sensación</div><div class="wx-hero-datum-val" id="wx-hero-feels"><span class="wx-skeleton wx-skel-datum"></span></div></div>
-            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Humedad</div><div class="wx-hero-datum-val" id="wx-hero-hum"><span class="wx-skeleton wx-skel-datum"></span></div></div>
-            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Viento</div><div class="wx-hero-datum-val" id="wx-hero-wind"><span class="wx-skeleton wx-skel-datum"></span></div></div>
-            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Lluvia hoy</div><div class="wx-hero-datum-val" id="wx-hero-rain"><span class="wx-skeleton wx-skel-datum"></span></div></div>
-          </div>
-        </div>
-       <div class="wx-hero-footer">
-          <span class="wx-hero-updated" id="wx-hero-updated" aria-live="polite" aria-atomic="true">Cargando...</span>
-          <span class="wx-hero-frase" id="wx-hero-frase" aria-live="polite" aria-atomic="true"></span>
-        </div>
-      </div>
-    </aside>
-  </div>
-<div class="hero-fade" aria-hidden="true"></div>
-
-<script>
-(function(){
-  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(reduced){
-    ['hero-word-1','hero-word-2'].forEach(function(id){
-      var el=document.getElementById(id);
-      if(el){el.style.opacity='1';el.style.transform='none';el.style.filter='none';}
-    });
-    var ey=document.querySelector('.hero-title .eyebrow');
-    if(ey){ey.style.opacity='1';ey.style.transform='none';}
-    return;
-  }
-  function animate(){
-    var ey=document.querySelector('.hero-title .eyebrow');
-    var w1=document.getElementById('hero-word-1');
-    var w2=document.getElementById('hero-word-2');
-    if(!w1||!w2)return;
-    /* Eyebrow */
-    setTimeout(function(){
-      if(ey){
-        void ey.offsetWidth;
-        ey.style.transition='opacity .8s ease .1s, transform .8s cubic-bezier(.16,1,.3,1) .1s';
-        ey.style.opacity='1';
-        ey.style.transform='translateY(0)';
-      }
-    },150);
-    /* Palabras emergen desde abajo como luz del agua */
-    function revealWater(el,delay){
-      /* Estado inicial: sumergido */
-      el.style.transform='translateY(110%) scale(0.92)';
-      el.style.filter='blur(8px)';
-      el.style.opacity='0';
-      setTimeout(function(){
-        el.style.transition=
-          'opacity 1.1s cubic-bezier(.16,1,.3,1),' +
-          'transform 1.1s cubic-bezier(.16,1,.3,1),' +
-          'filter 1.0s cubic-bezier(.16,1,.3,1)';
-        el.style.opacity='1';
-        el.style.transform='translateY(0) scale(1)';
-        el.style.filter='blur(0)';
-      },delay);
-    }
-    revealWater(w1,360);
-    revealWater(w2,520);
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',animate,{once:true});
-  }else{animate();}
-})();
-</script>
-<script>
-(function(){
-  window._usAnim = window._usAnim || {
-    reduced: window.matchMedia('(prefers-reduced-motion:reduce)').matches,
-    fine: window.matchMedia('(hover:hover) and (pointer:fine)').matches,
-    lerp: function(a,b,t){ return a+(b-a)*t; },
-    rafLoop: function(step){
-      var raf = null;
-      function frame(){ step(); raf = requestAnimationFrame(frame); }
-      return {
-        start: function(){ if(!raf) raf = requestAnimationFrame(frame); },
-        stop: function(){ if(raf){ cancelAnimationFrame(raf); raf = null; } }
-      };
-    },
-    spawnParticles: function(container, count, className, styleFn){
-      for(var i = 0; i < count; i++){
-        var el = document.createElement('span');
-        el.className = className;
-        el.style.cssText = styleFn(i);
-        container.appendChild(el);
-      }
-    }
-  };
-})();
-</script>
-</header>
-
-<nav class="main-nav" id="main-nav" aria-label="Categorías">
-<div class="nav-scroll-area">
-    <ul role="list" style="display:contents;list-style:none;margin:0;padding:0;">
-      
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item active" href="#mood" data-section="mood"><span class="nav-emoji" aria-hidden="true">✨</span> Empezar</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#circuitos" data-section="circuitos"><span class="nav-emoji" aria-hidden="true">🗺️</span> Circuitos</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#restaurantes" data-section="restaurantes"><span class="nav-emoji" aria-hidden="true">🍽️</span> Restaurantes</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#cafes" data-section="cafes"><span class="nav-emoji" aria-hidden="true">☕</span> Cafés</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#bares" data-section="bares"><span class="nav-emoji" aria-hidden="true">🍻</span> Bares</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#panaderias" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🥐</span> Panaderías</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#heladerias-anchor" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🍦</span> Heladerías</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#hosterias" data-section="hosterias"><span class="nav-emoji" aria-hidden="true">🏨</span> Hosterías</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#gimnasios" data-section="gimnasios"><span class="nav-emoji" aria-hidden="true">💪</span> Gimnasios</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#uni-ruta" data-section="uni-ruta"><span class="nav-emoji" aria-hidden="true">🎓</span> Universitarios</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#naturaleza" data-section="naturaleza"><span class="nav-emoji" aria-hidden="true">🌊</span> Naturaleza</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#patrimonio" data-section="patrimonio"><span class="nav-emoji" aria-hidden="true">🏛️</span> Patrimonio</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#historia" data-section="historia"><span class="nav-emoji" aria-hidden="true">📜</span> Historia</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#carnaval" data-section="carnaval"><span class="nav-emoji" aria-hidden="true">🎭</span> Carnaval</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#deporte" data-section="deporte"><span class="nav-emoji" aria-hidden="true">🏆</span> Deporte</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#veterinarias" data-section="veterinarias"><span class="nav-emoji" aria-hidden="true">🐾</span> Veterinarias</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#supermercados" data-section="supermercados"><span class="nav-emoji" aria-hidden="true">🛒</span> Compras</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#bancos" data-section="bancos"><span class="nav-emoji" aria-hidden="true">🏦</span> Bancos</a></li>
-<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
-<li><a class="nav-item" href="#remiserias" data-section="remiserias"><span class="nav-emoji" aria-hidden="true">🚖</span> Remiserías</a></li>
-    </ul>
-  </div>
-  <button class="search-icon-btn" id="search-toggle-btn" type="button" aria-label="Buscar en la guía" aria-expanded="false" aria-controls="search-bar-wrap">🔍<span class="search-btn-label">Buscar</span></button>
-  <button id="nav-scroll-left" aria-label="Ver secciones anteriores" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to left,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 16px 0 10px;position:relative;z-index:2;transition:color .2s ease">❮</button>
-  <button id="nav-scroll-right" aria-label="Ver más secciones" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to right,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 10px 0 16px;position:relative;z-index:2;transition:color .2s ease">❯</button>
-<div id="nav-light-trail" aria-hidden="true" style="position:absolute;height:2px;bottom:0;left:0;width:0;background:linear-gradient(90deg,transparent,rgba(10,255,239,0.8),transparent);pointer-events:none;z-index:10;transition:none;filter:blur(1px);"></div>
-
-<style>
+/* --- bloque originalmente en linea 3244-3298 --- */
 /* El indicador actual se convierte en cápsula líquida */
 .nav-indicator {
   height: 2px !important;
@@ -3295,101 +3093,7 @@ body {
   .nav-item::after { display: none; }
   .main-nav::before { display: none; }
 }
-</style>
-
-<script>
-(function(){
-  'use strict';
-  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var section = document.getElementById('patrimonio');
-  if(!section) return;
-
-  /* Inyectar partículas de polvo dorado */
-  if(!reduced){
-    section.style.position = 'relative';
-    section.style.overflow = 'hidden';
-
-    window._usAnim.spawnParticles(section, 12, 'patrimonio-dust', function(){
-      var size = 1 + Math.random() * 3;
-      return [
-        'width:' + size + 'px',
-        'height:' + size + 'px',
-        'left:' + (5 + Math.random() * 90) + '%',
-        'top:' + (10 + Math.random() * 80) + '%',
-        '--dust-dur:' + (6 + Math.random() * 10) + 's',
-        '--dust-del:-' + (Math.random() * 8) + 's',
-        '--dust-dx:' + ((Math.random() - 0.5) * 40) + 'px',
-        '--dust-alpha:' + (0.2 + Math.random() * 0.3)
-      ].join(';');
-    });
-  }
-
-  /* Añadir marcas de agua de año en cada card */
-  var yearMap = {
-    'Palacio San José':          '1857',
-    'Basílica Inmaculada':       '1859',
-    'Museo Casa de Delio':       '1793',
-    'Museo Andrés García':       '1900',
-    'Culturas Aborígenes':       '',
-    'Colegio Superior':          '1849',
-    'Palacio Santa Cándida':     '1847',
-    'Faro Stella Maris':         '1949',
-    'Plaza General':             '1783',
-    'Peatonal Rocamora':         '1856',
-    'Cine Teatro San Martín':    '',
-    'Museo de Dibujo':           '',
-    'Sala Evocativa':            '',
-    'Hipódromo':                 '',
-    'Barrio Puerto Viejo':       '1619',
-  };
-
-  document.querySelectorAll('.hp-card').forEach(function(card){
-    var nameEl = card.querySelector('.hp-name');
-    if(!nameEl) return;
-    var name = nameEl.textContent.trim();
-
-    /* Buscar año en el mapa usando coincidencia parcial */
-    var year = '';
-    Object.keys(yearMap).forEach(function(key){
-      if(name.includes(key)) year = yearMap[key];
-    });
-
-    if(year){
-      var wm = document.createElement('span');
-      wm.className = 'hp-year-watermark';
-      wm.textContent = year;
-      wm.setAttribute('aria-hidden', 'true');
-      card.appendChild(wm);
-    }
-
-    /* Sonido visual — pequeño "thud" al abrir */
-    if(!reduced){
-      card.addEventListener('toggle', function(){
-        if(card.open){
-          card.style.transform = 'scale(1.005)';
-          setTimeout(function(){ card.style.transform = ''; card.style.transition = 'transform 0.4s cubic-bezier(0.34,1.2,0.64,1)'; }, 10);
-          setTimeout(function(){ card.style.transition = ''; }, 450);
-        }
-      });
-    }
-  });
-})();
-</script>
-</nav>
-
-<div class="section-crumb" id="section-crumb" aria-live="polite" aria-atomic="true">
-  <span class="section-crumb-dot" aria-hidden="true"></span>
-  Estás viendo: <span class="section-crumb-current" id="section-crumb-current">Empezar</span>
-</div>
-
-<div class="search-bar-wrap" id="search-bar-wrap" role="search" aria-label="Buscar lugares en URU SPOT" inert>
-  <input class="search-input" id="search-input" type="search" placeholder="Buscá un lugar... ej: parrilla, café, Nero, La Ris..." autocomplete="off" aria-label="Buscar lugares" aria-autocomplete="list" aria-haspopup="listbox" />
-  <span class="search-count" id="search-count" aria-live="polite"></span>
-  <button class="search-close" id="search-close-btn" type="button" aria-label="Cerrar buscador"><span aria-hidden="true">✕</span></button>
-</div>
-
-<main class="main-body" id="main-content" aria-label="Contenido principal de la guía URU SPOT">
-  <style>
+/* --- bloque originalmente en linea 3392-3489 --- */
 
 /* El reflejo de brillo que sigue al mouse — mejorado */
 .rcard-tilt-shine {
@@ -3486,100 +3190,7 @@ body {
   .badge-gold::before { animation: none; }
   .rcard-feat .badge-gold { animation: none; }
 }
-</style>
-
-<script>
-(function(){
-  'use strict';
-  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var isFine  = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
-  if(reduced || !isFine) return;
-
-  /* Tilt 3D perspectivo + shine reactivo al mouse */
-  document.querySelectorAll('.rcard:not(.rcard-ad)').forEach(function(card){
-    var shine = document.createElement('div');
-    shine.className = 'rcard-tilt-shine';
-    card.appendChild(shine);
-
-    /* Contador vivo */
-    var baseViews = 3 + Math.floor(Math.random() * 12);
-    var views = baseViews;
-    var viewBadge = document.createElement('span');
-    viewBadge.className = 'rcard-live-views';
-    var dot = document.createElement('span');
-    dot.className = 'rcard-live-dot';
-    dot.setAttribute('aria-hidden','true');
-    var txt = document.createTextNode(views + ' mirando');
-    viewBadge.appendChild(dot);
-    viewBadge.appendChild(txt);
-    card.appendChild(viewBadge);
-
-    var tiltRaf, shineRaf;
-    var rotX = 0, rotY = 0, tRX = 0, tRY = 0;
-    var shX = 50, shY = 50, tSX = 50, tSY = 50;
-
-    card.addEventListener('mouseenter', function(){
-      /* Simular alguien más "viendo" */
-      if(Math.random() > 0.5){
-        views = baseViews + 1;
-        txt.textContent = views + ' mirando';
-      }
-      card.style.transition = 'none';
-      if(!tiltRaf) tiltRaf = requestAnimationFrame(animTilt);
-    });
-
-    card.addEventListener('mousemove', function(e){
-      var rect = card.getBoundingClientRect();
-      var x = (e.clientX - rect.left) / rect.width;
-      var y = (e.clientY - rect.top)  / rect.height;
-      tRX = (y - 0.5) * -8;
-      tRY = (x - 0.5) * 8;
-      tSX = x * 100;
-      tSY = y * 100;
-    });
-
-    card.addEventListener('mouseleave', function(){
-      tRX = 0; tRY = 0;
-      tSX = 50; tSY = 50;
-      views = baseViews;
-      txt.textContent = views + ' mirando';
-      setTimeout(function(){
-        card.style.transition = '';
-        card.style.transform  = '';
-        if(tiltRaf){ cancelAnimationFrame(tiltRaf); tiltRaf = null; }
-      }, 350);
-    });
-
-    function animTilt(){
-      rotX += (tRX - rotX) * 0.1;
-      rotY += (tRY - rotY) * 0.1;
-      shX  += (tSX - shX)  * 0.12;
-      shY  += (tSY - shY)  * 0.12;
-
-      card.style.transform = 'perspective(800px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateZ(2px)';
-      shine.style.setProperty('--shine-x', shX + '%');
-      shine.style.setProperty('--shine-y', shY + '%');
-
-      tiltRaf = requestAnimationFrame(animTilt);
-    }
-  });
-})();
-</script>
-
-
-<!-- ===================== MOOD PICKER + GLOSARIO ===================== -->
-<div class="mood-wrap reveal" id="mood" role="region" aria-label="Elegí qué te apetece hacer hoy">
-  <div class="mood-hdr">
-    <div><span class="mood-eyebrow">Solo en URU SPOT</span><h2 class="mood-title">✨ ¿Qué te apetece hoy?</h2></div>
-    <div class="mood-hdr-accent" aria-hidden="true"><span></span><span></span><span></span></div>
-  </div>
-  <div class="mood-card">
-    <div class="mood-suggest" id="mood-suggest-chip" role="status" aria-live="polite">
-      <span class="mood-suggest-dot" aria-hidden="true"></span>
-      <span id="mood-suggest-text">Cargando sugerencia...</span>
-    </div>
-    <span class="mood-question">Elegí según cómo estás ahora. La guía entera se ajusta — según la hora, el clima y tus ganas.</span>
-<div class="mood-grid" id="mood-grid" role="group" aria-label="Opciones de estado de ánimo"> <style>
+/* --- bloque originalmente en linea 3582-3594 --- */
 .mood-btn {position:relative;overflow:hidden;}
 .mood-btn::before {
   content:'';
@@ -3591,46 +3202,7 @@ body {
   pointer-events:none;
 }
 .mood-btn:hover::before, .mood-btn:focus-visible::before {opacity:1;}
-</style>
-      <button class="mood-btn" data-mood="rapido" type="button" aria-pressed="false">
-        <span class="mood-btn-icon" aria-hidden="true">⚡</span>
-        <span class="mood-btn-label">Algo rápido</span>
-        <span class="mood-btn-sub">Sin vueltas</span>
-      </button>
-      <button class="mood-btn" data-mood="barato" type="button" aria-pressed="false">
-        <span class="mood-btn-icon" aria-hidden="true">💸</span>
-        <span class="mood-btn-label">Gastar poco</span>
-        <span class="mood-btn-sub">Sin romper el presupuesto</span>
-      </button>
-      <button class="mood-btn" data-mood="sorpresa" type="button" aria-pressed="false">
-        <span class="mood-btn-icon" aria-hidden="true">🎲</span>
-        <span class="mood-btn-label">Sorprenderme</span>
-        <span class="mood-btn-sub">Puntaje URU SPOT verificado</span>
-      </button>
-      <button class="mood-btn" data-mood="relax" type="button" aria-pressed="false">
-        <span class="mood-btn-icon" aria-hidden="true">🌿</span>
-        <span class="mood-btn-label">Algo tranquilo</span>
-        <span class="mood-btn-sub">Para desconectarse del día</span>
-      </button>
-    </div>
-    <div class="mood-result" id="mood-result">
-      <div class="mood-result-inner" id="mood-result-inner"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ===================== CIRCUITOS TURÍSTICOS ===================== -->
-<section class="us-section" id="circuitos" aria-labelledby="title-circuitos">
-  <div class="section-header">
-    <div>
-      <span class="section-eyebrow">Guía operativa · Recorridos verificados</span>
-      <h2 class="section-title" id="title-circuitos">🗺️ Circuitos Turísticos</h2>
-    </div>
-    <span class="section-count">3 circuitos</span>
-    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
-  </div>
-
-  <style>
+/* --- bloque originalmente en linea 3633-3671 --- */
   .circ-intro {margin-bottom:48px;padding:32px 40px;background:var(--ink);border-left:5px solid var(--verde2);position:relative;overflow:hidden}
   .circ-intro::before {content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(29,92,64,.18) 0%,transparent 60%);pointer-events:none}
   .circ-intro-text {font-family:var(--f-display);font-style:italic;font-size:clamp(16px,2.2vw,22px);color:rgba(242,237,227,.80);line-height:1.6;position:relative;z-index:1;max-width:720px}
@@ -3668,20 +3240,7 @@ body {
   .circ-nota strong {color:rgba(26,25,22,.62)}
   @media(max-width:860px){.circ-grid {grid-template-columns:1fr}.circ-card, .circ-card-feat {min-height:unset}}
   @media(max-width:640px){.circ-card, .circ-card-feat {padding:24px 20px}.circ-intro {padding:24px var(--gutter)}}
-  </style>
-
-  <div class="circ-intro reveal">
-    <p class="circ-intro-text">Concepción del Uruguay tiene mucho para descubrir, pero no siempre es fácil saber por <em>dónde</em> empezar. Por eso armamos estos tres recorridos con información clara y tiempos estimados.</p>
-  </div>
-
-  <div class="circ-grid">
-
-    <div class="circ-card circ-card-feat reveal" style="--reveal-delay:60ms">
-      <span class="circ-duration">⏱ 4 horas · A pie · Centro histórico</span>
-      <span class="circ-card-icon" aria-hidden="true">🏛️</span>
-      <h3 class="circ-name">Concepción del Uruguay en 4 horas</h3>
-      <p class="circ-desc">El recorrido esencial del casco histórico. Todo a pie, sin necesidad de transporte. Ideal para quien llega el sábado al mediodía y quiere ver lo fundamental antes de la cena.</p>
-      <style>
+/* --- bloque originalmente en linea 3684-3705 --- */
 .circ-stops {position:relative;}
 .circ-stops::before {
   content:'';
@@ -3702,79 +3261,7 @@ body {
 .circ-card.is-drawn .circ-stop-num {
   transform:scale(1);
 }
-</style>
-      <ol class="circ-stops" aria-label="Paradas del circuito de 4 horas">
-        <li class="circ-stop"><span class="circ-stop-num">1</span><span><strong>Plaza Ramírez</strong> — 15 min. El centro geográfico y social de la ciudad. Arboleda, obelisco, vista a la Basílica.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">2</span><span><strong>Basílica Inmaculada Concepción</strong> — 30 min. Mausoleo de Urquiza, inaugurada 1859. 3 de Febrero 41.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">3</span><span><strong>Colegio del Uruguay</strong> — 20 min. Primer colegio laico del país (1849). Visita guiada obligatoria. Urquiza 25.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">4</span><span><strong>Peatonal Rocamora</strong> — 30 min. 5 cuadras peatonales, el corazón comercial. Llamada "Comercio" en 1856.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">5</span><span><strong>Museo Casa Delio Panizza</strong> — 30 min. La casona más antigua (1793). Sup. Entrerriano y Galarza.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">6</span><span><strong>Almuerzo en el centro</strong> — 60 min. Bonhomia, La Ris o Bella Vista, todos a 5 minutos caminando.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">7</span><span><strong>Faro Stella Maris (Isla del Puerto)</strong> — 45 min. Cruzar el puente de 210m, caminar la costanera. El único faro fluvial de Argentina según diversas fuentes locales.</span></li>
-      </ol>
-      <div class="circ-footer">
-        <span class="circ-pill">🚶 100% a pie</span>
-        <span class="circ-pill">💰 Entrada gratuita</span>
-        <span class="circ-pill">📸 Ideal para fotos</span>
-      </div>
-    </div>
-
-    <div class="circ-card reveal" style="--reveal-delay:120ms">
-      <span class="circ-duration">⏱ Un día completo · Auto + caminatas</span>
-      <span class="circ-card-icon" aria-hidden="true">☀️</span>
-      <h3 class="circ-name">Concepción del Uruguay en un día</h3>
-      <p class="circ-desc">El circuito para quien tiene un día completo. Combina el casco histórico con la experiencia del río y el balneario. Necesitás movilidad propia o remis para el tramo al Palacio San José.</p>
-      <ol class="circ-stops" aria-label="Paradas del circuito de un día">
-        <li class="circ-stop"><span class="circ-stop-num">1</span><span><strong>Mañana (9–13 hs): Circuito histórico central</strong> — Plaza, Basílica, Colegio del Uruguay, Museo Panizza. Igual que el circuito de 4 horas.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">2</span><span><strong>Almuerzo (13–14:30 hs)</strong> — Restaurante en el centro. Recomendado: Bella Vista o Bonhomia.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">3</span><span><strong>Tarde (14:30–17 hs): Costanera Isla del Puerto</strong> — 10 min en auto. Faro, sendero de humedales 1.5 km, vista al río. Gratuito.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">4</span><span><strong>Tarde (17–19 hs): Balneario Banco Pelay o Itapé</strong> — Playas del río Uruguay. Itapé es gratuito y queda a 15 cuadras del centro.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">5</span><span><strong>Noche (20:30–)</strong> — Bares del centro: 7 Colinas, Bonhomia o Bartolo según el ánimo.</span></li>
-      </ol>
-      <div class="circ-footer">
-        <span class="circ-pill">🚗 Requiere movilidad</span>
-        <span class="circ-pill">💰 $2.000 Banco Pelay</span>
-        <span class="circ-pill">🌅 Atardecer en el río</span>
-      </div>
-    </div>
-
-    <div class="circ-card reveal" style="--reveal-delay:180ms">
-      <span class="circ-duration">⏱ Fin de semana · Auto imprescindible</span>
-      <span class="circ-card-icon" aria-hidden="true">📅</span>
-      <h3 class="circ-name">Concepción del Uruguay en un fin de semana</h3>
-      <p class="circ-desc">El circuito para conocer la ciudad de verdad. El sábado: casco histórico y río. El domingo: el Palacio San José y las termas. Dos experiencias completamente diferentes que se complementan.</p>
-      <ol class="circ-stops" aria-label="Paradas del circuito de fin de semana">
-        <li class="circ-stop"><span class="circ-stop-num">1</span><span><strong>Sáb mañana: Circuito histórico central</strong> — Como el itinerario de un día.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">2</span><span><strong>Sáb tarde: Río e Isla del Puerto</strong> — Costanera, Faro, balneario.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">3</span><span><strong>Sáb noche: Vida nocturna del centro</strong> — Bares y restaurantes.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">4</span><span><strong>Dom 9–13 hs: Palacio San José</strong> — 12 km por Ruta 39, desvío norte 3 km. Gratuito. Visitas guiadas 11 hs y 15 hs. Llegá temprano para la primera.</span></li>
-        <li class="circ-stop"><span class="circ-stop-num">5</span><span><strong>Dom tarde: Termas Concepción</strong> — Km 129 Ruta 14. A 30 min del Palacio. 10 piscinas, spa, parque acuático. El cierre perfecto.</span></li>
-      </ol>
-      <div class="circ-footer">
-        <span class="circ-pill">🚗 Auto imprescindible</span>
-        <span class="circ-pill">🏰 Palacio gratuito</span>
-        <span class="circ-pill">♨️ Termas con cargo</span>
-      </div>
-    </div>
-
-  </div>
-
-  <p class="circ-nota reveal">⚠️ <strong>Nota sobre tiempos:</strong> Los tiempos indicados son estimaciones basadas en visitas normales, sin esperas imprevistas. El Palacio San José requiere llegar antes de las 11 hs para la primera visita guiada. Los balnearios cobran entrada entre las 8 y las 20 hs. Las termas tienen precios y horarios que cambian por temporada — verificar en termasconcepcion.com antes de ir.</p>
-
-</section>
-
-<!-- ===================== CÓMO LLEGAR Y MOVERSE ===================== -->
-<section class="us-section" id="como-llegar" aria-labelledby="title-como-llegar">
-  <div class="section-header">
-    <div>
-      <span class="section-eyebrow">Acceso · Movilidad · Distancias</span>
-      <h2 class="section-title" id="title-como-llegar">🧭 Cómo llegar y moverse</h2>
-    </div>
-    <span class="section-count">Distancias verificadas</span>
-    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
-  </div>
-
-  <style>
+/* --- bloque originalmente en linea 3777-3791 --- */
   .cl-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
 .cl-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);padding:28px 26px;display:flex;flex-direction:column;gap:12px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
 .cl-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
@@ -3788,50 +3275,7 @@ body {
 .cl-dist-val {color:var(--oro2);font-size:11px}
 .cl-tip {font-family:var(--f-ui);font-size:8.5px;font-weight:600;letter-spacing:.5px;color:var(--card-text-soft);padding:10px 14px;background:rgba(196,135,42,.06);border-left:3px solid rgba(196,135,42,.35);line-height:1.6;margin-top:4px}
   @media(max-width:640px){.cl-grid {grid-template-columns:1fr}}
-  </style>
-
-  <div class="cl-grid">
-    <div class="cl-card reveal">
-      <span class="cl-icon" aria-hidden="true">🚗</span>
-      <h3 class="cl-title">En auto — distancias desde ciudades principales</h3>
-      <div class="cl-distances" role="list">
-        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Buenos Aires (Retiro)</span><span class="cl-dist-val">330 km · ~3.5 hs por RN14</span></div>
-        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Paraná</span><span class="cl-dist-val">240 km · ~2.5 hs</span></div>
-        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Gualeguaychú</span><span class="cl-dist-val">90 km · ~1 hs</span></div>
-        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Colón</span><span class="cl-dist-val">45 km · ~35 min</span></div>
-        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Concordia</span><span class="cl-dist-val">120 km · ~1.5 hs</span></div>
-        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Rosario</span><span class="cl-dist-val">280 km · ~3 hs</span></div>
-      </div>
-      <p class="cl-tip">La Ruta Nacional 14 conecta Concepción del Uruguay con Buenos Aires sin semáforos hasta Gualeguaychú. Tramo final por Ruta 39 (asfalto en buen estado).</p>
-    </div>
-
-    <div class="cl-card reveal" style="--reveal-delay:60ms">
-      <span class="cl-icon" aria-hidden="true">🚍</span>
-      <h3 class="cl-title">En colectivo — Terminal de Ómnibus</h3>
-      <p class="cl-body">La Terminal de Ómnibus de Concepción del Uruguay recibe servicios directos desde <strong>Buenos Aires</strong> (Retiro, ~4 hs), <strong>Paraná</strong>, <strong>Rosario</strong>, <strong>Santa Fe</strong> y la mayoría de las ciudades entrerrianas. Los servicios de larga distancia operan con empresas como Flecha Bus, Río Uruguay y El Cóndor.</p>
-      <p class="cl-body" style="margin-top:8px">Para horarios actualizados: <a href="https://www.centraldepasajes.com.ar/pasaje-micro/terminal-de-concepcion-del-uruguay.html" target="_blank" rel="noopener noreferrer" style="color:var(--verde2);text-decoration:underline;text-decoration-color:rgba(38,122,85,.3)">centraldepasajes.com.ar ↗</a></p>
-      <p class="cl-tip">Desde la Terminal al centro histórico son 15 cuadras. Remises disponibles en la salida.</p>
-    </div>
-
-    <div class="cl-card reveal" style="--reveal-delay:120ms">
-      <span class="cl-icon" aria-hidden="true">🏙️</span>
-      <h3 class="cl-title">Movilidad dentro de la ciudad</h3>
-      <p class="cl-body">El <strong>casco histórico se recorre a pie</strong> en su totalidad. Las distancias entre Plaza Ramírez, la peatonal, el Colegio del Uruguay y la Isla del Puerto no superan los 15 minutos caminando.</p>
-      <p class="cl-body" style="margin-top:8px">Para <strong>balnearios y Palacio San José</strong> necesitás auto o remis. Los colectivos urbanos cubren los barrios pero no los balnearios con frecuencia confiable.</p>
-      <p class="cl-body" style="margin-top:8px"><strong>Bicicleta:</strong> la ciudad es llana y las distancias son manejables. Alquiler disponible en algunos hoteles y en la zona de la costanera en temporada.</p>
-    </div>
-
-    <div class="cl-card reveal" style="--reveal-delay:180ms">
-      <span class="cl-icon" aria-hidden="true">📋</span>
-      <h3 class="cl-title">Lo que tenés que saber antes de llegar</h3>
-      <p class="cl-body"><strong>No hay Cabify, pero sí Uber</strong> en Concepción del Uruguay. Los remises son el transporte puntual. Pedí el número de una remisería en tu alojamiento el primer día.</p>
-      <p class="cl-body" style="margin-top:8px"><strong>Los lunes la ciudad duerme:</strong> muchos restaurantes, cafés y comercios cierran los lunes. Si llegás un lunes, los lugares con horario regular incluyen Sanduba, El Calderón y Panza Verde.</p>
-      <p class="cl-body" style="margin-top:8px"><strong>Temporada alta (nov–mar):</strong> balnearios con guardavidas, ferias, eventos. <strong>Temporada baja:</strong> termas, gastronomía tranquila, museos sin filas.</p>
-    </div>
-  </div>
-</section>
-<!-- ── ESTILOS PROPIOS DE LA SECCIÓN (prefijo fin-) ── -->
-<style>
+/* --- bloque originalmente en linea 3834-4118 --- */
 /* ──────────────────────────────────────────────────────────────
    TOKENS — heredados del sistema de diseño global
    (no se redefinen variables ya existentes)
@@ -4115,10 +3559,7 @@ body {
   .fin-card,.fin-card::before,.fin-card-icon{transition:none}
   .fin-note-bersa-body{transition:none}
 }
-</style>
-
-  <!-- ── ESTILOS PROPIOS DE LA SECCIÓN (prefijo aloj-) ── -->
-<style>
+/* --- bloque originalmente en linea 4121-4363 --- */
 /* ── INTRO EJECUTIVO ── */
 .aloj-exec {
   margin-bottom:48px;
@@ -4360,7 +3801,1432 @@ body {
   .aloj-card,.aloj-card::before,.aloj-card-icon,
   .aloj-litem,.aloj-litem-icon,.aloj-litem-arrow{transition:none}
 }
+/* --- bloque originalmente en linea 4929-5082 --- */
+/* ── Prefijo: sm- para no colisionar con estilos globales ── */
+.sm-exec {
+  margin-bottom:48px;padding:36px 44px;
+  background:linear-gradient(135deg,#0a1a12 0%,#111810 100%);
+  border-left:5px solid var(--verde2);
+  position:relative;overflow:hidden;
+}
+.sm-exec::before {
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(29,92,64,.22) 0%,transparent 60%);
+  pointer-events:none;
+}
+.sm-exec-text {
+  font-family:var(--f-italic);font-style:italic;
+  font-size:clamp(14px,1.8vw,18px);color:rgba(242,237,227,.80);
+  line-height:1.7;max-width:720px;
+}
+.sm-exec-text em {font-style:normal;color:var(--oro2)}
+
+/* ── Bloque de escenario ── */
+
+/* ── Grid de tarjetas principales ── */
+.sm-grid-2 {
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
+  margin-bottom:2px;
+}
+/* ── Tarjeta base ── */
+.sm-card {
+  background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);
+  display:flex;flex-direction:column;gap:14px;padding:30px 26px;
+  position:relative;overflow:hidden;
+  transition:background .35s ease,border-color .35s ease;
+  border:1px solid var(--card-border-oro);
+}
+.sm-card:hover {
+  background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);
+  border-color:var(--card-border-oro-hover);
+}
+.sm-card::before {
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--verde2),var(--verde));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .35s var(--ease);z-index:0;
+}
+.sm-card:hover::before {transform:scaleX(1)}
+
+/* Variante destacada */
+.sm-card-feat {
+  background:var(--ink);
+  border-color:rgba(196,135,42,.50);
+}
+.sm-card-feat::after {
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 70% at 90% 10%,rgba(196,135,42,.10) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+.sm-card-feat:hover {background:#1e1e1a}
+.sm-card-feat .sm-card-name {color:var(--parchment)}
+.sm-card-feat .sm-card-desc {color:rgba(242,237,227,.52)}
+
+/* ── Contenido interior ── */
+.sm-card-inner {position:relative;z-index:1;display:flex;flex-direction:column;gap:11px;height:100%}
+.sm-card-icon {font-size:28px;line-height:1;flex-shrink:0;transition:transform .35s var(--ease)}
+.sm-card:hover .sm-card-icon {transform:scale(1.10)}
+
+.sm-card-name {
+  font-family:var(--f-display);
+  font-size:clamp(16px,1.8vw,20px);
+  color:var(--card-text);
+  letter-spacing:-.2px;line-height:1.15;font-weight:400;display:block;
+}
+.sm-card-desc {
+  font-family:var(--f-italic);font-style:italic;
+  font-size:13.5px;color:var(--card-text-soft);
+  line-height:1.75;flex:1;
+}
+.sm-card-desc strong {font-style:normal;color:var(--card-text)}
+
+/* Dirección / datos prácticos */
+.sm-card-addr {
+  font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:.5px;
+  color:rgba(248,238,224,.50);display:flex;align-items:flex-start;gap:6px;
+  padding-top:10px;border-top:1px solid rgba(242,237,227,.07);flex-direction:column;
+  row-gap:5px;
+}
+.sm-card-addr-line {display:flex;align-items:center;gap:6px}
+.sm-card-addr-line::before {content:'📍';font-size:10px;font-style:normal;flex-shrink:0}
+.sm-card-hours-line {display:flex;align-items:center;gap:6px;color:rgba(248,238,224,.40)}
+.sm-card-hours-line::before {content:'🕐';font-size:10px;font-style:normal;flex-shrink:0}
+
+/* Chips de perfil */
+
+/* ── Banner de feria ── */
+.sm-feria-banner {
+  background:var(--ink);
+  border-top:3px solid var(--verde2);
+  position:relative;overflow:hidden;
+  padding:36px 40px;margin-bottom:2px;
+}
+.sm-feria-banner::before {
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 55% 80% at 90% 50%,rgba(29,92,64,.18) 0%,transparent 60%);
+  pointer-events:none;
+}
+.sm-feria-inner {position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.sm-feria-left {display:flex;flex-direction:column;gap:12px}
+.sm-feria-eyebrow {font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(100,210,155,.80);display:block}
+.sm-feria-title {font-family:var(--f-display);font-size:clamp(20px,2.8vw,28px);color:var(--parchment);line-height:1.1;letter-spacing:-.3px}
+.sm-feria-desc {font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(242,237,227,.52);line-height:1.8}
+.sm-feria-desc strong {font-style:normal;color:var(--oro2);font-weight:400}
+.sm-feria-specs {display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(242,237,227,.07)}
+
+/* ── Nota editorial ── */
+.sm-editorial-text {
+  font-family:var(--f-ui);font-size:9.5px;font-weight:600;letter-spacing:.4px;
+  color:rgba(26,25,22,.52);line-height:1.8;
+}
+.sm-editorial-text strong {color:rgba(26,25,22,.72)}
+
+/* ── Bloque de contexto narrativo ── */
+
+/* ── Tarjeta lista (compacta) ── */
+.sm-litem {
+  background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);
+  display:flex;align-items:flex-start;gap:20px;padding:24px 28px;
+  position:relative;overflow:hidden;
+  border-left:4px solid rgba(196,135,42,.22);
+  transition:background .35s ease,border-left-color .35s ease,transform .35s var(--ease);
+  border:1px solid var(--card-border-oro);
+}
+.sm-litem:hover {
+  background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);
+  border-left-color:var(--oro2);transform:translateX(6px);
+}
+.sm-litem-icon {font-size:26px;flex-shrink:0;transition:transform .35s var(--ease)}
+.sm-litem:hover .sm-litem-icon {transform:scale(1.10)}
+.sm-litem-arrow {margin-left:auto;font-size:16px;color:rgba(242,237,227,.18);flex-shrink:0;transition:color .35s ease,transform .35s var(--ease)}
+.sm-litem:hover .sm-litem-arrow {color:var(--oro2);transform:translateX(4px)}
+
+/* ── Responsive ── */
+@media(max-width:860px) {
+  .sm-grid-2{grid-template-columns:1fr}
+  .sm-feria-inner{grid-template-columns:1fr}
+  .sm-exec{padding:28px 24px}
+  .sm-feria-banner{padding:28px 24px}
+}
+/* .sm-* @640px — consolidado en el bloque maestro único */
+@media(prefers-reduced-motion:reduce) {
+  .sm-card,.sm-card::before,.sm-card-icon,
+  .sm-litem,.sm-litem-icon,.sm-litem-arrow{transition:none}
+}
+/* --- bloque originalmente en linea 6223-6284 --- */
+
+.gcard-feat-heartbeat {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: visible;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes ac-scroll-ecg {
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.gcard-feat-ecg {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  height: 24px;
+  width: 200%;
+  opacity: 0.85;
+  animation: ac-scroll-ecg 2.8s linear infinite;
+}
+
+/* Score badge pulsante como corazón */
+@keyframes ac-heartbeat {
+  0%,80%,100% { transform: scale(1); }
+  14%         { transform: scale(1.15); }
+  28%         { transform: scale(1); }
+  42%         { transform: scale(1.08); }
+}
+.gcard-feat .gcard-score {
+  animation: ac-heartbeat 1.4s ease-in-out 3s infinite !important;
+}
+
+/* Barra de "energía" en tarjetas de gimnasio normales */
+.gcard-energy-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--verde2), rgba(10,255,239,0.8));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.2s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: none;
+  z-index: 3;
+}
+.gcard.is-energy-visible .gcard-energy-bar {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gcard-feat-ecg { animation: none; }
+  .gcard-feat .gcard-score { animation: none !important; }
+  .gcard-energy-bar { transform: scaleX(1); }
+}
+/* --- bloque originalmente en linea 6388-6415 --- */
+  .svc-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
+  .svc-card {background:var(--ink);display:flex;flex-direction:column;gap:14px;padding:30px 28px;position:relative;overflow:hidden;transition:background .35s ease}
+  .svc-card:hover {background:#1e1e1a}
+  .svc-card-link {text-decoration:none;color:inherit}
+  .svc-card-link:hover .svc-cta {color:var(--oro2)}
+  .svc-icon {font-size:32px;line-height:1;transition:transform .35s var(--ease)}
+  .svc-card:hover .svc-icon {transform:scale(1.12)}
+  .svc-title {font-family:var(--f-display);font-style:italic;font-size:20px;color:var(--parchment);letter-spacing:-.2px;line-height:1.1}
+  .svc-body {font-family:var(--f-italic);font-style:italic;font-size:13px;color:rgba(242,237,227,.45);line-height:1.7}
+  .svc-body strong {font-style:normal;color:rgba(242,237,227,.75);font-weight:400}
+  .svc-cta {display:inline-flex;align-items:center;gap:6px;font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.35);margin-top:4px;transition:color .3s ease}
+  .svc-emg-row {display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.04);padding:0 28px 28px}
+  .svc-emg-chip {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:22px 12px;text-decoration:none;transition:background .35s ease;border-radius:2px}
+  .svc-emg-chip:hover {background:rgba(255,255,255,.04)}
+  .svc-emg-num {font-family:var(--f-display);font-size:44px;line-height:1;color:var(--parchment);letter-spacing:-2px}
+  .svc-emg-label {font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,.35)}
+  .svc-more-grid {display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);border-top:none}
+  .svc-more-card {background:var(--ink);display:flex;flex-direction:column;gap:10px;padding:24px 22px;text-decoration:none;position:relative;overflow:hidden;transition:background .35s ease}
+  .svc-more-card:hover {background:#1e1e1a}
+  .svc-more-icon {font-size:26px;line-height:1;transition:transform .35s var(--ease)}
+  .svc-more-card:hover .svc-more-icon {transform:scale(1.10)}
+  .svc-more-name {font-family:var(--f-display);font-style:italic;font-size:16px;color:var(--parchment);line-height:1.1}
+  .svc-more-sub {font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.28)}
+  .svc-more-arrow {position:absolute;top:14px;right:14px;font-size:11px;color:rgba(242,237,227,.20)}
+  @media(max-width:860px){.svc-grid {grid-template-columns:1fr}.svc-emg-row {grid-template-columns:1fr 1fr 1fr;padding:0 20px 22px}.svc-more-grid {grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:640px){.svc-grid {grid-template-columns:1fr}.svc-card {padding:24px 20px}.svc-more-grid {grid-template-columns:1fr 1fr}.svc-emg-num {font-size:36px}}
+/* --- bloque originalmente en linea 6507-6513 --- */
+    #wave1 {animation:ac-scroll-wave-a 8s linear infinite}
+    #wave2 {animation:ac-scroll-wave-b 12s linear infinite}
+    @keyframes ac-scroll-wave-a{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @keyframes ac-scroll-wave-b{from{transform:translateX(-10%)}to{transform:translateX(-60%)}}
+    @media(prefers-reduced-motion:reduce){#wave1, #wave2 {animation:none}}
+/* --- bloque originalmente en linea 6952-7053 --- */
+/* Partículas de polvo histórico sobre la sección patrimonio */
+@keyframes dustFloat {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  10%  { opacity: var(--dust-alpha, 0.4); }
+  90%  { opacity: var(--dust-alpha, 0.4); }
+  100% { transform: translateY(-80px) translateX(var(--dust-dx, 15px)) rotate(180deg); opacity: 0; }
+}
+
+.patrimonio-dust {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: dustFloat var(--dust-dur, 8s) ease-in-out var(--dust-del, 0s) infinite;
+  background: radial-gradient(circle, rgba(196,135,42,0.6) 0%, transparent 70%);
+  will-change: transform, opacity;
+}
+
+/* Efecto clip-path "pergamino desplegándose" al abrir details */
+@keyframes ac-clip-reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0.3;
+  }
+  to {
+    clip-path: inset(0 0 0% 0);
+    opacity: 1;
+  }
+}
+
+.hp-card[open] .hp-body {
+  animation: ac-clip-reveal 0.5s cubic-bezier(0.16,1,0.3,1) both !important;
+}
+
+/* Línea "sello de cera" que aparece al abrir una card */
+@keyframes ac-draw-line {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+.hp-card[open]::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(196,135,42,0.8) 20%,
+    rgba(232,160,48,1) 50%,
+    rgba(196,135,42,0.8) 80%,
+    transparent 100%
+  );
+  animation: ac-draw-line 0.6s cubic-bezier(0.34,1.2,0.64,1) both;
+  transform-origin: left;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: 0 0 8px rgba(196,135,42,0.5);
+}
+
+/* Shimmer de "antiguedad" en la tarjeta activa */
+@keyframes ac-shimmer-reveal {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.hp-card[open] .hp-summary {
+  background: linear-gradient(
+    105deg,
+    rgba(242,237,227,0) 0%,
+    rgba(196,135,42,0.06) 40%,
+    rgba(242,237,227,0.04) 60%,
+    rgba(242,237,227,0) 100%
+  );
+  background-size: 300% 100%;
+  animation: ac-shimmer-reveal 2s ease-in-out 0.3s 1 both;
+}
+
+/* Número de año flotante decorativo */
+.hp-card .hp-year-watermark {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-family: var(--f-display, 'DM Serif Display', serif);
+  font-size: 56px;
+  line-height: 1;
+  color: rgba(196,135,42,0.06);
+  letter-spacing: -2px;
+  pointer-events: none;
+  z-index: 0;
+  transition: color 0.4s ease;
+  user-select: none;
+}
+.hp-card[open] .hp-year-watermark {
+  color: rgba(196,135,42,0.10);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-card[open] .hp-body { animation: none !important; }
+  .hp-card[open]::before { animation: none; }
+  .patrimonio-dust { animation: none; opacity: 0; }
+  .hp-card[open] .hp-summary { animation: none; }
+}
+/* --- bloque originalmente en linea 7563-7667 --- */
+/* Transición tipo "página pasando" entre capítulos históricos */
+@keyframes ac-flip-in {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) rotateY(-15deg) translateX(-40px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1200px) rotateY(0deg) translateX(0);
+    filter: blur(0);
+  }
+}
+@keyframes ac-flip-out {
+  from {
+    opacity: 1;
+    transform: perspective(1200px) rotateY(0deg) translateX(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: perspective(1200px) rotateY(15deg) translateX(40px);
+    filter: blur(2px);
+  }
+}
+
+.ht-chapter-active.page-flip-in {
+  animation: ac-flip-in 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.ht-chapter.page-flip-out {
+  animation: ac-flip-out 0.35s cubic-bezier(0.77,0,0.175,1) both;
+  pointer-events: none;
+}
+
+/* Cursor pluma de escribir sobre la sección historia */
+#historia-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99998;
+  font-size: 20px;
+  transform: translate(-4px, -18px) rotate(-20deg);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  will-change: transform;
+}
+
+/* Trazo de tinta que el cursor deja */
+.historia-ink-trail {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99997;
+  border-radius: 50%;
+  background: rgba(196,135,42,0.4);
+  transform: translate(-50%,-50%) scale(0);
+  animation: inkTrailFade 0.8s ease-out forwards;
+}
+@keyframes inkTrailFade {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.6; }
+  30%  { transform: translate(-50%,-50%) scale(1); }
+  100% { transform: translate(-50%,-50%) scale(1.5); opacity: 0; }
+}
+
+/* Efecto de "sello de lacre" en las stats del hero histórico */
+@keyframes ac-bounce-in-stat {
+  0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+  60%  { transform: scale(1.12) rotate(3deg); }
+  80%  { transform: scale(0.97) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.ht-stat.is-revealed {
+  animation: ac-bounce-in-stat 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* Número contando hacia arriba en stats historia */
+.ht-stat-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Progress de lectura del capítulo activo */
+.ht-reading-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(196,135,42,0.8), rgba(232,160,48,1));
+  transition: width 0.1s linear;
+  pointer-events: none;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 6px rgba(196,135,42,0.5);
+}
+.ht-tabs-wrap {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ht-chapter-active.page-flip-in { animation: none; }
+  .ht-chapter.page-flip-out { animation: none; }
+  #historia-cursor { display: none; }
+  .historia-ink-trail { display: none; }
+  .ht-stat.is-revealed { animation: none; }
+}
+/* --- bloque originalmente en linea 8238-8294 --- */
+/* ── INTRO ── */
+.dep-intro {margin-bottom:48px;padding:36px 44px;background:linear-gradient(135deg,#0a1420 0%,#0d1a14 100%);border-left:5px solid var(--verde2);position:relative;overflow:hidden}
+.dep-intro::before {content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(196,135,42,.16) 0%,transparent 60%);pointer-events:none}
+.dep-intro-text {font-family:var(--f-display);font-style:italic;font-size:clamp(18px,2.4vw,26px);color:rgba(242,237,227,.82);line-height:1.55;letter-spacing:-.3px;max-width:680px;position:relative;z-index:1}
+.dep-intro-text em {font-style:normal;color:var(--oro2)}
+
+/* ── HERO NÁUTICO ── */
+.dep-hero {position:relative;overflow:hidden;margin-bottom:1px;min-height:240px;background:linear-gradient(135deg,#0b1a26 0%,#0e2018 60%,#0a1420 100%);padding:48px 52px;border-radius:var(--radius-card)}
+.dep-hero-bg {position:absolute;inset:0;background:radial-gradient(ellipse 65% 80% at 85% 15%,rgba(26,92,138,.40) 0%,transparent 58%),radial-gradient(ellipse 40% 60% at 5% 85%,rgba(29,92,64,.20) 0%,transparent 55%)}
+.dep-hero-content {position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;max-width:760px}
+.dep-hero-chip {display:inline-flex;align-items:center;gap:10px;background:rgba(26,92,138,.14);border:1px solid rgba(26,92,138,.40);border-radius:2px;padding:8px 16px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(70,160,230,.95);width:fit-content}
+.dep-hero-chip-dot {width:6px;height:6px;border-radius:50%;background:#46a0e6;flex-shrink:0;animation:ac-pulse-glow 2.5s ease-in-out infinite alternate}
+.dep-hero-title {font-family:var(--f-display);font-size:clamp(30px,4.5vw,46px);line-height:1;letter-spacing:-1px;color:var(--parchment)}
+.dep-hero-sub {font-family:var(--f-italic);font-style:italic;font-size:15px;color:rgba(242,237,227,.58);line-height:1.75}
+.dep-hero-sub strong {font-style:normal;color:var(--oro2);font-weight:400}
+.dep-hero-tags {display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+
+/* ── STATS GRID ── */
+.dep-stats-grid {display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
+.dep-stat-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;flex-direction:column;gap:6px;padding:30px 24px;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
+.dep-stat-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.dep-stat-num {font-family:var(--f-display);font-size:clamp(26px,3vw,38px);line-height:1;color:var(--parchment);letter-spacing:-1.5px}
+.dep-stat-label {font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(242,237,227,.55)}
+.dep-stat-sub {font-family:var(--f-italic);font-style:italic;font-size:11px;color:rgba(242,237,227,.30)}
+
+/* ── SUBTÍTULOS ── */
+
+/* ── GOLF + MOTOR GRID ── */
+.dep-feat-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
+.dep-feat-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:30px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
+.dep-feat-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.dep-feat-body, .dep-athlete-body, .dep-club-body {display:flex;flex-direction:column;gap:8px}
+.dep-feat-name {font-family:var(--f-display);font-size:18px;color:var(--card-text);letter-spacing:-.2px;line-height:1.15;font-weight:800}
+.dep-feat-desc, .dep-club-desc {font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.7}
+.dep-feat-desc strong {font-style:normal;color:var(--card-text)}
+  .dep-feat-icon {font-size:32px;line-height:1;flex-shrink:0;transition:transform .35s var(--ease)}
+.dep-feat-card:hover .dep-feat-icon {transform:scale(1.12)}
+.dep-club-icon, .dep-athlete-icon {font-size:32px;line-height:1;flex-shrink:0}
+.dep-athlete-badge {display:inline-flex;align-items:center;padding:5px 12px;background:rgba(196,135,42,.12);border:1px solid rgba(196,135,42,.35);border-radius:2px;font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2);width:fit-content}
+
+/* ── CLUBES GRID ── */
+.dep-club-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
+.dep-club-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:28px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
+.dep-club-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.dep-club-tag {font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2)}
+.dep-club-name {font-family:var(--f-display);font-size:18px;color:var(--card-text);letter-spacing:-.2px;font-weight:800}
+
+/* ── ATLETAS GRID ── */
+.dep-athlete-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
+.dep-athlete-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:28px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
+.dep-athlete-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
+.dep-athlete-name {font-family:var(--f-display);font-size:19px;color:var(--card-text);letter-spacing:-.2px;font-weight:400}
+.dep-athlete-feat .dep-athlete-name {font-size:24px}
+.dep-athlete-desc {font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75}
+.dep-athlete-desc strong {font-style:normal;color:var(--card-text)}
+/* --- bloque originalmente en linea 8295-8313 --- */
+.dep-disclaimer {font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.72);line-height:1.8;padding:20px 24px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:24px}
+.dep-disclaimer strong {color:rgba(26,25,22,.88)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px) {
+  .dep-stats-grid{grid-template-columns:repeat(2,1fr)}
+  .dep-feat-grid{grid-template-columns:1fr}
+  .dep-club-grid{grid-template-columns:1fr}
+  .dep-athlete-grid{grid-template-columns:1fr}
+  .dep-athlete-feat{grid-column:span 1}
+  .dep-hero{padding:32px 28px}
+  .dep-intro{padding:26px 24px}
+}
+/* .dep-* @640px — consolidado en el bloque maestro único */
+@media(prefers-reduced-motion:reduce) {
+  .dep-feat-card,.dep-club-card,.dep-athlete-card,.dep-stat-card{transition:none}
+}
+/* --- bloque originalmente en linea 8315-8332 --- */
+  @media (max-width: 768px) {
+  .hero, .hero-inner, .hero-topbar, .hero-inner-left {
+    max-width: 100vw !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  .hero-title, .hero-title .main-line, .hero-title .main-line em {
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+  }
+  .identity-strip {
+    width: 100% !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+}
+/* --- bloque originalmente en linea 8335-8507 --- */
+.ru-section {
+  --paper:#EBE3D2;--paper-2:#E2D8C2;--paper-line:rgba(28,43,58,.09);
+  --ink:#1C2B3A;--ink-soft:#4C5C6C;--ink-faint:#1C2B3A66;
+  --pen-blue:#2B4570;--pen-red:#AE3526;--marker:#F0BD3E;--river:#3C6B5B;
+  --night:#0E1B27;--night-2:#0A141D;--night-line:rgba(232,212,170,.10);
+  --night-ink:#D8DEE3;--night-soft:#8FA0AC;--amber:#E6A23C;--amber-soft:#C98B33;
+  --f-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --f-body:'Inter',system-ui,sans-serif;
+  --f-hand:'Caveat',cursive;
+  --f-mono:'JetBrains Mono',ui-monospace,monospace;
+  display:block;position:relative;background:var(--paper);color:var(--ink);
+  font-family:var(--f-body);overflow:hidden;isolation:isolate;
+  margin-left:calc(-1 * var(--gutter,64px));
+  margin-right:calc(-1 * var(--gutter,64px));
+  width:calc(100% + 2 * var(--gutter,64px));
+}
+.ru-section::before {
+  content:'';display:block;height:80px;
+  background:linear-gradient(to bottom,var(--void,#060605),var(--paper));
+  position:relative;z-index:1;
+}
+.ru-section * {box-sizing:border-box;}
+.ru-section a {color:inherit;text-decoration:none;}
+.ru-section ol, .ru-section ul {list-style:none;margin:0;padding:0;}
+.ru-section h1, .ru-section h2, .ru-section h3, .ru-section h4, .ru-section p, .ru-section blockquote, .ru-section figure {margin:0;}
+.ru-section :focus-visible {outline:2px dashed var(--pen-blue);outline-offset:4px;border-radius:2px;}
+.ru-night :focus-visible {outline-color:var(--amber);}
+.ru-grain {position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.05;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.ru-night .ru-grain {opacity:.10;mix-blend-mode:screen;}
+.ru-ruled {position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:repeating-linear-gradient(to bottom,transparent 0 38px,var(--paper-line) 38px 39px);}
+.ru-wrap {position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 24px;width:100%;box-sizing:border-box;}
+.ru-reveal {opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);}
+.ru-reveal.is-in {opacity:1;transform:translateY(0);}
+@media(prefers-reduced-motion:reduce){.ru-reveal {opacity:1!important;transform:none!important;transition:none!important;}}
+.ru-stop {display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-weight:700;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pen-red);}
+.ru-night .ru-stop {color:var(--amber);}
+.ru-stop::before {content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;}
+.ru-chapter-head {max-width:640px;}
+.ru-chapter-title {font-family:var(--f-display);font-weight:800;font-size:clamp(2.1rem,4.6vw,3.4rem);line-height:1.02;letter-spacing:-.01em;margin:14px 0 16px;}
+.ru-chapter-title em {font-style:normal;color:var(--pen-blue);}
+.ru-night .ru-chapter-title em {color:var(--amber);}
+.ru-chapter-intro {font-size:1.02rem;line-height:1.6;color:var(--ink-soft);max-width:46ch;}
+.ru-night .ru-chapter-intro {color:var(--night-soft);}
+.ru-chapter {position:relative;padding:96px 0;}
+.ru-hero {position:relative;padding:128px 0 96px;}
+.ru-hero-wrap {display:flex;flex-direction:column;align-items:flex-start;}
+.ru-ticket-tag {position:relative;display:inline-flex;align-items:center;padding:8px 18px;font-family:var(--f-mono);font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pen-red);background:var(--paper-2);border:1.5px dashed var(--ink-faint);border-radius:2px;transform:rotate(-2deg);margin-bottom:30px;}
+.ru-ticket-tag::before, .ru-ticket-tag::after {content:"";position:absolute;top:50%;width:11px;height:11px;background:var(--paper);border-radius:50%;transform:translateY(-50%);}
+.ru-ticket-tag::before {left:-6px;}.ru-ticket-tag::after {right:-6px;}
+.ru-hero-title {font-family:var(--f-display);font-weight:800;font-size:clamp(2.7rem,7.2vw,5.8rem);line-height:.97;letter-spacing:-.02em;margin-bottom:28px;}
+.ru-hl {display:block;overflow:hidden;}
+.ru-hl span {display:block;animation:ac-reveal-up-word .85s cubic-bezier(.16,1,.3,1) both;}
+.ru-hl:nth-child(1) span {animation-delay:.05s;}
+.ru-hl:nth-child(2) span {animation-delay:.17s;}
+.ru-hl:nth-child(3) span {animation-delay:.29s;}
+@keyframes ac-reveal-up-word{from{transform:translateY(112%);}to{transform:translateY(0);}}
+.ru-hero-title em {font-style:normal;color:var(--pen-blue);}
+.ru-hero-desc {font-size:1.08rem;line-height:1.6;color:var(--ink-soft);max-width:44ch;margin-bottom:48px;}
+.ru-board-wrap {width:100%;max-width:720px;}
+.ru-board-label {display:block;font-family:var(--f-mono);font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;}
+.ru-board-track {position:relative;overflow:hidden;background:var(--ink);border-radius:3px;padding:14px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent);}
+.ru-board-row {display:flex;width:max-content;animation:ac-scroll-board 36s linear infinite;white-space:nowrap;}
+.ru-board-track:hover .ru-board-row, .ru-board-track:focus-within .ru-board-row {animation-play-state:paused;}
+@keyframes ac-scroll-board{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ru-chip {flex:none;font-family:var(--f-mono);font-size:.78rem;font-weight:600;color:var(--amber);padding:0 22px;border-right:1px solid rgba(232,212,170,.18);white-space:nowrap;}
+.ru-chip i {font-style:normal;color:rgba(216,222,227,.6);margin-left:8px;}
+.ru-scrolldown {margin-top:56px;display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+.ru-scrolldown svg {animation:ac-bob-y-down 1.7s ease-in-out infinite;}
+@keyframes ac-bob-y-down{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+.ru-route {position:relative;margin-top:52px;}
+.ru-route-track {position:absolute;left:18px;top:6px;bottom:6px;width:2px;background-image:repeating-linear-gradient(to bottom,var(--ink-faint) 0 6px,transparent 6px 12px);}
+.ru-route-fill {position:absolute;top:0;left:0;width:100%;height:0%;background:var(--pen-blue);}
+.ru-route-pin {position:absolute;left:18px;top:0%;transform:translate(-50%,-50%);width:18px;height:18px;color:var(--pen-blue);z-index:2;}
+.ru-route-pin svg {display:block;background:var(--paper);border-radius:50%;}
+.ru-steps {display:flex;flex-direction:column;gap:22px;}
+.ru-step {position:relative;display:grid;grid-template-columns:38px 1fr;gap:0 18px;align-items:start;}
+.ru-step-pin {grid-column:1;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-weight:700;font-size:.82rem;background:var(--paper);border:2px solid var(--ink);color:var(--ink);position:relative;z-index:2;}
+.ru-step-card {grid-column:2;background:var(--paper);border:1.5px solid var(--ink-faint);border-radius:3px;padding:24px 26px;box-shadow:5px 5px 0 0 var(--ink-faint);transition:transform .25s ease,box-shadow .25s ease;}
+.ru-step:nth-child(odd) .ru-step-card {transform:rotate(-.4deg);}
+.ru-step:nth-child(even) .ru-step-card {transform:rotate(.4deg);}
+.ru-step-card:hover {transform:rotate(0deg) translateY(-3px);box-shadow:7px 7px 0 0 var(--pen-blue);}
+.ru-step-tag {display:block;font-family:var(--f-mono);font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pen-red);margin-bottom:10px;}
+.ru-step-title {font-family:var(--f-display);font-weight:700;font-size:1.24rem;line-height:1.25;margin-bottom:10px;}
+.ru-step-body {font-size:.95rem;line-height:1.62;color:var(--ink-soft);}
+.ru-step-body strong {color:var(--ink);font-weight:600;}
+.ru-feature {display:grid;grid-template-columns:1fr 1.15fr auto;align-items:stretch;margin:48px 0 26px;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:6px 6px 0 0 var(--ink);transition:transform .25s ease,box-shadow .25s ease;}
+.ru-feature:hover {transform:translate(-3px,-3px);box-shadow:9px 9px 0 0 var(--pen-blue);}
+.ru-feature-board {background:var(--ink);color:var(--marker);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:32px 28px;font-family:var(--f-hand);}
+.ru-feature-board span:first-child {font-family:var(--f-mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,189,62,.55);}
+.ru-feature-board strong {font-size:2.5rem;line-height:1;font-weight:700;}
+.ru-feature-board span:last-child {font-size:1.05rem;opacity:.85;}
+.ru-feature-body {padding:32px 28px;display:flex;flex-direction:column;gap:9px;justify-content:center;background:var(--paper);}
+.ru-feature-eyebrow {font-family:var(--f-mono);font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pen-red);}
+.ru-feature-name {font-family:var(--f-display);font-weight:800;font-size:1.65rem;}
+.ru-feature-desc {font-size:.95rem;line-height:1.55;color:var(--ink-soft);max-width:38ch;}
+.ru-feature-cta {display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.86rem;color:var(--pen-blue);margin-top:4px;}
+.ru-feature-cta svg {transition:transform .2s ease;}
+.ru-feature:hover .ru-feature-cta svg {transform:translateX(4px);}
+.ru-feature-price {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:24px 26px;background:var(--paper-2);border-left:1.5px dashed var(--ink-faint);font-family:var(--f-mono);font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
+.ru-feature-price span {font-family:var(--f-display);font-size:1.55rem;font-weight:800;color:var(--ink);}
+.ru-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.ru-ticket {position:relative;background:var(--paper);border:1.5px solid var(--ink-faint);border-radius:3px;padding:26px 20px 18px;display:flex;flex-direction:column;gap:8px;box-shadow:4px 4px 0 0 var(--ink-faint);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;}
+.ru-ticket:nth-child(3n+1) {transform:rotate(-.6deg);}
+.ru-ticket:nth-child(3n+2) {transform:rotate(.5deg);}
+.ru-ticket:nth-child(3n+3) {transform:rotate(-.3deg);}
+.ru-ticket:hover {transform:rotate(0) translateY(-4px);box-shadow:6px 6px 0 0 var(--pen-blue);border-color:var(--pen-blue);}
+.ru-ticket-notch {position:absolute;top:-1.5px;left:50%;transform:translateX(-50%);width:60%;height:1.5px;background-image:repeating-linear-gradient(to right,var(--ink-faint) 0 6px,transparent 6px 11px);}
+.ru-ticket-notch::before, .ru-ticket-notch::after {content:"";position:absolute;top:-7px;width:13px;height:13px;border-radius:50%;background:var(--paper);border:1.5px solid var(--ink-faint);}
+.ru-ticket-notch::before {left:-6px;}.ru-ticket-notch::after {right:-6px;}
+.ru-ticket-tag2 {font-family:var(--f-mono);font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--river);}
+.ru-ticket-name {font-family:var(--f-display);font-weight:700;font-size:1.16rem;}
+.ru-ticket-desc {font-size:.87rem;line-height:1.5;color:var(--ink-soft);flex:1;}
+.ru-ticket-foot {display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px dashed var(--ink-faint);margin-top:4px;}
+.ru-ticket-price {font-family:var(--f-mono);font-weight:700;color:var(--ink);}
+.ru-ticket-arrow {color:var(--pen-blue);transition:transform .2s ease;display:inline-block;}
+.ru-ticket:hover .ru-ticket-arrow {transform:translate(3px,-3px);}
+.ru-secreto {position:relative;padding:0 0 88px;}
+.ru-secreto-wrap {max-width:740px;}
+.ru-secreto-label {display:block;font-family:var(--f-mono);font-size:.66rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:18px;}
+.ru-secreto-quote {font-family:var(--f-display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.85rem);line-height:1.45;color:var(--ink);}
+.ru-hl-text {background-image:linear-gradient(120deg,rgba(240,189,62,.6) 0%,rgba(240,189,62,.6) 100%);background-repeat:no-repeat;background-size:0% 88%;background-position:0 78%;-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:0 .06em;transition:background-size 1.1s cubic-bezier(.16,1,.3,1) .25s;}
+.ru-secreto.is-in .ru-hl-text {background-size:100% 88%;}
+.ru-secreto-source {display:block;margin-top:18px;font-family:var(--f-hand);font-weight:600;font-size:1.35rem;color:var(--ink-soft);}
+.ru-dusk, .ru-dawn {position:relative;height:150px;overflow:hidden;}
+.ru-dusk-sky {position:absolute;inset:0;background:linear-gradient(to bottom,var(--paper) 0%,#C99A6A 42%,var(--night) 100%);}
+.ru-dawn-sky {position:absolute;inset:0;background:linear-gradient(to bottom,var(--night) 0%,#C99A6A 60%,var(--paper) 100%);}
+.ru-dusk-sun, .ru-dawn-sun {position:absolute;left:50%;width:44px;height:44px;border-radius:50%;background:var(--amber);box-shadow:0 0 40px 6px rgba(230,162,60,.5);transform:translateX(-50%);opacity:.5;transition:top 1.4s cubic-bezier(.4,0,.2,1),opacity 1.4s ease;}
+.ru-dusk-sun {top:-28px;}.ru-dusk.is-in .ru-dusk-sun {top:112px;opacity:1;}
+.ru-dawn-sun {top:112px;}.ru-dawn.is-in .ru-dawn-sun {top:-28px;opacity:1;}
+.ru-dusk-line {position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--night-line);}
+.ru-night {background:var(--night);color:var(--night-ink);}
+.ru-streetlamps {position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 10% 0%,rgba(230,162,60,.16),transparent 38%),radial-gradient(circle at 90% 25%,rgba(230,162,60,.10),transparent 42%);}
+.ru-night-list {display:flex;flex-direction:column;margin-top:40px;border-top:1px solid var(--night-line);}
+.ru-night-item {border-bottom:1px solid var(--night-line);}
+.ru-night-item a {display:grid;grid-template-columns:40px 1fr auto 18px;align-items:center;gap:18px;padding:22px 4px;transition:padding-left .25s ease,background .25s ease;}
+.ru-night-item a:hover, .ru-night-item a:focus-visible {padding-left:14px;background:rgba(232,212,170,.045);}
+.ru-ni-rank {font-family:var(--f-mono);font-weight:700;color:var(--night-soft);font-size:.88rem;}
+.ru-ni-info {display:flex;flex-direction:column;gap:4px;min-width:0;}
+.ru-ni-tag {font-family:var(--f-mono);font-size:.64rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);}
+.ru-ni-name {font-family:var(--f-display);font-weight:700;font-size:1.22rem;}
+.ru-ni-desc {font-size:.87rem;color:var(--night-soft);line-height:1.5;max-width:52ch;}
+.ru-ni-meta {display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;}
+.ru-ni-price {font-family:var(--f-mono);font-weight:700;}
+.ru-ni-vibe {font-size:.68rem;color:var(--night-soft);text-transform:uppercase;letter-spacing:.06em;}
+.ru-ni-arrow {color:var(--amber);transition:transform .2s ease;display:inline-block;}
+.ru-night-item a:hover .ru-ni-arrow {transform:translateX(4px);}
+.ru-sos {position:relative;background:var(--night-2);padding:80px 0;}
+.ru-sos-head {margin-bottom:36px;}
+.ru-sos-stop {color:var(--pen-red);}
+.ru-sos-title {font-family:var(--f-display);font-weight:800;font-size:clamp(1.7rem,3.4vw,2.3rem);color:var(--night-ink);margin-top:12px;}
+.ru-sos-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.ru-sos-btn {display:flex;flex-direction:column;gap:6px;padding:24px 22px;border:1.5px solid rgba(193,58,46,.45);border-radius:4px;background:rgba(193,58,46,.06);color:var(--night-ink);transition:transform .2s ease,background .2s ease,border-color .2s ease;}
+.ru-sos-btn:hover, .ru-sos-btn:focus-visible {transform:translateY(-3px);background:rgba(193,58,46,.14);border-color:var(--pen-red);}
+.ru-sos-btn svg {color:var(--pen-red);margin-bottom:4px;}
+.ru-sos-num {font-family:var(--f-mono);font-weight:700;font-size:1.8rem;color:#fff;}
+.ru-sos-label {font-weight:600;font-size:.95rem;}
+.ru-sos-sub {font-size:.8rem;color:var(--night-soft);}
+.ru-cierre {position:relative;padding:110px 0 96px;}
+.ru-cierre-wrap {max-width:660px;}
+.ru-cierre-title {font-family:var(--f-display);font-weight:800;font-size:clamp(2rem,4.4vw,3.05rem);line-height:1.1;margin-bottom:18px;}
+.ru-cierre-title em {font-style:normal;color:var(--pen-blue);}
+.ru-cierre-sub {font-size:1.02rem;line-height:1.6;color:var(--ink-soft);max-width:46ch;margin-bottom:36px;}
+.ru-cta {display:inline-flex;align-items:center;gap:10px;padding:16px 28px;background:#1C2B3A;color:#F5EFE3;font-weight:700;font-size:.95rem;border-radius:3px;box-shadow:5px 5px 0 0 #2B4570;transition:box-shadow .2s ease,background .2s ease;border:1.5px solid rgba(245,239,227,.25);}
+.ru-cta:hover {background:#2B4570;color:#fff;box-shadow:5px 5px 0 0 #1C2B3A;}
+.ru-cta svg {transition:transform .2s ease;}
+.ru-cta:hover svg {transform:translateX(4px);}
+@media(max-width:880px){.ru-grid {grid-template-columns:repeat(2,1fr);}.ru-feature {grid-template-columns:1fr;}.ru-feature-price {border-left:none;border-top:1.5px dashed var(--ink-faint);flex-direction:row;gap:10px;padding:16px 28px;}}
+@media(max-width:640px){.ru-section {margin-left:calc(-1 * var(--gutter,18px));margin-right:calc(-1 * var(--gutter,18px));width:calc(100% + 2 * var(--gutter,18px));}.ru-wrap {padding:0 18px;}.ru-hero {padding:92px 0 72px;}.ru-chapter {padding:64px 0;}.ru-sos {padding:64px 0;}.ru-cierre {padding:80px 0 72px;}.ru-dusk, .ru-dawn {height:96px;}.ru-feature-board strong {font-size:2rem;}.ru-grid {grid-template-columns:1fr;}.ru-sos-grid {grid-template-columns:1fr;}.ru-night-item a {grid-template-columns:30px 1fr;row-gap:8px;}.ru-ni-meta {grid-column:2;flex-direction:row;align-items:center;gap:10px;text-align:left;}.ru-ni-arrow {display:none;}.ru-step {grid-template-columns:30px 1fr;}.ru-step-pin {width:30px;height:30px;font-size:.72rem;}.ru-route-track, .ru-route-pin {left:14px;}.ru-step-card {padding:20px;}}
+@media(prefers-reduced-motion:reduce){.ru-hl span {animation:none;}.ru-scrolldown svg {animation:none;}.ru-board-row {animation:none;}.ru-board-track {overflow-x:auto;-webkit-overflow-scrolling:touch;}.ru-dusk-sun, .ru-dawn-sun, .ru-hl-text {transition:none;}.ru-dusk-sun, .ru-dawn-sun {top:42px!important;opacity:1!important;}.ru-hl-text {background-size:100% 88%!important;}}
+/* --- bloque originalmente en linea 8887-8933 --- */
+/* Estrellitas sobre el logo en el footer */
+@keyframes starTwinkle {
+  0%,100% { opacity: 0; transform: scale(0) translate(var(--sx,0px), var(--sy,0px)); }
+  50%     { opacity: 1; transform: scale(1) translate(var(--sx,0px), var(--sy,0px)); }
+}
+
+/* Footer logo wrapper para posicionar estrellas */
+.footer-logo-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+/* Texto de año con efecto de "escritura a mano" */
+@keyframes ac-type-in {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+.footer-copy-animated {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  animation: ac-type-in 1.2s cubic-bezier(0.16,1,0.3,1) 0.8s both;
+  display: inline-block;
+}
+
+/* Footer hover — levitar el logo */
+.footer-logo:hover img {
+  transform: translateY(-6px) scale(1.08) rotate(-2deg) !important;
+  filter: drop-shadow(0 0 24px rgba(10,255,239,0.55)) drop-shadow(0 0 48px rgba(10,255,239,0.25)) brightness(1.20) !important;
+}
+
+/* Olas de texto en footer-stats */
+@keyframes ac-bob-y-up {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-3px); }
+}
+.footer-stats .footer-stat:nth-child(1) { animation: ac-bob-y-up 2.5s ease-in-out 0s infinite; }
+.footer-stats .footer-stat:nth-child(2) { animation: ac-bob-y-up 2.5s ease-in-out 0.3s infinite; }
+.footer-stats .footer-stat:nth-child(3) { animation: ac-bob-y-up 2.5s ease-in-out 0.6s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-copy-animated { animation: none; width: 100%; }
+  .footer-stats .footer-stat { animation: none; }
+  #footer-tide-canvas { display: none; }
+}
+/* --- bloque originalmente en linea 10267-10366 --- */
+/* Ink drop ripple al click en mood-btn */
+@keyframes ac-ripple-fill {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.8; }
+  80%  { opacity: 0.3; }
+  100% { transform: translate(-50%,-50%) scale(4); opacity: 0; }
+}
+.mood-ink-drop {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(10,255,239,0.35) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 10;
+  animation: ac-ripple-fill 0.65s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+#mood-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(10,255,239,0.6);
+  background: radial-gradient(circle, rgba(10,255,239,0.14) 0%, transparent 72%);
+  box-shadow: 0 0 26px rgba(10,255,239,0.28), inset 0 0 14px rgba(10,255,239,0.16);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transform: translate(-50%,-50%) scale(0);
+  mix-blend-mode: difference;
+  transition: width .38s cubic-bezier(.16,1,.3,1), height .38s cubic-bezier(.16,1,.3,1), border-color .38s ease, background .38s ease, box-shadow .38s ease, opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1);
+  will-change: left, top, width, height, transform;
+}
+@media (hover: none), (pointer: coarse) {
+  #mood-cursor { display: none; }
+}
+@media (hover: hover) and (pointer: fine) {
+  body, body * { cursor: none !important; }
+}
+
+/* Glow orbital en mood-card cuando hay selección activa */
+@keyframes ac-orbit {
+  0%   { transform: rotate(0deg) translateX(8px); }
+  100% { transform: rotate(360deg) translateX(8px); }
+}
+.mood-card.has-selection::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 6px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(10,255,239,0.15) 60deg,
+    rgba(232,160,48,0.15) 120deg,
+    transparent 180deg,
+    rgba(10,255,239,0.08) 240deg,
+    transparent 360deg
+  );
+  animation: ac-orbit 6s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Indicador de cantidad de resultados — badge animado */
+@keyframes ac-bounce-in-badge {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  70%  { transform: scale(1.15) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.mood-match-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  background: var(--bio-glow, #0AFFEF);
+  color: #020B12;
+  border-radius: 10px;
+  font-family: var(--f-ui, 'Syne', sans-serif);
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  animation: ac-bounce-in-badge 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 0 12px rgba(10,255,239,0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mood-ink-drop { animation: none; }
+  .mood-card.has-selection::after { animation: none; }
+  .mood-match-badge { animation: none; }
+}
+/* ===== fin de CSS consolidado ===== */
 </style>
+  </head>
+  <body>
+  <div id="mood-cursor" aria-hidden="true"></div>
+  
+<a class="skip-link" href="#main-content">Ir al contenido principal</a>
+<div id="progress-bar" aria-hidden="true" role="presentation"></div>
+
+<header class="hero">
+  <div class="hero-mesh" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+
+<!-- Superficie del río bioluminiscente -->
+  <div class="hero-river-grid" aria-hidden="true"></div>
+  
+  <!-- Corriente submarina — partículas de luz en movimiento -->
+  <div class="hero-current" aria-hidden="true">
+    <span class="hc-particle" style="--hcp-x:15%;--hcp-y:45%;--hcp-dur:18s;--hcp-del:0s;--hcp-size:3px"></span>
+    <span class="hc-particle" style="--hcp-x:32%;--hcp-y:38%;--hcp-dur:22s;--hcp-del:3s;--hcp-size:2px"></span>
+    <span class="hc-particle" style="--hcp-x:58%;--hcp-y:52%;--hcp-dur:15s;--hcp-del:6s;--hcp-size:4px"></span>
+    <span class="hc-particle" style="--hcp-x:75%;--hcp-y:40%;--hcp-dur:20s;--hcp-del:9s;--hcp-size:2px"></span>
+    <span class="hc-particle" style="--hcp-x:88%;--hcp-y:48%;--hcp-dur:25s;--hcp-del:2s;--hcp-size:3px"></span>
+    <span class="hc-particle" style="--hcp-x:42%;--hcp-y:62%;--hcp-dur:19s;--hcp-del:7s;--hcp-size:2px"></span>
+  </div>
+
+  <div class="hero-topbar">
+    <div class="city-tag">
+      <div class="city-flag" aria-hidden="true" role="presentation">📍</div>
+      <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
+    </div>
+    <a class="hero-logo" href="/" aria-label="URU SPOT — Ir al inicio">
+      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local de Concepción del Uruguay" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
+    </a>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-inner-left">
+      <div class="live-chip" role="status" aria-live="polite"><span class="live-dot" aria-hidden="true"></span>Verificado en CdU · Junio 2026</div>
+<h1 class="hero-title" id="hero-title-anim" aria-label="Restaurantes, bares y más en Concepción del Uruguay">
+  <span class="eyebrow hero-word-noscript" style="opacity:0;transform:translateY(12px);display:block;transition:opacity .7s ease .1s,transform .7s ease .1s">Restaurantes, bares y más en</span>
+  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span>
+  <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span>
+</h1>
+      <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
+      <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país.<br /><strong>100+ lugares verificados. Solo Concepción del Uruguay.</strong></p>
+  <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares verificados</div></div>
+  <div class="id-stat" role="listitem" style="border-left:2px solid rgba(212,116,42,.35)"><div class="id-stat-num" data-count="243" style="color:var(--oro2);font-size:clamp(32px,4vw,48px)">0</div><div class="id-stat-label" style="font-family:var(--f-italic);font-style:italic;color:rgba(232,180,140,.70);letter-spacing:1px">Años</div></div>
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="5">0</div><div class="id-stat-label">Universidades activas</div></div>
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="%">0<sup>%</sup></div><div class="id-stat-label">Local</div></div>
+</div>
+      <div class="hero-ctas">
+     <a class="btn-primary" href="#mood" id="hero-cta-primary">
+  Explorar la guía completa
+  <span aria-hidden="true"> →</span>
+</a>
+        <a class="btn-ghost" href="#circuitos" aria-label="Elegí qué te apetece hacer hoy">¿Qué te apetece hoy? ↓</a>
+      </div>
+    </div>
+    <aside class="wx-hero" aria-label="Clima actual en Concepción del Uruguay">
+      <div class="wx-hero-card">
+        <div class="wx-hero-bar" aria-hidden="true"></div>
+        <div class="wx-hero-body">
+          <div class="wx-hero-city">Concepción del Uruguay · En vivo</div>
+          <div class="wx-hero-main">
+            <div class="wx-hero-icon" id="wx-hero-icon" aria-hidden="true">⏳</div>
+            <div class="wx-hero-temp-wrap">
+             <div class="wx-hero-temp" id="wx-hero-temp" aria-live="polite" aria-atomic="true" aria-relevant="text"><span class="wx-skeleton wx-skel-temp" id="wx-hero-temp-skel"></span></div>
+              <div class="wx-hero-desc" id="wx-hero-desc"><span class="wx-skeleton wx-skel-desc"></span></div>
+            </div>
+          </div>
+          <div class="wx-hero-sep" aria-hidden="true"></div>
+          <div class="wx-hero-data">
+            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Sensación</div><div class="wx-hero-datum-val" id="wx-hero-feels"><span class="wx-skeleton wx-skel-datum"></span></div></div>
+            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Humedad</div><div class="wx-hero-datum-val" id="wx-hero-hum"><span class="wx-skeleton wx-skel-datum"></span></div></div>
+            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Viento</div><div class="wx-hero-datum-val" id="wx-hero-wind"><span class="wx-skeleton wx-skel-datum"></span></div></div>
+            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Lluvia hoy</div><div class="wx-hero-datum-val" id="wx-hero-rain"><span class="wx-skeleton wx-skel-datum"></span></div></div>
+          </div>
+        </div>
+       <div class="wx-hero-footer">
+          <span class="wx-hero-updated" id="wx-hero-updated" aria-live="polite" aria-atomic="true">Cargando...</span>
+          <span class="wx-hero-frase" id="wx-hero-frase" aria-live="polite" aria-atomic="true"></span>
+        </div>
+      </div>
+    </aside>
+  </div>
+<div class="hero-fade" aria-hidden="true"></div>
+
+<script>
+(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced){
+    ['hero-word-1','hero-word-2'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){el.style.opacity='1';el.style.transform='none';el.style.filter='none';}
+    });
+    var ey=document.querySelector('.hero-title .eyebrow');
+    if(ey){ey.style.opacity='1';ey.style.transform='none';}
+    return;
+  }
+  function animate(){
+    var ey=document.querySelector('.hero-title .eyebrow');
+    var w1=document.getElementById('hero-word-1');
+    var w2=document.getElementById('hero-word-2');
+    if(!w1||!w2)return;
+    /* Eyebrow */
+    setTimeout(function(){
+      if(ey){
+        void ey.offsetWidth;
+        ey.style.transition='opacity .8s ease .1s, transform .8s cubic-bezier(.16,1,.3,1) .1s';
+        ey.style.opacity='1';
+        ey.style.transform='translateY(0)';
+      }
+    },150);
+    /* Palabras emergen desde abajo como luz del agua */
+    function revealWater(el,delay){
+      /* Estado inicial: sumergido */
+      el.style.transform='translateY(110%) scale(0.92)';
+      el.style.filter='blur(8px)';
+      el.style.opacity='0';
+      setTimeout(function(){
+        el.style.transition=
+          'opacity 1.1s cubic-bezier(.16,1,.3,1),' +
+          'transform 1.1s cubic-bezier(.16,1,.3,1),' +
+          'filter 1.0s cubic-bezier(.16,1,.3,1)';
+        el.style.opacity='1';
+        el.style.transform='translateY(0) scale(1)';
+        el.style.filter='blur(0)';
+      },delay);
+    }
+    revealWater(w1,360);
+    revealWater(w2,520);
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',animate,{once:true});
+  }else{animate();}
+})();
+</script>
+<script>
+(function(){
+  window._usAnim = window._usAnim || {
+    reduced: window.matchMedia('(prefers-reduced-motion:reduce)').matches,
+    fine: window.matchMedia('(hover:hover) and (pointer:fine)').matches,
+    lerp: function(a,b,t){ return a+(b-a)*t; },
+    rafLoop: function(step){
+      var raf = null;
+      function frame(){ step(); raf = requestAnimationFrame(frame); }
+      return {
+        start: function(){ if(!raf) raf = requestAnimationFrame(frame); },
+        stop: function(){ if(raf){ cancelAnimationFrame(raf); raf = null; } }
+      };
+    },
+    spawnParticles: function(container, count, className, styleFn){
+      for(var i = 0; i < count; i++){
+        var el = document.createElement('span');
+        el.className = className;
+        el.style.cssText = styleFn(i);
+        container.appendChild(el);
+      }
+    }
+  };
+})();
+</script>
+</header>
+
+<nav class="main-nav" id="main-nav" aria-label="Categorías">
+<div class="nav-scroll-area">
+    <ul role="list" style="display:contents;list-style:none;margin:0;padding:0;">
+      
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item active" href="#mood" data-section="mood"><span class="nav-emoji" aria-hidden="true">✨</span> Empezar</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#circuitos" data-section="circuitos"><span class="nav-emoji" aria-hidden="true">🗺️</span> Circuitos</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#restaurantes" data-section="restaurantes"><span class="nav-emoji" aria-hidden="true">🍽️</span> Restaurantes</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#cafes" data-section="cafes"><span class="nav-emoji" aria-hidden="true">☕</span> Cafés</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#bares" data-section="bares"><span class="nav-emoji" aria-hidden="true">🍻</span> Bares</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#panaderias" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🥐</span> Panaderías</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#heladerias-anchor" data-section="panaderias"><span class="nav-emoji" aria-hidden="true">🍦</span> Heladerías</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#hosterias" data-section="hosterias"><span class="nav-emoji" aria-hidden="true">🏨</span> Hosterías</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#gimnasios" data-section="gimnasios"><span class="nav-emoji" aria-hidden="true">💪</span> Gimnasios</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#uni-ruta" data-section="uni-ruta"><span class="nav-emoji" aria-hidden="true">🎓</span> Universitarios</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#naturaleza" data-section="naturaleza"><span class="nav-emoji" aria-hidden="true">🌊</span> Naturaleza</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#patrimonio" data-section="patrimonio"><span class="nav-emoji" aria-hidden="true">🏛️</span> Patrimonio</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#historia" data-section="historia"><span class="nav-emoji" aria-hidden="true">📜</span> Historia</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#carnaval" data-section="carnaval"><span class="nav-emoji" aria-hidden="true">🎭</span> Carnaval</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#deporte" data-section="deporte"><span class="nav-emoji" aria-hidden="true">🏆</span> Deporte</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#veterinarias" data-section="veterinarias"><span class="nav-emoji" aria-hidden="true">🐾</span> Veterinarias</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#supermercados" data-section="supermercados"><span class="nav-emoji" aria-hidden="true">🛒</span> Compras</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#bancos" data-section="bancos"><span class="nav-emoji" aria-hidden="true">🏦</span> Bancos</a></li>
+<li role="presentation"><div class="nav-divider" aria-hidden="true"></div></li>
+<li><a class="nav-item" href="#remiserias" data-section="remiserias"><span class="nav-emoji" aria-hidden="true">🚖</span> Remiserías</a></li>
+    </ul>
+  </div>
+  <button class="search-icon-btn" id="search-toggle-btn" type="button" aria-label="Buscar en la guía" aria-expanded="false" aria-controls="search-bar-wrap">🔍<span class="search-btn-label">Buscar</span></button>
+  <button id="nav-scroll-left" aria-label="Ver secciones anteriores" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to left,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 16px 0 10px;position:relative;z-index:2;transition:color .2s ease">❮</button>
+  <button id="nav-scroll-right" aria-label="Ver más secciones" style="display:none;align-items:center;justify-content:center;min-width:36px;height:60px;background:linear-gradient(to right,transparent,rgba(6,6,5,.95) 40%);border:none;color:rgba(242,237,227,.7);font-size:20px;cursor:pointer;flex-shrink:0;padding:0 10px 0 16px;position:relative;z-index:2;transition:color .2s ease">❯</button>
+<div id="nav-light-trail" aria-hidden="true" style="position:absolute;height:2px;bottom:0;left:0;width:0;background:linear-gradient(90deg,transparent,rgba(10,255,239,0.8),transparent);pointer-events:none;z-index:10;transition:none;filter:blur(1px);"></div>
+
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var section = document.getElementById('patrimonio');
+  if(!section) return;
+
+  /* Inyectar partículas de polvo dorado */
+  if(!reduced){
+    section.style.position = 'relative';
+    section.style.overflow = 'hidden';
+
+    window._usAnim.spawnParticles(section, 12, 'patrimonio-dust', function(){
+      var size = 1 + Math.random() * 3;
+      return [
+        'width:' + size + 'px',
+        'height:' + size + 'px',
+        'left:' + (5 + Math.random() * 90) + '%',
+        'top:' + (10 + Math.random() * 80) + '%',
+        '--dust-dur:' + (6 + Math.random() * 10) + 's',
+        '--dust-del:-' + (Math.random() * 8) + 's',
+        '--dust-dx:' + ((Math.random() - 0.5) * 40) + 'px',
+        '--dust-alpha:' + (0.2 + Math.random() * 0.3)
+      ].join(';');
+    });
+  }
+
+  /* Añadir marcas de agua de año en cada card */
+  var yearMap = {
+    'Palacio San José':          '1857',
+    'Basílica Inmaculada':       '1859',
+    'Museo Casa de Delio':       '1793',
+    'Museo Andrés García':       '1900',
+    'Culturas Aborígenes':       '',
+    'Colegio Superior':          '1849',
+    'Palacio Santa Cándida':     '1847',
+    'Faro Stella Maris':         '1949',
+    'Plaza General':             '1783',
+    'Peatonal Rocamora':         '1856',
+    'Cine Teatro San Martín':    '',
+    'Museo de Dibujo':           '',
+    'Sala Evocativa':            '',
+    'Hipódromo':                 '',
+    'Barrio Puerto Viejo':       '1619',
+  };
+
+  document.querySelectorAll('.hp-card').forEach(function(card){
+    var nameEl = card.querySelector('.hp-name');
+    if(!nameEl) return;
+    var name = nameEl.textContent.trim();
+
+    /* Buscar año en el mapa usando coincidencia parcial */
+    var year = '';
+    Object.keys(yearMap).forEach(function(key){
+      if(name.includes(key)) year = yearMap[key];
+    });
+
+    if(year){
+      var wm = document.createElement('span');
+      wm.className = 'hp-year-watermark';
+      wm.textContent = year;
+      wm.setAttribute('aria-hidden', 'true');
+      card.appendChild(wm);
+    }
+
+    /* Sonido visual — pequeño "thud" al abrir */
+    if(!reduced){
+      card.addEventListener('toggle', function(){
+        if(card.open){
+          card.style.transform = 'scale(1.005)';
+          setTimeout(function(){ card.style.transform = ''; card.style.transition = 'transform 0.4s cubic-bezier(0.34,1.2,0.64,1)'; }, 10);
+          setTimeout(function(){ card.style.transition = ''; }, 450);
+        }
+      });
+    }
+  });
+})();
+</script>
+</nav>
+
+<div class="section-crumb" id="section-crumb" aria-live="polite" aria-atomic="true">
+  <span class="section-crumb-dot" aria-hidden="true"></span>
+  Estás viendo: <span class="section-crumb-current" id="section-crumb-current">Empezar</span>
+</div>
+
+<div class="search-bar-wrap" id="search-bar-wrap" role="search" aria-label="Buscar lugares en URU SPOT" inert>
+  <input class="search-input" id="search-input" type="search" placeholder="Buscá un lugar... ej: parrilla, café, Nero, La Ris..." autocomplete="off" aria-label="Buscar lugares" aria-autocomplete="list" aria-haspopup="listbox" />
+  <span class="search-count" id="search-count" aria-live="polite"></span>
+  <button class="search-close" id="search-close-btn" type="button" aria-label="Cerrar buscador"><span aria-hidden="true">✕</span></button>
+</div>
+
+<main class="main-body" id="main-content" aria-label="Contenido principal de la guía URU SPOT">
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var isFine  = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if(reduced || !isFine) return;
+
+  /* Tilt 3D perspectivo + shine reactivo al mouse */
+  document.querySelectorAll('.rcard:not(.rcard-ad)').forEach(function(card){
+    var shine = document.createElement('div');
+    shine.className = 'rcard-tilt-shine';
+    card.appendChild(shine);
+
+    /* Contador vivo */
+    var baseViews = 3 + Math.floor(Math.random() * 12);
+    var views = baseViews;
+    var viewBadge = document.createElement('span');
+    viewBadge.className = 'rcard-live-views';
+    var dot = document.createElement('span');
+    dot.className = 'rcard-live-dot';
+    dot.setAttribute('aria-hidden','true');
+    var txt = document.createTextNode(views + ' mirando');
+    viewBadge.appendChild(dot);
+    viewBadge.appendChild(txt);
+    card.appendChild(viewBadge);
+
+    var tiltRaf, shineRaf;
+    var rotX = 0, rotY = 0, tRX = 0, tRY = 0;
+    var shX = 50, shY = 50, tSX = 50, tSY = 50;
+
+    card.addEventListener('mouseenter', function(){
+      /* Simular alguien más "viendo" */
+      if(Math.random() > 0.5){
+        views = baseViews + 1;
+        txt.textContent = views + ' mirando';
+      }
+      card.style.transition = 'none';
+      if(!tiltRaf) tiltRaf = requestAnimationFrame(animTilt);
+    });
+
+    card.addEventListener('mousemove', function(e){
+      var rect = card.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width;
+      var y = (e.clientY - rect.top)  / rect.height;
+      tRX = (y - 0.5) * -8;
+      tRY = (x - 0.5) * 8;
+      tSX = x * 100;
+      tSY = y * 100;
+    });
+
+    card.addEventListener('mouseleave', function(){
+      tRX = 0; tRY = 0;
+      tSX = 50; tSY = 50;
+      views = baseViews;
+      txt.textContent = views + ' mirando';
+      setTimeout(function(){
+        card.style.transition = '';
+        card.style.transform  = '';
+        if(tiltRaf){ cancelAnimationFrame(tiltRaf); tiltRaf = null; }
+      }, 350);
+    });
+
+    function animTilt(){
+      rotX += (tRX - rotX) * 0.1;
+      rotY += (tRY - rotY) * 0.1;
+      shX  += (tSX - shX)  * 0.12;
+      shY  += (tSY - shY)  * 0.12;
+
+      card.style.transform = 'perspective(800px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateZ(2px)';
+      shine.style.setProperty('--shine-x', shX + '%');
+      shine.style.setProperty('--shine-y', shY + '%');
+
+      tiltRaf = requestAnimationFrame(animTilt);
+    }
+  });
+})();
+</script>
+
+
+<!-- ===================== MOOD PICKER + GLOSARIO ===================== -->
+<div class="mood-wrap reveal" id="mood" role="region" aria-label="Elegí qué te apetece hacer hoy">
+  <div class="mood-hdr">
+    <div><span class="mood-eyebrow">Solo en URU SPOT</span><h2 class="mood-title">✨ ¿Qué te apetece hoy?</h2></div>
+    <div class="mood-hdr-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+  <div class="mood-card">
+    <div class="mood-suggest" id="mood-suggest-chip" role="status" aria-live="polite">
+      <span class="mood-suggest-dot" aria-hidden="true"></span>
+      <span id="mood-suggest-text">Cargando sugerencia...</span>
+    </div>
+    <span class="mood-question">Elegí según cómo estás ahora. La guía entera se ajusta — según la hora, el clima y tus ganas.</span>
+<div class="mood-grid" id="mood-grid" role="group" aria-label="Opciones de estado de ánimo"> 
+      <button class="mood-btn" data-mood="rapido" type="button" aria-pressed="false">
+        <span class="mood-btn-icon" aria-hidden="true">⚡</span>
+        <span class="mood-btn-label">Algo rápido</span>
+        <span class="mood-btn-sub">Sin vueltas</span>
+      </button>
+      <button class="mood-btn" data-mood="barato" type="button" aria-pressed="false">
+        <span class="mood-btn-icon" aria-hidden="true">💸</span>
+        <span class="mood-btn-label">Gastar poco</span>
+        <span class="mood-btn-sub">Sin romper el presupuesto</span>
+      </button>
+      <button class="mood-btn" data-mood="sorpresa" type="button" aria-pressed="false">
+        <span class="mood-btn-icon" aria-hidden="true">🎲</span>
+        <span class="mood-btn-label">Sorprenderme</span>
+        <span class="mood-btn-sub">Puntaje URU SPOT verificado</span>
+      </button>
+      <button class="mood-btn" data-mood="relax" type="button" aria-pressed="false">
+        <span class="mood-btn-icon" aria-hidden="true">🌿</span>
+        <span class="mood-btn-label">Algo tranquilo</span>
+        <span class="mood-btn-sub">Para desconectarse del día</span>
+      </button>
+    </div>
+    <div class="mood-result" id="mood-result">
+      <div class="mood-result-inner" id="mood-result-inner"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CIRCUITOS TURÍSTICOS ===================== -->
+<section class="us-section" id="circuitos" aria-labelledby="title-circuitos">
+  <div class="section-header">
+    <div>
+      <span class="section-eyebrow">Guía operativa · Recorridos verificados</span>
+      <h2 class="section-title" id="title-circuitos">🗺️ Circuitos Turísticos</h2>
+    </div>
+    <span class="section-count">3 circuitos</span>
+    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+
+
+  <div class="circ-intro reveal">
+    <p class="circ-intro-text">Concepción del Uruguay tiene mucho para descubrir, pero no siempre es fácil saber por <em>dónde</em> empezar. Por eso armamos estos tres recorridos con información clara y tiempos estimados.</p>
+  </div>
+
+  <div class="circ-grid">
+
+    <div class="circ-card circ-card-feat reveal" style="--reveal-delay:60ms">
+      <span class="circ-duration">⏱ 4 horas · A pie · Centro histórico</span>
+      <span class="circ-card-icon" aria-hidden="true">🏛️</span>
+      <h3 class="circ-name">Concepción del Uruguay en 4 horas</h3>
+      <p class="circ-desc">El recorrido esencial del casco histórico. Todo a pie, sin necesidad de transporte. Ideal para quien llega el sábado al mediodía y quiere ver lo fundamental antes de la cena.</p>
+      <ol class="circ-stops" aria-label="Paradas del circuito de 4 horas">
+        <li class="circ-stop"><span class="circ-stop-num">1</span><span><strong>Plaza Ramírez</strong> — 15 min. El centro geográfico y social de la ciudad. Arboleda, obelisco, vista a la Basílica.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">2</span><span><strong>Basílica Inmaculada Concepción</strong> — 30 min. Mausoleo de Urquiza, inaugurada 1859. 3 de Febrero 41.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">3</span><span><strong>Colegio del Uruguay</strong> — 20 min. Primer colegio laico del país (1849). Visita guiada obligatoria. Urquiza 25.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">4</span><span><strong>Peatonal Rocamora</strong> — 30 min. 5 cuadras peatonales, el corazón comercial. Llamada "Comercio" en 1856.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">5</span><span><strong>Museo Casa Delio Panizza</strong> — 30 min. La casona más antigua (1793). Sup. Entrerriano y Galarza.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">6</span><span><strong>Almuerzo en el centro</strong> — 60 min. Bonhomia, La Ris o Bella Vista, todos a 5 minutos caminando.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">7</span><span><strong>Faro Stella Maris (Isla del Puerto)</strong> — 45 min. Cruzar el puente de 210m, caminar la costanera. El único faro fluvial de Argentina según diversas fuentes locales.</span></li>
+      </ol>
+      <div class="circ-footer">
+        <span class="circ-pill">🚶 100% a pie</span>
+        <span class="circ-pill">💰 Entrada gratuita</span>
+        <span class="circ-pill">📸 Ideal para fotos</span>
+      </div>
+    </div>
+
+    <div class="circ-card reveal" style="--reveal-delay:120ms">
+      <span class="circ-duration">⏱ Un día completo · Auto + caminatas</span>
+      <span class="circ-card-icon" aria-hidden="true">☀️</span>
+      <h3 class="circ-name">Concepción del Uruguay en un día</h3>
+      <p class="circ-desc">El circuito para quien tiene un día completo. Combina el casco histórico con la experiencia del río y el balneario. Necesitás movilidad propia o remis para el tramo al Palacio San José.</p>
+      <ol class="circ-stops" aria-label="Paradas del circuito de un día">
+        <li class="circ-stop"><span class="circ-stop-num">1</span><span><strong>Mañana (9–13 hs): Circuito histórico central</strong> — Plaza, Basílica, Colegio del Uruguay, Museo Panizza. Igual que el circuito de 4 horas.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">2</span><span><strong>Almuerzo (13–14:30 hs)</strong> — Restaurante en el centro. Recomendado: Bella Vista o Bonhomia.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">3</span><span><strong>Tarde (14:30–17 hs): Costanera Isla del Puerto</strong> — 10 min en auto. Faro, sendero de humedales 1.5 km, vista al río. Gratuito.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">4</span><span><strong>Tarde (17–19 hs): Balneario Banco Pelay o Itapé</strong> — Playas del río Uruguay. Itapé es gratuito y queda a 15 cuadras del centro.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">5</span><span><strong>Noche (20:30–)</strong> — Bares del centro: 7 Colinas, Bonhomia o Bartolo según el ánimo.</span></li>
+      </ol>
+      <div class="circ-footer">
+        <span class="circ-pill">🚗 Requiere movilidad</span>
+        <span class="circ-pill">💰 $2.000 Banco Pelay</span>
+        <span class="circ-pill">🌅 Atardecer en el río</span>
+      </div>
+    </div>
+
+    <div class="circ-card reveal" style="--reveal-delay:180ms">
+      <span class="circ-duration">⏱ Fin de semana · Auto imprescindible</span>
+      <span class="circ-card-icon" aria-hidden="true">📅</span>
+      <h3 class="circ-name">Concepción del Uruguay en un fin de semana</h3>
+      <p class="circ-desc">El circuito para conocer la ciudad de verdad. El sábado: casco histórico y río. El domingo: el Palacio San José y las termas. Dos experiencias completamente diferentes que se complementan.</p>
+      <ol class="circ-stops" aria-label="Paradas del circuito de fin de semana">
+        <li class="circ-stop"><span class="circ-stop-num">1</span><span><strong>Sáb mañana: Circuito histórico central</strong> — Como el itinerario de un día.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">2</span><span><strong>Sáb tarde: Río e Isla del Puerto</strong> — Costanera, Faro, balneario.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">3</span><span><strong>Sáb noche: Vida nocturna del centro</strong> — Bares y restaurantes.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">4</span><span><strong>Dom 9–13 hs: Palacio San José</strong> — 12 km por Ruta 39, desvío norte 3 km. Gratuito. Visitas guiadas 11 hs y 15 hs. Llegá temprano para la primera.</span></li>
+        <li class="circ-stop"><span class="circ-stop-num">5</span><span><strong>Dom tarde: Termas Concepción</strong> — Km 129 Ruta 14. A 30 min del Palacio. 10 piscinas, spa, parque acuático. El cierre perfecto.</span></li>
+      </ol>
+      <div class="circ-footer">
+        <span class="circ-pill">🚗 Auto imprescindible</span>
+        <span class="circ-pill">🏰 Palacio gratuito</span>
+        <span class="circ-pill">♨️ Termas con cargo</span>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="circ-nota reveal">⚠️ <strong>Nota sobre tiempos:</strong> Los tiempos indicados son estimaciones basadas en visitas normales, sin esperas imprevistas. El Palacio San José requiere llegar antes de las 11 hs para la primera visita guiada. Los balnearios cobran entrada entre las 8 y las 20 hs. Las termas tienen precios y horarios que cambian por temporada — verificar en termasconcepcion.com antes de ir.</p>
+
+</section>
+
+<!-- ===================== CÓMO LLEGAR Y MOVERSE ===================== -->
+<section class="us-section" id="como-llegar" aria-labelledby="title-como-llegar">
+  <div class="section-header">
+    <div>
+      <span class="section-eyebrow">Acceso · Movilidad · Distancias</span>
+      <h2 class="section-title" id="title-como-llegar">🧭 Cómo llegar y moverse</h2>
+    </div>
+    <span class="section-count">Distancias verificadas</span>
+    <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+
+
+  <div class="cl-grid">
+    <div class="cl-card reveal">
+      <span class="cl-icon" aria-hidden="true">🚗</span>
+      <h3 class="cl-title">En auto — distancias desde ciudades principales</h3>
+      <div class="cl-distances" role="list">
+        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Buenos Aires (Retiro)</span><span class="cl-dist-val">330 km · ~3.5 hs por RN14</span></div>
+        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Paraná</span><span class="cl-dist-val">240 km · ~2.5 hs</span></div>
+        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Gualeguaychú</span><span class="cl-dist-val">90 km · ~1 hs</span></div>
+        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Colón</span><span class="cl-dist-val">45 km · ~35 min</span></div>
+        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Concordia</span><span class="cl-dist-val">120 km · ~1.5 hs</span></div>
+        <div class="cl-dist-row" role="listitem"><span class="cl-dist-city">Rosario</span><span class="cl-dist-val">280 km · ~3 hs</span></div>
+      </div>
+      <p class="cl-tip">La Ruta Nacional 14 conecta Concepción del Uruguay con Buenos Aires sin semáforos hasta Gualeguaychú. Tramo final por Ruta 39 (asfalto en buen estado).</p>
+    </div>
+
+    <div class="cl-card reveal" style="--reveal-delay:60ms">
+      <span class="cl-icon" aria-hidden="true">🚍</span>
+      <h3 class="cl-title">En colectivo — Terminal de Ómnibus</h3>
+      <p class="cl-body">La Terminal de Ómnibus de Concepción del Uruguay recibe servicios directos desde <strong>Buenos Aires</strong> (Retiro, ~4 hs), <strong>Paraná</strong>, <strong>Rosario</strong>, <strong>Santa Fe</strong> y la mayoría de las ciudades entrerrianas. Los servicios de larga distancia operan con empresas como Flecha Bus, Río Uruguay y El Cóndor.</p>
+      <p class="cl-body" style="margin-top:8px">Para horarios actualizados: <a href="https://www.centraldepasajes.com.ar/pasaje-micro/terminal-de-concepcion-del-uruguay.html" target="_blank" rel="noopener noreferrer" style="color:var(--verde2);text-decoration:underline;text-decoration-color:rgba(38,122,85,.3)">centraldepasajes.com.ar ↗</a></p>
+      <p class="cl-tip">Desde la Terminal al centro histórico son 15 cuadras. Remises disponibles en la salida.</p>
+    </div>
+
+    <div class="cl-card reveal" style="--reveal-delay:120ms">
+      <span class="cl-icon" aria-hidden="true">🏙️</span>
+      <h3 class="cl-title">Movilidad dentro de la ciudad</h3>
+      <p class="cl-body">El <strong>casco histórico se recorre a pie</strong> en su totalidad. Las distancias entre Plaza Ramírez, la peatonal, el Colegio del Uruguay y la Isla del Puerto no superan los 15 minutos caminando.</p>
+      <p class="cl-body" style="margin-top:8px">Para <strong>balnearios y Palacio San José</strong> necesitás auto o remis. Los colectivos urbanos cubren los barrios pero no los balnearios con frecuencia confiable.</p>
+      <p class="cl-body" style="margin-top:8px"><strong>Bicicleta:</strong> la ciudad es llana y las distancias son manejables. Alquiler disponible en algunos hoteles y en la zona de la costanera en temporada.</p>
+    </div>
+
+    <div class="cl-card reveal" style="--reveal-delay:180ms">
+      <span class="cl-icon" aria-hidden="true">📋</span>
+      <h3 class="cl-title">Lo que tenés que saber antes de llegar</h3>
+      <p class="cl-body"><strong>No hay Cabify, pero sí Uber</strong> en Concepción del Uruguay. Los remises son el transporte puntual. Pedí el número de una remisería en tu alojamiento el primer día.</p>
+      <p class="cl-body" style="margin-top:8px"><strong>Los lunes la ciudad duerme:</strong> muchos restaurantes, cafés y comercios cierran los lunes. Si llegás un lunes, los lugares con horario regular incluyen Sanduba, El Calderón y Panza Verde.</p>
+      <p class="cl-body" style="margin-top:8px"><strong>Temporada alta (nov–mar):</strong> balnearios con guardavidas, ferias, eventos. <strong>Temporada baja:</strong> termas, gastronomía tranquila, museos sin filas.</p>
+    </div>
+  </div>
+</section>
+<!-- ── ESTILOS PROPIOS DE LA SECCIÓN (prefijo fin-) ── -->
+
+  <!-- ── ESTILOS PROPIOS DE LA SECCIÓN (prefijo aloj-) ── -->
 
 <!-- ══════════════════════════════════════════════════════════
      SECCIÓN PRINCIPAL
@@ -4926,160 +5792,6 @@ body {
 </section>
   <!-- ===================== SUPERMERCADOS Y COMPRAS ESENCIALES ===================== -->
 
-<style>
-/* ── Prefijo: sm- para no colisionar con estilos globales ── */
-.sm-exec {
-  margin-bottom:48px;padding:36px 44px;
-  background:linear-gradient(135deg,#0a1a12 0%,#111810 100%);
-  border-left:5px solid var(--verde2);
-  position:relative;overflow:hidden;
-}
-.sm-exec::before {
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(29,92,64,.22) 0%,transparent 60%);
-  pointer-events:none;
-}
-.sm-exec-text {
-  font-family:var(--f-italic);font-style:italic;
-  font-size:clamp(14px,1.8vw,18px);color:rgba(242,237,227,.80);
-  line-height:1.7;max-width:720px;
-}
-.sm-exec-text em {font-style:normal;color:var(--oro2)}
-
-/* ── Bloque de escenario ── */
-
-/* ── Grid de tarjetas principales ── */
-.sm-grid-2 {
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);
-  margin-bottom:2px;
-}
-/* ── Tarjeta base ── */
-.sm-card {
-  background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);
-  display:flex;flex-direction:column;gap:14px;padding:30px 26px;
-  position:relative;overflow:hidden;
-  transition:background .35s ease,border-color .35s ease;
-  border:1px solid var(--card-border-oro);
-}
-.sm-card:hover {
-  background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);
-  border-color:var(--card-border-oro-hover);
-}
-.sm-card::before {
-  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
-  background:linear-gradient(180deg,var(--verde2),var(--verde));
-  transform:scaleX(0);transform-origin:left;
-  transition:transform .35s var(--ease);z-index:0;
-}
-.sm-card:hover::before {transform:scaleX(1)}
-
-/* Variante destacada */
-.sm-card-feat {
-  background:var(--ink);
-  border-color:rgba(196,135,42,.50);
-}
-.sm-card-feat::after {
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 60% 70% at 90% 10%,rgba(196,135,42,.10) 0%,transparent 60%);
-  pointer-events:none;z-index:0;
-}
-.sm-card-feat:hover {background:#1e1e1a}
-.sm-card-feat .sm-card-name {color:var(--parchment)}
-.sm-card-feat .sm-card-desc {color:rgba(242,237,227,.52)}
-
-/* ── Contenido interior ── */
-.sm-card-inner {position:relative;z-index:1;display:flex;flex-direction:column;gap:11px;height:100%}
-.sm-card-icon {font-size:28px;line-height:1;flex-shrink:0;transition:transform .35s var(--ease)}
-.sm-card:hover .sm-card-icon {transform:scale(1.10)}
-
-.sm-card-name {
-  font-family:var(--f-display);
-  font-size:clamp(16px,1.8vw,20px);
-  color:var(--card-text);
-  letter-spacing:-.2px;line-height:1.15;font-weight:400;display:block;
-}
-.sm-card-desc {
-  font-family:var(--f-italic);font-style:italic;
-  font-size:13.5px;color:var(--card-text-soft);
-  line-height:1.75;flex:1;
-}
-.sm-card-desc strong {font-style:normal;color:var(--card-text)}
-
-/* Dirección / datos prácticos */
-.sm-card-addr {
-  font-family:var(--f-ui);font-size:10px;font-weight:700;letter-spacing:.5px;
-  color:rgba(248,238,224,.50);display:flex;align-items:flex-start;gap:6px;
-  padding-top:10px;border-top:1px solid rgba(242,237,227,.07);flex-direction:column;
-  row-gap:5px;
-}
-.sm-card-addr-line {display:flex;align-items:center;gap:6px}
-.sm-card-addr-line::before {content:'📍';font-size:10px;font-style:normal;flex-shrink:0}
-.sm-card-hours-line {display:flex;align-items:center;gap:6px;color:rgba(248,238,224,.40)}
-.sm-card-hours-line::before {content:'🕐';font-size:10px;font-style:normal;flex-shrink:0}
-
-/* Chips de perfil */
-
-/* ── Banner de feria ── */
-.sm-feria-banner {
-  background:var(--ink);
-  border-top:3px solid var(--verde2);
-  position:relative;overflow:hidden;
-  padding:36px 40px;margin-bottom:2px;
-}
-.sm-feria-banner::before {
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 55% 80% at 90% 50%,rgba(29,92,64,.18) 0%,transparent 60%);
-  pointer-events:none;
-}
-.sm-feria-inner {position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-.sm-feria-left {display:flex;flex-direction:column;gap:12px}
-.sm-feria-eyebrow {font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(100,210,155,.80);display:block}
-.sm-feria-title {font-family:var(--f-display);font-size:clamp(20px,2.8vw,28px);color:var(--parchment);line-height:1.1;letter-spacing:-.3px}
-.sm-feria-desc {font-family:var(--f-italic);font-style:italic;font-size:14px;color:rgba(242,237,227,.52);line-height:1.8}
-.sm-feria-desc strong {font-style:normal;color:var(--oro2);font-weight:400}
-.sm-feria-specs {display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(242,237,227,.07)}
-
-/* ── Nota editorial ── */
-.sm-editorial-text {
-  font-family:var(--f-ui);font-size:9.5px;font-weight:600;letter-spacing:.4px;
-  color:rgba(26,25,22,.52);line-height:1.8;
-}
-.sm-editorial-text strong {color:rgba(26,25,22,.72)}
-
-/* ── Bloque de contexto narrativo ── */
-
-/* ── Tarjeta lista (compacta) ── */
-.sm-litem {
-  background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);
-  display:flex;align-items:flex-start;gap:20px;padding:24px 28px;
-  position:relative;overflow:hidden;
-  border-left:4px solid rgba(196,135,42,.22);
-  transition:background .35s ease,border-left-color .35s ease,transform .35s var(--ease);
-  border:1px solid var(--card-border-oro);
-}
-.sm-litem:hover {
-  background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);
-  border-left-color:var(--oro2);transform:translateX(6px);
-}
-.sm-litem-icon {font-size:26px;flex-shrink:0;transition:transform .35s var(--ease)}
-.sm-litem:hover .sm-litem-icon {transform:scale(1.10)}
-.sm-litem-arrow {margin-left:auto;font-size:16px;color:rgba(242,237,227,.18);flex-shrink:0;transition:color .35s ease,transform .35s var(--ease)}
-.sm-litem:hover .sm-litem-arrow {color:var(--oro2);transform:translateX(4px)}
-
-/* ── Responsive ── */
-@media(max-width:860px) {
-  .sm-grid-2{grid-template-columns:1fr}
-  .sm-feria-inner{grid-template-columns:1fr}
-  .sm-exec{padding:28px 24px}
-  .sm-feria-banner{padding:28px 24px}
-}
-/* .sm-* @640px — consolidado en el bloque maestro único */
-@media(prefers-reduced-motion:reduce) {
-  .sm-card,.sm-card::before,.sm-card-icon,
-  .sm-litem,.sm-litem-icon,.sm-litem-arrow{transition:none}
-}
-</style>
 
 <section class="us-section" id="supermercados" aria-labelledby="title-supermercados">
 
@@ -6220,68 +6932,6 @@ body {
     </a>
   </div>
   <p class="search-no-results" id="no-results-gimnasios">No se encontraron gimnasios con ese nombre.</p>
-  <style>
-
-.gcard-feat-heartbeat {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  overflow: visible;
-  z-index: 3;
-  pointer-events: none;
-}
-
-@keyframes ac-scroll-ecg {
-  0%   { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
-}
-
-.gcard-feat-ecg {
-  position: absolute;
-  top: -10px;
-  left: 0;
-  height: 24px;
-  width: 200%;
-  opacity: 0.85;
-  animation: ac-scroll-ecg 2.8s linear infinite;
-}
-
-/* Score badge pulsante como corazón */
-@keyframes ac-heartbeat {
-  0%,80%,100% { transform: scale(1); }
-  14%         { transform: scale(1.15); }
-  28%         { transform: scale(1); }
-  42%         { transform: scale(1.08); }
-}
-.gcard-feat .gcard-score {
-  animation: ac-heartbeat 1.4s ease-in-out 3s infinite !important;
-}
-
-/* Barra de "energía" en tarjetas de gimnasio normales */
-.gcard-energy-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--verde2), rgba(10,255,239,0.8));
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 1.2s cubic-bezier(0.16,1,0.3,1);
-  pointer-events: none;
-  z-index: 3;
-}
-.gcard.is-energy-visible .gcard-energy-bar {
-  transform: scaleX(1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gcard-feat-ecg { animation: none; }
-  .gcard-feat .gcard-score { animation: none !important; }
-  .gcard-energy-bar { transform: scaleX(1); }
-}
-</style>
 
 <script>
 (function(){
@@ -6385,34 +7035,6 @@ body {
     <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
 
-  <style>
-  .svc-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
-  .svc-card {background:var(--ink);display:flex;flex-direction:column;gap:14px;padding:30px 28px;position:relative;overflow:hidden;transition:background .35s ease}
-  .svc-card:hover {background:#1e1e1a}
-  .svc-card-link {text-decoration:none;color:inherit}
-  .svc-card-link:hover .svc-cta {color:var(--oro2)}
-  .svc-icon {font-size:32px;line-height:1;transition:transform .35s var(--ease)}
-  .svc-card:hover .svc-icon {transform:scale(1.12)}
-  .svc-title {font-family:var(--f-display);font-style:italic;font-size:20px;color:var(--parchment);letter-spacing:-.2px;line-height:1.1}
-  .svc-body {font-family:var(--f-italic);font-style:italic;font-size:13px;color:rgba(242,237,227,.45);line-height:1.7}
-  .svc-body strong {font-style:normal;color:rgba(242,237,227,.75);font-weight:400}
-  .svc-cta {display:inline-flex;align-items:center;gap:6px;font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.35);margin-top:4px;transition:color .3s ease}
-  .svc-emg-row {display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.04);padding:0 28px 28px}
-  .svc-emg-chip {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:22px 12px;text-decoration:none;transition:background .35s ease;border-radius:2px}
-  .svc-emg-chip:hover {background:rgba(255,255,255,.04)}
-  .svc-emg-num {font-family:var(--f-display);font-size:44px;line-height:1;color:var(--parchment);letter-spacing:-2px}
-  .svc-emg-label {font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(242,237,227,.35)}
-  .svc-more-grid {display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);border-top:none}
-  .svc-more-card {background:var(--ink);display:flex;flex-direction:column;gap:10px;padding:24px 22px;text-decoration:none;position:relative;overflow:hidden;transition:background .35s ease}
-  .svc-more-card:hover {background:#1e1e1a}
-  .svc-more-icon {font-size:26px;line-height:1;transition:transform .35s var(--ease)}
-  .svc-more-card:hover .svc-more-icon {transform:scale(1.10)}
-  .svc-more-name {font-family:var(--f-display);font-style:italic;font-size:16px;color:var(--parchment);line-height:1.1}
-  .svc-more-sub {font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(242,237,227,.28)}
-  .svc-more-arrow {position:absolute;top:14px;right:14px;font-size:11px;color:rgba(242,237,227,.20)}
-  @media(max-width:860px){.svc-grid {grid-template-columns:1fr}.svc-emg-row {grid-template-columns:1fr 1fr 1fr;padding:0 20px 22px}.svc-more-grid {grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:640px){.svc-grid {grid-template-columns:1fr}.svc-card {padding:24px 20px}.svc-more-grid {grid-template-columns:1fr 1fr}.svc-emg-num {font-size:36px}}
-  </style>
 
   <div class="svc-grid reveal">
     <a class="svc-card svc-card-link" href="https://www.todoconcepcion.com/TodoConcepcion/farmacias-de-turno-disponibles-hoy/" target="_blank" rel="noopener noreferrer" aria-label="Ver farmacia de turno hoy">
@@ -6504,13 +7126,6 @@ body {
 <path id="wave1" d="M0,16 C150,4 300,28 450,16 C600,4 750,28 900,16 C1050,4 1200,28 1350,16 C1500,4 1650,28 1800,16 C1950,4 2100,28 2250,16 L2400,16 L2400,32 L0,32Z" fill="rgba(38,122,85,.38)"/>
     <path id="wave2" d="M0,20 C200,8 400,28 600,20 C800,12 1000,28 1200,20 C1400,12 1600,28 1800,20 C2000,12 2200,28 2400,20 L2400,32 L0,32Z" fill="rgba(29,92,64,.25)"/>
   </svg>
-  <style>
-    #wave1 {animation:ac-scroll-wave-a 8s linear infinite}
-    #wave2 {animation:ac-scroll-wave-b 12s linear infinite}
-    @keyframes ac-scroll-wave-a{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-    @keyframes ac-scroll-wave-b{from{transform:translateX(-10%)}to{transform:translateX(-60%)}}
-    @media(prefers-reduced-motion:reduce){#wave1, #wave2 {animation:none}}
-  </style>
 </div>
   </div>
 
@@ -6949,108 +7564,6 @@ body {
     <span class="hp-legend-item"><span class="hp-status hp-o">Fuente oficial</span> confirmado en sitio institucional/gubernamental</span>
     <span class="hp-legend-item"><span class="hp-status hp-nv">No verificado</span> fuente única, contradictoria o desactualizada</span>
   </div>
-  <style>
-/* Partículas de polvo histórico sobre la sección patrimonio */
-@keyframes dustFloat {
-  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
-  10%  { opacity: var(--dust-alpha, 0.4); }
-  90%  { opacity: var(--dust-alpha, 0.4); }
-  100% { transform: translateY(-80px) translateX(var(--dust-dx, 15px)) rotate(180deg); opacity: 0; }
-}
-
-.patrimonio-dust {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  animation: dustFloat var(--dust-dur, 8s) ease-in-out var(--dust-del, 0s) infinite;
-  background: radial-gradient(circle, rgba(196,135,42,0.6) 0%, transparent 70%);
-  will-change: transform, opacity;
-}
-
-/* Efecto clip-path "pergamino desplegándose" al abrir details */
-@keyframes ac-clip-reveal {
-  from {
-    clip-path: inset(0 0 100% 0);
-    opacity: 0.3;
-  }
-  to {
-    clip-path: inset(0 0 0% 0);
-    opacity: 1;
-  }
-}
-
-.hp-card[open] .hp-body {
-  animation: ac-clip-reveal 0.5s cubic-bezier(0.16,1,0.3,1) both !important;
-}
-
-/* Línea "sello de cera" que aparece al abrir una card */
-@keyframes ac-draw-line {
-  from { transform: scaleX(0); opacity: 0; }
-  to   { transform: scaleX(1); opacity: 1; }
-}
-.hp-card[open]::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(196,135,42,0.8) 20%,
-    rgba(232,160,48,1) 50%,
-    rgba(196,135,42,0.8) 80%,
-    transparent 100%
-  );
-  animation: ac-draw-line 0.6s cubic-bezier(0.34,1.2,0.64,1) both;
-  transform-origin: left;
-  pointer-events: none;
-  z-index: 3;
-  box-shadow: 0 0 8px rgba(196,135,42,0.5);
-}
-
-/* Shimmer de "antiguedad" en la tarjeta activa */
-@keyframes ac-shimmer-reveal {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-.hp-card[open] .hp-summary {
-  background: linear-gradient(
-    105deg,
-    rgba(242,237,227,0) 0%,
-    rgba(196,135,42,0.06) 40%,
-    rgba(242,237,227,0.04) 60%,
-    rgba(242,237,227,0) 100%
-  );
-  background-size: 300% 100%;
-  animation: ac-shimmer-reveal 2s ease-in-out 0.3s 1 both;
-}
-
-/* Número de año flotante decorativo */
-.hp-card .hp-year-watermark {
-  position: absolute;
-  bottom: 12px;
-  right: 16px;
-  font-family: var(--f-display, 'DM Serif Display', serif);
-  font-size: 56px;
-  line-height: 1;
-  color: rgba(196,135,42,0.06);
-  letter-spacing: -2px;
-  pointer-events: none;
-  z-index: 0;
-  transition: color 0.4s ease;
-  user-select: none;
-}
-.hp-card[open] .hp-year-watermark {
-  color: rgba(196,135,42,0.10);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hp-card[open] .hp-body { animation: none !important; }
-  .hp-card[open]::before { animation: none; }
-  .patrimonio-dust { animation: none; opacity: 0; }
-  .hp-card[open] .hp-summary { animation: none; }
-}
-</style>
 
 <script>
 (function(){
@@ -7560,111 +8073,6 @@ if(alive){rafId=requestAnimationFrame(loop);}
   <p class="search-no-results" id="no-results-historia">No se encontraron resultados para ese término.</p>
 </section>
 
-  <style>
-/* Transición tipo "página pasando" entre capítulos históricos */
-@keyframes ac-flip-in {
-  from {
-    opacity: 0;
-    transform: perspective(1200px) rotateY(-15deg) translateX(-40px);
-    filter: blur(2px);
-  }
-  to {
-    opacity: 1;
-    transform: perspective(1200px) rotateY(0deg) translateX(0);
-    filter: blur(0);
-  }
-}
-@keyframes ac-flip-out {
-  from {
-    opacity: 1;
-    transform: perspective(1200px) rotateY(0deg) translateX(0);
-    filter: blur(0);
-  }
-  to {
-    opacity: 0;
-    transform: perspective(1200px) rotateY(15deg) translateX(40px);
-    filter: blur(2px);
-  }
-}
-
-.ht-chapter-active.page-flip-in {
-  animation: ac-flip-in 0.5s cubic-bezier(0.16,1,0.3,1) both;
-}
-.ht-chapter.page-flip-out {
-  animation: ac-flip-out 0.35s cubic-bezier(0.77,0,0.175,1) both;
-  pointer-events: none;
-}
-
-/* Cursor pluma de escribir sobre la sección historia */
-#historia-cursor {
-  position: fixed;
-  pointer-events: none;
-  z-index: 99998;
-  font-size: 20px;
-  transform: translate(-4px, -18px) rotate(-20deg);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-  will-change: transform;
-}
-
-/* Trazo de tinta que el cursor deja */
-.historia-ink-trail {
-  position: fixed;
-  pointer-events: none;
-  z-index: 99997;
-  border-radius: 50%;
-  background: rgba(196,135,42,0.4);
-  transform: translate(-50%,-50%) scale(0);
-  animation: inkTrailFade 0.8s ease-out forwards;
-}
-@keyframes inkTrailFade {
-  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.6; }
-  30%  { transform: translate(-50%,-50%) scale(1); }
-  100% { transform: translate(-50%,-50%) scale(1.5); opacity: 0; }
-}
-
-/* Efecto de "sello de lacre" en las stats del hero histórico */
-@keyframes ac-bounce-in-stat {
-  0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
-  60%  { transform: scale(1.12) rotate(3deg); }
-  80%  { transform: scale(0.97) rotate(-1deg); }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-.ht-stat.is-revealed {
-  animation: ac-bounce-in-stat 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-
-/* Número contando hacia arriba en stats historia */
-.ht-stat-num {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Progress de lectura del capítulo activo */
-.ht-reading-progress {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  width: 0%;
-  background: linear-gradient(90deg, rgba(196,135,42,0.8), rgba(232,160,48,1));
-  transition: width 0.1s linear;
-  pointer-events: none;
-  border-radius: 0 2px 2px 0;
-  box-shadow: 0 0 6px rgba(196,135,42,0.5);
-}
-.ht-tabs-wrap {
-  position: relative;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ht-chapter-active.page-flip-in { animation: none; }
-  .ht-chapter.page-flip-out { animation: none; }
-  #historia-cursor { display: none; }
-  .historia-ink-trail { display: none; }
-  .ht-stat.is-revealed { animation: none; }
-}
-</style>
 
 <script>
 (function(){
@@ -8235,276 +8643,9 @@ var chapterEl = historiaSection.querySelector('.ht-chapter-active');
      ESTILOS EXCLUSIVOS — SECCIÓN DEPORTE
      Prefijo dep- — no colisiona con estilos globales del sitio
 ══════════════════════════════════════════════════════════════ -->
-<style>
-/* ── INTRO ── */
-.dep-intro {margin-bottom:48px;padding:36px 44px;background:linear-gradient(135deg,#0a1420 0%,#0d1a14 100%);border-left:5px solid var(--verde2);position:relative;overflow:hidden}
-.dep-intro::before {content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 95% 50%,rgba(196,135,42,.16) 0%,transparent 60%);pointer-events:none}
-.dep-intro-text {font-family:var(--f-display);font-style:italic;font-size:clamp(18px,2.4vw,26px);color:rgba(242,237,227,.82);line-height:1.55;letter-spacing:-.3px;max-width:680px;position:relative;z-index:1}
-.dep-intro-text em {font-style:normal;color:var(--oro2)}
 
-/* ── HERO NÁUTICO ── */
-.dep-hero {position:relative;overflow:hidden;margin-bottom:1px;min-height:240px;background:linear-gradient(135deg,#0b1a26 0%,#0e2018 60%,#0a1420 100%);padding:48px 52px;border-radius:var(--radius-card)}
-.dep-hero-bg {position:absolute;inset:0;background:radial-gradient(ellipse 65% 80% at 85% 15%,rgba(26,92,138,.40) 0%,transparent 58%),radial-gradient(ellipse 40% 60% at 5% 85%,rgba(29,92,64,.20) 0%,transparent 55%)}
-.dep-hero-content {position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;max-width:760px}
-.dep-hero-chip {display:inline-flex;align-items:center;gap:10px;background:rgba(26,92,138,.14);border:1px solid rgba(26,92,138,.40);border-radius:2px;padding:8px 16px;font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(70,160,230,.95);width:fit-content}
-.dep-hero-chip-dot {width:6px;height:6px;border-radius:50%;background:#46a0e6;flex-shrink:0;animation:ac-pulse-glow 2.5s ease-in-out infinite alternate}
-.dep-hero-title {font-family:var(--f-display);font-size:clamp(30px,4.5vw,46px);line-height:1;letter-spacing:-1px;color:var(--parchment)}
-.dep-hero-sub {font-family:var(--f-italic);font-style:italic;font-size:15px;color:rgba(242,237,227,.58);line-height:1.75}
-.dep-hero-sub strong {font-style:normal;color:var(--oro2);font-weight:400}
-.dep-hero-tags {display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-
-/* ── STATS GRID ── */
-.dep-stats-grid {display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
-.dep-stat-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;flex-direction:column;gap:6px;padding:30px 24px;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
-.dep-stat-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
-.dep-stat-num {font-family:var(--f-display);font-size:clamp(26px,3vw,38px);line-height:1;color:var(--parchment);letter-spacing:-1.5px}
-.dep-stat-label {font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(242,237,227,.55)}
-.dep-stat-sub {font-family:var(--f-italic);font-style:italic;font-size:11px;color:rgba(242,237,227,.30)}
-
-/* ── SUBTÍTULOS ── */
-
-/* ── GOLF + MOTOR GRID ── */
-.dep-feat-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
-.dep-feat-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:30px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
-.dep-feat-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
-.dep-feat-body, .dep-athlete-body, .dep-club-body {display:flex;flex-direction:column;gap:8px}
-.dep-feat-name {font-family:var(--f-display);font-size:18px;color:var(--card-text);letter-spacing:-.2px;line-height:1.15;font-weight:800}
-.dep-feat-desc, .dep-club-desc {font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.7}
-.dep-feat-desc strong {font-style:normal;color:var(--card-text)}
-  .dep-feat-icon {font-size:32px;line-height:1;flex-shrink:0;transition:transform .35s var(--ease)}
-.dep-feat-card:hover .dep-feat-icon {transform:scale(1.12)}
-.dep-club-icon, .dep-athlete-icon {font-size:32px;line-height:1;flex-shrink:0}
-.dep-athlete-badge {display:inline-flex;align-items:center;padding:5px 12px;background:rgba(196,135,42,.12);border:1px solid rgba(196,135,42,.35);border-radius:2px;font-family:var(--f-ui);font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2);width:fit-content}
-
-/* ── CLUBES GRID ── */
-.dep-club-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10);margin-bottom:1px}
-.dep-club-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:28px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
-.dep-club-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
-.dep-club-tag {font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--oro2)}
-.dep-club-name {font-family:var(--f-display);font-size:18px;color:var(--card-text);letter-spacing:-.2px;font-weight:800}
-
-/* ── ATLETAS GRID ── */
-.dep-athlete-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(26,25,22,.10);border:1px solid rgba(26,25,22,.10)}
-.dep-athlete-card {background:linear-gradient(160deg,var(--card-dark) 0%,var(--card-dark2) 100%);display:flex;align-items:flex-start;gap:18px;padding:28px 26px;position:relative;transition:background .35s ease,border-color .35s ease;border:1px solid var(--card-border-oro)}
-.dep-athlete-card:hover {background:linear-gradient(160deg,var(--card-dark3) 0%,var(--card-dark2) 100%);border-color:var(--card-border-oro-hover)}
-.dep-athlete-name {font-family:var(--f-display);font-size:19px;color:var(--card-text);letter-spacing:-.2px;font-weight:400}
-.dep-athlete-feat .dep-athlete-name {font-size:24px}
-.dep-athlete-desc {font-family:var(--f-italic);font-style:italic;font-size:13.5px;color:var(--card-text-soft);line-height:1.75}
-.dep-athlete-desc strong {font-style:normal;color:var(--card-text)}
-  </style>
-  <style>
-.dep-disclaimer {font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(26,25,22,.72);line-height:1.8;padding:20px 24px;background:rgba(26,25,22,.04);border-left:3px solid rgba(196,135,42,.35);margin-top:24px}
-.dep-disclaimer strong {color:rgba(26,25,22,.88)}
-
-/* ── RESPONSIVE ── */
-@media(max-width:860px) {
-  .dep-stats-grid{grid-template-columns:repeat(2,1fr)}
-  .dep-feat-grid{grid-template-columns:1fr}
-  .dep-club-grid{grid-template-columns:1fr}
-  .dep-athlete-grid{grid-template-columns:1fr}
-  .dep-athlete-feat{grid-column:span 1}
-  .dep-hero{padding:32px 28px}
-  .dep-intro{padding:26px 24px}
-}
-/* .dep-* @640px — consolidado en el bloque maestro único */
-@media(prefers-reduced-motion:reduce) {
-  .dep-feat-card,.dep-club-card,.dep-athlete-card,.dep-stat-card{transition:none}
-}
-</style>
-
-<style>
-  @media (max-width: 768px) {
-  .hero, .hero-inner, .hero-topbar, .hero-inner-left {
-    max-width: 100vw !important;
-    width: 100% !important;
-    overflow-x: hidden !important;
-  }
-  .hero-title, .hero-title .main-line, .hero-title .main-line em {
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-    white-space: normal !important;
-  }
-  .identity-strip {
-    width: 100% !important;
-    max-width: calc(100vw - 32px) !important;
-  }
-}
-</style>
 
   <!-- ===================== PARA UNIVERSITARIOS ===================== -->
-<style>
-.ru-section {
-  --paper:#EBE3D2;--paper-2:#E2D8C2;--paper-line:rgba(28,43,58,.09);
-  --ink:#1C2B3A;--ink-soft:#4C5C6C;--ink-faint:#1C2B3A66;
-  --pen-blue:#2B4570;--pen-red:#AE3526;--marker:#F0BD3E;--river:#3C6B5B;
-  --night:#0E1B27;--night-2:#0A141D;--night-line:rgba(232,212,170,.10);
-  --night-ink:#D8DEE3;--night-soft:#8FA0AC;--amber:#E6A23C;--amber-soft:#C98B33;
-  --f-display:'Bricolage Grotesque',system-ui,sans-serif;
-  --f-body:'Inter',system-ui,sans-serif;
-  --f-hand:'Caveat',cursive;
-  --f-mono:'JetBrains Mono',ui-monospace,monospace;
-  display:block;position:relative;background:var(--paper);color:var(--ink);
-  font-family:var(--f-body);overflow:hidden;isolation:isolate;
-  margin-left:calc(-1 * var(--gutter,64px));
-  margin-right:calc(-1 * var(--gutter,64px));
-  width:calc(100% + 2 * var(--gutter,64px));
-}
-.ru-section::before {
-  content:'';display:block;height:80px;
-  background:linear-gradient(to bottom,var(--void,#060605),var(--paper));
-  position:relative;z-index:1;
-}
-.ru-section * {box-sizing:border-box;}
-.ru-section a {color:inherit;text-decoration:none;}
-.ru-section ol, .ru-section ul {list-style:none;margin:0;padding:0;}
-.ru-section h1, .ru-section h2, .ru-section h3, .ru-section h4, .ru-section p, .ru-section blockquote, .ru-section figure {margin:0;}
-.ru-section :focus-visible {outline:2px dashed var(--pen-blue);outline-offset:4px;border-radius:2px;}
-.ru-night :focus-visible {outline-color:var(--amber);}
-.ru-grain {position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.05;mix-blend-mode:multiply;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
-.ru-night .ru-grain {opacity:.10;mix-blend-mode:screen;}
-.ru-ruled {position:absolute;inset:0;pointer-events:none;z-index:0;
-  background-image:repeating-linear-gradient(to bottom,transparent 0 38px,var(--paper-line) 38px 39px);}
-.ru-wrap {position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 24px;width:100%;box-sizing:border-box;}
-.ru-reveal {opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);}
-.ru-reveal.is-in {opacity:1;transform:translateY(0);}
-@media(prefers-reduced-motion:reduce){.ru-reveal {opacity:1!important;transform:none!important;transition:none!important;}}
-.ru-stop {display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-weight:700;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pen-red);}
-.ru-night .ru-stop {color:var(--amber);}
-.ru-stop::before {content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;}
-.ru-chapter-head {max-width:640px;}
-.ru-chapter-title {font-family:var(--f-display);font-weight:800;font-size:clamp(2.1rem,4.6vw,3.4rem);line-height:1.02;letter-spacing:-.01em;margin:14px 0 16px;}
-.ru-chapter-title em {font-style:normal;color:var(--pen-blue);}
-.ru-night .ru-chapter-title em {color:var(--amber);}
-.ru-chapter-intro {font-size:1.02rem;line-height:1.6;color:var(--ink-soft);max-width:46ch;}
-.ru-night .ru-chapter-intro {color:var(--night-soft);}
-.ru-chapter {position:relative;padding:96px 0;}
-.ru-hero {position:relative;padding:128px 0 96px;}
-.ru-hero-wrap {display:flex;flex-direction:column;align-items:flex-start;}
-.ru-ticket-tag {position:relative;display:inline-flex;align-items:center;padding:8px 18px;font-family:var(--f-mono);font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pen-red);background:var(--paper-2);border:1.5px dashed var(--ink-faint);border-radius:2px;transform:rotate(-2deg);margin-bottom:30px;}
-.ru-ticket-tag::before, .ru-ticket-tag::after {content:"";position:absolute;top:50%;width:11px;height:11px;background:var(--paper);border-radius:50%;transform:translateY(-50%);}
-.ru-ticket-tag::before {left:-6px;}.ru-ticket-tag::after {right:-6px;}
-.ru-hero-title {font-family:var(--f-display);font-weight:800;font-size:clamp(2.7rem,7.2vw,5.8rem);line-height:.97;letter-spacing:-.02em;margin-bottom:28px;}
-.ru-hl {display:block;overflow:hidden;}
-.ru-hl span {display:block;animation:ac-reveal-up-word .85s cubic-bezier(.16,1,.3,1) both;}
-.ru-hl:nth-child(1) span {animation-delay:.05s;}
-.ru-hl:nth-child(2) span {animation-delay:.17s;}
-.ru-hl:nth-child(3) span {animation-delay:.29s;}
-@keyframes ac-reveal-up-word{from{transform:translateY(112%);}to{transform:translateY(0);}}
-.ru-hero-title em {font-style:normal;color:var(--pen-blue);}
-.ru-hero-desc {font-size:1.08rem;line-height:1.6;color:var(--ink-soft);max-width:44ch;margin-bottom:48px;}
-.ru-board-wrap {width:100%;max-width:720px;}
-.ru-board-label {display:block;font-family:var(--f-mono);font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;}
-.ru-board-track {position:relative;overflow:hidden;background:var(--ink);border-radius:3px;padding:14px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent);}
-.ru-board-row {display:flex;width:max-content;animation:ac-scroll-board 36s linear infinite;white-space:nowrap;}
-.ru-board-track:hover .ru-board-row, .ru-board-track:focus-within .ru-board-row {animation-play-state:paused;}
-@keyframes ac-scroll-board{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-.ru-chip {flex:none;font-family:var(--f-mono);font-size:.78rem;font-weight:600;color:var(--amber);padding:0 22px;border-right:1px solid rgba(232,212,170,.18);white-space:nowrap;}
-.ru-chip i {font-style:normal;color:rgba(216,222,227,.6);margin-left:8px;}
-.ru-scrolldown {margin-top:56px;display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
-.ru-scrolldown svg {animation:ac-bob-y-down 1.7s ease-in-out infinite;}
-@keyframes ac-bob-y-down{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
-.ru-route {position:relative;margin-top:52px;}
-.ru-route-track {position:absolute;left:18px;top:6px;bottom:6px;width:2px;background-image:repeating-linear-gradient(to bottom,var(--ink-faint) 0 6px,transparent 6px 12px);}
-.ru-route-fill {position:absolute;top:0;left:0;width:100%;height:0%;background:var(--pen-blue);}
-.ru-route-pin {position:absolute;left:18px;top:0%;transform:translate(-50%,-50%);width:18px;height:18px;color:var(--pen-blue);z-index:2;}
-.ru-route-pin svg {display:block;background:var(--paper);border-radius:50%;}
-.ru-steps {display:flex;flex-direction:column;gap:22px;}
-.ru-step {position:relative;display:grid;grid-template-columns:38px 1fr;gap:0 18px;align-items:start;}
-.ru-step-pin {grid-column:1;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-weight:700;font-size:.82rem;background:var(--paper);border:2px solid var(--ink);color:var(--ink);position:relative;z-index:2;}
-.ru-step-card {grid-column:2;background:var(--paper);border:1.5px solid var(--ink-faint);border-radius:3px;padding:24px 26px;box-shadow:5px 5px 0 0 var(--ink-faint);transition:transform .25s ease,box-shadow .25s ease;}
-.ru-step:nth-child(odd) .ru-step-card {transform:rotate(-.4deg);}
-.ru-step:nth-child(even) .ru-step-card {transform:rotate(.4deg);}
-.ru-step-card:hover {transform:rotate(0deg) translateY(-3px);box-shadow:7px 7px 0 0 var(--pen-blue);}
-.ru-step-tag {display:block;font-family:var(--f-mono);font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pen-red);margin-bottom:10px;}
-.ru-step-title {font-family:var(--f-display);font-weight:700;font-size:1.24rem;line-height:1.25;margin-bottom:10px;}
-.ru-step-body {font-size:.95rem;line-height:1.62;color:var(--ink-soft);}
-.ru-step-body strong {color:var(--ink);font-weight:600;}
-.ru-feature {display:grid;grid-template-columns:1fr 1.15fr auto;align-items:stretch;margin:48px 0 26px;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:6px 6px 0 0 var(--ink);transition:transform .25s ease,box-shadow .25s ease;}
-.ru-feature:hover {transform:translate(-3px,-3px);box-shadow:9px 9px 0 0 var(--pen-blue);}
-.ru-feature-board {background:var(--ink);color:var(--marker);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:32px 28px;font-family:var(--f-hand);}
-.ru-feature-board span:first-child {font-family:var(--f-mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,189,62,.55);}
-.ru-feature-board strong {font-size:2.5rem;line-height:1;font-weight:700;}
-.ru-feature-board span:last-child {font-size:1.05rem;opacity:.85;}
-.ru-feature-body {padding:32px 28px;display:flex;flex-direction:column;gap:9px;justify-content:center;background:var(--paper);}
-.ru-feature-eyebrow {font-family:var(--f-mono);font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pen-red);}
-.ru-feature-name {font-family:var(--f-display);font-weight:800;font-size:1.65rem;}
-.ru-feature-desc {font-size:.95rem;line-height:1.55;color:var(--ink-soft);max-width:38ch;}
-.ru-feature-cta {display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.86rem;color:var(--pen-blue);margin-top:4px;}
-.ru-feature-cta svg {transition:transform .2s ease;}
-.ru-feature:hover .ru-feature-cta svg {transform:translateX(4px);}
-.ru-feature-price {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:24px 26px;background:var(--paper-2);border-left:1.5px dashed var(--ink-faint);font-family:var(--f-mono);font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
-.ru-feature-price span {font-family:var(--f-display);font-size:1.55rem;font-weight:800;color:var(--ink);}
-.ru-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-.ru-ticket {position:relative;background:var(--paper);border:1.5px solid var(--ink-faint);border-radius:3px;padding:26px 20px 18px;display:flex;flex-direction:column;gap:8px;box-shadow:4px 4px 0 0 var(--ink-faint);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;}
-.ru-ticket:nth-child(3n+1) {transform:rotate(-.6deg);}
-.ru-ticket:nth-child(3n+2) {transform:rotate(.5deg);}
-.ru-ticket:nth-child(3n+3) {transform:rotate(-.3deg);}
-.ru-ticket:hover {transform:rotate(0) translateY(-4px);box-shadow:6px 6px 0 0 var(--pen-blue);border-color:var(--pen-blue);}
-.ru-ticket-notch {position:absolute;top:-1.5px;left:50%;transform:translateX(-50%);width:60%;height:1.5px;background-image:repeating-linear-gradient(to right,var(--ink-faint) 0 6px,transparent 6px 11px);}
-.ru-ticket-notch::before, .ru-ticket-notch::after {content:"";position:absolute;top:-7px;width:13px;height:13px;border-radius:50%;background:var(--paper);border:1.5px solid var(--ink-faint);}
-.ru-ticket-notch::before {left:-6px;}.ru-ticket-notch::after {right:-6px;}
-.ru-ticket-tag2 {font-family:var(--f-mono);font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--river);}
-.ru-ticket-name {font-family:var(--f-display);font-weight:700;font-size:1.16rem;}
-.ru-ticket-desc {font-size:.87rem;line-height:1.5;color:var(--ink-soft);flex:1;}
-.ru-ticket-foot {display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px dashed var(--ink-faint);margin-top:4px;}
-.ru-ticket-price {font-family:var(--f-mono);font-weight:700;color:var(--ink);}
-.ru-ticket-arrow {color:var(--pen-blue);transition:transform .2s ease;display:inline-block;}
-.ru-ticket:hover .ru-ticket-arrow {transform:translate(3px,-3px);}
-.ru-secreto {position:relative;padding:0 0 88px;}
-.ru-secreto-wrap {max-width:740px;}
-.ru-secreto-label {display:block;font-family:var(--f-mono);font-size:.66rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:18px;}
-.ru-secreto-quote {font-family:var(--f-display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.85rem);line-height:1.45;color:var(--ink);}
-.ru-hl-text {background-image:linear-gradient(120deg,rgba(240,189,62,.6) 0%,rgba(240,189,62,.6) 100%);background-repeat:no-repeat;background-size:0% 88%;background-position:0 78%;-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:0 .06em;transition:background-size 1.1s cubic-bezier(.16,1,.3,1) .25s;}
-.ru-secreto.is-in .ru-hl-text {background-size:100% 88%;}
-.ru-secreto-source {display:block;margin-top:18px;font-family:var(--f-hand);font-weight:600;font-size:1.35rem;color:var(--ink-soft);}
-.ru-dusk, .ru-dawn {position:relative;height:150px;overflow:hidden;}
-.ru-dusk-sky {position:absolute;inset:0;background:linear-gradient(to bottom,var(--paper) 0%,#C99A6A 42%,var(--night) 100%);}
-.ru-dawn-sky {position:absolute;inset:0;background:linear-gradient(to bottom,var(--night) 0%,#C99A6A 60%,var(--paper) 100%);}
-.ru-dusk-sun, .ru-dawn-sun {position:absolute;left:50%;width:44px;height:44px;border-radius:50%;background:var(--amber);box-shadow:0 0 40px 6px rgba(230,162,60,.5);transform:translateX(-50%);opacity:.5;transition:top 1.4s cubic-bezier(.4,0,.2,1),opacity 1.4s ease;}
-.ru-dusk-sun {top:-28px;}.ru-dusk.is-in .ru-dusk-sun {top:112px;opacity:1;}
-.ru-dawn-sun {top:112px;}.ru-dawn.is-in .ru-dawn-sun {top:-28px;opacity:1;}
-.ru-dusk-line {position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--night-line);}
-.ru-night {background:var(--night);color:var(--night-ink);}
-.ru-streetlamps {position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 10% 0%,rgba(230,162,60,.16),transparent 38%),radial-gradient(circle at 90% 25%,rgba(230,162,60,.10),transparent 42%);}
-.ru-night-list {display:flex;flex-direction:column;margin-top:40px;border-top:1px solid var(--night-line);}
-.ru-night-item {border-bottom:1px solid var(--night-line);}
-.ru-night-item a {display:grid;grid-template-columns:40px 1fr auto 18px;align-items:center;gap:18px;padding:22px 4px;transition:padding-left .25s ease,background .25s ease;}
-.ru-night-item a:hover, .ru-night-item a:focus-visible {padding-left:14px;background:rgba(232,212,170,.045);}
-.ru-ni-rank {font-family:var(--f-mono);font-weight:700;color:var(--night-soft);font-size:.88rem;}
-.ru-ni-info {display:flex;flex-direction:column;gap:4px;min-width:0;}
-.ru-ni-tag {font-family:var(--f-mono);font-size:.64rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);}
-.ru-ni-name {font-family:var(--f-display);font-weight:700;font-size:1.22rem;}
-.ru-ni-desc {font-size:.87rem;color:var(--night-soft);line-height:1.5;max-width:52ch;}
-.ru-ni-meta {display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;}
-.ru-ni-price {font-family:var(--f-mono);font-weight:700;}
-.ru-ni-vibe {font-size:.68rem;color:var(--night-soft);text-transform:uppercase;letter-spacing:.06em;}
-.ru-ni-arrow {color:var(--amber);transition:transform .2s ease;display:inline-block;}
-.ru-night-item a:hover .ru-ni-arrow {transform:translateX(4px);}
-.ru-sos {position:relative;background:var(--night-2);padding:80px 0;}
-.ru-sos-head {margin-bottom:36px;}
-.ru-sos-stop {color:var(--pen-red);}
-.ru-sos-title {font-family:var(--f-display);font-weight:800;font-size:clamp(1.7rem,3.4vw,2.3rem);color:var(--night-ink);margin-top:12px;}
-.ru-sos-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.ru-sos-btn {display:flex;flex-direction:column;gap:6px;padding:24px 22px;border:1.5px solid rgba(193,58,46,.45);border-radius:4px;background:rgba(193,58,46,.06);color:var(--night-ink);transition:transform .2s ease,background .2s ease,border-color .2s ease;}
-.ru-sos-btn:hover, .ru-sos-btn:focus-visible {transform:translateY(-3px);background:rgba(193,58,46,.14);border-color:var(--pen-red);}
-.ru-sos-btn svg {color:var(--pen-red);margin-bottom:4px;}
-.ru-sos-num {font-family:var(--f-mono);font-weight:700;font-size:1.8rem;color:#fff;}
-.ru-sos-label {font-weight:600;font-size:.95rem;}
-.ru-sos-sub {font-size:.8rem;color:var(--night-soft);}
-.ru-cierre {position:relative;padding:110px 0 96px;}
-.ru-cierre-wrap {max-width:660px;}
-.ru-cierre-title {font-family:var(--f-display);font-weight:800;font-size:clamp(2rem,4.4vw,3.05rem);line-height:1.1;margin-bottom:18px;}
-.ru-cierre-title em {font-style:normal;color:var(--pen-blue);}
-.ru-cierre-sub {font-size:1.02rem;line-height:1.6;color:var(--ink-soft);max-width:46ch;margin-bottom:36px;}
-.ru-cta {display:inline-flex;align-items:center;gap:10px;padding:16px 28px;background:#1C2B3A;color:#F5EFE3;font-weight:700;font-size:.95rem;border-radius:3px;box-shadow:5px 5px 0 0 #2B4570;transition:box-shadow .2s ease,background .2s ease;border:1.5px solid rgba(245,239,227,.25);}
-.ru-cta:hover {background:#2B4570;color:#fff;box-shadow:5px 5px 0 0 #1C2B3A;}
-.ru-cta svg {transition:transform .2s ease;}
-.ru-cta:hover svg {transform:translateX(4px);}
-@media(max-width:880px){.ru-grid {grid-template-columns:repeat(2,1fr);}.ru-feature {grid-template-columns:1fr;}.ru-feature-price {border-left:none;border-top:1.5px dashed var(--ink-faint);flex-direction:row;gap:10px;padding:16px 28px;}}
-@media(max-width:640px){.ru-section {margin-left:calc(-1 * var(--gutter,18px));margin-right:calc(-1 * var(--gutter,18px));width:calc(100% + 2 * var(--gutter,18px));}.ru-wrap {padding:0 18px;}.ru-hero {padding:92px 0 72px;}.ru-chapter {padding:64px 0;}.ru-sos {padding:64px 0;}.ru-cierre {padding:80px 0 72px;}.ru-dusk, .ru-dawn {height:96px;}.ru-feature-board strong {font-size:2rem;}.ru-grid {grid-template-columns:1fr;}.ru-sos-grid {grid-template-columns:1fr;}.ru-night-item a {grid-template-columns:30px 1fr;row-gap:8px;}.ru-ni-meta {grid-column:2;flex-direction:row;align-items:center;gap:10px;text-align:left;}.ru-ni-arrow {display:none;}.ru-step {grid-template-columns:30px 1fr;}.ru-step-pin {width:30px;height:30px;font-size:.72rem;}.ru-route-track, .ru-route-pin {left:14px;}.ru-step-card {padding:20px;}}
-@media(prefers-reduced-motion:reduce){.ru-hl span {animation:none;}.ru-scrolldown svg {animation:none;}.ru-board-row {animation:none;}.ru-board-track {overflow-x:auto;-webkit-overflow-scrolling:touch;}.ru-dusk-sun, .ru-dawn-sun, .ru-hl-text {transition:none;}.ru-dusk-sun, .ru-dawn-sun {top:42px!important;opacity:1!important;}.ru-hl-text {background-size:100% 88%!important;}}
-</style>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap" media="print" onload="this.media='all'" />
 
@@ -8884,53 +9025,6 @@ var chapterEl = historiaSection.querySelector('.ht-chapter-active');
 <p class="footer-copy" style="margin-top:6px;font-size:8px;letter-spacing:1px;">Información verificada: junio 2026 · Próxima revisión: diciembre 2026</p>
   <canvas id="footer-tide-canvas" aria-hidden="true" style="position:absolute;bottom:0;left:0;width:100%;height:140px;pointer-events:none;z-index:0;opacity:0.35;"></canvas>
 
-<style>
-/* Estrellitas sobre el logo en el footer */
-@keyframes starTwinkle {
-  0%,100% { opacity: 0; transform: scale(0) translate(var(--sx,0px), var(--sy,0px)); }
-  50%     { opacity: 1; transform: scale(1) translate(var(--sx,0px), var(--sy,0px)); }
-}
-
-/* Footer logo wrapper para posicionar estrellas */
-.footer-logo-wrap {
-  position: relative;
-  display: inline-block;
-}
-
-/* Texto de año con efecto de "escritura a mano" */
-@keyframes ac-type-in {
-  from { width: 0; }
-  to   { width: 100%; }
-}
-.footer-copy-animated {
-  overflow: hidden;
-  white-space: nowrap;
-  width: 0;
-  animation: ac-type-in 1.2s cubic-bezier(0.16,1,0.3,1) 0.8s both;
-  display: inline-block;
-}
-
-/* Footer hover — levitar el logo */
-.footer-logo:hover img {
-  transform: translateY(-6px) scale(1.08) rotate(-2deg) !important;
-  filter: drop-shadow(0 0 24px rgba(10,255,239,0.55)) drop-shadow(0 0 48px rgba(10,255,239,0.25)) brightness(1.20) !important;
-}
-
-/* Olas de texto en footer-stats */
-@keyframes ac-bob-y-up {
-  0%,100% { transform: translateY(0); }
-  50%     { transform: translateY(-3px); }
-}
-.footer-stats .footer-stat:nth-child(1) { animation: ac-bob-y-up 2.5s ease-in-out 0s infinite; }
-.footer-stats .footer-stat:nth-child(2) { animation: ac-bob-y-up 2.5s ease-in-out 0.3s infinite; }
-.footer-stats .footer-stat:nth-child(3) { animation: ac-bob-y-up 2.5s ease-in-out 0.6s infinite; }
-
-@media (prefers-reduced-motion: reduce) {
-  .footer-copy-animated { animation: none; width: 100%; }
-  .footer-stats .footer-stat { animation: none; }
-  #footer-tide-canvas { display: none; }
-}
-</style>
 
 <script>
 (function(){
@@ -9102,9 +9196,11 @@ var _cachedOrb1 = document.querySelector('.hero-orb-1');
 
   /* Pausar orbes del Hero fuera de viewport (ahorro de composición GPU) */
   var _heroEl = document.querySelector('.hero');
+  var _heroVisible = true; /* asumido true hasta que el observer confirme lo contrario */
   if (_heroEl && 'IntersectionObserver' in window) {
     var _heroOrbObserver = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
+        _heroVisible = entry.isIntersecting;
         _heroEl.classList.toggle('hero-offscreen', !entry.isIntersecting);
       });
     }, {threshold:0});
@@ -9248,15 +9344,15 @@ if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
         updateProgress();
         updateNav();
         var sy = window.scrollY;
-        if(heroMesh){
+        if(_heroVisible && heroMesh){
           var intensity = Math.min(sy / 400, 1);
           heroMesh.style.opacity = 1 - intensity * 0.35;
         }
-if(window.innerWidth > 768 && sy < 700){
+if(_heroVisible && window.innerWidth > 768 && sy < 700){
         if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
         if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
       }
-        if(heroTitleEms.length && sy < 500){
+        if(_heroVisible && heroTitleEms.length && sy < 500){
           var t = sy / 500;
           var ls = -4 + t * 2;
           heroTitleEms.forEach(function(em){
@@ -10264,106 +10360,6 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   });
 })();
 </script>
-    <style>
-/* Ink drop ripple al click en mood-btn */
-@keyframes ac-ripple-fill {
-  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.8; }
-  80%  { opacity: 0.3; }
-  100% { transform: translate(-50%,-50%) scale(4); opacity: 0; }
-}
-.mood-ink-drop {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(10,255,239,0.35) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 10;
-  animation: ac-ripple-fill 0.65s cubic-bezier(0.16,1,0.3,1) forwards;
-}
-#mood-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(10,255,239,0.6);
-  background: radial-gradient(circle, rgba(10,255,239,0.14) 0%, transparent 72%);
-  box-shadow: 0 0 26px rgba(10,255,239,0.28), inset 0 0 14px rgba(10,255,239,0.16);
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0;
-  transform: translate(-50%,-50%) scale(0);
-  mix-blend-mode: difference;
-  transition: width .38s cubic-bezier(.16,1,.3,1), height .38s cubic-bezier(.16,1,.3,1), border-color .38s ease, background .38s ease, box-shadow .38s ease, opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1);
-  will-change: left, top, width, height, transform;
-}
-@media (hover: none), (pointer: coarse) {
-  #mood-cursor { display: none; }
-}
-@media (hover: hover) and (pointer: fine) {
-  body, body * { cursor: none !important; }
-}
-
-/* Glow orbital en mood-card cuando hay selección activa */
-@keyframes ac-orbit {
-  0%   { transform: rotate(0deg) translateX(8px); }
-  100% { transform: rotate(360deg) translateX(8px); }
-}
-.mood-card.has-selection::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 6px;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(10,255,239,0.15) 60deg,
-    rgba(232,160,48,0.15) 120deg,
-    transparent 180deg,
-    rgba(10,255,239,0.08) 240deg,
-    transparent 360deg
-  );
-  animation: ac-orbit 6s linear infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Indicador de cantidad de resultados — badge animado */
-@keyframes ac-bounce-in-badge {
-  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
-  70%  { transform: scale(1.15) rotate(3deg); }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-.mood-match-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  min-width: 20px;
-  height: 20px;
-  background: var(--bio-glow, #0AFFEF);
-  color: #020B12;
-  border-radius: 10px;
-  font-family: var(--f-ui, 'Syne', sans-serif);
-  font-size: 9px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 5px;
-  animation: ac-bounce-in-badge 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-  pointer-events: none;
-  z-index: 5;
-  box-shadow: 0 0 12px rgba(10,255,239,0.5);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mood-ink-drop { animation: none; }
-  .mood-card.has-selection::after { animation: none; }
-  .mood-match-badge { animation: none; }
-}
-</style>
 
 <script>
 (function(){
