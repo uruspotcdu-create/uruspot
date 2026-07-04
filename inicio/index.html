@@ -3021,6 +3021,11 @@ body {
 }
 
 </style>
+  <style>
+@media (max-width: 768px){
+  * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+}
+</style>
   </head>
   <body>
   <div id="mood-cursor" aria-hidden="true"></div>
@@ -10414,6 +10419,21 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
       }
     });
   });
+})();
+</script>
+    <script>
+(function(){
+  if (!('IntersectionObserver' in window)) return;
+  var els = Array.prototype.filter.call(document.querySelectorAll('body *'), function(el){
+    var cs = getComputedStyle(el);
+    return cs.animationName && cs.animationName !== 'none';
+  });
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      entry.target.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
+    });
+  }, {rootMargin: '200px'});
+  els.forEach(function(el){ io.observe(el); });
 })();
 </script>
 </body>
