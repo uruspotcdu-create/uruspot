@@ -10331,12 +10331,11 @@ document.querySelectorAll('.mood-btn').forEach(function(btn){
   var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   var cursor  = document.getElementById('mood-cursor');
   if(!reduced && cursor && window._usAnim.fine){
-    var cx = 0, cy = 0, tx = 0, ty = 0;
+var cx = 0, cy = 0, tx = 0, ty = 0;
     var cursorLoop = window._usAnim.rafLoop(function(){
       cx = window._usAnim.lerp(cx, tx, 0.14);
       cy = window._usAnim.lerp(cy, ty, 0.14);
-      cursor.style.left = cx + 'px';
-      cursor.style.top  = cy + 'px';
+      cursor.style.transform = 'translate(' + cx + 'px,' + cy + 'px) translate(-50%,-50%) scale(1)';
     });
 
     document.addEventListener('mousemove', function(e){
