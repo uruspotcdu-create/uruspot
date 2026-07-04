@@ -4507,14 +4507,14 @@ var chapterEl = historiaSection.querySelector('.ht-chapter-active');
     });
 
     /* Solo animar cuando el footer es visible */
-    var started = false;
+    var resizedOnce = false;
     if('IntersectionObserver' in window){
       var io = new IntersectionObserver(function(e){
-        if(e[0].isIntersecting && !started){
-          started = true;
-          resize();
+        if(e[0].isIntersecting){
+          if(!resizedOnce){ resizedOnce = true; resize(); }
           loop.start();
-          io.unobserve(footer);
+        } else {
+          loop.stop();
         }
       }, {threshold:0.1});
       io.observe(footer);
