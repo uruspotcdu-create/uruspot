@@ -4906,19 +4906,36 @@ var id=entry.target.getAttribute('id');
     },250);
   },{passive:true});
 
-  var revealObserver=new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(!entry.isIntersecting)return;
-      var el=entry.target;
-      el.style.willChange='opacity,transform,filter';
-      requestAnimationFrame(function(){
+  var revealQueue = [];
+  var revealFlushing = false;
+  function queueReveal(el){
+    revealQueue.push(el);
+    if(!revealFlushing){
+      revealFlushing = true;
+      requestAnimationFrame(flushRevealQueue);
+    }
+  }
+  function flushRevealQueue(){
+    var end = Math.min(20, revealQueue.length);
+    for(var i=0; i<end; i++){
+      (function(el){
+        el.style.willChange='opacity,transform,filter';
         el.classList.add('visible');
         el.addEventListener('transitionend',function cleanup(){
           el.style.willChange='';
           el.removeEventListener('transitionend',cleanup);
         });
-      });
-      revealObserver.unobserve(el);
+      })(revealQueue[i]);
+    }
+    revealQueue.splice(0, end);
+    if(revealQueue.length) requestAnimationFrame(flushRevealQueue);
+    else revealFlushing = false;
+  }
+  var revealObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(!entry.isIntersecting)return;
+      queueReveal(entry.target);
+      revealObserver.unobserve(entry.target);
     });
   },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
   revealEls.forEach(function(el){revealObserver.observe(el);});
@@ -4962,23 +4979,7 @@ navItems.forEach(function(item){
   updateProgress();updateNav();
 
   setTimeout(function(){
-    var pending = document.querySelectorAll('.reveal:not(.visible)');
-    var i = 0;
-    function revealBatch(){
-      var end = Math.min(i + 20, pending.length);
-      for(; i < end; i++){
-        (function(el){
-          el.style.willChange='opacity,transform,filter';
-          el.classList.add('visible');
-          el.addEventListener('transitionend',function cleanup(){
-            el.style.willChange='';
-            el.removeEventListener('transitionend',cleanup);
-          });
-        })(pending[i]);
-      }
-      if(i < pending.length) requestAnimationFrame(revealBatch);
-    }
-    if(pending.length) requestAnimationFrame(revealBatch);
+    document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){ queueReveal(el); });
   },800);
 
 /* ── BUSCADOR ── */
