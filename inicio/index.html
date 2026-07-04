@@ -9050,7 +9050,7 @@ var navScrollArea = document.querySelector('.nav-scroll-area');
 var navArrowRight = document.getElementById('nav-scroll-right');
 var navArrowLeft  = document.getElementById('nav-scroll-left');
 if(navScrollArea && navArrowRight){
-  function updateNavArrows(){
+function updateNavArrows(){
     var canScroll = navScrollArea.scrollWidth > navScrollArea.clientWidth + 4;
     var atStart   = navScrollArea.scrollLeft < 8;
     var atEnd     = navScrollArea.scrollLeft + navScrollArea.clientWidth >= navScrollArea.scrollWidth - 8;
@@ -9069,8 +9069,17 @@ if(navScrollArea && navArrowRight){
     navArrowLeft.addEventListener('mouseenter', function(){ this.style.color = 'rgba(242,237,227,1)'; });
     navArrowLeft.addEventListener('mouseleave', function(){ this.style.color = 'rgba(242,237,227,.7)'; });
   }
-  navScrollArea.addEventListener('scroll', updateNavArrows, {passive:true});
-  window.addEventListener('resize', updateNavArrows);
+  var _navArrowsTicking = false;
+  function _navArrowsOnScrollOrResize(){
+    if(_navArrowsTicking) return;
+    _navArrowsTicking = true;
+    requestAnimationFrame(function(){
+      updateNavArrows();
+      _navArrowsTicking = false;
+    });
+  }
+  navScrollArea.addEventListener('scroll', _navArrowsOnScrollOrResize, {passive:true});
+  window.addEventListener('resize', _navArrowsOnScrollOrResize);
   setTimeout(updateNavArrows, 400);
 }
 })();
