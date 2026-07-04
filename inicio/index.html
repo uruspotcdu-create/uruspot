@@ -119,7 +119,7 @@
       <div><span class="city-name">CDU · Entre Ríos</span><span class="city-sub">Argentina</span></div>
     </div>
     <a class="hero-logo" href="./" aria-label="URU SPOT — Ir al inicio">
-      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local de Concepción del Uruguay" width="80" height="101" fetchpriority="high" loading="eager" style="aspect-ratio:80/101;height:auto;" />
+      <img src="https://uruspotcdu-create.github.io/uruspot/img/logof-small.webp" alt="URU SPOT — Guía Local de Concepción del Uruguay" width="80" height="101" fetchpriority="high" loading="eager" decoding="async" style="aspect-ratio:80/101;height:auto;" />
     </a>
   </div>
   <div class="hero-inner">
@@ -435,8 +435,10 @@
       if(!tiltRaf) tiltRaf = requestAnimationFrame(animTilt);
     });
 
+    var _cardRect = null;
+    card.addEventListener('mouseenter', function(){ _cardRect = card.getBoundingClientRect(); });
     card.addEventListener('mousemove', function(e){
-      var rect = card.getBoundingClientRect();
+      var rect = _cardRect || card.getBoundingClientRect();
       var x = (e.clientX - rect.left) / rect.width;
       var y = (e.clientY - rect.top)  / rect.height;
       tRX = (y - 0.5) * -8;
@@ -446,6 +448,7 @@
     });
 
     card.addEventListener('mouseleave', function(){
+      _cardRect = null;
       tRX = 0; tRY = 0;
       tSX = 50; tSY = 50;
       views = baseViews;
@@ -4425,11 +4428,13 @@ var chapterEl = historiaSection.querySelector('.ht-chapter-active');
 
   var magnet = root.querySelector('[data-magnetic]');
   if(magnet && !reduced && window.matchMedia('(pointer: fine)').matches){
+    var _magnetRect = null;
+    magnet.addEventListener('mouseenter', function(){ _magnetRect = magnet.getBoundingClientRect(); });
     magnet.addEventListener('mousemove', function(e){
-      var r = magnet.getBoundingClientRect();
+      var r = _magnetRect || magnet.getBoundingClientRect();
       magnet.style.transform = 'translate(' + ((e.clientX - r.left) / r.width - 0.5) * 14 + 'px,' + ((e.clientY - r.top) / r.height - 0.5) * 14 + 'px)';
     });
-    magnet.addEventListener('mouseleave', function(){ magnet.style.transform = ''; });
+    magnet.addEventListener('mouseleave', function(){ _magnetRect = null; magnet.style.transform = ''; });
   }
 })();
 </script>
@@ -4853,13 +4858,16 @@ var navScrollAreaEl = document.querySelector('.nav-scroll-area');
     document.querySelectorAll('.ad-banner-btn').forEach(function(btn){
       var parent = btn.closest('.ad-banner');
       if(!parent) return;
+      var _btnRect = null;
+      parent.addEventListener('mouseenter', function(){ _btnRect = btn.getBoundingClientRect(); });
       parent.addEventListener('mousemove', function(e){
-        var r = btn.getBoundingClientRect();
+        var r = _btnRect || btn.getBoundingClientRect();
         var dx = (e.clientX - (r.left + r.width/2)) * 0.18;
         var dy = (e.clientY - (r.top + r.height/2)) * 0.18;
         btn.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
       });
       parent.addEventListener('mouseleave', function(){
+        _btnRect = null;
         btn.style.transform = '';
       });
     });
@@ -5765,11 +5773,14 @@ function forceCounters(){
     <script>
 /* ── MOOD BTN MOUSEMOVE ── */
 document.querySelectorAll('.mood-btn').forEach(function(btn){
+  var _moodBtnRect = null;
+  btn.addEventListener('mouseenter', function(){ _moodBtnRect = btn.getBoundingClientRect(); });
   btn.addEventListener('mousemove', function(e){
-    var r = btn.getBoundingClientRect();
+    var r = _moodBtnRect || btn.getBoundingClientRect();
     btn.style.setProperty('--bx', ((e.clientX - r.left) / r.width * 100) + '%');
     btn.style.setProperty('--by', ((e.clientY - r.top) / r.height * 100) + '%');
   });
+  btn.addEventListener('mouseleave', function(){ _moodBtnRect = null; });
 });
 
 /* ── CIRC CARD DRAW ANIMATION ── */
@@ -5875,10 +5886,23 @@ var cx = 0, cy = 0, tx = 0, ty = 0;
     <script>
 (function(){
   if (!('IntersectionObserver' in window)) return;
-  var els = Array.prototype.filter.call(document.querySelectorAll('body *'), function(el){
-    var cs = getComputedStyle(el);
-    return cs.animationName && cs.animationName !== 'none';
-  });
+  var els;
+  if ('getAnimations' in document) {
+    /* Usa el registro nativo de animaciones activas del navegador:
+       mismo resultado que antes, sin forzar getComputedStyle sobre
+       cada nodo del documento (evita recálculo de estilo O(N)). */
+    els = Array.prototype.map.call(document.getAnimations(), function(a){
+      return a.effect && a.effect.target;
+    }).filter(function(el, i, arr){
+      return el && arr.indexOf(el) === i;
+    });
+  } else {
+    /* Fallback para navegadores sin Document.getAnimations() (comportamiento original) */
+    els = Array.prototype.filter.call(document.querySelectorAll('body *'), function(el){
+      var cs = getComputedStyle(el);
+      return cs.animationName && cs.animationName !== 'none';
+    });
+  }
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       entry.target.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
