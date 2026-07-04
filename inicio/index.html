@@ -9599,8 +9599,10 @@ var _searchScrollTimer = null;
   });
 
   /* ── CLIMA ── */
-  var WX_LAT=-32.4825,WX_LON=-58.2372;
-  var WX_URL='https://api.open-meteo.com/v1/forecast?latitude='+WX_LAT+'&longitude='+WX_LON+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,uv_index,visibility&daily=precipitation_sum&timezone=America%2FArgentina%2FBuenos_Aires&forecast_days=1';
+  /* Se pide a /weather (función propia en Cloudflare Pages) en vez de pedirle
+     directo a api.open-meteo.com, porque hay ISPs argentinos que no rutean
+     bien hacia esa API. La función /weather hace de intermediaria. */
+  var WX_URL='/weather';
 
   function wxDecode(code){
     var map={0:{icon:'☀️',desc:'Despejado'},1:{icon:'🌤',desc:'Mayormente despejado'},2:{icon:'⛅',desc:'Parcialmente nublado'},3:{icon:'☁️',desc:'Nublado'},45:{icon:'🌫',desc:'Neblina'},48:{icon:'🌫',desc:'Niebla con escarcha'},51:{icon:'🌦',desc:'Llovizna leve'},53:{icon:'🌦',desc:'Llovizna moderada'},55:{icon:'🌧',desc:'Llovizna intensa'},61:{icon:'🌧',desc:'Lluvia leve'},63:{icon:'🌧',desc:'Lluvia moderada'},65:{icon:'🌧',desc:'Lluvia intensa'},71:{icon:'🌨',desc:'Nieve leve'},73:{icon:'❄️',desc:'Nieve moderada'},75:{icon:'❄️',desc:'Nieve intensa'},80:{icon:'🌦',desc:'Chaparrón leve'},81:{icon:'🌧',desc:'Chaparrón moderado'},82:{icon:'⛈',desc:'Chaparrón fuerte'},95:{icon:'⛈',desc:'Tormenta'},96:{icon:'⛈',desc:'Tormenta con granizo'},99:{icon:'⛈',desc:'Tormenta fuerte'}};
