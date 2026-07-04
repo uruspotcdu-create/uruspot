@@ -4421,7 +4421,7 @@ var chapterEl = historiaSection.querySelector('.ht-chapter-active');
     function onScroll(){ if(!ticking){ requestAnimationFrame(updateRoute); ticking = true; } }
     window.addEventListener('scroll', onScroll, { passive:true });
     window.addEventListener('resize', onScroll);
-    updateRoute();
+    requestAnimationFrame(updateRoute);
   } else if(routeEl && reduced){
     root.querySelector('[data-route-fill]').style.height = '100%';
     root.querySelector('[data-route-pin]').style.top    = '100%';
