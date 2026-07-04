@@ -336,6 +336,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {outline:2px solid #4
   0%{transform:translate(0,0);opacity:.8}
   100%{transform:translate(45px,-50px);opacity:.9}
 }
+.hero.hero-offscreen .hero-orb-1,
+.hero.hero-offscreen .hero-orb-2 {
+  animation-play-state: paused;
+}
 
 /* ── PARTÍCULAS — plancton bioluminiscente (valor final único) ── */
 .hero::before {
@@ -3059,6 +3063,51 @@ body {
   <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span>
   <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span>
 </h1>
+      <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
+      <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país.<br /><strong>100+ lugares verificados. Solo Concepción del Uruguay.</strong></p>
+  <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares verificados</div></div>
+  <div class="id-stat" role="listitem" style="border-left:2px solid rgba(212,116,42,.35)"><div class="id-stat-num" data-count="243" style="color:var(--oro2);font-size:clamp(32px,4vw,48px)">0</div><div class="id-stat-label" style="font-family:var(--f-italic);font-style:italic;color:rgba(232,180,140,.70);letter-spacing:1px">Años</div></div>
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="5">0</div><div class="id-stat-label">Universidades activas</div></div>
+  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="%">0<sup>%</sup></div><div class="id-stat-label">Local</div></div>
+</div>
+      <div class="hero-ctas">
+     <a class="btn-primary" href="#mood" id="hero-cta-primary">
+  Explorar la guía completa
+  <span aria-hidden="true"> →</span>
+</a>
+        <a class="btn-ghost" href="#circuitos" aria-label="Elegí qué te apetece hacer hoy">¿Qué te apetece hoy? ↓</a>
+      </div>
+    </div>
+    <aside class="wx-hero" aria-label="Clima actual en Concepción del Uruguay">
+      <div class="wx-hero-card">
+        <div class="wx-hero-bar" aria-hidden="true"></div>
+        <div class="wx-hero-body">
+          <div class="wx-hero-city">Concepción del Uruguay · En vivo</div>
+          <div class="wx-hero-main">
+            <div class="wx-hero-icon" id="wx-hero-icon" aria-hidden="true">⏳</div>
+            <div class="wx-hero-temp-wrap">
+             <div class="wx-hero-temp" id="wx-hero-temp" aria-live="polite" aria-atomic="true" aria-relevant="text"><span class="wx-skeleton wx-skel-temp" id="wx-hero-temp-skel"></span></div>
+              <div class="wx-hero-desc" id="wx-hero-desc"><span class="wx-skeleton wx-skel-desc"></span></div>
+            </div>
+          </div>
+          <div class="wx-hero-sep" aria-hidden="true"></div>
+          <div class="wx-hero-data">
+            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Sensación</div><div class="wx-hero-datum-val" id="wx-hero-feels"><span class="wx-skeleton wx-skel-datum"></span></div></div>
+            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Humedad</div><div class="wx-hero-datum-val" id="wx-hero-hum"><span class="wx-skeleton wx-skel-datum"></span></div></div>
+            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Viento</div><div class="wx-hero-datum-val" id="wx-hero-wind"><span class="wx-skeleton wx-skel-datum"></span></div></div>
+            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Lluvia hoy</div><div class="wx-hero-datum-val" id="wx-hero-rain"><span class="wx-skeleton wx-skel-datum"></span></div></div>
+          </div>
+        </div>
+       <div class="wx-hero-footer">
+          <span class="wx-hero-updated" id="wx-hero-updated" aria-live="polite" aria-atomic="true">Cargando...</span>
+          <span class="wx-hero-frase" id="wx-hero-frase" aria-live="polite" aria-atomic="true"></span>
+        </div>
+      </div>
+    </aside>
+  </div>
+<div class="hero-fade" aria-hidden="true"></div>
+
 <script>
 (function(){
   var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -3109,51 +3158,6 @@ body {
   }else{animate();}
 })();
 </script>
-      <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
-      <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país.<br /><strong>100+ lugares verificados. Solo Concepción del Uruguay.</strong></p>
-  <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
-  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="+">0<sup>+</sup></div><div class="id-stat-label">Lugares verificados</div></div>
-  <div class="id-stat" role="listitem" style="border-left:2px solid rgba(212,116,42,.35)"><div class="id-stat-num" data-count="243" style="color:var(--oro2);font-size:clamp(32px,4vw,48px)">0</div><div class="id-stat-label" style="font-family:var(--f-italic);font-style:italic;color:rgba(232,180,140,.70);letter-spacing:1px">Años</div></div>
-  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="5">0</div><div class="id-stat-label">Universidades activas</div></div>
-  <div class="id-stat" role="listitem"><div class="id-stat-num" data-count="100" data-suffix="%">0<sup>%</sup></div><div class="id-stat-label">Local</div></div>
-</div>
-      <div class="hero-ctas">
-     <a class="btn-primary" href="#mood" id="hero-cta-primary">
-  Explorar la guía completa
-  <span aria-hidden="true"> →</span>
-</a>
-        <a class="btn-ghost" href="#circuitos" aria-label="Elegí qué te apetece hacer hoy">¿Qué te apetece hoy? ↓</a>
-      </div>
-    </div>
-    <aside class="wx-hero" aria-label="Clima actual en Concepción del Uruguay">
-      <div class="wx-hero-card">
-        <div class="wx-hero-bar" aria-hidden="true"></div>
-        <div class="wx-hero-body">
-          <div class="wx-hero-city">Concepción del Uruguay · En vivo</div>
-          <div class="wx-hero-main">
-            <div class="wx-hero-icon" id="wx-hero-icon" aria-hidden="true">⏳</div>
-            <div class="wx-hero-temp-wrap">
-             <div class="wx-hero-temp" id="wx-hero-temp" aria-live="polite" aria-atomic="true" aria-relevant="text"><span class="wx-skeleton wx-skel-temp" id="wx-hero-temp-skel"></span></div>
-              <div class="wx-hero-desc" id="wx-hero-desc"><span class="wx-skeleton wx-skel-desc"></span></div>
-            </div>
-          </div>
-          <div class="wx-hero-sep" aria-hidden="true"></div>
-          <div class="wx-hero-data">
-            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Sensación</div><div class="wx-hero-datum-val" id="wx-hero-feels"><span class="wx-skeleton wx-skel-datum"></span></div></div>
-            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Humedad</div><div class="wx-hero-datum-val" id="wx-hero-hum"><span class="wx-skeleton wx-skel-datum"></span></div></div>
-            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Viento</div><div class="wx-hero-datum-val" id="wx-hero-wind"><span class="wx-skeleton wx-skel-datum"></span></div></div>
-            <div class="wx-hero-datum"><div class="wx-hero-datum-label">Lluvia hoy</div><div class="wx-hero-datum-val" id="wx-hero-rain"><span class="wx-skeleton wx-skel-datum"></span></div></div>
-          </div>
-        </div>
-       <div class="wx-hero-footer">
-          <span class="wx-hero-updated" id="wx-hero-updated" aria-live="polite" aria-atomic="true">Cargando...</span>
-          <span class="wx-hero-frase" id="wx-hero-frase" aria-live="polite" aria-atomic="true"></span>
-        </div>
-      </div>
-    </aside>
-  </div>
-  <div class="hero-fade" aria-hidden="true"></div>
-
 <script>
 (function(){
   window._usAnim = window._usAnim || {
@@ -7669,7 +7673,7 @@ if(alive){rafId=requestAnimationFrame(loop);}
     progBar.className = 'ht-reading-progress';
     tabsWrap.appendChild(progBar);
 
-    var chapterEl = historiaSection.querySelector('.ht-chapter-active');
+var chapterEl = historiaSection.querySelector('.ht-chapter-active');
     function updateProgress(){
       if(!chapterEl) return;
       var rect = chapterEl.getBoundingClientRect();
@@ -7677,7 +7681,16 @@ if(alive){rafId=requestAnimationFrame(loop);}
       var visible = Math.max(0, window.innerHeight - Math.max(0, rect.top));
       progBar.style.width = Math.min(100, (visible / total * 100)) + '%';
     }
-    window.addEventListener('scroll', updateProgress, {passive:true});
+    var historiaProgressTicking = false;
+    window.addEventListener('scroll', function(){
+      if(!historiaProgressTicking){
+        requestAnimationFrame(function(){
+          updateProgress();
+          historiaProgressTicking = false;
+        });
+        historiaProgressTicking = true;
+      }
+    }, {passive:true});
 
     /* Actualizar referencia al capítulo cuando cambia tab */
     var tablist = historiaSection.querySelector('.ht-tabs-wrap');
@@ -9068,8 +9081,19 @@ if(navScrollArea && navArrowRight){
 'use strict';
   var _wxAbortController = null;
   var srDebId = null;
-  var _cachedOrb1 = document.querySelector('.hero-orb-1');
+var _cachedOrb1 = document.querySelector('.hero-orb-1');
   var _cachedOrb2 = document.querySelector('.hero-orb-2');
+
+  /* Pausar orbes del Hero fuera de viewport (ahorro de composición GPU) */
+  var _heroEl = document.querySelector('.hero');
+  if (_heroEl && 'IntersectionObserver' in window) {
+    var _heroOrbObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        _heroEl.classList.toggle('hero-offscreen', !entry.isIntersecting);
+      });
+    }, {threshold:0});
+    _heroOrbObserver.observe(_heroEl);
+  }
 
   /* ── MODO TEMPORAL ── */
   var globalTimeMode = (function(){
