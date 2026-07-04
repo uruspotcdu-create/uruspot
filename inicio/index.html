@@ -266,8 +266,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {outline:2px solid #4
 /* ── HERO CONTAINER ── */
 .hero {
   position:relative;
-  min-height:100vh;
-  min-height:100svh;
+  min-height:0;
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -364,7 +363,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {outline:2px solid #4
     radial-gradient(1px 1px at 75% 35%, rgba(232,160,48,0.20) 50%, transparent 50%),
     radial-gradient(2px 2px at 22% 12%, rgba(10,255,239,0.60) 50%, transparent 50%),
     radial-gradient(1px 1px at 62% 22%, rgba(10,255,239,0.30) 50%, transparent 50%);
-  animation:ac-drift-plankton 35s ease-in-out infinite;
   opacity:.8;
 }
 
@@ -441,9 +439,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {outline:2px solid #4
 /* ── HERO INNER — layout principal ── */
 .hero-inner {
   position:relative;z-index:4;
-  padding:0 var(--gutter) 88px;
+  padding:36px var(--gutter) 48px;
   flex:1;display:flex;
-  flex-direction:row;align-items:flex-end;
+  flex-direction:row;align-items:center;
   justify-content:space-between;gap:48px;
 }
 .hero-inner-left {
@@ -2282,15 +2280,7 @@ body {
       rgba(10,255,239,0.012) 181px,
       rgba(10,255,239,0.012) 182px
     );
-  animation: ac-skew-ripple 25s ease-in-out infinite alternate;
   opacity: 0.7;
-}
-
-@keyframes ac-skew-ripple {
-  0%   { transform: skewX(0deg)  skewY(0deg)  scale(1);    opacity: 0.7; }
-  33%  { transform: skewX(.4deg) skewY(.1deg) scale(1.02); opacity: 0.9; }
-  66%  { transform: skewX(-.3deg) skewY(.2deg) scale(0.99); opacity: 0.6; }
-  100% { transform: skewX(.2deg) skewY(-.1deg) scale(1.01); opacity: 0.8; }
 }
 
 /* ── .hero-river-grid — consolidado más arriba ── */
@@ -3165,24 +3155,8 @@ body {
     </aside>
   </div>
   <div class="hero-fade" aria-hidden="true"></div>
-  <canvas id="hero-water-canvas" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0.18;mix-blend-mode:screen;"></canvas>
-
-<style>
-/* Caustics light patches — luz refractada bajo agua */
-@keyframes causticsMove {
-  0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity:0.6; }
-  25%  { transform: translate(18px,-12px) scale(1.08) rotate(2deg); opacity:1; }
-  50%  { transform: translate(-10px,-22px) scale(0.95) rotate(-1deg); opacity:0.7; }
-  75%  { transform: translate(8px,-8px) scale(1.04) rotate(1.5deg); opacity:0.9; }
-  100% { transform: translate(0,0) scale(1) rotate(0deg); opacity:0.6; }
-}
-
-
-
-</style>
 
 <script>
-/* Efecto de refracción canvas — caustics procedurales livianos */
 (function(){
   window._usAnim = window._usAnim || {
     reduced: window.matchMedia('(prefers-reduced-motion:reduce)').matches,
@@ -3205,86 +3179,6 @@ body {
       }
     }
   };
-
-  var reduced = window._usAnim.reduced;
-  var canvas = document.getElementById('hero-water-canvas');
-  if(!canvas || reduced) return;
-
-  var ctx = canvas.getContext('2d');
-  var W, H;
-  var ripples = [];
-
-  function resize(){
-    W = canvas.offsetWidth;
-    H = canvas.offsetHeight;
-    canvas.width  = W;
-    canvas.height = H;
-  }
-
-  function addRipple(){
-    ripples.push({
-      x: Math.random() * W,
-      y: Math.random() * H * 0.7,
-      r: 0,
-      maxR: 60 + Math.random() * 120,
-      alpha: 0.18 + Math.random() * 0.12,
-      speed: 0.4 + Math.random() * 0.6
-    });
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    ripples = ripples.filter(function(rp){
-      rp.r += rp.speed;
-      var life = 1 - rp.r / rp.maxR;
-      if(life <= 0) return false;
-      ctx.beginPath();
-      ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI*2);
-      ctx.strokeStyle = 'rgba(10,255,239,' + (rp.alpha * life) + ')';
-      ctx.lineWidth = 1 + life * 1.5;
-      ctx.stroke();
-
-      /* Segundo anillo más grande */
-      if(rp.r > rp.maxR * 0.3){
-        ctx.beginPath();
-        ctx.arc(rp.x, rp.y, rp.r * 1.4, 0, Math.PI*2);
-        ctx.strokeStyle = 'rgba(10,200,220,' + (rp.alpha * life * 0.4) + ')';
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-      }
-      return true;
-    });
-  }
-
-  var loop = window._usAnim.rafLoop(draw);
-  var rippleInterval;
-  function start(){
-    resize();
-    rippleInterval = setInterval(addRipple, 900);
-    loop.start();
-  }
-
-  /* Solo animar cuando el hero es visible */
-  var heroEl = document.querySelector('.hero');
-  if(heroEl && 'IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(e){
-      if(e[0].isIntersecting){
-        start();
-        io.unobserve(heroEl);
-      }
-    }, {threshold:0.1});
-    io.observe(heroEl);
-  } else { start(); }
-
-  window.addEventListener('resize', function(){
-    clearTimeout(window._heroCanvasResizeT);
-    window._heroCanvasResizeT = setTimeout(resize, 250);
-  }, {passive:true});
-
-  window.addEventListener('pagehide', function(){
-    clearInterval(rippleInterval);
-    loop.stop();
-  }, {once:true});
 })();
 </script>
 </header>
@@ -9170,45 +9064,6 @@ if(navScrollArea && navArrowRight){
 }
 })();
 </script>
-<script>
-  /* ── HERO PARALLAX MAGNÉTICO ── */
-(function(){
-  var reduced=window._usAnim.reduced;
-  if(reduced||window.innerWidth<769)return;
-  var orb1=document.querySelector('.hero-orb-1');
-  var orb2=document.querySelector('.hero-orb-2');
-  if(!orb1||!orb2)return;
-  orb1.style.animationPlayState='paused';
-  orb2.style.animationPlayState='paused';
-  var cx=0,cy=0,tx1=0,ty1=0,tx2=0,ty2=0;
-  document.addEventListener('mousemove',function(e){
-    cx=(e.clientX/window.innerWidth-.5)*2;
-    cy=(e.clientY/window.innerHeight-.5)*2;
-  },{passive:true});
-  var lerp=window._usAnim.lerp;
-var mesh=document.querySelector('.hero-mesh');
-  var loop=window._usAnim.rafLoop(function(){
-    tx1=lerp(tx1,cx*22,0.06);
-    ty1=lerp(ty1,cy*16,0.06);
-    tx2=lerp(tx2,cx*-14,0.045);
-    ty2=lerp(ty2,cy*-10,0.045);
-    orb1.style.transform='translate3d('+tx1+'px,'+ty1+'px,0)';
-    orb2.style.transform='translate3d('+tx2+'px,'+ty2+'px,0)';
-    if(mesh){
-      mesh.style.backgroundPosition=(50+cx*2)+'% '+(50+cy*2)+'%';
-    }
-  });
-  var heroSect=document.querySelector('.hero');
-  if(heroSect&&'IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(e){
-      if(e[0].isIntersecting){loop.start();}
-      else{loop.stop();}
-    },{threshold:0});
-    io.observe(heroSect);
-  }else{loop.start();}
-})();
-</script>
-
 <!-- JS PRINCIPAL -->
 <script>
 (function(){
