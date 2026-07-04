@@ -4893,14 +4893,17 @@ var id=entry.target.getAttribute('id');
       });
     },{rootMargin:'-'+(nav.offsetHeight+20)+'px 0px -55% 0px',threshold:0});
   }
-  var sectionObserver=createSectionObserver();
-  sections.forEach(function(s){sectionObserver.observe(s);});
+  var sectionObserver;
+  requestAnimationFrame(function(){
+    sectionObserver=createSectionObserver();
+    sections.forEach(function(s){sectionObserver.observe(s);});
+  });
 
   var _soResizeTimer=null;
   window.addEventListener('resize',function(){
     clearTimeout(_soResizeTimer);
     _soResizeTimer=setTimeout(function(){
-      sectionObserver.disconnect();
+      if(sectionObserver) sectionObserver.disconnect();
       sectionObserver=createSectionObserver();
       sections.forEach(function(s){sectionObserver.observe(s);});
     },250);
