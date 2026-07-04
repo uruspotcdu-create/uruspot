@@ -1,11 +1,5 @@
 // functions/weather.js
-// Cloudflare Pages Function — sirve como intermediario hacia Open-Meteo
-// porque algunos ISPs argentinos no rutean bien hacia api.open-meteo.com
-// directo desde el navegador del usuario.
-//
-// Se ejecuta automáticamente en Cloudflare Pages cuando alguien pide
-// la ruta /weather en el sitio (no requiere configuración extra,
-// Cloudflare detecta la carpeta /functions sola).
+// Cloudflare Pages Function — intermediario hacia Open-Meteo.
 
 const LAT = -32.4825;
 const LON = -58.2372;
@@ -19,21 +13,16 @@ export async function onRequestGet(context) {
 
   try {
     const res = await fetch(upstream, {
-      cf: {
-        // Cachea 5 minutos en el edge de Cloudflare para no golpear
-        // la API en cada visita.
-        cacheTtl: 300,
-        cacheEverything: true,
+      headers: {
+        "User-Agent": "uruspot-weather-proxy/1.0",
+        "Accept": "application/json",
       },
     });
 
     if (!res.ok) {
       return new Response(
         JSON.stringify({ error: "upstream_error", status: res.status }),
-        {
-          status: 502,
-          headers: { "content-type": "application/json" },
-        }
+        { status: 502, headers: { "content-type": "application/json" } }
       );
     }
 
@@ -43,7 +32,6 @@ export async function onRequestGet(context) {
       status: 200,
       headers: {
         "content-type": "application/json",
-        // Cache también en el navegador/CDN por 5 minutos
         "cache-control": "public, max-age=300",
         "access-control-allow-origin": "*",
       },
@@ -51,10 +39,7 @@ export async function onRequestGet(context) {
   } catch (err) {
     return new Response(
       JSON.stringify({ error: "fetch_failed", message: String(err) }),
-      {
-        status: 500,
-        headers: { "content-type": "application/json" },
-      }
+      { status: 500, headers: { "content-type": "application/json" } }
     );
   }
 }
