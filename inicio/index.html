@@ -5695,22 +5695,56 @@ var sectionNames = {
 var crumbEl = document.getElementById('section-crumb');
   var crumbCurrent = crumbEl ? crumbEl.querySelector('#section-crumb-current') : null;
 
- if(crumbEl){
+  if(crumbEl && crumbCurrent){
     crumbEl.classList.add('visible');
 
-    var crumbObserver = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if(!entry.isIntersecting || !crumbCurrent) return;
-        var id = entry.target.getAttribute('id');
-        if(id && sectionNames[id]){
-          crumbCurrent.textContent = sectionNames[id];
-        }
-      });
-    }, {rootMargin:'-120px 0px -60% 0px', threshold:0});
+    /* Antes esto usaba un IntersectionObserver con una banda angosta
+       (rootMargin -120px/-60%) que solo actualizaba el texto cuando una
+       sección cruzaba esa banda exacta. En scroll rápido o por inercia
+       (típico en mobile) el navegador puede saltarse esos cruces, y el
+       texto queda pegado en la última sección que sí disparó el evento.
+       Reemplazado por un cálculo directo tipo "scrollspy": en cada frame
+       de scroll se mide qué sección está realmente debajo del cartel,
+       sin depender de eventos de entrada/salida que se pueden perder. */
+    var crumbSections = Object.keys(sectionNames).map(function(id){
+      return {id:id, el:document.getElementById(id)};
+    }).filter(function(s){ return !!s.el; });
 
-    document.querySelectorAll('section[id]').forEach(function(s){
-      crumbObserver.observe(s);
+    /* Orden real en el DOM (no el orden de sectionNames, que puede no coincidir) */
+    crumbSections.sort(function(a,b){
+      var pos = a.el.compareDocumentPosition(b.el);
+      if(pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+      if(pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+      return 0;
     });
+
+    var crumbTicking = false;
+    var crumbLastId = null;
+
+    function updateCrumb(){
+      crumbTicking = false;
+      if(!crumbSections.length) return;
+      var anchor = crumbEl.getBoundingClientRect().bottom + 1;
+      var current = crumbSections[0];
+      for(var i=0;i<crumbSections.length;i++){
+        if(crumbSections[i].el.getBoundingClientRect().top <= anchor){
+          current = crumbSections[i];
+        } else {
+          break;
+        }
+      }
+      if(current.id !== crumbLastId){
+        crumbLastId = current.id;
+        crumbCurrent.textContent = sectionNames[current.id];
+      }
+    }
+
+    function onCrumbScroll(){
+      if(!crumbTicking){ crumbTicking = true; requestAnimationFrame(updateCrumb); }
+    }
+    window.addEventListener('scroll', onCrumbScroll, {passive:true});
+    window.addEventListener('resize', onCrumbScroll);
+    updateCrumb();
   }
 /* ====== CTA FLOTANTE "¿PERDIDO?" ====== */
   var lostFab = document.getElementById('lost-fab');
