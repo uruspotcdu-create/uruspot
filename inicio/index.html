@@ -4789,20 +4789,27 @@ if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
         updateProgress();
         updateNav();
         var sy = window.scrollY;
-        if(_heroVisible && heroMesh){
-          var intensity = Math.min(sy / 400, 1);
-          heroMesh.style.opacity = 1 - intensity * 0.35;
-        }
-if(_heroVisible && window.innerWidth > 768 && sy < 700){
-        if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
-        if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
-      }
-        if(_heroVisible && heroTitleEms.length && sy < 500){
-          var t = sy / 500;
-          var ls = -4 + t * 2;
-          heroTitleEms.forEach(function(em){
-            em.style.letterSpacing = ls + 'px';
-          });
+        /* Los 3 efectos de abajo (mesh opacity, parallax de orbes y
+           letter-spacing del título) sólo corren en desktop. En mobile,
+           el cambio de letter-spacing en cada frame de scroll forzaba
+           un reflow completo del título del hero — eso era el "hiper lag"
+           al abrir la web o volver arriba. */
+        if(_heroVisible && window.innerWidth > 768){
+          if(heroMesh){
+            var intensity = Math.min(sy / 400, 1);
+            heroMesh.style.opacity = 1 - intensity * 0.35;
+          }
+          if(sy < 700){
+            if(_cachedOrb1) _cachedOrb1.style.transform = 'translate3d(0,' + (sy * 0.12) + 'px,0)';
+            if(_cachedOrb2) _cachedOrb2.style.transform = 'translate3d(0,' + (sy * -0.08) + 'px,0)';
+          }
+          if(heroTitleEms.length && sy < 500){
+            var t = sy / 500;
+            var ls = -4 + t * 2;
+            heroTitleEms.forEach(function(em){
+              em.style.letterSpacing = ls + 'px';
+            });
+          }
         }
         ticking=false;
       });
