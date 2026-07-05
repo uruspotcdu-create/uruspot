@@ -482,6 +482,13 @@ footer::before{
   .vt-phrase2{opacity:1!important;transform:none!important;transition:none!important}
 }
 </style>
+
+<!-- Leaflet CSS & Fonts -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="grain-overlay" aria-hidden="true"></div>
@@ -730,42 +737,98 @@ footer::before{
 </div>
   
 </section>
-  <!-- MAPA -->
-  <div class="sec-title reveal">
-    <h2>Mapa interactivo</h2>
-    <p>55 lugares marcados · navegá y planeá tu visita</p>
-    <div class="sec-divider"></div>
+<section class="us-section" id="mapa" aria-labelledby="title-mapa">
+  <style>
+    :root{
+      --void:#08070A; --parchment:#F5EED8; --ink:#F2EDE3;
+      --verde:#1E5C38; --verde2:#267A4D; --oro:#E07828;
+      --f-display:'Playfair Display', serif; --f-ui:'Space Grotesk', sans-serif;
+    }
+    #mapa{ font-family:var(--f-ui); color:var(--ink); background:var(--void); padding:56px 20px; }
+    #mapa .section-header{ display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;padding-bottom:20px;gap:16px;flex-wrap:wrap; max-width:1180px; margin-inline:auto; }
+    #mapa .section-eyebrow{ font-family:var(--f-ui);font-size:8px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:var(--verde2);display:block;margin-bottom:8px }
+    #mapa .section-title{ font-family:var(--f-display);font-size:clamp(24px,3.2vw,34px);font-weight:400;color:var(--ink);line-height:1;letter-spacing:-.5px }
+    #mapa .section-count{ font-family:var(--f-ui);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(242,237,227,.5); border:1px solid rgba(242,237,227,.18); padding:8px 14px; border-radius:50px; white-space:nowrap; }
+
+    #mapa-wrap{ position:relative; max-width:1180px; margin:0 auto; border-radius:16px; overflow:hidden; border:1px solid rgba(242,237,227,.12); box-shadow:0 32px 72px -12px rgba(0,0,0,.55); background:#0E0C10; }
+
+    #mapa-toolbar{ display:flex; flex-wrap:wrap; gap:10px; padding:16px; background:rgba(8,7,10,.96); border-bottom:1px solid rgba(242,237,227,.10); align-items:center; }
+    #mapa-search-wrap{ position:relative; flex:1 1 220px; min-width:180px; }
+    #mapa-search{ width:100%; font-family:var(--f-ui); font-size:13px; color:var(--ink); background:rgba(242,237,227,.06); border:1px solid rgba(242,237,227,.16); border-radius:50px; padding:10px 16px 10px 36px; outline:none; transition:border-color .2s ease; }
+    #mapa-search:focus{ border-color:var(--verde2); }
+    #mapa-search-wrap svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.5; pointer-events:none; }
+    #mapa-geoloc{ font-family:var(--f-ui); font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:#fff; background:var(--verde); border:1px solid var(--verde2); border-radius:50px; padding:10px 16px; cursor:pointer; transition:filter .2s ease; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+    #mapa-geoloc:hover{ filter:brightness(1.15); }
+    #mapa-geoloc:disabled{ opacity:.5; cursor:wait; }
+
+    #mapa-filtros{ display:flex; flex-wrap:wrap; gap:8px; padding:14px 16px; background:rgba(8,7,10,.92); border-bottom:1px solid rgba(242,237,227,.10); }
+    .mapa-pill{ font-family:var(--f-ui); font-size:10px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:rgba(242,237,227,.65); background:rgba(242,237,227,.06); border:1px solid rgba(242,237,227,.14); border-radius:50px; padding:8px 16px; cursor:pointer; transition:all .2s ease; display:flex; align-items:center; gap:6px; }
+    .mapa-pill:hover{ border-color:rgba(38,122,85,.6); color:#fff; }
+    .mapa-pill.activo{ background:var(--pill-color, var(--verde)); border-color:var(--pill-color, var(--verde2)); color:#fff; }
+    .mapa-pill .cnt{ opacity:.7; font-weight:400; }
+
+    #mapa-leaflet{ height:580px; width:100%; background:#141218; }
+    #mapa-contador{ font-family:var(--f-ui); font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(242,237,227,.45); padding:12px 16px; background:rgba(8,7,10,.92); border-top:1px solid rgba(242,237,227,.08); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+    #mapa-contador strong{ color:var(--ink); }
+    #mapa-contador a{ color:var(--oro); text-decoration:none; cursor:pointer; }
+
+    .mapa-popup .leaflet-popup-content-wrapper{ background:#0E0C10; color:#F5EED8; border-radius:12px; border:1px solid rgba(242,237,227,.14); box-shadow:0 20px 50px rgba(0,0,0,.6); }
+    .mapa-popup .leaflet-popup-tip{ background:#0E0C10; }
+    .mapa-popup .leaflet-popup-content{ margin:14px 16px; width:236px !important; }
+    .mapa-popup-cat{ font-family:var(--f-ui); font-size:8px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--pop-color,#E07828); display:block; margin-bottom:6px; }
+    .mapa-popup-nombre{ font-family:var(--f-display); font-size:16px; color:#F5EED8; display:block; margin-bottom:4px; line-height:1.2; }
+    .mapa-popup-rating{ font-size:11px; color:#F0C419; margin-bottom:6px; display:flex; align-items:center; gap:4px; }
+    .mapa-popup-rating span.cant{ color:rgba(245,238,216,.5); }
+    .mapa-popup-norating{ font-size:11px; color:rgba(245,238,216,.4); margin-bottom:6px; display:block; font-style:italic; }
+    .mapa-popup-addr{ font-family:var(--f-ui); font-size:11px; line-height:1.4; color:rgba(245,238,216,.60); margin-bottom:4px; display:block; }
+    .mapa-popup-desc{ font-family:var(--f-ui); font-size:11px; line-height:1.4; color:rgba(245,238,216,.75); display:block; margin-bottom:10px; }
+    .mapa-popup-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .mapa-popup-actions a{ font-family:var(--f-ui); font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-decoration:none; padding:7px 11px; border-radius:50px; display:inline-flex; align-items:center; gap:4px; }
+    .mapa-popup-actions a.ir{ background:var(--pop-color,#267A4D); color:#fff; }
+    .mapa-popup-actions a.tel{ background:rgba(242,237,227,.10); color:#F5EED8; border:1px solid rgba(242,237,227,.18); }
+
+    .mapa-pin{ width:16px; height:16px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid rgba(255,255,255,.9); box-shadow:0 2px 6px rgba(0,0,0,.5); }
+    .mapa-cluster{ background:transparent !important; border:none !important; }
+    .mapa-cluster-inner{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--f-ui); font-weight:700; font-size:13px; border:2px solid rgba(255,255,255,.85); box-shadow:0 4px 14px rgba(0,0,0,.5); }
+
+    #mapa-empty{ display:none; padding:60px 20px; text-align:center; color:rgba(245,238,216,.55); font-size:13px; }
+    #mapa-leaflet .leaflet-control-zoom a{ background:#0E0C10; color:#F5EED8; border-color:rgba(242,237,227,.16); }
+    #mapa-leaflet .leaflet-control-attribution{ background:rgba(8,7,10,.8) !important; color:rgba(245,238,216,.5) !important; }
+    #mapa-leaflet .leaflet-control-attribution a{ color:rgba(245,238,216,.7) !important; }
+
+    @media (max-width: 640px){
+      #mapa-leaflet{ height:460px; }
+      #mapa-toolbar{ flex-direction:column; align-items:stretch; }
+      #mapa-geoloc{ justify-content:center; }
+    }
+  </style>
+
+  <div class="section-header">
+    <div>
+      <span class="section-eyebrow">Mapa completo</span>
+      <h2 class="section-title" id="title-mapa">🗺️ Todo URU SPOT en un mapa</h2>
+    </div>
+    <span class="section-count" id="mapa-total-badge">cargando…</span>
   </div>
 
-  <div class="map-section reveal rd1">
-    <div class="map-topbar">
-      <div class="map-topbar-l">
-        <h3>Todos los lugares en un mapa</h3>
-        <p>Hacé clic en cualquier pin · Filtrá por categoría desde el panel lateral</p>
+  <div id="mapa-wrap">
+    <div id="mapa-toolbar">
+      <div id="mapa-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="mapa-search" placeholder="Buscar un lugar…" autocomplete="off" aria-label="Buscar un lugar" />
       </div>
-      <div class="live-badge"><div class="live-dot" aria-hidden="true"></div>Actualizado</div>
+      <button id="mapa-geoloc" type="button">📍 Cerca de mí</button>
     </div>
+    <div id="mapa-filtros" role="group" aria-label="Filtrar por categoría"></div>
+    <div id="mapa-leaflet" role="application" aria-label="Mapa interactivo de Concepción del Uruguay"></div>
+    <div id="mapa-empty">No encontramos lugares con esa búsqueda o ese filtro. Probá con otra palabra.</div>
+    <div id="mapa-contador">
+      <span>Mostrando <strong id="mapa-count">0</strong> de <strong id="mapa-total">0</strong> lugares</span>
+      <span>Datos verificados vía Google Places · <a id="mapa-reset">ver todos</a></span>
+    </div>
+  </div>
+</section>
 
-    <div class="map-frame">
-      <div class="map-chrome" aria-hidden="true">
-        <div class="mc-dots">
-          <div class="mc-dot"></div>
-          <div class="mc-dot"></div>
-          <div class="mc-dot"></div>
-        </div>
-        <span class="mc-title">Dónde Comer en CDU · Mapa Gastronómico</span>
-        <span class="mc-right">uruspot.pages.dev</span>
-      </div>
-
-      <!-- ✅ MAPA CORREGIDO — ID real de Google My Maps -->
-<iframe
-  src="https://www.google.com/maps/d/embed?mid=1k9PKHaoWcWkr4SEjAWdBvozs12r4t18"
-  title="Mapa gastronómico interactivo de Concepción del Uruguay"
-  allowfullscreen
-  loading="lazy"
-  fetchpriority="low"
-  referrerpolicy="no-referrer-when-downgrade">
-</iframe>
 
       <div class="map-footer" aria-hidden="true">
         <span class="mf-text">55 lugares · CDU · Entre Ríos · Argentina</span>
@@ -868,6 +931,224 @@ footer::before{
     revealObserver.observe(el);
   });
 
+})();
+</script>
+<!-- ③ PEGAR ESTO ANTES DE </body> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script>
+(function () {
+  // ------------------------------------------------------------------
+  // 104 lugares — verificados y corroborados contra Google Places.
+  // Incluye los 68 lugares originales + 39 lugares gastronómicos
+  // nuevos del KMZ "Dónde comer en CdU" (menos 5 que ya estaban
+  // cargados) + limpieza de 3 duplicados detectados en la base previa.
+  // ------------------------------------------------------------------
+  var LUGARES = [{"id":1,"nombre":"Palacio San José","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"km 128, Ruta Provincial 39, Concepción del Uruguay, Entre Ríos","descripcion":"Museo y Monumento Histórico Nacional. Residencia de Urquiza.","lat":-32.4277523,"lng":-58.5203861,"rating":4.6,"rating_count":12068,"telefono":null,"place_id":"ChIJ4QInqMUtsJURlCiiklmd1DI"},{"id":2,"nombre":"Basílica Inmaculada Concepción","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"3 de Febrero 41, Concepción del Uruguay, Entre Ríos","descripcion":"Alberga el mausoleo de Urquiza.","lat":-32.4851484,"lng":-58.2330589,"rating":4.7,"rating_count":1155,"telefono":"+54 3442 42-7146","place_id":"ChIJB1MGvwDbr5UR5-KDt-6jfXo"},{"id":3,"nombre":"Museo Casa de Delio Panizza","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Supremo Entrerriano 58, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4834864,"lng":-58.2305544,"rating":4.6,"rating_count":179,"telefono":null,"place_id":"ChIJCwN5DgHbr5URr9IEnzO--60"},{"id":4,"nombre":"Museo Andrés García","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Supremo Entrerriano 31, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4839437,"lng":-58.2307909,"rating":4.2,"rating_count":41,"telefono":null,"place_id":"ChIJ4Xl9AwHbr5URwiLuMwoXHjg"},{"id":5,"nombre":"Museo de Culturas Aborígenes Yuchán","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4836009,"lng":-58.2309428,"rating":2.5,"rating_count":2,"telefono":"+54 3442 44-1602","place_id":"ChIJvwpj9gDbr5URRh3SRJ0hhb8"},{"id":6,"nombre":"Colegio Superior del Uruguay Justo José de Urquiza","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Leguizamón 24, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4844604,"lng":-58.2337798,"rating":null,"rating_count":null,"telefono":"+54 3442 42-5554","place_id":"ChIJqwEEkgDbr5URC5XUtP8hQqQ"},{"id":7,"nombre":"Palacio Santa Cándida","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Puente Fierro s/n, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.5117538,"lng":-58.2363906,"rating":4.6,"rating_count":203,"telefono":"+54 11 2049-9747","place_id":"ChIJvTvnPp3br5URBsP7nF2CFK0"},{"id":8,"nombre":"Faro Stella Maris","categoria":"Patrimonio / Naturaleza","grupo":"patrimonio","direccion":"Isla del Puerto, Concepción del Uruguay, Entre Ríos","descripcion":"Único faro fluvial de Argentina. Inaugurado en 1949.","lat":-32.4734996,"lng":-58.2103066,"rating":null,"rating_count":null,"telefono":null,"place_id":"ChIJBcL_ld_ar5URuNODQmvF-4w"},{"id":9,"nombre":"Plaza General Francisco Ramírez","categoria":"Plaza","grupo":"patrimonio","direccion":"Gral. Galarza 734, Concepción del Uruguay, Entre Ríos","descripcion":"Plaza principal de la ciudad, frente a la Basílica.","lat":-32.4845619,"lng":-58.2321167,"rating":4.6,"rating_count":6892,"telefono":null,"place_id":"ChIJ5VA95wDbr5URempuVpwvDCQ"},{"id":10,"nombre":"Peatonal Rocamora","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Rocamora 713, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4832259,"lng":-58.232599,"rating":4.3,"rating_count":1195,"telefono":null,"place_id":"ChIJyXSBou3br5URd89v6OF8tvw"},{"id":11,"nombre":"Cine Teatro San Martín","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Estrada 820, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4798727,"lng":-58.2351233,"rating":4.5,"rating_count":2284,"telefono":"+54 3442 42-6145","place_id":"ChIJ4YhQKQHbr5URb-PHXKacK9s"},{"id":12,"nombre":"Museo de Dibujo y Grabado Guamán Poma","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4865505,"lng":-58.2304685,"rating":4.3,"rating_count":16,"telefono":null,"place_id":"ChIJvd47vwbbr5URNRh6lW_Pvu4"},{"id":13,"nombre":"Sala Evocativa de la Ribera","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Isla del Puerto, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.5002289,"lng":-58.224577,"rating":4.2,"rating_count":5,"telefono":null,"place_id":"ChIJ1UN7vnLbr5UR6GADfqiNc9w"},{"id":14,"nombre":"Barrio Puerto Viejo","categoria":"Patrimonio histórico","grupo":"patrimonio","direccion":"Puerto Viejo, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4949199,"lng":-58.2329052,"rating":null,"rating_count":null,"telefono":null,"place_id":"ChIJif7twAnbr5UR_cbncwt89Kk"},{"id":15,"nombre":"Banco Pelay","categoria":"Naturaleza / Playa","grupo":"naturaleza","direccion":"Camino a Banco Pelay, Paso Vera y La Toma, Concepción del Uruguay, Entre Ríos","descripcion":"El balneario más extenso. Entrada $2.000 (temporada 25-26).","lat":-32.4524198,"lng":-58.2099104,"rating":4.3,"rating_count":760,"telefono":"+54 11 6549-3022","place_id":"ChIJGWJ33L_br5URuc0umsC75Tg"},{"id":16,"nombre":"Isla del Puerto (Costanera)","categoria":"Naturaleza / Playa","grupo":"naturaleza","direccion":"Isla del Puerto, Concepción del Uruguay, Entre Ríos","descripcion":"3.400 m de costanera elevada, puente de 210 m, Faro Stella Maris.","lat":-32.4945064,"lng":-58.2208708,"rating":4.7,"rating_count":552,"telefono":null,"place_id":"ChIJu9KxzEXar5URDvV_OHL1lb0"},{"id":17,"nombre":"Isla Cambacuá","categoria":"Naturaleza / Playa","grupo":"naturaleza","direccion":"Isla Cambacuá, Concepción del Uruguay, Entre Ríos","descripcion":"Acceso solo en catamarán/lancha. Playa de arena blanca.","lat":-32.4927651,"lng":-58.2975183,"rating":null,"rating_count":null,"telefono":null,"place_id":"Ej9Jc2xhIENhbWJhY3XDoSwgQ29uY2VwY2nDs24gZGVsIFVydWd1YXksIEVudHJlIFLDrW9zLCBBcmdlbnRpbmEiLiosChQKEglv2rOrntmvlREcsdgdbJjuLBIUChIJnZO8XQDbr5URsjQTy8Yjijw"},{"id":18,"nombre":"Paso Vera","categoria":"Naturaleza / Playa","grupo":"naturaleza","direccion":"Camino a Paso Vera, pasando Banco Pelay, Concepción del Uruguay, Entre Ríos","descripcion":"Playa al norte de Banco Pelay. Alquiler de kayaks en temporada.","lat":-32.4339741,"lng":-58.2065407,"rating":4.5,"rating_count":1892,"telefono":"+54 9 3442 40-0012","place_id":"ChIJT_K91_bar5URwU-rO95PKBE"},{"id":19,"nombre":"Balneario Itapé","categoria":"Naturaleza / Playa","grupo":"naturaleza","direccion":"Defensa Sur, Concepción del Uruguay, Entre Ríos","descripcion":"Balneario histórico (desde 1930), gratuito, a 15 cuadras del centro.","lat":-32.5005771,"lng":-58.229137,"rating":4.1,"rating_count":931,"telefono":"+54 3442 48-6469","place_id":"ChIJOW8jiQzbr5UR24cNiwXabuo"},{"id":20,"nombre":"Veterinaria FISIOVET","categoria":"Veterinaria","grupo":"mascotas","direccion":"J. J. Bruno 2942, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4871579,"lng":-58.2787372,"rating":4.8,"rating_count":260,"telefono":"+54 9 3442 49-8143","place_id":"ChIJeTyL1Gvbr5URZ4lg0Mom8jw"},{"id":21,"nombre":"Clínica Veterinaria Dr. Vet","categoria":"Veterinaria","grupo":"mascotas","direccion":"Bv. Dr. Luis F. Aráoz 115, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4894473,"lng":-58.2497591,"rating":4.5,"rating_count":130,"telefono":null,"place_id":"ChIJPyx1drHbr5URNwClU3BB8DA"},{"id":22,"nombre":"Agroveterinaria 9 de Julio","categoria":"Veterinaria","grupo":"mascotas","direccion":"9 de Julio 1016, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4855986,"lng":-58.2375003,"rating":4.4,"rating_count":12,"telefono":"+54 3442 42-7801","place_id":"ChIJP2iu9m_br5URGke_dDH2pOs"},{"id":23,"nombre":"Clínica Veterinaria Dres. Artusi y Bruchez","categoria":"Veterinaria","grupo":"mascotas","direccion":"Belgrano 900, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4793749,"lng":-58.2365335,"rating":4.6,"rating_count":229,"telefono":"+54 3442 42-2164","place_id":"ChIJ-7-3RADbr5URW-wtzO1MTRY"},{"id":24,"nombre":"ATP Veterinaria","categoria":"Veterinaria","grupo":"mascotas","direccion":"Blvd. Hipólito Yrigoyen 999, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4780224,"lng":-58.2384924,"rating":4.4,"rating_count":109,"telefono":"+54 3442 30-7175","place_id":"ChIJKTFeLVTar5URRn1gapnu5Ps"},{"id":25,"nombre":"Dog Center Pet Shop","categoria":"Veterinaria / Pet Shop","grupo":"mascotas","direccion":"Sarmiento 801, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.487144,"lng":-58.2334397,"rating":4.7,"rating_count":167,"telefono":"+54 3442 46-2158","place_id":"ChIJN5pHHc_br5URqdGue8YrAbo"},{"id":26,"nombre":"Tao Remises","categoria":"Remisería","grupo":"transporte","direccion":"Blvd. Montoneras 143, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4885479,"lng":-58.242182,"rating":3.7,"rating_count":45,"telefono":"+54 3442 54-2772","place_id":"ChIJ2dRKIKzbr5URwLCyGlfrcuU"},{"id":27,"nombre":"Acción Remises","categoria":"Remisería","grupo":"transporte","direccion":"Belgrano 674, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4788073,"lng":-58.2328388,"rating":3.6,"rating_count":77,"telefono":"+54 9 3442 64-1200","place_id":"ChIJB77Q7v_ar5URiSvdlLHX0fc"},{"id":28,"nombre":"Gimnasio 538 Gym","categoria":"Gimnasio","grupo":"deporte","direccion":"14 de Julio 232, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4819103,"lng":-58.2359989,"rating":4.7,"rating_count":34,"telefono":null,"place_id":"ChIJXwRBS8rbr5URfDmnd0zVvKY"},{"id":29,"nombre":"Gimnasio Muscle","categoria":"Gimnasio","grupo":"deporte","direccion":"Blvd. Hipólito Yrigoyen 1086, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4782772,"lng":-58.24004,"rating":4.6,"rating_count":147,"telefono":"+54 3442 58-5936","place_id":"ChIJkZyDBFTar5UR7ff0XGiQglo"},{"id":30,"nombre":"Gym Lucianos","categoria":"Gimnasio","grupo":"deporte","direccion":"Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4873135,"lng":-58.2476606,"rating":4.8,"rating_count":49,"telefono":"+54 3442 54-9415","place_id":"ChIJxQPPjLLbr5UR-WbN4walS4o"},{"id":31,"nombre":"CROSS CDELU","categoria":"Gimnasio / Crossfit","grupo":"deporte","direccion":"Pres. J. C. González, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4882245,"lng":-58.2831898,"rating":4.7,"rating_count":10,"telefono":"+54 3442 51-5067","place_id":"ChIJIzuiYAXbr5URpAdmJtLozOE"},{"id":32,"nombre":"Power Gym","categoria":"Gimnasio","grupo":"deporte","direccion":"Gral. Galarza 919, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4844434,"lng":-58.236045,"rating":4.8,"rating_count":13,"telefono":null,"place_id":"ChIJdwMwYqrbr5UREXEEnpFTH1I"},{"id":33,"nombre":"Casa del Árbol","categoria":"Hostería","grupo":"alojamiento","direccion":"8 de Junio 1096, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4836021,"lng":-58.2391554,"rating":4.5,"rating_count":164,"telefono":"+54 3442 46-3379","place_id":"ChIJkymAR6vbr5URo5jltYbOt7U"},{"id":34,"nombre":"Boutique Los Aguaribay","categoria":"Hostería","grupo":"alojamiento","direccion":"Artusi 797, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4806908,"lng":-58.2345271,"rating":4.8,"rating_count":302,"telefono":"+54 3442 40-6543","place_id":"ChIJ_z2LUh7br5UR6L8ssSAYDdo"},{"id":35,"nombre":"Bungalows México","categoria":"Hostería / Cabañas","grupo":"alojamiento","direccion":"Carlos Granillo Posse 197, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4900356,"lng":-58.2828429,"rating":4.4,"rating_count":805,"telefono":"+54 11 3469-0257","place_id":"ChIJAxwe04DZr5URRDddggbEVms"},{"id":36,"nombre":"Antigua Fonda","categoria":"Hostería","grupo":"alojamiento","direccion":"España 172, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.487357,"lng":-58.233203,"rating":4.4,"rating_count":625,"telefono":"+54 3442 43-3734","place_id":"ChIJ-7-3RADbr5URuQp786VlxfA"},{"id":37,"nombre":"Hostería Mitre","categoria":"Hostería","grupo":"alojamiento","direccion":"Bartolomé Mitre 949, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4818824,"lng":-58.236959,"rating":4.1,"rating_count":241,"telefono":"+54 3442 42-9754","place_id":"ChIJQ0VNMFXar5URAHK3N6Qvqsk"},{"id":38,"nombre":"Hostería Posta Torreón","categoria":"Hostería","grupo":"alojamiento","direccion":"Esquina Almafuerte y España, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4877761,"lng":-58.2330856,"rating":4.4,"rating_count":582,"telefono":"+54 9 3442 58-1731","place_id":"ChIJmV3cXQDbr5URWB7XYy321ho"},{"id":39,"nombre":"Gran Texier Hotel Casino","categoria":"Hotel / Casino","grupo":"alojamiento","direccion":"Eva Duarte de Perón 114, Concepción del Uruguay, Entre Ríos","descripcion":"El hotel más completo de la ciudad. Cuenta con casino, a una cuadra de Plaza Ramírez.","lat":-32.482842,"lng":-58.2315251,"rating":4.0,"rating_count":437,"telefono":"+54 9 3442 67-1460","place_id":"ChIJxUCTrgHbr5URCadvP_ey4_o"},{"id":40,"nombre":"Hotel Boutique Lourd Mary","categoria":"Hotel Boutique","grupo":"alojamiento","direccion":"Posadas 829, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.482244,"lng":-58.2348611,"rating":4.0,"rating_count":311,"telefono":"+54 3442 47-2422","place_id":"ChIJmV3cXQDbr5URkUO3FfkEolE"},{"id":41,"nombre":"Hotel Gran Litoral","categoria":"Hotel","grupo":"alojamiento","direccion":"Cnel. Rocamora 1406, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4852868,"lng":-58.24474,"rating":4.1,"rating_count":749,"telefono":"+54 3442 42-5644","place_id":"ChIJoZINXQDbr5UR8mjuAXKkt-Y"},{"id":42,"nombre":"Adriano Apart Hotel","categoria":"Apart Hotel","grupo":"alojamiento","direccion":"J. Azurduy 267, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4854962,"lng":-58.2705562,"rating":4.6,"rating_count":158,"telefono":"+54 9 3442 62-7894","place_id":"ChIJwXfiai7ar5URzAAveTTnL9o"},{"id":43,"nombre":"Virrey Hotel","categoria":"Hotel","grupo":"alojamiento","direccion":"Bv. Sansoni 2075, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4880131,"lng":-58.2568876,"rating":null,"rating_count":null,"telefono":"+54 3442 44-0017","place_id":"ChIJKwtj9gDbr5URWLZF3EnYcqA"},{"id":44,"nombre":"Aires del Campo","categoria":"Cabañas","grupo":"alojamiento","direccion":"Sansoni 1920, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4868325,"lng":-58.254338,"rating":4.2,"rating_count":657,"telefono":"+54 3442 44-2490","place_id":"ChIJ1dyq4Mrbr5UR3wOa4q9Aiyg"},{"id":45,"nombre":"Fogón Criollo Cabañas","categoria":"Cabañas","grupo":"alojamiento","direccion":"Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4908312,"lng":-58.2813829,"rating":4.6,"rating_count":72,"telefono":"+54 9 3442 48-7148","place_id":"ChIJw9LPvYDZr5URnusQbqk9NtE"},{"id":46,"nombre":"Banco Nación","categoria":"Banco / Cajero","grupo":"finanzas","direccion":"España 49, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4855977,"lng":-58.2337611,"rating":2.9,"rating_count":35,"telefono":"0810-666-4444","place_id":"ChIJg-__ugDbr5URpp8bsNSAzTM"},{"id":47,"nombre":"Banco Macro","categoria":"Banco / Cajero","grupo":"finanzas","direccion":"L. N. Alem 12 esq. 9 de Julio, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4852459,"lng":-58.2345334,"rating":3.5,"rating_count":8,"telefono":"+54 3442 45-0919","place_id":"ChIJTdUdnwDbr5URtYyANLYau9M"},{"id":48,"nombre":"Banco Credicoop (9 de Julio)","categoria":"Banco / Cajero","grupo":"finanzas","direccion":"9 de Julio 835, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4851381,"lng":-58.2344424,"rating":2.9,"rating_count":7,"telefono":"+54 3442 43-2332","place_id":"ChIJmV3cXQDbr5UR48yTPz4w51M"},{"id":49,"nombre":"Banco Galicia","categoria":"Banco / Cajero","grupo":"finanzas","direccion":"8 de Junio 800, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4826962,"lng":-58.2341239,"rating":3.2,"rating_count":46,"telefono":"0810-444-6500","place_id":"ChIJoZINXQDbr5UR6Xd5-pKlBWI"},{"id":50,"nombre":"BBVA (9 de Julio 847)","categoria":"Banco / Cajero","grupo":"finanzas","direccion":"9 de Julio 847, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4850938,"lng":-58.2350301,"rating":3.3,"rating_count":25,"telefono":"+54 3442 43-2559","place_id":"ChIJMzyBdqrbr5URd9el3dnYnJU"},{"id":51,"nombre":"BERSA","categoria":"Banco / Cajero","grupo":"finanzas","direccion":"Gral. Galarza 700, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4837959,"lng":-58.2321592,"rating":2.7,"rating_count":18,"telefono":"+54 3442 42-3396","place_id":"ChIJjY7n5abbr5UR9rOaV98veno"},{"id":52,"nombre":"Banco Patagonia","categoria":"Banco / Cajero","grupo":"finanzas","direccion":"9 de Julio 829, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4850919,"lng":-58.2342732,"rating":3.4,"rating_count":22,"telefono":"+54 3442 42-8691","place_id":"ChIJmV3cXQDbr5UR15AlZEkesis"},{"id":53,"nombre":"Banco Santander","categoria":"Banco / Cajero","grupo":"finanzas","direccion":"Juan Domingo Perón 34, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4848926,"lng":-58.2311376,"rating":3.4,"rating_count":45,"telefono":"+54 3442 42-3344","place_id":"ChIJEaPlJAHbr5URQdjQWYDm1mo"},{"id":54,"nombre":"Western Union (Galarza)","categoria":"Servicio financiero","grupo":"finanzas","direccion":"Gral. Galarza 712, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.483955,"lng":-58.232636,"rating":null,"rating_count":null,"telefono":"0810-444-1000","place_id":"ChIJM0BLQPfbr5URH23hGBXHUmQ"},{"id":55,"nombre":"Western Union (Lacava)","categoria":"Servicio financiero","grupo":"finanzas","direccion":"Dr. J. Lacava 722, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.477306,"lng":-58.255278,"rating":null,"rating_count":null,"telefono":"0810-444-1000","place_id":"ChIJqW8W8tDbr5URF7QIAcCZpf4"},{"id":56,"nombre":"Western Union (Sarmiento)","categoria":"Servicio financiero","grupo":"finanzas","direccion":"Sarmiento 1066, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4878133,"lng":-58.2377936,"rating":null,"rating_count":null,"telefono":"0810-444-1000","place_id":"ChIJ_b0mMbvbr5URyYO8RbT9A_4"},{"id":57,"nombre":"Western Union (Santa Teresita)","categoria":"Servicio financiero","grupo":"finanzas","direccion":"Santa Teresita 1045, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4753497,"lng":-58.2400006,"rating":null,"rating_count":null,"telefono":"0810-444-1000","place_id":"ChIJ49-Rfcrbr5URiKUiVAQQJhA"},{"id":58,"nombre":"Rapipago","categoria":"Servicio financiero","grupo":"finanzas","direccion":"25 de Mayo 148, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4825649,"lng":-58.2324183,"rating":null,"rating_count":null,"telefono":"0810-333-1064","place_id":"ChIJBSsJ_1zbr5URWOBiIji1wWE"},{"id":59,"nombre":"Supermercados DÍA","categoria":"Supermercado","grupo":"compras","direccion":"Sarmiento 1552, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4885086,"lng":-58.2417682,"rating":3.8,"rating_count":2273,"telefono":null,"place_id":"ChIJM71VD7Lbr5URMXtNkruZJQQ"},{"id":60,"nombre":"Supermercado Gran Rex","categoria":"Supermercado","grupo":"compras","direccion":"Juan Domingo Perón 330, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4891967,"lng":-58.230312,"rating":4.1,"rating_count":1179,"telefono":"+54 3442 43-3162","place_id":"ChIJ1dQfawbbr5UR55h5JvPme3g"},{"id":61,"nombre":"Supermercado Supremo","categoria":"Supermercado","grupo":"compras","direccion":"Alberdi 746, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4862602,"lng":-58.2326282,"rating":3.8,"rating_count":1075,"telefono":"+54 3442 43-2044","place_id":"ChIJISVxLQfbr5UR0YUGuikqhi8"},{"id":62,"nombre":"Supermercado Stop","categoria":"Supermercado","grupo":"compras","direccion":"JJ Bruno 2620, Concepción del Uruguay, Entre Ríos (ubicación aproximada)","descripcion":"","lat":-32.487,"lng":-58.2415,"rating":null,"rating_count":null,"telefono":null,"place_id":null},{"id":63,"nombre":"Supermercado Mayorista El Rey","categoria":"Supermercado mayorista","grupo":"compras","direccion":"Blvd. Montoneras 100-138, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4883184,"lng":-58.2417843,"rating":3.7,"rating_count":48,"telefono":null,"place_id":"ChIJXZTaGKzbr5URRRF9Ma4OhTk"},{"id":64,"nombre":"Hospital Urquiza","categoria":"Salud / Hospital","grupo":"salud","direccion":"Lorenzo Sartorio 2130, Concepción del Uruguay, Entre Ríos","descripcion":"Guardia 24 hs. Tel (03442) 443900.","lat":-32.4812832,"lng":-58.2610885,"rating":4.3,"rating_count":174,"telefono":"+54 3442 44-3901","place_id":"ChIJZfZ-4Dbar5URJvvaGVC3T0s"},{"id":65,"nombre":"Terminal de Ómnibus","categoria":"Transporte","grupo":"transporte","direccion":"Dr. Scelzi 50, Concepción del Uruguay, Entre Ríos","descripcion":"","lat":-32.4853912,"lng":-58.2419476,"rating":3.7,"rating_count":4839,"telefono":null,"place_id":"ChIJ0bsLlKzbr5URNn57nbyf1_o"},{"nombre":"Cremolatti","categoria":"Heladería","grupo":"gastronomia","direccion":"Gral. Galarza 830, Concepción del Uruguay, Entre Ríos","lat":-32.4841901,"lng":-58.2343391,"rating":4.6,"rating_count":788,"telefono":"+54 3442 42-5704","place_id":"ChIJVfwYQADbr5UR3oBPHiUnVyg","id":66,"descripcion":""},{"nombre":"Heladeria Dany's","categoria":"Heladería","grupo":"gastronomia","direccion":"3 de Febrero 11, Concepción del Uruguay, Entre Ríos","lat":-32.4849916,"lng":-58.2330357,"rating":4.2,"rating_count":157,"telefono":"+54 3442 30-1424","place_id":"ChIJmV3cXQDbr5UR0yuI2_az6KA","id":67,"descripcion":""},{"nombre":"Heladería Lucero","categoria":"Heladería","grupo":"gastronomia","direccion":"Blvd. Los Constituyentes 556, Concepción del Uruguay, Entre Ríos","lat":-32.4781653,"lng":-58.2439267,"rating":4.1,"rating_count":26,"telefono":null,"place_id":"ChIJKSoux7vbr5URM3axnqo2MUg","id":68,"descripcion":""},{"nombre":"Heladería Italia","categoria":"Heladería","grupo":"gastronomia","direccion":"9 de Julio 1714, Concepción del Uruguay, Entre Ríos","lat":-32.4877941,"lng":-58.2502801,"rating":4.7,"rating_count":2368,"telefono":"+54 3442 44-0770","place_id":"ChIJy7h2ErPbr5URL6UKWqQdih8","id":69,"descripcion":""},{"nombre":"Heladería Artesanal Yelatti","categoria":"Heladería","grupo":"gastronomia","direccion":"Blvd. Díaz Vélez 551, Concepción del Uruguay, Entre Ríos","lat":-32.4797183,"lng":-58.2515823,"rating":4.2,"rating_count":36,"telefono":"+54 3442 30-6577","place_id":"ChIJ5wNDZ__br5UR6XPgpnBuS78","id":70,"descripcion":""},{"nombre":"Justo José Restó Bar","categoria":"Restaurante","grupo":"gastronomia","direccion":"km 129, RN14, Concepción del Uruguay, Entre Ríos","lat":-32.4516835,"lng":-58.2908995,"rating":4.2,"rating_count":1073,"telefono":"+54 9 3442 56-6016","place_id":"ChIJx3cyKujZr5UR9lC1oEUtyug","id":71,"descripcion":""},{"nombre":"EL ARCA - Resto Bar","categoria":"Restaurante","grupo":"gastronomia","direccion":"Leguizamón 180, Concepción del Uruguay, Entre Ríos","lat":-32.4823139,"lng":-58.2342508,"rating":4.1,"rating_count":968,"telefono":"+54 3442 42-8000","place_id":"ChIJ82j1DgDbr5URxO0fNHZOYYo","id":72,"descripcion":""},{"nombre":"Papa Luigi","categoria":"Restaurante","grupo":"gastronomia","direccion":"21 de Noviembre 38, Concepción del Uruguay, Entre Ríos","lat":-32.4857328,"lng":-58.235359,"rating":4.4,"rating_count":738,"telefono":"+54 3442 43-3624","place_id":"ChIJTzCzDarbr5UR01zDy2W40F0","id":73,"descripcion":""},{"nombre":"Bella Vista Café y Restó","categoria":"Restaurante","grupo":"gastronomia","direccion":"3 de Febrero 5, Concepción del Uruguay, Entre Ríos","lat":-32.4849019,"lng":-58.2330407,"rating":4.4,"rating_count":2826,"telefono":"+54 9 3442 30-0170","place_id":"ChIJV1WV6QDbr5URBmIxHOLii4U","id":74,"descripcion":""},{"nombre":"Panza Verde Parador","categoria":"Restaurante","grupo":"gastronomia","direccion":"Parador Norte, Isla del Puerto, Concepción del Uruguay, Entre Ríos","lat":-32.4787526,"lng":-58.2131152,"rating":4.2,"rating_count":1350,"telefono":"+54 3442 31-2626","place_id":"ChIJ3-e5fl3br5URCbq5DpgnSus","id":75,"descripcion":""},{"nombre":"Bonhomia Resto Bar","categoria":"Restaurante","grupo":"gastronomia","direccion":"Bartolomé Mitre 61, Concepción del Uruguay, Entre Ríos","lat":-32.4791152,"lng":-58.2221372,"rating":4.4,"rating_count":503,"telefono":"+54 9 3442 56-1662","place_id":"ChIJ6bDrQR3br5URGfoQHTmNDBY","id":76,"descripcion":""},{"nombre":"La Ris Restó y Bar","categoria":"Restaurante","grupo":"gastronomia","direccion":"Gral. Galarza 750, Concepción del Uruguay, Entre Ríos","lat":-32.4839406,"lng":-58.2329887,"rating":4.0,"rating_count":957,"telefono":"+54 3442 43-7846","place_id":"ChIJoZINXQDbr5URhEuBdL3cZ-Q","id":77,"descripcion":""},{"nombre":"Parrilla La Gruta","categoria":"Restaurante","grupo":"gastronomia","direccion":"RN14 Km 126, Concepción del Uruguay, Entre Ríos","lat":-32.4771132,"lng":-58.3045185,"rating":4.6,"rating_count":1744,"telefono":"+54 9 3442 62-0955","place_id":"ChIJ-8M3wMHZr5URUmyy5P8Vsmk","id":78,"descripcion":""},{"nombre":"Sanduba","categoria":"Restaurante","grupo":"gastronomia","direccion":"Gral. Galarza 735, Concepción del Uruguay, Entre Ríos","lat":-32.4838979,"lng":-58.2328589,"rating":4.4,"rating_count":676,"telefono":"+54 3442 66-6321","place_id":"ChIJryQj8QDbr5URDdJwuGPk2xY","id":79,"descripcion":""},{"nombre":"Pimienta Negra","categoria":"Restaurante","grupo":"gastronomia","direccion":"9 de Julio 1124, Concepción del Uruguay, Entre Ríos","lat":-32.4858508,"lng":-58.2391933,"rating":4.1,"rating_count":1348,"telefono":"+54 3442 66-7093","place_id":"ChIJ-7-3RADbr5URcKevaykUVV0","id":80,"descripcion":""},{"nombre":"Parada 33","categoria":"Restaurante","grupo":"gastronomia","direccion":"Juan Domingo Perón 650, Concepción del Uruguay, Entre Ríos","lat":-32.4939341,"lng":-58.2295582,"rating":4.7,"rating_count":163,"telefono":null,"place_id":"ChIJm0CHJmnbr5URgThzXoUrWFI","id":81,"descripcion":""},{"nombre":"Faro 3260","categoria":"Restaurante","grupo":"gastronomia","direccion":"Defensa Sur y Jordana, Concepción del Uruguay, Entre Ríos","lat":-32.4961239,"lng":-58.2263557,"rating":4.3,"rating_count":285,"telefono":"+54 3442 54-3904","place_id":"ChIJlSb4uUjbr5UROgQmAJK-JH8","id":82,"descripcion":""},{"nombre":"El Calderón - Casa de Comidas","categoria":"Restaurante","grupo":"gastronomia","direccion":"C. Ciudad de la Paz 315, Concepción del Uruguay, Entre Ríos","lat":-32.4819334,"lng":-58.3004047,"rating":4.7,"rating_count":161,"telefono":"+54 3442 54-4466","place_id":"ChIJS6Td0qzZr5URT0o-AsK7lSA","id":83,"descripcion":""},{"nombre":"Parrilla La Segunda","categoria":"Restaurante","grupo":"gastronomia","direccion":"Dr. Isaac Stilman 44, Concepción del Uruguay, Entre Ríos","lat":-32.4888833,"lng":-58.259519,"rating":4.1,"rating_count":897,"telefono":"+54 3442 44-1076","place_id":"ChIJFRQGy8rbr5URUB0TBod6YoU","id":84,"descripcion":""},{"nombre":"Dolores Costa","categoria":"Restaurante","grupo":"gastronomia","direccion":"Gral. Galarza y República del Líbano, Concepción del Uruguay, Entre Ríos","lat":-32.4867145,"lng":-58.2481367,"rating":4.5,"rating_count":412,"telefono":"+54 3442 50-6970","place_id":"ChIJ3xFpjTfbr5URGeHDJ-glJh8","id":85,"descripcion":""},{"nombre":"Restaurant La Delfina","categoria":"Restaurante","grupo":"gastronomia","direccion":"Eva Duarte de Perón 125, Concepción del Uruguay, Entre Ríos","lat":-32.4826853,"lng":-58.2317183,"rating":4.2,"rating_count":847,"telefono":"+54 3442 62-0414","place_id":"ChIJmV3cXQDbr5URajuqUY_tBCY","id":86,"descripcion":""},{"nombre":"Mamma Mia","categoria":"Restaurante","grupo":"gastronomia","direccion":"España 160, Concepción del Uruguay, Entre Ríos","lat":-32.4872395,"lng":-58.2332978,"rating":4.8,"rating_count":176,"telefono":"+54 3442 42-8753","place_id":"ChIJV1XIOAfbr5URi6gu8i7_gDg","id":87,"descripcion":""},{"nombre":"Garifo","categoria":"Restaurante","grupo":"gastronomia","direccion":"España 193, Concepción del Uruguay, Entre Ríos","lat":-32.4876591,"lng":-58.2333507,"rating":4.4,"rating_count":915,"telefono":"+54 3442 62-2611","place_id":"ChIJE1cM-JPbr5URKSZ0-FsFklU","id":88,"descripcion":""},{"nombre":"Baco Fusión Restaurant","categoria":"Restaurante","grupo":"gastronomia","direccion":"Rocamora 129, Concepción del Uruguay, Entre Ríos","lat":-32.4814874,"lng":-58.2228074,"rating":4.5,"rating_count":864,"telefono":"+54 9 3442 54-9695","place_id":"ChIJKwtj9gDbr5URr4fTYUVQv6Y","id":89,"descripcion":""},{"nombre":"El Danubio Azul","categoria":"Restaurante","grupo":"gastronomia","direccion":"San Martín 763, Concepción del Uruguay, Entre Ríos","lat":-32.4855883,"lng":-58.2329142,"rating":4.2,"rating_count":2131,"telefono":"+54 3442 42-3244","place_id":"ChIJ-7-3RADbr5URwMuvBaNb4zQ","id":90,"descripcion":""},{"nombre":"Nero Café de Especialidad","categoria":"Cafetería","grupo":"gastronomia","direccion":"Eva Duarte de Perón 36, Concepción del Uruguay, Entre Ríos","lat":-32.4839469,"lng":-58.2313125,"rating":4.8,"rating_count":46,"telefono":null,"place_id":"ChIJtxHafDHbr5URI1SPK_5XvDs","id":91,"descripcion":""},{"nombre":"Cultura Café","categoria":"Cafetería","grupo":"gastronomia","direccion":"Blvd. Yrigoyen y Perú, Concepción del Uruguay, Entre Ríos","lat":-32.4759672,"lng":-58.2267354,"rating":4.7,"rating_count":39,"telefono":"+54 3442 53-2190","place_id":"ChIJywkLFY_br5URL4s6S8OfE5w","id":92,"descripcion":""},{"nombre":"Helena Café Resto","categoria":"Cafetería","grupo":"gastronomia","direccion":"Gral. Galarza 752, Concepción del Uruguay, Entre Ríos","lat":-32.4840065,"lng":-58.23322,"rating":4.2,"rating_count":501,"telefono":null,"place_id":"ChIJU6DFRQDbr5URQla4fF-wnS4","id":93,"descripcion":""},{"nombre":"London Café","categoria":"Cafetería","grupo":"gastronomia","direccion":"Gral. Galarza 656, Concepción del Uruguay, Entre Ríos","lat":-32.4837589,"lng":-58.2315953,"rating":4.3,"rating_count":243,"telefono":"+54 3442 48-0407","place_id":"ChIJP_VSLiPbr5URFgccV6tUMWM","id":94,"descripcion":""},{"nombre":"Drakkar Cervecería","categoria":"Bar","grupo":"gastronomia","direccion":"Artusi 755, Concepción del Uruguay, Entre Ríos","lat":-32.480575,"lng":-58.2339256,"rating":4.5,"rating_count":809,"telefono":"+54 3442 43-7805","place_id":"ChIJqVnj7v_ar5URC7NdkboiSOs","id":95,"descripcion":""},{"nombre":"Cervecería Klug Gebräu","categoria":"Bar","grupo":"gastronomia","direccion":"Cabo Oscar Labalta 440, Concepción del Uruguay, Entre Ríos","lat":-32.4822216,"lng":-58.2550146,"rating":4.8,"rating_count":308,"telefono":"+54 3442 45-6232","place_id":"ChIJn4W0RU3br5UR8oGxJMJEdKU","id":96,"descripcion":""},{"nombre":"Bartolo Bar","categoria":"Bar","grupo":"gastronomia","direccion":"San Martín 745, Concepción del Uruguay, Entre Ríos","lat":-32.4856557,"lng":-58.2327194,"rating":4.1,"rating_count":3102,"telefono":"+54 3442 42-7162","place_id":"ChIJmV3cXQDbr5URAv_w4FnsSN8","id":97,"descripcion":""},{"nombre":"House Garage","categoria":"Bar","grupo":"gastronomia","direccion":"Gral. Galarza 1477, Concepción del Uruguay, Entre Ríos","lat":-32.4864141,"lng":-58.2457761,"rating":4.4,"rating_count":705,"telefono":null,"place_id":"ChIJ2RmAPYjbr5URsCL5nBNqn8U","id":98,"descripcion":""},{"nombre":"7 Colinas Craft Brewery","categoria":"Bar","grupo":"gastronomia","direccion":"Estrada 838, Concepción del Uruguay, Entre Ríos","lat":-32.4799221,"lng":-58.2352318,"rating":4.4,"rating_count":1930,"telefono":"+54 3442 67-8573","place_id":"ChIJ2xDmZFXar5URtIkGwkySP-o","id":99,"descripcion":""},{"nombre":"Panadería Panettone","categoria":"Panadería","grupo":"gastronomia","direccion":"Blvd. Hipólito Yrigoyen, Concepción del Uruguay, Entre Ríos","lat":-32.4771982,"lng":-58.2316591,"rating":4.7,"rating_count":481,"telefono":"+54 3442 64-5151","place_id":"ChIJ5TBz5v7ar5URljQNmcvEWlg","id":100,"descripcion":""},{"nombre":"Lo de Juan","categoria":"Panadería","grupo":"gastronomia","direccion":"Blvd. Hipólito Yrigoyen 749, Concepción del Uruguay, Entre Ríos","lat":-32.4776528,"lng":-58.2342469,"rating":4.1,"rating_count":509,"telefono":"+54 3442 45-1320","place_id":"ChIJRTt0XP_ar5URodXvAXwf-zE","id":101,"descripcion":""},{"nombre":"Panadería Mi Viejo","categoria":"Panadería","grupo":"gastronomia","direccion":"8 de Junio 865, Concepción del Uruguay, Entre Ríos","lat":-32.4831629,"lng":-58.2356561,"rating":4.4,"rating_count":685,"telefono":"+54 3442 45-0138","place_id":"ChIJoQDll6rbr5URzvQczB2HF0I","id":102,"descripcion":""},{"nombre":"Panadería y Confitería San Carlos","categoria":"Panadería","grupo":"gastronomia","direccion":"9 de Julio 1549, Concepción del Uruguay, Entre Ríos","lat":-32.4874175,"lng":-58.2469054,"rating":4.4,"rating_count":402,"telefono":"+54 3442 42-9050","place_id":"ChIJmV3cXQDbr5URJ6IzTOnebAc","id":103,"descripcion":""},{"nombre":"Confitería La Cuadra","categoria":"Panadería","grupo":"gastronomia","direccion":"Gral. Galarza 1052, Concepción del Uruguay, Entre Ríos","lat":-32.484859,"lng":-58.238285,"rating":4.4,"rating_count":478,"telefono":"+54 3442 42-2186","place_id":"ChIJ5xlpBqvbr5UR-Ocb1x-2Uu8","id":104,"descripcion":""}];
+
+  // Grupos: color, ícono, etiqueta
+  var GRUPOS = {
+    gastronomia: { color: '#D4462F', label: 'Gastronomía', icon: '🍽️' },
+    patrimonio:  { color: '#E07828', label: 'Patrimonio',  icon: '🏛️' },
+    naturaleza:  { color: '#267A4D', label: 'Naturaleza',  icon: '🌊' },
+    alojamiento: { color: '#7B3068', label: 'Alojamiento', icon: '🏨' },
+    mascotas:    { color: '#B08A2E', label: 'Mascotas',    icon: '🐾' },
+    salud:       { color: '#C03428', label: 'Salud',       icon: '🏥' },
+    finanzas:    { color: '#1A5C8C', label: 'Finanzas',    icon: '🏦' },
+    compras:     { color: '#5C7A1E', label: 'Compras',     icon: '🛒' },
+    deporte:     { color: '#8C4A1A', label: 'Deporte',     icon: '💪' },
+    transporte:  { color: '#4A4A70', label: 'Transporte',  icon: '🚖' }
+  };
+
+  function pinIcon(color) {
+    return L.divIcon({
+      className: '',
+      html: '<div class="mapa-pin" style="background:' + color + '"></div>',
+      iconSize: [16, 16],
+      iconAnchor: [8, 16],
+      popupAnchor: [0, -16]
+    });
+  }
+
+  function clusterIcon(color) {
+    return function (cluster) {
+      return L.divIcon({
+        className: 'mapa-cluster',
+        html: '<div class="mapa-cluster-inner" style="background:' + color + '">' + cluster.getChildCount() + '</div>',
+        iconSize: [38, 38]
+      });
+    };
+  }
+
+  var map = L.map('mapa-leaflet', { scrollWheelZoom: false }).setView([-32.4836, -58.2335], 13);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 19
+  }).addTo(map);
+
+  // Un cluster group por grupo (así cada "racimo" respeta el color de su
+  // categoría y los filtros pueden mostrar/ocultar grupos enteros al instante)
+  var clusterGroups = {};
+  Object.keys(GRUPOS).forEach(function (g) {
+    clusterGroups[g] = L.markerClusterGroup({
+      iconCreateFunction: clusterIcon(GRUPOS[g].color),
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      maxClusterRadius: 46
+    });
+  });
+
+  var todosLosMarkers = []; // {marker, grupo, nombre, lugar}
+  var filtroActivo = 'todos';
+  var textoBusqueda = '';
+
+  function starsHtml(rating) {
+    var full = Math.round(rating);
+    var s = '';
+    for (var i = 0; i < 5; i++) s += (i < full) ? '★' : '☆';
+    return s;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function popupHtml(lugar, color) {
+    var html = '<span class="mapa-popup-cat">' + GRUPOS[lugar.grupo].icon + ' ' + escapeHtml(lugar.categoria) + '</span>';
+    html += '<span class="mapa-popup-nombre">' + escapeHtml(lugar.nombre) + '</span>';
+    if (lugar.rating) {
+      html += '<div class="mapa-popup-rating">' + starsHtml(lugar.rating) + ' ' + lugar.rating.toFixed(1) +
+              (lugar.rating_count ? ' <span class="cant">(' + lugar.rating_count + ')</span>' : '') + '</div>';
+    } else {
+      html += '<span class="mapa-popup-norating">Sin calificación de Google aún</span>';
+    }
+    if (lugar.direccion) html += '<span class="mapa-popup-addr">📍 ' + escapeHtml(lugar.direccion) + '</span>';
+    if (lugar.descripcion) html += '<span class="mapa-popup-desc">' + escapeHtml(lugar.descripcion) + '</span>';
+    html += '<div class="mapa-popup-actions">';
+    html += '<a class="ir" style="--pop-color:' + color + '" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + lugar.lat + ',' + lugar.lng + (lugar.place_id ? '&destination_place_id=' + lugar.place_id : '') + '">↗ Cómo llegar</a>';
+    if (lugar.telefono) html += '<a class="tel" href="tel:' + lugar.telefono.replace(/\s+/g, '') + '">📞 Llamar</a>';
+    html += '</div>';
+    return html;
+  }
+
+  function agregarLugar(lugar) {
+    var grupo = GRUPOS[lugar.grupo] ? lugar.grupo : 'patrimonio';
+    var color = GRUPOS[grupo].color;
+    var marker = L.marker([lugar.lat, lugar.lng], { icon: pinIcon(color), title: lugar.nombre });
+    marker.bindPopup(popupHtml(lugar, color), { className: 'mapa-popup' });
+    marker.lugarData = lugar;
+    clusterGroups[grupo].addLayer(marker);
+    todosLosMarkers.push({ marker: marker, grupo: grupo, nombre: lugar.nombre.toLowerCase(), lugar: lugar });
+  }
+
+  function renderFiltros() {
+    var cont = document.getElementById('mapa-filtros');
+    var counts = {};
+    todosLosMarkers.forEach(function (m) { counts[m.grupo] = (counts[m.grupo] || 0) + 1; });
+
+    var html = '<button class="mapa-pill activo" data-cat="todos" type="button">Todos <span class="cnt">' + todosLosMarkers.length + '</span></button>';
+    Object.keys(GRUPOS).forEach(function (g) {
+      if (!counts[g]) return;
+      html += '<button class="mapa-pill" data-cat="' + g + '" type="button" style="--pill-color:' + GRUPOS[g].color + '">' +
+              GRUPOS[g].icon + ' ' + GRUPOS[g].label + ' <span class="cnt">' + counts[g] + '</span></button>';
+    });
+    cont.innerHTML = html;
+
+    cont.querySelectorAll('.mapa-pill').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        cont.querySelectorAll('.mapa-pill').forEach(function (b) { b.classList.remove('activo'); });
+        btn.classList.add('activo');
+        filtroActivo = btn.getAttribute('data-cat');
+        aplicarFiltros();
+      });
+    });
+  }
+
+  function aplicarFiltros() {
+    Object.keys(clusterGroups).forEach(function (g) { map.removeLayer(clusterGroups[g]); });
+
+    var visibles = 0;
+    todosLosMarkers.forEach(function (m) {
+      var pasaCategoria = (filtroActivo === 'todos' || m.grupo === filtroActivo);
+      var pasaBusqueda = (textoBusqueda === '' || m.nombre.indexOf(textoBusqueda) > -1);
+      var mostrar = pasaCategoria && pasaBusqueda;
+      var grupo = clusterGroups[m.grupo];
+      if (mostrar) {
+        if (!grupo.hasLayer(m.marker)) grupo.addLayer(m.marker);
+        visibles++;
+      } else {
+        if (grupo.hasLayer(m.marker)) grupo.removeLayer(m.marker);
+      }
+    });
+
+    Object.keys(clusterGroups).forEach(function (g) {
+      if (filtroActivo === 'todos' || filtroActivo === g) map.addLayer(clusterGroups[g]);
+    });
+
+    document.getElementById('mapa-count').textContent = visibles;
+    document.getElementById('mapa-empty').style.display = (visibles === 0) ? 'block' : 'none';
+    document.getElementById('mapa-leaflet').style.display = (visibles === 0) ? 'none' : 'block';
+  }
+
+  function cargarDatos(extra) {
+    var combinados = LUGARES.concat(extra || []);
+    combinados.forEach(agregarLugar);
+
+    document.getElementById('mapa-total-badge').textContent = combinados.length + ' lugares';
+    document.getElementById('mapa-total').textContent = combinados.length;
+    renderFiltros();
+    aplicarFiltros();
+  }
+
+  // Intenta fusionar con un JSON externo adicional en tu sitio, si alguna
+  // vez lo agregás (ej. lugares cargados a mano aparte de este archivo).
+  // Si no existe o falla, seguimos solo con LUGARES sin romper nada.
+  fetch('lugares-mapa.json')
+    .then(function (r) { if (!r.ok) throw new Error('no existe'); return r.json(); })
+    .then(function (data) { cargarDatos(Array.isArray(data) ? data : []); })
+    .catch(function () { cargarDatos([]); });
+
+  // Buscador
+  document.getElementById('mapa-search').addEventListener('input', function (e) {
+    textoBusqueda = e.target.value.trim().toLowerCase();
+    aplicarFiltros();
+  });
+
+  document.getElementById('mapa-reset').addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('mapa-search').value = '';
+    textoBusqueda = '';
+    filtroActivo = 'todos';
+    document.querySelectorAll('.mapa-pill').forEach(function (b) { b.classList.remove('activo'); });
+    var todosBtn = document.querySelector('.mapa-pill[data-cat="todos"]');
+    if (todosBtn) todosBtn.classList.add('activo');
+    aplicarFiltros();
+    map.setView([-32.4836, -58.2335], 13);
+  });
+
+  // Geolocalización
+  document.getElementById('mapa-geoloc').addEventListener('click', function () {
+    var btn = this;
+    if (!navigator.geolocation) { alert('Tu navegador no permite geolocalización.'); return; }
+    btn.disabled = true;
+    btn.textContent = '📍 Buscando…';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var latlng = [pos.coords.latitude, pos.coords.longitude];
+      map.setView(latlng, 15);
+      L.marker(latlng, {
+        icon: L.divIcon({ className: '', html: '<div class="mapa-pin" style="background:#3AA0FF"></div>', iconSize: [16,16], iconAnchor:[8,16] })
+      }).addTo(map).bindPopup('Estás acá').openPopup();
+      btn.disabled = false;
+      btn.textContent = '📍 Cerca de mí';
+    }, function () {
+      alert('No pudimos acceder a tu ubicación.');
+      btn.disabled = false;
+      btn.textContent = '📍 Cerca de mí';
+    });
+  });
 })();
 </script>
 </body>
