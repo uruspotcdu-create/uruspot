@@ -8,13 +8,13 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="description" content="La guía completa de Concepción del Uruguay: gastronomía, patrimonio, naturaleza, alojamiento y servicios en un mapa interactivo verificado, lugar por lugar.">
-
 <meta name="theme-color" content="#0c0904">
 
 <meta name="robots" content="index, follow">
 
-<title>Guía completa de Concepción del Uruguay · URU SPOT</title>
+<title>Guía completa de Concepción del Uruguay · 653+ lugares · URU SPOT</title>
+
+<meta name="description" content="La guía urbana completa de Concepción del Uruguay: 13 categorías, cientos de lugares verificados contra Google Places, en un mapa interactivo con filtros por rubro y subcategoría.">
 
 <link rel="canonical" href="https://uruspotcdu-create.github.io/uruspot/guia-concepcion-del-uruguay/">
 
@@ -28,7 +28,7 @@
 
   "name": "Guía de Concepción del Uruguay",
 
-  "description": "Guía interactiva de Concepción del Uruguay: gastronomía, patrimonio, naturaleza, alojamiento y servicios, verificados lugar por lugar.",
+  "description": "Guía interactiva de Concepción del Uruguay: gastronomía, compras, salud, finanzas, patrimonio, naturaleza, alojamiento y más, verificados lugar por lugar.",
 
   "url": "https://uruspotcdu-create.github.io/uruspot/guia-concepcion-del-uruguay/",
 
@@ -49,14 +49,6 @@
 }
 
 </script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
-
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap"></noscript>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -963,7 +955,7 @@ footer::before{
 
 
 
-    <p class="hero-sub">🎯 <strong>263 lugares verificados</strong> — curada con precisión: gastronomía, patrimonio, naturaleza, alojamiento y servicios completos</p>
+    <p class="hero-sub">🎯 <strong><span id="hero-total-lugares">···</span> lugares verificados</strong> — curada con precisión: gastronomía, compras, salud, finanzas, patrimonio, naturaleza, alojamiento y mucho más</p>
 
 
 
@@ -983,7 +975,7 @@ footer::before{
 
       <div class="hs" role="listitem"><div class="hs-n" id="stat-total-lugares">···</div><div class="hs-l">Lugares</div></div>
 
-      <div class="hs" role="listitem"><div class="hs-n">5</div><div class="hs-l">Categorías</div></div>
+      <div class="hs" role="listitem"><div class="hs-n" id="stat-total-categorias">···</div><div class="hs-l">Categorías</div></div>
 
       <div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Ciudad</div></div>
 
@@ -1051,68 +1043,8 @@ footer::before{
 
   <div class="cats-wrap reveal rd1">
 
-    <div class="cats">
-
-      <a class="cat cat-gastronomia" href="#mapa" data-filtro="gastronomia">
-
-        <span class="cat-icon" aria-hidden="true">🍽️</span>
-
-        <div class="cat-name"><span class="cat-dot" style="background:#D4462F"></span>Gastronomía</div>
-
-        <div class="cat-desc">Restaurantes, bares, cafeterías, panaderías y heladerías.</div>
-
-        <div class="cat-count"><span id="cnt-gastronomia">···</span> lugares</div>
-
-      </a>
-
-      <a class="cat cat-patrimonio" href="#mapa" data-filtro="patrimonio">
-
-        <span class="cat-icon" aria-hidden="true">🏛️</span>
-
-        <div class="cat-name"><span class="cat-dot" style="background:#E07828"></span>Patrimonio &amp; Historia</div>
-
-        <div class="cat-desc">Museos, plazas, monumentos y edificios históricos.</div>
-
-        <div class="cat-count"><span id="cnt-patrimonio">···</span> lugares</div>
-
-      </a>
-
-      <a class="cat cat-naturaleza" href="#mapa" data-filtro="naturaleza">
-
-        <span class="cat-icon" aria-hidden="true">🌊</span>
-
-        <div class="cat-name"><span class="cat-dot" style="background:#267A4D"></span>Naturaleza &amp; Playas</div>
-
-        <div class="cat-desc">Balnearios, islas y la costanera del río Uruguay.</div>
-
-        <div class="cat-count"><span id="cnt-naturaleza">···</span> lugares</div>
-
-      </a>
-
-      <a class="cat cat-alojamiento" href="#mapa" data-filtro="alojamiento">
-
-        <span class="cat-icon" aria-hidden="true">🏨</span>
-
-        <div class="cat-name"><span class="cat-dot" style="background:#7B3068"></span>Alojamiento</div>
-
-        <div class="cat-desc">Hoteles, hosterías, cabañas y apart hotels.</div>
-
-        <div class="cat-count"><span id="cnt-alojamiento">···</span> lugares</div>
-
-      </a>
-
-      <a class="cat cat-servicios" href="#mapa" data-filtro="servicios">
-
-        <span class="cat-icon" aria-hidden="true">🧭</span>
-
-        <div class="cat-name"><span class="cat-dot" style="background:#1A5C8C"></span>Servicios</div>
-
-        <div class="cat-desc">Salud, bancos, veterinarias, transporte y compras.</div>
-
-        <div class="cat-count"><span id="cnt-servicios">···</span> lugares</div>
-
-      </a>
-
+    <div class="cats" id="cats-container">
+      <!-- Generado dinámicamente por JS (renderHeroCards) a partir de GRUPOS y los datos reales de LUGARES. -->
     </div>
 
   </div>
@@ -1183,6 +1115,14 @@ footer::before{
     .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-decoration:none; padding:7px 11px; border-radius:50px; display:inline-flex; align-items:center; gap:4px; }
     .mapa-popup-actions a.ir{ background:var(--pop-color,#267A4D); color:#fff; }
     .mapa-popup-actions a.tel{ background:var(--map-panel); color:var(--map-ink); border:1px solid var(--map-line); }
+    .mapa-popup-actions a.wa{ background:#25D366; color:#fff; }
+    .mapa-popup-grupo{ opacity:.7; font-weight:400; letter-spacing:1px; }
+
+    #mapa-subfiltros{ display:none; flex-wrap:wrap; gap:6px; padding:0 16px 14px; background:var(--map-panel); }
+    #mapa-subfiltros.visible{ display:flex; }
+    .mapa-subpill{ font-family:var(--f-ui-map); font-size:9.5px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; color:var(--map-muted); background:var(--map-paper); border:1px solid var(--map-line); border-radius:50px; padding:6px 12px; cursor:pointer; transition:all .2s ease; }
+    .mapa-subpill:hover{ border-color:var(--gold); color:var(--map-ink); }
+    .mapa-subpill.activo{ background:var(--gold); border-color:var(--gold); color:#fff; }
 
 
 
@@ -1262,6 +1202,8 @@ footer::before{
 
     <div id="mapa-filtros" role="group" aria-label="Filtrar por categoría"></div>
 
+    <div id="mapa-subfiltros" role="group" aria-label="Filtrar por subcategoría"></div>
+
     <div id="mapa-canvas">
 
       <div id="mapa-leaflet" role="application" aria-label="Mapa interactivo de Concepción del Uruguay"></div>
@@ -1312,128 +1254,8 @@ footer::before{
 
 
 
-<div class="cd-wrap reveal rd1">
-
-    <div class="cd-item" id="cat-detalle-gastronomia">
-
-      <h3>🍽️ Dónde comer en Concepción del Uruguay <span class="cd-count">(<span id="dcnt-gastronomia">122</span> lugares)</span></h3>
-
-      <p><strong>¡EXPANDIDO!</strong> Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías, pizzerías, cervecerías artesanales, desayunerías y mucho más — más de 130 lugares gastronómicos verificados. La oferta más completa de la ciudad.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="gastronomia">Ver en el mapa →</a>
-
-    </div>
-
-    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "name": "Dónde comer en Concepción del Uruguay", "numberOfItems": 39, "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Cremolatti"}, {"@type": "ListItem", "position": 2, "name": "Heladeria Dany's"}, {"@type": "ListItem", "position": 3, "name": "Heladería Lucero"}, {"@type": "ListItem", "position": 4, "name": "Heladería Italia"}, {"@type": "ListItem", "position": 5, "name": "Heladería Artesanal Yelatti"}, {"@type": "ListItem", "position": 6, "name": "Justo José Restó Bar"}, {"@type": "ListItem", "position": 7, "name": "EL ARCA - Resto Bar"}, {"@type": "ListItem", "position": 8, "name": "Papa Luigi"}, {"@type": "ListItem", "position": 9, "name": "Bella Vista Café y Restó"}, {"@type": "ListItem", "position": 10, "name": "Panza Verde Parador"}, {"@type": "ListItem", "position": 11, "name": "Bonhomia Resto Bar"}, {"@type": "ListItem", "position": 12, "name": "La Ris Restó y Bar"}, {"@type": "ListItem", "position": 13, "name": "Parrilla La Gruta"}, {"@type": "ListItem", "position": 14, "name": "Sanduba"}, {"@type": "ListItem", "position": 15, "name": "Pimienta Negra"}, {"@type": "ListItem", "position": 16, "name": "Parada 33"}, {"@type": "ListItem", "position": 17, "name": "Faro 3260"}, {"@type": "ListItem", "position": 18, "name": "El Calderón - Casa de Comidas"}, {"@type": "ListItem", "position": 19, "name": "Parrilla La Segunda"}, {"@type": "ListItem", "position": 20, "name": "Dolores Costa"}, {"@type": "ListItem", "position": 21, "name": "Restaurant La Delfina"}, {"@type": "ListItem", "position": 22, "name": "Mamma Mia"}, {"@type": "ListItem", "position": 23, "name": "Garifo"}, {"@type": "ListItem", "position": 24, "name": "Baco Fusión Restaurant"}, {"@type": "ListItem", "position": 25, "name": "El Danubio Azul"}, {"@type": "ListItem", "position": 26, "name": "Nero Café de Especialidad"}, {"@type": "ListItem", "position": 27, "name": "Cultura Café"}, {"@type": "ListItem", "position": 28, "name": "Helena Café Resto"}, {"@type": "ListItem", "position": 29, "name": "London Café"}, {"@type": "ListItem", "position": 30, "name": "Drakkar Cervecería"}, {"@type": "ListItem", "position": 31, "name": "Cervecería Klug Gebräu"}, {"@type": "ListItem", "position": 32, "name": "Bartolo Bar"}, {"@type": "ListItem", "position": 33, "name": "House Garage"}, {"@type": "ListItem", "position": 34, "name": "7 Colinas Craft Brewery"}, {"@type": "ListItem", "position": 35, "name": "Panadería Panettone"}, {"@type": "ListItem", "position": 36, "name": "Lo de Juan"}, {"@type": "ListItem", "position": 37, "name": "Panadería Mi Viejo"}, {"@type": "ListItem", "position": 38, "name": "Panadería y Confitería San Carlos"}, {"@type": "ListItem", "position": 39, "name": "Confitería La Cuadra"}]}</script>
-
-    <div class="cd-item" id="cat-detalle-patrimonio">
-
-      <h3>Patrimonio e historia de CDU <span class="cd-count">(<span id="dcnt-patrimonio">13</span> lugares)</span></h3>
-
-      <p>Museos, plazas, edificios y sitios ligados a la historia de la ciudad — cuna de la Constitución Nacional. Ideal para quien visita por primera vez y quiere entender por qué el lugar importa.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="patrimonio">Ver en el mapa →</a>
-
-    </div>
-
-    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "name": "Patrimonio e historia de CDU", "numberOfItems": 14, "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Palacio San José"}, {"@type": "ListItem", "position": 2, "name": "Basílica Inmaculada Concepción"}, {"@type": "ListItem", "position": 3, "name": "Museo Casa de Delio Panizza"}, {"@type": "ListItem", "position": 4, "name": "Museo Andrés García"}, {"@type": "ListItem", "position": 5, "name": "Museo de Culturas Aborígenes Yuchán"}, {"@type": "ListItem", "position": 6, "name": "Colegio Superior del Uruguay Justo José de Urquiza"}, {"@type": "ListItem", "position": 7, "name": "Palacio Santa Cándida"}, {"@type": "ListItem", "position": 8, "name": "Faro Stella Maris"}, {"@type": "ListItem", "position": 9, "name": "Plaza General Francisco Ramírez"}, {"@type": "ListItem", "position": 10, "name": "Peatonal Rocamora"}, {"@type": "ListItem", "position": 11, "name": "Cine Teatro San Martín"}, {"@type": "ListItem", "position": 12, "name": "Museo de Dibujo y Grabado Guamán Poma"}, {"@type": "ListItem", "position": 13, "name": "Sala Evocativa de la Ribera"}, {"@type": "ListItem", "position": 14, "name": "Barrio Puerto Viejo"}]}</script>
-
-    <div class="cd-item" id="cat-detalle-naturaleza">
-
-      <h3>Naturaleza y playas sobre el río Uruguay <span class="cd-count">(<span id="dcnt-naturaleza">4</span> lugares)</span></h3>
-
-      <p>Balnearios, islas y la costanera. Es la categoría más chica del mapa hoy, pero la que más define el perfil turístico de la ciudad en temporada.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="naturaleza">Ver en el mapa →</a>
-
-    </div>
-
-    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "name": "Naturaleza y playas sobre el río Uruguay", "numberOfItems": 5, "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Banco Pelay"}, {"@type": "ListItem", "position": 2, "name": "Isla del Puerto (Costanera)"}, {"@type": "ListItem", "position": 3, "name": "Isla Cambacuá"}, {"@type": "ListItem", "position": 4, "name": "Paso Vera"}, {"@type": "ListItem", "position": 5, "name": "Balneario Itapé"}]}</script>
-
-    <div class="cd-item" id="cat-detalle-alojamiento">
-
-      <h3>🏨 Dónde alojarse en Concepción del Uruguay <span class="cd-count">(<span id="dcnt-alojamiento">21</span> lugares)</span></h3>
-
-      <p><strong>¡AMPLIADO!</strong> Hoteles, hosterías, cabañas, apart hotels, hostels y opciones de hospedaje — más de 20 alternativas verificadas para una estadía cómoda de uno o varios días.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="alojamiento">Ver en el mapa →</a>
-
-    </div>
-
-    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "name": "Dónde alojarse en Concepción del Uruguay", "numberOfItems": 13, "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Casa del Árbol"}, {"@type": "ListItem", "position": 2, "name": "Boutique Los Aguaribay"}, {"@type": "ListItem", "position": 3, "name": "Bungalows México"}, {"@type": "ListItem", "position": 4, "name": "Antigua Fonda"}, {"@type": "ListItem", "position": 5, "name": "Hostería Mitre"}, {"@type": "ListItem", "position": 6, "name": "Hostería Posta Torreón"}, {"@type": "ListItem", "position": 7, "name": "Gran Texier Hotel Casino"}, {"@type": "ListItem", "position": 8, "name": "Hotel Boutique Lourd Mary"}, {"@type": "ListItem", "position": 9, "name": "Hotel Gran Litoral"}, {"@type": "ListItem", "position": 10, "name": "Adriano Apart Hotel"}, {"@type": "ListItem", "position": 11, "name": "Virrey Hotel"}, {"@type": "ListItem", "position": 12, "name": "Aires del Campo"}, {"@type": "ListItem", "position": 13, "name": "Fogón Criollo Cabañas"}]}</script>
-
-    <div class="cd-item" id="cat-detalle-servicios">
-
-      <h3>Servicios útiles para moverte por la ciudad <span class="cd-count">(<span id="dcnt-servicios">81</span> lugares)</span></h3>
-
-      <p>Salud, bancos y cajeros, veterinarias, gimnasios, transporte y supermercados — todo lo que no es turismo pero se necesita para pasar unos días o vivir en CDU.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="servicios">Ver en el mapa →</a>
-
-    </div>
-
-    <div class="cd-item" id="cat-detalle-compras">
-
-      <h3>🛒 Compras y supermercados <span class="cd-count">(<span id="dcnt-compras">18</span> lugares)</span></h3>
-
-      <p>Supermercados, espacios de compra y comercios para todas tus necesidades diarias. Opciones variadas desde hipermercados hasta locales especializados.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="compras">Ver en el mapa →</a>
-
-    </div>
-
-    <div class="cd-item" id="cat-detalle-deporte">
-
-      <h3>🏋️ Gimnasios y deporte <span class="cd-count">(<span id="dcnt-deporte">13</span> lugares)</span></h3>
-
-      <p>Gimnasios, espacios de entrenamiento y centros de actividad física. Mantente activo durante tu visita o si vives en la ciudad.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="deporte">Ver en el mapa →</a>
-
-    </div>
-
-    <div class="cd-item" id="cat-detalle-finanzas">
-
-      <h3>💰 Bancos y servicios financieros <span class="cd-count">(<span id="dcnt-finanzas">13</span> lugares)</span></h3>
-
-      <p>Bancos, cajeros automáticos, servicios de remesas y transacciones financieras. Todo lo que necesitas para tus operaciones bancarias en CDU.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="finanzas">Ver en el mapa →</a>
-
-    </div>
-
-    <div class="cd-item" id="cat-detalle-mascotas">
-
-      <h3>🐾 Veterinarias y mascotas <span class="cd-count">(<span id="dcnt-mascotas">6</span> lugares)</span></h3>
-
-      <p>Clínicas veterinarias y pet shops especializados. Cuidado profesional para tus compañeros peludos.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="mascotas">Ver en el mapa →</a>
-
-    </div>
-
-    <div class="cd-item" id="cat-detalle-salud">
-
-      <h3>🏥 Salud y servicios médicos <span class="cd-count">(<span id="dcnt-salud">28</span> lugares)</span></h3>
-
-      <p>Hospital, clínicas y servicios de salud. Atención médica profesional disponible 24/7.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="salud">Ver en el mapa →</a>
-
-    </div>
-
-    <div class="cd-item" id="cat-detalle-transporte">
-
-      <h3>🚗 Transporte y movilidad <span class="cd-count">(<span id="dcnt-transporte">3</span> lugares)</span></h3>
-
-      <p>Remiserías, servicios de transporte y terminal de ómnibus. Opciones para moverte dentro y fuera de la ciudad.</p>
-
-      <a class="cd-link" href="#mapa" data-filtro="transporte">Ver en el mapa →</a>
-
-    </div>
-
-    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "name": "Servicios útiles para moverte por la ciudad", "numberOfItems": 33, "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Veterinaria FISIOVET"}, {"@type": "ListItem", "position": 2, "name": "Clínica Veterinaria Dr. Vet"}, {"@type": "ListItem", "position": 3, "name": "Agroveterinaria 9 de Julio"}, {"@type": "ListItem", "position": 4, "name": "Clínica Veterinaria Dres. Artusi y Bruchez"}, {"@type": "ListItem", "position": 5, "name": "ATP Veterinaria"}, {"@type": "ListItem", "position": 6, "name": "Dog Center Pet Shop"}, {"@type": "ListItem", "position": 7, "name": "Tao Remises"}, {"@type": "ListItem", "position": 8, "name": "Acción Remises"}, {"@type": "ListItem", "position": 9, "name": "Gimnasio 538 Gym"}, {"@type": "ListItem", "position": 10, "name": "Gimnasio Muscle"}, {"@type": "ListItem", "position": 11, "name": "Gym Lucianos"}, {"@type": "ListItem", "position": 12, "name": "CROSS CDELU"}, {"@type": "ListItem", "position": 13, "name": "Power Gym"}, {"@type": "ListItem", "position": 14, "name": "Banco Nación"}, {"@type": "ListItem", "position": 15, "name": "Banco Macro"}, {"@type": "ListItem", "position": 16, "name": "Banco Credicoop (9 de Julio)"}, {"@type": "ListItem", "position": 17, "name": "Banco Galicia"}, {"@type": "ListItem", "position": 18, "name": "BBVA (9 de Julio 847)"}, {"@type": "ListItem", "position": 19, "name": "BERSA"}, {"@type": "ListItem", "position": 20, "name": "Banco Patagonia"}, {"@type": "ListItem", "position": 21, "name": "Banco Santander"}, {"@type": "ListItem", "position": 22, "name": "Western Union (Galarza)"}, {"@type": "ListItem", "position": 23, "name": "Western Union (Lacava)"}, {"@type": "ListItem", "position": 24, "name": "Western Union (Sarmiento)"}, {"@type": "ListItem", "position": 25, "name": "Western Union (Santa Teresita)"}, {"@type": "ListItem", "position": 26, "name": "Rapipago"}, {"@type": "ListItem", "position": 27, "name": "Supermercados DÍA"}, {"@type": "ListItem", "position": 28, "name": "Supermercado Gran Rex"}, {"@type": "ListItem", "position": 29, "name": "Supermercado Supremo"}, {"@type": "ListItem", "position": 30, "name": "Supermercado Stop"}, {"@type": "ListItem", "position": 31, "name": "Supermercado Mayorista El Rey"}, {"@type": "ListItem", "position": 32, "name": "Hospital Urquiza"}, {"@type": "ListItem", "position": 33, "name": "Terminal de Ómnibus"}]}</script>
-
+<div class="cd-wrap reveal rd1" id="cd-wrap-container">
+<!-- Generado dinámicamente por JS (renderCdWrap) a partir de GRUPOS y los datos reales de LUGARES. -->
 </div>
 
 
@@ -1829,41 +1651,33 @@ footer::before{
 
     // (pills activas, clusters del mapa, leyenda).
 
-    gastronomia: { color: '#AD1E1E', label: 'Gastronomía', icon: '🍽️' },
+    gastronomia: { color: '#AD1E1E', label: 'Gastronomía', icon: '🍽️', desc: 'Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.' },
 
-    patrimonio:  { color: '#9C681B', label: 'Patrimonio',  icon: '🏛️' },
+    patrimonio:  { color: '#9C681B', label: 'Patrimonio',  icon: '🏛️', desc: 'Museos, plazas, iglesias, centros culturales y edificios históricos.' },
 
-    naturaleza:  { color: '#3A8216', label: 'Naturaleza',  icon: '🌊' },
+    naturaleza:  { color: '#3A8216', label: 'Naturaleza',  icon: '🌊', desc: 'Balnearios, islas, parques y la costanera del río Uruguay.' },
 
-    alojamiento: { color: '#1E57AD', label: 'Alojamiento', icon: '🏨' },
+    alojamiento: { color: '#1E57AD', label: 'Alojamiento', icon: '🏨', desc: 'Hoteles, hosterías, cabañas, hostels y apart hotels.' },
 
-    mascotas:    { color: '#168241', label: 'Mascotas',    icon: '🐾' },
+    mascotas:    { color: '#168241', label: 'Mascotas',    icon: '🐾', desc: 'Veterinarias y pet shops para el cuidado de tus compañeros.' },
 
-    salud:       { color: '#168282', label: 'Salud',       icon: '🏥' },
+    salud:       { color: '#168282', label: 'Salud',       icon: '🏥', desc: 'Farmacias, clínicas, laboratorios y profesionales de la salud.' },
 
-    finanzas:    { color: '#3B1EAD', label: 'Finanzas',    icon: '🏦' },
+    finanzas:    { color: '#3B1EAD', label: 'Finanzas',    icon: '🏦', desc: 'Bancos, seguros, abogados, escribanías e inmobiliarias.' },
 
-    compras:     { color: '#657915', label: 'Compras',     icon: '🛒' },
+    compras:     { color: '#657915', label: 'Compras',     icon: '🛒', desc: 'Supermercados, ferreterías, indumentaria y comercios de todo tipo.' },
 
-    deporte:     { color: '#901EAD', label: 'Deporte',     icon: '💪' },
+    deporte:     { color: '#901EAD', label: 'Deporte',     icon: '💪', desc: 'Gimnasios, clubes deportivos y espacios de entrenamiento.' },
 
-    transporte:  { color: '#AD1E74', label: 'Transporte',  icon: '🚖' },
+    transporte:  { color: '#AD1E74', label: 'Transporte',  icon: '🚖', desc: 'Remiserías, talleres, estaciones de servicio y agencias de viaje.' },
 
-    belleza:     { color: '#7A1EAD', label: 'Belleza',     icon: '💇' },
+    belleza:     { color: '#7A1EAD', label: 'Belleza',     icon: '💇', desc: 'Peluquerías, barberías y centros de estética.' },
 
-    servicios_publicos: { color: '#AD5E1E', label: 'Servicios públicos', icon: '🏢' },
+    servicios_publicos: { color: '#AD5E1E', label: 'Servicios públicos', icon: '🏢', desc: 'Municipalidad, policía, correo, Registro Civil y más.' },
 
-    educacion:   { color: '#1EAD8C', label: 'Educación',   icon: '🎓' }
+    educacion:   { color: '#1EAD8C', label: 'Educación',   icon: '🎓', desc: 'Universidades, institutos, escuelas y jardines de infantes.' }
 
   };
-
-
-
-  // 'Servicios' en las tarjetas del hero es una etiqueta agregada:
-
-  // agrupa varios 'grupo' reales del dataset que no tienen tarjeta propia.
-
-  var SERVICIOS_GRUPOS = ['mascotas', 'salud', 'finanzas', 'compras', 'deporte', 'transporte'];
 
 
 
@@ -1947,11 +1761,21 @@ footer::before{
 
 
 
-  var todosLosMarkers = []; // {marker, grupo, nombre, lugar}
+  var todosLosMarkers = []; // {marker, grupo, nombre, categoria, lugar}
 
   var filtroActivo = 'todos';
 
+  var subFiltroActivo = null; // categoria específica dentro del grupo activo, o null = todas
+
   var textoBusqueda = '';
+
+  // Normaliza acentos/mayúsculas para que "heladeria" encuentre "Heladería".
+  function normalizarTexto(str) {
+    return String(str || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  }
 
 
 
@@ -1981,42 +1805,38 @@ footer::before{
 
 
 
+  // Convierte un teléfono en formato local/argentino a dígitos puros
+  // aptos para un enlace wa.me (código de país + número, sin '+', espacios
+  // ni guiones). No modifica el dato original (lugar.telefono).
+  function telefonoWhatsapp(telefono) {
+    if (!telefono) return null;
+    var digitos = String(telefono).replace(/[^\d]/g, '');
+    if (digitos.indexOf('54') !== 0) digitos = '54' + digitos.replace(/^0+/, '');
+    return digitos;
+  }
+
   function popupHtml(lugar, color) {
-
     var html = '';
-
     if (lugar.destacado) html += '<span class="mapa-popup-destacado">★ Destacado</span>';
-
-    html += '<span class="mapa-popup-cat">' + GRUPOS[lugar.grupo].icon + ' ' + escapeHtml(lugar.categoria) + '</span>';
-
+    html += '<span class="mapa-popup-cat">' + GRUPOS[lugar.grupo].icon + ' ' + escapeHtml(lugar.categoria) +
+            ' <span class="mapa-popup-grupo">· ' + escapeHtml(GRUPOS[lugar.grupo].label) + '</span></span>';
     html += '<span class="mapa-popup-nombre">' + escapeHtml(lugar.nombre) + '</span>';
-
     if (lugar.rating) {
-
       html += '<div class="mapa-popup-rating">' + starsHtml(lugar.rating) + ' ' + lugar.rating.toFixed(1) +
-
               (lugar.rating_count ? ' <span class="cant">(' + lugar.rating_count + ')</span>' : '') + '</div>';
-
     } else {
-
       html += '<span class="mapa-popup-norating">Sin calificación de Google aún</span>';
-
     }
-
     if (lugar.direccion) html += '<span class="mapa-popup-addr">📍 ' + escapeHtml(lugar.direccion) + '</span>';
-
     if (lugar.descripcion) html += '<span class="mapa-popup-desc">' + escapeHtml(lugar.descripcion) + '</span>';
-
     html += '<div class="mapa-popup-actions">';
-
     html += '<a class="ir" style="--pop-color:' + color + '" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + lugar.lat + ',' + lugar.lng + (lugar.place_id ? '&destination_place_id=' + lugar.place_id : '') + '">↗ Cómo llegar</a>';
-
-    if (lugar.telefono) html += '<a class="tel" href="tel:' + lugar.telefono.replace(/\s+/g, '') + '">📞 Llamar</a>';
-
+    if (lugar.telefono) {
+      html += '<a class="tel" href="tel:' + lugar.telefono.replace(/\s+/g, '') + '">📞 Llamar</a>';
+      html += '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/' + telefonoWhatsapp(lugar.telefono) + '">💬 WhatsApp</a>';
+    }
     html += '</div>';
-
     return html;
-
   }
 
 
@@ -2035,7 +1855,14 @@ footer::before{
 
     clusterGroups[grupo].addLayer(marker);
 
-    todosLosMarkers.push({ marker: marker, grupo: grupo, nombre: lugar.nombre.toLowerCase(), lugar: lugar });
+    todosLosMarkers.push({
+      marker: marker,
+      grupo: grupo,
+      categoria: lugar.categoria || '',
+      nombreNorm: normalizarTexto(lugar.nombre),
+      categoriaNorm: normalizarTexto(lugar.categoria),
+      lugar: lugar
+    });
 
   }
 
@@ -2073,9 +1900,89 @@ footer::before{
 
         filtroActivo = btn.getAttribute('data-cat');
 
+        subFiltroActivo = null;
+
         aplicarFiltros();
 
         sincronizarActivos(filtroActivo);
+
+        renderSubfiltros();
+
+      });
+
+    });
+
+  }
+
+
+
+  // Genera los chips de subcategoría (campo 'categoria' del dataset) para el
+
+  // grupo actualmente seleccionado. Se recalculan en cada cambio de filtro
+
+  // porque dependen de qué lugares quedan visibles para ese grupo.
+
+  function renderSubfiltros() {
+
+    var cont = document.getElementById('mapa-subfiltros');
+
+    if (!cont) return;
+
+    if (filtroActivo === 'todos') {
+
+      cont.classList.remove('visible');
+
+      cont.innerHTML = '';
+
+      return;
+
+    }
+
+    var counts = {};
+
+    todosLosMarkers.forEach(function (m) {
+
+      if (m.grupo !== filtroActivo) return;
+
+      counts[m.categoria] = (counts[m.categoria] || 0) + 1;
+
+    });
+
+    var subcats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+
+    if (subcats.length < 2) {
+
+      cont.classList.remove('visible');
+
+      cont.innerHTML = '';
+
+      return;
+
+    }
+
+    var html = '<button class="mapa-subpill' + (!subFiltroActivo ? ' activo' : '') + '" data-subcat="" type="button">Todas <span class="cnt">' + subcats.reduce(function (a, c) { return a + counts[c]; }, 0) + '</span></button>';
+
+    subcats.forEach(function (c) {
+
+      html += '<button class="mapa-subpill' + (subFiltroActivo === c ? ' activo' : '') + '" data-subcat="' + escapeHtml(c) + '" type="button">' + escapeHtml(c) + ' <span class="cnt">' + counts[c] + '</span></button>';
+
+    });
+
+    cont.innerHTML = html;
+
+    cont.classList.add('visible');
+
+    cont.querySelectorAll('.mapa-subpill').forEach(function (btn) {
+
+      btn.addEventListener('click', function () {
+
+        subFiltroActivo = btn.getAttribute('data-subcat') || null;
+
+        cont.querySelectorAll('.mapa-subpill').forEach(function (b) { b.classList.remove('activo'); });
+
+        btn.classList.add('activo');
+
+        aplicarFiltros();
 
       });
 
@@ -2095,21 +2002,13 @@ footer::before{
 
     document.querySelectorAll('.mapa-pill').forEach(function (b) {
 
-      var cat = b.getAttribute('data-cat');
-
-      var coincide = (f === 'servicios') ? SERVICIOS_GRUPOS.indexOf(cat) > -1 : cat === f;
-
-      b.classList.toggle('activo', coincide);
+      b.classList.toggle('activo', b.getAttribute('data-cat') === f);
 
     });
 
     document.querySelectorAll('.mapa-legend-item').forEach(function (it) {
 
-      var cat = it.getAttribute('data-cat');
-
-      var coincide = (f === 'servicios') ? SERVICIOS_GRUPOS.indexOf(cat) > -1 : cat === f;
-
-      it.classList.toggle('activo', coincide);
+      it.classList.toggle('activo', it.getAttribute('data-cat') === f);
 
     });
 
@@ -2163,9 +2062,13 @@ footer::before{
 
         filtroActivo = item.getAttribute('data-cat');
 
+        subFiltroActivo = null;
+
         aplicarFiltros();
 
         sincronizarActivos(filtroActivo);
+
+        renderSubfiltros();
 
       });
 
@@ -2203,13 +2106,17 @@ footer::before{
 
     todosLosMarkers.forEach(function (m) {
 
-      var pasaCategoria = (filtroActivo === 'todos') ||
+      var pasaCategoria = (filtroActivo === 'todos') || (m.grupo === filtroActivo);
 
-        (filtroActivo === 'servicios' ? SERVICIOS_GRUPOS.indexOf(m.grupo) > -1 : m.grupo === filtroActivo);
+      var pasaSubcategoria = (!subFiltroActivo) || (m.categoria === subFiltroActivo);
 
-      var pasaBusqueda = (textoBusqueda === '' || m.nombre.indexOf(textoBusqueda) > -1);
+      var pasaBusqueda = (textoBusqueda === '') ||
 
-      var mostrar = pasaCategoria && pasaBusqueda;
+        (m.nombreNorm.indexOf(textoBusqueda) > -1) ||
+
+        (m.categoriaNorm.indexOf(textoBusqueda) > -1);
+
+      var mostrar = pasaCategoria && pasaSubcategoria && pasaBusqueda;
 
       var grupo = clusterGroups[m.grupo];
 
@@ -2247,9 +2154,185 @@ footer::before{
 
 
 
-  // Calcula y pinta el total del hero y el contador de cada tarjeta de
+  // Genera las 13 tarjetas de "Explorá por categoría" en el hero, con
 
-  // categoría (incl. "Servicios", que suma varios grupos reales del dataset).
+  // conteo real y color/ícono tomados de GRUPOS (una sola fuente de verdad,
+
+  // ya no hay una tarjeta "Servicios" genérica que mezcle 6 grupos distintos).
+
+  function renderHeroCards(counts) {
+
+    var cont = document.getElementById('cats-container');
+
+    if (!cont) return;
+
+    var html = '';
+
+    Object.keys(GRUPOS).forEach(function (g) {
+
+      if (!counts[g]) return;
+
+      var info = GRUPOS[g];
+
+      html += '<a class="cat cat-' + g + '" href="#mapa" data-filtro="' + g + '">' +
+
+              '<span class="cat-icon" aria-hidden="true">' + info.icon + '</span>' +
+
+              '<div class="cat-name"><span class="cat-dot" style="background:' + info.color + '"></span>' + escapeHtml(info.label) + '</div>' +
+
+              '<div class="cat-desc">' + escapeHtml(info.desc) + '</div>' +
+
+              '<div class="cat-count"><span id="cnt-' + g + '">' + counts[g] + '</span> lugares</div>' +
+
+              '</a>';
+
+    });
+
+    cont.innerHTML = html;
+
+  }
+
+
+
+  // Genera "Categorías en detalle": un bloque por cada uno de los 13 grupos
+
+  // reales, con conteo dinámico (nunca escrito a mano) y sin números de
+
+  // lugares hardcodeados en la copy.
+
+  function renderCdWrap(counts) {
+
+    var cont = document.getElementById('cd-wrap-container');
+
+    if (!cont) return;
+
+    var html = '';
+
+    Object.keys(GRUPOS).forEach(function (g) {
+
+      if (!counts[g]) return;
+
+      var info = GRUPOS[g];
+
+      html += '<div class="cd-item" id="cat-detalle-' + g + '">' +
+
+              '<h3>' + info.icon + ' ' + escapeHtml(info.label) + ' <span class="cd-count">(<span id="dcnt-' + g + '">' + counts[g] + '</span> lugares)</span></h3>' +
+
+              '<p>' + escapeHtml(info.desc) + ' Categoría con ' + counts[g] + ' lugares registrados y verificados contra Google Places.</p>' +
+
+              '<a class="cd-link" href="#mapa" data-filtro="' + g + '">Ver en el mapa →</a>' +
+
+              '</div>';
+
+    });
+
+    cont.innerHTML = html;
+
+  }
+
+
+
+  // Genera un ItemList (schema.org) por categoría a partir de los datos
+
+  // reales de LUGARES, y lo agrega al <head> como JSON-LD. Reemplaza los
+
+  // bloques estáticos y desactualizados que existían antes (con conteos
+
+  // manuales que ya no coincidían con la base real).
+
+  function generarSEOItemLists() {
+
+    Object.keys(GRUPOS).forEach(function (g) {
+
+      var lugaresGrupo = todosLosMarkers.filter(function (m) { return m.grupo === g; });
+
+      if (!lugaresGrupo.length) return;
+
+      var itemList = {
+
+        '@context': 'https://schema.org',
+
+        '@type': 'ItemList',
+
+        name: GRUPOS[g].label + ' en Concepción del Uruguay',
+
+        numberOfItems: lugaresGrupo.length,
+
+        itemListElement: lugaresGrupo.map(function (m, i) {
+
+          return { '@type': 'ListItem', position: i + 1, name: m.lugar.nombre };
+
+        })
+
+      };
+
+      var script = document.createElement('script');
+
+      script.type = 'application/ld+json';
+
+      script.text = JSON.stringify(itemList);
+
+      document.head.appendChild(script);
+
+    });
+
+  }
+
+
+
+  // Anima los contadores numéricos con un conteo ascendente. A diferencia
+
+  // de la versión anterior (que corría a ciegas 500ms después de 'load' y
+
+  // podía disparar antes de que los datos reales estuvieran pintados), esta
+
+  // se llama explícitamente después de que los números reales ya están en
+
+  // el DOM, así que siempre anima hacia el valor correcto.
+
+  function animarContadores() {
+
+    var elementos = document.querySelectorAll('[id^="dcnt-"], [id^="cnt-"], #stat-total-lugares, #stat-total-categorias, #hero-total-lugares');
+
+    elementos.forEach(function (el) {
+
+      var valor = parseInt(el.textContent, 10);
+
+      if (isNaN(valor)) return;
+
+      var actual = 0;
+
+      var incremento = Math.max(1, Math.ceil(valor / 30));
+
+      var intervalo = setInterval(function () {
+
+        actual += incremento;
+
+        if (actual >= valor) {
+
+          el.textContent = valor;
+
+          clearInterval(intervalo);
+
+        } else {
+
+          el.textContent = actual;
+
+        }
+
+      }, 20);
+
+    });
+
+  }
+
+
+
+  // Calcula y pinta el total del hero, el contador "Categorías", y genera
+
+  // dinámicamente las tarjetas del hero y de "Categorías en detalle" para
+
+  // los 13 grupos reales — nunca valores escritos a mano.
 
   function actualizarContadoresHero(total) {
 
@@ -2263,31 +2346,49 @@ footer::before{
 
     if (elTotal) elTotal.textContent = total;
 
+    var elHeroTotal = document.getElementById('hero-total-lugares');
+
+    if (elHeroTotal) elHeroTotal.textContent = total;
+
+    var elCategorias = document.getElementById('stat-total-categorias');
+
+    if (elCategorias) elCategorias.textContent = Object.keys(GRUPOS).filter(function (g) { return counts[g]; }).length;
 
 
-    ['gastronomia', 'patrimonio', 'naturaleza', 'alojamiento'].forEach(function (g) {
 
-      var el = document.getElementById('cnt-' + g);
+    renderHeroCards(counts);
 
-      if (el) el.textContent = counts[g] || 0;
+    renderCdWrap(counts);
 
-      var elDet = document.getElementById('dcnt-' + g);
 
-      if (elDet) elDet.textContent = counts[g] || 0;
+
+    // Re-vincula los listeners de las tarjetas recién generadas.
+
+    document.querySelectorAll('.cats .cat[data-filtro], .cd-link[data-filtro]').forEach(function (card) {
+
+      card.addEventListener('click', function () {
+
+        var f = card.getAttribute('data-filtro');
+
+        filtroActivo = f;
+
+        subFiltroActivo = null;
+
+        textoBusqueda = '';
+
+        var buscador = document.getElementById('mapa-search');
+
+        if (buscador) buscador.value = '';
+
+        aplicarFiltros();
+
+        sincronizarActivos(f);
+
+        renderSubfiltros();
+
+      });
 
     });
-
-
-
-    var totalServicios = SERVICIOS_GRUPOS.reduce(function (acc, g) { return acc + (counts[g] || 0); }, 0);
-
-    var elServicios = document.getElementById('cnt-servicios');
-
-    if (elServicios) elServicios.textContent = totalServicios;
-
-    var elServiciosDet = document.getElementById('dcnt-servicios');
-
-    if (elServiciosDet) elServiciosDet.textContent = totalServicios;
 
   }
 
@@ -2312,6 +2413,10 @@ footer::before{
     aplicarFiltros();
 
     actualizarContadoresHero(combinados.length);
+
+    generarSEOItemLists();
+
+    animarContadores();
 
   }
 
