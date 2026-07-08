@@ -76,19 +76,22 @@
      no 13 colores compitiendo (los 13 colores de GRUPOS quedan
      confinados al mapa y los pills de filtro, su función original). */
   :root{
-    --ink:#0b1620;
+    --ink:#0A1416;
     --ink-soft:#3a4a56;
     --bg:#f6f4ef;
     --bg-panel:#ffffff;
     --bg-sunk:#ece8df;
-    --river-900:#0e2a3d;
-    --river-700:#16425a;
-    --river-500:#1f5e78;
-    --river-300:#5c93a6;
-    --river-100:#cfe3e8;
-    --sunset:#e0793f;
-    --sunset-bright:#f0975e;
-    --sunset-pale:#fbe0cc;
+    --river-900:#16323B;
+    --river-700:#2C5F6B;
+    --river-500:#4A8B94;
+    --river-300:#A9CDD1;
+    --river-100:#EAF4F4;
+    --sunset:#E8734A;
+    --sunset-bright:#FBAE5C;
+    --sunset-pale:#FDE8D0;
+    --text-on-dark:#F7F3EE;
+    --text-neutral:#6B6B6B;
+    --accent-star:#F2B705;
     --muted:#7d8a90;
     --border:rgba(14,42,61,.12);
     --border-s:rgba(14,42,61,.22);
@@ -237,19 +240,44 @@
   .act-btn.is-fav{color:var(--sunset); border-color:var(--sunset)}
   .act-btn-lg{width:auto; height:auto; padding:.6rem 1rem; border-radius:50px; font-size:.85rem; font-weight:600; gap:.4rem}
 
-  /* Planes */
-  .planes-container{display:grid; grid-template-columns:1fr; gap:1rem}
-  @media (min-width:720px){ .planes-container{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))} }
-  .plan-card{
-    background:linear-gradient(160deg, var(--river-700), var(--river-900));
-    color:#fff; border-radius:var(--radius-lg); padding:1.5rem; cursor:pointer; border:0; text-align:left;
-    display:flex; flex-direction:column; gap:.5rem; transition:transform .18s ease;
+  /* El Cauce */
+  .cauce-container{display:flex; flex-direction:column; gap:1.1rem; max-width:640px; margin:0 auto}
+  .cauce-tabs{display:flex; gap:.5rem; justify-content:center}
+  .cauce-tab{
+    flex:1; max-width:150px; padding:.55rem .8rem; border-radius:50px; border:1px solid var(--border);
+    background:var(--bg-panel); color:var(--ink-soft); font-size:.82rem; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:.35rem; transition:all .18s ease;
   }
-  .plan-card:hover{transform:translateY(-3px)}
-  .plan-eyebrow{font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--sunset-bright)}
-  .plan-card h4{font-family:var(--f-display); font-size:1.2rem; color:#fff}
-  .plan-desc{font-size:.85rem; color:rgba(255,255,255,.75); line-height:1.5}
-  .plan-count{font-size:.75rem; color:rgba(255,255,255,.55); margin-top:.3rem}
+  .cauce-tab:hover{border-color:var(--border-s)}
+  .cauce-tab.is-active{background:var(--sunset); border-color:var(--sunset); color:#fff}
+  .cauce-tab.is-ahora::after{content:'•'; color:var(--sunset-bright); font-size:1.1rem; line-height:0}
+  .cauce-tab.is-active.is-ahora::after{color:var(--text-on-dark)}
+  .cauce-card{
+    border-radius:var(--radius-lg); padding:1.6rem 1.5rem; color:var(--text-on-dark);
+    display:flex; flex-direction:column; gap:1.1rem; transition:background .3s ease;
+  }
+  .cauce-card[data-franja="manana"]{background:linear-gradient(160deg, var(--river-500), var(--river-900));}
+  .cauce-card[data-franja="tarde"]{background:linear-gradient(160deg, var(--sunset), var(--river-900));}
+  .cauce-card[data-franja="noche"]{background:linear-gradient(160deg, var(--river-900), var(--ink));}
+  .cauce-eyebrow{font-size:.7rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--sunset-bright)}
+  .cauce-card h4{font-family:var(--f-display); font-size:1.3rem; color:var(--text-on-dark)}
+  .cauce-desc{font-size:.88rem; color:rgba(247,243,238,.8); line-height:1.5}
+  .cauce-trazo-wrap{width:100%; max-width:360px; margin:0 auto}
+  .cauce-trazo-wrap svg{width:100%; height:auto; display:block}
+  .cauce-lista{display:flex; flex-direction:column; gap:.7rem}
+  .cauce-item{display:flex; align-items:center; gap:.7rem; padding:.6rem .7rem; background:rgba(255,255,255,.08); border-radius:var(--radius-sm)}
+  .cauce-item-num{width:26px; height:26px; border-radius:50%; background:var(--sunset); color:#fff; font-size:.78rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex:0 0 auto}
+  .cauce-item-icon{font-size:1.1rem; flex:0 0 auto}
+  .cauce-item-body{display:flex; flex-direction:column; gap:.1rem; min-width:0}
+  .cauce-item-nombre{font-weight:600; font-size:.92rem; color:var(--text-on-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .cauce-item-rating{font-size:.75rem; color:var(--accent-star)}
+  .cauce-cta{
+    align-self:flex-start; background:var(--text-on-dark); color:var(--river-900); border:0; border-radius:50px;
+    padding:.7rem 1.3rem; font-size:.85rem; font-weight:700; cursor:pointer; transition:transform .15s ease;
+  }
+  .cauce-cta:hover{transform:translateY(-2px)}
+  .cauce-trazo-linea{stroke-dasharray:1000; stroke-dashoffset:1000; animation:cauce-dibujar 1.4s ease-out forwards}
+  @keyframes cauce-dibujar{to{stroke-dashoffset:0}}
 
   /* ═══════════ CATEGORÍAS (mantienen selectores originales) ═══════════ */
   .cats-wrap{max-width:1080px; margin:0 auto; padding:0 1.25rem 1rem}
@@ -449,15 +477,15 @@
     </div>
   </section>
 
-  <!-- Planes -->
+  <!-- El Cauce: 3 planes curados, uno por franja horaria -->
   <section class="ed-section" aria-labelledby="title-planes">
     <div class="sec-title reveal">
-      <h2 id="title-planes">Planes armados</h2>
-      <p>Para cuando no querés elegir lugar por lugar</p>
+      <h2 id="title-planes">El Cauce</h2>
+      <p>Un recorrido distinto para la mañana, la tarde y la noche</p>
       <div class="sec-divider"></div>
     </div>
-    <div id="planes-container" class="planes-container reveal rd1">
-      <!-- Generado dinámicamente por JS (renderPlanes) -->
+    <div id="cauce-container" class="cauce-container reveal rd1">
+      <!-- Generado dinámicamente por JS (renderElCauce) -->
     </div>
   </section>
 
@@ -1831,7 +1859,7 @@
     // adentro ya está garantizado que todosLosMarkers está poblado. ───
     renderLugarDelDia();
     renderImperdibles();
-    renderPlanes();
+    renderElCauce();
 
   }
 
@@ -2129,7 +2157,7 @@
   // LUGARES, aplicarFiltros, cargarDatos ni ninguna función del motor
   // de mapa/filtros. Todo lo de acá abajo lee de todosLosMarkers ya
   // poblado y escribe en contenedores propios (#lugar-del-dia-container,
-  // #imperdibles-container, #planes-container).
+  // #imperdibles-container, #cauce-container).
   // ══════════════════════════════════════════════════════════════════
 
   // Curaduría manual provisional: IDs de lugares marcados como destacados.
@@ -2240,40 +2268,159 @@
     bindAccionesLugar(cont);
   }
 
-  // Planes curados: cada plan es un array de IDs de lugares (puede cruzar
-  // categorías libremente, algo que ningún directorio genérico hace). Al
-  // hacer click, filtra el mapa a ese conjunto de lugares en el momento,
-  // sin tocar aplicarFiltros ni duplicar su lógica de filtrado por grupo.
-  var PLANES = [
-    { id: 'tarde-costanera', nombre: 'Tarde en la costanera', desc: 'Isla del Puerto, el Faro y una parada dulce para cerrar.', ids: [16, 8, 69] },
-    { id: 'centro-historico', nombre: 'Centro histórico a pie', desc: 'La Basílica, la Peatonal y un café de especialidad en el medio.', ids: [2, 10, 91] },
-    { id: 'domingo-familia', nombre: 'Domingo en familia', desc: 'Plaza, heladería y patrimonio, todo caminando.', ids: [9, 66, 413] },
-    { id: 'noche-cerveza', nombre: 'Noche de cervecería', desc: 'Las mejores cervezas artesanales de la ciudad.', ids: [95, 96, 99] },
-    { id: 'dia-playa', nombre: 'Día de playa', desc: 'Banco Pelay y una parrilla cerca para cerrar el día.', ids: [15, 18, 78] }
-  ];
+  // ═══════════════════════════════════════════════════════════
+  // EL CAUCE: 3 planes curados, uno por franja horaria (mañana/
+  // tarde/noche). Cada plan es un array de IDs de LUGARES (puede
+  // cruzar categorías libremente). Al hacer click en "Ver en el
+  // mapa" filtra el mapa a ese conjunto vía mostrarSoloLugares(),
+  // función ya existente y no modificada por esta capa.
+  // ═══════════════════════════════════════════════════════════
+  var PLANES_FRANJA = {
+    manana: {
+      id: 'manana-cafe-centro',
+      nombre: 'Café y centro histórico',
+      desc: 'Un café de especialidad, la plaza principal, la Basílica y la Peatonal — todo en 4 cuadras.',
+      ids: [91, 9, 2, 10]
+    },
+    tarde: {
+      id: 'tarde-costanera-faro',
+      nombre: 'Costanera, faro y helado',
+      desc: 'La Isla del Puerto, el único faro fluvial de Argentina, una plaza y un helado para cerrar.',
+      ids: [16, 8, 415, 69]
+    },
+    noche: {
+      id: 'noche-cena-cerveza',
+      nombre: 'Cena y cervecería',
+      desc: 'Una cena entrerriana y una ruta de tres cervecerías artesanales de la ciudad.',
+      ids: [74, 95, 96, 99, 97]
+    }
+  };
 
-  function renderPlanes() {
-    var cont = document.getElementById('planes-container');
-    if (!cont) return;
-    var html = PLANES.map(function (plan) {
+  var FRANJA_INFO = {
+    manana: { label: 'Mañana', icon: '🌅' },
+    tarde:  { label: 'Tarde',  icon: '☀️' },
+    noche:  { label: 'Noche',  icon: '🌙' }
+  };
+
+  // Posiciones fijas (x,y sobre viewBox 0 0 360 220) de la silueta de
+  // El Trazo. Cada franja usa un subconjunto de estos 8 puntos, en el
+  // orden que corresponda a su recorrido; el asset de fondo es uno solo.
+  var TRAZO_PUNTOS = {
+    P1: [42, 172], P2: [78, 122], P3: [128, 168],
+    P4: [176, 108], P5: [222, 156], P6: [266, 94],
+    P7: [302, 138], P8: [332, 80]
+  };
+
+  var TRAZO_CONFIG = {
+    manana: { puntos: ['P1', 'P3', 'P5', 'P7'] },
+    tarde:  { puntos: ['P1', 'P4', 'P6', 'P8'] },
+    noche:  { puntos: ['P2', 'P4', 'P5', 'P7', 'P8'] }
+  };
+
+  // Franja horaria real, para marcar cuál plan corresponde "ahora".
+  function getFranjaActual() {
+    var h = new Date().getHours();
+    if (h >= 6 && h < 13) return 'manana';
+    if (h >= 13 && h < 19) return 'tarde';
+    return 'noche';
+  }
+
+  function getLugarPorId(id) {
+    return LUGARES.filter(function (l) { return l.id === id; })[0] || null;
+  }
+
+  // Genera el SVG de El Trazo para una franja: silueta base (río +
+  // costanera + plaza) con los 8 puntos fantasma, y el recorrido
+  // resaltado uniendo solo los puntos que usa esa franja, en orden.
+  function generarTrazoSVG(franja) {
+    var puntos = TRAZO_CONFIG[franja].puntos;
+    var coords = puntos.map(function (p) { return TRAZO_PUNTOS[p]; });
+    var pathD = coords.map(function (c, i) {
+      return (i === 0 ? 'M' : 'L') + c[0] + ',' + c[1];
+    }).join(' ');
+
+    var fantasmas = Object.keys(TRAZO_PUNTOS).map(function (key) {
+      var c = TRAZO_PUNTOS[key];
+      var activo = puntos.indexOf(key) !== -1;
+      return activo ? '' : '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="4" fill="rgba(255,255,255,.18)"/>';
+    }).join('');
+
+    var paradas = coords.map(function (c, i) {
       return (
-        '<button type="button" class="plan-card" data-plan-id="' + plan.id + '">' +
-          '<span class="plan-eyebrow">Plan curado</span>' +
-          '<h4>' + escapeHtml(plan.nombre) + '</h4>' +
-          '<p class="plan-desc">' + escapeHtml(plan.desc) + '</p>' +
-          '<span class="plan-count">' + plan.ids.length + ' paradas</span>' +
-        '</button>'
+        '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="9" fill="var(--sunset)" stroke="var(--text-on-dark)" stroke-width="1.5"/>' +
+        '<text x="' + c[0] + '" y="' + (c[1] + 4) + '" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">' + (i + 1) + '</text>'
       );
     }).join('');
-    cont.innerHTML = html;
-    cont.querySelectorAll('[data-plan-id]').forEach(function (btn) {
+
+    return (
+      '<svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<path d="M0,60 Q90,20 180,55 T360,50 L360,0 L0,0 Z" fill="rgba(255,255,255,.06)"/>' +
+        '<ellipse cx="70" cy="185" rx="60" ry="22" fill="rgba(255,255,255,.05)"/>' +
+        fantasmas +
+        '<path d="' + pathD + '" fill="none" stroke="var(--sunset-bright)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cauce-trazo-linea"/>' +
+        paradas +
+      '</svg>'
+    );
+  }
+
+  function renderElCauce(franjaSeleccionada) {
+    var cont = document.getElementById('cauce-container');
+    if (!cont) return;
+    var franjaAhora = getFranjaActual();
+    var franja = franjaSeleccionada || franjaAhora;
+    var plan = PLANES_FRANJA[franja];
+    if (!plan) return;
+
+    var lugares = plan.ids.map(getLugarPorId).filter(function (l) { return l; });
+
+    var tabsHtml = Object.keys(FRANJA_INFO).map(function (key) {
+      var info = FRANJA_INFO[key];
+      var clases = 'cauce-tab' + (key === franja ? ' is-active' : '') + (key === franjaAhora ? ' is-ahora' : '');
+      return '<button type="button" class="' + clases + '" data-franja="' + key + '">' + info.icon + ' ' + info.label + '</button>';
+    }).join('');
+
+    var listaHtml = lugares.map(function (lugar, i) {
+      var grupoInfo = GRUPOS[lugar.grupo] || {};
+      var ratingHtml = lugar.rating
+        ? '<span class="cauce-item-rating">' + starsHtml(lugar.rating) + ' ' + lugar.rating.toFixed(1) + '</span>'
+        : '';
+      return (
+        '<div class="cauce-item">' +
+          '<span class="cauce-item-num">' + (i + 1) + '</span>' +
+          '<span class="cauce-item-icon">' + (grupoInfo.icon || '📍') + '</span>' +
+          '<span class="cauce-item-body">' +
+            '<span class="cauce-item-nombre">' + escapeHtml(lugar.nombre) + '</span>' +
+            ratingHtml +
+          '</span>' +
+        '</div>'
+      );
+    }).join('');
+
+    cont.innerHTML =
+      '<div class="cauce-tabs">' + tabsHtml + '</div>' +
+      '<div class="cauce-card" data-franja="' + franja + '">' +
+        '<div>' +
+          '<span class="cauce-eyebrow">Plan curado · ' + FRANJA_INFO[franja].label + '</span>' +
+          '<h4>' + escapeHtml(plan.nombre) + '</h4>' +
+          '<p class="cauce-desc">' + escapeHtml(plan.desc) + '</p>' +
+        '</div>' +
+        '<div class="cauce-trazo-wrap">' + generarTrazoSVG(franja) + '</div>' +
+        '<div class="cauce-lista">' + listaHtml + '</div>' +
+        '<button type="button" class="cauce-cta" data-cauce-cta="' + franja + '">Ver este plan en el mapa</button>' +
+      '</div>';
+
+    cont.querySelectorAll('[data-franja]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var plan = PLANES.filter(function (p) { return p.id === btn.getAttribute('data-plan-id'); })[0];
-        if (!plan) return;
+        renderElCauce(btn.getAttribute('data-franja'));
+      });
+    });
+    var ctaBtn = cont.querySelector('[data-cauce-cta]');
+    if (ctaBtn) {
+      ctaBtn.addEventListener('click', function () {
         mostrarSoloLugares(plan.ids);
         document.getElementById('mapa').scrollIntoView({ behavior: 'smooth' });
       });
-    });
+    }
   }
 
   // Acota el mapa a un conjunto arbitrario de IDs de lugares (usado por los
