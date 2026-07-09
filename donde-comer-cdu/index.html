@@ -58,6 +58,10 @@
 
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap"></noscript>
 
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
+
 <style>
   .skip-link{
     position:absolute;top:-100%;left:1rem;
@@ -104,8 +108,6 @@
     --f-display:'Fraunces','Georgia',serif;
     --f-ui:'Inter','Helvetica Neue',Arial,sans-serif;
   }
-
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
 
   html{scroll-behavior:smooth}
   body{
@@ -1019,13 +1021,20 @@
 
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js" defer></script>
 
 <script>
 
-(function () {
+// Este bloque depende de que Leaflet (L) ya esté cargado. Como los <script src>
+// de arriba ahora usan defer (no bloquean el parseo), su ejecución se pospone
+// hasta después de terminar de parsear el documento, en el mismo orden en que
+// aparecen — justo antes de DOMContentLoaded. Por eso este bloque se engancha
+// a DOMContentLoaded en vez de ejecutarse como IIFE inmediata: así se garantiza
+// que L ya exista cuando corra, sin importar cuánto tarden en descargarse los
+// scripts de Leaflet desde el CDN.
+document.addEventListener('DOMContentLoaded', function () {
 
   // Los datos de los lugares viven en lugares-mapa.json (fuente única
 
@@ -1167,6 +1176,24 @@
 
   var todosLosMarkers = []; // {marker, grupo, nombre, categoria, lugar}
 
+  // Cachés de conteo: se recalculan una sola vez por carga de datos (ver
+  // recalcularCounts(), invocada desde cargarDatos()) en vez de que cada
+  // función de render vuelva a recorrer los 862 lugares por su cuenta.
+  // countsPorGrupo:            { grupo: cantidad }
+  // countsPorCategoriaPorGrupo:{ grupo: { categoria: cantidad } }
+  var countsPorGrupo = {};
+  var countsPorCategoriaPorGrupo = {};
+
+  function recalcularCounts() {
+    countsPorGrupo = {};
+    countsPorCategoriaPorGrupo = {};
+    todosLosMarkers.forEach(function (m) {
+      countsPorGrupo[m.grupo] = (countsPorGrupo[m.grupo] || 0) + 1;
+      if (!countsPorCategoriaPorGrupo[m.grupo]) countsPorCategoriaPorGrupo[m.grupo] = {};
+      countsPorCategoriaPorGrupo[m.grupo][m.categoria] = (countsPorCategoriaPorGrupo[m.grupo][m.categoria] || 0) + 1;
+    });
+  }
+
   var filtroActivo = 'todos';
 
   var subFiltroActivo = null; // categoria específica dentro del grupo activo, o null = todas
@@ -1276,9 +1303,7 @@
 
     var cont = document.getElementById('mapa-filtros');
 
-    var counts = {};
-
-    todosLosMarkers.forEach(function (m) { counts[m.grupo] = (counts[m.grupo] || 0) + 1; });
+    var counts = countsPorGrupo;
 
 
 
@@ -1298,9 +1323,18 @@
 
 
 
-    cont.querySelectorAll('.mapa-pill').forEach(function (btn) {
+    // Delegación de eventos: un solo listener en el contenedor (agregado una
+    // única vez, guardado con dataset.bound) en vez de re-agregar un listener
+    // por cada botón cada vez que se regenera el innerHTML.
+    if (!cont.dataset.bound) {
 
-      btn.addEventListener('click', function () {
+      cont.dataset.bound = '1';
+
+      cont.addEventListener('click', function (e) {
+
+        var btn = e.target.closest('.mapa-pill');
+
+        if (!btn || !cont.contains(btn)) return;
 
         filtroActivo = btn.getAttribute('data-cat');
 
@@ -1314,7 +1348,7 @@
 
       });
 
-    });
+    }
 
   }
 
@@ -1342,15 +1376,7 @@
 
     }
 
-    var counts = {};
-
-    todosLosMarkers.forEach(function (m) {
-
-      if (m.grupo !== filtroActivo) return;
-
-      counts[m.categoria] = (counts[m.categoria] || 0) + 1;
-
-    });
+    var counts = countsPorCategoriaPorGrupo[filtroActivo] || {};
 
     var subcats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
 
@@ -1376,9 +1402,15 @@
 
     cont.classList.add('visible');
 
-    cont.querySelectorAll('.mapa-subpill').forEach(function (btn) {
+    if (!cont.dataset.bound) {
 
-      btn.addEventListener('click', function () {
+      cont.dataset.bound = '1';
+
+      cont.addEventListener('click', function (e) {
+
+        var btn = e.target.closest('.mapa-subpill');
+
+        if (!btn || !cont.contains(btn)) return;
 
         subFiltroActivo = btn.getAttribute('data-subcat') || null;
 
@@ -1390,7 +1422,7 @@
 
       });
 
-    });
+    }
 
   }
 
@@ -1434,9 +1466,7 @@
 
     if (!cont) return;
 
-    var counts = {};
-
-    todosLosMarkers.forEach(function (m) { counts[m.grupo] = (counts[m.grupo] || 0) + 1; });
+    var counts = countsPorGrupo;
 
 
 
@@ -1460,9 +1490,15 @@
 
 
 
-    cont.querySelectorAll('.mapa-legend-item').forEach(function (item) {
+    if (!cont.dataset.bound) {
 
-      item.addEventListener('click', function () {
+      cont.dataset.bound = '1';
+
+      cont.addEventListener('click', function (e) {
+
+        var item = e.target.closest('.mapa-legend-item');
+
+        if (!item || !cont.contains(item)) return;
 
         filtroActivo = item.getAttribute('data-cat');
 
@@ -1476,7 +1512,7 @@
 
       });
 
-    });
+    }
 
 
 
@@ -1740,9 +1776,7 @@
 
   function actualizarContadoresHero(total) {
 
-    var counts = {};
-
-    todosLosMarkers.forEach(function (m) { counts[m.grupo] = (counts[m.grupo] || 0) + 1; });
+    var counts = countsPorGrupo;
 
 
 
@@ -1808,6 +1842,8 @@
   function cargarDatos() {
 
     LUGARES.forEach(agregarLugar);
+
+    recalcularCounts(); // una sola pasada; renderFiltros/renderLeyenda/actualizarContadoresHero reutilizan el resultado
 
 
 
@@ -1977,7 +2013,7 @@
 
   });
 
-})();
+}); // fin del listener DOMContentLoaded
 
 /* ═══════════════════════════════════════════════════════════════ */
 /* MEJORAS DE INTERACTIVIDAD AVANZADA */
