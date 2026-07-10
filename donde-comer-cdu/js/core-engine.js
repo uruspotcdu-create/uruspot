@@ -170,48 +170,60 @@
 
     // ─── Inicialización del mapa ───
     function initMapa() {
-      // [FIX] Antes: scrollWheelZoom:true + dragging táctil activo desde el
-      // arranque. Resultado: apenas el dedo (o la rueda del mouse) tocaba
-      // el mapa, Leaflet capturaba el gesto para hacer pan/zoom en vez de
-      // dejar scrollear la página — sensación de "mapa trabado". Se pide
-      // un primer toque/click para "activar" el mapa; hasta entonces deja
-      // pasar el swipe/scroll normal.
-      map = L.map('mapa-leaflet', { scrollWheelZoom: false, dragging: false, tap: false })
+      // [FIX v2] El intento anterior deshabilitaba dragging/tap y los volvía
+      // a habilitar DENTRO del propio touchstart del mapa. Problema real:
+      // Leaflet solo empieza a trackear un gesto si su handler ya estaba
+      // activo ANTES de que el navegador dispare ese touchstart — al
+      // habilitarlo recién ahí, ese primer swipe se "tragaba" sin mover
+      // nada (ni mapa ni página), lo que se sentía como más lag/traba que
+      // antes, no menos.
+      //
+      // Solución correcta: el mapa queda 100% funcional desde el arranque
+      // (sin tocar dragging/tap), pero se tapa con una capa transparente
+      // APARTE por encima. El primer toque/click cae sobre esa capa (nunca
+      // llega a Leaflet), así que ese primer gesto siempre se comporta como
+      // scroll normal de página. La capa se saca sola apenas se la toca, y
+      // desde el segundo gesto en adelante el mapa reacciona directo, sin
+      // ninguna carrera contra el gesto en curso.
+      map = L.map('mapa-leaflet', { scrollWheelZoom: false })
         .setView(config.mapCenter || [0, 0], config.mapZoom || 13);
-
-      var mapaEl = document.getElementById('mapa-leaflet');
-      var activado = false;
-      function activarMapa() {
-        if (activado) return;
-        activado = true;
-        map.dragging.enable();
-        map.scrollWheelZoom.enable();
-        map.tap && map.tap.enable();
-        if (mapaEl) mapaEl.classList.remove('mapa-inactivo');
-      }
-      if (mapaEl) {
-        mapaEl.classList.add('mapa-inactivo');
-        mapaEl.addEventListener('touchstart', activarMapa, { passive: true, once: true });
-        mapaEl.addEventListener('click', activarMapa, { once: true });
-        // Con dos dedos (pinch) el gesto no es scroll de página: activar directo.
-        mapaEl.addEventListener('touchstart', function (e) {
-          if (e.touches && e.touches.length > 1) activarMapa();
-        }, { passive: true });
-      }
 
       L.tileLayer(config.tileUrl || 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: config.tileAttribution || '&copy; OpenStreetMap &copy; CARTO',
         maxZoom: 19
       }).addTo(map);
 
+      var mapaEl = document.getElementById('mapa-leaflet');
+      if (mapaEl) {
+        var activador = document.createElement('div');
+        activador.className = 'mapa-activador';
+        activador.setAttribute('aria-hidden', 'true');
+        activador.innerHTML = '<span>Tocá el mapa para interactuar</span>';
+        mapaEl.appendChild(activador);
+
+        var quitarActivador = function () {
+          if (activador.parentNode) activador.parentNode.removeChild(activador);
+          map.scrollWheelZoom.enable();
+        };
+        activador.addEventListener('touchstart', quitarActivador, { passive: true, once: true });
+        activador.addEventListener('click', quitarActivador, { once: true });
+      } else {
+        map.scrollWheelZoom.enable();
+      }
+
       // Un cluster group por grupo (así cada "racimo" respeta el color de su
       // categoría y los filtros pueden mostrar/ocultar grupos enteros al instante).
+      // [FIX] chunkedLoading: con 862 lugares, agregarlos todos de un tirón
+      // congelaba el hilo principal un instante (más notorio en celulares
+      // gama media/baja). Con esto, Leaflet.markercluster los procesa en
+      // lotes vía requestAnimationFrame en vez de en un solo bloque síncrono.
       Object.keys(GRUPOS).forEach(function (g) {
         clusterGroups[g] = L.markerClusterGroup({
           iconCreateFunction: clusterIcon(GRUPOS[g].color),
           showCoverageOnHover: false,
           spiderfyOnMaxZoom: true,
-          maxClusterRadius: 46
+          maxClusterRadius: 46,
+          chunkedLoading: true
         });
       });
     }
@@ -468,6 +480,56 @@
         if (todosLosMarkers[i].lugar.id === id) return todosLosMarkers[i].lugar;
       }
       return null;
+    }
+
+    // [FIX] Buscador real para el overlay spotlight: antes el input de
+    // #spotlight-input solo reenviaba el texto al filtro del mapa, pero
+    // #spotlight-results/#spotlight-suggestions nunca se llenaban — no
+    // había forma de tocar un resultado y llegar a un lugar. Esto habilita
+    // ese camino directo (escribir → tocar el resultado → listo).
+    function buscarLugares(texto, limite) {
+      var norm = utils.normalizarTexto(texto || '').trim();
+      if (!norm) return [];
+      var max = limite || 8;
+      var resultados = [];
+      for (var i = 0; i < todosLosMarkers.length && resultados.length < max; i++) {
+        var m = todosLosMarkers[i];
+        if (m.nombreNorm.indexOf(norm) > -1 || m.categoriaNorm.indexOf(norm) > -1) {
+          resultados.push(m);
+        }
+      }
+      return resultados;
+    }
+
+    // Lugares mejor puntuados, para mostrar como accesos rápidos apenas se
+    // abre el buscador (antes de que el usuario escriba nada).
+    function lugaresSugeridos(cantidad) {
+      return todosLosMarkers
+        .slice()
+        .sort(function (a, b) { return (b.lugar.rating || 0) - (a.lugar.rating || 0); })
+        .slice(0, cantidad || 6);
+    }
+
+    // Salto directo a un lugar puntual: resetea cualquier filtro/búsqueda
+    // que lo estuviera tapando, hace zoom hasta sacarlo del cluster (API
+    // propia de Leaflet.markercluster) y abre su popup con la info.
+    function irALugar(id) {
+      var entry = null;
+      for (var i = 0; i < todosLosMarkers.length; i++) {
+        if (todosLosMarkers[i].lugar.id === id) { entry = todosLosMarkers[i]; break; }
+      }
+      if (!entry) return false;
+
+      setFiltro('todos', { limpiarBusqueda: true });
+
+      var grupo = clusterGroups[entry.grupo];
+      if (grupo && grupo.zoomToShowLayer) {
+        grupo.zoomToShowLayer(entry.marker, function () { entry.marker.openPopup(); });
+      } else {
+        map.setView(entry.marker.getLatLng(), 17);
+        entry.marker.openPopup();
+      }
+      return true;
     }
 
     function contarPorGrupo() {
@@ -734,6 +796,9 @@
       aplicarFiltros: aplicarFiltros,
       mostrarSoloLugares: mostrarSoloLugares,
       getLugarPorId: getLugarPorId,
+      buscarLugares: buscarLugares,
+      irALugar: irALugar,
+      sugeridos: lugaresSugeridos,
       contarPorGrupo: contarPorGrupo,
       bindFiltroLinks: bindFiltroLinks,
       compartirLugar: function (lugar) {
@@ -837,7 +902,7 @@
 
   // Overlay de búsqueda (spotlight): no duplica lógica de filtrado, redirige
   // el valor al #mapa-search real y dispara su evento input.
-  function initSpotlightSearch() {
+  function initSpotlightSearch(motor, GRUPOS) {
     var overlay = document.getElementById('search-spotlight');
     var input = document.getElementById('spotlight-input');
     var closeBtn = document.getElementById('spotlight-close');
@@ -846,12 +911,69 @@
     // conectada: solo se escuchaba el botón de la bottom nav mobile.
     var openBtnHeader = document.getElementById('header-search-trigger');
     var realSearch = document.getElementById('mapa-search');
+    var resultsEl = document.getElementById('spotlight-results');
+    var suggestEl = document.getElementById('spotlight-suggestions');
+    var emptyEl = document.getElementById('spotlight-empty');
     if (!overlay || !input || !realSearch) return;
+
+    // [FIX] Antes #spotlight-results/#spotlight-suggestions nunca se
+    // llenaban: el buscador filtraba el mapa por detrás pero no había
+    // ningún resultado para tocar. Esto arma la tarjeta clickeable que
+    // lleva directo al lugar (buscar → tocar → el mapa vuela ahí y abre
+    // la ficha), en vez de tener que ir a buscarlo a mano en el mapa.
+    function itemHtml(entry) {
+      var g = GRUPOS && GRUPOS[entry.grupo];
+      var icon = g ? g.icon : '📍';
+      var label = g ? g.label : entry.categoria;
+      var rating = entry.lugar.rating ? '★ ' + parseFloat(entry.lugar.rating).toFixed(1) : '';
+      return '<button type="button" class="spotlight-item" data-ir="' + entry.lugar.id + '">' +
+        '<span class="spotlight-item-icon" aria-hidden="true">' + icon + '</span>' +
+        '<span class="spotlight-item-info">' +
+          '<span class="spotlight-item-nombre">' + utils.escapeHtml(entry.lugar.nombre) + '</span>' +
+          '<span class="spotlight-item-cat">' + utils.escapeHtml(label) + (rating ? ' · ' + rating : '') + '</span>' +
+        '</span>' +
+      '</button>';
+    }
+
+    function bindItems(container) {
+      container.querySelectorAll('[data-ir]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = parseInt(btn.getAttribute('data-ir'), 10);
+          cerrar();
+          var mapaSection = document.getElementById('mapa');
+          if (mapaSection) mapaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Le da tiempo al scroll a terminar antes de mover el mapa
+          // (evita pelear el flyTo/zoomToShowLayer contra el scroll nativo).
+          setTimeout(function () { motor.irALugar(id); }, 350);
+        });
+      });
+    }
+
+    function renderSugeridos() {
+      if (!suggestEl) return;
+      var top = motor.sugeridos ? motor.sugeridos(6) : [];
+      suggestEl.innerHTML = top.length
+        ? '<div class="spotlight-suggestions-label">Los mejor puntuados</div>' + top.map(itemHtml).join('')
+        : '';
+      bindItems(suggestEl);
+    }
+
+    function renderResultados(texto) {
+      var matches = motor.buscarLugares ? motor.buscarLugares(texto, 8) : [];
+      if (resultsEl) {
+        resultsEl.innerHTML = matches.map(itemHtml).join('');
+        bindItems(resultsEl);
+      }
+      if (suggestEl) suggestEl.innerHTML = '';
+      if (emptyEl) emptyEl.hidden = matches.length > 0;
+    }
 
     function abrir(e) {
       if (e) e.preventDefault();
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
+      if (emptyEl) emptyEl.hidden = true;
+      if (!input.value.trim()) renderSugeridos();
       setTimeout(function () { input.focus(); }, 50);
     }
     function cerrar() {
@@ -865,9 +987,17 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && overlay.classList.contains('is-open')) cerrar();
     });
+
+    var debouncedRender = utils.debounce(function () {
+      var texto = input.value.trim();
+      if (texto) renderResultados(texto);
+      else { if (resultsEl) resultsEl.innerHTML = ''; renderSugeridos(); }
+    }, 150);
+
     input.addEventListener('input', function () {
       realSearch.value = input.value;
       realSearch.dispatchEvent(new Event('input', { bubbles: true }));
+      debouncedRender();
     });
   }
 
@@ -954,7 +1084,7 @@
       motor.init();
 
       initLocalVisitanteToggle();
-      initSpotlightSearch();
+      initSpotlightSearch(motor, config.grupos || {});
       initDrawer();
       initBottomNav();
       initReveal();
