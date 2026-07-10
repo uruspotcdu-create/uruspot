@@ -32,6 +32,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+<!-- Adelanta la descarga del dataset del mapa en paralelo con CSS/fuentes:
+     el fetch('lugares-mapa.json') real sigue viviendo en core-engine.js
+     (cargarConExtra); esto solo hace que la respuesta ya esté en caché
+     cuando el JS la pida, en vez de recién empezar a pedirla ahí. -->
+<link rel="preload" as="fetch" href="lugares-mapa.json">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap"></noscript>
 
