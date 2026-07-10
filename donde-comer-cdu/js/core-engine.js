@@ -272,7 +272,23 @@
         riseOnHover: true,
         zIndexOffset: lugar.destacado ? 1000 : 0
       });
-      marker.bindPopup(popupHtml(lugar, color), { className: 'mapa-popup' });
+      // [OPTIMIZACIÓN — Fase 2] Antes popupHtml(lugar, color) se ejecutaba
+      // acá mismo para los 862 lugares en el arranque (concatenación de
+      // strings + escapeHtml + formateo de rating/teléfono, por cada uno),
+      // aunque la enorme mayoría de esos popups no se abre nunca en una
+      // sesión típica. Ahora el popup se vincula vacío y el HTML real recién
+      // se genera la primera vez que se abre ('popupopen'), cacheado en el
+      // propio marker para no repetir el trabajo si se vuelve a abrir. El
+      // evento 'popupopen' de Leaflet se dispara tanto al hacer clic en el
+      // pin como al abrir el popup de forma programática (irALugar()), así
+      // que el comportamiento visible es idéntico en ambos casos.
+      marker.bindPopup('', { className: 'mapa-popup' });
+      marker.on('popupopen', function () {
+        if (!marker._popupHtmlListo) {
+          marker._popupHtmlListo = true;
+          marker.setPopupContent(popupHtml(lugar, color));
+        }
+      });
       marker.lugarData = lugar;
       clusterGroups[grupo].addLayer(marker);
       todosLosMarkers.push({
