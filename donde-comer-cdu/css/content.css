@@ -145,6 +145,26 @@
   .spotlight-empty {
     padding: 2rem 1rem; text-align: center; color: var(--muted); font-size: .9rem;
   }
+  /* [FIX] Antes #spotlight-results/#spotlight-suggestions se quedaban
+     siempre vacíos (nada los llenaba). Ahora sí muestran resultados/
+     sugeridos tocables: escribir → tocar → llegar al lugar, sin tener
+     que ir a buscarlo a mano en el mapa. */
+  .spotlight-suggestions-label {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--muted); padding: .25rem .25rem .1rem;
+  }
+  .spotlight-item {
+    display: flex; align-items: center; gap: .75rem; width: 100%;
+    padding: .625rem .5rem; border: none; background: none; border-radius: .625rem;
+    text-align: left; cursor: pointer; transition: background .15s ease;
+  }
+  .spotlight-item:hover, .spotlight-item:focus-visible { background: var(--bg-sunk); }
+  .spotlight-item-icon { font-size: 1.25rem; flex-shrink: 0; }
+  .spotlight-item-info { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+  .spotlight-item-nombre {
+    font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .spotlight-item-cat { font-size: .8rem; color: var(--muted); }
 
   /* ═══════════ DRAWER ═══════════ */
   .us-drawer {
