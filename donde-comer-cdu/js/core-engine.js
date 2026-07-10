@@ -607,6 +607,15 @@
       actualizarContadoresHero(combinados.length, counts);
       if (config.seoItemListSufijo !== false) generarSEOItemLists(config.seoItemListSufijo);
       animarContadores();
+
+      // [FIX] El overlay #app-loading queda tapando la app para siempre si
+      // nadie le agrega "is-done" (ver comentario en index.html líneas 55-59).
+      // Se saca acá porque es el punto donde termina el primer render real.
+      var appLoading = document.getElementById('app-loading');
+      if (appLoading) {
+        appLoading.classList.add('is-done');
+        appLoading.setAttribute('inert', '');
+      }
     }
 
     function cargarConExtra() {
