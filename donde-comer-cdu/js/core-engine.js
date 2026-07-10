@@ -693,7 +693,6 @@
       renderLeyenda(counts);
       aplicarFiltros();
       actualizarContadoresHero(combinados.length, counts);
-      if (config.seoItemListSufijo !== false) generarSEOItemLists(config.seoItemListSufijo);
       animarContadores();
 
       // [FIX] El overlay #app-loading queda tapando la app para siempre si
@@ -703,6 +702,25 @@
       if (appLoading) {
         appLoading.classList.add('is-done');
         appLoading.setAttribute('inert', '');
+      }
+
+      // [OPTIMIZACIÓN — Fase 1] generarSEOItemLists() no aporta nada a lo
+      // que el usuario ve: solo escribe <script type="application/ld+json">
+      // en <head> para buscadores. Antes corría de forma síncrona en medio
+      // del render inicial (recorre todosLosMarkers completo + hace un
+      // appendChild por cada grupo con lugares), compitiendo por el mismo
+      // hilo justo en el momento más sensible de la carga. Se difiere con
+      // requestIdleCallback para que se ejecute cuando el navegador ya
+      // terminó el trabajo visual importante; con un timeout de seguridad
+      // (2s) para no depender de que el hilo quede ocioso, y un fallback a
+      // setTimeout(…, 1) en navegadores que no soportan la API (Safari).
+      if (config.seoItemListSufijo !== false) {
+        var lanzarSEOItemLists = function () { generarSEOItemLists(config.seoItemListSufijo); };
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(lanzarSEOItemLists, { timeout: 2000 });
+        } else {
+          setTimeout(lanzarSEOItemLists, 1);
+        }
       }
     }
 
