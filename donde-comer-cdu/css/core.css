@@ -530,6 +530,13 @@
 
     :where(#mapa-canvas){ position:relative; }
     :where(#mapa-leaflet){ height:36.25rem; width:100%; background:#e9e4d4; }
+    :where(#mapa-leaflet.mapa-inactivo)::after {
+      content: 'Tocá el mapa para interactuar';
+      position: absolute; left: 50%; bottom: .875rem; transform: translateX(-50%);
+      width: max-content; max-width: 88%; padding: .4rem .9rem; border-radius: 999px;
+      background: rgba(20,20,20,.72); color: #fff; font-size: .75rem; text-align: center;
+      pointer-events: none; z-index: 650; white-space: nowrap;
+    }
     :where(#mapa-contador){ font-family:var(--f-ui-map); font-size:0.6875rem; letter-spacing:0.09375rem; text-transform:uppercase; color:var(--map-muted); padding:0.75rem 1rem; background:var(--map-paper); border-top:1px solid var(--map-line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
     :where(#mapa-contador) strong{ color:var(--map-ink); }
     :where(#mapa-contador) a{ color:var(--copper); text-decoration:none; cursor:pointer; font-weight:500; }
