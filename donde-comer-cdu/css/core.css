@@ -1,0 +1,706 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   URU SPOT — MÓDULO A (CORE)
+   Design system + infraestructura visual reutilizable.
+   No contiene texto, colores de categoría, ni datos de ninguna ciudad:
+   los 13 colores de categoría, los textos editoriales y el dataset viven
+   en el MÓDULO B (contenido) y se inyectan vía JS/config.
+
+   ═══ CASCADA EXPLÍCITA CON @layer ═══
+   El archivo tiene capas naturales (reset → tokens → layout → componentes →
+   mapa) que antes competían todas en la misma cascada implícita, dependiendo
+   del orden físico de las reglas para resolver conflictos. Ahora esas capas
+   se declaran explícitamente con @layer, en orden de prioridad ascendente:
+
+     reset < tokens < layout < componentes < mapa
+
+   Una regla en una capa posterior siempre gana sobre una capa anterior,
+   sin importar especificidad ni dónde esté físicamente escrita dentro de
+   su propia capa. Esto es lo que permite, por ejemplo, que .mapa-pill
+   (capa "mapa") pise de forma predecible a la receta genérica de pills
+   (capa "componentes"), en vez de depender de "quién está más abajo en
+   el archivo".
+
+   Dos grupos de reglas quedan DELIBERADAMENTE FUERA de las capas (sin
+   @layer), porque una regla no-capada siempre gana contra cualquier regla
+   capada, sin importar especificidad ni orden:
+
+   1) Los overrides que pelean contra CSS de Leaflet inyectado en runtime
+      (fuera de nuestra cascada por completo). Iban con !important porque
+      el archivo no tenía capas y Leaflet podía cargar después; ahora,
+      al quedar sin capa, ganan siempre — y donde antes hacía falta
+      !important por pura fuerza bruta, ya no compite contra nuestro
+      propio código (que vive en capas), así que el !important queda
+      reducido a los 6 casos que YA eran genuinamente necesarios contra
+      Leaflet — incluye .mapa-cluster, reubicada acá en la revisión de
+      especificidad (documentados más abajo, junto a esas reglas, con
+      justificación individual de cada uno).
+   2) El fix de accesibilidad (:focus-visible) al final del archivo. Antes
+      funcionaba por estar físicamente al final (last-wins). Ahora gana
+      SIEMPRE por definición de la cascada de capas — se podría mover a
+      cualquier posición del archivo y seguiría ganando —, así que ya no
+      es un artefacto frágil de orden sino una garantía estructural.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ⚙ DOS PARES TIPOGRÁFICOS, A PROPÓSITO (punto 3) — ambos están importados
+     acá arriba, nada queda sin cargar:
+       1) Fraunces + Inter → --f-display / --f-ui, el sistema del CORE
+          (hero, secciones editoriales, cards, nav). Tono cálido/editorial.
+       2) Cormorant Garamond + Outfit → --f-display-map / --f-ui-map, el
+          sistema exclusivo de :where(#mapa) (ver capa "mapa"). Es una
+          decisión de identidad visual deliberada, no un descuido: el mapa
+          se piensa como una pieza tipo "atlas/cartografía de época" (paleta
+          sepia/dorada, --map-paper, --map-line), un módulo con voz propia
+          dentro de la página, no una sección más del core. Por eso tiene su
+          propio par tipográfico en vez de heredar Fraunces/Inter.
+     Estos dos pares NO se unifican en un solo sistema porque son lenguajes
+     visuales distintos a propósito; lo que sí se garantiza es que ambos
+     estén importados (antes solo se documentaban las variables, ahora
+     también las fuentes) y que ningún otro componente fuera de #mapa use
+     Cormorant Garamond/Outfit, ni el mapa use Fraunces/Inter — cada sistema
+     queda contenido a su propio árbol. */
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Outfit:wght@400;500;600;700&display=swap');
+
+  /* Orden explícito de capas: cada una posterior pisa a la anterior. */
+  @layer reset, tokens, layout, componentes, mapa;
+
+  /* ═══════════ CAPA: RESET ═══════════ */
+  @layer reset{
+    .skip-link{
+      position:absolute;top:-100%;left:1rem;
+      background:var(--ink);color:var(--bg);
+      font-size:.85rem;font-weight:500;padding:.6rem 1.2rem;
+      border-radius:0 0 .5rem .5rem;text-decoration:none;
+      z-index:var(--z-skiplink);transition:top .2s ease;
+    }
+    .skip-link:focus{top:0}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  }
+
+  /* ═══════════ CAPA: TOKENS ═══════════
+     Paleta: río / atardecer sobre el Uruguay. Un acento cálido único,
+     no 13 colores compitiendo (los 13 colores de GRUPOS quedan
+     confinados al mapa y los pills de filtro, su función original). */
+  @layer tokens{
+    :root{
+      --ink:#0A1416;
+      --ink-soft:#3a4a56;
+      --bg:#f6f4ef;
+      --bg-panel:#ffffff;
+      --bg-sunk:#ece8df;
+      --river-900:#16323B;
+      --river-700:#2C5F6B;
+      --river-500:#4A8B94;
+      --river-300:#A9CDD1;
+      --river-100:#EAF4F4;
+      /* ⚠ AUDITORÍA DE CONTRASTE (punto 4) — HALLAZGO SIN CORREGIR, requiere decisión
+         de diseño antes de tocarlo:
+         --sunset (#E8734A) tiene luminancia media (~0.30) y da ~3.0:1 tanto como texto
+         sobre fondo claro (.cat-count, .cd-link, .riel-cat, .ldd-tag, .intro-band strong,
+         .bn-item.is-active) como en texto blanco sobre fondo --sunset (.hero-cta,
+         .cauce-tab.is-active, .cauce-item-num). Falla el mínimo AA de 4.5:1 en las dos
+         direcciones — no es un caso aislado, es el color de acento de marca en +10
+         selectores. NO se modifica en este PR porque cambiar --sunset es una decisión
+         de identidad visual, no un fix mecánico, y excede el alcance acordado (solo
+         accesibilidad + especificidad, sin refactors estructurales). Recomendación para
+         una próxima etapa: introducir un token derivado (ej. --sunset-text:#C25530,
+         ~4.6:1 en ambas direcciones) para usar específicamente en texto/texto-sobre-fondo,
+         dejando --sunset intacto para bordes, dots y otros usos no textuales.
+         --sunset-bright SÍ fue verificado (7.28:1 sobre --river-900) y no presenta
+         problema: solo se usa como texto sobre fondos oscuros (hero, cauce). */
+      --sunset:#E8734A;
+      --sunset-bright:#FBAE5C;
+      --sunset-pale:#FDE8D0;
+      --text-on-dark:#F7F3EE;
+      --text-neutral:#6B6B6B; /* nota auditoría: sin ningún uso en este archivo (dead code); no se elimina por si el HTML/JS lo referencia inline, queda señalado */
+      --accent-star:#F2B705;
+      --muted:#5f6b70; /* verificado en la auditoría de contraste (punto 4): 5.0:1 sobre --bg y 5.49:1 sobre --bg-panel — pasa AA, no requiere cambio */
+      --border:rgba(14,42,61,.12);
+      --border-s:rgba(14,42,61,.22);
+      /* ⚙ CONVENCIÓN DE UNIDADES (punto 8) — unificada con la capa "mapa":
+         rem para tipografía, spacing, tamaños y radios (escala con el
+         font-size raíz, accesible a zoom/preferencias del usuario).
+         px se reserva SOLO para: 1) grosor de borde/outline (1-3px:
+         un borde de 0.0625rem puede desalinearse a sub-píxel en ciertos
+         zoom/DPI — ya era así en la capa mapa, ver :where(#mapa-wrap)
+         y el bloque de :focus-visible); 2) desplazamientos de hover
+         (translateY de -1px/-2px/-3px: es un micro-ajuste de animación,
+         no una medida tipográfica); 3) blur/offsets de box-shadow, que
+         ya vivían en px en toda la capa mapa. Con esto el core y el mapa
+         comparten la misma regla, ya no son dos convenciones distintas. */
+      --radius:1rem;
+      --radius-lg:1.375rem;
+      --radius-sm:.625rem;
+      --radius-pill:3.125rem;
+      --shadow-sm:0 2px 8px rgba(14,42,61,.08);
+      --shadow-md:0 8px 24px rgba(14,42,61,.12);
+      --shadow-lg:0 16px 48px rgba(14,42,61,.18);
+      --f-display:'Fraunces','Georgia',serif;
+      --f-ui:'Inter','Helvetica Neue',Arial,sans-serif;
+
+      /* ═══ ESCALA DE Z-INDEX ═══
+         Antes eran números sueltos e inventados en cada componente
+         (10000, 2000, 900, 500, 1, 0...) sin relación explícita entre sí.
+         Ahora son una escala documentada con huecos deliberados para que
+         los próximos overlays (modal, toast, tooltip) tengan un lugar claro
+         donde entrar sin "z-index inflation" (subir el número porque sí).
+
+         — Nivel LOCAL (compite solo dentro de su propio contenedor con
+           position:relative, no contra el resto del documento): —
+         --z-base        nivel de fondo explícito dentro de un contexto de
+                         apilamiento local (ej: hero-media, la capa de
+                         imagen/gradiente detrás del contenido del hero).
+         --z-raised      eleva un elemento sobre su hermano inmediato dentro
+                         del mismo contexto de apilamiento (ej: hero-inner /
+                         hero-wave por encima de hero-media).
+         --z-panel-local paneles flotantes acotados a un componente propio
+                         (ej: la leyenda del mapa, que solo necesita ganarle
+                         a los controles de Leaflet dentro de #mapa-wrap,
+                         no al resto de la página).
+
+         — Nivel GLOBAL (compite en todo el documento; mantener el orden,
+           no reordenar sin revisar toda la escala): —
+         --z-nav         navegación persistente en pantalla (bottom-nav).
+         --z-overlay     overlays de pantalla completa (spotlight de
+                         búsqueda hoy; futuros modales entran acá).
+         --z-toast       reservado para notificaciones tipo toast: por
+                         encima de overlays/modales, por debajo del
+                         skip-link. Ningún componente lo usa todavía;
+                         está aquí para que cuando aparezca un toast no
+                         haga falta inventar un número nuevo.
+         --z-skiplink    siempre el más alto: accesibilidad de teclado
+                         nunca debe quedar tapada por nada. */
+      --z-base:0;
+      --z-raised:1;
+      --z-panel-local:500;
+      --z-nav:900;
+      --z-overlay:2000;
+      --z-toast:5000;
+      --z-skiplink:10000;
+    }
+  }
+
+  /* ═══════════ CAPA: LAYOUT ═══════════
+     Estructura de página, secciones y contenedores. Sin estilos de
+     "componente" reutilizable (eso vive en la capa componentes). */
+  @layer layout{
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--f-ui);
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+      padding-bottom:4rem; /* deja lugar a la bottom-nav en mobile */
+    }
+    @media (min-width:56.3125rem){ body{ padding-bottom:0 } }
+
+    h1,h2,h3{font-family:var(--f-display); color:var(--river-900); font-weight:600}
+    a{color:inherit}
+
+    /* ═══════════ HERO (estructura) ═══════════ */
+    .hero{
+      position:relative;
+      min-height:88vh;
+      display:flex;
+      align-items:flex-end;
+      overflow:hidden;
+      background:var(--river-900);
+      padding:2.5rem 1.25rem 0;
+    }
+    .hero-media{position:absolute; inset:0; z-index:var(--z-base)}
+    .hero-media-gradient{
+      position:absolute; inset:0;
+      background:
+        radial-gradient(120% 90% at 15% 0%, rgba(31,94,120,.9) 0%, transparent 55%),
+        radial-gradient(100% 80% at 100% 100%, rgba(224,121,63,.35) 0%, transparent 60%),
+        linear-gradient(180deg, var(--river-900) 0%, #0a1a26 100%);
+    }
+    .hero-media-pattern{
+      position:absolute; inset:0; opacity:.15;
+      background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.06) 0 .125rem, transparent .125rem 2.5rem);
+    }
+    .hero-inner{position:relative; z-index:var(--z-raised); max-width:40rem; margin:0 auto; width:100%; padding-bottom:4.5rem; color:#fff}
+    .eyebrow{
+      display:inline-flex; align-items:center; gap:.5rem;
+      font-family:var(--f-ui); font-size:.72rem; font-weight:600; letter-spacing:.1rem; text-transform:uppercase;
+      color:var(--sunset-bright); margin-bottom:1.1rem;
+    }
+    .eyebrow-dot{width:.375rem;height:.375rem;border-radius:50%;background:var(--sunset-bright)}
+    .hero-title{
+      font-size:clamp(2.1rem, 7vw, 3.4rem); line-height:1.08; color:#fff; margin-bottom:1.1rem; letter-spacing:-.01em;
+    }
+    .hero-title strong{color:var(--sunset-bright); font-weight:600}
+    .hero-sub{font-size:1.02rem; color:rgba(255,255,255,.78); max-width:46ch; margin-bottom:1.7rem}
+    .hero-actions{display:flex; flex-wrap:wrap; gap:.7rem; margin-bottom:1.6rem}
+    .hero-stats{display:flex; gap:1.8rem}
+    .hs-n{font-family:var(--f-display); font-size:1.6rem; font-weight:700; color:#fff}
+    .hs-l{font-size:.72rem; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.0625rem}
+    .hero-wave{position:absolute; bottom:0; left:0; right:0; line-height:0; z-index:var(--z-raised)}
+    .hero-wave svg{width:100%; height:auto; display:block}
+
+    /* ═══════════ SECCIONES EDITORIALES (estructura) ═══════════ */
+    .ed-section{max-width:67.5rem; margin:0 auto; padding:3.2rem 1.25rem 0}
+    .sec-title{text-align:center; max-width:32.5rem; margin:0 auto 1.8rem}
+    .sec-title h2{font-size:clamp(1.5rem,4vw,2rem); margin-bottom:.35rem}
+    .sec-title p{color:var(--muted); font-size:.95rem}
+    .sec-divider{width:2.75rem; height:.1875rem; background:var(--sunset); border-radius:.125rem; margin:1rem auto 0}
+
+    .ldd-container{display:flex; justify-content:center}
+
+    .riel-container{display:flex; gap:1rem; overflow-x:auto; padding:.4rem 1.25rem 1rem; margin:0 -1.25rem; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch}
+    .riel-container::-webkit-scrollbar{display:none}
+
+    /* ═══════════ CATEGORÍAS (contenedor) ═══════════ */
+    .cats-wrap{max-width:67.5rem; margin:0 auto; padding:0 1.25rem 1rem}
+    .cats{display:grid; grid-template-columns:repeat(auto-fill,minmax(11.875rem,1fr)); gap:.9rem}
+
+    /* Intro band (se mantiene por si el HTML lo referencia en otro punto) */
+    .intro-band{max-width:45rem; margin:0 auto; padding:2rem 1.25rem; text-align:center}
+    .intro-band p{color:var(--ink-soft); font-size:1rem; line-height:1.6}
+    .intro-band strong{color:var(--sunset); font-style:normal; font-weight:600}
+
+    /* cd-wrap: "Categorías en detalle" — mantiene .cd-item/.cd-link intactos */
+    .cd-wrap{max-width:57.5rem; margin:0 auto; padding:2.5rem 1.25rem 3rem; display:flex; flex-direction:column; gap:1.4rem}
+
+    .us-section{background:var(--bg)}
+
+    /* ═══════════ REVEAL (scroll-in, reemplaza el IIFE viejo) ═══════════ */
+    .reveal{opacity:0; transform:translateY(.875rem); transition:opacity .5s ease, transform .5s ease}
+    .reveal.is-visible{opacity:1; transform:none}
+    @media (prefers-reduced-motion: reduce){
+      .reveal{opacity:1; transform:none; transition:none}
+      html{scroll-behavior:auto}
+    }
+
+    /* ═══════════ NAV INFERIOR MOBILE (posición) ═══════════ */
+    .bottom-nav{
+      display:flex; position:fixed; left:0; right:0; bottom:0; z-index:var(--z-nav);
+      background:rgba(255,255,255,.96); backdrop-filter:blur(.5rem);
+      border-top:1px solid var(--border); padding:.4rem .3rem calc(.4rem + env(safe-area-inset-bottom));
+    }
+    @media (min-width:56.3125rem){ .bottom-nav{display:none} }
+
+    /* ═══════════ OVERLAY DE BÚSQUEDA (SPOTLIGHT — posición) ═══════════ */
+    .search-spotlight{
+      position:fixed; inset:0; z-index:var(--z-overlay); background:rgba(11,22,32,.7); backdrop-filter:blur(.25rem);
+      display:flex; align-items:flex-start; justify-content:center; padding:4rem 1.25rem;
+      opacity:0; pointer-events:none; transition:opacity .2s ease;
+    }
+    .search-spotlight.is-open{opacity:1; pointer-events:auto}
+    .spotlight-inner{width:100%; max-width:35rem}
+    .spotlight-hint{color:rgba(255,255,255,.6); font-size:.8rem; margin-top:.8rem; text-align:center}
+
+    /* Modo "Local": reordena secciones vía CSS order (pura presentación) */
+    body.modo-local .ed-section[aria-labelledby="title-planes"]{order:-1}
+    body.modo-local main#main-content{display:flex; flex-direction:column}
+  }
+
+  /* ═══════════ CAPA: COMPONENTES ═══════════
+     Piezas de UI reutilizables (botones, cards, tabs, pills). Todo lo que
+     aparece más de una vez o tiene identidad visual propia vive acá. */
+  @layer componentes{
+    /* ═══ LENGUAJE DE PILLS: clase base reutilizable (punto 7) ═══
+       .pill-base es ahora la abstracción real: contiene la receta común
+       (forma, cursor, transición) y puede agregarse en el HTML junto a
+       cualquier clase específica — ej. class="hero-cta pill-base" — para
+       que un componente nuevo adopte el lenguaje de pills sin repetir
+       declaraciones. Los 6 selectores existentes (.hero-cta, .toggle-btn,
+       .cauce-tab, .mapa-pill, .mapa-subpill, .act-btn-lg) se agrupan en la
+       misma regla que .pill-base para que el HTML actual siga funcionando
+       tal cual está, sin necesitar tocarlo ahora — es la misma migración
+       en dos pasos que ya usa el resto del archivo (agregar sin romper).
+       .cat queda afuera a propósito: es una card (border-radius:var(--radius),
+       1rem), no una pill (3.125rem) — geometría distinta, no forma parte de esta familia. */
+    .pill-base,
+    .hero-cta,
+    .toggle-btn,
+    .cauce-tab,
+    .mapa-pill,
+    .mapa-subpill,
+    .act-btn-lg{
+      display:inline-flex; align-items:center; justify-content:center;
+      border-radius:var(--radius-pill); cursor:pointer;
+      transition:transform .15s ease, filter .15s ease, background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .hero-cta{
+      gap:.4rem;
+      font-family:var(--f-ui); font-weight:600; font-size:.92rem;
+      background:var(--sunset); color:#fff; text-decoration:none;
+      padding:.85rem 1.5rem;
+    }
+    .hero-cta:hover{filter:brightness(1.08); transform:translateY(-1px)}
+    .hero-cta-ghost{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.28)}
+    .hero-toggle{display:inline-flex; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); border-radius:3.125rem; padding:.25rem; margin-bottom:1.8rem}
+    .toggle-btn{
+      font-family:var(--f-ui); font-size:.82rem; font-weight:600; color:rgba(255,255,255,.7);
+      background:transparent; border:0; padding:.55rem 1.1rem;
+    }
+    .toggle-btn.is-active{background:#fff; color:var(--river-900)}
+
+    /* Lugar del día */
+    .ldd-card{
+      display:flex; flex-direction:column; width:100%; max-width:47.5rem;
+      background:var(--bg-panel); border-radius:var(--radius-lg); overflow:hidden;
+      box-shadow:var(--shadow-md); border:1px solid var(--border);
+    }
+    @media (min-width:40rem){ .ldd-card{flex-direction:row} }
+    .ldd-media{position:relative; flex:0 0 42%; min-height:12.5rem}
+    .ldd-body{flex:1; padding:1.6rem 1.7rem; display:flex; flex-direction:column; gap:.6rem}
+    .ldd-tag{display:inline-block; font-size:.7rem; font-weight:700; letter-spacing:.075rem; text-transform:uppercase; color:var(--sunset); margin-bottom:.2rem}
+    .ldd-body h3{font-size:1.35rem}
+    .ldd-frase{color:var(--ink-soft); font-size:.96rem; line-height:1.55}
+    .ldd-actions{display:flex; gap:.6rem; margin-top:.5rem}
+
+    /* Placeholder de imagen (sin fotos reales todavía) — patrón consistente
+       por categoría, generado con el color de GRUPOS + un ícono propio,
+       nunca stock genérico. Reemplazable por <img> real sin tocar componentes. */
+    .place-media{
+      position:relative; width:100%; height:100%; min-height:9.375rem;
+      display:flex; align-items:center; justify-content:center; overflow:hidden;
+    }
+    .place-media img{width:100%; height:100%; object-fit:cover; display:block}
+    .place-media.ph{
+      background:
+        radial-gradient(120% 140% at 15% 15%, rgba(255,255,255,.22) 0%, transparent 45%),
+        repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 .625rem, transparent .625rem 1.375rem);
+    }
+    .place-media.ph .ph-icon{width:34%; max-width:4rem; opacity:.9; color:#fff}
+
+    /* Rieles (imperdibles / secciones curadas) */
+    .riel-card{
+      flex:0 0 15rem; scroll-snap-align:start; background:var(--bg-panel); border-radius:var(--radius); overflow:hidden;
+      box-shadow:var(--shadow-sm); border:1px solid var(--border); display:flex; flex-direction:column; text-decoration:none; color:inherit;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .riel-card:hover{transform:translateY(-3px); box-shadow:var(--shadow-md)}
+    .riel-media{height:8.125rem}
+    .riel-body{padding:.9rem 1rem 1.1rem; display:flex; flex-direction:column; gap:.35rem; flex:1}
+    .riel-cat{font-size:.6875rem; font-weight:700; letter-spacing:.0625rem; text-transform:uppercase; color:var(--sunset)}
+    .riel-body h4{font-family:var(--f-display); font-size:1.02rem; color:var(--river-900); line-height:1.25}
+    .riel-frase{font-size:.82rem; color:var(--muted); line-height:1.4; flex:1}
+    .riel-foot{display:flex; align-items:center; justify-content:space-between; margin-top:.3rem}
+    .riel-rating{font-size:.78rem; color:var(--ink-soft)}
+
+    /* Botones de acción (favorito / compartir) */
+    .act-btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:.3rem;
+      width:2.125rem; height:2.125rem; border-radius:50%; border:1px solid var(--border-s);
+      background:var(--bg-panel); color:var(--river-700); cursor:pointer; transition:all .15s ease; font-size:1rem;
+    }
+    .act-btn:hover{background:var(--river-100)}
+    .act-btn.is-fav{color:var(--sunset); border-color:var(--sunset)}
+    .act-btn-lg{width:auto; height:auto; padding:.6rem 1rem; font-size:.85rem; font-weight:600; gap:.4rem}
+
+    /* El Cauce */
+    .cauce-container{display:flex; flex-direction:column; gap:1.1rem; max-width:40rem; margin:0 auto}
+    .cauce-tabs{display:flex; gap:.5rem; justify-content:center}
+    .cauce-tab{
+      flex:1; max-width:9.375rem; padding:.55rem .8rem; border:1px solid var(--border);
+      background:var(--bg-panel); color:var(--ink-soft); font-size:.82rem; font-weight:600;
+      gap:.35rem;
+    }
+    .cauce-tab:hover{border-color:var(--border-s)}
+    .cauce-tab.is-active{background:var(--sunset); border-color:var(--sunset); color:#fff}
+    .cauce-tab.is-ahora::after{content:'•'; color:var(--sunset-bright); font-size:1.1rem; line-height:0}
+    .cauce-tab.is-active.is-ahora::after{color:var(--text-on-dark)}
+    .cauce-card{
+      border-radius:var(--radius-lg); padding:1.6rem 1.5rem; color:var(--text-on-dark);
+      display:flex; flex-direction:column; gap:1.1rem; transition:background .3s ease;
+    }
+    .cauce-card[data-franja="manana"]{background:linear-gradient(160deg, var(--river-500), var(--river-900));}
+    .cauce-card[data-franja="tarde"]{background:linear-gradient(160deg, var(--sunset), var(--river-900));}
+    .cauce-card[data-franja="noche"]{background:linear-gradient(160deg, var(--river-900), var(--ink));}
+    .cauce-eyebrow{font-size:.7rem; font-weight:700; letter-spacing:.075rem; text-transform:uppercase; color:var(--sunset-bright)}
+    .cauce-card h4{font-family:var(--f-display); font-size:1.3rem; color:var(--text-on-dark)}
+    .cauce-desc{font-size:.88rem; color:rgba(247,243,238,.8); line-height:1.5}
+    .cauce-trazo-wrap{width:100%; max-width:22.5rem; margin:0 auto}
+    .cauce-trazo-wrap svg{width:100%; height:auto; display:block}
+    .cauce-lista{display:flex; flex-direction:column; gap:.7rem}
+    .cauce-item{display:flex; align-items:center; gap:.7rem; padding:.6rem .7rem; background:rgba(255,255,255,.08); border-radius:var(--radius-sm)}
+    .cauce-item-num{width:1.625rem; height:1.625rem; border-radius:50%; background:var(--sunset); color:#fff; font-size:.78rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex:0 0 auto}
+    .cauce-item-icon{font-size:1.1rem; flex:0 0 auto}
+    .cauce-item-body{display:flex; flex-direction:column; gap:.1rem; min-width:0}
+    .cauce-item-nombre{font-weight:600; font-size:.92rem; color:var(--text-on-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .cauce-item-rating{font-size:.75rem; color:var(--accent-star)}
+    .cauce-cta{
+      align-self:flex-start; background:var(--text-on-dark); color:var(--river-900); border:0; border-radius:3.125rem;
+      padding:.7rem 1.3rem; font-size:.85rem; font-weight:700; cursor:pointer; transition:transform .15s ease;
+    }
+    .cauce-cta:hover{transform:translateY(-2px)}
+    .cauce-trazo-linea{stroke-dasharray:1000; stroke-dashoffset:1000; animation:cauce-dibujar 1.4s ease-out forwards}
+    @keyframes cauce-dibujar{to{stroke-dashoffset:0}}
+
+    /* ═══════════ CATEGORÍAS (card, mantiene selectores originales) ═══════════ */
+    .cat{
+      display:flex; flex-direction:column; gap:.4rem; padding:1.1rem 1.2rem; background:var(--bg-panel);
+      border:1px solid var(--border); border-radius:var(--radius); text-decoration:none; color:inherit;
+      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .cat:hover{transform:translateY(-2px); box-shadow:var(--shadow-sm); border-color:var(--border-s)}
+    .cat.is-active{border-color:var(--sunset); box-shadow:0 0 0 2px var(--sunset-pale)}
+    .cat-icon{font-size:1.5rem; line-height:1}
+    .cat-name{display:flex; align-items:center; gap:.4rem; font-weight:600; font-size:.95rem; color:var(--river-900)}
+    .cat-dot{width:.5625rem; height:.5625rem; border-radius:50%; flex:0 0 auto}
+    .cat-desc{font-size:.78rem; color:var(--muted); line-height:1.4}
+    .cat-count{font-size:.72rem; color:var(--sunset); font-weight:600; margin-top:.2rem}
+
+    /* cd-item / cd-link: mantiene selectores originales */
+    .cd-item{background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem}
+    .cd-item h3{font-size:1.05rem; color:var(--river-900); margin-bottom:.4rem}
+    .cd-count{color:var(--muted); font-weight:400; font-size:.85rem}
+    .cd-item p{font-size:.88rem; color:var(--ink-soft); line-height:1.5; margin-bottom:.6rem}
+    .cd-link{display:inline-block; font-size:.85rem; font-weight:600; color:var(--sunset); text-decoration:none}
+
+    /* Ítems de la nav inferior mobile */
+    .bn-item{
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:.2rem;
+      font-family:var(--f-ui); font-size:.6875rem; font-weight:600; color:var(--muted);
+      text-decoration:none; background:none; border:0; padding:.4rem 0; cursor:pointer; min-height:2.75rem;
+    }
+    .bn-item.is-active{color:var(--sunset)}
+    .bn-icon{width:1.375rem; height:1.375rem; border-radius:.375rem; background:currentColor; opacity:.18}
+    .bn-item.is-active .bn-icon{opacity:.9; background:var(--sunset)}
+
+    /* Barra del spotlight de búsqueda */
+    .spotlight-bar{display:flex; align-items:center; gap:.6rem; background:#fff; border-radius:var(--radius); padding:.5rem .5rem .5rem 1.1rem; box-shadow:var(--shadow-lg)}
+    #spotlight-input{flex:1; border:0; outline:0; font-family:var(--f-ui); font-size:1.05rem; padding:.7rem 0; background:transparent}
+    #spotlight-close{width:2.25rem; height:2.25rem; border-radius:50%; border:0; background:var(--bg-sunk); cursor:pointer; font-size:1rem; color:var(--ink-soft)}
+  }
+
+  /* ─── CAPA: MAPA — Componente: Mapa interactivo (Leaflet) ───
+
+     ═══ FIX ESPECIFICIDAD: todo #mapa-* va envuelto en :where() ═══
+     :where() matchea igual pero aporta especificidad 0. Así los IDs dejan
+     de competir entre sí — cualquier ajuste futuro se pisa con una simple
+     clase, sin escalar a otro ID ni a !important.
+
+     Esta capa es la de mayor prioridad entre las capadas, así que
+     .mapa-pill / .mapa-subpill pisan de forma predecible a la receta
+     genérica de la capa "componentes" sin necesitar más especificidad
+     ni depender de su posición en el archivo. */
+  @layer mapa{
+    :where(#mapa){
+      --map-ink:#0c0904; --map-paper:#fffdf8; --map-panel:#f5eed8;
+      --map-line:rgba(184,135,42,.22);
+      /* --map-muted oscurecido de #8a7a62 a #6b5c47 (fix accesibilidad, punto 4):
+         el valor original daba 3.59:1 contra --map-panel y 4.13:1 contra --map-paper,
+         ambos por debajo del mínimo WCAG AA de 4.5:1 para texto normal — y el uso es
+         mayormente en texto de 11px (contador, addr, popup), no texto grande exento.
+         El nuevo valor da 5.53:1 y 6.36:1 respectivamente. Misma familia cálida/sepia,
+         solo más oscuro. */
+      --map-muted:#6b5c47;
+      --copper:#8a6220; --gold:#d4a843; --gold-pale:#f0d88a;
+      /* --gold-bright y --parchment-mid: NO recuperados del CSS original (no existía ningún
+         hex literal en el archivo que los delatara). Son valores RECONSTRUIDOS POR INFERENCIA:
+         --gold-bright se interpoló entre --gold y --gold-pale siguiendo el mismo patrón de
+         gradación que --sunset/--sunset-bright/--sunset-pale del core; --parchment-mid se
+         estimó como tono intermedio entre --map-paper y --map-panel. Verificar contra el
+         diseño fuente (Figma u origen equivalente) antes de tratarlos como oficiales. */
+      --gold-bright:#e2c066;
+      --parchment-mid:#faf5e8;
+      /* Par tipográfico propio del mapa — justificado y con @import al inicio
+         del archivo (punto 3, ver comentario junto a los @import). */
+      --f-display-map:'Cormorant Garamond', serif; --f-ui-map:'Outfit', sans-serif;
+      font-family:var(--f-ui-map); color:var(--map-ink); background:var(--parchment-mid); padding:3.5rem 1.25rem;
+    }
+    :where(#mapa) .section-header{ display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.25rem;padding-bottom:1.25rem;gap:1rem;flex-wrap:wrap; max-width:73.75rem; margin-inline:auto; }
+    :where(#mapa) .section-eyebrow{ font-family:var(--f-ui-map);font-size:0.6875rem;font-weight:700;letter-spacing:0.21875rem;text-transform:uppercase;color:var(--copper);display:block;margin-bottom:0.5rem }
+    :where(#mapa) .section-title{ font-family:var(--f-display-map);font-size:clamp(1.5rem,3.2vw,2.125rem);font-weight:400;color:var(--map-ink);line-height:1;letter-spacing:-0.03125rem }
+    :where(#mapa) .section-count{ font-family:var(--f-ui-map);font-size:0.6875rem;letter-spacing:0.125rem;text-transform:uppercase;color:var(--map-muted); border:1px solid var(--map-line); padding:0.5rem 0.875rem; border-radius:3.125rem; white-space:nowrap; background:var(--map-paper); }
+
+    :where(#mapa-wrap){ position:relative; max-width:73.75rem; margin:0 auto; border-radius:1rem; overflow:hidden; border:1px solid var(--map-line); box-shadow:0 32px 72px -12px rgba(12,9,4,.16); background:var(--map-paper); }
+
+    :where(#mapa-toolbar){ display:flex; flex-wrap:wrap; gap:0.625rem; padding:1rem; background:var(--map-paper); border-bottom:1px solid var(--map-line); align-items:center; }
+    :where(#mapa-search-wrap){ position:relative; flex:1 1 13.75rem; min-width:11.25rem; }
+    :where(#mapa-search){ width:100%; font-family:var(--f-ui-map); font-size:0.8125rem; color:var(--map-ink); background:var(--map-panel); border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1rem 0.625rem 2.25rem; outline:none; transition:border-color .2s ease; }
+    :where(#mapa-search):focus{ border-color:var(--gold); }
+    :where(#mapa-search-wrap) svg{ position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); opacity:.5; pointer-events:none; color:var(--map-muted); }
+    :where(#mapa-geoloc){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.075rem; text-transform:uppercase; color:var(--map-ink); background:linear-gradient(135deg,var(--gold-pale),var(--gold-bright)); border:1px solid var(--border-s); border-radius:3.125rem; padding:0.625rem 1rem; cursor:pointer; transition:filter .2s ease; display:flex; align-items:center; gap:0.375rem; white-space:nowrap; }
+    :where(#mapa-geoloc):hover{ filter:brightness(1.08); }
+    :where(#mapa-geoloc):disabled{ opacity:.5; cursor:wait; }
+
+    :where(#mapa-filtros){ display:flex; flex-wrap:wrap; gap:0.5rem; padding:0.875rem 1rem; background:var(--map-panel); border-bottom:1px solid var(--map-line); }
+    .mapa-pill{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.08125rem; text-transform:uppercase; color:var(--map-muted); background:var(--map-paper); border:1px solid var(--map-line); padding:0.5rem 1rem; gap:0.375rem; }
+    .mapa-pill:hover{ border-color:var(--gold); color:var(--map-ink); }
+    .mapa-pill.activo{ background:var(--pill-color, var(--gold)); border-color:var(--pill-color, var(--gold)); color:#fff; }
+    .mapa-pill .cnt{ opacity:.75; font-weight:400; }
+
+    :where(#mapa-canvas){ position:relative; }
+    :where(#mapa-leaflet){ height:36.25rem; width:100%; background:#e9e4d4; }
+    :where(#mapa-contador){ font-family:var(--f-ui-map); font-size:0.6875rem; letter-spacing:0.09375rem; text-transform:uppercase; color:var(--map-muted); padding:0.75rem 1rem; background:var(--map-paper); border-top:1px solid var(--map-line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+    :where(#mapa-contador) strong{ color:var(--map-ink); }
+    :where(#mapa-contador) a{ color:var(--copper); text-decoration:none; cursor:pointer; font-weight:500; }
+    :where(#mapa-contador) a:hover{ color:var(--gold); }
+
+    .mapa-popup-destacado{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:#0c0904; background:linear-gradient(135deg,#f0d88a,#d4a843); display:inline-block; padding:0.1875rem 0.5rem; border-radius:3.125rem; margin-bottom:0.375rem; }
+    .mapa-popup-cat{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.125rem; text-transform:uppercase; color:var(--pop-color,#A85A1E); display:block; margin-bottom:0.375rem; }
+    .mapa-popup-nombre{ font-family:var(--f-display-map); font-size:1rem; color:var(--map-ink); display:block; margin-bottom:0.25rem; line-height:1.2; }
+    /* color:#a8790f original daba 3.85:1 contra --map-paper (falla AA 4.5:1 en texto de
+       11px). Se reemplaza por var(--copper), ya presente en el sistema y ya verificado
+       en 5.41:1 — evita introducir un hex nuevo solo para esto. */
+    .mapa-popup-rating{ font-size:0.6875rem; color:var(--copper); margin-bottom:0.375rem; display:flex; align-items:center; gap:0.25rem; }
+    .mapa-popup-rating span.cant{ color:var(--map-muted); }
+    .mapa-popup-norating{ font-size:0.6875rem; color:var(--map-muted); margin-bottom:0.375rem; display:block; font-style:italic; }
+    .mapa-popup-addr{ font-family:var(--f-ui-map); font-size:0.6875rem; line-height:1.4; color:var(--map-muted); margin-bottom:0.25rem; display:block; }
+    .mapa-popup-desc{ font-family:var(--f-ui-map); font-size:0.6875rem; line-height:1.4; color:var(--map-ink); opacity:.85; display:block; margin-bottom:0.625rem; }
+    .mapa-popup-actions{ display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem; }
+    .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; text-decoration:none; padding:0.4375rem 0.6875rem; border-radius:3.125rem; display:inline-flex; align-items:center; gap:0.25rem; }
+    .mapa-popup-actions a.ir{ background:var(--pop-color,#267A4D); color:#fff; }
+    .mapa-popup-actions a.tel{ background:var(--map-panel); color:var(--map-ink); border:1px solid var(--map-line); }
+    .mapa-popup-actions a.wa{ background:#25D366; color:#fff; }
+    .mapa-popup-grupo{ opacity:.7; font-weight:400; letter-spacing:0.0625rem; }
+
+    :where(#mapa-subfiltros){ display:none; flex-wrap:wrap; gap:0.375rem; padding:0 1rem 0.875rem; background:var(--map-panel); }
+    :where(#mapa-subfiltros).visible{ display:flex; }
+    .mapa-subpill{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:600; letter-spacing:.05rem; text-transform:uppercase; color:var(--map-muted); background:var(--map-paper); border:1px solid var(--map-line); padding:0.375rem 0.75rem; }
+    .mapa-subpill:hover{ border-color:var(--gold); color:var(--map-ink); }
+    .mapa-subpill.activo{ background:var(--gold); border-color:var(--gold); color:#fff; }
+
+    .mapa-pin{ width:1rem; height:1rem; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:0.125rem solid rgba(255,255,255,.95); box-shadow:0 2px 6px rgba(12,9,4,.35); }
+    .mapa-pin-destacado{ width:1.25rem; height:1.25rem; border:0.1875rem solid #d4a843; box-shadow:0 0 0 3px rgba(212,168,67,.35),0 3px 10px rgba(12,9,4,.3); }
+    /* .mapa-cluster (el wrapper !important) se movió fuera de esta capa — ver
+       "EXCEPCIÓN SIN CAPA #1" más abajo — porque en realidad pelea contra el
+       CSS propio de Leaflet, igual que los overrides de popup/attribution.
+       .mapa-cluster-inner se queda: no toca nada de Leaflet, es un div propio
+       sin clase de Leaflet encima. */
+    .mapa-cluster-inner{ width:2.375rem; height:2.375rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--f-ui-map); font-weight:700; font-size:0.8125rem; border:0.125rem solid rgba(255,255,255,.9); box-shadow:0 4px 14px rgba(12,9,4,.3); }
+
+    :where(#mapa-empty){ display:none; padding:3.75rem 1.25rem; text-align:center; color:var(--map-muted); font-size:0.8125rem; background:var(--map-paper); }
+
+    /* --- Leyenda del mapa: panel flotante con color + icono + etiqueta + conteo --- */
+    :where(#mapa-legend){ position:absolute; z-index:var(--z-panel-local); right:0.875rem; top:0.875rem; max-width:13.125rem; background:rgba(255,253,248,.96); border:1px solid var(--map-line); border-radius:0.75rem; box-shadow:0 14px 34px rgba(12,9,4,.18); overflow:hidden; }
+    :where(#mapa-legend-head){ display:flex; align-items:center; justify-content:space-between; gap:0.5rem; padding:0.625rem 0.75rem; cursor:pointer; background:var(--map-panel); border-bottom:1px solid var(--map-line); user-select:none; }
+    :where(#mapa-legend-head) span.titulo{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:var(--map-ink); }
+    :where(#mapa-legend-head) span.toggle-ico{ font-size:0.6875rem; color:var(--map-muted); transition:transform .2s ease; }
+    :where(#mapa-legend).colapsada :where(#mapa-legend-head) span.toggle-ico{ transform:rotate(-90deg); }
+    :where(#mapa-legend-list){ max-height:17.5rem; overflow-y:auto; padding:0.375rem; }
+    :where(#mapa-legend).colapsada :where(#mapa-legend-list){ display:none; }
+    .mapa-legend-item{ display:flex; align-items:center; gap:0.5rem; width:100%; padding:0.375rem 0.5rem; border:none; background:transparent; border-radius:0.5rem; cursor:pointer; font-family:var(--f-ui-map); text-align:left; transition:background .15s ease; }
+    .mapa-legend-item:hover{ background:var(--map-panel); }
+    .mapa-legend-item.activo{ background:var(--map-panel); }
+    .mapa-legend-swatch{ width:0.75rem; height:0.75rem; min-width:0.75rem; border-radius:50%; border:1.5px solid rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(12,9,4,.15); }
+    .mapa-legend-label{ flex:1; font-size:0.6875rem; color:var(--map-ink); line-height:1.2; }
+    .mapa-legend-count{ font-size:0.6875rem; color:var(--map-muted); font-weight:600; }
+
+    @media (max-width: 40rem){
+      :where(#mapa-leaflet){ height:28.75rem; }
+      :where(#mapa-toolbar){ flex-direction:column; align-items:stretch; }
+      :where(#mapa-geoloc){ justify-content:center; }
+      :where(#mapa-legend){ position:static; max-width:none; margin:0; border-radius:0; border-left:none; border-right:none; box-shadow:none; }
+      :where(#mapa-legend-list){ max-height:11.25rem; }
+    }
+  }
+
+  /* ═══ EXCEPCIÓN SIN CAPA #1: Leaflet (DOM inyectado en runtime) ═══
+     Estas reglas pelean contra clases (.leaflet-popup-*, .leaflet-control-*,
+     .leaflet-div-icon) que Leaflet inyecta en runtime, fuera de nuestra
+     cascada de @layer por completo. Una regla sin capa siempre gana contra
+     cualquier regla capada —incluidas las de la capa "mapa" de arriba—, así
+     que sacarlas de las capas es justamente lo que garantiza el override, en
+     vez de depender de que nuestro <link> cargue después que el de Leaflet.
+
+     AUDITORÍA DE ESPECIFICIDAD (punto 6) — revisión de los 6 !important reales
+     del archivo (el comentario anterior decía "3" y no contaba los 2 de
+     .mapa-cluster ni distinguía el de .leaflet-control-attribution a; quedan
+     corregidos acá):
+
+     1-2) .mapa-cluster{background:transparent;border:none} — MOVIDA a esta
+          sección (antes vivía adentro de @layer mapa, lo cual no tenía
+          sentido: competía contra Leaflet, no contra nuestro propio CSS).
+          Leaflet aplica su clase interna .leaflet-div-icon a TODO marcador
+          creado con L.divIcon, incluidos los de cluster — y esa clase trae
+          background/border propios en el leaflet.css externo (no capado).
+          El color real del cluster lo pinta .mapa-cluster-inner (hijo, sin
+          !important, porque no carga ninguna clase de Leaflet encima) vía
+          estilo inline por nivel/cantidad; pero el WRAPPER exterior no se
+          pinta por JS, así que sin !important quedarían esquinas/fondo
+          blanco de Leaflet asomando detrás del círculo redondeado. Se
+          mantienen los 2 !important — necesarios, no eliminables sin tocar
+          el JS que genera el icono.
+     3)   .leaflet-popup-content{width:14.75rem !important} — necesario:
+          Leaflet aplica un ancho inline/propio a su popup que solo un
+          !important puede vencer de forma confiable.
+     4-5) .leaflet-control-attribution{background...!important;color...!important}
+          — necesarios: el control de atribución es de los pocos elementos
+          de Leaflet que puede recargar su propio CSS con !important o mayor
+          especificidad según versión/plugin; sin !important el override es
+          frágil.
+     6)   .leaflet-control-attribution a{color:var(--copper) !important} —
+          mismo motivo que el anterior, es un descendiente con su propia
+          regla de color en el CSS de Leaflet.
+
+     Ningún !important de este bloque se elimina: los 6 están justificados
+     porque pelean contra CSS o inline-styles que Leaflet controla y que
+     ninguna capa/especificidad nuestra puede vencer de otra forma. Quedan
+     como excepción aislada y documentada, no como patrón a repetir en el
+     resto del archivo (por eso .leaflet-control-zoom a, dos líneas más abajo,
+     NO lleva !important: ese selector sí gana solo con :where(#mapa-leaflet)
+     + especificidad normal, sin necesitarlo). */
+  .mapa-cluster{ background:transparent !important; border:none !important; }
+  .mapa-popup .leaflet-popup-content-wrapper{ background:var(--map-paper); color:var(--map-ink); border-radius:0.75rem; border:1px solid var(--map-line); box-shadow:0 20px 50px rgba(12,9,4,.22); }
+  .mapa-popup .leaflet-popup-tip{ background:var(--map-paper); }
+  .mapa-popup .leaflet-popup-content{ margin:0.875rem 1rem; width:14.75rem !important; }
+  :where(#mapa-leaflet) .leaflet-control-zoom a{ background:var(--map-paper); color:var(--map-ink); border-color:var(--map-line); }
+  :where(#mapa-leaflet) .leaflet-control-attribution{ background:rgba(255,253,248,.85) !important; color:var(--map-muted) !important; }
+  :where(#mapa-leaflet) .leaflet-control-attribution a{ color:var(--copper) !important; }
+
+  /* ═══ EXCEPCIÓN SIN CAPA #2: FIX ACCESIBILIDAD — estados de foco (teclado) ═══
+     Sin @layer, así que gana siempre sobre TODAS las capas de arriba (reset,
+     tokens, layout, componentes, mapa), sin importar especificidad ni en qué
+     línea del archivo esté. Antes dependía de estar físicamente al final del
+     archivo (last-wins); ahora esa dependencia desaparece: se podría mover
+     esta sección a cualquier lugar del CSS y el foco de teclado seguiría
+     viéndose siempre.
+
+     COBERTURA (punto 5 — 100% de los interactivos, sin excepciones):
+     inventario armado revisando cada cursor:pointer, :hover, <a>/<button>/<input>
+     real del archivo. Se agrupa por tratamiento visual, no por capa de origen —
+     por eso hay selectores del "core" y del "mapa" mezclados en el mismo grupo
+     cuando comparten el mismo tono de foco (así ya lo hacía el archivo original
+     con .mapa-pill/#mapa-geoloc dentro del grupo --sunset).
+
+     Nota técnica: --gold y --copper son custom properties LOCALES, declaradas
+     dentro de :where(#mapa){...} (ver capa "mapa" arriba) — solo existen para
+     elementos dentro de #mapa. Por eso #spotlight-input, que vive fuera de
+     #mapa, NO puede usar var(--gold) (quedaría sin valor / inválido) y se
+     agrupó con --sunset en su lugar. Único elemento que legítimamente usa
+     --gold aquí es #mapa-search, porque está dentro del árbol de #mapa. */
+
+  /* Grupo 1 — pill sobre fondo oscuro/marca, con radio explícito */
+  .hero-cta:focus-visible,
+  .toggle-btn:focus-visible,
+  .cauce-cta:focus-visible{
+    outline:2px solid var(--sunset-bright); outline-offset:3px; border-radius:3.125rem;
+  }
+
+  /* Grupo 2 — tratamiento general (tarjetas, botones, pills, links, mapa) */
+  .cauce-tab:focus-visible,
+  .cat:focus-visible,
+  .act-btn:focus-visible,
+  .act-btn-lg:focus-visible,
+  .bn-item:focus-visible,
+  .riel-card:focus-visible,
+  .cd-link:focus-visible,
+  #spotlight-close:focus-visible,
+  .mapa-pill:focus-visible,
+  .mapa-subpill:focus-visible,
+  .mapa-popup-actions a:focus-visible,
+  .mapa-legend-item:focus-visible,
+  :where(#mapa-geoloc):focus-visible,
+  :where(#mapa-contador) a:focus-visible,
+  :where(#mapa-legend-head):focus-visible{
+    outline:2px solid var(--sunset); outline-offset:2px;
+  }
+
+  /* Grupo 3 — campos de entrada / dorado, solo dentro de #mapa donde --gold existe */
+  :where(#mapa-search):focus-visible{
+    outline:2px solid var(--gold); outline-offset:2px;
+  }
+
+  /* Grupo 4 — input fuera de #mapa: usa --sunset (--gold no está disponible acá) */
+  #spotlight-input:focus-visible{
+    outline:2px solid var(--sunset); outline-offset:2px;
+  }
