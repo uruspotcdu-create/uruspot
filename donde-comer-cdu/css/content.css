@@ -59,6 +59,9 @@
   }
   .us-scrim[hidden] { display: none; }
   .us-scrim:not([hidden]) { opacity: 1; }
+  /* [FIX] Bloquea el scroll de fondo mientras hay un overlay abierto
+     (drawer, sheets). Antes no existía: el body scrolleaba detrás. */
+  body.no-scroll { overflow: hidden; }
 
   /* ═══════════ APP HEADER ═══════════ */
   .us-app-header {
@@ -118,6 +121,12 @@
     box-shadow: var(--shadow-lg); display: flex; align-items: center; justify-content: center;
     transition: transform .2s ease;
   }
+  /* [FIX] #fab-planner abre un "Planner" (armar un plan de visita) que
+     todavía no existe: no hay ninguna lógica en core-engine.js/content.js
+     que lo construya, así que el botón no hacía nada al tocarlo. Se oculta
+     hasta que el Planner esté implementado, en vez de dejar un botón
+     muerto. El markup (index.html) queda intacto para reactivarlo. */
+  #fab-planner { display: none; }
   .us-fab:hover { transform: translateY(-2px); }
   .us-fab-icon {
     width: 1.25rem; height: 1.25rem; position: relative;
