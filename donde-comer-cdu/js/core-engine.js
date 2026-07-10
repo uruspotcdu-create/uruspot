@@ -170,8 +170,34 @@
 
     // ─── Inicialización del mapa ───
     function initMapa() {
-      map = L.map('mapa-leaflet', { scrollWheelZoom: true })
+      // [FIX] Antes: scrollWheelZoom:true + dragging táctil activo desde el
+      // arranque. Resultado: apenas el dedo (o la rueda del mouse) tocaba
+      // el mapa, Leaflet capturaba el gesto para hacer pan/zoom en vez de
+      // dejar scrollear la página — sensación de "mapa trabado". Se pide
+      // un primer toque/click para "activar" el mapa; hasta entonces deja
+      // pasar el swipe/scroll normal.
+      map = L.map('mapa-leaflet', { scrollWheelZoom: false, dragging: false, tap: false })
         .setView(config.mapCenter || [0, 0], config.mapZoom || 13);
+
+      var mapaEl = document.getElementById('mapa-leaflet');
+      var activado = false;
+      function activarMapa() {
+        if (activado) return;
+        activado = true;
+        map.dragging.enable();
+        map.scrollWheelZoom.enable();
+        map.tap && map.tap.enable();
+        if (mapaEl) mapaEl.classList.remove('mapa-inactivo');
+      }
+      if (mapaEl) {
+        mapaEl.classList.add('mapa-inactivo');
+        mapaEl.addEventListener('touchstart', activarMapa, { passive: true, once: true });
+        mapaEl.addEventListener('click', activarMapa, { once: true });
+        // Con dos dedos (pinch) el gesto no es scroll de página: activar directo.
+        mapaEl.addEventListener('touchstart', function (e) {
+          if (e.touches && e.touches.length > 1) activarMapa();
+        }, { passive: true });
+      }
 
       L.tileLayer(config.tileUrl || 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: config.tileAttribution || '&copy; OpenStreetMap &copy; CARTO',
@@ -748,6 +774,48 @@
     };
   }
 
+  // Menú lateral (drawer): el HTML/CSS ya existían (hamburguesa, aside con
+  // los links, scrim compartido #scrim) pero no había NINGÚN JS que los
+  // conectara — el botón de 3 barras no hacía nada. Usa el mismo #scrim
+  // que consumen los otros overlays (data-owner evita que se pisen).
+  function initDrawer() {
+    var trigger = document.getElementById('header-drawer-trigger');
+    var drawer = document.getElementById('app-drawer');
+    var closeBtn = document.getElementById('drawer-close');
+    var scrim = document.getElementById('scrim');
+    if (!trigger || !drawer) return;
+
+    function abrir() {
+      drawer.removeAttribute('hidden');
+      trigger.setAttribute('aria-expanded', 'true');
+      if (scrim) { scrim.removeAttribute('hidden'); scrim.setAttribute('data-owner', 'drawer'); }
+      document.body.classList.add('no-scroll');
+    }
+    function cerrar() {
+      drawer.setAttribute('hidden', '');
+      trigger.setAttribute('aria-expanded', 'false');
+      if (scrim && scrim.getAttribute('data-owner') === 'drawer') {
+        scrim.setAttribute('hidden', '');
+        scrim.setAttribute('data-owner', '');
+      }
+      document.body.classList.remove('no-scroll');
+    }
+    trigger.addEventListener('click', abrir);
+    if (closeBtn) closeBtn.addEventListener('click', cerrar);
+    if (scrim) scrim.addEventListener('click', function () {
+      if (scrim.getAttribute('data-owner') === 'drawer') cerrar();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !drawer.hasAttribute('hidden')) cerrar();
+    });
+    // Los links con href (#hero, #mapa, etc.) navegan solos: alcanza con
+    // cerrar el drawer. Los botones sin href (favoritos/historial/etc.)
+    // todavía no tienen su propia superficie implementada.
+    drawer.querySelectorAll('.us-drawer-item').forEach(function (item) {
+      item.addEventListener('click', function () { cerrar(); });
+    });
+  }
+
   // ─────────────────────────────────────────────────────────────────────
   // Componentes de UI globales (independientes del motor de mapa)
   // ─────────────────────────────────────────────────────────────────────
@@ -774,10 +842,14 @@
     var input = document.getElementById('spotlight-input');
     var closeBtn = document.getElementById('spotlight-close');
     var openBtn = document.getElementById('bn-buscar');
+    // [FIX] La lupa visible del header (#header-search-trigger) nunca estaba
+    // conectada: solo se escuchaba el botón de la bottom nav mobile.
+    var openBtnHeader = document.getElementById('header-search-trigger');
     var realSearch = document.getElementById('mapa-search');
     if (!overlay || !input || !realSearch) return;
 
-    function abrir() {
+    function abrir(e) {
+      if (e) e.preventDefault();
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
       setTimeout(function () { input.focus(); }, 50);
@@ -787,8 +859,12 @@
       overlay.setAttribute('aria-hidden', 'true');
     }
     if (openBtn) openBtn.addEventListener('click', abrir);
+    if (openBtnHeader) openBtnHeader.addEventListener('click', abrir);
     if (closeBtn) closeBtn.addEventListener('click', cerrar);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) cerrar(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) cerrar();
+    });
     input.addEventListener('input', function () {
       realSearch.value = input.value;
       realSearch.dispatchEvent(new Event('input', { bubbles: true }));
@@ -879,6 +955,7 @@
 
       initLocalVisitanteToggle();
       initSpotlightSearch();
+      initDrawer();
       initBottomNav();
       initReveal();
       initSmoothAnchors();
