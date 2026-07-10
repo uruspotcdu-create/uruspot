@@ -41,9 +41,23 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap"></noscript>
 
+<!-- [OPTIMIZACIÓN — Fase 1] Antes estas 3 hojas de estilo de cdnjs.cloudflare.com
+     bloqueaban el primer render (<link rel="stylesheet"> normal), aunque el
+     mapa (#mapa-leaflet) está muy por debajo del viewport inicial y no hace
+     falta tenerlo estilizado hasta que el usuario llega a esa sección.
+     Se usa el mismo patrón ya probado en la carga de fuentes (línea 41):
+     el navegador las descarga con baja prioridad como "print" y, al
+     terminar, onload las conmuta a "all" sin haber bloqueado nada.
+     <noscript> mantiene el comportamiento original (bloqueante) para
+     navegadores sin JS, que no pueden ejecutar el onload. -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" media="print" onload="this.media='all'" />
+<noscript>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+</noscript>
 
 <!-- manifest.webmanifest / icons/favicon.svg / icons/apple-touch-icon.png no
      existen en este proyecto. Se usa el mismo favicon con URL absoluta que
