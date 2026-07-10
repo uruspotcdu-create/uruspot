@@ -1,424 +1,183 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   URU SPOT — MÓDULO B (CONTENIDO) · content.css
-   Estilos de la interfaz "app shell" nueva: header, drawer, home hub,
-   carruseles, cards, bottom sheet, full sheet, diálogos, toasts, skeletons
-   y estado vacío. No redefine tokens ni el design system: reutiliza los
-   custom properties declarados en core.css (@layer tokens).
+ * URU SPOT — MÓDULO B (CONTENIDO) · content.js
+ * Datos de la ciudad (GRUPOS), copy editorial (hero, footer, metadatos) e
+ * inicialización del motor. No contiene lógica de mapa/filtros/favoritos:
+ * eso vive en core-engine.js (MÓDULO A). Este archivo solo entrega
+ * configuración y arma la copy que el Core no conoce.
+ *
+ * Fuente de los datos: extraídos de index.backup y lugares-mapa.json
+ * (versión anterior funcional de esta misma sección), no inventados.
+ * ═══════════════════════════════════════════════════════════════════════ */
 
-   Se declara en su propia capa, después de "componentes" y antes de
-   "mapa", para no competir con los estilos del motor de mapa ni quedar
-   por debajo de las capas base (reset/tokens/layout) del core.
-   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
 
-/* Registra el orden completo de capas (coincide con el de core.css) y
-   suma "contenido" en la posición exacta que le corresponde: después de
-   "componentes" (para poder apoyarse en esos estilos base) y antes de
-   "mapa" (para que el motor de mapa, más específico en su dominio,
-   siempre pueda ganar si hiciera falta). Si no se declarara así, CSS
-   agregaría "contenido" al final de todas las capas automáticamente. */
-@layer reset, tokens, layout, componentes, contenido, mapa;
+  // ─────────────────────────────────────────────────────────────────────
+  // GRUPOS — taxonomía de categorías (13), tal como vivía en index.backup.
+  // Paleta verificada con contraste AA (ver nota de auditoría en core.css).
+  // ─────────────────────────────────────────────────────────────────────
+  var GRUPOS = {
+    gastronomia: { color: '#AD1E1E', label: 'Gastronomía', icon: '🍽️', desc: 'Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.' },
+    patrimonio:  { color: '#9C681B', label: 'Patrimonio',  icon: '🏛️', desc: 'Museos, plazas, iglesias, centros culturales y edificios históricos.' },
+    naturaleza:  { color: '#3A8216', label: 'Naturaleza',  icon: '🌊', desc: 'Balnearios, islas, parques y la costanera del río Uruguay.' },
+    alojamiento: { color: '#1E57AD', label: 'Alojamiento', icon: '🏨', desc: 'Hoteles, hosterías, cabañas, hostels y apart hotels.' },
+    mascotas:    { color: '#168241', label: 'Mascotas',    icon: '🐾', desc: 'Veterinarias y pet shops para el cuidado de tus compañeros.' },
+    salud:       { color: '#168282', label: 'Salud',       icon: '🏥', desc: 'Farmacias, clínicas, laboratorios y profesionales de la salud.' },
+    finanzas:    { color: '#3B1EAD', label: 'Finanzas',    icon: '🏦', desc: 'Bancos, seguros, abogados, escribanías e inmobiliarias.' },
+    compras:     { color: '#657915', label: 'Compras',     icon: '🛒', desc: 'Supermercados, ferreterías, indumentaria y comercios de todo tipo.' },
+    deporte:     { color: '#901EAD', label: 'Deporte',     icon: '💪', desc: 'Gimnasios, clubes deportivos y espacios de entrenamiento.' },
+    transporte:  { color: '#AD1E74', label: 'Transporte',  icon: '🚖', desc: 'Remiserías, talleres, estaciones de servicio y agencias de viaje.' },
+    belleza:     { color: '#7A1EAD', label: 'Belleza',     icon: '💇', desc: 'Peluquerías, barberías y centros de estética.' },
+    servicios_publicos: { color: '#AD5E1E', label: 'Servicios públicos', icon: '🏢', desc: 'Municipalidad, policía, correo, Registro Civil y más.' },
+    educacion:   { color: '#1EAD8C', label: 'Educación',   icon: '🎓', desc: 'Universidades, institutos, escuelas y jardines de infantes.' }
+  };
 
-@layer contenido {
+  // ─────────────────────────────────────────────────────────────────────
+  // Metadatos de la página. Corrige dos problemas detectados en
+  // index.backup: (1) la URL canónica apuntaba a una ruta vieja
+  // ("/guia-concepcion-del-uruguay/") que no coincide con sitemap.xml
+  // (la real es "/donde-comer-cdu/"); (2) el conteo de lugares en el
+  // título/descripción estaba desactualizado (653 → 862 reales).
+  // Si el dataset crece de forma significativa, actualizar el número acá.
+  // ─────────────────────────────────────────────────────────────────────
+  var CANONICAL_URL = 'https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/';
+  var OG_IMAGE = 'https://uruspot.pages.dev/img/logof.webp';
+  var TOTAL_LUGARES_APROX = 862;
 
-  /* ═══════════ UTILIDADES ═══════════ */
-  .grain-overlay {
-    position: fixed; inset: 0; pointer-events: none; z-index: var(--z-base);
-    opacity: .035; mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  .visually-hidden {
-    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-  }
+  var PAGE_TITLE = 'Guía completa de Concepción del Uruguay · ' + TOTAL_LUGARES_APROX + '+ lugares · URU SPOT';
+  var PAGE_DESCRIPTION = 'La guía urbana completa de Concepción del Uruguay: 13 categorías, cientos de lugares verificados contra Google Places, en un mapa interactivo con filtros por rubro y subcategoría.';
 
-  /* ═══════════ APP LOADING ═══════════ */
-  .us-app-loading {
-    position: fixed; inset: 0; z-index: var(--z-overlay);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 1rem; background: var(--bg); transition: opacity .4s ease, visibility .4s ease;
-  }
-  .us-app-loading.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
-  .us-app-loading-mark {
-    width: 2.75rem; height: 2.75rem; border-radius: 50%;
-    border: .1875rem solid var(--border-s); border-top-color: var(--sunset);
-    animation: us-spin .8s linear infinite;
-  }
-  @keyframes us-spin { to { transform: rotate(360deg); } }
-  .us-app-loading-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem;
-    width: min(20rem, 80vw);
-  }
-  .us-app-loading-grid:empty { display: none; }
-
-  /* ═══════════ SCRIM (backdrop compartido) ═══════════ */
-  .us-scrim {
-    position: fixed; inset: 0; z-index: var(--z-overlay);
-    background: rgba(10, 20, 22, .55); backdrop-filter: blur(2px);
-    opacity: 0; transition: opacity .25s ease;
-  }
-  .us-scrim[hidden] { display: none; }
-  .us-scrim:not([hidden]) { opacity: 1; }
-
-  /* ═══════════ APP HEADER ═══════════ */
-  .us-app-header {
-    position: sticky; top: 0; z-index: var(--z-nav);
-    background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
-    backdrop-filter: blur(10px); border-bottom: 1px solid transparent;
-    transition: border-color .25s ease, box-shadow .25s ease, padding .25s ease;
-  }
-  .us-app-header[data-state="compact"] {
-    border-bottom-color: var(--border); box-shadow: var(--shadow-sm);
-  }
-  .us-app-header-inner {
-    display: flex; align-items: center; gap: .75rem;
-    max-width: 75rem; margin: 0 auto; padding: .75rem 1.25rem;
-  }
-  .us-app-brand {
-    display: flex; align-items: center; gap: .5rem; text-decoration: none;
-    color: var(--ink); margin-right: auto;
-  }
-  .us-app-brand-mark {
-    width: 1.75rem; height: 1.75rem; border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--river-700), var(--sunset));
-  }
-  .us-app-brand-text {
-    font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .02em;
-  }
-  .us-app-header-search {
-    display: flex; align-items: center; gap: .5rem; flex: 1; max-width: 26rem;
-    background: var(--bg-sunk); border: 1px solid var(--border); color: var(--ink-soft);
-    border-radius: var(--radius-pill); padding: .55rem 1rem; font-size: .85rem;
-    font-family: var(--f-ui); cursor: pointer; text-align: left;
-  }
-  .us-app-header-search span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .us-app-header-search:hover { border-color: var(--border-s); }
-  .us-app-header-menu {
-    display: flex; flex-direction: column; gap: .3125rem; align-items: flex-end;
-    width: 2.5rem; height: 2.5rem; justify-content: center; background: none; border: none; cursor: pointer;
-  }
-  .us-app-header-menu-bar,
-  .us-app-header-menu-bar::before,
-  .us-app-header-menu-bar::after {
-    content: ""; display: block; width: 1.25rem; height: 2px; background: var(--ink); border-radius: 1px;
-  }
-  .us-app-header-menu-bar { position: relative; }
-  .us-app-header-menu-bar::before { position: absolute; top: -.375rem; width: 1.5rem; }
-  .us-app-header-menu-bar::after { position: absolute; top: .375rem; width: 1rem; }
-
-  /* ═══════════ BOTTOM NAV — piezas que faltaban ═══════════ */
-  .bn-label { font-size: .625rem; font-weight: 500; }
-  .bn-search .bn-icon { background: var(--sunset); border-radius: 50%; }
-
-  /* ═══════════ FAB ═══════════ */
-  .us-fab {
-    position: fixed; right: 1.25rem; bottom: 5.5rem; z-index: var(--z-nav);
-    width: 3.5rem; height: 3.5rem; border-radius: 50%; border: none; cursor: pointer;
-    background: linear-gradient(135deg, var(--sunset), var(--sunset-bright));
-    box-shadow: var(--shadow-lg); display: flex; align-items: center; justify-content: center;
-    transition: transform .2s ease;
-  }
-  .us-fab:hover { transform: translateY(-2px); }
-  .us-fab-icon {
-    width: 1.25rem; height: 1.25rem; position: relative;
-  }
-  .us-fab-icon::before, .us-fab-icon::after {
-    content: ""; position: absolute; background: var(--text-on-dark); border-radius: 1px;
-  }
-  .us-fab-icon::before { top: 50%; left: 0; width: 100%; height: 2px; transform: translateY(-50%); }
-  .us-fab-icon::after { left: 50%; top: 0; height: 100%; width: 2px; transform: translateX(-50%); }
-
-  /* ═══════════ SPOTLIGHT — piezas que faltaban ═══════════ */
-  .spotlight-suggestions:empty, .spotlight-results:empty { display: none; }
-  .spotlight-suggestions, .spotlight-results {
-    display: flex; flex-direction: column; gap: .25rem; overflow-y: auto; margin-top: .75rem;
-  }
-  .spotlight-empty {
-    padding: 2rem 1rem; text-align: center; color: var(--muted); font-size: .9rem;
+  function setMeta(id, attr, value) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (attr === 'text') el.textContent = value;
+    else el.setAttribute(attr, value);
   }
 
-  /* ═══════════ DRAWER ═══════════ */
-  .us-drawer {
-    position: fixed; top: 0; right: 0; bottom: 0; z-index: calc(var(--z-overlay) + 1);
-    width: min(20rem, 85vw); background: var(--bg-panel); box-shadow: var(--shadow-lg);
-    display: flex; flex-direction: column; transform: translateX(100%);
-    transition: transform .3s ease;
-  }
-  .us-drawer:not([hidden]) { transform: translateX(0); }
-  .us-drawer[hidden] { display: flex; visibility: hidden; }
-  .us-drawer-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.25rem; border-bottom: 1px solid var(--border);
-  }
-  .us-drawer-header button {
-    background: none; border: none; font-size: 1.1rem; color: var(--ink-soft); cursor: pointer;
-  }
-  .us-drawer-nav { display: flex; flex-direction: column; padding: .5rem; overflow-y: auto; flex: 1; }
-  .us-drawer-item {
-    display: block; width: 100%; text-align: left; padding: .875rem 1rem;
-    border-radius: var(--radius-sm); background: none; border: none; cursor: pointer;
-    font-family: var(--f-ui); font-size: .95rem; color: var(--ink); text-decoration: none;
-  }
-  .us-drawer-item:hover { background: var(--bg-sunk); }
-  .us-drawer-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); font-size: .8rem; color: var(--muted); }
-  .us-drawer-footer:empty { display: none; }
+  setMeta('doc-title', 'text', PAGE_TITLE);
+  setMeta('doc-description', 'content', PAGE_DESCRIPTION);
+  setMeta('doc-canonical', 'href', CANONICAL_URL);
+  setMeta('og-title', 'content', PAGE_TITLE);
+  setMeta('og-description', 'content', PAGE_DESCRIPTION);
+  setMeta('og-image', 'content', OG_IMAGE);
+  setMeta('twitter-title', 'content', PAGE_TITLE);
+  setMeta('twitter-description', 'content', PAGE_DESCRIPTION);
+  setMeta('twitter-image', 'content', OG_IMAGE);
 
-  /* ═══════════ BOTTOM SHEET — ficha del lugar ═══════════ */
-  .us-sheet {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: calc(var(--z-overlay) + 1);
-    max-height: 90vh; background: var(--bg-panel); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    box-shadow: var(--shadow-lg); transform: translateY(100%); transition: transform .3s ease;
-    display: flex; flex-direction: column;
-  }
-  .us-sheet:not([hidden]) { transform: translateY(0); }
-  .us-sheet[hidden] { display: flex; visibility: hidden; }
-  .us-sheet-handle {
-    width: 2.5rem; height: .25rem; border-radius: var(--radius-pill);
-    background: var(--border-s); margin: .75rem auto .25rem;
-  }
-  .us-sheet-close {
-    position: absolute; top: .75rem; right: .75rem; z-index: 1;
-    width: 2rem; height: 2rem; border-radius: 50%; border: none;
-    background: var(--bg-sunk); color: var(--ink); cursor: pointer;
-  }
-  .us-sheet-loading { display: none; }
-  .us-sheet-loading:not([aria-hidden="true"]) {
-    display: block; min-height: 12rem;
-    background: linear-gradient(90deg, var(--bg-sunk) 25%, var(--border) 50%, var(--bg-sunk) 75%);
-    background-size: 200% 100%; animation: us-shimmer 1.4s infinite;
-  }
-  .us-sheet-scroll { overflow-y: auto; padding-bottom: 2rem; }
-  .us-sheet-hero {
-    display: flex; gap: .25rem; overflow-x: auto; height: 14rem;
-    background: var(--bg-sunk);
-  }
-  .us-sheet-hero:empty {
-    background: linear-gradient(135deg, var(--river-300), var(--river-100));
-  }
-  .us-sheet-header { padding: 1.25rem 1.25rem .5rem; }
-  .us-sheet-category {
-    display: inline-block; font-size: .75rem; font-weight: 600; color: var(--river-700);
-    text-transform: uppercase; letter-spacing: .04em; margin-bottom: .375rem;
-  }
-  .us-sheet-title { font-family: var(--f-display); font-size: 1.5rem; font-weight: 700; color: var(--ink); }
-  .us-sheet-status { display: block; margin-top: .375rem; font-size: .85rem; color: var(--muted); }
-  .us-sheet-meta {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem 1rem;
-    padding: 1rem 1.25rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  }
-  .us-sheet-meta-item dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
-  .us-sheet-meta-item dd { font-size: .9rem; color: var(--ink); margin-top: .125rem; }
-  .us-sheet-meta-item:empty, .us-sheet-meta-item dd:empty { display: none; }
-  .us-sheet-services {
-    display: flex; flex-wrap: wrap; gap: .5rem; padding: 1rem 1.25rem;
-  }
-  .us-sheet-services:empty { display: none; }
-  .us-sheet-actions {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .625rem;
-    padding: 1rem 1.25rem;
-  }
-  .us-sheet-action {
-    display: flex; align-items: center; justify-content: center; gap: .375rem;
-    padding: .7rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border);
-    background: var(--bg-panel); color: var(--ink); font-size: .85rem; font-weight: 500;
-    text-decoration: none; cursor: pointer; font-family: var(--f-ui);
-  }
-  .us-sheet-action:hover { border-color: var(--border-s); background: var(--bg-sunk); }
-  .us-sheet-action[data-action="ir"], .us-sheet-action[data-action="maps"] {
-    background: var(--sunset); border-color: var(--sunset); color: var(--text-on-dark);
-  }
-  .us-sheet-related { padding: .5rem 0 1rem; }
-  .us-sheet-related:empty { display: none; }
-
-  /* ═══════════ FULL SCREEN SHEET ═══════════ */
-  .us-fullsheet {
-    position: fixed; inset: 0; z-index: calc(var(--z-overlay) + 1);
-    background: var(--bg); display: flex; flex-direction: column;
-    transform: translateY(100%); transition: transform .3s ease;
-  }
-  .us-fullsheet:not([hidden]) { transform: translateY(0); }
-  .us-fullsheet[hidden] { display: flex; visibility: hidden; }
-  .us-fullsheet-header {
-    display: flex; align-items: center; gap: .75rem; padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border); background: var(--bg-panel);
-  }
-  .us-fullsheet-close {
-    width: 2rem; height: 2rem; border-radius: 50%; border: none;
-    background: var(--bg-sunk); color: var(--ink); cursor: pointer;
-  }
-  .us-fullsheet-title { font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; flex: 1; }
-  .us-fullsheet-header-actions { display: flex; gap: .5rem; }
-  .us-fullsheet-header-actions:empty { display: none; }
-  .us-fullsheet-body { flex: 1; overflow-y: auto; padding: 1.25rem; }
-
-  /* ═══════════ SISTEMA DE DIÁLOGOS ═══════════ */
-  .us-dialog-root {
-    position: fixed; inset: 0; z-index: calc(var(--z-overlay) + 2);
-    display: flex; align-items: center; justify-content: center; padding: 1.25rem;
-    background: rgba(10, 20, 22, .55);
-  }
-  .us-dialog-root[hidden] { display: none; }
-  .us-dialog-panel {
-    width: min(24rem, 100%); background: var(--bg-panel); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg); padding: 1.5rem;
-  }
-  .us-dialog-title { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; margin-bottom: .5rem; }
-  .us-dialog-body { font-size: .9rem; color: var(--ink-soft); line-height: 1.5; }
-  .us-dialog-actions { display: flex; justify-content: flex-end; gap: .625rem; margin-top: 1.25rem; }
-  .us-dialog-actions button {
-    padding: .6rem 1.1rem; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 500;
-    cursor: pointer; font-family: var(--f-ui); border: 1px solid var(--border); background: var(--bg-panel);
+  var ldJsonEl = document.getElementById('ld-json');
+  if (ldJsonEl) {
+    ldJsonEl.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Guía de Concepción del Uruguay',
+      description: PAGE_DESCRIPTION,
+      url: CANONICAL_URL,
+      inLanguage: 'es-AR',
+      about: {
+        '@type': 'City',
+        name: 'Concepción del Uruguay',
+        addressRegion: 'Entre Ríos',
+        addressCountry: 'AR'
+      }
+    });
   }
 
-  /* ═══════════ TOASTS ═══════════ */
-  .us-toast-region {
-    position: fixed; left: 50%; bottom: 5.5rem; transform: translateX(-50%);
-    z-index: var(--z-toast); display: flex; flex-direction: column; gap: .5rem; width: min(24rem, 92vw);
-  }
-  .us-toast {
-    display: flex; align-items: center; gap: .625rem; padding: .75rem 1rem;
-    background: var(--ink); color: var(--text-on-dark); border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-md); animation: us-toast-in .25s ease;
-  }
-  @keyframes us-toast-in { from { opacity: 0; transform: translateY(.5rem); } to { opacity: 1; transform: translateY(0); } }
-  .us-toast-icon { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
-  .us-toast-message { flex: 1; font-size: .85rem; }
-  .us-toast-close { background: none; border: none; color: inherit; opacity: .7; cursor: pointer; }
-
-  /* ═══════════ HOME HUB Y CARRUSELES ═══════════ */
-  .us-home-hub { display: flex; flex-direction: column; gap: 1.75rem; padding: 1.5rem 0; }
-  .us-carousel-section:has(.us-carousel-track:empty):not(:has(.us-skeleton-card)) { display: none; }
-  .us-carousel-header {
-    display: flex; align-items: baseline; justify-content: space-between; gap: .75rem;
-    padding: 0 1.25rem; margin-bottom: .75rem;
-  }
-  .us-carousel-eyebrow {
-    display: block; font-size: .7rem; font-weight: 600; text-transform: uppercase;
-    letter-spacing: .06em; color: var(--sunset);
-  }
-  .us-carousel-title { font-family: var(--f-display); font-size: 1.25rem; font-weight: 700; color: var(--ink); }
-  .us-carousel-count { font-size: .8rem; color: var(--muted); }
-  .us-carousel-view-all {
-    background: none; border: none; color: var(--river-700); font-size: .85rem; font-weight: 600;
-    cursor: pointer; font-family: var(--f-ui);
-  }
-  .us-carousel-viewport { position: relative; }
-  .us-carousel-track {
-    display: flex; gap: .875rem; overflow-x: auto; scroll-snap-type: x proximity;
-    padding: 0 1.25rem; scrollbar-width: none;
-  }
-  .us-carousel-track::-webkit-scrollbar { display: none; }
-  .us-carousel-track > * { scroll-snap-align: start; flex: 0 0 auto; }
-  .us-carousel-nav {
-    position: absolute; top: 50%; transform: translateY(-50%); z-index: 1;
-    width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 1px solid var(--border);
-    background: var(--bg-panel); box-shadow: var(--shadow-sm); cursor: pointer; font-size: 1.1rem;
-    display: none; align-items: center; justify-content: center;
-  }
-  .us-carousel-nav.prev { left: .25rem; }
-  .us-carousel-nav.next { right: .25rem; }
-  .us-carousel-nav:disabled { opacity: .35; cursor: default; }
-  @media (hover: hover) { .us-carousel-nav { display: flex; } }
-  .us-carousel-empty { padding: 1.5rem 1.25rem; color: var(--muted); font-size: .85rem; }
-  .us-carousel-empty[hidden] { display: none; }
-
-  /* ═══════════ CARD (lugar) ═══════════ */
-  .us-card {
-    width: 12.5rem; background: var(--bg-panel); border-radius: var(--radius);
-    border: 1px solid var(--border); overflow: hidden; text-decoration: none; color: inherit;
-    box-shadow: var(--shadow-sm); transition: transform .2s ease, box-shadow .2s ease;
-  }
-  .us-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-  .us-card-media { position: relative; aspect-ratio: 16 / 11; background: var(--bg-sunk); }
-  .us-card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .us-card-badge {
-    position: absolute; left: .5rem; padding: .25rem .55rem; border-radius: var(--radius-pill);
-    font-size: .65rem; font-weight: 600; color: var(--text-on-dark); background: var(--river-900);
-  }
-  .us-card-badge-category { top: .5rem; }
-  .us-card-badge-status { bottom: .5rem; background: var(--sunset); }
-  .us-card-badge:empty { display: none; }
-  .us-card-fav {
-    position: absolute; top: .5rem; right: .5rem; width: 1.875rem; height: 1.875rem;
-    border-radius: 50%; border: none; background: rgba(255,255,255,.9); cursor: pointer;
-  }
-  .us-card-fav::before {
-    content: "♡"; font-size: 1rem; color: var(--ink);
-  }
-  .us-card-fav[aria-pressed="true"]::before { content: "♥"; color: var(--sunset); }
-  .us-card-body { padding: .75rem .875rem .875rem; }
-  .us-card-title {
-    font-family: var(--f-ui); font-size: .95rem; font-weight: 600; color: var(--ink);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .us-card-meta { font-size: .8rem; color: var(--muted); margin-top: .25rem; }
-  .us-card-tags { display: flex; flex-wrap: wrap; gap: .3125rem; margin-top: .5rem; }
-  .us-card-tags:empty { display: none; }
-
-  /* ═══════════ SKELETON (carga) ═══════════ */
-  @keyframes us-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  .us-skeleton-card { width: 12.5rem; flex: 0 0 auto; }
-  .us-skeleton-media, .us-skeleton-line {
-    background: linear-gradient(90deg, var(--bg-sunk) 25%, var(--border) 50%, var(--bg-sunk) 75%);
-    background-size: 200% 100%; animation: us-shimmer 1.4s infinite; border-radius: var(--radius-sm);
-  }
-  .us-skeleton-media { aspect-ratio: 16 / 11; border-radius: var(--radius); }
-  .us-skeleton-line { height: .75rem; margin-top: .625rem; }
-  .us-skeleton-line-lg { width: 85%; }
-  .us-skeleton-line-sm { width: 55%; }
-
-  /* ═══════════ ESTADO VACÍO ═══════════ */
-  .us-empty-state {
-    display: flex; flex-direction: column; align-items: center; text-align: center;
-    padding: 2.5rem 1.5rem; gap: .5rem;
-  }
-  .us-empty-icon { font-size: 2rem; }
-  .us-empty-title { font-family: var(--f-display); font-size: 1.05rem; font-weight: 700; color: var(--ink); }
-  .us-empty-desc { font-size: .85rem; color: var(--muted); max-width: 22rem; }
-  .us-empty-action {
-    margin-top: .5rem; padding: .6rem 1.25rem; border-radius: var(--radius-pill);
-    border: none; background: var(--sunset); color: var(--text-on-dark); font-weight: 600;
-    font-size: .85rem; cursor: pointer; font-family: var(--f-ui);
-  }
-  .us-empty-action[hidden] { display: none; }
-
-  /* ═══════════ FOOTER ═══════════
-     core.css no trae estilos de footer (se confirmó antes de escribir
-     esto): es contenido, no infraestructura, así que vive acá. */
-  #site-footer {
-    text-align: center; padding: 3rem 1.25rem 2rem; color: var(--text-on-dark);
-    background: var(--river-900);
-  }
-  .footer-quote {
-    font-family: var(--f-display); font-style: italic; font-size: 1.05rem;
-    max-width: 30rem; margin: 0 auto 1.25rem; opacity: .85;
-  }
-  .footer-logo { font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; letter-spacing: .04em; }
-  .footer-sub { font-size: .8rem; opacity: .65; margin-top: .25rem; }
-  .footer-links {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.25rem;
-    margin-top: 1.5rem; font-size: .85rem;
-  }
-  .footer-links a { text-decoration: none; opacity: .8; }
-  .footer-links a:hover { opacity: 1; text-decoration: underline; }
-
-  /* ═══════════ FOCUS-VISIBLE — mismo tratamiento que el core ═══════════ */
-  .us-drawer-item:focus-visible,
-  .us-card:focus-visible,
-  .us-sheet-action:focus-visible,
-  .us-carousel-nav:focus-visible,
-  .us-app-header-search:focus-visible,
-  .us-fab:focus-visible,
-  .us-empty-action:focus-visible {
-    outline: 2px solid var(--sunset-bright); outline-offset: 2px;
+  // ─────────────────────────────────────────────────────────────────────
+  // HERO — misma copy y misma estructura de clases que ya vive en
+  // core.css (.hero, .hero-media, .hero-inner, .hero-title, .hero-sub,
+  // .hero-stats, .hero-cta, .hero-wave). #cats-container queda vacío:
+  // core-engine.js lo llena solo (ver renderHeroCards en JSPERFECTO1_AUDITED.js).
+  // ─────────────────────────────────────────────────────────────────────
+  var heroMount = document.getElementById('hero-mount');
+  if (heroMount) {
+    heroMount.innerHTML =
+      '<section class="hero" id="hero">' +
+        '<div class="hero-media" aria-hidden="true">' +
+          '<div class="hero-media-gradient"></div>' +
+          '<div class="hero-media-pattern"></div>' +
+        '</div>' +
+        '<div class="hero-inner">' +
+          '<span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Entre Ríos, Argentina</span>' +
+          '<h1 class="hero-title">La Guía de<br><strong>Concepción del Uruguay</strong></h1>' +
+          '<p class="hero-sub">🎯 <strong><span id="hero-total-lugares">···</span> lugares verificados</strong> — curada con precisión: gastronomía, compras, salud, finanzas, patrimonio, naturaleza, alojamiento y mucho más</p>' +
+          '<div class="hero-actions">' +
+            '<a class="hero-cta" href="#mapa">Explorar el mapa ↓</a>' +
+          '</div>' +
+          '<div class="hero-stats" role="list">' +
+            '<div class="hs" role="listitem"><div class="hs-n" id="stat-total-lugares">···</div><div class="hs-l">Lugares</div></div>' +
+            '<div class="hs" role="listitem"><div class="hs-n" id="stat-total-categorias">···</div><div class="hs-l">Categorías</div></div>' +
+            '<div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Ciudad</div></div>' +
+            '<div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Verificado</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="hero-wave" aria-hidden="true">' +
+          '<svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="var(--bg)" d="M0,40 C360,90 1080,-10 1440,40 L1440,80 L0,80 Z"></path></svg>' +
+        '</div>' +
+      '</section>' +
+      '<div class="cats-wrap">' +
+        '<div class="cats" id="cats-container"></div>' +
+      '</div>';
   }
 
-  /* ═══════════ RESPONSIVE — escritorio ═══════════ */
-  @media (min-width: 61rem) {
-    .us-fab { right: 2rem; bottom: 2rem; }
-    .us-drawer { width: 20rem; }
-    .us-sheet, .us-fullsheet { left: 50%; right: auto; width: min(36rem, 92vw); transform: translate(-50%, 100%); }
-    .us-sheet:not([hidden]), .us-fullsheet:not([hidden]) { transform: translate(-50%, 0); }
-    .us-sheet { bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 85vh; }
-    .us-fullsheet { top: 3vh; bottom: 3vh; border-radius: var(--radius-lg); overflow: hidden; }
+  // ─────────────────────────────────────────────────────────────────────
+  // FOOTER — misma copy que index.backup. Se corrige un bug real que
+  // tenía el backup: el link "Servicios" usaba data-filtro="servicios",
+  // una clave que NUNCA existió en GRUPOS (la clave real es
+  // "servicios_publicos"), así que ese link quedaba roto y no filtraba
+  // nada. Estilos nuevos en content.css (.footer-*), porque core.css no
+  // trae estilos de footer.
+  // ─────────────────────────────────────────────────────────────────────
+  var footerMount = document.getElementById('site-footer');
+  if (footerMount) {
+    footerMount.innerHTML =
+      '<p class="footer-quote">"El mejor lugar es el que no sabías que estaba ahí."</p>' +
+      '<div class="footer-logo">URU SPOT</div>' +
+      '<div class="footer-sub">Guía de Concepción del Uruguay · Entre Ríos · Argentina</div>' +
+      '<nav class="footer-links" aria-label="Navegación del sitio">' +
+        '<a href="#mapa">El mapa</a>' +
+        '<a class="footer-filtro" data-filtro="gastronomia" href="#mapa">Gastronomía</a>' +
+        '<a class="footer-filtro" data-filtro="patrimonio" href="#mapa">Patrimonio</a>' +
+        '<a class="footer-filtro" data-filtro="naturaleza" href="#mapa">Naturaleza</a>' +
+        '<a class="footer-filtro" data-filtro="alojamiento" href="#mapa">Alojamiento</a>' +
+        '<a class="footer-filtro" data-filtro="servicios_publicos" href="#mapa">Servicios</a>' +
+      '</nav>';
   }
-}
+
+  // ─────────────────────────────────────────────────────────────────────
+  // INIT — arranca el motor. "lugares" queda vacío a propósito: se usa
+  // extraDataUrl para que el propio Core haga fetch('lugares-mapa.json')
+  // y lo mezcle (ver cargarConExtra() en core-engine.js), en vez de
+  // incrustar acá un array de 862 objetos a mano.
+  // mapCenter/mapZoom/tileUrl/tileAttribution: mismos valores reales que
+  // usaba el mapa Leaflet en index.backup (línea ~1726).
+  // ─────────────────────────────────────────────────────────────────────
+  if (window.UruSpotCore) {
+    window.UruSpotCore.init({
+      grupos: GRUPOS,
+      lugares: [],
+      extraDataUrl: 'lugares-mapa.json',
+      mapCenter: [-32.4836, -58.2335],
+      mapZoom: 13,
+      tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      tileAttribution: '&copy; OpenStreetMap &copy; CARTO'
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // SACAR EL LOADER — #app-loading (.us-app-loading en content.css) cubre
+  // toda la pantalla hasta que algo le agrega la clase "is-done" (ver
+  // content.css). El motor (core-engine.js) monta el mapa/hero de forma
+  // síncrona dentro de UruSpotCore.init() —los 862 lugares llegan después,
+  // vía fetch a lugares-mapa.json, y se pintan solos cuando resuelven—
+  // así que apenas init() vuelve ya hay un primer render en pantalla y es
+  // seguro destapar la app. inert + aria-hidden lo sacan del árbol de foco
+  // para lectores de pantalla y tab-order una vez que ya no se ve.
+  // ─────────────────────────────────────────────────────────────────────
+  var appLoading = document.getElementById('app-loading');
+  if (appLoading) {
+    appLoading.classList.add('is-done');
+    appLoading.setAttribute('inert', '');
+    appLoading.setAttribute('aria-hidden', 'true');
+  }
+
+})();
