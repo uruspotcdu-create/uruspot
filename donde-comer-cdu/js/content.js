@@ -1,0 +1,166 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * URU SPOT — MÓDULO B (CONTENIDO) · content.js
+ * Datos de la ciudad (GRUPOS), copy editorial (hero, footer, metadatos) e
+ * inicialización del motor. No contiene lógica de mapa/filtros/favoritos:
+ * eso vive en core-engine.js (MÓDULO A). Este archivo solo entrega
+ * configuración y arma la copy que el Core no conoce.
+ *
+ * Fuente de los datos: extraídos de index.backup y lugares-mapa.json
+ * (versión anterior funcional de esta misma sección), no inventados.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  // ─────────────────────────────────────────────────────────────────────
+  // GRUPOS — taxonomía de categorías (13), tal como vivía en index.backup.
+  // Paleta verificada con contraste AA (ver nota de auditoría en core.css).
+  // ─────────────────────────────────────────────────────────────────────
+  var GRUPOS = {
+    gastronomia: { color: '#AD1E1E', label: 'Gastronomía', icon: '🍽️', desc: 'Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.' },
+    patrimonio:  { color: '#9C681B', label: 'Patrimonio',  icon: '🏛️', desc: 'Museos, plazas, iglesias, centros culturales y edificios históricos.' },
+    naturaleza:  { color: '#3A8216', label: 'Naturaleza',  icon: '🌊', desc: 'Balnearios, islas, parques y la costanera del río Uruguay.' },
+    alojamiento: { color: '#1E57AD', label: 'Alojamiento', icon: '🏨', desc: 'Hoteles, hosterías, cabañas, hostels y apart hotels.' },
+    mascotas:    { color: '#168241', label: 'Mascotas',    icon: '🐾', desc: 'Veterinarias y pet shops para el cuidado de tus compañeros.' },
+    salud:       { color: '#168282', label: 'Salud',       icon: '🏥', desc: 'Farmacias, clínicas, laboratorios y profesionales de la salud.' },
+    finanzas:    { color: '#3B1EAD', label: 'Finanzas',    icon: '🏦', desc: 'Bancos, seguros, abogados, escribanías e inmobiliarias.' },
+    compras:     { color: '#657915', label: 'Compras',     icon: '🛒', desc: 'Supermercados, ferreterías, indumentaria y comercios de todo tipo.' },
+    deporte:     { color: '#901EAD', label: 'Deporte',     icon: '💪', desc: 'Gimnasios, clubes deportivos y espacios de entrenamiento.' },
+    transporte:  { color: '#AD1E74', label: 'Transporte',  icon: '🚖', desc: 'Remiserías, talleres, estaciones de servicio y agencias de viaje.' },
+    belleza:     { color: '#7A1EAD', label: 'Belleza',     icon: '💇', desc: 'Peluquerías, barberías y centros de estética.' },
+    servicios_publicos: { color: '#AD5E1E', label: 'Servicios públicos', icon: '🏢', desc: 'Municipalidad, policía, correo, Registro Civil y más.' },
+    educacion:   { color: '#1EAD8C', label: 'Educación',   icon: '🎓', desc: 'Universidades, institutos, escuelas y jardines de infantes.' }
+  };
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Metadatos de la página. Corrige dos problemas detectados en
+  // index.backup: (1) la URL canónica apuntaba a una ruta vieja
+  // ("/guia-concepcion-del-uruguay/") que no coincide con sitemap.xml
+  // (la real es "/donde-comer-cdu/"); (2) el conteo de lugares en el
+  // título/descripción estaba desactualizado (653 → 862 reales).
+  // Si el dataset crece de forma significativa, actualizar el número acá.
+  // ─────────────────────────────────────────────────────────────────────
+  var CANONICAL_URL = 'https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/';
+  var OG_IMAGE = 'https://uruspot.pages.dev/img/logof.webp';
+  var TOTAL_LUGARES_APROX = 862;
+
+  var PAGE_TITLE = 'Guía completa de Concepción del Uruguay · ' + TOTAL_LUGARES_APROX + '+ lugares · URU SPOT';
+  var PAGE_DESCRIPTION = 'La guía urbana completa de Concepción del Uruguay: 13 categorías, cientos de lugares verificados contra Google Places, en un mapa interactivo con filtros por rubro y subcategoría.';
+
+  function setMeta(id, attr, value) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (attr === 'text') el.textContent = value;
+    else el.setAttribute(attr, value);
+  }
+
+  setMeta('doc-title', 'text', PAGE_TITLE);
+  setMeta('doc-description', 'content', PAGE_DESCRIPTION);
+  setMeta('doc-canonical', 'href', CANONICAL_URL);
+  setMeta('og-title', 'content', PAGE_TITLE);
+  setMeta('og-description', 'content', PAGE_DESCRIPTION);
+  setMeta('og-image', 'content', OG_IMAGE);
+  setMeta('twitter-title', 'content', PAGE_TITLE);
+  setMeta('twitter-description', 'content', PAGE_DESCRIPTION);
+  setMeta('twitter-image', 'content', OG_IMAGE);
+
+  var ldJsonEl = document.getElementById('ld-json');
+  if (ldJsonEl) {
+    ldJsonEl.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Guía de Concepción del Uruguay',
+      description: PAGE_DESCRIPTION,
+      url: CANONICAL_URL,
+      inLanguage: 'es-AR',
+      about: {
+        '@type': 'City',
+        name: 'Concepción del Uruguay',
+        addressRegion: 'Entre Ríos',
+        addressCountry: 'AR'
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // HERO — misma copy y misma estructura de clases que ya vive en
+  // core.css (.hero, .hero-media, .hero-inner, .hero-title, .hero-sub,
+  // .hero-stats, .hero-cta, .hero-wave). #cats-container queda vacío:
+  // core-engine.js lo llena solo (ver renderHeroCards en JSPERFECTO1_AUDITED.js).
+  // ─────────────────────────────────────────────────────────────────────
+  var heroMount = document.getElementById('hero-mount');
+  if (heroMount) {
+    heroMount.innerHTML =
+      '<section class="hero" id="hero">' +
+        '<div class="hero-media" aria-hidden="true">' +
+          '<div class="hero-media-gradient"></div>' +
+          '<div class="hero-media-pattern"></div>' +
+        '</div>' +
+        '<div class="hero-inner">' +
+          '<span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Entre Ríos, Argentina</span>' +
+          '<h1 class="hero-title">La Guía de<br><strong>Concepción del Uruguay</strong></h1>' +
+          '<p class="hero-sub">🎯 <strong><span id="hero-total-lugares">···</span> lugares verificados</strong> — curada con precisión: gastronomía, compras, salud, finanzas, patrimonio, naturaleza, alojamiento y mucho más</p>' +
+          '<div class="hero-actions">' +
+            '<a class="hero-cta" href="#mapa">Explorar el mapa ↓</a>' +
+          '</div>' +
+          '<div class="hero-stats" role="list">' +
+            '<div class="hs" role="listitem"><div class="hs-n" id="stat-total-lugares">···</div><div class="hs-l">Lugares</div></div>' +
+            '<div class="hs" role="listitem"><div class="hs-n" id="stat-total-categorias">···</div><div class="hs-l">Categorías</div></div>' +
+            '<div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Ciudad</div></div>' +
+            '<div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Verificado</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="hero-wave" aria-hidden="true">' +
+          '<svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="var(--bg)" d="M0,40 C360,90 1080,-10 1440,40 L1440,80 L0,80 Z"></path></svg>' +
+        '</div>' +
+      '</section>' +
+      '<div class="cats-wrap">' +
+        '<div class="cats" id="cats-container"></div>' +
+      '</div>';
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // FOOTER — misma copy que index.backup. Se corrige un bug real que
+  // tenía el backup: el link "Servicios" usaba data-filtro="servicios",
+  // una clave que NUNCA existió en GRUPOS (la clave real es
+  // "servicios_publicos"), así que ese link quedaba roto y no filtraba
+  // nada. Estilos nuevos en content.css (.footer-*), porque core.css no
+  // trae estilos de footer.
+  // ─────────────────────────────────────────────────────────────────────
+  var footerMount = document.getElementById('site-footer');
+  if (footerMount) {
+    footerMount.innerHTML =
+      '<p class="footer-quote">"El mejor lugar es el que no sabías que estaba ahí."</p>' +
+      '<div class="footer-logo">URU SPOT</div>' +
+      '<div class="footer-sub">Guía de Concepción del Uruguay · Entre Ríos · Argentina</div>' +
+      '<nav class="footer-links" aria-label="Navegación del sitio">' +
+        '<a href="#mapa">El mapa</a>' +
+        '<a class="footer-filtro" data-filtro="gastronomia" href="#mapa">Gastronomía</a>' +
+        '<a class="footer-filtro" data-filtro="patrimonio" href="#mapa">Patrimonio</a>' +
+        '<a class="footer-filtro" data-filtro="naturaleza" href="#mapa">Naturaleza</a>' +
+        '<a class="footer-filtro" data-filtro="alojamiento" href="#mapa">Alojamiento</a>' +
+        '<a class="footer-filtro" data-filtro="servicios_publicos" href="#mapa">Servicios</a>' +
+      '</nav>';
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // INIT — arranca el motor. "lugares" queda vacío a propósito: se usa
+  // extraDataUrl para que el propio Core haga fetch('lugares-mapa.json')
+  // y lo mezcle (ver cargarConExtra() en core-engine.js), en vez de
+  // incrustar acá un array de 862 objetos a mano.
+  // mapCenter/mapZoom/tileUrl/tileAttribution: mismos valores reales que
+  // usaba el mapa Leaflet en index.backup (línea ~1726).
+  // ─────────────────────────────────────────────────────────────────────
+  if (window.UruSpotCore) {
+    window.UruSpotCore.init({
+      grupos: GRUPOS,
+      lugares: [],
+      extraDataUrl: 'lugares-mapa.json',
+      mapCenter: [-32.4836, -58.2335],
+      mapZoom: 13,
+      tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      tileAttribution: '&copy; OpenStreetMap &copy; CARTO'
+    });
+  }
+
+})();
