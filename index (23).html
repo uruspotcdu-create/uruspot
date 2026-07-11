@@ -3,11 +3,23 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Garifo — URU SPOT</title>
+<meta name="description" content="Gimnasio Muscle — Concepción del Uruguay. Instalaciones modernas, entrenamiento personalizado y clases grupales. URU SPOT Score: 8.7" />
+<title>Gimnasio Muscle · URU SPOT · Concepción del Uruguay</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
+.post-body, .post-outer, .post-outer-container,
+.blog-posts, .centered-bottom, #main {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.page_body .centered {
+  max-width: 100% !important;
+  padding: 0 !important;
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -65,8 +77,9 @@ body {
 }
 .hero-img {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; transform: scale(1.06);
-  transition: transform 8s ease; filter: brightness(0.7) saturate(0.9);
+  object-fit: cover; object-position: center top;
+  transform: scale(1.06);
+  transition: transform 8s ease; filter: brightness(0.65) saturate(0.85);
 }
 .hero:hover .hero-img { transform: scale(1.02); }
 .hero-overlay {
@@ -165,6 +178,7 @@ body {
 .btn-primary { background: var(--gold); color: var(--ink); }
 .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
 .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-dark { background: var(--ink); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
 
 /* MAIN LAYOUT */
 .page { max-width: 1200px; margin: 0 auto; padding: 80px 48px; }
@@ -203,20 +217,6 @@ body {
 .gallery img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s; filter: brightness(0.9) saturate(0.95); }
 .gallery-item { overflow: hidden; }
 .gallery-item:hover img { transform: scale(1.04); }
-
-/* PROPUESTA LIST */
-.propuesta-list {
-  list-style: none; padding: 0; margin: 0;
-  display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;
-}
-.propuesta-list li {
-  font-size: 14px; color: var(--muted); line-height: 1.6;
-  padding: 14px 20px;
-  border: 1px solid var(--border);
-  background: var(--cream-deep);
-  border-radius: 2px;
-}
-.propuesta-list li b { color: var(--ink); font-weight: 600; }
 
 /* HIGHLIGHTS */
 .highlights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
@@ -259,12 +259,13 @@ body {
 .score-row-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
 .score-name { font-size: 13px; font-weight: 500; color: var(--ink); letter-spacing: 0.05em; }
 .score-val { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; color: var(--gold-dark); }
-.score-track { height: 3px; background: rgba(0,0,0,0.08); border-radius: 0; }
+.score-track { height: 3px; background: rgba(0,0,0,0.08); border-radius: 0; overflow: hidden; }
 .score-fill {
   height: 3px; background: var(--gold); border-radius: 0;
-  transform-origin: left; animation: fillBar 1.2s ease forwards; transform: scaleX(0);
+  transform-origin: left; transform: scaleX(0);
+  transition: transform 1.2s ease;
 }
-@keyframes fillBar { to { transform: scaleX(1); } }
+.score-fill.animated { transform: scaleX(1); }
 
 /* SCHEDULE BLOCK */
 .schedule-block {
@@ -283,7 +284,6 @@ body {
 .schedule-row:last-child { border-bottom: none; }
 .schedule-day { color: rgba(255,255,255,0.5); font-weight: 300; }
 .schedule-time { color: #fff; font-weight: 400; }
-.schedule-closed { color: #ef4444; font-weight: 400; }
 .schedule-price-block { padding: 28px; border: 1px solid rgba(201,168,76,0.2); margin-top: 8px; }
 .schedule-price-label { font-size: 10px; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
 .schedule-price-val { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; color: #fff; margin-bottom: 4px; }
@@ -354,28 +354,28 @@ body {
   .scores-section, .map-section, .verdict-section { padding: 56px 24px; }
 }
 </style>
-<link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/locales/garifo/">
-<meta name="description" content="Garifo — Un rincón cálido con historia viva en el corazón de la ciudad. — España 193, Concepción del Uruguay, Entre Ríos — Score URU SPOT: 8.8">
-<meta property="og:title" content="Garifo · URU SPOT">
-<meta property="og:description" content="Garifo — Un rincón cálido con historia viva en el corazón de la ciudad. — España 193, Concepción del Uruguay, Entre Ríos — Score URU SPOT: 8.8">
-<meta property="og:image" content="https://i.imgur.com/gqlbkM4.png">
+<link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/locales/muscle-gimnasio/">
+<meta property="og:title" content="Gimnasio Muscle · URU SPOT · Concepción del Uruguay">
+<meta property="og:description" content="Gimnasio Muscle — Concepción del Uruguay. Instalaciones modernas, entrenamiento personalizado y clases grupales. URU SPOT Score: 8.7">
+<meta property="og:image" content="https://github.com/uruspotcdu-create/uruspot/blob/main/img/musclefrente.png?raw=true">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/locales/muscle-gimnasio/">
 </head>
 <body>
 
 <!-- NAV -->
 <nav class="nav" role="navigation" aria-label="URU SPOT">
-  <a href="#" class="nav-logo">URU SPOT</a>
-  <span class="nav-tag">Guía gastronómica · Concepción del Uruguay</span>
-  <span class="nav-badge">✧ Experiencia</span>
+  <a href="https://uruspot.pages.dev/" class="nav-logo">URU SPOT</a>
+  <span class="nav-tag">Guía local · Concepción del Uruguay</span>
+  <span class="nav-badge">💪 Destacado</span>
 </nav>
 
 <!-- HERO -->
-<section class="hero" aria-label="Garifo — Tradición & Bodegón Moderno">
+<section class="hero" aria-label="Gimnasio Muscle — Centro de Entrenamiento">
   <img
     class="hero-img"
-    src="https://i.imgur.com/gqlbkM4.png"
-    alt="Patio histórico y fachada de Garifo en Concepción del Uruguay"
+    src="https://github.com/uruspotcdu-create/uruspot/blob/main/img/musclefrente.png?raw=true"
+    alt="Frente del Gimnasio Muscle en Concepción del Uruguay"
     fetchpriority="high"
     loading="eager"
     width="1200" height="800"
@@ -385,22 +385,22 @@ body {
   <div class="hero-content">
     <div class="hero-eyebrow">
       <span class="eyebrow-line" aria-hidden="true"></span>
-      <span class="eyebrow-text">Tradición &amp; Bodegón Moderno</span>
+      <span class="eyebrow-text">Centro de Entrenamiento &amp; Bienestar</span>
     </div>
-    <h1 class="hero-title">Ga<em>rifo</em></h1>
-    <p class="hero-subtitle">Un rincón cálido con historia viva en el corazón de la ciudad.</p>
+    <h1 class="hero-title">Gimnasio <em>Muscle</em></h1>
+    <p class="hero-subtitle">Instalaciones modernas y equipamiento de primera para alcanzar tus objetivos en salud y rendimiento físico.</p>
     <div class="hero-chips">
-      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span>
-      <span class="chip">España 193</span>
-      <span class="chip">Mar–Dom 20:00 – 01:00</span>
-      <span class="chip">$10k – $35k ARS</span>
+      <span class="chip chip-gold">⭐ 8.7 URU SPOT</span>
+      <span class="chip">Blvd. Yrigoyen 1086</span>
+      <span class="chip">Lun–Vie 7:00–22:30</span>
+      <span class="chip">Gimnasio completo</span>
     </div>
   </div>
 
-  <div class="hero-score" aria-label="Puntuación: 8.8 sobre 10">
-    <div class="score-num">8.8</div>
+  <div class="hero-score" aria-label="Puntuación: 8.7 sobre 10">
+    <div class="score-num">8.7</div>
     <div class="score-label">URU SPOT Score</div>
-    <div class="score-stars" aria-hidden="true">★★★★★</div>
+    <div class="score-stars" aria-hidden="true">★★★★☆</div>
   </div>
 </section>
 
@@ -413,71 +413,60 @@ body {
   </div>
   <div class="info-cell">
     <span class="info-cell-label">Ubicación</span>
-    <span class="info-cell-value">España 193</span>
-    <span class="info-cell-sub">🏛️ Concepción del Uruguay · Casco Histórico</span>
+    <span class="info-cell-value">Blvd. H. Yrigoyen 1086</span>
+    <span class="info-cell-sub">Concepción del Uruguay · Entre Ríos</span>
   </div>
   <div class="info-cell">
-    <span class="info-cell-label">Reservas</span>
-    <span class="info-cell-value">03442 62-2611</span>
+    <span class="info-cell-label">Contacto</span>
+    <span class="info-cell-value">03442 58-5936</span>
     <div class="action-row" style="margin-top: 12px;">
-      <a href="tel:03442622611" class="btn btn-primary" aria-label="Llamar a Garifo al 03442 62-2611">
+      <a href="tel:+5493442585936" class="btn btn-primary" aria-label="Llamar a Gimnasio Muscle al 03442 58-5936">
         📞 Llamar
       </a>
-      <button onclick="compartirEntrada()" class="btn btn-ghost" aria-label="Compartir esta página de Garifo">
-        📤 Compartir
-      </button>
     </div>
-    <span class="info-cell-sub" style="margin-top: 8px;">📈 Alta demanda — conviene reservar antes</span>
+    <span class="info-cell-sub" style="margin-top: 8px;">📈 Alta demanda — consultá disponibilidad</span>
   </div>
 </div>
 
 <!-- ABOUT -->
 <section class="page" aria-labelledby="about-heading">
   <div class="section-header">
-    <span class="section-label">Sobre el lugar</span>
+    <span class="section-label">Sobre el gimnasio</span>
     <span class="section-line" aria-hidden="true"></span>
   </div>
   <div class="about-grid">
     <div>
       <h2 class="about-title" id="about-heading">
-        Un espacio con <strong>historia</strong> en el corazón de la ciudad
+        Un espacio de <strong>entrenamiento</strong> en el corazón de la ciudad
       </h2>
       <p class="about-body">
-        <strong>Garifo</strong> abrió sus puertas en 2019 con una propuesta clara: recuperar el espíritu de los espacios tradicionales y llevarlos a una experiencia actual.
+        Gimnasio Muscle se encuentra estratégicamente ubicado en Concepción del Uruguay, ofreciendo instalaciones modernas y equipamiento de primera calidad. Su equipo de profesionales está plenamente comprometido con la salud y el bienestar de cada cliente.
       </p>
       <p class="about-body">
-        Su amplio patio, acompañado por un clásico aljibe, marca el tono de una experiencia donde lo auténtico es protagonista. Desde la música hasta la carta, todo está pensado para el disfrute.
+        Cuenta con una amplia variedad de clases grupales, desde entrenamiento funcional hasta yoga, en un ambiente motivador y colaborativo. Dispone además de zonas diferenciadas para fuerza, cardio y recuperación.
       </p>
       <div class="pullquote" role="blockquote">
-        <p>"Garifo logra ese equilibrio que pocos alcanzan: la mística de un bodegón de barrio con la sofisticación de la gastronomía actual."</p>
+        <p>"Instalaciones modernas, atención personalizada y un ambiente que te empuja a superarte."</p>
       </div>
-
-      <h3 style="color: var(--ink); font-family: 'Cormorant Garamond',serif; font-size: 20px; font-weight: 600; letter-spacing: 0.03em; margin-bottom: 16px;">La Propuesta</h3>
-      <ul class="propuesta-list">
-        <li>🍽️ <b>Platos caseros</b> con identidad local</li>
-        <li>🍺 <b>Selección de cervezas</b> y tragos artesanales</li>
-        <li>🏡 <b>Ambiente cálido</b> y relajado</li>
-        <li>🪴 <b>Patio con aljibe</b> histórico</li>
-      </ul>
-
-      <div class="tags-row" aria-label="Características del lugar">
-        <span class="tag">Patio histórico</span>
-        <span class="tag">Aljibe</span>
-        <span class="tag">Bodegón moderno</span>
-        <span class="tag">Cervezas artesanales</span>
-        <span class="tag">Casco histórico</span>
+      <div class="tags-row" aria-label="Características del gimnasio">
+        <span class="tag">Clases grupales</span>
+        <span class="tag">Entrenamiento funcional</span>
+        <span class="tag">Cardio</span>
+        <span class="tag">Musculación</span>
+        <span class="tag">Yoga</span>
+        <span class="tag">Asesoramiento personalizado</span>
       </div>
     </div>
     <div>
-      <div class="gallery" aria-label="Galería fotográfica de Garifo">
+      <div class="gallery" aria-label="Galería fotográfica de Gimnasio Muscle">
         <div class="gallery-item gallery-main">
-          <img src="https://i.imgur.com/huxPQVZ.jpeg" alt="Platos caseros en Garifo" loading="lazy" />
+          <img src="https://github.com/uruspotcdu-create/uruspot/blob/main/img/muscl3.png?raw=true" alt="Interior del Gimnasio Muscle — zona de pesas" loading="lazy" />
         </div>
         <div class="gallery-item">
-          <img src="https://i.imgur.com/OQzSws3.png" alt="Ambiente del patio con aljibe" loading="lazy" />
+          <img src="https://github.com/uruspotcdu-create/uruspot/blob/main/img/muscl2.png?raw=true" alt="Equipamiento de cardio en Gimnasio Muscle" loading="lazy" />
         </div>
         <div class="gallery-item">
-          <img src="https://i.imgur.com/noQNRb4.png" alt="Detalles de bodegón moderno" loading="lazy" />
+          <img src="https://github.com/uruspotcdu-create/uruspot/blob/main/img/muscl1.png?raw=true" alt="Zona de clases grupales en Gimnasio Muscle" loading="lazy" />
         </div>
       </div>
     </div>
@@ -488,18 +477,18 @@ body {
 <div class="highlights-grid" role="list" aria-label="Lo mejor del lugar">
   <div class="highlight-card" role="listitem">
     <div class="highlight-num" aria-hidden="true">01</div>
-    <div class="highlight-title">Patio con Historia</div>
-    <p class="highlight-text">Su amplio patio con aljibe histórico es, sin dudas, uno de los mejores rincones de la ciudad.</p>
+    <div class="highlight-title">Equipamiento &amp; Espacio</div>
+    <p class="highlight-text">Máquinas de última generación y áreas bien distribuidas para todo tipo de entrenamiento.</p>
   </div>
   <div class="highlight-card" role="listitem">
     <div class="highlight-num" aria-hidden="true">02</div>
-    <div class="highlight-title">Bodegón Moderno</div>
-    <p class="highlight-text">La mística del bodegón de barrio con la sofisticación de la gastronomía actual. Un equilibrio único.</p>
+    <div class="highlight-title">Clases para todos</div>
+    <p class="highlight-text">Funcional, yoga, cardio y más. Una propuesta completa para cualquier nivel de condición física.</p>
   </div>
   <div class="highlight-card" role="listitem">
     <div class="highlight-num" aria-hidden="true">03</div>
-    <div class="highlight-title">Identidad Local</div>
-    <p class="highlight-text">Platos caseros con identidad propia. Desde la música hasta la carta, todo pensado para el disfrute.</p>
+    <div class="highlight-title">Profesionales comprometidos</div>
+    <p class="highlight-text">Instructores calificados que diseñan programas personalizados según cada objetivo y necesidad.</p>
   </div>
 </div>
 
@@ -511,37 +500,46 @@ body {
       <span class="section-line" aria-hidden="true"></span>
     </div>
     <div class="scores-grid">
-      <div class="score-big" aria-label="Puntuación total: 8.8 de 10">
-        <div class="score-big-num">8.8</div>
+      <div class="score-big" aria-label="Puntuación total: 8.7 de 10">
+        <div class="score-big-num">8.7</div>
         <div class="score-big-den">/ 10</div>
         <div class="score-big-label">Puntuación URU SPOT</div>
       </div>
       <div class="score-bars">
         <div class="score-row">
           <div class="score-row-top">
-            <span class="score-name">🍴 Comida</span>
-            <span class="score-val">8.7</span>
+            <span class="score-name">🏋️ Equipamiento</span>
+            <span class="score-val">9.0</span>
           </div>
           <div class="score-track">
-            <div class="score-fill" style="width: 87%;" role="meter" aria-valuenow="87" aria-valuemin="0" aria-valuemax="100" aria-label="Comida: 8.7 de 10"></div>
+            <div class="score-fill" style="width: 90%;" role="meter" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="Equipamiento: 9.0 de 10"></div>
           </div>
         </div>
         <div class="score-row">
           <div class="score-row-top">
-            <span class="score-name">🛎️ Servicio</span>
-            <span class="score-val">8.9</span>
-          </div>
-          <div class="score-track">
-            <div class="score-fill" style="width: 89%; animation-delay: 0.15s;" role="meter" aria-valuenow="89" aria-valuemin="0" aria-valuemax="100" aria-label="Servicio: 8.9 de 10"></div>
-          </div>
-        </div>
-        <div class="score-row">
-          <div class="score-row-top">
-            <span class="score-name">🏠 Ambiente</span>
+            <span class="score-name">👥 Atención &amp; Profesionalismo</span>
             <span class="score-val">8.8</span>
           </div>
           <div class="score-track">
-            <div class="score-fill" style="width: 88%; animation-delay: 0.3s;" role="meter" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="Ambiente: 8.8 de 10"></div>
+            <div class="score-fill" style="width: 88%; animation-delay: 0.15s;" role="meter" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="Atención: 8.8 de 10"></div>
+          </div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">📍 Ubicación &amp; Acceso</span>
+            <span class="score-val">8.4</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" style="width: 84%; animation-delay: 0.3s;" role="meter" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" aria-label="Ubicación: 8.4 de 10"></div>
+          </div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">🧘 Variedad de clases</span>
+            <span class="score-val">8.6</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" style="width: 86%; animation-delay: 0.45s;" role="meter" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100" aria-label="Variedad: 8.6 de 10"></div>
           </div>
         </div>
       </div>
@@ -552,46 +550,62 @@ body {
 <!-- HORARIOS -->
 <div class="schedule-block" aria-labelledby="schedule-heading">
   <div>
-    <h2 class="schedule-title" id="schedule-heading">Horarios &amp; Precio</h2>
-    <div class="schedule-row">
-      <span class="schedule-day">Martes a Viernes</span>
-      <span class="schedule-time">20:00 – 01:00 hs</span>
-    </div>
-    <div class="schedule-row">
-      <span class="schedule-day">Fines de semana</span>
-      <span class="schedule-time">20:00 – 01:30 hs</span>
-    </div>
+    <h2 class="schedule-title" id="schedule-heading">Horarios &amp; Membresía</h2>
     <div class="schedule-row">
       <span class="schedule-day">Lunes</span>
-      <span class="schedule-closed">Cerrado</span>
+      <span class="schedule-time">07:00 hs. – 22:30 hs.</span>
+    </div>
+    <div class="schedule-row">
+      <span class="schedule-day">Martes</span>
+      <span class="schedule-time">07:00 hs. – 22:30 hs.</span>
+    </div>
+    <div class="schedule-row">
+      <span class="schedule-day">Miércoles</span>
+      <span class="schedule-time">07:00 hs. – 09:30 hs.</span>
+    </div>
+    <div class="schedule-row">
+      <span class="schedule-day">Jueves</span>
+      <span class="schedule-time">07:00 hs. – 22:30 hs.</span>
+    </div>
+    <div class="schedule-row">
+      <span class="schedule-day">Viernes</span>
+      <span class="schedule-time">07:00 hs. – 22:30 hs.</span>
+    </div>
+    <div class="schedule-row">
+      <span class="schedule-day">Sábado</span>
+      <span class="schedule-time">09:00 hs. – 20:00 hs.</span>
+    </div>
+    <div class="schedule-row">
+      <span class="schedule-day">Domingo</span>
+      <span class="schedule-time">09:00 hs. – 12:00 hs.</span>
     </div>
     <div class="schedule-price-block" style="margin-top: 24px;">
-      <div class="schedule-price-label">Precio estimado por persona</div>
-      <div class="schedule-price-val">$10.000 – $35.000 ARS</div>
-      <div class="schedule-price-usd">~U$D 10–35 · menú completo con bebida</div>
+      <div class="schedule-price-label">Membresía mensual</div>
+      <div class="schedule-price-val">Consultá por precio</div>
+      <div class="schedule-price-usd">Llamá al 03442 58-5936 para aranceles y planes</div>
     </div>
 
-    <ul class="adn-list" aria-label="ADN Gastronómico" style="margin-top: 28px;">
-      <li>Patio histórico con aljibe — uno de los mejores rincones de la ciudad</li>
-      <li>Cervezas artesanales y tragos de autor</li>
-      <li>Platos caseros con identidad local</li>
+    <ul class="adn-list" aria-label="ADN del Gimnasio" style="margin-top: 28px;">
+      <li>Equipamiento de última generación y zonas diferenciadas</li>
+      <li>Clases grupales: funcional, yoga, cardio y más</li>
+      <li>Instructores calificados con programas personalizados</li>
     </ul>
 
-    <p style="font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 20px; letter-spacing: 0.05em;">Información actualizada recientemente</p>
+    <p style="font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 20px; letter-spacing: 0.05em;">Horarios según Google Maps — pueden variar en feriados</p>
   </div>
   <div>
     <div style="margin-bottom: 24px;" aria-live="polite">
       <div id="schedStatusPill" class="status-pill" style="background: rgba(64,145,108,0.15); color: #40916c;">
         <span class="status-dot" style="background: #40916c;" aria-hidden="true" id="schedDot"></span>
-        <span id="schedStatusText">Cargando...</span>
+        <span id="schedStatusText">Verificando horario...</span>
       </div>
       <p id="schedInfo" style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 8px;"></p>
     </div>
     <div style="display: flex; flex-direction: column; gap: 12px;">
-      <a href="https://www.google.com/maps/place/Garifo/@-32.4876591,-58.2359256,17z/data=!3m1!4b1!4m6!3m5!1s0x95afdb93f80c5713:0x5592055bf8742629!8m2!3d-32.4876591!4d-58.2333507!16s%2Fg%2F11h5_t8bzs" target="_blank" rel="noopener noreferrer" class="btn btn-primary" aria-label="Ver Garifo en Google Maps">
+      <a href="https://www.google.com/maps/place/Gimnasio+Muscle/@-32.4782772,-58.24004,17z" target="_blank" rel="noopener noreferrer" class="btn btn-primary" aria-label="Ver Gimnasio Muscle en Google Maps">
         🗺️ Cómo llegar
       </a>
-      <button onclick="compartirEntrada()" class="btn btn-ghost" aria-label="Compartir esta página de Garifo">
+      <button onclick="compartirEntrada()" class="btn btn-ghost" aria-label="Compartir esta página de Gimnasio Muscle">
         📤 Compartir
       </button>
     </div>
@@ -608,26 +622,50 @@ body {
     <div class="map-grid">
       <div class="map-frame">
         <iframe
-          title="Mapa de ubicación de Garifo"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3310.879!2d-58.2359256!3d-32.4876591!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95afdb93f80c5713%3A0x5592055bf8742629!2sGarifo!5e0!3m2!1ses!2sar!4v1716000000001!5m2!1ses!2sar"
+          title="Mapa de ubicación de Gimnasio Muscle"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3312.0!2d-58.24004!3d-32.4782772!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95afda5404839c91%3A0x5a8290685cf4f7ed!2sGimnasio%20Muscle!5e0!3m2!1ses!2sar!4v1234567890"
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
           allowfullscreen
         ></iframe>
       </div>
       <div>
-        <h2 class="map-info-title" id="map-heading">España 193, Casco Histórico</h2>
-        <p class="map-detail"><strong>Dirección:</strong> España 193, Concepción del Uruguay, Entre Ríos</p>
-        <p class="map-detail"><strong>Zona:</strong> Casco Histórico — corazón de la ciudad</p>
-        <p class="map-detail"><strong>Alta demanda:</strong> Recomendamos reservar mesa con anticipación, especialmente los fines de semana.</p>
+        <h2 class="map-info-title" id="map-heading">Blvd. Hipólito Yrigoyen 1086</h2>
+        <p class="map-detail"><strong>Dirección:</strong> Blvd. Hipólito Yrigoyen 1086, Concepción del Uruguay, Entre Ríos</p>
+        <p class="map-detail"><strong>Referencia:</strong> Zona céntrica — fácil acceso y estacionamiento en la zona</p>
+        <p class="map-detail"><strong>Teléfono:</strong> 03442 58-5936</p>
+        <p class="map-detail"><strong>143 reseñas</strong> en Google con un promedio de <strong>4.6 / 5</strong> — uno de los mejor valorados de la ciudad.</p>
         <div style="margin-top: 28px; display: flex; flex-direction: column; gap: 10px;">
-          <a href="https://www.google.com/maps/place/Garifo/@-32.4876591,-58.2359256,17z/data=!3m1!4b1!4m6!3m5!1s0x95afdb93f80c5713:0x5592055bf8742629!8m2!3d-32.4876591!4d-58.2333507!16s%2Fg%2F11h5_t8bzs" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-align:center;">
+          <a href="https://www.google.com/maps/place/Gimnasio+Muscle/@-32.4782772,-58.24004,17z" target="_blank" rel="noopener noreferrer" class="btn btn-primary" aria-label="Abrir en Google Maps">
             🗺️ Abrir en Google Maps
           </a>
-          <a href="tel:03442622611" class="btn btn-ghost" aria-label="Llamar a Garifo" style="text-align:center; color:#fff;">
-            📞 Llamar al 03442 62-2611
+          <a href="tel:+5493442585936" class="btn btn-dark" aria-label="Llamar al gimnasio">
+            📞 Llamar ahora
           </a>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEÑAS -->
+<section class="scores-section" aria-labelledby="reviews-heading">
+  <div class="scores-inner">
+    <div class="section-header">
+      <span class="section-label">Opiniones de usuarios</span>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <div class="scores-grid">
+      <div class="score-big" aria-label="Puntuación Google: 4.6 de 5">
+        <div class="score-big-num" style="font-size: 80px;">4.6</div>
+        <div class="score-big-den">/ 5 ★</div>
+        <div class="score-big-label">143 reseñas en Google</div>
+      </div>
+      <div>
+        <p style="font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; line-height: 1.5; color: var(--ink); margin-bottom: 16px;">
+          Con 143 valoraciones y un promedio de 4,6 sobre 5, Gimnasio Muscle demuestra ser una opción sólida y confiable para quienes quieren entrenar en Concepción del Uruguay.
+        </p>
+        <p style="font-size: 14px; color: var(--muted); line-height: 1.8;">Los usuarios destacan la calidad del equipamiento, la atención del personal y la variedad de clases disponibles. Una puntuación consistentemente alta que lo posiciona entre los mejores centros de entrenamiento de la ciudad.</p>
       </div>
     </div>
   </div>
@@ -645,7 +683,7 @@ body {
       <div class="verdict-content">
         <div class="verdict-label" id="verdict-heading">🟢 Recomendado</div>
         <p class="verdict-text">
-          Garifo logra ese equilibrio que pocos alcanzan: la mística de un bodegón de barrio con la sofisticación de la gastronomía actual. Su patio es, sin dudas, uno de los mejores rincones de la ciudad.
+          Gimnasio Muscle es la elección natural para quienes buscan un centro de entrenamiento serio en CdU. Instalaciones completas, profesionales capacitados y una comunidad motivadora hacen de este lugar una apuesta segura para mejorar tu condición física.
         </p>
       </div>
     </div>
@@ -654,39 +692,33 @@ body {
 
 <!-- FOOTER -->
 <footer class="footer">
-  <a href="#" class="footer-logo">URU SPOT</a>
-  <span>Guía gastronómica de Concepción del Uruguay</span>
-  <span>Información actualizada recientemente</span>
+  <a href="https://uruspot.pages.dev/" class="footer-logo">URU SPOT</a>
+  <span>Guía local de Concepción del Uruguay</span>
+  <span>Información actualizada Mayo 2026</span>
 </footer>
 
 <script>
 (function() {
-  var apertura     = 20;    // 20:00 hs
-  var cierreNormal = 25;    // 01:00 hs (hora extendida)
-  var cierreFinde  = 25.5;  // 01:30 hs (hora extendida)
+  var schedules = {
+    0: { open: 9,    close: 12,   label: 'Dom 9:00–12:00' },
+    1: { open: 7,    close: 22.5, label: 'Lun 7:00–22:30' },
+    2: { open: 7,    close: 22.5, label: 'Mar 7:00–22:30' },
+    3: { open: 7,    close: 9.5,  label: 'Mié 7:00–9:30'  },
+    4: { open: 7,    close: 22.5, label: 'Jue 7:00–22:30' },
+    5: { open: 7,    close: 22.5, label: 'Vie 7:00–22:30' },
+    6: { open: 9,    close: 20,   label: 'Sáb 9:00–20:00' }
+  };
 
-  var ahora     = new Date();
-  var dia       = ahora.getDay(); // 0=dom,1=lun,...6=sáb
-  var hora      = ahora.getHours();
-  var minutos   = ahora.getMinutes();
-  var horaTotal = hora + minutos / 60;
+  var now  = new Date();
+  var day  = now.getDay();
+  var h    = now.getHours() + now.getMinutes() / 60;
+  var sched  = schedules[day];
+  var isOpen = sched && h >= sched.open && h < sched.close;
 
-  // Extender horas post-medianoche para comparación continua
-  var horaExt = hora < 5 ? horaTotal + 24 : horaTotal;
-
-  // Fin de semana: viernes noche (5), sábado (6) y domingo (0) hasta 01:30
-  var esFinde = (dia === 5 || dia === 6 || dia === 0);
-  var limiteCierre = esFinde ? cierreFinde : cierreNormal;
-
-  // Lunes: cerrado todo el día
-  var cerradoHoy = (dia === 1);
-
-  var isOpen = !cerradoHoy && (horaExt >= apertura && horaExt < limiteCierre);
-
-  var openColor   = '#40916c';
-  var openBg      = 'rgba(64,145,108,0.15)';
+  var openColor  = '#40916c';
+  var openBg     = 'rgba(64,145,108,0.15)';
   var closedColor = '#c1121f';
-  var closedBg    = 'rgba(193,18,31,0.12)';
+  var closedBg   = 'rgba(193,18,31,0.12)';
 
   function setStatus(open, subText) {
     var pill = document.getElementById('schedStatusPill');
@@ -711,27 +743,33 @@ body {
   }
 
   if (isOpen) {
-    var hCierreReal = limiteCierre >= 24 ? limiteCierre - 24 : limiteCierre;
-    var hh = Math.floor(hCierreReal);
-    var mm = Math.round((hCierreReal % 1) * 60);
-    var label = hh + ':' + (mm === 0 ? '00' : mm);
-    setStatus(true, 'Disfrutando de la noche. Cierra a las ' + label + ' hs');
+    var minsLeft = Math.round((sched.close - h) * 60);
+    var closeStr = sched.close % 1 === 0
+      ? sched.close + ':00'
+      : Math.floor(sched.close) + ':30';
+    setStatus(true, minsLeft <= 60 ? 'Cierra en ' + minsLeft + ' min' : 'Cierra a las ' + closeStr + ' hs.');
   } else {
-    if (dia === 1) {
-      setStatus(false, 'Cerrado los lunes · Vuelve a abrir el martes a las 20:00 hs');
-    } else if (horaExt < apertura) {
-      setStatus(false, 'Abrimos hoy a las 20:00 hs para la cena');
-    } else {
-      setStatus(false, 'Abrimos mañana a las 20:00 hs para la cena');
-    }
+    setStatus(false, sched ? 'Hoy: ' + sched.label : 'Consultá horarios por teléfono');
   }
+
+  // Animate score bars on scroll
+  var fills = document.querySelectorAll('.score-fill');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animated');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  fills.forEach(function(f) { observer.observe(f); });
 })();
 
 function compartirEntrada() {
   if (navigator.share) {
     navigator.share({
-      title: 'Garifo — URU SPOT',
-      text: '¡Mirá este bodegón moderno en Concepción del Uruguay!',
+      title: 'Gimnasio Muscle — URU SPOT',
+      text: '¡Mirá este gimnasio en Concepción del Uruguay! Instalaciones modernas y entrenamiento profesional.',
       url: window.location.href
     }).catch(function() {});
   } else {
