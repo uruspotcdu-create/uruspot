@@ -158,13 +158,24 @@
     // por cada marcador (Leaflet soporta reusar íconos entre markers).
     var iconCache = {};
 
-    // [OPTIMIZACIÓN — Fase 3, punto 3.3] Cache separada para íconos de
-    // cluster, con el mismo criterio que iconCache pero en su propio
-    // objeto: la clave de iconCache es "color|0" o "color|1" (destacado),
-    // y un cluster con childCount 0 o 1 generaría exactamente esa misma
-    // clave si compartiera el objeto — se separan para que no haya
-    // colisión posible entre un pin individual y un cluster.
-    var clusterIconCache = {};
+    // [LOTE 1 — Mejora 4, evidencia] Antes existía acá una clusterIconCache
+    // keyeada por "color|childCount". Esa estrategia es correcta para
+    // pinIcon() (26 combinaciones fijas: 13 colores × destacado/no) pero es
+    // matemáticamente inútil para clusters: childCount NO es un estado fijo
+    // del dominio, es una cantidad que cambia con cada pan/zoom (depende de
+    // cuántos marcadores caen dentro de maxClusterRadius en la posición y
+    // zoom actuales). Un mismo color puede generar, a lo largo de una sola
+    // sesión de uso normal, decenas o cientos de valores distintos de
+    // childCount — cada uno una clave nueva, retenida para siempre (nunca
+    // se hacía delete ni se limitaba el tamaño del objeto). Resultado neto:
+    // la caché fallaba en su propósito declarado ("evitar recrear el ícono
+    // en cada zoom/pan" — en la práctica, para clusters, esto casi nunca se
+    // cumplía) y además crecía sin límite durante toda la vida de la
+    // pestaña (fuga de memoria de baja severidad pero real, agravada por el
+    // tamaño del dataset). Se elimina la caché para clusters: crear un
+    // L.divIcon por cluster visible es una operación barata (un objeto
+    // literal + un string), muy por debajo del costo que en teoría se
+    // buscaba evitar. Ver AUDITORIA_PERFORMANCE_donde-comer-cdu.md, P5.
 
     // Cache de las listas de botones "pill"/leyenda, actualizada cada vez
     // que renderFiltros()/renderLeyenda() reconstruyen su HTML. Evita
@@ -210,23 +221,20 @@
     }
 
     function clusterIcon(color) {
-      // Antes: un L.divIcon nuevo (con su html armado por concatenación)
-      // en cada llamada, es decir en cada zoom/pan que reagrupa clusters —
-      // a diferencia de pinIcon, que sí cacheaba. Ahora se cachea por
-      // "color|childCount": todos los clusters del mismo grupo (mismo
-      // color) con la misma cantidad de lugares adentro comparten la
-      // misma instancia de ícono, igual que ya hacían los pines.
+      // [LOTE 1 — Mejora 4] Sin caché (ver nota junto a la declaración de
+      // clusterIconCache más arriba, ahora eliminada). Cada cluster visible
+      // recibe su propio L.divIcon nuevo, con el conteo real siempre
+      // correcto — no hay riesgo de mostrar un número de un cluster viejo
+      // reutilizado por error, y no hay ningún objeto que quede retenido
+      // en memoria más allá de lo que Leaflet ya retiene por su cuenta
+      // mientras el cluster existe.
       return function (cluster) {
         var count = cluster.getChildCount();
-        var key = color + '|' + count;
-        if (!clusterIconCache[key]) {
-          clusterIconCache[key] = L.divIcon({
-            className: 'mapa-cluster',
-            html: '<div class="mapa-cluster-inner" style="background:' + color + '">' + count + '</div>',
-            iconSize: [38, 38]
-          });
-        }
-        return clusterIconCache[key];
+        return L.divIcon({
+          className: 'mapa-cluster',
+          html: '<div class="mapa-cluster-inner" style="background:' + color + '">' + count + '</div>',
+          iconSize: [38, 38]
+        });
       };
     }
 
@@ -360,7 +368,22 @@
         }
       });
       marker.lugarData = lugar;
-      clusterGroups[grupo].addLayer(marker);
+      // [LOTE 1 — Mejora 1, evidencia] Antes: clusterGroups[grupo].addLayer(marker)
+      // acá mismo, uno por uno para cada lugar. Esto anulaba en la práctica
+      // la opción chunkedLoading:true configurada en initMapa() — según la
+      // documentación oficial de Leaflet.markercluster, chunkedLoading
+      // trocea específicamente el procesamiento de addLayers() (plural,
+      // bulk); nunca se llamaba a addLayers() en este archivo, así que esa
+      // opción no tenía ningún efecto real. Además, cada addLayer()
+      // individual dispara su propia recomputación de bounds/posición
+      // ponderada ascendiendo por el árbol de clusters (así lo documenta el
+      // propio autor del plugin en el PR #584 de Leaflet.markercluster).
+      // Ahora agregarLugar() solo arma el marker y lo devuelve; es
+      // cargarDatos() quien agrupa todos los markers nuevos por grupo y
+      // llama a addLayers() UNA sola vez por grupo — ahí sí se activa
+      // chunkedLoading de verdad, y la recomputación de bounds se hace una
+      // sola vez al final en vez de una vez por marcador. Ver
+      // AUDITORIA_PERFORMANCE_donde-comer-cdu.md, P1.
       var entry = {
         marker: marker,
         grupo: grupo,
@@ -372,6 +395,7 @@
       todosLosMarkers.push(entry);
       if (!markersPorGrupo[grupo]) markersPorGrupo[grupo] = [];
       markersPorGrupo[grupo].push(entry);
+      return entry;
     }
 
     // ─── Filtros (pills) ───
