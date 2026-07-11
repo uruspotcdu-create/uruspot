@@ -145,6 +145,15 @@
     var filtroActivo = 'todos';
     var subFiltroActivo = null; // categoria específica dentro del grupo activo, o null = todas
     var textoBusqueda = '';
+    // [FIX — AUDITORIA_DONDE_COMER.md, P3] true cuando se sabe con certeza
+    // que NINGÚN marcador está oculto (recién cargados los datos, o recién
+    // terminada una pasada completa de aplicarFiltros() en el estado
+    // "todos + sin subfiltro + sin búsqueda"). Se pone en false en
+    // cualquier pasada que no sea ese caso trivial, porque ahí es donde
+    // pueden quedar marcadores ocultos dentro de su propio clusterGroup.
+    // Permite un fast-path 100% seguro: solo se salta el recorrido de
+    // markersPorGrupo cuando ya se sabe que no hay nada que restaurar.
+    var estadoSinOcultos = true;
 
     // Cache de nodos del DOM que exige el contrato documentado al inicio del
     // archivo (existen desde el arranque y nunca se reemplazan por completo,
@@ -535,6 +544,29 @@
       var visibles = 0;
       var esTodos = (filtroActivo === 'todos');
 
+      // [FIX — AUDITORIA_DONDE_COMER.md, P3] Fast-path para el caso trivial
+      // ("todos" + sin subfiltro + sin búsqueda), pero solo cuando
+      // estadoSinOcultos garantiza que no hay ningún marcador escondido
+      // dentro de su propio clusterGroup (ver declaración de la variable
+      // más arriba). La versión de la auditoría saltaba este caso siempre
+      // que fuera trivial, sin esa garantía — eso podía dejar ocultos
+      // marcadores que se habían removido en un filtro/búsqueda anterior,
+      // al volver a "todos" sin pasar de nuevo por el loop. Con el guard
+      // agregado, el fast-path solo se activa cuando de verdad no hay
+      // trabajo que hacer (carga inicial, o resets consecutivos sin haber
+      // filtrado nada en el medio).
+      var esCasoTrivial = esTodos && !subFiltroActivo && (textoBusqueda === '');
+      if (esCasoTrivial && estadoSinOcultos) {
+        Object.keys(clusterGroups).forEach(function (g) {
+          if (!map.hasLayer(clusterGroups[g])) map.addLayer(clusterGroups[g]);
+        });
+        visibles = todosLosMarkers.length;
+        if (els.count) els.count.textContent = visibles;
+        if (els.empty) els.empty.style.display = (visibles === 0) ? 'block' : 'none';
+        if (els.mapaDiv) els.mapaDiv.style.display = (visibles === 0) ? 'none' : 'block';
+        return visibles;
+      }
+
       Object.keys(clusterGroups).forEach(function (g) {
         var grupoLayer = clusterGroups[g];
         var esCandidato = esTodos || (g === filtroActivo);
@@ -544,7 +576,17 @@
           return;
         }
 
+        // [FIX — AUDITORIA_DONDE_COMER.md, P2] Antes: addLayer/removeLayer
+        // individual por cada marcador del grupo, dentro del propio for.
+        // Ahora: se decide primero (mismo criterio, mismo guard hasLayer de
+        // Fase 2) qué marcadores cambian de estado, y se aplican los dos
+        // lotes con una sola llamada bulk cada uno (addLayers/removeLayers)
+        // en vez de N llamadas individuales. El conjunto final de
+        // marcadores visibles, y el conteo "visibles", son exactamente los
+        // mismos que antes.
         var lista = markersPorGrupo[g] || [];
+        var aAgregar = [];
+        var aQuitar = [];
         for (var i = 0; i < lista.length; i++) {
           var m = lista[i];
           var pasaSubcategoria = (!subFiltroActivo) || (m.categoria === subFiltroActivo);
@@ -553,15 +595,23 @@
             (m.categoriaNorm.indexOf(textoBusqueda) > -1);
           var mostrar = pasaSubcategoria && pasaBusqueda;
           if (mostrar) {
-            if (!grupoLayer.hasLayer(m.marker)) grupoLayer.addLayer(m.marker);
             visibles++;
+            if (!grupoLayer.hasLayer(m.marker)) aAgregar.push(m.marker);
           } else {
-            if (grupoLayer.hasLayer(m.marker)) grupoLayer.removeLayer(m.marker);
+            if (grupoLayer.hasLayer(m.marker)) aQuitar.push(m.marker);
           }
         }
+        if (aQuitar.length) grupoLayer.removeLayers(aQuitar);
+        if (aAgregar.length) grupoLayer.addLayers(aAgregar);
 
         if (!map.hasLayer(grupoLayer)) map.addLayer(grupoLayer);
       });
+
+      // [FIX — AUDITORIA_DONDE_COMER.md, P3] Esta pasada completa acaba de
+      // recorrer todo; si el estado resultante es el caso trivial, queda
+      // garantizado que no hay nada oculto, y el próximo llamado a
+      // aplicarFiltros() en ese mismo estado podrá usar el fast-path.
+      estadoSinOcultos = esCasoTrivial;
 
       if (els.count) els.count.textContent = visibles;
       if (els.empty) els.empty.style.display = (visibles === 0) ? 'block' : 'none';
@@ -590,19 +640,49 @@
     // funcionalidades de contenido como recorridos/itinerarios), sin pasar
     // por el sistema de categorías/búsqueda.
     function mostrarSoloLugares(ids) {
+      // [FIX — AUDITORIA_DONDE_COMER.md, P3] Esta función puede dejar
+      // marcadores ocultos fuera del flujo normal de aplicarFiltros(); si
+      // no se avisa acá, el fast-path de aplicarFiltros() podría asumir
+      // erróneamente que no hay nada oculto la próxima vez que se llame en
+      // el estado "todos + sin filtro". Se invalida ese estado siempre,
+      // sin excepción (es más barato que verificar si ids cubre todos los
+      // lugares, y garantiza que el próximo aplicarFiltros() haga el
+      // recorrido completo si hace falta).
+      estadoSinOcultos = false;
+
       // Lookup por objeto en vez de ids.indexOf(...) dentro del forEach:
       // evita un escaneo del array "ids" por cada uno de los marcadores.
       var idsSet = {};
       for (var i = 0; i < ids.length; i++) idsSet[ids[i]] = true;
 
+      // [FIX — AUDITORIA_DONDE_COMER.md, P2] Mismo cambio que en
+      // aplicarFiltros(): en vez de addLayer/removeLayer individual por
+      // marcador, se agrupan los cambios por clusterGroup y se aplican con
+      // una sola llamada bulk (addLayers/removeLayers) por grupo. El mismo
+      // guard hasLayer se conserva, así que el resultado visible es
+      // idéntico al de antes.
+      var aAgregarPorGrupo = {};
+      var aQuitarPorGrupo = {};
       todosLosMarkers.forEach(function (m) {
-        var grupo = clusterGroups[m.grupo];
+        var g = m.grupo;
+        var grupoLayer = clusterGroups[g];
         if (idsSet[m.lugar.id]) {
-          if (!grupo.hasLayer(m.marker)) grupo.addLayer(m.marker);
+          if (!grupoLayer.hasLayer(m.marker)) {
+            (aAgregarPorGrupo[g] || (aAgregarPorGrupo[g] = [])).push(m.marker);
+          }
         } else {
-          if (grupo.hasLayer(m.marker)) grupo.removeLayer(m.marker);
+          if (grupoLayer.hasLayer(m.marker)) {
+            (aQuitarPorGrupo[g] || (aQuitarPorGrupo[g] = [])).push(m.marker);
+          }
         }
       });
+      Object.keys(aQuitarPorGrupo).forEach(function (g) {
+        clusterGroups[g].removeLayers(aQuitarPorGrupo[g]);
+      });
+      Object.keys(aAgregarPorGrupo).forEach(function (g) {
+        clusterGroups[g].addLayers(aAgregarPorGrupo[g]);
+      });
+
       // Todos los grupos terminan en el mapa (igual que antes); solo se
       // agregan los que todavía no estuvieran, sin sacarlos primero.
       Object.keys(clusterGroups).forEach(function (g) {
@@ -817,7 +897,28 @@
       extra = Array.isArray(extra) ? extra : [];
       
       var combinados = lugaresIniciales.concat(extra);
-      combinados.forEach(agregarLugar);
+
+      // [FIX — AUDITORIA_DONDE_COMER.md, P1] agregarLugar() ya no agrega el
+      // marker a su clusterGroup (ver comentario en esa función); acá se
+      // agrupan los markers nuevos por grupo y se agregan con UNA sola
+      // llamada a addLayers() por grupo (API bulk de Leaflet.markercluster),
+      // en vez de dejar que sea aplicarFiltros() —más abajo— quien los
+      // agregue de a uno vía addLayer() individual. Esto sí activa
+      // chunkedLoading (esa opción solo trocea addLayers(), plural, según
+      // la documentación oficial del plugin). aplicarFiltros() se sigue
+      // llamando igual después: para cada marker ya agregado acá, su guard
+      // "if (!grupoLayer.hasLayer(m.marker))" da false, así que no lo
+      // vuelve a agregar — el resultado visible final es idéntico.
+      var markersNuevosPorGrupo = {};
+      combinados.forEach(function (lugar) {
+        var entry = agregarLugar(lugar);
+        if (!entry) return;
+        if (!markersNuevosPorGrupo[entry.grupo]) markersNuevosPorGrupo[entry.grupo] = [];
+        markersNuevosPorGrupo[entry.grupo].push(entry.marker);
+      });
+      Object.keys(markersNuevosPorGrupo).forEach(function (g) {
+        clusterGroups[g].addLayers(markersNuevosPorGrupo[g]);
+      });
 
       if (els.totalBadge) els.totalBadge.textContent = combinados.length + ' lugares';
       if (els.total) els.total.textContent = combinados.length;
