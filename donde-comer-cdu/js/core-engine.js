@@ -26,6 +26,18 @@
   // recreaba el objeto literal por cada carácter especial encontrado).
   var ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
+  // [OPTIMIZACIÓN — Fase 2, punto 3.2] El buscador del panel del mapa
+  // (bindControlesMapa) y el spotlight (initSpotlightSearch) debounceaban
+  // la misma clase de operación — filtrar sobre el array completo de
+  // lugares — con dos valores distintos (250ms y 150ms), sin ninguna
+  // razón funcional para la diferencia; solo hacía que las dos búsquedas
+  // del sitio se sintieran distintas entre sí. Se unifica en un único
+  // punto intermedio (200ms): suficientemente bajo para no sentirse lento
+  // al tipear, y suficientemente alto para seguir amortiguando el costo
+  // de recorrer todosLosMarkers en cada evento (ver 2.1 para el problema
+  // de fondo, que esta constante no resuelve, solo estandariza).
+  var DEBOUNCE_BUSQUEDA_MS = 200;
+
   var utils = {
     // Normaliza acentos/mayúsculas para que "heladeria" encuentre "Heladería".
     normalizarTexto: function (str) {
@@ -55,6 +67,15 @@
       if (!telefono) return null;
       var digitos = String(telefono).replace(/[^\d]/g, '');
       if (digitos.indexOf('54') !== 0) digitos = '54' + digitos.replace(/^0+/, '');
+      // [FIX — punto 4.2] Antes se devolvía el resultado tal cual, sin
+      // validar longitud: un dato sucio en el JSON (ej. "telefono" mal
+      // cargado, con letras o incompleto) podía generar un link
+      // "wa.me/54123" roto sin que nada lo detectara. Un teléfono argentino
+      // con código de país (54 + característica + número, con o sin el 9
+      // de celular) cae siempre entre 10 y 13 dígitos totales; fuera de
+      // ese rango se descarta como no-plausible en vez de armar un link
+      // que sabemos que no va a funcionar.
+      if (digitos.length < 10 || digitos.length > 13) return null;
       return digitos;
     },
 
@@ -80,9 +101,23 @@
     function toggleFavorito(id) {
       var favs = getFavoritos();
       var i = favs.indexOf(id);
-      if (i === -1) favs.push(id); else favs.splice(i, 1);
-      try { localStorage.setItem(KEY, JSON.stringify(favs)); } catch (e) {}
-      return i === -1;
+      var seAgrego = (i === -1);
+      if (seAgrego) favs.push(id); else favs.splice(i, 1);
+      try {
+        localStorage.setItem(KEY, JSON.stringify(favs));
+      } catch (e) {
+        // [FIX — punto 4.3] Antes este catch quedaba vacío: si el guardado
+        // fallaba (Safari en modo privado, storage lleno), la función
+        // devolvía igual el resultado como si hubiera persistido, y el
+        // botón de favorito cambiaba de estado visualmente aunque no se
+        // hubiera guardado nada — quedaba inconsistente apenas se
+        // recargaba la página. Ahora, si falla, se revierte el cambio en
+        // memoria y se devuelve el estado ANTERIOR (real), para que el
+        // botón no muestre algo que no se guardó.
+        if (seAgrego) favs.pop(); else favs.splice(i, 0, id);
+        return !seAgrego;
+      }
+      return seAgrego;
     }
     return { get: getFavoritos, is: esFavorito, toggle: toggleFavorito };
   }
@@ -99,6 +134,14 @@
     var map = null;
     var clusterGroups = {};
     var todosLosMarkers = []; // {marker, grupo, categoria, nombreNorm, categoriaNorm, lugar}
+    // [OPTIMIZACIÓN — Fase 2, punto 2.1] Índice grupo → array de las mismas
+    // entradas de todosLosMarkers (mismas referencias de objeto, no copias:
+    // cualquier cambio sobre una entrada se ve reflejado en ambas
+    // estructuras, así que no hay riesgo de que queden desincronizadas).
+    // Permite que aplicarFiltros() recorra solo los marcadores del grupo
+    // activo en vez de los 862 completos cuando hay un filtro de categoría
+    // puesto — ver aplicarFiltros() para el uso real.
+    var markersPorGrupo = {};
     var filtroActivo = 'todos';
     var subFiltroActivo = null; // categoria específica dentro del grupo activo, o null = todas
     var textoBusqueda = '';
@@ -114,6 +157,14 @@
     // que comparten la misma instancia de ícono en vez de crear un L.divIcon
     // por cada marcador (Leaflet soporta reusar íconos entre markers).
     var iconCache = {};
+
+    // [OPTIMIZACIÓN — Fase 3, punto 3.3] Cache separada para íconos de
+    // cluster, con el mismo criterio que iconCache pero en su propio
+    // objeto: la clave de iconCache es "color|0" o "color|1" (destacado),
+    // y un cluster con childCount 0 o 1 generaría exactamente esa misma
+    // clave si compartiera el objeto — se separan para que no haya
+    // colisión posible entre un pin individual y un cluster.
+    var clusterIconCache = {};
 
     // Cache de las listas de botones "pill"/leyenda, actualizada cada vez
     // que renderFiltros()/renderLeyenda() reconstruyen su HTML. Evita
@@ -159,12 +210,23 @@
     }
 
     function clusterIcon(color) {
+      // Antes: un L.divIcon nuevo (con su html armado por concatenación)
+      // en cada llamada, es decir en cada zoom/pan que reagrupa clusters —
+      // a diferencia de pinIcon, que sí cacheaba. Ahora se cachea por
+      // "color|childCount": todos los clusters del mismo grupo (mismo
+      // color) con la misma cantidad de lugares adentro comparten la
+      // misma instancia de ícono, igual que ya hacían los pines.
       return function (cluster) {
-        return L.divIcon({
-          className: 'mapa-cluster',
-          html: '<div class="mapa-cluster-inner" style="background:' + color + '">' + cluster.getChildCount() + '</div>',
-          iconSize: [38, 38]
-        });
+        var count = cluster.getChildCount();
+        var key = color + '|' + count;
+        if (!clusterIconCache[key]) {
+          clusterIconCache[key] = L.divIcon({
+            className: 'mapa-cluster',
+            html: '<div class="mapa-cluster-inner" style="background:' + color + '">' + count + '</div>',
+            iconSize: [38, 38]
+          });
+        }
+        return clusterIconCache[key];
       };
     }
 
@@ -250,7 +312,15 @@
       html += '<a class="ir" style="--pop-color:' + color + '" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + lugar.lat + ',' + lugar.lng + (lugar.place_id ? '&destination_place_id=' + lugar.place_id : '') + '">↗ Cómo llegar</a>';
       if (lugar.telefono) {
         html += '<a class="tel" href="tel:' + lugar.telefono.replace(/\s+/g, '') + '">📞 Llamar</a>';
-        html += '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/' + utils.telefonoWhatsapp(lugar.telefono) + '">💬 WhatsApp</a>';
+        // [FIX — punto 4.2] El botón "Llamar" se queda igual (los
+        // marcadores tel: son tolerantes a formato); el de WhatsApp ahora
+        // solo se renderiza si telefonoWhatsapp() considera el número
+        // plausible, para no ofrecer un botón que sabemos que va a un
+        // link roto.
+        var waNumero = utils.telefonoWhatsapp(lugar.telefono);
+        if (waNumero) {
+          html += '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/' + waNumero + '">💬 WhatsApp</a>';
+        }
       }
       html += '</div>';
       return html;
@@ -291,14 +361,17 @@
       });
       marker.lugarData = lugar;
       clusterGroups[grupo].addLayer(marker);
-      todosLosMarkers.push({
+      var entry = {
         marker: marker,
         grupo: grupo,
         categoria: lugar.categoria || '',
         nombreNorm: utils.normalizarTexto(lugar.nombre),
         categoriaNorm: utils.normalizarTexto(lugar.categoria || ''),
         lugar: lugar
-      });
+      };
+      todosLosMarkers.push(entry);
+      if (!markersPorGrupo[grupo]) markersPorGrupo[grupo] = [];
+      markersPorGrupo[grupo].push(entry);
     }
 
     // ─── Filtros (pills) ───
@@ -334,8 +407,12 @@
         return;
       }
       var counts = {};
-      todosLosMarkers.forEach(function (m) {
-        if (m.grupo !== filtroActivo) return;
+      // [OPTIMIZACIÓN — Fase 2, punto 2.1] Antes recorría todosLosMarkers
+      // completo filtrando por m.grupo !== filtroActivo; con el índice
+      // markersPorGrupo ya armado para aplicarFiltros(), se reutiliza acá
+      // para recorrer solo los lugares del grupo activo.
+      var lista = markersPorGrupo[filtroActivo] || [];
+      lista.forEach(function (m) {
         counts[m.categoria] = (counts[m.categoria] || 0) + 1;
       });
       var subcats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
@@ -411,35 +488,55 @@
 
     // ─── Filtro combinado (categoría + subcategoría + búsqueda) ───
     function aplicarFiltros() {
+      // [OPTIMIZACIÓN — Fase 2, punto 2.1] Antes: un solo forEach sobre los
+      // 862 marcadores completos, evaluando pasaCategoria por cada uno —
+      // incluidos los ~800 que ya se sabía de antemano que no pertenecen al
+      // grupo activo, y sobre los que igual se llamaba grupo.removeLayer()
+      // (trabajo de reclusterización interna de Leaflet.markercluster) aun
+      // cuando esos ~12 grupos enteros se iban a sacar del mapa dos pasos
+      // después de todos modos. Ahora: se decide primero qué grupos son
+      // "candidatos" a estar visibles (todos, o solo el activo), y:
+      //   - los grupos NO candidatos se sacan del mapa como capa entera,
+      //     sin tocar un solo marcador individual dentro de ellos (si el
+      //     grupo no está en el mapa, no importa el estado interno de sus
+      //     marcadores — Leaflet no los va a pintar de todas formas).
+      //   - los grupos candidatos son los únicos donde se recorren
+      //     marcadores, y se recorre solo su propio subconjunto vía
+      //     markersPorGrupo (no los 862), evaluando subcategoría/búsqueda.
+      // Resultado final (qué marcadores terminan visibles) es exactamente
+      // el mismo que antes; cambia solo cuánto trabajo hace falta para
+      // llegar a ese resultado. Con filtroActivo==='todos' el costo es
+      // idéntico al de antes (se recorren todos los grupos igual); la
+      // mejora aplica cuando hay un filtro de categoría puesto.
       var visibles = 0;
-      todosLosMarkers.forEach(function (m) {
-        var pasaCategoria = (filtroActivo === 'todos') || (m.grupo === filtroActivo);
-        var pasaSubcategoria = (!subFiltroActivo) || (m.categoria === subFiltroActivo);
-        var pasaBusqueda = (textoBusqueda === '') ||
-          (m.nombreNorm.indexOf(textoBusqueda) > -1) ||
-          (m.categoriaNorm.indexOf(textoBusqueda) > -1);
-        var mostrar = pasaCategoria && pasaSubcategoria && pasaBusqueda;
-        var grupo = clusterGroups[m.grupo];
-        if (mostrar) {
-          if (!grupo.hasLayer(m.marker)) grupo.addLayer(m.marker);
-          visibles++;
-        } else {
-          if (grupo.hasLayer(m.marker)) grupo.removeLayer(m.marker);
-        }
-      });
+      var esTodos = (filtroActivo === 'todos');
 
-      // Antes: se sacaba TODO cluster group del mapa y se volvía a agregar
-      // el que correspondiera, en cada tecla del buscador. Eso forzaba a
-      // Leaflet.markercluster a reclusterizar grupos que ni siquiera habían
-      // cambiado de estado. Ahora solo se toca (add/remove) el grupo cuyo
-      // estado deseado difiere del actual — el resultado final (qué grupos
-      // quedan en el mapa) es exactamente el mismo.
       Object.keys(clusterGroups).forEach(function (g) {
-        var grupo = clusterGroups[g];
-        var debeEstar = (filtroActivo === 'todos' || filtroActivo === g);
-        var estaEnMapa = map.hasLayer(grupo);
-        if (debeEstar && !estaEnMapa) map.addLayer(grupo);
-        else if (!debeEstar && estaEnMapa) map.removeLayer(grupo);
+        var grupoLayer = clusterGroups[g];
+        var esCandidato = esTodos || (g === filtroActivo);
+
+        if (!esCandidato) {
+          if (map.hasLayer(grupoLayer)) map.removeLayer(grupoLayer);
+          return;
+        }
+
+        var lista = markersPorGrupo[g] || [];
+        for (var i = 0; i < lista.length; i++) {
+          var m = lista[i];
+          var pasaSubcategoria = (!subFiltroActivo) || (m.categoria === subFiltroActivo);
+          var pasaBusqueda = (textoBusqueda === '') ||
+            (m.nombreNorm.indexOf(textoBusqueda) > -1) ||
+            (m.categoriaNorm.indexOf(textoBusqueda) > -1);
+          var mostrar = pasaSubcategoria && pasaBusqueda;
+          if (mostrar) {
+            if (!grupoLayer.hasLayer(m.marker)) grupoLayer.addLayer(m.marker);
+            visibles++;
+          } else {
+            if (grupoLayer.hasLayer(m.marker)) grupoLayer.removeLayer(m.marker);
+          }
+        }
+
+        if (!map.hasLayer(grupoLayer)) map.addLayer(grupoLayer);
       });
 
       if (els.count) els.count.textContent = visibles;
@@ -757,7 +854,7 @@
         var debouncedSearch = utils.debounce(function (e) {
           textoBusqueda = utils.normalizarTexto(e.target.value.trim());
           aplicarFiltros();
-        }, 250); // 250ms debounce
+        }, DEBOUNCE_BUSQUEDA_MS);
         
         buscador.addEventListener('input', function (e) {
           debouncedSearch(e);
@@ -1026,7 +1123,7 @@
       var texto = input.value.trim();
       if (texto) renderResultados(texto);
       else { if (resultsEl) resultsEl.innerHTML = ''; renderSugeridos(); }
-    }, 150);
+    }, DEBOUNCE_BUSQUEDA_MS);
 
     input.addEventListener('input', function () {
       realSearch.value = input.value;
