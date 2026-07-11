@@ -38,8 +38,16 @@
      (cargarConExtra); esto solo hace que la respuesta ya esté en caché
      cuando el JS la pida, en vez de recién empezar a pedirla ahí. -->
 <link rel="preload" as="fetch" href="lugares-mapa.json">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap"></noscript>
+<!-- [OPTIMIZACIÓN — Fase 3, hallazgo Outfit] Outfit cargaba 300;400;500,
+     pero el CSS del mapa pide 400 (base de #mapa) y 700 (.mapa-popup-cat,
+     .mapa-popup-destacado, .mapa-popup-actions a, leyenda) y 600
+     (.mapa-subpill). El peso 700 nunca estuvo cargado: el navegador lo
+     renderizaba con negrita sintética (engrosado algorítmico del glifo
+     regular) en vez del archivo real. No es un peso nuevo — el CSS ya
+     pedía 700, esto corrige la fuente que responde a ese pedido. 300 y
+     500 se quitan por no tener ningún selector que los use. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Outfit:wght@400;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Outfit:wght@400;600;700&display=swap"></noscript>
 
 <!-- [OPTIMIZACIÓN — Fase 1] Antes estas 3 hojas de estilo de cdnjs.cloudflare.com
      bloqueaban el primer render (<link rel="stylesheet"> normal), aunque el
