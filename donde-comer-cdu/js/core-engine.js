@@ -104,6 +104,23 @@
         clearTimeout(t);
         t = setTimeout(function () { fn.apply(ctx, args); }, wait);
       };
+    },
+
+    // [NUEVA FUNCIONALIDAD — vista lista] Distancia en línea recta (fórmula
+    // de Haversine) entre la posición del usuario y un lugar, en km. Se usa
+    // para "Más cerca" (orden) y para mostrar "a X m/km" en cada tarjeta de
+    // la lista. Es una estimación geométrica sobre coordenadas reales — no
+    // inventa ningún dato del lugar — por eso se muestra siempre como
+    // distancia en línea recta, nunca como "tiempo caminando/en auto" (eso
+    // sí requeriría un servicio de ruteo real que este proyecto no tiene).
+    distanciaKm: function (lat1, lng1, lat2, lng2) {
+      var R = 6371;
+      var dLat = (lat2 - lat1) * Math.PI / 180;
+      var dLng = (lng2 - lng1) * Math.PI / 180;
+      var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
   };
 
@@ -213,6 +230,16 @@
     // markersPorGrupo cuando ya se sabe que no hay nada que restaurar.
     var estadoSinOcultos = true;
 
+    // [NUEVA FUNCIONALIDAD — pasada "toolbar del mapa"] Estado de la vista
+    // alternativa a Leaflet (#mapa-view-toggle), del criterio de orden
+    // (#mapa-orden) y de la última posición geográfica conocida del
+    // usuario (compartida entre "📍 Cerca de mí" y "Más cerca" del
+    // selector de orden, para no pedir permiso de geolocalización dos
+    // veces por la misma sesión).
+    var vistaActual = 'mapa'; // 'mapa' | 'lista'
+    var ordenActual = 'relevancia'; // 'relevancia' | 'cercania' | 'recomendados' | 'recientes'
+    var posicionUsuario = null; // {lat, lng} | null
+
     // [OPTIMIZACIÓN] Caché del resultado ordenado por rating que usa
     // lugaresSugeridos(). todosLosMarkers queda fijo apenas termina
     // cargarDatos() en init() (no hay ninguna función pública que agregue
@@ -286,6 +313,12 @@
       els.total = document.getElementById('mapa-total');
       els.resetBtn = document.getElementById('mapa-reset');
       els.geolocBtn = document.getElementById('mapa-geoloc');
+      // [NUEVA FUNCIONALIDAD — pasada "toolbar del mapa"]
+      els.orden = document.getElementById('mapa-orden');
+      els.viewMapaBtn = document.getElementById('mapa-view-mapa');
+      els.viewListaBtn = document.getElementById('mapa-view-lista');
+      els.mapaCanvas = document.getElementById('mapa-canvas');
+      els.listaDiv = document.getElementById('mapa-lista');
     }
 
     // ─── Íconos de mapa ───
@@ -608,6 +641,192 @@
       }
     }
 
+    // ═════════════════════════════════════════════════════════════════
+    // VISTA LISTA (#mapa-view-toggle) + ORDENAR (#mapa-orden)
+    // [NUEVA FUNCIONALIDAD — pasada "toolbar del mapa"] Tres controles
+    // vivían en el HTML/CSS del toolbar sin una sola línea de JS detrás:
+    // el botón "Lista" no cambiaba nada al tocarlo, el <select> de orden
+    // no se leía en ningún lado, y sus estilos ni siquiera existían (ver
+    // core.css). Esta sección los implementa reutilizando el MISMO estado
+    // de filtro/categoría/búsqueda/subcategoría que ya gobierna el mapa
+    // (filtroActivo/subFiltroActivo/textoBusqueda): la lista muestra
+    // exactamente el mismo conjunto de lugares que el mapa tendría
+    // visibles en ese instante, nunca un criterio de filtrado paralelo.
+    // ═════════════════════════════════════════════════════════════════
+
+    // Mismo criterio de "candidato" que usa aplicarFiltros(): con un grupo
+    // activo, solo se recorren sus propias entradas (no las 862 completas).
+    function entradasCandidatas() {
+      if (filtroActivo === 'todos') return todosLosMarkers;
+      return markersPorGrupo[filtroActivo] || [];
+    }
+
+    // Aplica subcategoría + búsqueda sobre las candidatas — misma lógica
+    // de predicado que el loop caliente de aplicarFiltros(), pero acá
+    // devuelve un array de datos (para pintar tarjetas) en vez de tocar
+    // capas de Leaflet.
+    function entradasFiltradas() {
+      var candidatas = entradasCandidatas();
+      var tieneSubFiltro = !!subFiltroActivo;
+      var tieneBusqueda = (textoBusqueda !== '');
+      if (!tieneSubFiltro && !tieneBusqueda) return candidatas.slice();
+      var out = [];
+      var len = candidatas.length;
+      for (var i = 0; i < len; i++) {
+        var m = candidatas[i];
+        var pasaSubcategoria = !tieneSubFiltro || (m.categoria === subFiltroActivo);
+        var pasaBusqueda = !tieneBusqueda ||
+          (m.nombreNorm.indexOf(textoBusqueda) > -1) ||
+          (m.categoriaNorm.indexOf(textoBusqueda) > -1);
+        if (pasaSubcategoria && pasaBusqueda) out.push(m);
+      }
+      return out;
+    }
+
+    // Ordena según #mapa-orden. "recomendados" y "recientes" son señales
+    // 100% reales del dataset (rating/rating_count e id); "cercania"
+    // requiere posicionUsuario (ver solicitarUbicacionParaOrden). Sin
+    // ninguna de esas condiciones, se deja el orden del dataset tal cual
+    // (equivalente a "relevancia") en vez de inventar una fórmula de
+    // ranking que esta guía no tiene forma de justificar con datos reales.
+    function ordenarEntradas(entradas) {
+      var arr = entradas.slice();
+      if (ordenActual === 'recomendados') {
+        arr.sort(function (a, b) {
+          var ra = a.lugar.rating || 0, rb = b.lugar.rating || 0;
+          if (rb !== ra) return rb - ra;
+          return (b.lugar.rating_count || 0) - (a.lugar.rating_count || 0);
+        });
+      } else if (ordenActual === 'recientes') {
+        arr.sort(function (a, b) { return (b.lugar.id || 0) - (a.lugar.id || 0); });
+      } else if (ordenActual === 'cercania' && posicionUsuario) {
+        arr.forEach(function (e) {
+          e._distKm = utils.distanciaKm(posicionUsuario.lat, posicionUsuario.lng, e.lugar.lat, e.lugar.lng);
+        });
+        arr.sort(function (a, b) { return a._distKm - b._distKm; });
+      }
+      return arr;
+    }
+
+    // Tarjeta de la vista lista. Reutiliza exactamente las mismas fuentes
+    // de verdad que popupHtml() (mismos campos, mismo utils.starsHtml/
+    // telefonoWhatsapp/escapeHtml) para que un lugar se vea consistente
+    // entre el popup del mapa y su tarjeta de lista — nunca dos redacciones
+    // distintas del mismo dato.
+    function cardListaHtml(entry) {
+      var lugar = entry.lugar;
+      var g = GRUPOS[entry.grupo];
+      var esFav = favoritos.is(lugar.id);
+      var html = '<article class="lista-card" data-lugar-id="' + lugar.id + '">';
+      html += '<button type="button" class="lista-card-ir" data-ir-lista="' + lugar.id + '" style="--card-color:' + entry.color + '">';
+      html += '<span class="lista-card-icon" aria-hidden="true">' + g.icon + '</span>';
+      html += '<span class="lista-card-body">';
+      html += '<span class="lista-card-top"><span class="lista-card-cat">' + utils.escapeHtml(lugar.categoria || g.label) + '</span>' +
+              (lugar.destacado ? '<span class="lista-card-destacado">★ Destacado</span>' : '') + '</span>';
+      html += '<span class="lista-card-nombre">' + utils.escapeHtml(lugar.nombre || '') + '</span>';
+      if (lugar.rating) {
+        var rating = parseFloat(lugar.rating);
+        if (!isNaN(rating)) {
+          html += '<span class="lista-card-rating">' + utils.starsHtml(rating) + ' ' + rating.toFixed(1) +
+                  (lugar.rating_count ? ' <span class="cant">(' + lugar.rating_count + ')</span>' : '') + '</span>';
+        }
+      } else {
+        html += '<span class="lista-card-norating">Sin calificación aún</span>';
+      }
+      if (lugar.direccion) html += '<span class="lista-card-addr">📍 ' + utils.escapeHtml(lugar.direccion) + '</span>';
+      if (typeof entry._distKm === 'number') {
+        html += '<span class="lista-card-dist">' +
+          (entry._distKm < 1 ? Math.round(entry._distKm * 1000) + ' m' : entry._distKm.toFixed(1) + ' km') +
+          ' de tu ubicación</span>';
+      }
+      html += '</span></button>';
+      html += '<div class="lista-card-actions">';
+      html += '<button type="button" class="lista-card-fav' + (esFav ? ' is-fav' : '') + '" data-fav-id="' + lugar.id + '" aria-label="' +
+              (esFav ? 'Quitar de favoritos' : 'Guardar en favoritos') + '">' + (esFav ? '♥' : '♡') + '</button>';
+      if (lugar.telefono) {
+        html += '<a class="lista-card-tel" href="tel:' + lugar.telefono.replace(/\s+/g, '') + '" aria-label="Llamar">📞</a>';
+        var waNumero = utils.telefonoWhatsapp(lugar.telefono);
+        if (waNumero) html += '<a class="lista-card-wa" target="_blank" rel="noopener" href="https://wa.me/' + waNumero + '" aria-label="WhatsApp">💬</a>';
+      }
+      html += '<button type="button" class="lista-card-share" data-share-id="' + lugar.id + '" aria-label="Compartir">↗</button>';
+      html += '</div></article>';
+      return html;
+    }
+
+    // Clic en el cuerpo de una tarjeta: vuelve a la vista mapa y hace volar
+    // el mapa hasta ese lugar (mismo patrón ya usado por el spotlight de
+    // búsqueda) — no duplica un "detalle inline" nuevo, reutiliza el
+    // popup que el mapa ya sabe construir.
+    function bindListaCards(container) {
+      container.querySelectorAll('[data-ir-lista]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = parseInt(btn.getAttribute('data-ir-lista'), 10);
+          cambiarVista('mapa');
+          setTimeout(function () { irALugar(id); }, 260);
+        });
+      });
+      api.bindAccionesLugar(container);
+    }
+
+    // Pinta la grilla de tarjetas para el estado actual de filtro/orden.
+    // Si todavía no hay datos (cargarConExtra() no resolvió el fetch:
+    // recordar que la lista puede pedirse antes de que eso termine, ver
+    // lazyInitMapa), muestra 3 tarjetas esqueleto en vez de una grilla
+    // vacía — mismo criterio de "nunca dejar un momento de espera sin
+    // feedback" que ya usa #mapa-geoloc con "📍 Buscando…".
+    function renderLista() {
+      var cont = els.listaDiv;
+      if (!cont) return;
+      if (!todosLosMarkers.length) {
+        cont.innerHTML = '<div class="lista-skeleton">' +
+          '<div class="lista-skeleton-card"></div><div class="lista-skeleton-card"></div><div class="lista-skeleton-card"></div>' +
+          '</div>';
+        return;
+      }
+      var entradas = ordenarEntradas(entradasFiltradas());
+      cont.innerHTML = entradas.map(cardListaHtml).join('');
+      bindListaCards(cont);
+    }
+
+    // Único punto de entrada para cambiar entre "Mapa" y "Lista" — lo usan
+    // tanto los botones del toolbar como el clic en una tarjeta de lista
+    // (que vuelve a "mapa" para mostrar el popup del lugar tocado).
+    function cambiarVista(vista) {
+      if (vista === vistaActual) return;
+      vistaActual = vista;
+      if (els.viewMapaBtn) els.viewMapaBtn.setAttribute('aria-pressed', vista === 'mapa' ? 'true' : 'false');
+      if (els.viewListaBtn) els.viewListaBtn.setAttribute('aria-pressed', vista === 'lista' ? 'true' : 'false');
+      if (els.mapaCanvas) els.mapaCanvas.setAttribute('data-view', vista);
+      if (els.listaDiv) els.listaDiv.hidden = (vista !== 'lista');
+      if (vista === 'lista') {
+        renderLista();
+      } else if (map) {
+        // El contenedor de Leaflet pudo haber estado display:none (vía CSS,
+        // ver [data-view="lista"] en core.css) mientras la lista estaba
+        // activa; Leaflet cachea el tamaño de su contenedor y no lo
+        // recalcula solo, así que sin este invalidateSize() el mapa vuelve
+        // recortado/desalineado hasta el próximo resize manual del navegador.
+        setTimeout(function () { map.invalidateSize(); }, 0);
+      }
+    }
+
+    // Pide geolocalización específicamente para el criterio de orden
+    // "Más cerca" del <select>. Reutiliza posicionUsuario con el botón
+    // "📍 Cerca de mí" del toolbar (ver bindControlesMapa): si el usuario
+    // ya compartió su ubicación por cualquiera de los dos caminos, el otro
+    // no vuelve a pedir permiso. Sin permiso/API, cae en silencio al orden
+    // del dataset — no hay forma honesta de "ordenar por cercanía" sin
+    // saber dónde está el usuario, así que no se simula un resultado.
+    function solicitarUbicacionParaOrden() {
+      if (!navigator.geolocation) { renderLista(); return; }
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        posicionUsuario = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (vistaActual === 'lista') renderLista();
+      }, function () {
+        if (vistaActual === 'lista') renderLista();
+      }, { timeout: 8000 });
+    }
+
     // ─── Filtro combinado (categoría + subcategoría + búsqueda) ───
     function aplicarFiltros() {
       // [ARQUITECTURA — mapa diferido] initMapa() ya no corre en el
@@ -668,6 +887,10 @@
         if (els.count) els.count.textContent = visibles;
         if (els.empty) els.empty.style.display = (visibles === 0) ? 'block' : 'none';
         if (els.mapaDiv) els.mapaDiv.style.display = (visibles === 0) ? 'none' : 'block';
+        // [NUEVA FUNCIONALIDAD — vista lista] Mantiene la lista sincronizada
+        // con el mismo filtro/búsqueda que el mapa, sin costo cuando la
+        // lista no está visible (vistaActual !== 'lista').
+        if (vistaActual === 'lista') renderLista();
         return visibles;
       }
 
@@ -729,6 +952,8 @@
       if (els.count) els.count.textContent = visibles;
       if (els.empty) els.empty.style.display = (visibles === 0) ? 'block' : 'none';
       if (els.mapaDiv) els.mapaDiv.style.display = (visibles === 0) ? 'none' : 'block';
+
+      if (vistaActual === 'lista') renderLista();
 
       return visibles;
     }
@@ -1144,6 +1369,12 @@
             }
           }
         }
+        // [NUEVA FUNCIONALIDAD — vista lista] Las tarjetas de lista muestran
+        // dirección/teléfono cuando existen; si la lista ya está pintada
+        // con el dataset "core" (sin esos campos, ver arquitectura carga
+        // core/detalles), se repinta una vez para incorporarlos — mismo
+        // criterio que ya aplicaba acá para el popup abierto.
+        if (vistaActual === 'lista') renderLista();
       };
       if ('requestIdleCallback' in window) {
         requestIdleCallback(aplicar, { timeout: 2000 });
@@ -1271,6 +1502,11 @@
             }).addTo(map).bindPopup('Estás acá').openPopup();
             btn.disabled = false;
             btn.textContent = textoOriginal;
+            // [NUEVA FUNCIONALIDAD — vista lista] Se comparte la misma
+            // posición con el orden "Más cerca" del selector de la lista,
+            // para no pedir permiso de geolocalización dos veces.
+            posicionUsuario = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            if (vistaActual === 'lista' && ordenActual === 'cercania') renderLista();
           }, function () {
             clearTimeout(timeoutId);
             alert('No pudimos acceder a tu ubicación.');
@@ -1279,10 +1515,39 @@
           });
         });
       }
+
+      // [NUEVA FUNCIONALIDAD — pasada "toolbar del mapa"] #mapa-orden y
+      // #mapa-view-toggle: ver la nota de arquitectura junto a
+      // renderLista()/cambiarVista() más arriba en este archivo.
+      var ordenSelect = els.orden;
+      if (ordenSelect) {
+        ordenSelect.addEventListener('change', function () {
+          ordenActual = ordenSelect.value;
+          if (ordenActual === 'cercania' && !posicionUsuario) {
+            solicitarUbicacionParaOrden();
+          } else if (vistaActual === 'lista') {
+            renderLista();
+          }
+        });
+      }
+
+      if (els.viewMapaBtn) els.viewMapaBtn.addEventListener('click', function () { cambiarVista('mapa'); });
+      if (els.viewListaBtn) els.viewListaBtn.addEventListener('click', function () { cambiarVista('lista'); });
     }
 
     // ─── API pública del motor ───
-    return {
+    // [NUEVA FUNCIONALIDAD — vista lista] Antes este objeto se retornaba
+    // como literal anónimo directo en el "return {...}". Se lo nombra acá
+    // (var api = {...}; return api;) por una única razón: bindListaCards()
+    // necesita llamar a bindAccionesLugar() (favoritos + compartir) sobre
+    // las tarjetas de la lista sin duplicar esa lógica. Por clausura, "api"
+    // ya está asignado para cuando bindListaCards() efectivamente se
+    // ejecuta (solo corre en respuesta a un clic, muy después de que
+    // crearMotor() terminó de construir este objeto) — mismo patrón que
+    // ya usa bindAccionesLugar() internamente con "var self = this".
+    // Ningún método ni valor de la API pública cambia: es el mismo objeto,
+    // solo con un nombre.
+    var api = {
       utils: utils,
       favoritos: favoritos,
 
@@ -1362,6 +1627,7 @@
       get todosLosMarkers() { return todosLosMarkers; },
       get filtroActivo() { return filtroActivo; }
     };
+    return api;
   }
 
   // Menú lateral (drawer): el HTML/CSS ya existían (hamburguesa, aside con
