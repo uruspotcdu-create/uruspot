@@ -106,10 +106,24 @@
   // ─────────────────────────────────────────────────────────────────────
 
   // ─────────────────────────────────────────────────────────────────────
-  // INIT — arranca el motor. "lugares" queda vacío a propósito: se usa
-  // extraDataUrl para que el propio Core haga fetch('lugares-mapa.json')
-  // y lo mezcle (ver cargarConExtra() en core-engine.js), en vez de
-  // incrustar acá un array de 862 objetos a mano.
+  // INIT — arranca el motor. "lugares" queda vacío a propósito: se usan
+  // extraDataUrl/detailsDataUrl para que el propio Core haga fetch de los
+  // datasets y los mezcle (ver cargarConExtra() en core-engine.js), en vez
+  // de incrustar acá un array de 862 objetos a mano.
+  //
+  // [ARQUITECTURA — carga core/detalles] "lugares-mapa.json" (862 lugares,
+  // 13 campos c/u) dejó de descargarse en el arranque. Se reemplaza por
+  // dos archivos generados a partir de él con split_dataset.py:
+  //   - extraDataUrl (lugares-core.json): id/nombre/categoria/grupo/lat/lng
+  //     /rating — lo mínimo para pintar pines, contar filtros y que
+  //     funcione la búsqueda. Es el único fetch que bloquea la interacción.
+  //   - detailsDataUrl (lugares-detalles.json): direccion/descripcion/
+  //     telefono/place_id — solo se usan dentro de un popup ya abierto, así
+  //     que se piden en paralelo pero se aplican en segundo plano, sin
+  //     retrasar un solo milisegundo el momento en que el mapa ya es
+  //     interactivo. Si se edita lugares-mapa.json, correr
+  //     "python3 split_dataset.py" antes de deployar para regenerar ambos.
+  //
   // mapCenter/mapZoom/tileUrl/tileAttribution: mismos valores reales que
   // usaba el mapa Leaflet en index.backup (línea ~1726).
   // ─────────────────────────────────────────────────────────────────────
@@ -117,7 +131,8 @@
     window.UruSpotCore.init({
       grupos: GRUPOS,
       lugares: [],
-      extraDataUrl: 'lugares-mapa.json',
+      extraDataUrl: 'lugares-core.json',
+      detailsDataUrl: 'lugares-detalles.json',
       mapCenter: [-32.4836, -58.2335],
       mapZoom: 13,
       tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
