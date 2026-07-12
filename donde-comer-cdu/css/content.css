@@ -1,9 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════
    URU SPOT — MÓDULO B (CONTENIDO) · content.css
-   Estilos de la interfaz "app shell" nueva: header, drawer, home hub,
-   carruseles, cards, bottom sheet, full sheet, diálogos, toasts, skeletons
-   y estado vacío. No redefine tokens ni el design system: reutiliza los
-   custom properties declarados en core.css (@layer tokens).
+   Estilos de la interfaz "app shell": header, drawer, FAB, spotlight de
+   búsqueda, footer y utilidades. No redefine tokens ni el design system:
+   reutiliza los custom properties declarados en core.css (@layer tokens).
 
    SIN @layer A PROPÓSITO. Antes este archivo declaraba su propia capa
    ("contenido") e intentaba insertarla entre "componentes" y "mapa" con
@@ -45,11 +44,7 @@
     animation: us-spin .8s linear infinite;
   }
   @keyframes us-spin { to { transform: rotate(360deg); } }
-  .us-app-loading-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem;
-    width: min(20rem, 80vw);
-  }
-  .us-app-loading-grid:empty { display: none; }
+  .us-app-loading-grid { display: none; }
 
   /* ═══════════ SCRIM (backdrop compartido) ═══════════ */
   .us-scrim {
@@ -60,7 +55,7 @@
   .us-scrim[hidden] { display: none; }
   .us-scrim:not([hidden]) { opacity: 1; }
   /* [FIX] Bloquea el scroll de fondo mientras hay un overlay abierto
-     (drawer, sheets). Antes no existía: el body scrolleaba detrás. */
+     (drawer). Antes no existía: el body scrolleaba detrás. */
   body.no-scroll { overflow: hidden; }
 
   /* ═══════════ APP HEADER ═══════════ */
@@ -69,9 +64,6 @@
     background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
     backdrop-filter: blur(10px); border-bottom: 1px solid transparent;
     transition: border-color .25s ease, box-shadow .25s ease, padding .25s ease;
-  }
-  .us-app-header[data-state="compact"] {
-    border-bottom-color: var(--border); box-shadow: var(--shadow-sm);
   }
   .us-app-header-inner {
     display: flex; align-items: center; gap: .75rem;
@@ -192,225 +184,6 @@
   .us-drawer-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); font-size: .8rem; color: var(--muted); }
   .us-drawer-footer:empty { display: none; }
 
-  /* ═══════════ BOTTOM SHEET — ficha del lugar ═══════════ */
-  .us-sheet {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: calc(var(--z-overlay) + 1);
-    max-height: 90vh; background: var(--bg-panel); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    box-shadow: var(--shadow-lg); transform: translateY(100%); transition: transform .3s ease;
-    display: flex; flex-direction: column;
-  }
-  .us-sheet:not([hidden]) { transform: translateY(0); }
-  .us-sheet[hidden] { display: flex; visibility: hidden; }
-  .us-sheet-handle {
-    width: 2.5rem; height: .25rem; border-radius: var(--radius-pill);
-    background: var(--border-s); margin: .75rem auto .25rem;
-  }
-  .us-sheet-close {
-    position: absolute; top: .75rem; right: .75rem; z-index: 1;
-    width: 2rem; height: 2rem; border-radius: 50%; border: none;
-    background: var(--bg-sunk); color: var(--ink); cursor: pointer;
-  }
-  .us-sheet-loading { display: none; }
-  .us-sheet-loading:not([aria-hidden="true"]) {
-    display: block; min-height: 12rem;
-    background: linear-gradient(90deg, var(--bg-sunk) 25%, var(--border) 50%, var(--bg-sunk) 75%);
-    background-size: 200% 100%; animation: us-shimmer 1.4s infinite;
-  }
-  .us-sheet-scroll { overflow-y: auto; padding-bottom: 2rem; }
-  .us-sheet-hero {
-    display: flex; gap: .25rem; overflow-x: auto; height: 14rem;
-    background: var(--bg-sunk);
-  }
-  .us-sheet-hero:empty {
-    background: linear-gradient(135deg, var(--river-300), var(--river-100));
-  }
-  .us-sheet-header { padding: 1.25rem 1.25rem .5rem; }
-  .us-sheet-category {
-    display: inline-block; font-size: .75rem; font-weight: 600; color: var(--river-700);
-    text-transform: uppercase; letter-spacing: .04em; margin-bottom: .375rem;
-  }
-  .us-sheet-title { font-family: var(--f-display); font-size: 1.5rem; font-weight: 700; color: var(--ink); }
-  .us-sheet-status { display: block; margin-top: .375rem; font-size: .85rem; color: var(--muted); }
-  .us-sheet-meta {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem 1rem;
-    padding: 1rem 1.25rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  }
-  .us-sheet-meta-item dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
-  .us-sheet-meta-item dd { font-size: .9rem; color: var(--ink); margin-top: .125rem; }
-  .us-sheet-meta-item:empty, .us-sheet-meta-item dd:empty { display: none; }
-  .us-sheet-services {
-    display: flex; flex-wrap: wrap; gap: .5rem; padding: 1rem 1.25rem;
-  }
-  .us-sheet-services:empty { display: none; }
-  .us-sheet-actions {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .625rem;
-    padding: 1rem 1.25rem;
-  }
-  .us-sheet-action {
-    display: flex; align-items: center; justify-content: center; gap: .375rem;
-    padding: .7rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border);
-    background: var(--bg-panel); color: var(--ink); font-size: .85rem; font-weight: 500;
-    text-decoration: none; cursor: pointer; font-family: var(--f-ui);
-  }
-  .us-sheet-action:hover { border-color: var(--border-s); background: var(--bg-sunk); }
-  .us-sheet-action[data-action="ir"], .us-sheet-action[data-action="maps"] {
-    background: var(--sunset); border-color: var(--sunset); color: var(--text-on-dark);
-  }
-  .us-sheet-related { padding: .5rem 0 1rem; }
-  .us-sheet-related:empty { display: none; }
-
-  /* ═══════════ FULL SCREEN SHEET ═══════════ */
-  .us-fullsheet {
-    position: fixed; inset: 0; z-index: calc(var(--z-overlay) + 1);
-    background: var(--bg); display: flex; flex-direction: column;
-    transform: translateY(100%); transition: transform .3s ease;
-  }
-  .us-fullsheet:not([hidden]) { transform: translateY(0); }
-  .us-fullsheet[hidden] { display: flex; visibility: hidden; }
-  .us-fullsheet-header {
-    display: flex; align-items: center; gap: .75rem; padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border); background: var(--bg-panel);
-  }
-  .us-fullsheet-close {
-    width: 2rem; height: 2rem; border-radius: 50%; border: none;
-    background: var(--bg-sunk); color: var(--ink); cursor: pointer;
-  }
-  .us-fullsheet-title { font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; flex: 1; }
-  .us-fullsheet-header-actions { display: flex; gap: .5rem; }
-  .us-fullsheet-header-actions:empty { display: none; }
-  .us-fullsheet-body { flex: 1; overflow-y: auto; padding: 1.25rem; }
-
-  /* ═══════════ SISTEMA DE DIÁLOGOS ═══════════ */
-  .us-dialog-root {
-    position: fixed; inset: 0; z-index: calc(var(--z-overlay) + 2);
-    display: flex; align-items: center; justify-content: center; padding: 1.25rem;
-    background: rgba(10, 20, 22, .55);
-  }
-  .us-dialog-root[hidden] { display: none; }
-  .us-dialog-panel {
-    width: min(24rem, 100%); background: var(--bg-panel); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg); padding: 1.5rem;
-  }
-  .us-dialog-title { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; margin-bottom: .5rem; }
-  .us-dialog-body { font-size: .9rem; color: var(--ink-soft); line-height: 1.5; }
-  .us-dialog-actions { display: flex; justify-content: flex-end; gap: .625rem; margin-top: 1.25rem; }
-  .us-dialog-actions button {
-    padding: .6rem 1.1rem; border-radius: var(--radius-sm); font-size: .85rem; font-weight: 500;
-    cursor: pointer; font-family: var(--f-ui); border: 1px solid var(--border); background: var(--bg-panel);
-  }
-
-  /* ═══════════ TOASTS ═══════════ */
-  .us-toast-region {
-    position: fixed; left: 50%; bottom: 5.5rem; transform: translateX(-50%);
-    z-index: var(--z-toast); display: flex; flex-direction: column; gap: .5rem; width: min(24rem, 92vw);
-  }
-  .us-toast {
-    display: flex; align-items: center; gap: .625rem; padding: .75rem 1rem;
-    background: var(--ink); color: var(--text-on-dark); border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-md); animation: us-toast-in .25s ease;
-  }
-  @keyframes us-toast-in { from { opacity: 0; transform: translateY(.5rem); } to { opacity: 1; transform: translateY(0); } }
-  .us-toast-icon { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
-  .us-toast-message { flex: 1; font-size: .85rem; }
-  .us-toast-close { background: none; border: none; color: inherit; opacity: .7; cursor: pointer; }
-
-  /* ═══════════ HOME HUB Y CARRUSELES ═══════════ */
-  .us-home-hub { display: flex; flex-direction: column; gap: 1.75rem; padding: 1.5rem 0; }
-  .us-carousel-section:has(.us-carousel-track:empty):not(:has(.us-skeleton-card)) { display: none; }
-  .us-carousel-header {
-    display: flex; align-items: baseline; justify-content: space-between; gap: .75rem;
-    padding: 0 1.25rem; margin-bottom: .75rem;
-  }
-  .us-carousel-eyebrow {
-    display: block; font-size: .7rem; font-weight: 600; text-transform: uppercase;
-    letter-spacing: .06em; color: var(--sunset);
-  }
-  .us-carousel-title { font-family: var(--f-display); font-size: 1.25rem; font-weight: 700; color: var(--ink); }
-  .us-carousel-count { font-size: .8rem; color: var(--muted); }
-  .us-carousel-view-all {
-    background: none; border: none; color: var(--river-700); font-size: .85rem; font-weight: 600;
-    cursor: pointer; font-family: var(--f-ui);
-  }
-  .us-carousel-viewport { position: relative; }
-  .us-carousel-track {
-    display: flex; gap: .875rem; overflow-x: auto; scroll-snap-type: x proximity;
-    padding: 0 1.25rem; scrollbar-width: none;
-  }
-  .us-carousel-track::-webkit-scrollbar { display: none; }
-  .us-carousel-track > * { scroll-snap-align: start; flex: 0 0 auto; }
-  .us-carousel-nav {
-    position: absolute; top: 50%; transform: translateY(-50%); z-index: 1;
-    width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 1px solid var(--border);
-    background: var(--bg-panel); box-shadow: var(--shadow-sm); cursor: pointer; font-size: 1.1rem;
-    display: none; align-items: center; justify-content: center;
-  }
-  .us-carousel-nav.prev { left: .25rem; }
-  .us-carousel-nav.next { right: .25rem; }
-  .us-carousel-nav:disabled { opacity: .35; cursor: default; }
-  @media (hover: hover) { .us-carousel-nav { display: flex; } }
-  .us-carousel-empty { padding: 1.5rem 1.25rem; color: var(--muted); font-size: .85rem; }
-  .us-carousel-empty[hidden] { display: none; }
-
-  /* ═══════════ CARD (lugar) ═══════════ */
-  .us-card {
-    width: 12.5rem; background: var(--bg-panel); border-radius: var(--radius);
-    border: 1px solid var(--border); overflow: hidden; text-decoration: none; color: inherit;
-    box-shadow: var(--shadow-sm); transition: transform .2s ease, box-shadow .2s ease;
-  }
-  .us-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-  .us-card-media { position: relative; aspect-ratio: 16 / 11; background: var(--bg-sunk); }
-  .us-card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .us-card-badge {
-    position: absolute; left: .5rem; padding: .25rem .55rem; border-radius: var(--radius-pill);
-    font-size: .65rem; font-weight: 600; color: var(--text-on-dark); background: var(--river-900);
-  }
-  .us-card-badge-category { top: .5rem; }
-  .us-card-badge-status { bottom: .5rem; background: var(--sunset); }
-  .us-card-badge:empty { display: none; }
-  .us-card-fav {
-    position: absolute; top: .5rem; right: .5rem; width: 1.875rem; height: 1.875rem;
-    border-radius: 50%; border: none; background: rgba(255,255,255,.9); cursor: pointer;
-  }
-  .us-card-fav::before {
-    content: "♡"; font-size: 1rem; color: var(--ink);
-  }
-  .us-card-fav[aria-pressed="true"]::before { content: "♥"; color: var(--sunset); }
-  .us-card-body { padding: .75rem .875rem .875rem; }
-  .us-card-title {
-    font-family: var(--f-ui); font-size: .95rem; font-weight: 600; color: var(--ink);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .us-card-meta { font-size: .8rem; color: var(--muted); margin-top: .25rem; }
-  .us-card-tags { display: flex; flex-wrap: wrap; gap: .3125rem; margin-top: .5rem; }
-  .us-card-tags:empty { display: none; }
-
-  /* ═══════════ SKELETON (carga) ═══════════ */
-  @keyframes us-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  .us-skeleton-card { width: 12.5rem; flex: 0 0 auto; }
-  .us-skeleton-media, .us-skeleton-line {
-    background: linear-gradient(90deg, var(--bg-sunk) 25%, var(--border) 50%, var(--bg-sunk) 75%);
-    background-size: 200% 100%; animation: us-shimmer 1.4s infinite; border-radius: var(--radius-sm);
-  }
-  .us-skeleton-media { aspect-ratio: 16 / 11; border-radius: var(--radius); }
-  .us-skeleton-line { height: .75rem; margin-top: .625rem; }
-  .us-skeleton-line-lg { width: 85%; }
-  .us-skeleton-line-sm { width: 55%; }
-
-  /* ═══════════ ESTADO VACÍO ═══════════ */
-  .us-empty-state {
-    display: flex; flex-direction: column; align-items: center; text-align: center;
-    padding: 2.5rem 1.5rem; gap: .5rem;
-  }
-  .us-empty-icon { font-size: 2rem; }
-  .us-empty-title { font-family: var(--f-display); font-size: 1.05rem; font-weight: 700; color: var(--ink); }
-  .us-empty-desc { font-size: .85rem; color: var(--muted); max-width: 22rem; }
-  .us-empty-action {
-    margin-top: .5rem; padding: .6rem 1.25rem; border-radius: var(--radius-pill);
-    border: none; background: var(--sunset); color: var(--text-on-dark); font-weight: 600;
-    font-size: .85rem; cursor: pointer; font-family: var(--f-ui);
-  }
-  .us-empty-action[hidden] { display: none; }
-
   /* ═══════════ FOOTER ═══════════
      core.css no trae estilos de footer (se confirmó antes de escribir
      esto): es contenido, no infraestructura, así que vive acá. */
@@ -433,12 +206,8 @@
 
   /* ═══════════ FOCUS-VISIBLE — mismo tratamiento que el core ═══════════ */
   .us-drawer-item:focus-visible,
-  .us-card:focus-visible,
-  .us-sheet-action:focus-visible,
-  .us-carousel-nav:focus-visible,
   .us-app-header-search:focus-visible,
-  .us-fab:focus-visible,
-  .us-empty-action:focus-visible {
+  .us-fab:focus-visible {
     outline: 2px solid var(--sunset-bright); outline-offset: 2px;
   }
 
@@ -446,8 +215,4 @@
   @media (min-width: 61rem) {
     .us-fab { right: 2rem; bottom: 2rem; }
     .us-drawer { width: 20rem; }
-    .us-sheet, .us-fullsheet { left: 50%; right: auto; width: min(36rem, 92vw); transform: translate(-50%, 100%); }
-    .us-sheet:not([hidden]), .us-fullsheet:not([hidden]) { transform: translate(-50%, 0); }
-    .us-sheet { bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 85vh; }
-    .us-fullsheet { top: 3vh; bottom: 3vh; border-radius: var(--radius-lg); overflow: hidden; }
   }
