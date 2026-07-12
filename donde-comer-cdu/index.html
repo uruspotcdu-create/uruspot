@@ -69,14 +69,21 @@
 <script src="js/core-engine.js" defer fetchpriority="high"></script>
 <script src="js/content.js" defer fetchpriority="high"></script>
 
-<!-- Adelanta la descarga del dataset del mapa en paralelo con CSS/fuentes/
-     scripts: el fetch('lugares-mapa.json') real sigue viviendo en
-     core-engine.js (cargarConExtra); esto solo hace que la respuesta ya
-     esté en caché cuando el JS la pida, en vez de recién empezar a
-     pedirla ahí — le saca un round-trip completo de red al momento en que
-     #app-loading pierde is-done. fetchpriority="high" porque es la otra
-     mitad del camino crítico hasta que desaparece la pantalla de carga. -->
-<link rel="preload" as="fetch" href="lugares-mapa.json" crossorigin="anonymous" fetchpriority="high">
+<!-- [ARQUITECTURA — carga core/detalles] "lugares-mapa.json" (todos los
+     campos, 862 lugares) dejó de pedirse en el arranque; se reemplaza por
+     dos archivos generados con split_dataset.py — ver la nota en
+     content.js. Los fetch reales siguen viviendo en core-engine.js
+     (cargarConExtra); estos preload solo adelantan la descarga en paralelo
+     con CSS/fuentes/scripts, para que la respuesta ya esté en caché cuando
+     el JS la pida.
+       - lugares-core.json: bloquea el primer render (pines/filtros/
+         búsqueda) → fetchpriority="high", igual que antes.
+       - lugares-detalles.json: solo alimenta un popup ya abierto, nunca
+         bloquea nada → fetchpriority="low" para que el navegador no le
+         quite ancho de banda al core, los tiles del mapa ni las fuentes,
+         que sí son parte del camino crítico. -->
+<link rel="preload" as="fetch" href="lugares-core.json" crossorigin="anonymous" fetchpriority="high">
+<link rel="preload" as="fetch" href="lugares-detalles.json" crossorigin="anonymous" fetchpriority="low">
 <!-- [OPTIMIZACIÓN — Fase 3, hallazgo Outfit] Outfit cargaba 300;400;500,
      pero el CSS del mapa pide 400 (base de #mapa) y 700 (.mapa-popup-cat,
      .mapa-popup-destacado, .mapa-popup-actions a, leyenda) y 600
@@ -265,7 +272,7 @@
        IDs ya estaban documentados como "opcionales" en el contrato de
        DOM de core-engine.js (no le importa quién los creó). Mismo caso
        para #cats-container: sigue vacío, renderHeroCards(counts) lo
-       llena una vez que el fetch de lugares-mapa.json responde (esa
+       llena una vez que el fetch de lugares-core.json responde (esa
        parte es imposible de tener estática: los conteos por categoría
        no existen hasta ese momento).
   ═══════════════════════════════════════════════════════════════ -->
