@@ -36,15 +36,13 @@
      son <script defer>, y defer garantiza que se EJECUTAN en el orden del
      documento, cada uno recién después de que el anterior terminó de
      ejecutar. Ese mismo orden es el que hoy tienen en el <body>: Leaflet →
-     core-engine.js → content.js. content.js es quien escribe el <h1> del
-     hero (el candidato a LCP de esta página) y quien llama a
-     UruSpotCore.init(), que dispara initDrawer/initBottomNav/initReveal/
-     initSmoothAnchors/initSpotlightSearch DESPUÉS de motor.init() (que
-     llama a initMapa()->L.map(), y por eso necesita L ya definida). O sea:
-     mientras Leaflet no termine de descargar+ejecutar, no hay hero visible
-     ni un solo listener del resto del sitio activo — el mapa es lo de
-     menos. Bajarle prioridad de red (como en la pasada anterior) no movía
-     trabajo lejos del camino crítico: alargaba el camino crítico entero. -->
+     core-engine.js → content.js. content.js llama a UruSpotCore.init(),
+     que dispara initDrawer/initBottomNav/initReveal/initSmoothAnchors/
+     initSpotlightSearch DESPUÉS de motor.init() (que llama a
+     initMapa()->L.map(), y por eso necesita L ya definida). El hero y el
+     footer YA NO dependen de este script para pintarse (ver más abajo);
+     pero los listeners y el mapa siguen dependiendo de esta cadena, así
+     que sigue siendo camino crítico para interactividad. -->
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
 <!-- [CORRECCIÓN — auditoría final] Los 4 <script defer> que forman la
@@ -126,6 +124,15 @@
        el dataset. El motor le agrega la clase "is-done" y lo saca del
        árbol de foco (inert) apenas el primer render está listo; evita
        pantalla en blanco y da lugar donde mostrar skeletons desde ya.
+
+       [SIN CAMBIOS — auditoría de arquitectura hero/footer] Este bloque
+       y el timing de "is-done" en core-engine.js (cargarDatos) no se
+       tocan en esta pasada: no hay forma de verificar sin core.css si
+       este overlay tapa el hero por completo, y adelantar o retrasar
+       cuándo pierde "is-done" es un cambio de comportamiento visual que
+       no se puede validar sin esa información. Ver nota junto a
+       #hero-mount (ahora reemplazado por el hero estático de abajo) para
+       el detalle completo de la investigación.
   ═══════════════════════════════════════════════════════════════ -->
   <div class="us-app-loading" id="app-loading" role="presentation" aria-hidden="true">
     <div class="us-app-loading-mark" aria-hidden="true"></div>
@@ -241,13 +248,55 @@
   </aside>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       HERO (mount point)
-       El MÓDULO B renderiza la copy editorial del hero acá adentro.
-       El motor Core sólo escribe en los IDs: #hero-total-lugares,
-       #stat-total-lugares, #stat-total-categorias, #cats-container,
-       #toggle-local, #toggle-visitante (si existen en el markup inyectado).
+       HERO
+       [ARQUITECTURA — auditoría hero/footer estático] Antes este bloque
+       era un mount point vacío (<div id="hero-mount"></div>) que
+       content.js llenaba con innerHTML recién después de que la cadena
+       completa de <script defer> (Leaflet, MarkerCluster, core-engine,
+       content) terminaba de ejecutar. Todo este markup es texto/enlaces
+       fijos — no depende de ningún dato del dataset de lugares — así
+       que se lo deja directamente en el HTML, presente desde el primer
+       byte, tal como recomienda la propia auditoría de performance.
+       Los 3 valores que sí son dinámicos (#hero-total-lugares,
+       #stat-total-lugares, #stat-total-categorias) arrancan con el
+       mismo placeholder "···" que ya tenían antes de que corriera JS;
+       core-engine.js los sobrescribe con el valor real en
+       actualizarContadoresHero(), exactamente igual que antes — estos
+       IDs ya estaban documentados como "opcionales" en el contrato de
+       DOM de core-engine.js (no le importa quién los creó). Mismo caso
+       para #cats-container: sigue vacío, renderHeroCards(counts) lo
+       llena una vez que el fetch de lugares-mapa.json responde (esa
+       parte es imposible de tener estática: los conteos por categoría
+       no existen hasta ese momento).
   ═══════════════════════════════════════════════════════════════ -->
-  <div id="hero-mount"></div>
+  <div id="hero-mount">
+    <section class="hero" id="hero">
+      <div class="hero-media" aria-hidden="true">
+        <div class="hero-media-gradient"></div>
+        <div class="hero-media-pattern"></div>
+      </div>
+      <div class="hero-inner">
+        <span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Entre Ríos, Argentina</span>
+        <h1 class="hero-title">La Guía de<br><strong>Concepción del Uruguay</strong></h1>
+        <p class="hero-sub">🎯 <strong><span id="hero-total-lugares">···</span> lugares verificados</strong> — curada con precisión: gastronomía, compras, salud, finanzas, patrimonio, naturaleza, alojamiento y mucho más</p>
+        <div class="hero-actions">
+          <a class="hero-cta" href="#mapa">Explorar el mapa ↓</a>
+        </div>
+        <div class="hero-stats" role="list">
+          <div class="hs" role="listitem"><div class="hs-n" id="stat-total-lugares">···</div><div class="hs-l">Lugares</div></div>
+          <div class="hs" role="listitem"><div class="hs-n" id="stat-total-categorias">···</div><div class="hs-l">Categorías</div></div>
+          <div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Ciudad</div></div>
+          <div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Verificado</div></div>
+        </div>
+      </div>
+      <div class="hero-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="var(--bg)" d="M0,40 C360,90 1080,-10 1440,40 L1440,80 L0,80 Z"></path></svg>
+      </div>
+    </section>
+    <div class="cats-wrap">
+      <div class="cats" id="cats-container"></div>
+    </div>
+  </div>
 
   <main id="main-content">
 
@@ -339,16 +388,32 @@
   </main>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       FOOTER (mount point)
-       El MÓDULO B inyecta acá la copy y los links del footer.
-       [OPTIMIZACIÓN] content-visibility:auto — es texto/links planos sin
-       ninguna librería que necesite medir su layout antes de tiempo (a
-       diferencia de #mapa-leaflet, que sí depende de Leaflet calculando
-       tamaños reales, por eso ese contenedor NO se toca), así que el
-       navegador puede saltear su layout/paint hasta que el usuario
-       realmente scrollea hasta el final de la página.
+       FOOTER
+       [ARQUITECTURA — auditoría hero/footer estático] Mismo razonamiento
+       que el hero: es copy 100% fija, sin ningún dato del dataset de
+       lugares. Los links con [data-filtro] se enganchan igual que antes
+       vía bindFiltroLinks(document) en core-engine.js, que los busca por
+       atributo en todo el documento — no le importa si existían desde
+       el parseo del HTML o si los acababa de inyectar un script.
+       content-visibility:auto sigue aplicando igual (sigue siendo texto/
+       links planos sin ninguna librería que necesite medir su layout
+       antes de tiempo): el navegador saltea su layout/paint hasta que el
+       usuario scrollea hasta el final de la página, esté el contenido
+       ya presente en el HTML o no.
   ═══════════════════════════════════════════════════════════════ -->
-  <footer id="site-footer" style="content-visibility:auto;contain-intrinsic-size:0 400px;"></footer>
+  <footer id="site-footer" style="content-visibility:auto;contain-intrinsic-size:0 400px;">
+    <p class="footer-quote">"El mejor lugar es el que no sabías que estaba ahí."</p>
+    <div class="footer-logo">URU SPOT</div>
+    <div class="footer-sub">Guía de Concepción del Uruguay · Entre Ríos · Argentina</div>
+    <nav class="footer-links" aria-label="Navegación del sitio">
+      <a href="#mapa">El mapa</a>
+      <a class="footer-filtro" data-filtro="gastronomia" href="#mapa">Gastronomía</a>
+      <a class="footer-filtro" data-filtro="patrimonio" href="#mapa">Patrimonio</a>
+      <a class="footer-filtro" data-filtro="naturaleza" href="#mapa">Naturaleza</a>
+      <a class="footer-filtro" data-filtro="alojamiento" href="#mapa">Alojamiento</a>
+      <a class="footer-filtro" data-filtro="servicios_publicos" href="#mapa">Servicios</a>
+    </nav>
+  </footer>
 
   <!-- [CORRECCIÓN] Los 4 <script defer> del camino crítico (Leaflet,
        MarkerCluster, core-engine.js, content.js) ya se cargan desde el
