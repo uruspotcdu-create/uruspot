@@ -317,6 +317,18 @@
         <div id="mapa-filtros" role="group" aria-label="Filtrar por categoría"></div>
         <div id="mapa-subfiltros" role="group" aria-label="Filtrar por subcategoría"></div>
         <div id="mapa-active-filtros" role="group" aria-label="Filtros activos" aria-live="polite"></div>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             [NUEVA FUNCIONALIDAD — pasada "Dónde Comer"] Rieles curados
+             (Más populares / Mejor puntuados / Recién agregados / por tipo
+             de cocina / Cerca tuyo). Se llenan desde core-engine.js
+             (renderRielesGastronomia(), llamada al final de cargarDatos())
+             apenas el mapa entra en carga — mismo momento en que ya se
+             pinta el resto de #mapa-wrap, sin adelantar ningún fetch nuevo
+             ni tocar el resto de la arquitectura de carga diferida.
+        ═══════════════════════════════════════════════════════════════ -->
+        <div id="donde-comer-rieles" aria-label="Descubrí más lugares para comer"></div>
+
         <div id="mapa-canvas" data-view="mapa">
           <div id="mapa-leaflet" role="application" aria-label="Mapa interactivo"></div>
           <div id="mapa-legend" aria-label="Leyenda de categorías del mapa">
