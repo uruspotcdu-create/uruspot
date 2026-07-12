@@ -193,7 +193,7 @@
        Las secciones "Planes rápidos" del Home Hub alimentan la misma
        superficie (Full Screen Sheet #full-sheet) que abre este botón.
   ═══════════════════════════════════════════════════════════════ -->
-  <button type="button" class="us-fab" id="fab-planner" data-action="open-planner" aria-haspopup="dialog" aria-controls="full-sheet">
+  <button type="button" class="us-fab" id="fab-planner" data-action="open-planner">
     <span class="us-fab-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Armar un plan rápido</span>
   </button>
@@ -239,105 +239,6 @@
     <!-- El MÓDULO B puede sumar acá links de contacto/legales sin tocar la nav -->
     <div class="us-drawer-footer" id="drawer-footer-mount"></div>
   </aside>
-
-  <!-- ═══════════════════════════════════════════════════════════════
-       BOTTOM SHEET — centro de operaciones de un lugar. Todo el detalle
-       vive dentro de este único panel, sin cambiar de pantalla.
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="us-sheet" id="place-sheet" role="dialog" aria-modal="true" aria-labelledby="place-sheet-title" hidden>
-    <div class="us-sheet-handle" id="place-sheet-handle" aria-hidden="true"></div>
-    <button type="button" class="us-sheet-close" id="place-sheet-close" aria-label="Cerrar ficha del lugar">✕</button>
-
-    <!-- El sheet abre instantáneo con física del handle; mientras el motor
-         resuelve el lugar (getLugarPorId) este skeleton cubre el contenido
-         real para que nunca se vea vacío ni saltee layout al hidratar. -->
-    <div class="us-sheet-loading" id="place-sheet-loading" aria-hidden="true"></div>
-
-    <div class="us-sheet-scroll" id="place-sheet-scroll" itemscope itemtype="https://schema.org/LocalBusiness">
-
-      <!-- Hero + galería -->
-      <div class="us-sheet-hero" id="place-gallery" role="list" aria-label="Galería de fotos" itemprop="image"></div>
-
-      <!-- Identidad -->
-      <div class="us-sheet-header">
-        <span class="us-sheet-category" id="place-category"></span>
-        <h2 class="us-sheet-title" id="place-sheet-title" itemprop="name"></h2>
-        <span class="us-sheet-status" id="place-status"></span>
-      </div>
-
-      <!-- Datos operativos -->
-      <dl class="us-sheet-meta" id="place-meta">
-        <div class="us-sheet-meta-item" data-meta="horarios">
-          <dt>Horarios</dt><dd id="place-horarios"></dd>
-        </div>
-        <div class="us-sheet-meta-item" data-meta="direccion">
-          <dt>Dirección</dt><dd id="place-direccion" itemprop="address"></dd>
-        </div>
-        <div class="us-sheet-meta-item" data-meta="tiempo">
-          <dt>Tiempo estimado</dt><dd id="place-tiempo-estimado"></dd>
-        </div>
-        <div class="us-sheet-meta-item" data-meta="distancia">
-          <dt>Distancia</dt><dd id="place-distancia"></dd>
-        </div>
-      </dl>
-
-      <!-- Servicios -->
-      <div class="us-sheet-services" id="place-servicios" role="list" aria-label="Servicios"></div>
-
-      <!-- Acciones rápidas -->
-      <div class="us-sheet-actions" id="place-actions" role="group" aria-label="Acciones rápidas">
-        <a class="us-sheet-action" id="action-maps" data-action="maps" href="#" target="_blank" rel="noopener">Ver en Google Maps</a>
-        <a class="us-sheet-action" id="action-ir" data-action="ir" href="#" target="_blank" rel="noopener">Ir</a>
-        <a class="us-sheet-action" id="action-llamar" data-action="llamar" href="tel:" itemprop="telephone">Llamar</a>
-        <a class="us-sheet-action" id="action-whatsapp" data-action="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
-        <a class="us-sheet-action" id="action-instagram" data-action="instagram" href="#" target="_blank" rel="noopener">Instagram</a>
-        <a class="us-sheet-action" id="action-facebook" data-action="facebook" href="#" target="_blank" rel="noopener">Facebook</a>
-        <a class="us-sheet-action" id="action-sitio-web" data-action="sitio-web" href="#" target="_blank" rel="noopener" itemprop="url">Sitio web</a>
-        <button type="button" class="us-sheet-action" id="action-compartir" data-action="compartir">Compartir</button>
-        <button type="button" class="us-sheet-action" id="action-guardar" data-action="guardar" aria-pressed="false">Guardar</button>
-        <button type="button" class="us-sheet-action" id="action-agregar-recorrido" data-action="agregar-recorrido">Agregar al recorrido</button>
-        <button type="button" class="us-sheet-action" id="action-copiar-direccion" data-action="copiar-direccion">Copiar dirección</button>
-      </div>
-
-      <!-- Descubrimiento contextual — el motor clona #tpl-carousel-section
-           por cada grupo relacionado (similares, muy cerca, también
-           visitan, ideal antes, ideal después, seguir explorando). -->
-      <div class="us-sheet-related" id="place-related" data-related-groups="muy-cerca,tambien-visitan,ideal-antes,ideal-despues,similares,abiertos-ahora,caminando-5,caminando-10,gratis-cerca,destacados"></div>
-
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════════
-       FULL SCREEN SHEET — superficie genérica a pantalla completa:
-       Planner, Recorridos, Filtros avanzados, Galería expandida.
-       El MÓDULO B/motor define qué se monta en #full-sheet-body según
-       data-mode (el atributo lo setea quien la abre).
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="us-fullsheet" id="full-sheet" role="dialog" aria-modal="true" aria-labelledby="full-sheet-title" data-mode="" hidden>
-    <header class="us-fullsheet-header">
-      <button type="button" class="us-fullsheet-close" id="full-sheet-close" aria-label="Cerrar">✕</button>
-      <h2 class="us-fullsheet-title" id="full-sheet-title"></h2>
-      <div class="us-fullsheet-header-actions" id="full-sheet-header-actions"></div>
-    </header>
-    <div class="us-fullsheet-body" id="full-sheet-body"></div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════════
-       SISTEMA DE DIÁLOGOS — confirmaciones puntuales (borrar favorito,
-       vaciar historial, permisos de ubicación). Contenido inyectado.
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="us-dialog-root" id="dialog-root" role="alertdialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-body" hidden>
-    <div class="us-dialog-panel">
-      <h2 class="us-dialog-title" id="dialog-title"></h2>
-      <p class="us-dialog-body" id="dialog-body"></p>
-      <div class="us-dialog-actions" id="dialog-actions"></div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════════
-       TOASTS
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="us-toast-region" id="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <!-- ═══════════════════════════════════════════════════════════════
        HERO (mount point)
@@ -448,73 +349,6 @@
        realmente scrollea hasta el final de la página.
   ═══════════════════════════════════════════════════════════════ -->
   <footer id="site-footer" style="content-visibility:auto;contain-intrinsic-size:0 400px;"></footer>
-
-  <!-- ═══════════════════════════════════════════════════════════════
-       TEMPLATES REUTILIZABLES — nunca se muestran directamente; el
-       motor los clona con content.cloneNode(true) hacia los contenedores
-       de arriba. Única fuente de verdad por tipo de componente: escala a
-       10.000 lugares y 100 categorías sin duplicar markup en el HTML.
-  ═══════════════════════════════════════════════════════════════ -->
-
-  <template id="tpl-carousel-section">
-    <section class="us-carousel-section" data-home-key="">
-      <header class="us-carousel-header">
-        <div>
-          <span class="us-carousel-eyebrow"></span>
-          <h2 class="us-carousel-title"></h2>
-        </div>
-        <span class="us-carousel-count" aria-live="polite"></span>
-        <button type="button" class="us-carousel-view-all" data-action="ver-todo" hidden>Ver todo</button>
-      </header>
-      <div class="us-carousel-viewport">
-        <button type="button" class="us-carousel-nav prev" aria-label="Anterior" disabled>‹</button>
-        <div class="us-carousel-track" role="list" data-snap="proximity" tabindex="0"></div>
-        <button type="button" class="us-carousel-nav next" aria-label="Siguiente">›</button>
-      </div>
-      <div class="us-carousel-empty" hidden></div>
-    </section>
-  </template>
-
-  <template id="tpl-place-card">
-    <article class="us-card" data-place-id="" role="listitem" itemscope itemtype="https://schema.org/LocalBusiness">
-      <div class="us-card-media">
-        <img class="us-card-img" src="" alt="" loading="lazy" decoding="async" width="320" height="220" itemprop="image">
-        <span class="us-card-badge us-card-badge-category"></span>
-        <span class="us-card-badge us-card-badge-status"></span>
-        <button type="button" class="us-card-fav" data-action="guardar" aria-pressed="false" aria-label="Guardar en favoritos"></button>
-      </div>
-      <div class="us-card-body">
-        <h3 class="us-card-title" itemprop="name"></h3>
-        <p class="us-card-meta"></p>
-        <div class="us-card-tags" role="list"></div>
-      </div>
-    </article>
-  </template>
-
-  <template id="tpl-skeleton-card">
-    <div class="us-skeleton-card" aria-hidden="true">
-      <div class="us-skeleton-media"></div>
-      <div class="us-skeleton-line us-skeleton-line-lg"></div>
-      <div class="us-skeleton-line us-skeleton-line-sm"></div>
-    </div>
-  </template>
-
-  <template id="tpl-empty-state">
-    <div class="us-empty-state">
-      <span class="us-empty-icon" aria-hidden="true"></span>
-      <h3 class="us-empty-title"></h3>
-      <p class="us-empty-desc"></p>
-      <button type="button" class="us-empty-action" hidden></button>
-    </div>
-  </template>
-
-  <template id="tpl-toast">
-    <div class="us-toast" role="status">
-      <span class="us-toast-icon" aria-hidden="true"></span>
-      <span class="us-toast-message"></span>
-      <button type="button" class="us-toast-close" aria-label="Cerrar aviso">✕</button>
-    </div>
-  </template>
 
   <!-- [CORRECCIÓN] Los 4 <script defer> del camino crítico (Leaflet,
        MarkerCluster, core-engine.js, content.js) ya se cargan desde el
