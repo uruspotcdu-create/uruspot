@@ -516,19 +516,15 @@
     </div>
   </template>
 
-  <!-- defer en las 4 (mismo orden de documento = mismo orden de ejecución):
-       no bloquean el parseo del HTML y siguen ejecutando antes de
-       DOMContentLoaded. fetchpriority="high" parejo en las 4: son una
-       cadena secuencial (defer ejecuta en orden de documento, cada script
-       espera a que el anterior termine), así que el tiempo total hasta
-       que content.js corre —y con él, el hero, y el resto de init()— es
-       la SUMA de las 4, no el máximo. No hay ninguna de las 4 a la que
-       convenga restarle prioridad de descarga: eso solo alarga la suma.
-       (Ver preload+preconnect de cdnjs en el head para el resto de esta
-       misma corrección.) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer fetchpriority="high"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js" defer fetchpriority="high"></script>
-  <script src="js/core-engine.js" defer fetchpriority="high"></script>
-  <script src="js/content.js" defer fetchpriority="high"></script>
+  <!-- [CORRECCIÓN] Los 4 <script defer> del camino crítico (Leaflet,
+       MarkerCluster, core-engine.js, content.js) ya se cargan desde el
+       <head> (ver líneas ~69-72): con defer, cada <script src> declarado
+       ejecuta su archivo una vez, sin importar que el navegador cachee
+       la descarga, así que tenerlos repetidos acá abajo corría toda la
+       cadena —y con ella motor.init(), L.map() y el resto de init()—
+       DOS veces por carga de página. Se elimina la copia sobrante; el
+       comportamiento observable es el mismo (una sola inicialización,
+       como siempre debió ser) y se corta a la mitad el tiempo de
+       scripting/CPU de estos 4 archivos. -->
 </body>
 </html>
