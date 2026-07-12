@@ -45,7 +45,7 @@
      ni un solo listener del resto del sitio activo — el mapa es lo de
      menos. Bajarle prioridad de red (como en la pasada anterior) no movía
      trabajo lejos del camino crítico: alargaba el camino crítico entero. -->
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
 <!-- [CORRECCIÓN — auditoría final] Los 4 <script defer> que forman la
      cadena crítica (ver nota de arriba) vivían al final del <body>, ~500
@@ -78,7 +78,7 @@
      pedirla ahí — le saca un round-trip completo de red al momento en que
      #app-loading pierde is-done. fetchpriority="high" porque es la otra
      mitad del camino crítico hasta que desaparece la pantalla de carga. -->
-<link rel="preload" as="fetch" href="lugares-mapa.json" fetchpriority="high">
+<link rel="preload" as="fetch" href="lugares-mapa.json" crossorigin="anonymous" fetchpriority="high">
 <!-- [OPTIMIZACIÓN — Fase 3, hallazgo Outfit] Outfit cargaba 300;400;500,
      pero el CSS del mapa pide 400 (base de #mapa) y 700 (.mapa-popup-cat,
      .mapa-popup-destacado, .mapa-popup-actions a, leyenda) y 600
