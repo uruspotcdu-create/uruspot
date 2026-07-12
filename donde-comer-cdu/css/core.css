@@ -454,6 +454,62 @@
 
     :where(#mapa-empty){ display:none; padding:3.75rem 1.25rem; text-align:center; color:var(--map-muted); font-size:0.8125rem; background:var(--map-paper); }
 
+    /* ═══════════ VISTA LISTA + ORDENAR ═══════════
+       [NUEVA FUNCIONALIDAD — pasada "toolbar del mapa"] #mapa-orden y
+       #mapa-view-toggle ya existían en el HTML (con sus IDs, aria-pressed
+       y las 4 opciones de orden) pero nunca habían tenido CSS: eran un
+       <select> nativo del navegador y dos <button> sin estilo, sueltos
+       en medio de un toolbar por lo demás completamente diseñado. Se
+       resuelve con el mismo lenguaje visual que #mapa-geoloc/.mapa-pill
+       (mismos tokens --gold/--map-line/--f-ui-map), no un sistema nuevo. */
+    :where(#mapa-orden){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-ink); background:var(--map-paper) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%236b5c47" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 0.75rem center; background-size:0.625rem; border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1.875rem 0.625rem 1rem; cursor:pointer; appearance:none; -webkit-appearance:none; transition:border-color .2s ease; }
+    :where(#mapa-orden):hover{ border-color:var(--gold); }
+    :where(#mapa-orden):focus-visible{ outline:0.125rem solid var(--gold); outline-offset:0.125rem; }
+
+    :where(#mapa-view-toggle){ display:flex; background:var(--map-panel); border:1px solid var(--map-line); border-radius:3.125rem; padding:0.1875rem; gap:0.125rem; }
+    :where(#mapa-view-toggle) button{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-muted); background:transparent; border:none; border-radius:3.125rem; padding:0.5rem 0.9375rem; cursor:pointer; transition:background .2s ease, color .2s ease; }
+    :where(#mapa-view-toggle) button:hover{ color:var(--map-ink); }
+    :where(#mapa-view-toggle) button[aria-pressed="true"]{ background:var(--map-paper); color:var(--map-ink); box-shadow:0 1px 4px rgba(12,9,4,.18); }
+    :where(#mapa-view-toggle) button:focus-visible{ outline:0.125rem solid var(--gold); outline-offset:0.125rem; }
+
+    /* --- Grilla de tarjetas de la vista lista --- */
+    :where(#mapa-lista){ display:grid; grid-template-columns:repeat(auto-fill, minmax(16.25rem,1fr)); gap:0.75rem; padding:1.125rem; background:var(--map-panel); }
+    :where(#mapa-lista)[hidden]{ display:none; }
+
+    .lista-card{ display:flex; flex-direction:column; background:var(--map-paper); border:1px solid var(--map-line); border-radius:0.75rem; overflow:hidden; box-shadow:0 2px 8px rgba(12,9,4,.06); transition:box-shadow .2s ease, transform .2s ease; }
+    .lista-card:hover{ box-shadow:0 10px 24px rgba(12,9,4,.14); transform:translateY(-0.125rem); }
+    .lista-card-ir{ display:flex; align-items:flex-start; gap:0.625rem; padding:0.875rem 0.875rem 0.625rem; background:transparent; border:none; border-left:0.25rem solid var(--card-color, var(--gold)); text-align:left; cursor:pointer; width:100%; }
+    .lista-card-icon{ font-size:1.125rem; line-height:1; flex-shrink:0; margin-top:0.0625rem; }
+    .lista-card-body{ display:flex; flex-direction:column; gap:0.25rem; min-width:0; }
+    .lista-card-top{ display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
+    .lista-card-cat{ font-family:var(--f-ui-map); font-size:0.625rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:var(--copper); }
+    .lista-card-destacado{ font-family:var(--f-ui-map); font-size:0.5625rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; color:#0c0904; background:linear-gradient(135deg,var(--gold-pale),var(--gold)); padding:0.125rem 0.4375rem; border-radius:3.125rem; }
+    .lista-card-nombre{ font-family:var(--f-display-map); font-size:1.0625rem; color:var(--map-ink); line-height:1.2; }
+    .lista-card-rating{ font-size:0.75rem; color:var(--copper); }
+    .lista-card-rating .cant{ color:var(--map-muted); }
+    .lista-card-norating{ font-size:0.6875rem; color:var(--map-muted); font-style:italic; }
+    .lista-card-addr{ font-size:0.6875rem; line-height:1.35; color:var(--map-muted); }
+    .lista-card-dist{ font-size:0.6875rem; font-weight:600; color:var(--river-700, var(--copper)); }
+    .lista-card-actions{ display:flex; align-items:center; gap:0.375rem; padding:0 0.875rem 0.75rem 2rem; margin-top:auto; }
+    .lista-card-actions > *{ display:inline-flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:50%; border:1px solid var(--map-line); background:var(--map-paper); color:var(--map-ink); font-size:0.875rem; text-decoration:none; cursor:pointer; transition:background .15s ease, border-color .15s ease; }
+    .lista-card-actions > *:hover{ border-color:var(--gold); background:var(--map-panel); }
+    .lista-card-fav.is-fav{ color:#c0392b; border-color:#c0392b; }
+    .lista-card-wa{ background:#25D366; border-color:#25D366; color:#fff; }
+    .lista-card-wa:hover{ filter:brightness(1.05); background:#25D366; }
+
+    /* --- Estado de carga: 3 tarjetas "esqueleto" con shimmer, en vez de
+       dejar la grilla en blanco mientras cargarConExtra() todavía no
+       resolvió el fetch (la lista puede pedirse ANTES de que el fetch
+       de lugares-core.json/lugares-detalles.json termine). --- */
+    .lista-skeleton{ display:grid; grid-template-columns:repeat(auto-fill, minmax(16.25rem,1fr)); gap:0.75rem; grid-column:1 / -1; }
+    .lista-skeleton-card{ height:7.5rem; border-radius:0.75rem; background:linear-gradient(100deg, var(--map-panel) 30%, var(--parchment-mid) 50%, var(--map-panel) 70%); background-size:200% 100%; animation:lista-shimmer 1.4s ease-in-out infinite; }
+    @keyframes lista-shimmer{ 0%{ background-position:200% 0; } 100%{ background-position:-200% 0; } }
+    @media (prefers-reduced-motion: reduce){ .lista-skeleton-card{ animation:none; } }
+
+    :where(#mapa-canvas[data-view="lista"]) :where(#mapa-leaflet),
+    :where(#mapa-canvas[data-view="lista"]) :where(#mapa-legend){ display:none; }
+    :where(#mapa-canvas[data-view="mapa"]) :where(#mapa-lista){ display:none; }
+
     /* --- Leyenda del mapa: panel flotante con color + icono + etiqueta + conteo --- */
     :where(#mapa-legend){ position:absolute; z-index:var(--z-panel-local); right:0.875rem; top:0.875rem; max-width:13.125rem; background:rgba(255,253,248,.96); border:1px solid var(--map-line); border-radius:0.75rem; box-shadow:0 14px 34px rgba(12,9,4,.18); overflow:hidden; }
     :where(#mapa-legend-head){ display:flex; align-items:center; justify-content:space-between; gap:0.5rem; padding:0.625rem 0.75rem; cursor:pointer; background:var(--map-panel); border-bottom:1px solid var(--map-line); user-select:none; }
@@ -475,6 +531,11 @@
       :where(#mapa-geoloc){ justify-content:center; }
       :where(#mapa-legend){ position:static; max-width:none; margin:0; border-radius:0; border-left:none; border-right:none; box-shadow:none; }
       :where(#mapa-legend-list){ max-height:11.25rem; }
+      :where(#mapa-orden){ width:100%; background-position:right 1rem center; }
+      :where(#mapa-view-toggle){ width:100%; }
+      :where(#mapa-view-toggle) button{ flex:1; }
+      :where(#mapa-lista){ grid-template-columns:1fr; padding:0.75rem; }
+      .lista-skeleton{ grid-template-columns:1fr; }
     }
   }
 
