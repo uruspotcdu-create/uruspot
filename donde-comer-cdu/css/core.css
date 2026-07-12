@@ -109,6 +109,14 @@
          --sunset-bright SÍ fue verificado (7.28:1 sobre --river-900) y no presenta
          problema: solo se usa como texto sobre fondos oscuros (hero). */
       --sunset:#E8734A;
+      /* [FIX — auditoría de contraste, punto 4, hallazgo antes sin corregir]
+         Token derivado de --sunset específicamente para texto y para texto
+         sobre fondo de acento: 4.53:1 en ambas direcciones (blanco sobre
+         --sunset-text, y --sunset-text sobre --bg-panel), pasa AA para
+         texto normal. --sunset se mantiene intacto para usos no textuales
+         (bordes, dots, el fondo del ícono activo de bottom-nav, outlines de
+         foco) — ver los 4 selectores que pasan a --sunset-text más abajo. */
+      --sunset-text:#C25530;
       --sunset-bright:#FBAE5C;
       --text-on-dark:#F7F3EE;
       --accent-star:#F2B705;
@@ -298,7 +306,7 @@
     .hero-cta{
       gap:.4rem;
       font-family:var(--f-ui); font-weight:600; font-size:.92rem;
-      background:var(--sunset); color:#fff; text-decoration:none;
+      background:var(--sunset-text); color:#fff; text-decoration:none;
       padding:.85rem 1.5rem;
     }
     .hero-cta:hover{filter:brightness(1.08); transform:translateY(-1px)}
@@ -314,14 +322,14 @@
     .cat-name{display:flex; align-items:center; gap:.4rem; font-weight:600; font-size:.95rem; color:var(--river-900)}
     .cat-dot{width:.5625rem; height:.5625rem; border-radius:50%; flex:0 0 auto}
     .cat-desc{font-size:.78rem; color:var(--muted); line-height:1.4}
-    .cat-count{font-size:.72rem; color:var(--sunset); font-weight:600; margin-top:.2rem}
+    .cat-count{font-size:.72rem; color:var(--sunset-text); font-weight:600; margin-top:.2rem}
 
     /* cd-item / cd-link: mantiene selectores originales */
     .cd-item{background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem}
     .cd-item h3{font-size:1.05rem; color:var(--river-900); margin-bottom:.4rem}
     .cd-count{color:var(--muted); font-weight:400; font-size:.85rem}
     .cd-item p{font-size:.88rem; color:var(--ink-soft); line-height:1.5; margin-bottom:.6rem}
-    .cd-link{display:inline-block; font-size:.85rem; font-weight:600; color:var(--sunset); text-decoration:none}
+    .cd-link{display:inline-block; font-size:.85rem; font-weight:600; color:var(--sunset-text); text-decoration:none}
 
     /* Ítems de la nav inferior mobile */
     .bn-item{
@@ -329,7 +337,7 @@
       font-family:var(--f-ui); font-size:.6875rem; font-weight:600; color:var(--muted);
       text-decoration:none; background:none; border:0; padding:.4rem 0; cursor:pointer; min-height:2.75rem;
     }
-    .bn-item.is-active{color:var(--sunset)}
+    .bn-item.is-active{color:var(--sunset-text)}
     .bn-icon{width:1.375rem; height:1.375rem; border-radius:.375rem; background:currentColor; opacity:.18}
     .bn-item.is-active .bn-icon{opacity:.9; background:var(--sunset)}
 
