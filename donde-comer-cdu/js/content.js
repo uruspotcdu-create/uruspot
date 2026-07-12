@@ -15,6 +15,9 @@
   // ─────────────────────────────────────────────────────────────────────
   // GRUPOS — taxonomía de categorías (13), tal como vivía en index.backup.
   // Paleta verificada con contraste AA (ver nota de auditoría en core.css).
+  // Objeto literal plano: es la forma de menor costo posible para
+  // construir esta estructura (una asignación por propiedad, sin pasos
+  // intermedios) y es exactamente la forma que espera core-engine.js.
   // ─────────────────────────────────────────────────────────────────────
   var GRUPOS = {
     gastronomia: { color: '#AD1E1E', label: 'Gastronomía', icon: '🍽️', desc: 'Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.' },
@@ -44,7 +47,9 @@
   var OG_IMAGE = 'https://uruspot.pages.dev/img/logof.webp';
   var TOTAL_LUGARES_APROX = 862;
 
-  var PAGE_TITLE = 'Guía completa de Concepción del Uruguay · ' + TOTAL_LUGARES_APROX + '+ lugares · URU SPOT';
+  // Template literal con una sola sustitución: mismo resultado que la
+  // concatenación con "+", una sola pasada de construcción de string.
+  var PAGE_TITLE = `Guía completa de Concepción del Uruguay · ${TOTAL_LUGARES_APROX}+ lugares · URU SPOT`;
   var PAGE_DESCRIPTION = 'La guía urbana completa de Concepción del Uruguay: 13 categorías, cientos de lugares verificados contra Google Places, en un mapa interactivo con filtros por rubro y subcategoría.';
 
   function setMeta(id, attr, value) {
@@ -54,6 +59,12 @@
     else el.setAttribute(attr, value);
   }
 
+  // 9 llamadas directas: cada id es distinto y se usa una sola vez en
+  // toda la vida del script, así que no hay recorrido que fusionar ni
+  // build de tabla que amortizar. Una tabla intermedia (array de
+  // arrays) para iterar sobre esto sería estrictamente más trabajo
+  // (10 asignaciones de array + lecturas indexadas) que estas 9
+  // llamadas con argumentos literales conocidos en tiempo de compilación.
   setMeta('doc-title', 'text', PAGE_TITLE);
   setMeta('doc-description', 'content', PAGE_DESCRIPTION);
   setMeta('doc-canonical', 'href', CANONICAL_URL);
@@ -87,36 +98,22 @@
   // core.css (.hero, .hero-media, .hero-inner, .hero-title, .hero-sub,
   // .hero-stats, .hero-cta, .hero-wave). #cats-container queda vacío:
   // core-engine.js lo llena solo (ver renderHeroCards en JSPERFECTO1_AUDITED.js).
+  //
+  // Este bloque no tiene NINGUNA interpolación de variables: es HTML
+  // 100% literal. En la versión anterior estaba partido en ~19
+  // fragmentos unidos con "+", lo que obliga al intérprete (este script
+  // corre una sola vez y nunca llega a ser recalentado por el JIT, así
+  // que nunca se beneficia de folding en tiempo de ejecución) a producir
+  // ~18 operaciones ADD y strings intermedios antes de la asignación a
+  // innerHTML — justo en la ruta crítica previa al primer render, ya que
+  // el hero es contenido above-the-fold. Al ser un único literal de
+  // string, el motor lo trata como una sola constante: cero
+  // concatenaciones en tiempo de ejecución, cero strings intermedios,
+  // misma y única escritura al DOM (innerHTML) que antes.
   // ─────────────────────────────────────────────────────────────────────
   var heroMount = document.getElementById('hero-mount');
   if (heroMount) {
-    heroMount.innerHTML =
-      '<section class="hero" id="hero">' +
-        '<div class="hero-media" aria-hidden="true">' +
-          '<div class="hero-media-gradient"></div>' +
-          '<div class="hero-media-pattern"></div>' +
-        '</div>' +
-        '<div class="hero-inner">' +
-          '<span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Entre Ríos, Argentina</span>' +
-          '<h1 class="hero-title">La Guía de<br><strong>Concepción del Uruguay</strong></h1>' +
-          '<p class="hero-sub">🎯 <strong><span id="hero-total-lugares">···</span> lugares verificados</strong> — curada con precisión: gastronomía, compras, salud, finanzas, patrimonio, naturaleza, alojamiento y mucho más</p>' +
-          '<div class="hero-actions">' +
-            '<a class="hero-cta" href="#mapa">Explorar el mapa ↓</a>' +
-          '</div>' +
-          '<div class="hero-stats" role="list">' +
-            '<div class="hs" role="listitem"><div class="hs-n" id="stat-total-lugares">···</div><div class="hs-l">Lugares</div></div>' +
-            '<div class="hs" role="listitem"><div class="hs-n" id="stat-total-categorias">···</div><div class="hs-l">Categorías</div></div>' +
-            '<div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Ciudad</div></div>' +
-            '<div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Verificado</div></div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="hero-wave" aria-hidden="true">' +
-          '<svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="var(--bg)" d="M0,40 C360,90 1080,-10 1440,40 L1440,80 L0,80 Z"></path></svg>' +
-        '</div>' +
-      '</section>' +
-      '<div class="cats-wrap">' +
-        '<div class="cats" id="cats-container"></div>' +
-      '</div>';
+    heroMount.innerHTML = '<section class="hero" id="hero"><div class="hero-media" aria-hidden="true"><div class="hero-media-gradient"></div><div class="hero-media-pattern"></div></div><div class="hero-inner"><span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Entre Ríos, Argentina</span><h1 class="hero-title">La Guía de<br><strong>Concepción del Uruguay</strong></h1><p class="hero-sub">🎯 <strong><span id="hero-total-lugares">···</span> lugares verificados</strong> — curada con precisión: gastronomía, compras, salud, finanzas, patrimonio, naturaleza, alojamiento y mucho más</p><div class="hero-actions"><a class="hero-cta" href="#mapa">Explorar el mapa ↓</a></div><div class="hero-stats" role="list"><div class="hs" role="listitem"><div class="hs-n" id="stat-total-lugares">···</div><div class="hs-l">Lugares</div></div><div class="hs" role="listitem"><div class="hs-n" id="stat-total-categorias">···</div><div class="hs-l">Categorías</div></div><div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Ciudad</div></div><div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Verificado</div></div></div></div><div class="hero-wave" aria-hidden="true"><svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="var(--bg)" d="M0,40 C360,90 1080,-10 1440,40 L1440,80 L0,80 Z"></path></svg></div></section><div class="cats-wrap"><div class="cats" id="cats-container"></div></div>';
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -126,21 +123,15 @@
   // "servicios_publicos"), así que ese link quedaba roto y no filtraba
   // nada. Estilos nuevos en content.css (.footer-*), porque core.css no
   // trae estilos de footer.
+  //
+  // Igual que el hero: 100% literal, sin variables. Se colapsa a un
+  // único string constante por el mismo motivo (elimina ~5 ADD +
+  // strings intermedios en el arranque, misma escritura única a
+  // innerHTML).
   // ─────────────────────────────────────────────────────────────────────
   var footerMount = document.getElementById('site-footer');
   if (footerMount) {
-    footerMount.innerHTML =
-      '<p class="footer-quote">"El mejor lugar es el que no sabías que estaba ahí."</p>' +
-      '<div class="footer-logo">URU SPOT</div>' +
-      '<div class="footer-sub">Guía de Concepción del Uruguay · Entre Ríos · Argentina</div>' +
-      '<nav class="footer-links" aria-label="Navegación del sitio">' +
-        '<a href="#mapa">El mapa</a>' +
-        '<a class="footer-filtro" data-filtro="gastronomia" href="#mapa">Gastronomía</a>' +
-        '<a class="footer-filtro" data-filtro="patrimonio" href="#mapa">Patrimonio</a>' +
-        '<a class="footer-filtro" data-filtro="naturaleza" href="#mapa">Naturaleza</a>' +
-        '<a class="footer-filtro" data-filtro="alojamiento" href="#mapa">Alojamiento</a>' +
-        '<a class="footer-filtro" data-filtro="servicios_publicos" href="#mapa">Servicios</a>' +
-      '</nav>';
+    footerMount.innerHTML = '<p class="footer-quote">"El mejor lugar es el que no sabías que estaba ahí."</p><div class="footer-logo">URU SPOT</div><div class="footer-sub">Guía de Concepción del Uruguay · Entre Ríos · Argentina</div><nav class="footer-links" aria-label="Navegación del sitio"><a href="#mapa">El mapa</a><a class="footer-filtro" data-filtro="gastronomia" href="#mapa">Gastronomía</a><a class="footer-filtro" data-filtro="patrimonio" href="#mapa">Patrimonio</a><a class="footer-filtro" data-filtro="naturaleza" href="#mapa">Naturaleza</a><a class="footer-filtro" data-filtro="alojamiento" href="#mapa">Alojamiento</a><a class="footer-filtro" data-filtro="servicios_publicos" href="#mapa">Servicios</a></nav>';
   }
 
   // ─────────────────────────────────────────────────────────────────────
