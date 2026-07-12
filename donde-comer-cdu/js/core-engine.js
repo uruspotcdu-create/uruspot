@@ -173,6 +173,136 @@
   }
 
   // ─────────────────────────────────────────────────────────────────────
+  // Toast / snackbar — feedback no bloqueante para acciones puntuales
+  // (favorito guardado/quitado con "Deshacer", enlace copiado, errores de
+  // geolocalización o de carga). Reemplaza los alert() nativos que existían
+  // en esos mismos puntos: alert() bloquea el hilo principal y toda la
+  // interacción de la página hasta que el usuario lo cierra manualmente —
+  // exactamente lo opuesto a la sensación de "aplicación" que persigue este
+  // proyecto. Usa var(--z-toast), ya reservado en :root (core.css, capa
+  // tokens) sin que ningún componente lo consumiera todavía. Un solo
+  // contenedor compartido para todo el documento (igual que #scrim): no
+  // hace falta que exista en el HTML, se crea perezosamente en el primer
+  // toast que se muestra.
+  // ─────────────────────────────────────────────────────────────────────
+  var TOAST_DURACION_MS = 4200;
+  var toastContainerEl = null;
+  function getToastContainer() {
+    if (toastContainerEl) return toastContainerEl;
+    toastContainerEl = document.createElement('div');
+    toastContainerEl.className = 'us-toast-container';
+    toastContainerEl.setAttribute('role', 'status');
+    toastContainerEl.setAttribute('aria-live', 'polite');
+    document.body.appendChild(toastContainerEl);
+    return toastContainerEl;
+  }
+  // mostrarToast(mensaje, { accionLabel, onAccion, duracion })
+  // opts.accionLabel + opts.onAccion son opcionales: sin ellos, el toast es
+  // solo informativo (ej. "Enlace copiado"); con ellos, agrega un botón de
+  // acción (ej. "Deshacer" al quitar un favorito).
+  function mostrarToast(mensaje, opts) {
+    opts = opts || {};
+    var cont = getToastContainer();
+    var el = document.createElement('div');
+    el.className = 'us-toast';
+
+    var texto = document.createElement('span');
+    texto.className = 'us-toast-msg';
+    texto.textContent = mensaje;
+    el.appendChild(texto);
+
+    var cerrado = false;
+    var timeoutId = null;
+    function cerrar() {
+      if (cerrado) return;
+      cerrado = true;
+      clearTimeout(timeoutId);
+      el.classList.remove('is-visible');
+      el.classList.add('is-leaving');
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 220);
+    }
+    if (opts.accionLabel && typeof opts.onAccion === 'function') {
+      var btnAccion = document.createElement('button');
+      btnAccion.type = 'button';
+      btnAccion.className = 'us-toast-action';
+      btnAccion.textContent = opts.accionLabel;
+      btnAccion.addEventListener('click', function () {
+        opts.onAccion();
+        cerrar();
+      });
+      el.appendChild(btnAccion);
+    }
+    var btnCerrar = document.createElement('button');
+    btnCerrar.type = 'button';
+    btnCerrar.className = 'us-toast-close';
+    btnCerrar.setAttribute('aria-label', 'Cerrar aviso');
+    btnCerrar.textContent = '✕';
+    btnCerrar.addEventListener('click', cerrar);
+    el.appendChild(btnCerrar);
+
+    cont.appendChild(el);
+    // Fuerza reflow: agregar la clase "is-visible" en el mismo frame en que
+    // se crea el nodo no dispara la transición de entrada (el navegador
+    // colapsa ambos cambios de estilo en un único frame sin transición).
+    void el.offsetWidth;
+    el.classList.add('is-visible');
+
+    var duracion = opts.duracion || TOAST_DURACION_MS;
+    timeoutId = setTimeout(cerrar, duracion);
+    // Pausa el auto-cierre mientras el puntero está sobre el toast (mismo
+    // criterio que cualquier snackbar: no se cierra solo mientras el
+    // usuario está a mitad de leerlo o a punto de tocar "Deshacer").
+    el.addEventListener('mouseenter', function () { clearTimeout(timeoutId); });
+    el.addEventListener('mouseleave', function () { timeoutId = setTimeout(cerrar, 1500); });
+
+    return { close: cerrar };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Trampa de foco — utilidad compartida por Drawer y Spotlight (los dos
+  // diálogos con aria-modal="true" del sitio). Antes ninguno de los dos
+  // bloqueaba realmente el foco de teclado dentro de sí mismo: con Tab, un
+  // usuario de teclado o de lector de pantalla podía salir del diálogo
+  // "modal" y seguir tabulando por el contenido de fondo mientras el
+  // diálogo seguía abierto en pantalla — contradice el propio
+  // aria-modal="true" que ya declaraba el HTML. Tampoco se devolvía el
+  // foco al botón que abrió el diálogo al cerrarlo (quedaba huérfano, en
+  // <body>). Selector de "focusable" deliberadamente simple: cubre los
+  // elementos que hoy existen dentro de Drawer/Spotlight, no pretende ser
+  // una librería general de accesibilidad.
+  // ─────────────────────────────────────────────────────────────────────
+  var FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function crearTrampaFoco(container) {
+    var previoFocus = null;
+    function onKeydown(e) {
+      if (e.key !== 'Tab') return;
+      var focusables = Array.prototype.slice.call(container.querySelectorAll(FOCUSABLE_SELECTOR))
+        .filter(function (el) { return el.offsetParent !== null; }); // solo lo visible
+      if (!focusables.length) return;
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    }
+    return {
+      // Guarda qué elemento tenía el foco antes de abrir (para restaurarlo
+      // al cerrar) y empieza a interceptar Tab dentro del contenedor.
+      activar: function () {
+        previoFocus = document.activeElement;
+        container.addEventListener('keydown', onKeydown);
+      },
+      desactivar: function () {
+        container.removeEventListener('keydown', onKeydown);
+        if (previoFocus && typeof previoFocus.focus === 'function') previoFocus.focus();
+        previoFocus = null;
+      }
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
   // Motor principal
   // ─────────────────────────────────────────────────────────────────────
   function crearMotor(config) {
@@ -420,6 +550,16 @@
     function popupHtml(lugar, color) {
       var html = '';
       var g = GRUPOS[lugar.grupo];
+      // [NUEVA FUNCIONALIDAD — paridad mapa/lista] La vista lista ya
+      // permite guardar en favoritos y compartir cada lugar
+      // (cardListaHtml/lista-card-actions); el popup del mapa —la
+      // superficie que en la práctica ve la mayoría de las visitas,
+      // porque "Mapa" es la vista por defecto— no ofrecía ninguna de las
+      // dos. Mismos data-attribute (data-fav-id/data-share-id) que ya
+      // reconoce bindAccionesLugar(), así que no hace falta lógica nueva:
+      // solo pintar el botón y llamar a esa misma función desde
+      // 'popupopen' (ver agregarLugar más abajo).
+      var esFav = favoritos.is(lugar.id);
       if (lugar.destacado) html += '<span class="mapa-popup-destacado">★ Destacado</span>';
       html += '<span class="mapa-popup-cat">' + g.icon + ' ' + utils.escapeHtml(lugar.categoria || '') +
               ' <span class="mapa-popup-grupo">· ' + utils.escapeHtml(g.label) + '</span></span>';
@@ -449,6 +589,9 @@
           html += '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/' + waNumero + '">💬 WhatsApp</a>';
         }
       }
+      html += '<button type="button" class="fav' + (esFav ? ' is-fav' : '') + '" data-fav-id="' + lugar.id + '" aria-label="' +
+              (esFav ? 'Quitar de favoritos' : 'Guardar en favoritos') + '">' + (esFav ? '♥ Guardado' : '♡ Guardar') + '</button>';
+      html += '<button type="button" class="compartir" data-share-id="' + lugar.id + '" aria-label="Compartir este lugar">↗ Compartir</button>';
       html += '</div>';
       return html;
     }
@@ -485,6 +628,14 @@
         if (!marker._popupHtmlListo) {
           marker._popupHtmlListo = true;
           marker.setPopupContent(popupHtml(lugar, color));
+          // El popup de Leaflet recién tiene nodo DOM real después de
+          // setPopupContent(); "api" ya está asignado en este punto porque
+          // 'popupopen' solo puede dispararse por un gesto del usuario (o
+          // por irALugar()), siempre después de que crearMotor() terminó de
+          // construir el objeto motor completo — mismo razonamiento que ya
+          // documenta bindListaCards() para este mismo objeto "api".
+          var popupEl = marker.getPopup().getElement();
+          if (popupEl && api.bindAccionesLugar) api.bindAccionesLugar(popupEl);
         }
       });
       marker.lugarData = lugar;
@@ -827,6 +978,75 @@
       }, { timeout: 8000 });
     }
 
+    // ─── Reset de filtros — a nivel de motor para que tanto el link
+    // "ver todos" (bindControlesMapa) como los botones del estado vacío
+    // (renderEmptyState, justo abajo) llamen a la misma implementación. ───
+    function limpiarTodoFiltro(e) {
+      if (e) e.preventDefault();
+      if (els.buscador) els.buscador.value = '';
+      textoBusqueda = '';
+      filtroActivo = 'todos';
+      (pillNodes || document.querySelectorAll('.mapa-pill')).forEach(function (b) { b.classList.remove('activo'); });
+      var todosBtn = els.filtros ? els.filtros.querySelector('.mapa-pill[data-cat="todos"]') : document.querySelector('.mapa-pill[data-cat="todos"]');
+      if (todosBtn) todosBtn.classList.add('activo');
+      (legendNodes || document.querySelectorAll('.mapa-legend-item')).forEach(function (it) { it.classList.remove('activo'); });
+      aplicarFiltros();
+      // [ARQUITECTURA — mapa diferido] Ver nota histórica: si todavía no
+      // existe `map` (usuario tocó el reset antes de que la sección del
+      // mapa arrancara Leaflet), no hay vista que reposicionar todavía;
+      // cuando el mapa sí se cree va a arrancar directo en
+      // config.mapCenter/mapZoom, mismo resultado sin doble trabajo.
+      if (map) map.setView(config.mapCenter || [0, 0], config.mapZoom || 13);
+    }
+    // Variante más quirúrgica: borra solo el texto buscado y conserva el
+    // filtro de categoría activo (si el usuario ya eligió "Gastronomía" y
+    // tipeó algo que no encontró ahí, lo más útil es reofrecerle TODA
+    // gastronomía, no mandarlo de vuelta a "todos" los grupos del sitio).
+    function limpiarSoloBusqueda() {
+      if (els.buscador) els.buscador.value = '';
+      textoBusqueda = '';
+      aplicarFiltros();
+    }
+
+    // [NUEVA FUNCIONALIDAD — estado vacío accionable] Antes #mapa-empty era
+    // un texto fijo idéntico sin importar la causa (búsqueda sin match,
+    // filtro de categoría sin resultados, o ambos combinados) y sin ninguna
+    // acción: el usuario tenía que borrar a mano lo que había tipeado o
+    // volver a tocar el chip de categoría por su cuenta. Ahora el mensaje
+    // nombra la causa real (usa GRUPOS, ya cargado en el motor, para el
+    // nombre legible de la categoría) y ofrece el atajo exacto que la
+    // resuelve, en vez de una sola salida genérica ("ver todos") que en el
+    // caso de un filtro de categoría activo tira también ese filtro, que
+    // puede no ser lo que el usuario quería conservar.
+    function renderEmptyState() {
+      var cont = els.empty;
+      if (!cont) return;
+      var hayBusqueda = textoBusqueda !== '';
+      var hayFiltro = filtroActivo !== 'todos';
+      var grupoInfo = GRUPOS[filtroActivo];
+      var nombreGrupo = grupoInfo ? grupoInfo.label : filtroActivo;
+      var mensaje, acciones = '';
+      if (hayBusqueda && hayFiltro) {
+        mensaje = 'Sin resultados para "' + utils.escapeHtml(textoBusqueda) + '" dentro de ' + utils.escapeHtml(nombreGrupo) + '.';
+        acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="solo-busqueda">Buscar en todas las categorías</button>';
+        acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="todo">Ver todo ' + utils.escapeHtml(nombreGrupo) + '</button>';
+      } else if (hayBusqueda) {
+        mensaje = 'Sin resultados para "' + utils.escapeHtml(textoBusqueda) + '".';
+        acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="solo-busqueda">Borrar búsqueda</button>';
+      } else if (hayFiltro) {
+        mensaje = 'Todavía no hay lugares verificados en ' + utils.escapeHtml(nombreGrupo) + '.';
+        acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="todo">Ver todas las categorías</button>';
+      } else {
+        mensaje = 'No encontramos lugares con esa búsqueda o ese filtro.';
+        acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="todo">Ver todos los lugares</button>';
+      }
+      cont.innerHTML = '<p class="mapa-empty-msg">' + mensaje + '</p><div class="mapa-empty-acciones">' + acciones + '</div>';
+      var btnSoloBusqueda = cont.querySelector('[data-empty-accion="solo-busqueda"]');
+      if (btnSoloBusqueda) btnSoloBusqueda.addEventListener('click', limpiarSoloBusqueda);
+      var btnTodo = cont.querySelector('[data-empty-accion="todo"]');
+      if (btnTodo) btnTodo.addEventListener('click', limpiarTodoFiltro);
+    }
+
     // ─── Filtro combinado (categoría + subcategoría + búsqueda) ───
     function aplicarFiltros() {
       // [ARQUITECTURA — mapa diferido] initMapa() ya no corre en el
@@ -885,6 +1105,7 @@
         });
         visibles = todosLosMarkers.length;
         if (els.count) els.count.textContent = visibles;
+        if (visibles === 0) renderEmptyState();
         if (els.empty) els.empty.style.display = (visibles === 0) ? 'block' : 'none';
         if (els.mapaDiv) els.mapaDiv.style.display = (visibles === 0) ? 'none' : 'block';
         // [NUEVA FUNCIONALIDAD — vista lista] Mantiene la lista sincronizada
@@ -950,6 +1171,7 @@
       estadoSinOcultos = esCasoTrivial;
 
       if (els.count) els.count.textContent = visibles;
+      if (visibles === 0) renderEmptyState();
       if (els.empty) els.empty.style.display = (visibles === 0) ? 'block' : 'none';
       if (els.mapaDiv) els.mapaDiv.style.display = (visibles === 0) ? 'none' : 'block';
 
@@ -1443,25 +1665,7 @@
 
       var resetBtn = els.resetBtn;
       if (resetBtn) {
-        resetBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          if (buscador) buscador.value = '';
-          textoBusqueda = '';
-          filtroActivo = 'todos';
-          (pillNodes || document.querySelectorAll('.mapa-pill')).forEach(function (b) { b.classList.remove('activo'); });
-          var todosBtn = els.filtros ? els.filtros.querySelector('.mapa-pill[data-cat="todos"]') : document.querySelector('.mapa-pill[data-cat="todos"]');
-          if (todosBtn) todosBtn.classList.add('activo');
-          (legendNodes || document.querySelectorAll('.mapa-legend-item')).forEach(function (it) { it.classList.remove('activo'); });
-          aplicarFiltros();
-          // [ARQUITECTURA — mapa diferido] Ver nota en aplicarFiltros(): si
-          // todavía no existe `map` (el usuario tocó "ver todos" antes de
-          // que la sección del mapa arrancara Leaflet), no hay vista que
-          // reposicionar todavía. filtroActivo/textoBusqueda ya quedaron
-          // reseteados arriba, así que cuando el mapa sí se cree va a
-          // arrancar directamente en config.mapCenter/mapZoom (su propio
-          // setView() en initMapa()) — mismo resultado, sin doble trabajo.
-          if (map) map.setView(config.mapCenter || [0, 0], config.mapZoom || 13);
-        });
+        resetBtn.addEventListener('click', limpiarTodoFiltro);
       }
 
       var geolocBtn = els.geolocBtn;
@@ -1479,10 +1683,10 @@
           // "L is not defined" si el usuario alcanza a tocar el botón en
           // esa ventana.
           if (!map || typeof L === 'undefined') {
-            alert('El mapa todavía se está cargando — esperá un instante y probá de nuevo.');
+            mostrarToast('El mapa todavía se está cargando — esperá un instante y probá de nuevo.');
             return;
           }
-          if (!navigator.geolocation) { alert('Tu navegador no permite geolocalización.'); return; }
+          if (!navigator.geolocation) { mostrarToast('Tu navegador no permite geolocalización.'); return; }
           btn.disabled = true;
           btn.textContent = '📍 Buscando…';
           
@@ -1490,7 +1694,7 @@
           var timeoutId = setTimeout(function () {
             btn.disabled = false;
             btn.textContent = textoOriginal;
-            alert('La geolocalización tardó demasiado. Intenta de nuevo.');
+            mostrarToast('La geolocalización tardó demasiado. Intentá de nuevo.');
           }, 10000); // 10 segundos timeout
           
           navigator.geolocation.getCurrentPosition(function (pos) {
@@ -1509,7 +1713,7 @@
             if (vistaActual === 'lista' && ordenActual === 'cercania') renderLista();
           }, function () {
             clearTimeout(timeoutId);
-            alert('No pudimos acceder a tu ubicación.');
+            mostrarToast('No pudimos acceder a tu ubicación.');
             btn.disabled = false;
             btn.textContent = textoOriginal;
           });
@@ -1597,7 +1801,9 @@
           navigator.share({ title: lugar.nombre, text: texto, url: url }).catch(function () {});
         } else if (navigator.clipboard) {
           navigator.clipboard.writeText(url).then(function () {
-            alert('Enlace copiado: ' + url);
+            mostrarToast('Enlace copiado al portapapeles');
+          }).catch(function () {
+            mostrarToast('No pudimos copiar el enlace');
           });
         }
       },
@@ -1607,12 +1813,45 @@
           btn.addEventListener('click', function () {
             var id = parseInt(btn.getAttribute('data-fav-id'), 10);
             var ahoraFav = favoritos.toggle(id);
-            btn.classList.toggle('is-fav', ahoraFav);
-            if (btn.classList.contains('act-btn-lg')) {
-              btn.textContent = ahoraFav ? '♥ Guardado' : '♡ Guardar';
-            } else {
-              btn.textContent = ahoraFav ? '♥' : '♡';
-            }
+            // Refresca CUALQUIER botón de favorito de este mismo lugar que
+            // esté visible ahora mismo (mapa y lista muestran el mismo
+            // lugar con marcado propio) para que no queden desincronizados
+            // entre sí — antes solo se actualizaba el botón exacto que
+            // recibió el clic.
+            document.querySelectorAll('[data-fav-id="' + id + '"]').forEach(function (b) {
+              b.classList.toggle('is-fav', ahoraFav);
+              b.setAttribute('aria-label', ahoraFav ? 'Quitar de favoritos' : 'Guardar en favoritos');
+              if (b.classList.contains('act-btn-lg')) {
+                b.textContent = ahoraFav ? '♥ Guardado' : '♡ Guardar';
+              } else {
+                b.textContent = ahoraFav ? '♥' : '♡';
+              }
+            });
+            // [NUEVA FUNCIONALIDAD — feedback de favoritos] Confirmación no
+            // bloqueante con "Deshacer": un toque accidental en el corazón
+            // (mobile, listas densas) ya no obliga a buscar el lugar de
+            // nuevo para revertirlo. Reutiliza el mismo toggle(), no
+            // duplica el camino de guardado/lectura de localStorage.
+            var lugarRef = getLugarPorId(id);
+            var nombre = lugarRef ? lugarRef.nombre : 'Lugar';
+            mostrarToast(
+              ahoraFav ? '♥ Guardado en favoritos: ' + nombre : 'Quitado de favoritos: ' + nombre,
+              {
+                accionLabel: 'Deshacer',
+                onAccion: function () {
+                  var revertido = favoritos.toggle(id);
+                  document.querySelectorAll('[data-fav-id="' + id + '"]').forEach(function (b) {
+                    b.classList.toggle('is-fav', revertido);
+                    b.setAttribute('aria-label', revertido ? 'Quitar de favoritos' : 'Guardar en favoritos');
+                    if (b.classList.contains('act-btn-lg')) {
+                      b.textContent = revertido ? '♥ Guardado' : '♡ Guardar';
+                    } else {
+                      b.textContent = revertido ? '♥' : '♡';
+                    }
+                  });
+                }
+              }
+            );
           });
         });
         root.querySelectorAll('[data-share-id]').forEach(function (btn) {
@@ -1640,12 +1879,20 @@
     var closeBtn = document.getElementById('drawer-close');
     var scrim = document.getElementById('scrim');
     if (!trigger || !drawer) return;
+    var trampa = crearTrampaFoco(drawer);
 
     function abrir() {
       drawer.removeAttribute('hidden');
       trigger.setAttribute('aria-expanded', 'true');
       if (scrim) { scrim.removeAttribute('hidden'); scrim.setAttribute('data-owner', 'drawer'); }
       document.body.classList.add('no-scroll');
+      trampa.activar();
+      // Mueve el foco DENTRO del diálogo apenas se abre (el cierre, si
+      // existe, es el destino más predecible; si no, el primer link/botón
+      // de la nav) — antes el foco se quedaba en el botón hamburguesa,
+      // fuera del propio diálogo que se acababa de declarar abierto.
+      var primerFoco = closeBtn || drawer.querySelector('.us-drawer-item');
+      if (primerFoco) setTimeout(function () { primerFoco.focus(); }, 0);
     }
     function cerrar() {
       drawer.setAttribute('hidden', '');
@@ -1655,6 +1902,7 @@
         scrim.setAttribute('data-owner', '');
       }
       document.body.classList.remove('no-scroll');
+      trampa.desactivar();
     }
     trigger.addEventListener('click', abrir);
     if (closeBtn) closeBtn.addEventListener('click', cerrar);
@@ -1706,6 +1954,7 @@
     var suggestEl = document.getElementById('spotlight-suggestions');
     var emptyEl = document.getElementById('spotlight-empty');
     if (!overlay || !input || !realSearch) return;
+    var trampa = crearTrampaFoco(overlay);
 
     // [FIX] Antes #spotlight-results/#spotlight-suggestions nunca se
     // llenaban: el buscador filtraba el mapa por detrás pero no había
@@ -1766,11 +2015,13 @@
       overlay.setAttribute('aria-hidden', 'false');
       if (emptyEl) emptyEl.hidden = true;
       if (!input.value.trim()) renderSugeridos();
+      trampa.activar();
       setTimeout(function () { input.focus(); }, 50);
     }
     function cerrar() {
       overlay.classList.remove('is-open');
       overlay.setAttribute('aria-hidden', 'true');
+      trampa.desactivar();
     }
     if (openBtn) openBtn.addEventListener('click', abrir);
     if (openBtnHeader) openBtnHeader.addEventListener('click', abrir);
