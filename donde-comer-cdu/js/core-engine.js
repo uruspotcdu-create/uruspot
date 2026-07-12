@@ -183,7 +183,15 @@
 
     var map = null;
     var clusterGroups = {};
-    var todosLosMarkers = []; // {marker, grupo, categoria, nombreNorm, categoriaNorm, lugar}
+    var todosLosMarkers = []; // {marker, grupo, categoria, nombreNorm, categoriaNorm, lugar, color}
+    // [ARQUITECTURA — carga core/detalles] Índice id → entry con acceso
+    // O(1). Antes getLugarPorId()/irALugar() recorrían todosLosMarkers
+    // completo (862 comparaciones en el peor caso) cada vez que se abría un
+    // lugar desde un link externo o desde el spotlight. Se llena en
+    // agregarLugar() (una escritura extra por lugar, costo despreciable) y
+    // se reutiliza acá y en cargarDetalles() (ver más abajo) para aplicar
+    // el merge de detalles por id sin volver a escanear el array grande.
+    var lugaresPorId = {};
     // [OPTIMIZACIÓN — Fase 2, punto 2.1] Índice grupo → array de las mismas
     // entradas de todosLosMarkers (mismas referencias de objeto, no copias:
     // cualquier cambio sobre una entrada se ve reflejado en ambas
@@ -469,9 +477,14 @@
         categoria: lugar.categoria || '',
         nombreNorm: utils.normalizarTexto(lugar.nombre),
         categoriaNorm: utils.normalizarTexto(lugar.categoria || ''),
-        lugar: lugar
+        lugar: lugar,
+        // [ARQUITECTURA — carga core/detalles] Se guarda acá para que
+        // cargarDetalles() pueda regenerar el popup (popupHtml necesita el
+        // color) sin duplicar la lógica grupoInfo/GRUPO_DEFECTO de arriba.
+        color: color
       };
       todosLosMarkers.push(entry);
+      lugaresPorId[lugar.id] = entry;
       if (!markersPorGrupo[grupo]) markersPorGrupo[grupo] = [];
       markersPorGrupo[grupo].push(entry);
       return entry;
@@ -779,13 +792,8 @@
     }
 
     function getLugarPorId(id) {
-      // Corte temprano en vez de .filter(...)[0]: no sigue recorriendo el
-      // array después de encontrar el lugar buscado.
-      var total = todosLosMarkers.length;
-      for (var i = 0; i < total; i++) {
-        if (todosLosMarkers[i].lugar.id === id) return todosLosMarkers[i].lugar;
-      }
-      return null;
+      var entry = lugaresPorId[id];
+      return entry ? entry.lugar : null;
     }
 
     // [FIX] Buscador real para el overlay spotlight: antes el input de
@@ -825,11 +833,7 @@
     // que lo estuviera tapando, hace zoom hasta sacarlo del cluster (API
     // propia de Leaflet.markercluster) y abre su popup con la info.
     function irALugar(id) {
-      var entry = null;
-      var total = todosLosMarkers.length;
-      for (var i = 0; i < total; i++) {
-        if (todosLosMarkers[i].lugar.id === id) { entry = todosLosMarkers[i]; break; }
-      }
+      var entry = lugaresPorId[id];
       if (!entry) return false;
 
       setFiltro('todos', OPTS_LIMPIAR_BUSQUEDA);
@@ -1081,13 +1085,82 @@
       }
     }
 
+    // [ARQUITECTURA — carga core/detalles] Aplica los campos de detalle
+    // (direccion/descripcion/telefono/place_id) sobre los lugares ya
+    // cargados, por id, vía lugaresPorId (O(1) por registro). Se llama
+    // recién cuando cargarDatos() ya terminó su render inicial, así que
+    // esto nunca compite por el hilo principal con el trabajo que decide
+    // cuándo el usuario puede interactuar — y se agenda en tiempo ocioso
+    // porque, a diferencia del fetch en sí (I/O, no ocupa el hilo), el
+    // propio merge sí es trabajo de CPU (aunque liviano: ~770 asignaciones
+    // de propiedades como mucho).
+    //
+    // popupHtml() ya usa "if (lugar.direccion)" / "if (lugar.descripcion)"
+    // / etc. para cada campo opcional (ver popupHtml más arriba), así que
+    // un popup abierto ANTES de que lleguen los detalles simplemente
+    // muestra menos líneas — nunca rompe ni deja "undefined" a la vista — y
+    // se completa solo la próxima vez que se abra. El único caso que se
+    // maneja explícitamente acá es el popup que ya está abierto en el
+    // instante exacto en que llegan los detalles: se regenera en el acto
+    // para que el usuario no tenga que cerrar/volver a abrir.
+    function mergeDetalles(detalles) {
+      if (!Array.isArray(detalles) || !detalles.length) return;
+      var aplicar = function () {
+        var total = detalles.length;
+        for (var i = 0; i < total; i++) {
+          var d = detalles[i];
+          var entry = lugaresPorId[d.id];
+          if (!entry) continue; // detalle huérfano (lugar borrado del core, dataset desincronizado)
+          var lugar = entry.lugar;
+          if (d.direccion) lugar.direccion = d.direccion;
+          if (d.descripcion) lugar.descripcion = d.descripcion;
+          if (d.telefono) lugar.telefono = d.telefono;
+          if (d.place_id) lugar.place_id = d.place_id;
+
+          if (entry.marker._popupHtmlListo) {
+            entry.marker._popupHtmlListo = false;
+            if (entry.marker.isPopupOpen && entry.marker.isPopupOpen()) {
+              entry.marker._popupHtmlListo = true;
+              entry.marker.setPopupContent(popupHtml(lugar, entry.color));
+            }
+          }
+        }
+      };
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(aplicar, { timeout: 2000 });
+      } else {
+        setTimeout(aplicar, 1);
+      }
+    }
+
     function cargarConExtra() {
-      var url = config.extraDataUrl;
-      if (!url) { cargarDatos(config.lugares); return; }
-      fetch(url)
+      var coreUrl = config.extraDataUrl;
+      var detailsUrl = config.detailsDataUrl;
+
+      // [ARQUITECTURA — carga core/detalles] El fetch de detalles arranca
+      // ACÁ, en paralelo con el de core, no después: HTTP/2 los multiplexa
+      // sobre la misma conexión sin que se pisen, y arrancar la red lo
+      // antes posible es gratis (es I/O, no ocupa el hilo principal). Lo
+      // que se difiere no es el pedido, es la APLICACIÓN del resultado
+      // (mergeDetalles) — eso sí espera a que el mapa ya esté pintado.
+      var detallesPromise = detailsUrl
+        ? fetch(detailsUrl)
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (data) { return Array.isArray(data) ? data : []; })
+            .catch(function () { return []; })
+        : null;
+
+      if (!coreUrl) { cargarDatos(config.lugares); return; }
+      fetch(coreUrl)
         .then(function (r) { if (!r.ok) throw new Error('no existe'); return r.json(); })
-        .then(function (data) { cargarDatos(config.lugares, Array.isArray(data) ? data : []); })
-        .catch(function () { cargarDatos(config.lugares); });
+        .then(function (data) {
+          cargarDatos(config.lugares, Array.isArray(data) ? data : []);
+          if (detallesPromise) detallesPromise.then(mergeDetalles);
+        })
+        .catch(function () {
+          cargarDatos(config.lugares);
+          if (detallesPromise) detallesPromise.then(mergeDetalles);
+        });
     }
 
     // ─── Buscador, reset y geolocalización del panel del mapa ───
