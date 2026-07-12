@@ -103,6 +103,21 @@
       "@type": "Question",
       "name": "¿URU SPOT funciona bien desde el celular?",
       "acceptedAnswer": { "@type": "Answer", "text": "Sí, el sitio tiene un diseño responsive con una barra de navegación inferior pensada específicamente para uso mobile." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué diferencia hay entre Favoritos e Historial?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Favoritos es lo que guardás a propósito desde la tarjeta de un lugar. Historial se arma solo, con todo lo que ya abriste, para que puedas retomarlo sin buscarlo de nuevo." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo compartir un lugar puntual con alguien?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sí, cada lugar tiene su propia opción de compartir desde la tarjeta, que arma un link directo a esa ficha en particular, no a la guía en general." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo elegir según cuánto tiempo tengo disponible?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sí, el centro de recomendaciones (Explorar) tiene colecciones armadas por tiempo disponible —30 minutos, 1 hora, 2 horas, tarde o día completo— además de por clima y momento." }
     }
   ]
 }
@@ -224,7 +239,7 @@
       <span class="bn-icon" aria-hidden="true"></span>
       <span class="bn-label">Inicio</span>
     </a>
-    <a href="#home-hub" class="bn-item" data-bn="explorar">
+    <a href="#explorar-recomendaciones" class="bn-item" data-bn="explorar">
       <span class="bn-icon" aria-hidden="true"></span>
       <span class="bn-label">Explorar</span>
     </a>
@@ -283,13 +298,13 @@
     </div>
     <nav class="us-drawer-nav" aria-label="Secciones">
       <a href="#hero" class="us-drawer-item" data-drawer-action="inicio">Inicio</a>
-      <a href="#home-hub" class="us-drawer-item" data-drawer-action="explorar">Explorar</a>
+      <a href="#explorar-recomendaciones" class="us-drawer-item" data-drawer-action="explorar">Explorar</a>
       <a href="#mapa" class="us-drawer-item" data-drawer-action="mapa">Mapa</a>
       <button type="button" class="us-drawer-item" data-drawer-action="favoritos">Favoritos</button>
       <button type="button" class="us-drawer-item" data-drawer-action="historial">Historial</button>
       <button type="button" class="us-drawer-item" data-drawer-action="recorridos">Recorridos</button>
       <button type="button" class="us-drawer-item" data-drawer-action="planner">Planner</button>
-      <a href="#cd-wrap-container" class="us-drawer-item" data-drawer-action="categorias">Categorías</a>
+      <a href="#categorias-detalle" class="us-drawer-item" data-drawer-action="categorias">Categorías</a>
       <!-- [NUEVO — pasada "Dónde Comer"] Mismo patrón que el resto: <a>
            con clase us-drawer-item, sin lógica adicional. -->
       <a href="#donde-comer-guia" class="us-drawer-item" data-drawer-action="donde-comer">Dónde comer</a>
@@ -352,6 +367,45 @@
   <main id="main-content">
 
     <!-- ═══════════════════════════════════════════════════════════════
+         [NUEVO — pasada de contenido] POR QUÉ USAR URU SPOT
+         Franja de valor inmediatamente después del hero. 100% editorial,
+         sin datos de negocios puntuales: describe funcionalidades reales
+         ya presentes en este HTML (mapa, verificación, favoritos/historial,
+         diseño mobile) para dar contexto de confianza antes de que el
+         usuario siga bajando.
+    ═══════════════════════════════════════════════════════════════ -->
+    <section class="us-section" id="por-que-uruspot" aria-labelledby="title-por-que-uruspot">
+      <div class="section-header">
+        <div>
+          <span class="section-eyebrow">En una mirada</span>
+          <h2 class="section-title" id="title-por-que-uruspot">Por qué usar URU SPOT para moverte por la ciudad</h2>
+        </div>
+      </div>
+      <div class="dc-grid" role="list" aria-label="Razones para usar URU SPOT">
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">🗺️</span>
+          <h3>Todo en un mismo mapa</h3>
+          <p>Gastronomía, patrimonio, naturaleza, alojamiento y servicios, agrupados y filtrables desde una sola pantalla en vez de saltar entre apps distintas.</p>
+        </article>
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">✓</span>
+          <h3>Datos verificados</h3>
+          <p>El contador de resultados del mapa marca explícitamente "Datos verificados" sobre el total de lugares que se muestran, no una lista sin curar.</p>
+        </article>
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">❤️</span>
+          <h3>Favoritos e historial</h3>
+          <p>Guardá lo que te interesa y retomá después justo donde lo dejaste, sin tener que volver a buscar lo mismo dos veces.</p>
+        </article>
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">📱</span>
+          <h3>Pensado para el celular</h3>
+          <p>Barra de navegación inferior, búsqueda instantánea y vista de lista pensadas para recorrer la ciudad con el teléfono en la mano.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
          [NUEVO — 2ª pasada] CÓMO EXPLORAR LA CIUDAD
          Overview de categorías + tabla de contenido de acceso rápido.
          100% estática, sin fetch. Las 5 categorías y su valor
@@ -371,47 +425,102 @@
           <h2 class="section-title" id="title-explorar-ciudad">Cómo explorar Concepción del Uruguay</h2>
         </div>
       </div>
-      <p class="dc-intro-copy" style="max-width:72ch">
+      <p class="dc-intro-copy dc-intro-copy--wide">
         URU SPOT organiza toda la ciudad en cinco grandes categorías. Tocá la que te
         interesa para saltar directo al mapa ya filtrado, o usá los accesos rápidos
         de abajo para ir a cualquier otra parte de la guía.
       </p>
 
       <div class="dc-grid" role="list" aria-label="Categorías de la ciudad">
-        <a class="dc-card" role="listitem" href="#mapa" data-filtro="gastronomia" style="text-decoration:none">
+        <a class="dc-card" role="listitem" href="#mapa" data-filtro="gastronomia">
           <span class="dc-card-icon" aria-hidden="true">🍽️</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Gastronomía</h3>
+          <h3>Gastronomía</h3>
           <p>Restaurantes, bares y cafés, con rieles curados y filtros por presupuesto y ocasión.</p>
         </a>
-        <a class="dc-card" role="listitem" href="#mapa" data-filtro="patrimonio" style="text-decoration:none">
+        <a class="dc-card" role="listitem" href="#mapa" data-filtro="patrimonio">
           <span class="dc-card-icon" aria-hidden="true">🏛️</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Patrimonio</h3>
+          <h3>Patrimonio</h3>
           <p>Sitios históricos y culturales de la ciudad, ubicados en el mapa interactivo.</p>
         </a>
-        <a class="dc-card" role="listitem" href="#mapa" data-filtro="naturaleza" style="text-decoration:none">
+        <a class="dc-card" role="listitem" href="#mapa" data-filtro="naturaleza">
           <span class="dc-card-icon" aria-hidden="true">🌳</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Naturaleza</h3>
+          <h3>Naturaleza</h3>
           <p>Espacios verdes, costa del río y lugares al aire libre para recorrer.</p>
         </a>
-        <a class="dc-card" role="listitem" href="#mapa" data-filtro="alojamiento" style="text-decoration:none">
+        <a class="dc-card" role="listitem" href="#mapa" data-filtro="alojamiento">
           <span class="dc-card-icon" aria-hidden="true">🛏️</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Alojamiento</h3>
+          <h3>Alojamiento</h3>
           <p>Opciones para hospedarte en la ciudad, filtrables desde el mismo mapa.</p>
         </a>
-        <a class="dc-card" role="listitem" href="#mapa" data-filtro="servicios_publicos" style="text-decoration:none">
+        <a class="dc-card" role="listitem" href="#mapa" data-filtro="servicios_publicos">
           <span class="dc-card-icon" aria-hidden="true">🏥</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Servicios</h3>
+          <h3>Servicios</h3>
           <p>Servicios públicos y de utilidad para moverte por la ciudad con más información.</p>
         </a>
       </div>
 
       <h3 class="dc-subhead">Acceso rápido a esta guía</h3>
       <nav class="dc-intro-actions" aria-label="Accesos rápidos a secciones de la página">
-        <a class="dc-chip" href="#home-hub">Explorar recomendaciones</a>
+        <a class="dc-chip" href="#para-quien-es-esta-guia">¿Qué tipo de visita hacés?</a>
+        <a class="dc-chip" href="#explorar-recomendaciones">Explorar recomendaciones</a>
+        <a class="dc-chip" href="#segun-tiempo-y-momento">Según tiempo o momento</a>
         <a class="dc-chip" href="#mapa">Ver el mapa completo</a>
-        <a class="dc-chip dc-chip--primary" href="#donde-comer-guia">Guía: dónde comer</a>
-        <a class="dc-chip" href="#cd-wrap-container">Categorías en detalle</a>
+        <a class="dc-chip" href="#donde-comer-guia">Guía: dónde comer</a>
+        <a class="dc-chip" href="#guardar-volver-compartir">Favoritos, historial y compartir</a>
+        <a class="dc-chip" href="#categorias-detalle">Categorías en detalle</a>
       </nav>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         [NUEVO — pasada de contenido] ¿QUÉ TIPO DE VISITA ESTÁS HACIENDO?
+         Descubrimiento por perfil. 100% estática. Cada CTA reutiliza
+         exactamente claves ya declaradas en data-home-keys de #home-hub
+         (no se inventa ninguna colección nueva) o filtros de categoría ya
+         usados en el resto del documento (data-filtro). La tarjeta de "día
+         completo" menciona el planificador flotante (#fab-planner) y el
+         menú lateral como texto plano, no como controles falsos: no se
+         agrega ningún botón nuevo que dispare data-drawer-action fuera del
+         propio <aside id="app-drawer">, porque no hay forma de confirmar
+         desde este archivo si ese binding es delegado globalmente o
+         exclusivo del drawer.
+    ═══════════════════════════════════════════════════════════════ -->
+    <section class="us-section" id="para-quien-es-esta-guia" aria-labelledby="title-para-quien-es-esta-guia">
+      <div class="section-header">
+        <div>
+          <span class="section-eyebrow">Elegí tu punto de partida</span>
+          <h2 class="section-title" id="title-para-quien-es-esta-guia">¿Qué tipo de visita estás haciendo hoy?</h2>
+        </div>
+      </div>
+      <p class="dc-intro-copy dc-intro-copy--wide">
+        No hace falta que recorras toda la guía de arriba a abajo. Elegí la situación que
+        más se parece a la tuya y te dejamos directo en la colección que le sirve.
+      </p>
+      <div class="dc-grid" role="list" aria-label="Perfiles de visita">
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">⏱️</span>
+          <h3>Estás de paso, con poco tiempo</h3>
+          <p>Arrancá por las colecciones de <strong>Plan 30 min</strong> y <strong>Cerca tuyo</strong>, y activá "Cerca de mí" en el mapa para no perder tiempo yendo y viniendo.</p>
+          <div class="dc-intro-actions"><a class="dc-chip" href="#explorar-recomendaciones">Ver colecciones rápidas</a></div>
+        </article>
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">👨‍👩‍👧</span>
+          <h3>Vas con la familia</h3>
+          <p>Las colecciones de <strong>Familias</strong> y <strong>Con estacionamiento</strong> filtran directo lo que suele funcionar mejor para grupos con chicos.</p>
+          <div class="dc-intro-actions"><a class="dc-chip" href="#explorar-recomendaciones">Ver colecciones para familias</a></div>
+        </article>
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">💎</span>
+          <h3>Sos de acá y querés redescubrir</h3>
+          <p>Las colecciones de <strong>Joyas ocultas</strong> y <strong>Recién agregados</strong> están pensadas para no repetir siempre los mismos lugares.</p>
+          <div class="dc-intro-actions"><a class="dc-chip" href="#explorar-recomendaciones">Ver joyas ocultas</a></div>
+        </article>
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">📅</span>
+          <h3>Querés armar el día completo</h3>
+          <p>Combiná la colección <strong>Plan de día</strong> con el planificador rápido (botón flotante) o con un recorrido armado desde el menú lateral.</p>
+          <div class="dc-intro-actions"><a class="dc-chip" href="#explorar-recomendaciones">Ver Plan de día</a></div>
+        </article>
+      </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
@@ -439,10 +548,10 @@
          data-home-keys, agrupadas por tipo — contenido derivado 1:1 del
          propio atributo, no inventado.
     ═══════════════════════════════════════════════════════════════ -->
-    <div class="sec-title reveal">
+    <div class="sec-title reveal" id="explorar-recomendaciones">
       <span class="section-eyebrow">Explorar</span>
       <h2>Recomendaciones pensadas para vos</h2>
-      <p class="dc-intro-copy" style="max-width:72ch">
+      <p class="dc-intro-copy dc-intro-copy--wide">
         Esta sección arma automáticamente carruseles temáticos a partir de todo
         lo que hay cargado en la guía: desde lo más recomendado hasta ideas
         rápidas según cuánto tiempo tengas disponible.
@@ -465,6 +574,74 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
+         [NUEVO — pasada de contenido] ELEGÍ SEGÚN CUÁNTO TIEMPO TENGAS /
+         SEGÚN EL MOMENTO. Desarrolla en contenido real las claves de
+         data-home-keys que hasta ahora solo aparecían como tags sueltos
+         (plan-30min, plan-1h, plan-2h, plan-tarde, plan-dia, lluvia,
+         verano, segun-momento): no se inventa ninguna colección nueva,
+         solo se explica con más detalle lo que ya existe.
+    ═══════════════════════════════════════════════════════════════ -->
+    <section class="us-section" id="segun-tiempo-y-momento" aria-labelledby="title-segun-tiempo-y-momento">
+      <div class="section-header">
+        <div>
+          <span class="section-eyebrow">Otra forma de elegir</span>
+          <h2 class="section-title" id="title-segun-tiempo-y-momento">Según cuánto tiempo tengas o el momento</h2>
+        </div>
+      </div>
+      <div class="dc-cols">
+        <div>
+          <h3 class="dc-subhead">Por tiempo disponible</h3>
+          <div class="dc-grid" role="list" aria-label="Colecciones por tiempo disponible">
+            <article class="dc-card" role="listitem">
+              <span class="dc-card-icon" aria-hidden="true">⏱️</span>
+              <h3>Plan 30 min</h3>
+              <p>Para una parada corta entre otra cosa que estés haciendo.</p>
+            </article>
+            <article class="dc-card" role="listitem">
+              <span class="dc-card-icon" aria-hidden="true">🕐</span>
+              <h3>Plan 1 h / 2 h</h3>
+              <p>Un rato más largo, sin llegar a ocupar media jornada.</p>
+            </article>
+            <article class="dc-card" role="listitem">
+              <span class="dc-card-icon" aria-hidden="true">🌇</span>
+              <h3>Plan de tarde</h3>
+              <p>Para cuando arrancás después del mediodía y querés aprovechar lo que queda del día.</p>
+            </article>
+            <article class="dc-card" role="listitem">
+              <span class="dc-card-icon" aria-hidden="true">📅</span>
+              <h3>Plan de día</h3>
+              <p>Cuando tenés la jornada completa libre para recorrer sin apuro.</p>
+            </article>
+          </div>
+        </div>
+        <div>
+          <h3 class="dc-subhead">Por clima o momento</h3>
+          <div class="dc-grid" role="list" aria-label="Colecciones por clima o momento">
+            <article class="dc-card" role="listitem">
+              <span class="dc-card-icon" aria-hidden="true">🌧️</span>
+              <h3>Días de lluvia</h3>
+              <p>Opciones que no dependen de que el clima acompañe.</p>
+            </article>
+            <article class="dc-card" role="listitem">
+              <span class="dc-card-icon" aria-hidden="true">☀️</span>
+              <h3>Verano</h3>
+              <p>Pensado para los días de más calor del año.</p>
+            </article>
+            <article class="dc-card" role="listitem">
+              <span class="dc-card-icon" aria-hidden="true">🕰️</span>
+              <h3>Según el momento</h3>
+              <p>Una colección que se ajusta según el momento en el que estés explorando.</p>
+            </article>
+          </div>
+          <p class="dc-intro-copy" style="margin-bottom:0">
+            Todas estas colecciones viven dentro de <a href="#explorar-recomendaciones">Explorar</a>,
+            junto al resto de los carruseles temáticos.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
          MAPA COMPLETO
     ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="mapa" aria-labelledby="title-mapa">
@@ -474,6 +651,30 @@
           <h2 class="section-title" id="title-mapa">Todo en un mapa</h2>
         </div>
         <span class="section-count" id="mapa-total-badge">cargando…</span>
+      </div>
+
+      <!-- [NUEVO — pasada de contenido] Microguía general de la barra de
+           herramientas del mapa. A diferencia del .dc-intro de más abajo
+           (que es específico de gastronomía), esto describe los controles
+           de #mapa-toolbar para las 5 categorías por igual. No agrega
+           ningún control nuevo, solo explica los que ya existen. -->
+      <div class="dc-intro reveal">
+        <span class="section-eyebrow">Cómo usar esta herramienta</span>
+        <h3 class="dc-intro-title">Sacale el jugo al mapa en cinco pasos</h3>
+        <ol class="dc-steps">
+          <li><span><strong>Elegí una categoría</strong> desde los filtros de arriba, o dejá todas activas para ver el panorama completo.</span></li>
+          <li><span><strong>Afiná con subcategorías</strong> si ya sabés qué tipo de lugar buscás dentro de esa categoría.</span></li>
+          <li><span><strong>Ordená los resultados</strong> por relevancia, cercanía, recomendados o recién agregados, según qué te importa más en este momento.</span></li>
+          <li><span><strong>Cambiá entre mapa y lista</strong> según prefieras ubicar visualmente cada lugar o recorrerlos con scroll.</span></li>
+          <li><span><strong>Tocá "Cerca de mí"</strong> para reordenar todo por distancia real a tu ubicación actual.</span></li>
+        </ol>
+        <p class="dc-intro-copy" style="margin-bottom:.6rem"><strong>Errores comunes que hacen perder tiempo:</strong></p>
+        <ul class="dc-checklist dc-checklist--warn" style="margin-bottom:0">
+          <li>Dejar todos los filtros apagados y scrollear a ciegas entre cientos de lugares.</li>
+          <li>Buscar por rubro genérico en vez de usar la subcategoría, que acota mucho más rápido.</li>
+          <li>Olvidarse de activar "Cerca de mí" cuando en realidad lo que importa es la distancia.</li>
+          <li>No guardar nada en Favoritos y tener que rehacer la misma búsqueda al rato.</li>
+        </ul>
       </div>
 
       <div id="mapa-wrap">
@@ -519,8 +720,12 @@
                  estaba en el HTML desde el parseo o si lo agregó un
                  script; así que un enlace nuevo con este atributo queda
                  enganchado gratis por el motor existente.
-               · href="#home-hub" / href="#donde-comer-guia" → anchors
-                 nativos, mismo patrón que ya usan bottom-nav y drawer.
+               · href="#explorar-recomendaciones" / href="#donde-comer-guia"
+                 → anchors nativos, mismo patrón que ya usan bottom-nav y
+                 drawer. [Refinamiento] "#explorar-recomendaciones" es el id
+                 de la cabecera <h2> que antecede a la sección#home-hub, no
+                 el mount point en sí — así el scroll revela también el
+                 título en vez de aterrizar directo en los carruseles.
                · class="reveal" → misma clase de animación de entrada que
                  ya usa "Categorías en detalle" (ver más abajo) al
                  scrollear.
@@ -535,7 +740,7 @@
           </p>
           <div class="dc-intro-actions">
             <a class="dc-chip dc-chip--primary" href="#mapa" data-filtro="gastronomia">Ver todos los lugares para comer</a>
-            <a class="dc-chip" href="#home-hub">Colecciones por presupuesto y ocasión</a>
+            <a class="dc-chip" href="#explorar-recomendaciones">Colecciones por presupuesto y ocasión</a>
             <a class="dc-chip" href="#donde-comer-guia">Guía completa para elegir ↓</a>
           </div>
         </div>
@@ -603,6 +808,7 @@
         max-width:62ch;
         margin:0 0 1rem;
       }
+      .dc-intro-copy--wide{max-width:72ch}
       .dc-intro-actions{display:flex;flex-wrap:wrap;gap:.55rem}
       .dc-chip{
         display:inline-flex;align-items:center;gap:.4rem;
@@ -634,13 +840,21 @@
         margin:1rem 0 2rem;
       }
       .dc-card{
+        display:block;
         padding:1.1rem 1.1rem 1.25rem;
         border:1px solid var(--line, rgba(245,239,230,.12));
         border-radius:14px;
         background:var(--surface, rgba(245,239,230,.035));
+        text-decoration:none;
+        transition:transform .15s ease, border-color .15s ease;
       }
+      a.dc-card:hover, a.dc-card:focus-visible{
+        border-color:var(--accent, #d9a441);
+        transform:translateY(-2px);
+      }
+      @media (prefers-reduced-motion:reduce){ .dc-card{transition:none} a.dc-card:hover{transform:none} }
       .dc-card-icon{font-size:1.35rem;display:block;margin-bottom:.5rem}
-      .dc-card h4{margin:0 0 .35rem;font-size:1rem;font-weight:600}
+      .dc-card h3{margin:0 0 .35rem;font-size:1rem;font-weight:600}
       .dc-card p{margin:0;font-size:.85rem;line-height:1.5;color:var(--ink-soft, rgba(243,236,224,.75))}
       .dc-card a{color:inherit}
       .dc-subhead{
@@ -665,6 +879,16 @@
         font-size:.9rem;line-height:1.5;color:var(--ink-soft, rgba(243,236,224,.85));
       }
       .dc-checklist li::before{content:"✓";flex:none;color:var(--accent, #d9a441);font-weight:700}
+      .dc-checklist--warn li::before{content:"✗";color:var(--warn, #e0685a)}
+      .dc-steps{list-style:none;margin:0 0 2rem;padding:0;counter-reset:dc-step;display:flex;flex-direction:column;gap:.85rem}
+      .dc-steps li{display:flex;gap:.85rem;align-items:flex-start;font-size:.9rem;line-height:1.55;color:var(--ink-soft, rgba(243,236,224,.85))}
+      .dc-steps li::before{
+        counter-increment:dc-step;content:counter(dc-step);
+        flex:none;width:1.6rem;height:1.6rem;border-radius:50%;
+        background:var(--accent, #d9a441);color:var(--on-accent, #1a1208);
+        font-weight:700;font-size:.8rem;line-height:1.6rem;text-align:center;
+      }
+      .dc-steps strong{color:var(--ink, #f3ece0)}
       .dc-faq{margin:0 0 2rem;display:flex;flex-direction:column;gap:.6rem}
       .dc-faq details{
         border:1px solid var(--line, rgba(245,239,230,.12));
@@ -707,7 +931,7 @@
         <span class="section-count">Guía · datos verificados</span>
       </div>
 
-      <p class="dc-intro-copy" style="max-width:72ch">
+      <p class="dc-intro-copy dc-intro-copy--wide">
         Esta guía reúne, en un solo lugar, las herramientas de URU SPOT pensadas para
         la parte gastronómica de la ciudad: cómo buscar, cómo filtrar, cómo descubrir
         algo nuevo y cómo no perder de vista lo que ya te gustó.
@@ -717,33 +941,38 @@
       <div class="dc-grid" role="list" aria-label="Herramientas para encontrar dónde comer">
         <article class="dc-card" role="listitem">
           <span class="dc-card-icon" aria-hidden="true">🔎</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Búsqueda instantánea</h3>
+          <h3>Búsqueda instantánea</h3>
           <p>Escribí el nombre de un lugar en el <a href="#mapa">buscador del mapa</a> o en el spotlight del header y los resultados se sincronizan al instante.</p>
         </article>
         <article class="dc-card" role="listitem">
           <span class="dc-card-icon" aria-hidden="true">🏷️</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Filtros por tipo</h3>
+          <h3>Filtros por tipo</h3>
           <p>Combiná categoría, subcategoría y orden (relevancia, cercanía, recomendados, recién agregados) desde la barra de filtros del mapa.</p>
         </article>
         <article class="dc-card" role="listitem">
           <span class="dc-card-icon" aria-hidden="true">🎢</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Rieles curados</h3>
+          <h3>Rieles curados</h3>
           <p>Más populares, mejor puntuados, recién agregados y por tipo de cocina, siempre visibles arriba del mapa.</p>
         </article>
         <article class="dc-card" role="listitem">
           <span class="dc-card-icon" aria-hidden="true">📍</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Cerca de mí</h3>
+          <h3>Cerca de mí</h3>
           <p>Un toque en <em>"Cerca de mí"</em> reordena todo por distancia real a tu ubicación actual.</p>
         </article>
         <article class="dc-card" role="listitem">
           <span class="dc-card-icon" aria-hidden="true">🗂️</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Mapa o lista</h3>
+          <h3>Mapa o lista</h3>
           <p>Cambiá de vista según prefieras explorar visualmente o recorrer los resultados en formato lista.</p>
         </article>
         <article class="dc-card" role="listitem">
           <span class="dc-card-icon" aria-hidden="true">❤️</span>
-          <h3 style="margin:0 0 .35rem;font-size:1rem;font-weight:600">Favoritos</h3>
+          <h3>Favoritos</h3>
           <p>Guardá cualquier lugar desde su tarjeta y encontralo después agrupado en <em>Favoritos</em> (barra inferior o menú).</p>
+        </article>
+        <article class="dc-card" role="listitem">
+          <span class="dc-card-icon" aria-hidden="true">📤</span>
+          <h3>Compartí lugares</h3>
+          <p>Cada lugar se puede compartir directo desde su tarjeta, sin tener que copiar y pegar el nombre a mano para que alguien más lo encuentre.</p>
         </article>
       </div>
 
@@ -751,7 +980,7 @@
         <div>
           <h3 class="dc-subhead">Explorá por presupuesto y ocasión</h3>
           <p class="dc-intro-copy">
-            El centro de recomendaciones (<a href="#home-hub">Explorar</a>) arma colecciones
+            El centro de recomendaciones (<a href="#explorar-recomendaciones">Explorar</a>) arma colecciones
             automáticas que también aplican a la parte gastronómica de la ciudad. Además de
             los rieles de arriba, vas a encontrar:
           </p>
@@ -770,6 +999,14 @@
             <li>Salís en grupo grande o con niños: mirá las colecciones de <strong>familias</strong> y las que tienen <strong>estacionamiento</strong>.</li>
             <li>Estás recorriendo el centro sin plan fijo: activá <strong>Cerca de mí</strong> y cambiá a vista <strong>Lista</strong> para decidir más rápido.</li>
             <li>Cuidando el presupuesto: usá directamente las colecciones <strong>económicos</strong> o <strong>gratis</strong> en vez de filtrar a mano.</li>
+          </ul>
+
+          <h3 class="dc-subhead">Errores comunes al elegir</h3>
+          <ul class="dc-checklist dc-checklist--warn">
+            <li>Quedarte con el primer resultado sin ordenar por mejor puntuados o más recomendados.</li>
+            <li>No revisar la subcategoría y terminar mirando lugares que no tienen nada que ver con lo que buscabas.</li>
+            <li>Ignorar los rieles de recién agregados y repetir siempre las mismas opciones de siempre.</li>
+            <li>Elegir sin filtrar por ocasión cuando vas en grupo grande o con niños.</li>
           </ul>
 
           <h3 class="dc-subhead">Antes de salir</h3>
@@ -816,7 +1053,7 @@
 
           <h3 class="dc-subhead" style="margin-top:1.5rem">Seguí explorando</h3>
           <div class="dc-intro-actions">
-            <a class="dc-chip" href="#cd-wrap-container">Categorías en detalle</a>
+            <a class="dc-chip" href="#categorias-detalle">Categorías en detalle</a>
             <a class="dc-chip" href="#mapa" data-filtro="patrimonio">Patrimonio</a>
             <a class="dc-chip" href="#mapa" data-filtro="alojamiento">Alojamiento</a>
           </div>
@@ -825,14 +1062,66 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
+         [NUEVO — pasada de contenido] GUARDÁ, VOLVÉ Y COMPARTÍ
+         Mini-guías paso a paso para 3 funcionalidades transversales
+         (favoritos, historial, compartir) que hasta ahora solo se
+         mencionaban de forma suelta en la FAQ y en la vitrina de la guía
+         gastronómica. 100% estática, describe únicamente comportamiento
+         ya documentado en otros comentarios de este mismo archivo
+         (favoritos vía bindAccionesLugar/compartirLugar, bottom-nav y
+         drawer con data-bn="favoritos" / data-drawer-action="historial").
+    ═══════════════════════════════════════════════════════════════ -->
+    <section class="us-section" id="guardar-volver-compartir" aria-labelledby="title-guardar-volver-compartir">
+      <div class="section-header">
+        <div>
+          <span class="section-eyebrow">Sacale el jugo</span>
+          <h2 class="section-title" id="title-guardar-volver-compartir">Guardá, volvé y compartí</h2>
+        </div>
+      </div>
+      <p class="dc-intro-copy dc-intro-copy--wide">
+        Tres funciones chicas que hacen que explorar la ciudad sea mucho menos repetitivo:
+        no perder de vista lo que te gustó, retomar donde dejaste y pasarle un lugar a
+        quien te acompaña sin tener que explicarle dónde queda.
+      </p>
+      <div class="dc-cols">
+        <div>
+          <h3 class="dc-subhead">Guardar un favorito</h3>
+          <ol class="dc-steps">
+            <li><span>Abrí la tarjeta del lugar que te interesa, desde el mapa, la lista o cualquier carrusel de Explorar.</span></li>
+            <li><span>Tocá el ícono de favorito (❤️) en la tarjeta.</span></li>
+            <li><span>Encontralo agrupado en <strong>Favoritos</strong>, accesible desde la barra inferior o el menú lateral.</span></li>
+          </ol>
+        </div>
+        <div>
+          <h3 class="dc-subhead">Retomar desde el historial</h3>
+          <ol class="dc-steps">
+            <li><span>Cada lugar que abrís queda registrado automáticamente, sin que tengas que guardarlo a mano.</span></li>
+            <li><span>Entrá a <strong>Historial</strong> desde el menú lateral para ver todo lo que ya viste.</span></li>
+            <li><span>Usá <em>Continuar explorando</em> en Recomendaciones para retomar justo donde lo dejaste.</span></li>
+          </ol>
+        </div>
+      </div>
+      <h3 class="dc-subhead">Compartir un lugar</h3>
+      <ol class="dc-steps" style="max-width:62ch">
+        <li><span>Desde la tarjeta de cualquier lugar, usá la opción de compartir.</span></li>
+        <li><span>Se arma un link directo a ese lugar puntual, no a la guía en general.</span></li>
+        <li><span>Mandalo por el canal que prefieras: quien lo reciba entra directo a esa ficha.</span></li>
+      </ol>
+      <nav class="dc-intro-actions" aria-label="Seguir navegando">
+        <a class="dc-chip dc-chip--primary" href="#mapa">Ir al mapa</a>
+        <a class="dc-chip" href="#explorar-recomendaciones">Ver Favoritos e Historial en Explorar</a>
+      </nav>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
          CATEGORÍAS EN DETALLE (SEO, mount point)
     ═══════════════════════════════════════════════════════════════ -->
-    <div class="sec-title reveal">
+    <div class="sec-title reveal" id="categorias-detalle">
       <h2>Categorías en detalle</h2>
       <!-- [NUEVO — 2ª pasada] Bajada + accesos por categoría. El mount
            point #cd-wrap-container queda exactamente igual que antes;
            esto sólo agrega contexto y enlazado interno alrededor. -->
-      <p class="dc-intro-copy" style="max-width:72ch;margin-top:.5rem">
+      <p class="dc-intro-copy dc-intro-copy--wide" style="margin-top:.5rem">
         Cada categoría de la ciudad tiene su propia ficha con subcategorías y
         lugares agrupados. Si ya sabés qué estás buscando, saltá directo:
       </p>
@@ -905,10 +1194,41 @@
               <summary>¿URU SPOT funciona bien desde el celular?</summary>
               <p class="dc-faq-a">Sí, el sitio tiene un diseño responsive con una barra de navegación inferior pensada específicamente para uso mobile.</p>
             </details>
+            <details>
+              <summary>¿Qué diferencia hay entre Favoritos e Historial?</summary>
+              <p class="dc-faq-a">Favoritos es lo que guardás a propósito desde la tarjeta de un lugar. Historial se arma solo, con todo lo que ya abriste, para que puedas retomarlo sin buscarlo de nuevo.</p>
+            </details>
+            <details>
+              <summary>¿Puedo compartir un lugar puntual con alguien?</summary>
+              <p class="dc-faq-a">Sí, cada lugar tiene su propia opción de compartir desde la tarjeta, que arma un link directo a esa ficha en particular, no a la guía en general.</p>
+            </details>
+            <details>
+              <summary>¿Puedo elegir según cuánto tiempo tengo disponible?</summary>
+              <p class="dc-faq-a">Sí, el centro de recomendaciones (Explorar) tiene colecciones armadas por tiempo disponible —30 minutos, 1 hora, 2 horas, tarde o día completo— además de por clima y momento.</p>
+            </details>
           </div>
+
+          <!-- [Refinamiento] Compartí el sitio completo: mismo patrón 1:1 que
+               "Compartí esta guía" de #donde-comer-guia (misma clase
+               dc-share, mismos 3 canales), pero apuntando al sitio en
+               general en vez de a la guía gastronómica puntual. Antes solo
+               existía esta acción para la guía de comida; quien termina de
+               leer "de qué se trata todo" es a quien más sentido le hace
+               ofrecerle compartirlo. -->
+          <h3 class="dc-subhead" style="margin-top:1.5rem">Compartí URU SPOT</h3>
+          <div class="dc-share">
+            <a href="https://wa.me/?text=Descubrí%20URU%20SPOT%2C%20la%20guía%20de%20Concepción%20del%20Uruguay%3A%20https%3A%2F%2Furuspot.pages.dev%2F" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
+            <a href="https://t.me/share/url?url=https%3A%2F%2Furuspot.pages.dev%2F&text=Descubrí%20URU%20SPOT%2C%20la%20guía%20de%20Concepción%20del%20Uruguay" target="_blank" rel="noopener noreferrer">✈️ Telegram</a>
+            <a href="mailto:?subject=URU%20SPOT%20—%20guía%20de%20Concepción%20del%20Uruguay&body=Te%20paso%20esta%20guía%20de%20Concepción%20del%20Uruguay%2C%20está%20buena%3A%20https%3A%2F%2Furuspot.pages.dev%2F">✉️ Email</a>
+          </div>
+
           <nav class="dc-intro-actions" aria-label="Volver a otras secciones">
             <a class="dc-chip dc-chip--primary" href="#hero" data-scroll="hero">↑ Volver arriba</a>
+            <a class="dc-chip" href="#para-quien-es-esta-guia">¿Qué tipo de visita hacés?</a>
+            <a class="dc-chip" href="#explorar-recomendaciones">Explorar recomendaciones</a>
+            <a class="dc-chip" href="#mapa">Ver el mapa</a>
             <a class="dc-chip" href="#donde-comer-guia">Guía: dónde comer</a>
+            <a class="dc-chip" href="#guardar-volver-compartir">Favoritos, historial y compartir</a>
           </nav>
         </div>
       </div>
@@ -936,11 +1256,15 @@
     <div class="footer-sub">Guía de Concepción del Uruguay · Entre Ríos · Argentina</div>
     <nav class="footer-links" aria-label="Navegación del sitio">
       <a href="#hero" data-scroll="hero">Inicio</a>
+      <a href="#por-que-uruspot">Por qué usarlo</a>
       <a href="#explorar-ciudad">Cómo explorar</a>
-      <a href="#home-hub">Recomendaciones</a>
+      <a href="#para-quien-es-esta-guia">Según tu visita</a>
+      <a href="#explorar-recomendaciones">Recomendaciones</a>
+      <a href="#segun-tiempo-y-momento">Según tiempo o momento</a>
       <a href="#mapa">El mapa</a>
       <a href="#donde-comer-guia">Guía: dónde comer</a>
-      <a href="#cd-wrap-container">Categorías en detalle</a>
+      <a href="#guardar-volver-compartir">Favoritos y compartir</a>
+      <a href="#categorias-detalle">Categorías en detalle</a>
       <a href="#sobre-uruspot">Sobre el sitio</a>
     </nav>
     <nav class="footer-links" aria-label="Categorías del sitio">
