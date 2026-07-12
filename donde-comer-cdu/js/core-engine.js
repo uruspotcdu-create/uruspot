@@ -610,6 +610,21 @@
 
     // ─── Filtro combinado (categoría + subcategoría + búsqueda) ───
     function aplicarFiltros() {
+      // [ARQUITECTURA — mapa diferido] initMapa() ya no corre en el
+      // arranque (ver lazyInitMapa()/motor.initMapaYDatos() al final del
+      // archivo): el mapa recién se crea cuando la sección se acerca al
+      // viewport. Hasta ese momento `map` es null, pero bindFiltroLinks()
+      // ya está enganchado desde el primer instante (initShell), así que
+      // es alcanzable que el usuario haga clic en un chip de categoría
+      // ANTES de que exista `map`. setFiltro() ya actualizó filtroActivo
+      // igual (eso no depende de Leaflet); acá simplemente no hay todavía
+      // ninguna capa de Leaflet sobre la que aplicar addLayer/removeLayer,
+      // así que se corta temprano sin tocar `map`. Cuando el mapa termine
+      // de inicializarse, cargarDatos() llama a aplicarFiltros() de nuevo
+      // y ese filtroActivo ya actualizado se aplica normalmente — no se
+      // pierde el clic, solo se pospone su efecto visual unos instantes.
+      if (!map) return 0;
+
       // [OPTIMIZACIÓN — Fase 2, punto 2.1] Antes: un solo forEach sobre los
       // 862 marcadores completos, evaluando pasaCategoria por cada uno —
       // incluidos los ~800 que ya se sabía de antemano que no pertenecen al
@@ -1056,14 +1071,18 @@
       actualizarContadoresHero(totalCombinados, counts);
       animarContadores();
 
-      // [FIX] El overlay #app-loading queda tapando la app para siempre si
-      // nadie le agrega "is-done" (ver comentario en index.html líneas 55-59).
-      // Se saca acá porque es el punto donde termina el primer render real.
-      var appLoading = document.getElementById('app-loading');
-      if (appLoading) {
-        appLoading.classList.add('is-done');
-        appLoading.setAttribute('inert', '');
-      }
+      // [ARQUITECTURA — mapa diferido] La remoción de #app-loading YA NO
+      // vive acá. Antes este era "el punto donde termina el primer render
+      // real" porque TODO el arranque (hero, header, drawer, bottom nav)
+      // pasaba por esta misma cadena síncrona; ahora el hero es HTML
+      // estático presente desde el primer byte y el resto del app-shell
+      // (drawer/spotlight/bottom-nav/reveal) se engancha en initShell(),
+      // sin depender de Leaflet ni de este fetch. cargarDatos() puede
+      // correr recién cuando el usuario scrollea cerca de #mapa —a veces
+      // segundos después de que la página ya es interactiva—, así que
+      // seguir tapando la pantalla entera hasta este punto habría
+      // significado bloquear TODO el sitio por algo que ni siquiera está a
+      // la vista. Ver UruSpotCore.init() al final del archivo.
 
       // [OPTIMIZACIÓN — Fase 1] generarSEOItemLists() no aporta nada a lo
       // que el usuario ve: solo escribe <script type="application/ld+json">
@@ -1133,34 +1152,47 @@
       }
     }
 
-    function cargarConExtra() {
+    // [ARQUITECTURA — mapa diferido] El pedido de red (fetch) no necesita
+    // Leaflet para nada — es I/O puro, no toca el hilo principal ni usa L.
+    // Antes esto vivía adentro de cargarConExtra(), que solo se llamaba
+    // DESPUÉS de que <script defer> terminara de bajar y ejecutar Leaflet +
+    // MarkerCluster (~150KB de JS) en el arranque. Con el mapa ahora
+    // diferido a un IntersectionObserver (ver lazyInitMapa más abajo), esos
+    // dos trabajos —descargar Leaflet, y pedir lugares-core.json/
+    // lugares-detalles.json— pueden arrancar en el mismo instante en vez de
+    // uno atrás del otro: iniciarFetch() se llama apenas se decide cargar
+    // el mapa (en paralelo con cargarScript(LEAFLET_JS)), y cargarConExtra()
+    // —que corre recién cuando Leaflet ya está listo— reutiliza la MISMA
+    // promesa en vez de volver a pedir la red. idempotente: si algo llama a
+    // iniciarFetch() más de una vez, no se duplica el fetch.
+    var corePromise = null;
+    var detallesPromise = null;
+    function iniciarFetch() {
+      if (corePromise) return; // ya arrancado
       var coreUrl = config.extraDataUrl;
       var detailsUrl = config.detailsDataUrl;
 
-      // [ARQUITECTURA — carga core/detalles] El fetch de detalles arranca
-      // ACÁ, en paralelo con el de core, no después: HTTP/2 los multiplexa
-      // sobre la misma conexión sin que se pisen, y arrancar la red lo
-      // antes posible es gratis (es I/O, no ocupa el hilo principal). Lo
-      // que se difiere no es el pedido, es la APLICACIÓN del resultado
-      // (mergeDetalles) — eso sí espera a que el mapa ya esté pintado.
-      var detallesPromise = detailsUrl
+      detallesPromise = detailsUrl
         ? fetch(detailsUrl)
             .then(function (r) { return r.ok ? r.json() : []; })
             .then(function (data) { return Array.isArray(data) ? data : []; })
             .catch(function () { return []; })
-        : null;
+        : Promise.resolve([]);
 
-      if (!coreUrl) { cargarDatos(config.lugares); return; }
-      fetch(coreUrl)
-        .then(function (r) { if (!r.ok) throw new Error('no existe'); return r.json(); })
-        .then(function (data) {
-          cargarDatos(config.lugares, Array.isArray(data) ? data : []);
-          if (detallesPromise) detallesPromise.then(mergeDetalles);
-        })
-        .catch(function () {
-          cargarDatos(config.lugares);
-          if (detallesPromise) detallesPromise.then(mergeDetalles);
-        });
+      corePromise = coreUrl
+        ? fetch(coreUrl)
+            .then(function (r) { if (!r.ok) throw new Error('no existe'); return r.json(); })
+            .then(function (data) { return Array.isArray(data) ? data : []; })
+            .catch(function () { return null; }) // null = "no se pudo", cargarDatos cae al dataset base
+        : Promise.resolve(null);
+    }
+
+    function cargarConExtra() {
+      iniciarFetch();
+      corePromise.then(function (data) {
+        cargarDatos(config.lugares, data || []);
+        detallesPromise.then(mergeDetalles);
+      });
     }
 
     // ─── Buscador, reset y geolocalización del panel del mapa ───
@@ -1190,7 +1222,14 @@
           if (todosBtn) todosBtn.classList.add('activo');
           (legendNodes || document.querySelectorAll('.mapa-legend-item')).forEach(function (it) { it.classList.remove('activo'); });
           aplicarFiltros();
-          map.setView(config.mapCenter || [0, 0], config.mapZoom || 13);
+          // [ARQUITECTURA — mapa diferido] Ver nota en aplicarFiltros(): si
+          // todavía no existe `map` (el usuario tocó "ver todos" antes de
+          // que la sección del mapa arrancara Leaflet), no hay vista que
+          // reposicionar todavía. filtroActivo/textoBusqueda ya quedaron
+          // reseteados arriba, así que cuando el mapa sí se cree va a
+          // arrancar directamente en config.mapCenter/mapZoom (su propio
+          // setView() en initMapa()) — mismo resultado, sin doble trabajo.
+          if (map) map.setView(config.mapCenter || [0, 0], config.mapZoom || 13);
         });
       }
 
@@ -1199,6 +1238,19 @@
         geolocBtn.addEventListener('click', function () {
           var btn = this;
           var textoOriginal = btn.textContent;
+          // [ARQUITECTURA — mapa diferido] Este botón vive en el toolbar del
+          // mapa: en la práctica, para que el usuario pueda verlo y tocarlo
+          // ya tuvo que scrollear hasta la sección #mapa, que es la misma
+          // señal (IntersectionObserver, rootMargin 800px) que dispara la
+          // carga de Leaflet/datos con anticipación — así que llegar acá
+          // con `map` todavía null debería ser muy raro (red muy lenta).
+          // Se guarda igual, en vez de dejar que L.marker() explote con
+          // "L is not defined" si el usuario alcanza a tocar el botón en
+          // esa ventana.
+          if (!map || typeof L === 'undefined') {
+            alert('El mapa todavía se está cargando — esperá un instante y probá de nuevo.');
+            return;
+          }
           if (!navigator.geolocation) { alert('Tu navegador no permite geolocalización.'); return; }
           btn.disabled = true;
           btn.textContent = '📍 Buscando…';
@@ -1233,11 +1285,35 @@
     return {
       utils: utils,
       favoritos: favoritos,
-      init: function () {
+
+      // [ARQUITECTURA — mapa diferido] "Shell": todo lo que el motor puede
+      // hacer SIN Leaflet cargado — cachear nodos del DOM y enganchar los
+      // listeners del toolbar del mapa (buscador, reset, geoloc) y de los
+      // links [data-filtro] (hero cards, "categorías en detalle", footer).
+      // Nada de esto crea un solo objeto de Leaflet ni toca la red; es
+      // barato (microsegundos) y corre síncrono en el arranque, para que
+      // esos controles respondan al tacto desde el primer instante aunque
+      // el mapa en sí todavía no exista.
+      initShell: function () {
         cachearElementos();
-        initMapa();
         bindControlesMapa();
         bindFiltroLinks(document);
+      },
+
+      // Arranca el fetch de lugares-core.json/lugares-detalles.json sin
+      // esperar a Leaflet — se puede llamar en paralelo con la descarga del
+      // script de Leaflet (ver lazyInitMapa). Público e idempotente.
+      precargarDatos: function () {
+        iniciarFetch();
+      },
+
+      // "Motor pesado": crea el mapa Leaflet real (L.map, tileLayer,
+      // clusterGroups) y dispara/consume la carga de datos. Requiere que
+      // `L` (y `L.markerClusterGroup`) ya estén definidos globalmente —
+      // el llamador (lazyInitMapa) garantiza eso esperando a que los
+      // scripts terminen de cargar antes de invocar esto.
+      initMapaYDatos: function () {
+        initMapa();
         cargarConExtra();
       },
       setFiltro: setFiltro,
@@ -1529,6 +1605,147 @@
   }
 
   // ─────────────────────────────────────────────────────────────────────
+  // Carga diferida de Leaflet + Leaflet.markercluster
+  // ─────────────────────────────────────────────────────────────────────
+  // [ARQUITECTURA — mapa diferido, hallazgo principal de esta auditoría]
+  // Antes, leaflet.min.js (~145KB) y leaflet.markercluster.min.js (~30KB)
+  // se declaraban como <script defer> en el <head>: con defer, el
+  // navegador los descarga en paralelo con el resto, pero los EJECUTA en
+  // orden de documento antes de DOMContentLoaded — y content.js (el script
+  // que sigue en esa misma cadena defer) llamaba a UruSpotCore.init() de
+  // forma síncrona apenas le tocaba el turno. Eso significa que analizar +
+  // ejecutar ~175KB de una librería de mapas (parseo, registro de clases,
+  // detección de capacidades del navegador, etc.) quedaba en el camino
+  // crítico de CUALQUIER interacción del sitio — el botón de hamburguesa
+  // del drawer, la lupa de búsqueda, el resaltado de la bottom nav — aun
+  // cuando ninguno de esos componentes usa una sola línea de Leaflet.
+  // Peor: el mapa (#mapa-leaflet) está varias pantallas por debajo del
+  // hero, así que en la enorme mayoría de las cargas ese trabajo se hacía
+  // ANTES de que hubiera ninguna garantía de que el usuario fuera a
+  // scrollear hasta ahí.
+  //
+  // Ahora Leaflet/MarkerCluster (JS y CSS) se inyectan dinámicamente recién
+  // cuando #mapa-leaflet está por entrar en viewport (IntersectionObserver
+  // con rootMargin generoso, para que ya esté listo cuando el usuario
+  // realmente llegue scrolleando, sin sentirse "cargando"). Todo lo que SÍ
+  // debe funcionar desde el primer instante (drawer, spotlight, bottom nav,
+  // reveal, smooth-scroll, buscador/reset/geoloc del toolbar) se engancha
+  // en UruSpotCore.init() sin esperar nada de esto — ver más abajo.
+  var LEAFLET_JS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+  var CLUSTER_JS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js';
+  var LEAFLET_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+  var CLUSTER_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css';
+  var CLUSTER_DEFAULT_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css';
+
+  function cargarCssAsync(href) {
+    if (document.querySelector('link[href="' + href + '"]')) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  // Carga un <script> bajo demanda. Idempotente: si dos llamadores piden el
+  // mismo src (no debería pasar con un solo lazyInitMapa, pero es barato
+  // de garantizar), no se duplica el tag ni la descarga.
+  //
+  // `yaListo` (opcional) es un chequeo directo de disponibilidad (ej. "¿ya
+  // existe window.L?"), no solo el evento 'load'. Motivo: si ALGÚN OTRO
+  // punto de la página ya declaró este mismo <script src> de forma eager
+  // (por fuera de este archivo), su evento 'load' puede haber disparado
+  // ANTES de que este código llegara a engancharse — y un 'load' que ya
+  // pasó no vuelve a pasar, lo que dejaría la promesa colgada para
+  // siempre. Sondear el resultado real, no solo el evento, hace esto
+  // seguro sin importar quién puso el script ahí.
+  function cargarScriptAsync(src, yaListo) {
+    return new Promise(function (resolve, reject) {
+      if (typeof yaListo === 'function' && yaListo()) { resolve(); return; }
+      var existente = document.querySelector('script[src="' + src + '"]');
+      if (existente) {
+        if (existente._uruspotCargado) { resolve(); return; }
+        existente.addEventListener('load', function () { resolve(); });
+        existente.addEventListener('error', reject);
+        if (typeof yaListo === 'function' && yaListo()) resolve();
+        return;
+      }
+      var script = document.createElement('script');
+      script.src = src;
+      script.async = true; // ya no hace falta orden de documento: se encadena a mano abajo
+      script.onload = function () { script._uruspotCargado = true; resolve(); };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  function arrancarMapaPesado(motor) {
+    // precargarDatos() e Leaflet arrancan en el MISMO instante: el fetch de
+    // lugares-core.json/lugares-detalles.json es I/O puro y no necesita `L`
+    // para nada, así que no hay ninguna razón para esperar a que Leaflet
+    // termine de descargar/ejecutar antes de pedirlo por red.
+    motor.precargarDatos();
+
+    cargarCssAsync(LEAFLET_CSS);
+    cargarCssAsync(CLUSTER_CSS);
+    cargarCssAsync(CLUSTER_DEFAULT_CSS);
+
+    // leaflet.markercluster extiende el objeto L, así que su script debe
+    // ejecutar DESPUÉS de que leaflet.min.js ya haya corrido — de ahí el
+    // encadenado en vez de cargar los dos en paralelo.
+    cargarScriptAsync(LEAFLET_JS, function () { return typeof window.L !== 'undefined'; })
+      .then(function () {
+        return cargarScriptAsync(CLUSTER_JS, function () {
+          return typeof window.L !== 'undefined' && typeof window.L.markerClusterGroup !== 'undefined';
+        });
+      })
+      .then(function () { motor.initMapaYDatos(); })
+      .catch(function () {
+        // Red caída/bloqueada: al menos no dejamos "cargando…" para
+        // siempre en el badge de la sección.
+        var badge = document.getElementById('mapa-total-badge');
+        if (badge) badge.textContent = 'No se pudo cargar el mapa';
+        var empty = document.getElementById('mapa-empty');
+        if (empty) { empty.textContent = 'No se pudo cargar el mapa. Revisá tu conexión y recargá la página.'; empty.style.display = 'block'; }
+      });
+  }
+
+  function lazyInitMapa(motor) {
+    var mapaEl = document.getElementById('mapa-leaflet');
+    if (!mapaEl) return; // contrato de DOM no cumplido: nada que diferir
+
+    var arrancado = false;
+    function arrancar() {
+      if (arrancado) return;
+      arrancado = true;
+      arrancarMapaPesado(motor);
+    }
+
+    if ('IntersectionObserver' in window) {
+      // rootMargin generoso (800px por debajo del viewport): el objetivo
+      // no es "cargar solo lo visible" a rajatabla, sino sacar el trabajo
+      // pesado del camino crítico del arranque. Con este margen, para la
+      // gran mayoría de patrones de scroll el mapa ya está listo (o casi)
+      // para cuando el usuario efectivamente lo tiene enfrente.
+      var obs = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting) {
+            obs.disconnect();
+            arrancar();
+            return;
+          }
+        }
+      }, { rootMargin: '800px 0px', threshold: 0 });
+      obs.observe(mapaEl);
+    } else {
+      // Navegador sin IntersectionObserver (residual): no se vuelve a la
+      // carga síncrona en el arranque, se difiere a tiempo ocioso con un
+      // timeout de seguridad, que sigue siendo mejor que competir por el
+      // hilo principal en el momento más sensible de la página.
+      if ('requestIdleCallback' in window) requestIdleCallback(arrancar, { timeout: 3000 });
+      else setTimeout(arrancar, 1);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
   // Punto de entrada público
   // ─────────────────────────────────────────────────────────────────────
   var UruSpotCore = {
@@ -1538,14 +1755,31 @@
     // config.grupos y config.lugares los provee el MÓDULO B (contenido).
     init: function (config) {
       var motor = crearMotor(config);
-      motor.init();
 
+      // ─── App-shell: interactivo YA, sin depender de Leaflet ni de red ───
+      motor.initShell();
       initLocalVisitanteToggle();
       initSpotlightSearch(motor, config.grupos || {});
       initDrawer();
       initBottomNav();
       initReveal();
       initSmoothAnchors();
+
+      // [ARQUITECTURA — mapa diferido] El overlay #app-loading se saca ACÁ,
+      // apenas el app-shell completo ya respondió al tacto (header, drawer,
+      // spotlight, bottom nav, hero — este último 100% HTML/CSS estático,
+      // sin ninguna dependencia de este punto). Antes esperaba a que
+      // cargarDatos() terminara de procesar 862 lugares — trabajo que ni
+      // siquiera es visible hasta que el usuario scrollea hasta #mapa. La
+      // página entera ya no tiene motivo para seguir tapada por eso.
+      var appLoading = document.getElementById('app-loading');
+      if (appLoading) {
+        appLoading.classList.add('is-done');
+        appLoading.setAttribute('inert', '');
+      }
+
+      // ─── Mapa: recién cuando la sección se acerca al viewport ───
+      lazyInitMapa(motor);
 
       return motor;
     }
