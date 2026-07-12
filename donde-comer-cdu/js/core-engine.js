@@ -25,6 +25,21 @@
   // Tabla usada por utils.escapeHtml. Se crea una sola vez (antes se
   // recreaba el objeto literal por cada carácter especial encontrado).
   var ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  // [OPTIMIZACIÓN] Regex compartidas: antes cada llamada a normalizarTexto()
+  // y escapeHtml() evaluaba un literal /regex/ propio, lo que crea una
+  // instancia de RegExp nueva por invocación. normalizarTexto() sola corre
+  // ~1700+ veces solo en el arranque (nombreNorm + categoriaNorm de cada
+  // uno de los 862 lugares); compartir una única instancia elimina esas
+  // asignaciones sin cambiar el resultado (los regex no llevan estado
+  // relevante entre llamadas de .replace(), que resetea lastIndex solo).
+  var DIACRITICS_REGEX = /[\u0300-\u036f]/g;
+  var ESCAPE_REGEX = /[&<>"']/g;
+  // [OPTIMIZACIÓN] starsHtml(rating) solo depende de Math.floor(rating),
+  // que en este dominio (ratings de 0 a 5) tiene exactamente 6 salidas
+  // posibles. En vez de reconstruir el string con un loop en cada llamada
+  // (se invoca por cada popup abierto y por cada resultado de búsqueda
+  // mostrado), se resuelve con una tabla precomputada una sola vez.
+  var STARS_CACHE = ['☆☆☆☆☆', '★☆☆☆☆', '★★☆☆☆', '★★★☆☆', '★★★★☆', '★★★★★'];
 
   // [OPTIMIZACIÓN — Fase 2, punto 3.2] El buscador del panel del mapa
   // (bindControlesMapa) y el spotlight (initSpotlightSearch) debounceaban
@@ -43,19 +58,22 @@
     normalizarTexto: function (str) {
       return String(str || '')
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
+        .replace(DIACRITICS_REGEX, '')
         .toLowerCase();
     },
 
+    // [OPTIMIZACIÓN] Ver STARS_CACHE: lookup directo en vez de loop+concat.
+    // Mismo resultado que antes para cualquier rating (incluidos los casos
+    // límite fuera de 0-5, que el loop original también recortaba de
+    // forma efectiva a "todo lleno" o "todo vacío").
     starsHtml: function (rating) {
       var full = Math.floor(rating);
-      var s = '';
-      for (var i = 0; i < 5; i++) s += (i < full) ? '★' : '☆';
-      return s;
+      if (full < 0) full = 0; else if (full > 5) full = 5;
+      return STARS_CACHE[full];
     },
 
     escapeHtml: function (str) {
-      return String(str).replace(/[&<>"']/g, function (c) {
+      return String(str).replace(ESCAPE_REGEX, function (c) {
         return ESCAPE_MAP[c];
       });
     },
@@ -94,12 +112,27 @@
   // ─────────────────────────────────────────────────────────────────────
   function crearFavoritos(storageKey) {
     var KEY = storageKey || 'uruspot_favoritos';
-    function getFavoritos() {
+    // [OPTIMIZACIÓN] Antes getFavoritos() hacía localStorage.getItem +
+    // JSON.parse en CADA llamada, incluida esFavorito() (que puede
+    // invocarse una vez por cada botón de favorito que se pinta en
+    // pantalla). Se cachea el array ya parseado en memoria: se lee una
+    // sola vez y se reutiliza; toggle() sigue escribiendo a localStorage
+    // en cada cambio (comportamiento de persistencia idéntico al original).
+    var cache = null;
+    function leerDeStorage() {
       try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; }
     }
-    function esFavorito(id) { return getFavoritos().indexOf(id) !== -1; }
+    function getFavoritosInterno() {
+      if (cache === null) cache = leerDeStorage();
+      return cache;
+    }
+    // API pública: devuelve una copia, igual que antes (JSON.parse siempre
+    // producía un array nuevo) — así ningún consumidor externo que mute el
+    // resultado puede corromper la caché interna.
+    function getFavoritos() { return getFavoritosInterno().slice(); }
+    function esFavorito(id) { return getFavoritosInterno().indexOf(id) !== -1; }
     function toggleFavorito(id) {
-      var favs = getFavoritos();
+      var favs = getFavoritosInterno();
       var i = favs.indexOf(id);
       var seAgrego = (i === -1);
       if (seAgrego) favs.push(id); else favs.splice(i, 1);
@@ -129,6 +162,23 @@
     config = config || {};
 
     var GRUPOS = config.grupos || {};
+    // [OPTIMIZACIÓN] GRUPOS no cambia después de este punto (no hay ningún
+    // GRUPOS[x] = ... en todo el archivo), así que sus claves se calculan
+    // una sola vez y se reutilizan en todos los puntos que antes llamaban a
+    // Object.keys(GRUPOS) por separado (initMapa, renderFiltros,
+    // renderLeyenda, renderHeroCards, renderCdWrap, generarSEOItemLists,
+    // actualizarContadoresHero) — entre ellos, dos llamadas dentro de
+    // aplicarFiltros(), la función que corre en cada tecleo de búsqueda y
+    // en cada clic de filtro. clusterGroups se construye iterando este
+    // mismo conjunto de claves en initMapa() (ver más abajo), así que
+    // Object.keys(clusterGroups) es siempre idéntico a GRUPO_KEYS y
+    // también se reemplaza por la misma constante.
+    var GRUPO_KEYS = Object.keys(GRUPOS);
+    // [OPTIMIZACIÓN] Antes agregarLugar() recalculaba
+    // "Object.keys(GRUPOS)[0]" en cada una de sus 862 llamadas solo para
+    // tener un valor de respaldo casi nunca usado (solo cuando el JSON trae
+    // un lugar con "grupo" inválido o ausente). Se calcula una única vez acá.
+    var GRUPO_DEFECTO = config.grupoPorDefecto || GRUPO_KEYS[0];
     var favoritos = crearFavoritos(config.favoritesKey);
 
     var map = null;
@@ -154,6 +204,23 @@
     // Permite un fast-path 100% seguro: solo se salta el recorrido de
     // markersPorGrupo cuando ya se sabe que no hay nada que restaurar.
     var estadoSinOcultos = true;
+
+    // [OPTIMIZACIÓN] Caché del resultado ordenado por rating que usa
+    // lugaresSugeridos(). todosLosMarkers queda fijo apenas termina
+    // cargarDatos() en init() (no hay ninguna función pública que agregue
+    // lugares después); el orden por rating es entonces el mismo en toda
+    // la vida de la página, así que se ordena una sola vez la primera vez
+    // que se pide, y se reutiliza (con distintos "cantidad") en cada
+    // apertura del buscador con el campo vacío en vez de copiar+ordenar
+    // los 862 lugares de nuevo cada vez.
+    var sugeridosCache = null;
+
+    // [OPTIMIZACIÓN] Objeto de opciones reutilizado por los dos únicos
+    // puntos que llaman a setFiltro(grupo, { limpiarBusqueda: true }):
+    // setFiltro() solo LEE opts.limpiarBusqueda, nunca lo modifica, así
+    // que es seguro compartir la misma instancia en vez de crear un
+    // objeto literal nuevo en cada clic.
+    var OPTS_LIMPIAR_BUSQUEDA = { limpiarBusqueda: true };
 
     // Cache de nodos del DOM que exige el contrato documentado al inicio del
     // archivo (existen desde el arranque y nunca se reemplazan por completo,
@@ -216,9 +283,10 @@
     // ─── Íconos de mapa ───
     function pinIcon(color, destacado) {
       var key = color + '|' + (destacado ? '1' : '0');
-      if (!iconCache[key]) {
+      var icon = iconCache[key];
+      if (!icon) {
         var claseExtra = destacado ? ' mapa-pin-destacado' : '';
-        iconCache[key] = L.divIcon({
+        icon = iconCache[key] = L.divIcon({
           className: '',
           html: '<div class="mapa-pin' + claseExtra + '" style="background:' + color + '"></div>',
           iconSize: destacado ? [20, 20] : [16, 16],
@@ -226,7 +294,7 @@
           popupAnchor: [0, -16]
         });
       }
-      return iconCache[key];
+      return icon;
     }
 
     function clusterIcon(color) {
@@ -296,7 +364,7 @@
       // congelaba el hilo principal un instante (más notorio en celulares
       // gama media/baja). Con esto, Leaflet.markercluster los procesa en
       // lotes vía requestAnimationFrame en vez de en un solo bloque síncrono.
-      Object.keys(GRUPOS).forEach(function (g) {
+      GRUPO_KEYS.forEach(function (g) {
         clusterGroups[g] = L.markerClusterGroup({
           iconCreateFunction: clusterIcon(GRUPOS[g].color),
           showCoverageOnHover: false,
@@ -310,9 +378,10 @@
     // ─── Popup de un lugar ───
     function popupHtml(lugar, color) {
       var html = '';
+      var g = GRUPOS[lugar.grupo];
       if (lugar.destacado) html += '<span class="mapa-popup-destacado">★ Destacado</span>';
-      html += '<span class="mapa-popup-cat">' + GRUPOS[lugar.grupo].icon + ' ' + utils.escapeHtml(lugar.categoria || '') +
-              ' <span class="mapa-popup-grupo">· ' + utils.escapeHtml(GRUPOS[lugar.grupo].label) + '</span></span>';
+      html += '<span class="mapa-popup-cat">' + g.icon + ' ' + utils.escapeHtml(lugar.categoria || '') +
+              ' <span class="mapa-popup-grupo">· ' + utils.escapeHtml(g.label) + '</span></span>';
       html += '<span class="mapa-popup-nombre">' + utils.escapeHtml(lugar.nombre || '') + '</span>';
       if (lugar.rating) {
         var rating = parseFloat(lugar.rating);
@@ -350,14 +419,15 @@
       if (typeof lugar.lat !== 'number' || typeof lugar.lng !== 'number') return;
       if (!lugar.id || !lugar.nombre) return;
 
-      var grupoDefault = config.grupoPorDefecto || Object.keys(GRUPOS)[0];
-      var grupo = GRUPOS[lugar.grupo] ? lugar.grupo : grupoDefault;
-      var color = GRUPOS[grupo].color;
+      var grupoInfo = GRUPOS[lugar.grupo];
+      var grupo = grupoInfo ? lugar.grupo : GRUPO_DEFECTO;
+      var color = grupoInfo ? grupoInfo.color : GRUPOS[GRUPO_DEFECTO].color;
+      var destacado = !!lugar.destacado;
       var marker = L.marker([lugar.lat, lugar.lng], {
-        icon: pinIcon(color, !!lugar.destacado),
+        icon: pinIcon(color, destacado),
         title: lugar.nombre,
         riseOnHover: true,
-        zIndexOffset: lugar.destacado ? 1000 : 0
+        zIndexOffset: destacado ? 1000 : 0
       });
       // [OPTIMIZACIÓN — Fase 2] Antes popupHtml(lugar, color) se ejecutaba
       // acá mismo para los 862 lugares en el arranque (concatenación de
@@ -413,10 +483,12 @@
       if (!cont) return;
 
       var html = '<button class="mapa-pill activo" data-cat="todos" type="button">Todos <span class="cnt">' + todosLosMarkers.length + '</span></button>';
-      Object.keys(GRUPOS).forEach(function (g) {
-        if (!counts[g]) return;
-        html += '<button class="mapa-pill" data-cat="' + g + '" type="button" style="--pill-color:' + GRUPOS[g].color + '">' +
-                GRUPOS[g].icon + ' ' + GRUPOS[g].label + ' <span class="cnt">' + counts[g] + '</span></button>';
+      GRUPO_KEYS.forEach(function (g) {
+        var c = counts[g];
+        if (!c) return;
+        var info = GRUPOS[g];
+        html += '<button class="mapa-pill" data-cat="' + g + '" type="button" style="--pill-color:' + info.color + '">' +
+                info.icon + ' ' + info.label + ' <span class="cnt">' + c + '</span></button>';
       });
       cont.innerHTML = html;
 
@@ -445,9 +517,11 @@
       // markersPorGrupo ya armado para aplicarFiltros(), se reutiliza acá
       // para recorrer solo los lugares del grupo activo.
       var lista = markersPorGrupo[filtroActivo] || [];
-      lista.forEach(function (m) {
-        counts[m.categoria] = (counts[m.categoria] || 0) + 1;
-      });
+      var listaLen = lista.length;
+      for (var li = 0; li < listaLen; li++) {
+        var cat = lista[li].categoria;
+        counts[cat] = (counts[cat] || 0) + 1;
+      }
       var subcats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
       if (subcats.length < 2) {
         cont.classList.remove('visible');
@@ -493,12 +567,14 @@
       if (!cont) return;
 
       var html = '';
-      Object.keys(GRUPOS).forEach(function (g) {
-        if (!counts[g]) return;
+      GRUPO_KEYS.forEach(function (g) {
+        var c = counts[g];
+        if (!c) return;
+        var info = GRUPOS[g];
         html += '<button class="mapa-legend-item' + (filtroActivo === g ? ' activo' : '') + '" data-cat="' + g + '" type="button">' +
-                '<span class="mapa-legend-swatch" style="background:' + GRUPOS[g].color + '"></span>' +
-                '<span class="mapa-legend-label">' + GRUPOS[g].icon + ' ' + GRUPOS[g].label + '</span>' +
-                '<span class="mapa-legend-count">' + counts[g] + '</span></button>';
+                '<span class="mapa-legend-swatch" style="background:' + info.color + '"></span>' +
+                '<span class="mapa-legend-label">' + info.icon + ' ' + info.label + '</span>' +
+                '<span class="mapa-legend-count">' + c + '</span></button>';
       });
       cont.innerHTML = html;
 
@@ -557,7 +633,7 @@
       // filtrado nada en el medio).
       var esCasoTrivial = esTodos && !subFiltroActivo && (textoBusqueda === '');
       if (esCasoTrivial && estadoSinOcultos) {
-        Object.keys(clusterGroups).forEach(function (g) {
+        GRUPO_KEYS.forEach(function (g) {
           if (!map.hasLayer(clusterGroups[g])) map.addLayer(clusterGroups[g]);
         });
         visibles = todosLosMarkers.length;
@@ -567,7 +643,7 @@
         return visibles;
       }
 
-      Object.keys(clusterGroups).forEach(function (g) {
+      GRUPO_KEYS.forEach(function (g) {
         var grupoLayer = clusterGroups[g];
         var esCandidato = esTodos || (g === filtroActivo);
 
@@ -587,10 +663,19 @@
         var lista = markersPorGrupo[g] || [];
         var aAgregar = [];
         var aQuitar = [];
-        for (var i = 0; i < lista.length; i++) {
+        // [OPTIMIZACIÓN] tieneSubFiltro/tieneBusqueda no cambian durante
+        // esta pasada (subFiltroActivo/textoBusqueda son fijos mientras
+        // dura una sola llamada a aplicarFiltros()); se evalúan una vez acá
+        // en vez de re-evaluar "!subFiltroActivo"/"textoBusqueda === ''"
+        // en cada uno de los marcadores del grupo. lista.length también se
+        // cachea en vez de releerlo en cada vuelta del for.
+        var tieneSubFiltro = !!subFiltroActivo;
+        var tieneBusqueda = (textoBusqueda !== '');
+        var listaLen = lista.length;
+        for (var i = 0; i < listaLen; i++) {
           var m = lista[i];
-          var pasaSubcategoria = (!subFiltroActivo) || (m.categoria === subFiltroActivo);
-          var pasaBusqueda = (textoBusqueda === '') ||
+          var pasaSubcategoria = !tieneSubFiltro || (m.categoria === subFiltroActivo);
+          var pasaBusqueda = !tieneBusqueda ||
             (m.nombreNorm.indexOf(textoBusqueda) > -1) ||
             (m.categoriaNorm.indexOf(textoBusqueda) > -1);
           var mostrar = pasaSubcategoria && pasaBusqueda;
@@ -653,7 +738,8 @@
       // Lookup por objeto en vez de ids.indexOf(...) dentro del forEach:
       // evita un escaneo del array "ids" por cada uno de los marcadores.
       var idsSet = {};
-      for (var i = 0; i < ids.length; i++) idsSet[ids[i]] = true;
+      var idsLen = ids.length;
+      for (var i = 0; i < idsLen; i++) idsSet[ids[i]] = true;
 
       // [FIX — AUDITORIA_DONDE_COMER.md, P2] Mismo cambio que en
       // aplicarFiltros(): en vez de addLayer/removeLayer individual por
@@ -663,7 +749,9 @@
       // idéntico al de antes.
       var aAgregarPorGrupo = {};
       var aQuitarPorGrupo = {};
-      todosLosMarkers.forEach(function (m) {
+      var totalMarkers = todosLosMarkers.length;
+      for (var mi = 0; mi < totalMarkers; mi++) {
+        var m = todosLosMarkers[mi];
         var g = m.grupo;
         var grupoLayer = clusterGroups[g];
         if (idsSet[m.lugar.id]) {
@@ -675,7 +763,7 @@
             (aQuitarPorGrupo[g] || (aQuitarPorGrupo[g] = [])).push(m.marker);
           }
         }
-      });
+      }
       Object.keys(aQuitarPorGrupo).forEach(function (g) {
         clusterGroups[g].removeLayers(aQuitarPorGrupo[g]);
       });
@@ -685,7 +773,7 @@
 
       // Todos los grupos terminan en el mapa (igual que antes); solo se
       // agregan los que todavía no estuvieran, sin sacarlos primero.
-      Object.keys(clusterGroups).forEach(function (g) {
+      GRUPO_KEYS.forEach(function (g) {
         if (!map.hasLayer(clusterGroups[g])) map.addLayer(clusterGroups[g]);
       });
     }
@@ -693,7 +781,8 @@
     function getLugarPorId(id) {
       // Corte temprano en vez de .filter(...)[0]: no sigue recorriendo el
       // array después de encontrar el lugar buscado.
-      for (var i = 0; i < todosLosMarkers.length; i++) {
+      var total = todosLosMarkers.length;
+      for (var i = 0; i < total; i++) {
         if (todosLosMarkers[i].lugar.id === id) return todosLosMarkers[i].lugar;
       }
       return null;
@@ -709,10 +798,13 @@
       if (!norm) return [];
       var max = limite || 8;
       var resultados = [];
-      for (var i = 0; i < todosLosMarkers.length && resultados.length < max; i++) {
+      var encontrados = 0;
+      var total = todosLosMarkers.length;
+      for (var i = 0; i < total && encontrados < max; i++) {
         var m = todosLosMarkers[i];
         if (m.nombreNorm.indexOf(norm) > -1 || m.categoriaNorm.indexOf(norm) > -1) {
           resultados.push(m);
+          encontrados++;
         }
       }
       return resultados;
@@ -721,10 +813,12 @@
     // Lugares mejor puntuados, para mostrar como accesos rápidos apenas se
     // abre el buscador (antes de que el usuario escriba nada).
     function lugaresSugeridos(cantidad) {
-      return todosLosMarkers
-        .slice()
-        .sort(function (a, b) { return (b.lugar.rating || 0) - (a.lugar.rating || 0); })
-        .slice(0, cantidad || 6);
+      if (!sugeridosCache) {
+        sugeridosCache = todosLosMarkers
+          .slice()
+          .sort(function (a, b) { return (b.lugar.rating || 0) - (a.lugar.rating || 0); });
+      }
+      return sugeridosCache.slice(0, cantidad || 6);
     }
 
     // Salto directo a un lugar puntual: resetea cualquier filtro/búsqueda
@@ -732,12 +826,13 @@
     // propia de Leaflet.markercluster) y abre su popup con la info.
     function irALugar(id) {
       var entry = null;
-      for (var i = 0; i < todosLosMarkers.length; i++) {
+      var total = todosLosMarkers.length;
+      for (var i = 0; i < total; i++) {
         if (todosLosMarkers[i].lugar.id === id) { entry = todosLosMarkers[i]; break; }
       }
       if (!entry) return false;
 
-      setFiltro('todos', { limpiarBusqueda: true });
+      setFiltro('todos', OPTS_LIMPIAR_BUSQUEDA);
 
       var grupo = clusterGroups[entry.grupo];
       if (grupo && grupo.zoomToShowLayer) {
@@ -751,7 +846,11 @@
 
     function contarPorGrupo() {
       var counts = {};
-      todosLosMarkers.forEach(function (m) { counts[m.grupo] = (counts[m.grupo] || 0) + 1; });
+      var total = todosLosMarkers.length;
+      for (var i = 0; i < total; i++) {
+        var g = todosLosMarkers[i].grupo;
+        counts[g] = (counts[g] || 0) + 1;
+      }
       return counts;
     }
 
@@ -760,14 +859,15 @@
       var cont = els.catsContainer;
       if (!cont) return;
       var html = '';
-      Object.keys(GRUPOS).forEach(function (g) {
-        if (!counts[g]) return;
+      GRUPO_KEYS.forEach(function (g) {
+        var c = counts[g];
+        if (!c) return;
         var info = GRUPOS[g];
         html += '<a class="cat cat-' + g + '" href="#mapa" data-filtro="' + g + '">' +
                 '<span class="cat-icon" aria-hidden="true">' + info.icon + '</span>' +
                 '<div class="cat-name"><span class="cat-dot" style="background:' + info.color + '"></span>' + utils.escapeHtml(info.label) + '</div>' +
                 '<div class="cat-desc">' + utils.escapeHtml(info.desc || '') + '</div>' +
-                '<div class="cat-count"><span id="cnt-' + g + '">' + counts[g] + '</span> lugares</div>' +
+                '<div class="cat-count"><span id="cnt-' + g + '">' + c + '</span> lugares</div>' +
                 '</a>';
       });
       cont.innerHTML = html;
@@ -779,11 +879,12 @@
       var cont = els.cdWrapContainer;
       if (!cont) return;
       var html = '';
-      Object.keys(GRUPOS).forEach(function (g) {
-        if (!counts[g]) return;
+      GRUPO_KEYS.forEach(function (g) {
+        var c = counts[g];
+        if (!c) return;
         var info = GRUPOS[g];
         html += '<div class="cd-item" id="cat-detalle-' + g + '">' +
-                '<h3>' + info.icon + ' ' + utils.escapeHtml(info.label) + ' <span class="cd-count">(<span id="dcnt-' + g + '">' + counts[g] + '</span> lugares)</span></h3>' +
+                '<h3>' + info.icon + ' ' + utils.escapeHtml(info.label) + ' <span class="cd-count">(<span id="dcnt-' + g + '">' + c + '</span> lugares)</span></h3>' +
                 '<p>' + utils.escapeHtml(info.desc || '') + '</p>' +
                 '<a class="cd-link" href="#mapa" data-filtro="' + g + '">Ver en el mapa →</a>' +
                 '</div>';
@@ -795,20 +896,25 @@
     // reales ya cargados, y lo agrega al <head> como JSON-LD.
     function generarSEOItemLists(nombreSufijo) {
       var porGrupo = {};
-      todosLosMarkers.forEach(function (m) {
+      var totalMarkers = todosLosMarkers.length;
+      for (var i = 0; i < totalMarkers; i++) {
+        var m = todosLosMarkers[i];
         (porGrupo[m.grupo] || (porGrupo[m.grupo] = [])).push(m);
-      });
-      Object.keys(GRUPOS).forEach(function (g) {
+      }
+      GRUPO_KEYS.forEach(function (g) {
         var lugaresGrupo = porGrupo[g];
-        if (!lugaresGrupo || !lugaresGrupo.length) return;
+        var n = lugaresGrupo ? lugaresGrupo.length : 0;
+        if (!n) return;
+        var itemListElement = new Array(n);
+        for (var li = 0; li < n; li++) {
+          itemListElement[li] = { '@type': 'ListItem', position: li + 1, name: lugaresGrupo[li].lugar.nombre };
+        }
         var itemList = {
           '@context': 'https://schema.org',
           '@type': 'ItemList',
           name: GRUPOS[g].label + (nombreSufijo ? ' ' + nombreSufijo : ''),
-          numberOfItems: lugaresGrupo.length,
-          itemListElement: lugaresGrupo.map(function (m, i) {
-            return { '@type': 'ListItem', position: i + 1, name: m.lugar.nombre };
-          })
+          numberOfItems: n,
+          itemListElement: itemListElement
         };
         var script = document.createElement('script');
         script.type = 'application/ld+json';
@@ -829,27 +935,31 @@
       var tiempoInicio = null;
       var duracion = 600; // 600ms total de animación
 
-      elementos.forEach(function (el) {
+      var totalElementos = elementos.length;
+      for (var i = 0; i < totalElementos; i++) {
+        var el = elementos[i];
         var valor = parseInt(el.textContent, 10);
-        if (isNaN(valor)) return;
+        if (isNaN(valor)) continue;
         animaciones.push({ el: el, valorFinal: valor, valorActual: 0 });
-      });
+      }
 
-      if (!animaciones.length) return;
+      var totalAnimaciones = animaciones.length;
+      if (!totalAnimaciones) return;
 
       function animar(timestamp) {
         if (!tiempoInicio) tiempoInicio = timestamp;
         var progreso = (timestamp - tiempoInicio) / duracion;
+        var j;
 
         if (progreso >= 1) {
-          animaciones.forEach(function (a) { a.el.textContent = a.valorFinal; });
+          for (j = 0; j < totalAnimaciones; j++) animaciones[j].el.textContent = animaciones[j].valorFinal;
           return;
         }
 
-        animaciones.forEach(function (a) {
-          var valorIntermedio = Math.floor(a.valorFinal * progreso);
-          a.el.textContent = valorIntermedio;
-        });
+        for (j = 0; j < totalAnimaciones; j++) {
+          var a = animaciones[j];
+          a.el.textContent = Math.floor(a.valorFinal * progreso);
+        }
 
         requestAnimationFrame(animar);
       }
@@ -864,7 +974,14 @@
 
       if (els.statTotal) els.statTotal.textContent = total;
       if (els.heroTotal) els.heroTotal.textContent = total;
-      if (els.statCategorias) els.statCategorias.textContent = Object.keys(GRUPOS).filter(function (g) { return counts[g]; }).length;
+      if (els.statCategorias) {
+        var catCount = 0;
+        var grupoKeysLen = GRUPO_KEYS.length;
+        for (var gi = 0; gi < grupoKeysLen; gi++) {
+          if (counts[GRUPO_KEYS[gi]]) catCount++;
+        }
+        els.statCategorias.textContent = catCount;
+      }
 
       renderHeroCards(counts);
       renderCdWrap(counts);
@@ -885,7 +1002,7 @@
         if (card.dataset.filtroBound) return;
         card.dataset.filtroBound = '1';
         card.addEventListener('click', function () {
-          setFiltro(card.getAttribute('data-filtro'), { limpiarBusqueda: true });
+          setFiltro(card.getAttribute('data-filtro'), OPTS_LIMPIAR_BUSQUEDA);
         });
       });
     }
@@ -910,18 +1027,20 @@
       // "if (!grupoLayer.hasLayer(m.marker))" da false, así que no lo
       // vuelve a agregar — el resultado visible final es idéntico.
       var markersNuevosPorGrupo = {};
-      combinados.forEach(function (lugar) {
-        var entry = agregarLugar(lugar);
-        if (!entry) return;
-        if (!markersNuevosPorGrupo[entry.grupo]) markersNuevosPorGrupo[entry.grupo] = [];
-        markersNuevosPorGrupo[entry.grupo].push(entry.marker);
-      });
+      var totalCombinados = combinados.length;
+      for (var ci = 0; ci < totalCombinados; ci++) {
+        var entry = agregarLugar(combinados[ci]);
+        if (!entry) continue;
+        var arrGrupo = markersNuevosPorGrupo[entry.grupo];
+        if (!arrGrupo) arrGrupo = markersNuevosPorGrupo[entry.grupo] = [];
+        arrGrupo.push(entry.marker);
+      }
       Object.keys(markersNuevosPorGrupo).forEach(function (g) {
         clusterGroups[g].addLayers(markersNuevosPorGrupo[g]);
       });
 
-      if (els.totalBadge) els.totalBadge.textContent = combinados.length + ' lugares';
-      if (els.total) els.total.textContent = combinados.length;
+      if (els.totalBadge) els.totalBadge.textContent = totalCombinados + ' lugares';
+      if (els.total) els.total.textContent = totalCombinados;
 
       // Se calculan los conteos por grupo una sola vez y se reutilizan en
       // renderFiltros/renderLeyenda/actualizarContadoresHero (antes cada una
@@ -930,7 +1049,7 @@
       renderFiltros(counts);
       renderLeyenda(counts);
       aplicarFiltros();
-      actualizarContadoresHero(combinados.length, counts);
+      actualizarContadoresHero(totalCombinados, counts);
       animarContadores();
 
       // [FIX] El overlay #app-loading queda tapando la app para siempre si
@@ -1069,6 +1188,7 @@
         }
       },
       bindAccionesLugar: function (root) {
+        var self = this;
         root.querySelectorAll('[data-fav-id]').forEach(function (btn) {
           btn.addEventListener('click', function () {
             var id = parseInt(btn.getAttribute('data-fav-id'), 10);
@@ -1085,9 +1205,9 @@
           btn.addEventListener('click', function () {
             var id = parseInt(btn.getAttribute('data-share-id'), 10);
             var lugar = getLugarPorId(id);
-            if (lugar) this.compartirLugar(lugar);
-          }.bind(this));
-        }, this);
+            if (lugar) self.compartirLugar(lugar);
+          });
+        });
       },
       get map() { return map; },
       get todosLosMarkers() { return todosLosMarkers; },
@@ -1178,14 +1298,15 @@
     // lleva directo al lugar (buscar → tocar → el mapa vuela ahí y abre
     // la ficha), en vez de tener que ir a buscarlo a mano en el mapa.
     function itemHtml(entry) {
-      var g = GRUPOS && GRUPOS[entry.grupo];
+      var lugar = entry.lugar;
+      var g = GRUPOS[entry.grupo];
       var icon = g ? g.icon : '📍';
       var label = g ? g.label : entry.categoria;
-      var rating = entry.lugar.rating ? '★ ' + parseFloat(entry.lugar.rating).toFixed(1) : '';
-      return '<button type="button" class="spotlight-item" data-ir="' + entry.lugar.id + '">' +
+      var rating = lugar.rating ? '★ ' + parseFloat(lugar.rating).toFixed(1) : '';
+      return '<button type="button" class="spotlight-item" data-ir="' + lugar.id + '">' +
         '<span class="spotlight-item-icon" aria-hidden="true">' + icon + '</span>' +
         '<span class="spotlight-item-info">' +
-          '<span class="spotlight-item-nombre">' + utils.escapeHtml(entry.lugar.nombre) + '</span>' +
+          '<span class="spotlight-item-nombre">' + utils.escapeHtml(lugar.nombre) + '</span>' +
           '<span class="spotlight-item-cat">' + utils.escapeHtml(label) + (rating ? ' · ' + rating : '') + '</span>' +
         '</span>' +
       '</button>';
@@ -1278,14 +1399,21 @@
       var target = document.querySelector(a.getAttribute('href'));
       return { element: a, offsetTop: target ? target.offsetTop : 0 };
     });
-    
+
+    // [OPTIMIZACIÓN] targetData/items no cambian de tamaño después de este
+    // punto: se cachean sus longitudes acá afuera en vez de releer
+    // targetData.length/items.length en cada evento de scroll (que puede
+    // dispararse decenas de veces por segundo).
+    var targetDataLen = targetData.length;
+    var itemsLen = items.length;
+
     window.addEventListener('scroll', function () {
       var pos = window.scrollY + 120;
       var activo = 0;
-      for (var i = 0; i < targetData.length; i++) {
+      for (var i = 0; i < targetDataLen; i++) {
         if (targetData[i].offsetTop <= pos) activo = i;
       }
-      for (var j = 0; j < items.length; j++) {
+      for (var j = 0; j < itemsLen; j++) {
         items[j].classList.toggle('is-active', j === activo);
       }
     }, { passive: true });
