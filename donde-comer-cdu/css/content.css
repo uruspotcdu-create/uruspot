@@ -17,7 +17,25 @@
    seguro: una regla SIN capa le gana siempre a cualquier regla CON capa,
    sin importar el orden de los @layer ni la especificidad. Así queda
    garantizado que esto se aplique siempre, pase lo que pase con el orden
-   de capas del resto del CSS. */
+   de capas del resto del CSS.
+
+   ═══ AUDITORÍA ESTRUCTURAL — MOVIMIENTO UNIFICADO CON core.css ═══
+   Hallazgo de fondo (no una corrección puntual): core.css define y
+   documenta --transition-fast/--transition-base/--transition-slow y
+   --ease-standard precisamente para que "ningún componente repita su
+   propia duración/curva a mano" — y ese mismo archivo se auditó a sí
+   mismo para cumplirlo. Este archivo, sin embargo, nunca migró: seguía
+   escribiendo ".15s ease", ".2s ease", ".25s ease", ".3s ease", ".4s ease"
+   sueltos en 13 selectores distintos, cada uno reinventando por su cuenta
+   la misma curva por defecto del navegador que core.css explícitamente
+   reemplazó por sentirse genérica. El resultado práctico: dos mitades del
+   mismo sistema con dos lenguajes de movimiento — uno deliberado (core.css)
+   y uno accidental (content.css). Se migran todas las transiciones de este
+   archivo a los tokens ya públicos de core.css, redondeando cada valor
+   suelto al más cercano de los tres (150/200/500ms): esto no es un ajuste
+   estético, es la diferencia entre que el "feel" de toda la interfaz
+   dependa de una sola fuente de verdad (3 custom properties) o de 13
+   copias manuales que pueden divergir con cada edición futura. */
 
 
   /* ═══════════ UTILIDADES ═══════════ */
@@ -35,7 +53,7 @@
   .us-app-loading {
     position: fixed; inset: 0; z-index: var(--z-overlay);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 1rem; background: var(--bg); transition: opacity .4s ease, visibility .4s ease;
+    gap: 1rem; background: var(--bg); transition: opacity var(--transition-slow), visibility var(--transition-slow);
     contain: layout style;
   }
   .us-app-loading.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -57,13 +75,13 @@
   /* ═══════════ SCRIM (backdrop compartido) ═══════════
      [FIX — CAPA 4/5, cierre roto] Antes `.us-scrim[hidden]{display:none}`
      apagaba el elemento de golpe apenas el motor agregaba el atributo
-     `hidden` para cerrar: la transición de `opacity` (.25s) quedaba
-     declarada pero nunca llegaba a verse en el cierre, porque `display:none`
+     `hidden` para cerrar: la transición de `opacity` quedaba declarada
+     pero nunca llegaba a verse en el cierre, porque `display:none`
      saca el elemento del árbol de render en el mismo frame, antes de que la
      animación tuviera chance de correr (sí se veía al ABRIR, porque ahí
      display pasa a visible de entrada — el bug era unidireccional).
      Se reemplaza `display` por `visibility` en la transición: es la misma
-     técnica que ya usa `.us-app-loading` dos bloques más abajo en este
+     técnica que ya usa `.us-app-loading` dos bloques más arriba en este
      mismo archivo (mismo criterio en todo el sistema, no una excepción),
      y aprovecha una regla del spec de CSS que ya resuelve esto sin timings
      a mano: cuando `visibility` está en la lista de `transition` y el
@@ -77,7 +95,7 @@
     position: fixed; inset: 0; z-index: var(--z-overlay);
     background: rgba(10, 20, 22, .55); backdrop-filter: blur(2px);
     opacity: 0; visibility: hidden;
-    transition: opacity .25s ease, visibility .25s ease;
+    transition: opacity var(--transition-base), visibility var(--transition-base);
     contain: layout style;
   }
   .us-scrim[hidden] { display: block; }
@@ -105,7 +123,7 @@
     position: sticky; top: 0; z-index: var(--z-nav);
     background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
     backdrop-filter: blur(10px); border-bottom: 1px solid transparent;
-    transition: border-color .25s ease, box-shadow .25s ease;
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
     contain: layout style;
   }
   .us-app-header[data-state="compact"] {
@@ -115,7 +133,7 @@
   .us-app-header-inner {
     display: flex; align-items: center; gap: .75rem;
     max-width: 75rem; margin: 0 auto; padding: .75rem 1.25rem;
-    transition: padding .25s ease;
+    transition: padding var(--transition-base);
   }
   .us-app-header[data-state="compact"] .us-app-header-inner {
     padding-block: .5rem;
@@ -136,7 +154,7 @@
     background: var(--bg-sunk); border: 1px solid var(--border); color: var(--ink-soft);
     border-radius: var(--radius-pill); padding: .55rem 1rem; font-size: .85rem;
     font-family: var(--f-ui); cursor: pointer; text-align: left;
-    transition: border-color .15s ease, background .15s ease, filter .15s ease;
+    transition: border-color var(--transition-fast), background var(--transition-fast), filter var(--transition-fast);
   }
   /* min-width:0 arriba es lo que permite que esto realmente trunque:
      sin él, un flex item nunca se achica por debajo del ancho de su
@@ -147,7 +165,7 @@
   .us-app-header-menu {
     display: flex; flex-direction: column; gap: .3125rem; align-items: center; justify-content: center;
     width: 2.75rem; height: 2.75rem; background: none; border: none; border-radius: var(--radius-sm);
-    cursor: pointer; transition: background .15s ease;
+    cursor: pointer; transition: background var(--transition-fast);
   }
   .us-app-header-menu:hover { background: var(--bg-sunk); }
   .us-app-header-menu:active { background: var(--border); }
@@ -182,7 +200,7 @@
     width: 3.5rem; height: 3.5rem; border-radius: 50%; border: none; cursor: pointer;
     background: linear-gradient(135deg, var(--sunset), var(--sunset-bright));
     box-shadow: var(--shadow-lg); display: flex; align-items: center; justify-content: center;
-    transition: transform .2s ease, filter .2s ease;
+    transition: transform var(--transition-base), filter var(--transition-base);
   }
   /* [FIX] #fab-planner abre un "Planner" (armar un plan de visita) que
      todavía no existe: no hay ninguna lógica en core-engine.js/content.js
@@ -226,7 +244,7 @@
   .spotlight-item {
     display: flex; align-items: center; gap: .75rem; width: 100%;
     padding: .625rem .5rem; border: none; background: none; border-radius: .625rem;
-    text-align: left; cursor: pointer; transition: background .15s ease;
+    text-align: left; cursor: pointer; transition: background var(--transition-fast);
   }
   .spotlight-item:hover, .spotlight-item:focus-visible { background: var(--bg-sunk); }
   .spotlight-item:active { background: var(--border); }
@@ -244,20 +262,24 @@
      golpe), pero `visibility` no formaba parte de la lista de `transition`
      — solo se leía su valor final en `.us-drawer[hidden]`, así que
      cambiaba de estado en el mismo instante que se agregaba el atributo
-     `hidden`, antes de que el `transform` (.3s) alcanzara a deslizar el
+     `hidden`, antes de que el `transform` alcanzara a deslizar el
      panel fuera de pantalla: se ocultaba (visibility:hidden) mientras
      todavía estaba a mitad de camino del slide-out, invisible el resto de
      la animación aunque `transform` siguiera interpolando por detrás.
      Sumar `visibility` a `transition` activa la misma regla del spec ya
      aprovechada en `.us-app-loading`/`.us-scrim`: al cerrar (destino
-     `hidden`), el cambio real se demora hasta el final de los .3s —el
+     `hidden`), el cambio real se demora hasta el final de la transición —el
      slide-out completo queda visible—; al abrir (destino `visible`), se
-     aplica de entrada, sin retraso perceptible. */
+     aplica de entrada, sin retraso perceptible. Duración migrada a
+     --transition-base: core.css la define para "cambios de estado con más
+     superficie (card, input, toggle)" — un panel de navegación completo
+     es exactamente ese caso, y 300ms sueltos no tenían ningún fundamento
+     frente al resto del sistema. */
   .us-drawer {
     position: fixed; top: 0; right: 0; bottom: 0; z-index: calc(var(--z-overlay) + 1);
     width: min(20rem, 85vw); background: var(--bg-panel); box-shadow: var(--shadow-lg);
     display: flex; flex-direction: column; transform: translateX(100%);
-    transition: transform .3s ease, visibility .3s ease;
+    transition: transform var(--transition-base), visibility var(--transition-base);
     contain: layout style;
   }
   .us-drawer:not([hidden]) { transform: translateX(0); }
@@ -270,7 +292,7 @@
     display: flex; align-items: center; justify-content: center;
     width: 2rem; height: 2rem; background: none; border: none; border-radius: var(--radius-sm);
     font-size: 1.1rem; color: var(--ink-soft); cursor: pointer;
-    transition: background .15s ease, color .15s ease;
+    transition: background var(--transition-fast), color var(--transition-fast);
   }
   .us-drawer-header button:hover { background: var(--bg-sunk); color: var(--ink); }
   .us-drawer-header button:active { background: var(--border); }
@@ -282,7 +304,7 @@
     display: block; width: 100%; text-align: left; padding: .875rem 1rem;
     border-radius: var(--radius-sm); background: none; border: none; cursor: pointer;
     font-family: var(--f-ui); font-size: .95rem; color: var(--ink); text-decoration: none;
-    transition: background .15s ease;
+    transition: background var(--transition-fast);
   }
   .us-drawer-item:hover { background: var(--bg-sunk); }
   .us-drawer-item:active { background: var(--border); }
@@ -309,7 +331,7 @@
     display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.25rem;
     margin-top: 1.5rem; font-size: .85rem;
   }
-  .footer-links a { text-decoration: none; opacity: .8; transition: opacity .15s ease; }
+  .footer-links a { text-decoration: none; opacity: .8; transition: opacity var(--transition-fast); }
   .footer-links a:hover { opacity: 1; text-decoration: underline; }
   .footer-links a:active { opacity: .65; }
 
@@ -349,25 +371,34 @@
     padding: .75rem .75rem .75rem 1rem;
     font-family: var(--f-ui); font-size: .85rem; line-height: 1.3;
     opacity: 0; transform: translateY(.5rem) scale(.98);
-    transition: opacity .2s ease, transform .2s ease;
+    transition: opacity var(--transition-base), transform var(--transition-base);
   }
   .us-toast.is-visible { opacity: 1; transform: translateY(0) scale(1); }
   .us-toast.is-leaving { opacity: 0; transform: translateY(.35rem) scale(.98); }
   .us-toast-msg { flex: 1 1 auto; min-width: 0; overflow-wrap: break-word; }
-  .us-toast-action {
+  /* [ESTRUCTURA] .us-toast-action y .us-toast-close son dos variantes del
+     mismo mecanismo (botón-ícono sin fondo dentro del toast): mismo
+     inline-flex de centrado, mismo reset de borde/fondo, mismo radio y
+     misma transición. Antes cada uno repetía esas seis declaraciones
+     letra por letra; se agrupan acá (mismo criterio que ya usa core.css
+     para su receta compartida de pills) y cada selector se queda solo con
+     lo que de verdad lo distingue: tamaño, tipografía, color, opacidad. */
+  .us-toast-action,
+  .us-toast-close {
     display: inline-flex; align-items: center; justify-content: center;
     flex: 0 0 auto; background: none; border: 0; cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+  }
+  .us-toast-action {
     color: var(--sunset-bright); font-family: var(--f-ui); font-weight: 700;
     font-size: .8125rem; letter-spacing: .02em; padding: .375rem .5rem;
-    border-radius: var(--radius-sm); transition: background .15s ease;
   }
   .us-toast-action:hover { text-decoration: underline; }
   .us-toast-close {
-    display: inline-flex; align-items: center; justify-content: center;
-    flex: 0 0 auto; min-width: 1.75rem; min-height: 1.75rem;
-    background: none; border: 0; cursor: pointer; border-radius: var(--radius-sm);
+    min-width: 1.75rem; min-height: 1.75rem;
     color: var(--text-on-dark); opacity: .55; font-size: .8125rem; line-height: 1;
-    transition: opacity .15s ease, background .15s ease;
+    transition: opacity var(--transition-fast), background var(--transition-fast);
   }
   .us-toast-close:hover { opacity: .9; }
   /* Mismo valor de "prensado" en ambos: son las dos únicas acciones de
@@ -382,12 +413,23 @@
      <button> porque no navegan a ningún href, así que se agrega la base
      compartida para botón + las dos variantes, mismo lenguaje visual
      (pill, mismo padding/tipografía) que sus vecinos. */
+  /* [ESTRUCTURA] .mapa-popup-actions button y .mapa-empty-accion son la
+     misma familia de "botón-pill de acción" (sin borde propio, radio pill,
+     cursor pointer, misma transición) con distinta tipografía/color según
+     dónde viven — mismo criterio de receta compartida que el bloque de
+     arriba (toast) y que core.css ya usa para .hero-cta/.mapa-pill/
+     .mapa-subpill. Se agrupa la base común; cada uno conserva su propia
+     tipografía, padding, color y feedback de hover/active. */
+  .mapa-popup-actions button,
+  .mapa-empty-accion {
+    border: 0; border-radius: var(--radius-pill); cursor: pointer;
+    transition: filter var(--transition-fast), transform var(--transition-fast);
+  }
   .mapa-popup-actions button {
     font-family: var(--f-ui-map); font-size: .6875rem; font-weight: 700;
     letter-spacing: .0625rem; text-transform: uppercase;
-    padding: .4375rem .6875rem; border-radius: var(--radius-pill); border: 0; cursor: pointer;
+    padding: .4375rem .6875rem;
     display: inline-flex; align-items: center; gap: .25rem;
-    transition: filter .15s ease, transform .15s ease;
   }
   .mapa-popup-actions button:hover { filter: brightness(1.05); }
   .mapa-popup-actions button:active { filter: brightness(.96); transform: scale(.96); }
@@ -409,9 +451,8 @@
   .mapa-empty-acciones { display: flex; flex-wrap: wrap; justify-content: center; gap: .625rem; }
   .mapa-empty-accion {
     font-family: var(--f-ui); font-size: .8125rem; font-weight: 600;
-    color: #fff; background: var(--river-700); border: 0; border-radius: var(--radius-pill);
-    padding: .5625rem 1.125rem; cursor: pointer;
-    transition: filter .15s ease, transform .15s ease;
+    color: #fff; background: var(--river-700);
+    padding: .5625rem 1.125rem;
   }
   .mapa-empty-accion:hover { filter: brightness(1.08); transform: translateY(-1px); }
   .mapa-empty-accion:active { filter: brightness(.96); transform: translateY(0); }
