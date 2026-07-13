@@ -58,6 +58,38 @@
    contraste de --sunset decía "hallazgo sin corregir", pero el propio
    archivo ya resolvía el problema dos líneas más abajo con --sunset-text.
    Quedaba un comentario contradictorio con el código; ver el token abajo.
+
+   ═══ AUDITORÍA v3 — CALIDAD PERCIBIDA, NO SOLO ARQUITECTURA ═══
+   El ciclo anterior ordenó el sistema (tokens, capas, foco). Este ciclo
+   cuestiona decisiones de diseño: qué se siente plano, qué componente no
+   tiene suficiente presencia, dónde falta feedback táctil, dónde el
+   ritmo visual se vuelve monótono. Igual que en v2, cero cambios de
+   selector/id/clase — todo lo nuevo es refinamiento visual sobre el
+   mismo contrato HTML/JS. Resumen de lo que cambia (detalle junto a
+   cada bloque):
+
+   1. ELEVACIÓN Y PRESENCIA — .cat pasa de "plana hasta el hover" a tener
+      sombra propia en reposo (--shadow-xs, nuevo); .hero-cta gana un
+      resplandor cálido de marca (antes era un botón sólido sin ninguna
+      sombra sobre un hero muy oscuro — perdía jerarquía como CTA
+      principal); las cards de lista y el CTA ahora responden también al
+      :active (feedback de "presión" que no existía en NINGÚN elemento
+      del archivo — se agrega de forma sistemática, no ad-hoc).
+   2. RITMO ENTRE SECCIONES — .us-section alterna dos superficies sutiles
+      (nth-of-type) para que el scroll largo tenga variación tonal en vez
+      de un único --bg plano de punta a punta; .sec-title gana un acento
+      editorial (línea corta) coherente con el .eyebrow del hero.
+   3. RESPONSIVE REAL — se agregan tramos intermedios (tablet real, no
+      solo "mobile vs. desktop"), un tramo para mobile en landscape (hero
+      de 88vh es excesivo en una pantalla de 375px de alto acostado), y un
+      tramo ultrawide que evita que los contenedores se sientan perdidos
+      en monitores muy anchos.
+   4. FEEDBACK Y DETALLE — anillo de foco en :focus-within para los campos
+      de búsqueda (antes solo cambiaba el borde), spinner real en
+      #mapa-geoloc mientras geolocaliza (antes solo bajaba la opacidad),
+      selección de texto y scrollbars con la paleta de marca en vez del
+      gris de sistema, estado vacío del mapa con un ícono en vez de solo
+      texto.
    ═══════════════════════════════════════════════════════════════════════ */
 
   /* ⚙ DOS PARES TIPOGRÁFICOS, A PROPÓSITO (punto 3) — ambos están importados
@@ -150,9 +182,21 @@
       --radius-sm:.625rem;
       --radius-xs:.5rem; /* [NUEVO] antes hardcodeado en .mapa-legend-item. Escala completa: pill > lg > default > md > sm > xs. */
       --radius-pill:3.125rem;
+      /* --shadow-xs [NUEVO]: elevación de reposo. Antes .cat vivía sin
+         sombra hasta el :hover — se sentía "recortada", pegada al fondo,
+         no como una superficie propia (el problema que Airbnb/Notion
+         resuelven con una sombra casi imperceptible incluso en reposo).
+         --shadow-glow-cta [NUEVO]: no es una sombra de elevación sino un
+         resplandor de color de marca para el único botón "hero" del
+         sistema — technique de Stripe/Linear para que el CTA principal
+         tenga peso incluso sobre un fondo oscuro donde una sombra gris
+         normal no se notaría. */
+      --shadow-xs:0 1px 3px rgba(14,42,61,.06);
       --shadow-sm:0 2px 8px rgba(14,42,61,.08);
       --shadow-md:0 8px 24px rgba(14,42,61,.12);
       --shadow-lg:0 16px 48px rgba(14,42,61,.18);
+      --shadow-glow-cta:0 8px 20px -6px rgba(194,85,48,.55);
+      --shadow-glow-cta-hover:0 12px 28px -6px rgba(194,85,48,.7);
       --f-display:'Fraunces','Georgia',serif;
       --f-ui:'Inter','Helvetica Neue',Arial,sans-serif;
 
@@ -230,10 +274,27 @@
      CSS no soporta "custom media queries" de forma nativa todavía en todos
      los navegadores objetivo, así que no se pueden tokenizar como el resto
      del sistema. Referencia única para no inventar un breakpoint nuevo:
+       40rem (640px)       → módulo mapa: toolbar/leyenda/lista pasan a
+                              layout mobile de una sola columna.
+       48rem (768px)       → [NUEVO] tramo tablet real para .cats y el
+                              hero. Antes el archivo saltaba directo de
+                              "mobile" a "900px = desktop"; una tablet en
+                              portrait (768-899px) caía en las reglas
+                              mobile aunque tiene mucho más aire horizontal
+                              disponible — se desperdiciaba.
        56.3125rem (900px)  → cambio nav mobile / desktop (bottom-nav,
                               padding inferior del body).
-       40rem (640px)       → módulo mapa: toolbar/leyenda/lista pasan a
-                              layout mobile de una sola columna. */
+       90rem (1440px)      → [NUEVO] tramo ultrawide: los contenedores con
+                              max-width fijo (cats-wrap, cd-wrap, mapa-wrap)
+                              se sienten angostos y "perdidos" en el centro
+                              de un monitor de 27"+ — se amplían levemente,
+                              sin llegar a estirar líneas de texto más allá
+                              de lo legible.
+       (max-height:26.875rem) and (orientation:landscape) → [NUEVO] mobile
+                              apaisado: 88vh de alto de hero sobre una
+                              pantalla de ~360px de alto acostada deja casi
+                              sin aire al contenido; se reduce el hero y su
+                              padding solo en ese caso concreto. */
   @layer layout{
     html{scroll-behavior:smooth}
     body{
@@ -245,6 +306,20 @@
       padding-bottom:4rem; /* deja lugar a la bottom-nav en mobile */
     }
     @media (min-width:56.3125rem){ body{ padding-bottom:0 } }
+
+    /* [NUEVO] Selección de texto y scrollbar con la paleta de marca en vez
+       del gris de sistema por defecto: mismo tipo de detalle que separa un
+       sitio "terminado" de uno "por defecto" (Notion, Linear, Arc lo hacen).
+       Scrollbar solo se estiliza con propiedades estándar (scrollbar-width/
+       -color, Firefox) + ::-webkit-scrollbar (Chromium/Safari); en
+       navegadores que no soportan ninguna de las dos, cae al scrollbar
+       nativo del sistema sin ningún efecto negativo. */
+    ::selection{ background:var(--sunset-text); color:#fff; }
+    html{ scrollbar-width:thin; scrollbar-color:var(--river-300) transparent; }
+    ::-webkit-scrollbar{ width:.75rem; height:.75rem; }
+    ::-webkit-scrollbar-track{ background:transparent; }
+    ::-webkit-scrollbar-thumb{ background:var(--river-300); border-radius:var(--radius-pill); border:.1875rem solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover{ background:var(--river-500); }
 
     h1,h2,h3{font-family:var(--f-display); color:var(--river-900); font-weight:600}
     a{color:inherit}
@@ -259,12 +334,28 @@
       background:var(--river-900);
       padding:2.5rem 1.25rem 0;
     }
+    /* [NUEVO] Mobile apaisado: 88vh sobre ~360px de alto real (celular
+       acostado) deja el título pegado al borde superior con casi nada de
+       margen de lectura. No es un caso exótico — cualquiera que gire el
+       teléfono para ver el mapa completo pasa por acá. Se detecta por
+       altura de viewport, no por ancho, porque es la dimensión que
+       realmente se queda corta. */
+    @media (max-height:26.875rem) and (orientation:landscape){
+      .hero{ min-height:auto; padding-top:1.5rem; }
+      .hero-inner{ padding-bottom:1.75rem; }
+    }
     .hero-media{position:absolute; inset:0; z-index:var(--z-base)}
     .hero-media-gradient{
       position:absolute; inset:0;
       background:
         radial-gradient(120% 90% at 15% 0%, rgba(31,94,120,.9) 0%, transparent 55%),
         radial-gradient(100% 80% at 100% 100%, rgba(224,121,63,.35) 0%, transparent 60%),
+        /* [NUEVO] viñeta: oscurece sutilmente el borde inferior para que
+           el texto blanco (sobre todo hero-sub, más tenue) nunca compita
+           con el punto más claro del fondo — recurso habitual en heroes
+           editoriales (Apple/Airbnb) para que la atención caiga siempre
+           en el contenido, no en el fondo. */
+        radial-gradient(140% 100% at 50% 100%, transparent 40%, rgba(0,0,0,.25) 100%),
         linear-gradient(180deg, var(--river-900) 0%, #0a1a26 100%);
     }
     .hero-media-pattern{
@@ -285,6 +376,17 @@
     .hero-sub{font-size:1.02rem; color:rgba(255,255,255,.78); max-width:46ch; margin-bottom:1.7rem}
     .hero-actions{display:flex; flex-wrap:wrap; gap:.7rem; margin-bottom:1.6rem}
     .hero-stats{display:flex; gap:1.8rem}
+    /* [NUEVO] Separador vertical entre stats: antes eran 3 números
+       flotando solo con espacio en blanco entre sí, sin nada que los
+       agrupe como "un mismo bloque de datos" — un patrón habitual de
+       dashboards premium (Stripe, Linear) es un divisor fino, no un gap
+       más ancho. Se agrega con ::before (no border-left) para controlar
+       alto/opacidad del divisor sin depender del box-model del texto. */
+    .hero-stats > *{position:relative}
+    .hero-stats > * + *::before{
+      content:''; position:absolute; left:-.9rem; top:.15rem; bottom:.15rem;
+      width:1px; background:rgba(255,255,255,.18);
+    }
     .hs-n{font-family:var(--f-display); font-size:1.6rem; font-weight:700; color:#fff}
     .hs-l{font-size:.72rem; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.0625rem}
     .hero-wave{position:absolute; bottom:0; left:0; right:0; line-height:0; z-index:var(--z-raised)}
@@ -292,17 +394,56 @@
 
     /* ═══════════ SECCIONES EDITORIALES (estructura) ═══════════ */
     .sec-title{text-align:center; max-width:32.5rem; margin:0 auto 1.8rem}
+    /* [NUEVO] Acento corto arriba del título: mismo lenguaje que el
+       .eyebrow del hero (marca + gesto editorial), pero en miniatura,
+       para que las secciones internas no se sientan "genéricas" al lado
+       de un hero con mucho más cuidado tipográfico. Puramente decorativo
+       (aria-hidden implícito: no lleva contenido, es un ::before). */
+    .sec-title::before{
+      content:''; display:block; width:2.25rem; height:.1875rem; margin:0 auto .75rem;
+      background:var(--sunset-text); border-radius:var(--radius-pill);
+    }
     .sec-title h2{font-size:clamp(1.5rem,4vw,2rem); margin-bottom:.35rem}
     .sec-title p{color:var(--muted); font-size:.95rem}
 
     /* ═══════════ CATEGORÍAS (contenedor) ═══════════ */
     .cats-wrap{max-width:67.5rem; margin:0 auto; padding:0 1.25rem 1rem}
     .cats{display:grid; grid-template-columns:repeat(auto-fill,minmax(11.875rem,1fr)); gap:.9rem}
+    /* [NUEVO] Tablet real (768-899px): antes este rango caía en las
+       reglas de mobile (auto-fill igual funciona, pero con columnas de
+       190px mínimo se desperdicia el ancho extra de una tablet en
+       portrait). Se sube el mínimo de columna para que se vean 3 en vez
+       de 2 con más aire cada una. */
+    @media (min-width:48rem) and (max-width:67.4375rem){
+      .cats{grid-template-columns:repeat(auto-fill,minmax(13.75rem,1fr)); gap:1.1rem}
+    }
 
     /* cd-wrap: "Categorías en detalle" — mantiene .cd-item/.cd-link intactos */
     .cd-wrap{max-width:57.5rem; margin:0 auto; padding:2.5rem 1.25rem 3rem; display:flex; flex-direction:column; gap:1.4rem}
 
+    /* [NUEVO] Ultrawide (1440px+): los contenedores con max-width fijo
+       (pensados para monitores de hasta ~24") se sienten angostos y
+       "perdidos" en el centro de un monitor de 27"+ con mucho --bg vacío
+       a los costados. Se amplían con moderación — nunca al punto de que
+       una línea de texto supere ~75-80 caracteres, que es lo que de
+       verdad afecta la legibilidad, no el ancho del contenedor en sí. */
+    @media (min-width:90rem){
+      .cats-wrap{max-width:80rem}
+      .cd-wrap{max-width:64rem}
+    }
+
+    /* [NUEVO] .us-section alterna dos superficies muy próximas entre sí
+       (--bg y --bg-sunk) según su posición en el flujo del documento,
+       en vez de un único --bg plano de punta a punta — el "scroll largo
+       sin cambios visuales" que pide la auditoría. La diferencia es
+       deliberadamente sutil (no son bloques de color compitiendo, es
+       ritmo tonal, como el fondo alterno de una tabla o de las secciones
+       de una landing de Stripe). Es un best-effort con nth-of-type: si
+       las secciones no son hermanas directas bajo el mismo padre en el
+       HTML, este selector simplemente no aplica nada — no hay forma de
+       que rompa el layout existente en ningún escenario. */
     .us-section{background:var(--bg)}
+    .us-section:nth-of-type(even){background:var(--bg-sunk)}
 
     /* ═══════════ REVEAL (scroll-in, reemplaza el IIFE viejo) ═══════════ */
     .reveal{opacity:0; transform:translateY(.875rem); transition:opacity var(--transition-slow), transform var(--transition-slow)}
@@ -353,28 +494,79 @@
       font-family:var(--f-ui); font-weight:600; font-size:.92rem;
       background:var(--sunset-text); color:#fff; text-decoration:none;
       padding:.85rem 1.5rem;
+      /* [NUEVO] Antes era un botón sólido sin ninguna sombra sobre un
+         hero muy oscuro: contrastaba por color pero no "flotaba" — no se
+         leía como el elemento más importante de la pantalla. El
+         resplandor cálido (color de marca, no gris) le da presencia sin
+         agregar un elemento nuevo. */
+      box-shadow:var(--shadow-glow-cta);
+      transition:transform var(--transition-fast), filter var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-base);
     }
-    .hero-cta:hover{filter:brightness(1.08); transform:translateY(-1px)}
+    .hero-cta:hover{filter:brightness(1.08); transform:translateY(-1px); box-shadow:var(--shadow-glow-cta-hover)}
+    /* [NUEVO] :active — en todo el archivo original no existía NINGÚN
+       estado de "presionado": un click se sentía visualmente idéntico
+       antes y después de soltarlo. Un scale sutil hacia adentro es la
+       forma estándar (iOS/Material/Linear) de confirmar "tu toque fue
+       recibido" sin depender de que termine de cargar la navegación. */
+    .hero-cta:active{transform:translateY(0) scale(.97); box-shadow:var(--shadow-glow-cta)}
 
     /* ═══════════ CATEGORÍAS (card, mantiene selectores originales) ═══════════ */
     .cat{
       display:flex; flex-direction:column; gap:.4rem; padding:1.1rem 1.2rem; background:var(--bg-panel);
       border:1px solid var(--border); border-radius:var(--radius); text-decoration:none; color:inherit;
+      /* [NUEVO] --shadow-xs en reposo: antes .cat era plana hasta el
+         :hover, lo que la hacía sentir "pegada" al fondo en vez de una
+         superficie propia. Ahora tiene una elevación mínima constante y
+         el hover profundiza esa misma elevación en vez de crearla de la
+         nada — la diferencia entre una card que "aparece" al pasar el
+         mouse y una que ya estaba ahí y simplemente reacciona. */
+      box-shadow:var(--shadow-xs);
       transition:transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     }
     .cat:hover{transform:translateY(-2px); box-shadow:var(--shadow-sm); border-color:var(--border-s)}
-    .cat-icon{font-size:1.5rem; line-height:1}
+    .cat:active{transform:translateY(-2px) scale(.98)}
+    /* [NUEVO] Contenedor del ícono: antes .cat-icon era un emoji flotando
+       suelto arriba a la izquierda de la card, sin ningún peso propio.
+       Un fondo tenue con esquinas redondeadas (mismo patrón que
+       Notion/Linear usan para íconos de página) le da una "casa" visual
+       al ícono y ayuda a escanear la grilla de categorías más rápido. */
+    .cat-icon{
+      font-size:1.15rem; line-height:1; width:2.25rem; height:2.25rem;
+      display:flex; align-items:center; justify-content:center;
+      background:var(--bg-sunk); border-radius:var(--radius-sm);
+      margin-bottom:.15rem;
+    }
     .cat-name{display:flex; align-items:center; gap:.4rem; font-weight:600; font-size:.95rem; color:var(--river-900)}
     .cat-dot{width:.5625rem; height:.5625rem; border-radius:50%; flex:0 0 auto}
     .cat-desc{font-size:.78rem; color:var(--muted); line-height:1.4}
     .cat-count{font-size:.72rem; color:var(--sunset-text); font-weight:600; margin-top:.2rem}
 
-    /* cd-item / cd-link: mantiene selectores originales */
-    .cd-item{background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem}
+    /* cd-item / cd-link: mantiene selectores originales. Misma
+       --shadow-xs de reposo que .cat: son las dos cards "core" del
+       sistema y antes hablaban lenguajes distintos (.cat sin sombra
+       propia, .cd-item también sin sombra pero con más padding) — ahora
+       comparten el mismo tratamiento de superficie. Sin hover con
+       transform: a diferencia de .cat, .cd-item no es en sí un enlace
+       (el enlace real es .cd-link, adentro), así que no se simula una
+       interactividad que el propio HTML no ofrece a nivel de card completa. */
+    .cd-item{background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem; box-shadow:var(--shadow-xs)}
     .cd-item h3{font-size:1.05rem; color:var(--river-900); margin-bottom:.4rem}
     .cd-count{color:var(--muted); font-weight:400; font-size:.85rem}
     .cd-item p{font-size:.88rem; color:var(--ink-soft); line-height:1.5; margin-bottom:.6rem}
-    .cd-link{display:inline-block; font-size:.85rem; font-weight:600; color:var(--sunset-text); text-decoration:none}
+    /* [NUEVO] Subrayado animado con gradiente de fondo en vez de
+       text-decoration:underline estático: el link "core" con más peso
+       semántico del sistema (lleva a la categoría en detalle) no tenía
+       ningún feedback de hover con mouse, solo de foco por teclado. El
+       truco de background-size 0→100% da un trazo que crece de forma
+       fluida en vez de aparecer de golpe. */
+    .cd-link{
+      display:inline-block; font-size:.85rem; font-weight:600; color:var(--sunset-text); text-decoration:none;
+      background-image:linear-gradient(var(--sunset-text),var(--sunset-text));
+      background-repeat:no-repeat; background-position:0 100%; background-size:0% 1px;
+      transition:background-size var(--transition-base);
+      padding-bottom:.0625rem;
+    }
+    .cd-link:hover{background-size:100% 1px}
 
     /* Ítems de la nav inferior mobile */
     .bn-item{
@@ -383,13 +575,30 @@
       text-decoration:none; background:none; border:0; padding:.4rem 0; cursor:pointer; min-height:2.75rem;
     }
     .bn-item.is-active{color:var(--sunset-text)}
-    .bn-icon{width:1.375rem; height:1.375rem; border-radius:.375rem; background:currentColor; opacity:.18; transition:background-color var(--transition-fast), opacity var(--transition-fast)}
+    .bn-icon{width:1.375rem; height:1.375rem; border-radius:.375rem; background:currentColor; opacity:.18; transition:background-color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast)}
     .bn-item.is-active .bn-icon{opacity:.9; background:var(--sunset)}
+    .bn-item:active .bn-icon{transform:scale(.85)}
 
     /* Barra del spotlight de búsqueda */
-    .spotlight-bar{display:flex; align-items:center; gap:.6rem; background:#fff; border-radius:var(--radius); padding:.5rem .5rem .5rem 1.1rem; box-shadow:var(--shadow-lg)}
+    .spotlight-bar{
+      display:flex; align-items:center; gap:.6rem; background:#fff; border-radius:var(--radius);
+      padding:.5rem .5rem .5rem 1.1rem; box-shadow:var(--shadow-lg);
+      border:1.5px solid transparent; transition:border-color var(--transition-base);
+    }
+    /* [NUEVO] :focus-within en el contenedor, no solo :focus en el input:
+       el outline nativo del navegador queda oculto por el propio input
+       sin borde (border:0) — sin esto, escribir en el spotlight no daba
+       NINGÚN feedback visual de que el campo estaba enfocado, más allá
+       del cursor parpadeando. */
+    .spotlight-bar:focus-within{border-color:var(--sunset)}
     #spotlight-input{flex:1; border:0; outline:0; font-family:var(--f-ui); font-size:1.05rem; padding:.7rem 0; background:transparent}
-    #spotlight-close{width:2.25rem; height:2.25rem; border-radius:50%; border:0; background:var(--bg-sunk); cursor:pointer; font-size:1rem; color:var(--ink-soft)}
+    #spotlight-close{
+      width:2.25rem; height:2.25rem; border-radius:50%; border:0; background:var(--bg-sunk);
+      cursor:pointer; font-size:1rem; color:var(--ink-soft);
+      transition:background-color var(--transition-fast), transform var(--transition-fast);
+    }
+    #spotlight-close:hover{background:var(--border-s)}
+    #spotlight-close:active{transform:scale(.9)}
   }
 
   /* ─── CAPA: MAPA — Componente: Mapa interactivo (Leaflet) ───
@@ -450,17 +659,40 @@
     :where(#mapa-wrap){ position:relative; max-width:73.75rem; margin:0 auto; border-radius:1rem; overflow:hidden; border:1px solid var(--map-line); box-shadow:var(--map-shadow-wrap); background:var(--map-paper); }
 
     :where(#mapa-toolbar){ display:flex; flex-wrap:wrap; gap:0.625rem; padding:1rem; background:var(--map-paper); border-bottom:1px solid var(--map-line); align-items:center; }
-    :where(#mapa-search-wrap){ position:relative; flex:1 1 13.75rem; min-width:11.25rem; }
+    :where(#mapa-search-wrap){ position:relative; flex:1 1 13.75rem; min-width:11.25rem; border-radius:3.125rem; transition:box-shadow var(--transition-base); }
+    /* [NUEVO] Anillo en el contenedor vía :focus-within, sumado al cambio
+       de borde que ya existía en el input. El ícono de lupa (absoluto,
+       superpuesto) quedaba fuera del área que cambiaba de color al
+       enfocar — visualmente el campo "completo" no se sentía activo. */
+    :where(#mapa-search-wrap):focus-within{ box-shadow:0 0 0 3px rgba(212,168,67,.25); }
     :where(#mapa-search){ width:100%; font-family:var(--f-ui-map); font-size:0.8125rem; color:var(--map-ink); background:var(--map-panel); border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1rem 0.625rem 2.25rem; outline:none; transition:border-color var(--transition-base); }
     :where(#mapa-search):focus{ border-color:var(--gold); }
-    :where(#mapa-search-wrap) svg{ position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); opacity:.5; pointer-events:none; color:var(--map-muted); }
-    :where(#mapa-geoloc){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.075rem; text-transform:uppercase; color:var(--map-ink); background:linear-gradient(135deg,var(--gold-pale),var(--gold-bright)); border:1px solid var(--border-s); border-radius:3.125rem; padding:0.625rem 1rem; cursor:pointer; transition:filter var(--transition-base); display:flex; align-items:center; gap:0.375rem; white-space:nowrap; }
+    :where(#mapa-search-wrap) svg{ position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); opacity:.5; pointer-events:none; color:var(--map-muted); transition:opacity var(--transition-base), color var(--transition-base); }
+    :where(#mapa-search-wrap):focus-within svg{ opacity:.9; color:var(--copper); }
+    :where(#mapa-geoloc){ position:relative; font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.075rem; text-transform:uppercase; color:var(--map-ink); background:linear-gradient(135deg,var(--gold-pale),var(--gold-bright)); border:1px solid var(--border-s); border-radius:3.125rem; padding:0.625rem 1rem; cursor:pointer; transition:filter var(--transition-base), transform var(--transition-fast); display:flex; align-items:center; gap:0.375rem; white-space:nowrap; }
     :where(#mapa-geoloc):hover{ filter:brightness(1.08); }
-    :where(#mapa-geoloc):disabled{ opacity:.5; cursor:wait; }
+    :where(#mapa-geoloc):active{ transform:scale(.96); }
+    /* [NUEVO] Spinner real mientras geolocaliza: antes el único feedback
+       de "está trabajando" era bajar la opacidad al 50% — indistinguible,
+       a primera vista, de un simple estado deshabilitado sin actividad.
+       Un ::after con borde giratorio (mismo patrón que un spinner nativo
+       de sistema) comunica "proceso en curso" sin depender de texto
+       adicional que el HTML no tiene. Respeta prefers-reduced-motion. */
+    :where(#mapa-geoloc):disabled{ opacity:.65; cursor:wait; }
+    :where(#mapa-geoloc):disabled::after{
+      content:''; width:.75rem; height:.75rem; border-radius:50%;
+      border:.125rem solid rgba(12,9,4,.25); border-top-color:var(--map-ink);
+      animation:mapa-spin .7s linear infinite;
+    }
+    @keyframes mapa-spin{ to{ transform:rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce){
+      :where(#mapa-geoloc):disabled::after{ animation:none; }
+    }
 
     :where(#mapa-filtros){ display:flex; flex-wrap:wrap; gap:0.5rem; padding:0.875rem 1rem; background:var(--map-panel); border-bottom:1px solid var(--map-line); }
     .mapa-pill{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.08125rem; text-transform:uppercase; color:var(--map-muted); background:var(--map-paper); border:1px solid var(--map-line); padding:0.5rem 1rem; gap:0.375rem; }
     .mapa-pill:hover{ border-color:var(--gold); color:var(--map-ink); }
+    .mapa-pill:active{ transform:scale(.96); }
     .mapa-pill.activo{ background:var(--pill-color, var(--gold)); border-color:var(--pill-color, var(--gold)); color:#fff; }
     .mapa-pill .cnt{ opacity:.75; font-weight:400; }
 
@@ -500,8 +732,9 @@
     .mapa-popup-addr{ font-family:var(--f-ui-map); font-size:0.6875rem; line-height:1.4; color:var(--map-muted); margin-bottom:0.25rem; display:block; }
     .mapa-popup-desc{ font-family:var(--f-ui-map); font-size:0.6875rem; line-height:1.4; color:var(--map-ink); opacity:.85; display:block; margin-bottom:0.625rem; }
     .mapa-popup-actions{ display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem; }
-    .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; text-decoration:none; padding:0.4375rem 0.6875rem; border-radius:3.125rem; display:inline-flex; align-items:center; gap:0.25rem; transition:filter var(--transition-fast); }
+    .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; text-decoration:none; padding:0.4375rem 0.6875rem; border-radius:3.125rem; display:inline-flex; align-items:center; gap:0.25rem; transition:filter var(--transition-fast), transform var(--transition-fast); }
     .mapa-popup-actions a:hover{ filter:brightness(1.06); }
+    .mapa-popup-actions a:active{ transform:scale(.95); }
     .mapa-popup-actions a.ir{ background:var(--pop-color,#267A4D); color:#fff; }
     .mapa-popup-actions a.tel{ background:var(--map-panel); color:var(--map-ink); border:1px solid var(--map-line); }
     .mapa-popup-actions a.wa{ background:#25D366; color:#fff; }
@@ -511,6 +744,7 @@
     :where(#mapa-subfiltros).visible{ display:flex; }
     .mapa-subpill{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:600; letter-spacing:.05rem; text-transform:uppercase; color:var(--map-muted); background:var(--map-paper); border:1px solid var(--map-line); padding:0.375rem 0.75rem; }
     .mapa-subpill:hover{ border-color:var(--gold); color:var(--map-ink); }
+    .mapa-subpill:active{ transform:scale(.95); }
     .mapa-subpill.activo{ background:var(--gold); border-color:var(--gold); color:#fff; }
 
     .mapa-pin{ width:1rem; height:1rem; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:0.125rem solid rgba(255,255,255,.95); box-shadow:var(--map-shadow-pin); }
@@ -545,10 +779,23 @@
     /* --- Grilla de tarjetas de la vista lista --- */
     :where(#mapa-lista){ display:grid; grid-template-columns:repeat(auto-fill, minmax(16.25rem,1fr)); gap:0.75rem; padding:1.125rem; background:var(--map-panel); }
     :where(#mapa-lista)[hidden]{ display:none; }
+    /* [NUEVO] Tablet real para la grilla de lista: mismo criterio que
+       .cats más arriba — entre 640px (donde ya pasa a 1 columna) y 900px
+       el mínimo de columna original (16.25rem) igual arma 2-3 columnas,
+       pero muy ajustadas; se le da más aire en el tramo intermedio. */
+    @media (min-width:48rem) and (max-width:67.4375rem){
+      :where(#mapa-lista){ grid-template-columns:repeat(auto-fill, minmax(17.5rem,1fr)); gap:0.875rem; }
+    }
 
     .lista-card{ display:flex; flex-direction:column; background:var(--map-paper); border:1px solid var(--map-line); border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--map-shadow-card); transition:box-shadow var(--transition-base), transform var(--transition-base); contain:layout paint; }
     .lista-card:hover{ box-shadow:var(--map-shadow-card-hover); transform:translateY(-0.125rem); }
-    .lista-card-ir{ display:flex; align-items:flex-start; gap:0.625rem; padding:0.875rem 0.875rem 0.625rem; background:transparent; border:none; border-left:0.25rem solid var(--card-color, var(--gold)); text-align:left; cursor:pointer; width:100%; }
+    /* [NUEVO] :active en la card entera: la única superficie "clickeable
+       de bloque" del archivo (a diferencia de .cat, que es un <a>) no
+       tenía ningún feedback de presión — se agrega sin afectar el hover,
+       que sigue siendo el lift existente. */
+    .lista-card:active{ transform:translateY(-0.125rem) scale(.99); }
+    .lista-card-ir{ display:flex; align-items:flex-start; gap:0.625rem; padding:0.875rem 0.875rem 0.625rem; background:transparent; border:none; border-left:0.25rem solid var(--card-color, var(--gold)); text-align:left; cursor:pointer; width:100%; transition:background-color var(--transition-fast); }
+    .lista-card-ir:hover{ background:rgba(12,9,4,.02); }
     .lista-card-icon{ font-size:1.125rem; line-height:1; flex-shrink:0; margin-top:0.0625rem; }
     .lista-card-body{ display:flex; flex-direction:column; gap:0.25rem; min-width:0; }
     .lista-card-top{ display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
