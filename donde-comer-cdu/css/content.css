@@ -45,6 +45,10 @@
     animation: us-spin .8s linear infinite;
   }
   @keyframes us-spin { to { transform: rotate(360deg); } }
+  /* Oculto a propósito: no hay evidencia en este archivo de qué markup
+     lo usa ni de que algo lo necesite visible. No se elimina sin poder
+     confirmar contra index.html que nada lo referencia; ver nota al
+     final de la auditoría. */
   .us-app-loading-grid { display: none; }
 
   /* ═══════════ SCRIM (backdrop compartido) ═══════════ */
@@ -66,6 +70,7 @@
     background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
     backdrop-filter: blur(10px); border-bottom: 1px solid transparent;
     transition: border-color .25s ease, box-shadow .25s ease, padding .25s ease;
+    contain: layout style;
   }
   .us-app-header-inner {
     display: flex; align-items: center; gap: .75rem;
@@ -83,15 +88,18 @@
     font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .02em;
   }
   .us-app-header-search {
-    display: flex; align-items: center; gap: .5rem; flex: 1; max-width: 26rem;
+    display: flex; align-items: center; gap: .5rem; flex: 1; min-width: 0; max-width: 26rem;
     background: var(--bg-sunk); border: 1px solid var(--border); color: var(--ink-soft);
     border-radius: var(--radius-pill); padding: .55rem 1rem; font-size: .85rem;
     font-family: var(--f-ui); cursor: pointer; text-align: left;
-    transition: border-color .15s ease, background .15s ease;
+    transition: border-color .15s ease, background .15s ease, filter .15s ease;
   }
+  /* min-width:0 arriba es lo que permite que esto realmente trunque:
+     sin él, un flex item nunca se achica por debajo del ancho de su
+     contenido y el ellipsis no llega a dispararse en mobile angosto. */
   .us-app-header-search span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .us-app-header-search:hover { border-color: var(--border-s); }
-  .us-app-header-search:active { filter: brightness(.97); }
+  .us-app-header-search:active { filter: brightness(.96); }
   .us-app-header-menu {
     display: flex; flex-direction: column; gap: .3125rem; align-items: center; justify-content: center;
     width: 2.75rem; height: 2.75rem; background: none; border: none; border-radius: var(--radius-sm);
@@ -118,7 +126,7 @@
     width: 3.5rem; height: 3.5rem; border-radius: 50%; border: none; cursor: pointer;
     background: linear-gradient(135deg, var(--sunset), var(--sunset-bright));
     box-shadow: var(--shadow-lg); display: flex; align-items: center; justify-content: center;
-    transition: transform .2s ease;
+    transition: transform .2s ease, filter .2s ease;
   }
   /* [FIX] #fab-planner abre un "Planner" (armar un plan de visita) que
      todavía no existe: no hay ninguna lógica en core-engine.js/content.js
@@ -127,7 +135,7 @@
      muerto. El markup (index.html) queda intacto para reactivarlo. */
   #fab-planner { display: none; }
   .us-fab:hover { transform: translateY(-2px); }
-  .us-fab:active { transform: translateY(0) scale(.96); }
+  .us-fab:active { filter: brightness(.96); transform: translateY(0) scale(.96); }
   .us-fab-icon {
     width: 1.25rem; height: 1.25rem; position: relative;
   }
@@ -141,6 +149,7 @@
   .spotlight-suggestions:empty, .spotlight-results:empty { display: none; }
   .spotlight-suggestions, .spotlight-results {
     display: flex; flex-direction: column; gap: .25rem; overflow-y: auto; margin-top: .75rem;
+    overscroll-behavior: contain;
   }
   .spotlight-empty {
     padding: 2rem 1rem; text-align: center; color: var(--muted); font-size: .9rem;
@@ -189,7 +198,10 @@
   }
   .us-drawer-header button:hover { background: var(--bg-sunk); color: var(--ink); }
   .us-drawer-header button:active { background: var(--border); }
-  .us-drawer-nav { display: flex; flex-direction: column; padding: .5rem; overflow-y: auto; flex: 1; }
+  .us-drawer-nav {
+    display: flex; flex-direction: column; padding: .5rem; overflow-y: auto; flex: 1;
+    overscroll-behavior: contain;
+  }
   .us-drawer-item {
     display: block; width: 100%; text-align: left; padding: .875rem 1rem;
     border-radius: var(--radius-sm); background: none; border: none; cursor: pointer;
@@ -198,7 +210,10 @@
   }
   .us-drawer-item:hover { background: var(--bg-sunk); }
   .us-drawer-item:active { background: var(--border); }
-  .us-drawer-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); font-size: .8rem; color: var(--muted); }
+  .us-drawer-footer {
+    padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--border); font-size: .8rem; color: var(--muted);
+  }
   .us-drawer-footer:empty { display: none; }
 
   /* ═══════════ FOOTER ═══════════
@@ -242,7 +257,8 @@
      archivo (ver nota al inicio): tiene que ganar siempre, sin depender
      del orden de carga frente a core.css. */
   .us-toast-container {
-    position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%);
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
     z-index: var(--z-toast);
     display: flex; flex-direction: column-reverse; gap: .5rem;
     width: calc(100% - 2rem); max-width: 26rem;
@@ -261,7 +277,7 @@
   }
   .us-toast.is-visible { opacity: 1; transform: translateY(0) scale(1); }
   .us-toast.is-leaving { opacity: 0; transform: translateY(.35rem) scale(.98); }
-  .us-toast-msg { flex: 1 1 auto; }
+  .us-toast-msg { flex: 1 1 auto; min-width: 0; overflow-wrap: break-word; }
   .us-toast-action {
     display: inline-flex; align-items: center; justify-content: center;
     flex: 0 0 auto; background: none; border: 0; cursor: pointer;
@@ -270,7 +286,6 @@
     border-radius: var(--radius-sm); transition: background .15s ease;
   }
   .us-toast-action:hover { text-decoration: underline; }
-  .us-toast-action:active { background: rgba(255, 255, 255, .12); }
   .us-toast-close {
     display: inline-flex; align-items: center; justify-content: center;
     flex: 0 0 auto; min-width: 1.75rem; min-height: 1.75rem;
@@ -279,7 +294,11 @@
     transition: opacity .15s ease, background .15s ease;
   }
   .us-toast-close:hover { opacity: .9; }
-  .us-toast-close:active { background: rgba(255, 255, 255, .12); }
+  /* Mismo valor de "prensado" en ambos: son las dos únicas acciones de
+     este archivo sobre un fondo oscuro sólido (var(--river-900)), así
+     que comparten el mismo overlay blanco translúcido en vez de cada
+     una definir el suyo. */
+  .us-toast-action:active, .us-toast-close:active { background: rgba(255, 255, 255, .12); }
 
   /* ═══════════ ACCIONES DEL POPUP DEL MAPA — favorito / compartir ═══════════
      [NUEVA FUNCIONALIDAD — paridad mapa/lista] .mapa-popup-actions ya
@@ -290,17 +309,20 @@
   .mapa-popup-actions button {
     font-family: var(--f-ui-map); font-size: .6875rem; font-weight: 700;
     letter-spacing: .0625rem; text-transform: uppercase;
-    padding: .4375rem .6875rem; border-radius: 3.125rem; border: 0; cursor: pointer;
+    padding: .4375rem .6875rem; border-radius: var(--radius-pill); border: 0; cursor: pointer;
     display: inline-flex; align-items: center; gap: .25rem;
     transition: filter .15s ease, transform .15s ease;
   }
   .mapa-popup-actions button:hover { filter: brightness(1.05); }
-  .mapa-popup-actions button:active { transform: scale(.96); }
-  .mapa-popup-actions button.fav {
+  .mapa-popup-actions button:active { filter: brightness(.96); transform: scale(.96); }
+  .mapa-popup-actions button.fav,
+  .mapa-popup-actions button.compartir {
     background: var(--map-panel); color: var(--map-ink); border: 1px solid var(--map-line);
   }
+  /* Paleta intencionalmente propia (no son tokens de core.css): rosa/rojo
+     reservado para el estado "favorito activo", sin equivalente en la
+     paleta río/atardecer del resto del sistema. */
   .mapa-popup-actions button.fav.is-fav { background: #FBE4E4; color: #B23B3B; border-color: transparent; }
-  .mapa-popup-actions button.compartir { background: var(--map-panel); color: var(--map-ink); border: 1px solid var(--map-line); }
 
   /* ═══════════ ESTADO VACÍO ACCIONABLE DEL MAPA ═══════════
      [NUEVA FUNCIONALIDAD] #mapa-empty ya tenía posición/tipografía propia
@@ -392,6 +414,7 @@
     .us-drawer-header button,
     .us-app-header-menu,
     .us-fab,
+    .us-toast,
     .mapa-popup-actions button,
     .mapa-empty-accion {
       border: 1px solid ButtonText;
