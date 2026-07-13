@@ -350,6 +350,17 @@
     var filtroActivo = 'todos';
     var subFiltroActivo = null; // categoria específica dentro del grupo activo, o null = todas
     var textoBusqueda = '';
+    // [FIX — AUDITORIA_DONDE_COMER.md, accesibilidad] textoBusqueda ya está
+    // normalizado (sin acentos/mayúsculas, ver normalizarTexto) porque así
+    // conviene para comparar contra nombreNorm/categoriaNorm. Para el
+    // anuncio de accesibilidad conviene mostrar lo que el usuario realmente
+    // escribió, así que se guarda aparte y no se usa en ningún filtro.
+    var textoBusquedaOriginal = '';
+    // Último conteo de visibles calculado por aplicarFiltros(). Se reutiliza
+    // en el handler de #mapa-orden (que no vuelve a llamar aplicarFiltros(),
+    // porque cambiar el orden no cambia qué lugares son visibles) para poder
+    // anunciar el nuevo orden sin recalcular nada.
+    var ultimoVisibles = 0;
     // [FIX — AUDITORIA_DONDE_COMER.md, P3] true cuando se sabe con certeza
     // que NINGÚN marcador está oculto (recién cargados los datos, o recién
     // terminada una pasada completa de aplicarFiltros() en el estado
@@ -431,6 +442,13 @@
       els.legendHead = document.getElementById('mapa-legend-head');
       els.legendPanel = document.getElementById('mapa-legend');
       els.count = document.getElementById('mapa-count');
+      // [FIX — AUDITORIA_DONDE_COMER.md, accesibilidad] El propio centro de
+      // ayuda (#accesibilidad) le promete al usuario que los filtros
+      // activos del mapa se anuncian vía aria-live="polite". El nodo existe
+      // en el DOM desde siempre pero nunca se escribía nada acá — se cachea
+      // igual que el resto de los nodos del toolbar para poder llenarlo en
+      // cada cambio de filtro/búsqueda/orden (ver anunciarEstadoFiltros()).
+      els.activeFiltros = document.getElementById('mapa-active-filtros');
       els.empty = document.getElementById('mapa-empty');
       els.mapaDiv = document.getElementById('mapa-leaflet');
       els.buscador = document.getElementById('mapa-search');
@@ -786,8 +804,23 @@
       var panel = els.legendPanel;
       if (head && panel && !head.dataset.bound) {
         head.dataset.bound = '1';
-        head.addEventListener('click', function () {
-          panel.classList.toggle('colapsada');
+        var toggleLeyenda = function () {
+          var colapsada = panel.classList.toggle('colapsada');
+          head.setAttribute('aria-expanded', colapsada ? 'false' : 'true');
+        };
+        head.addEventListener('click', toggleLeyenda);
+        // [FIX — AUDITORIA_DONDE_COMER.md, accesibilidad] #mapa-legend-head
+        // es un <div role="button"> (ver index.html): a diferencia de un
+        // <button> real, un div con role="button" no dispara click con
+        // Enter/Espacio por sí solo — el navegador no le agrega ese
+        // comportamiento gratis, hay que engancharlo a mano. El CSS
+        // :focus-visible para este nodo ya existía (core.css); sin
+        // tabindex+esto, nunca se llegaba a activar.
+        head.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            toggleLeyenda();
+          }
         });
       }
     }
@@ -985,6 +1018,7 @@
       if (e) e.preventDefault();
       if (els.buscador) els.buscador.value = '';
       textoBusqueda = '';
+      textoBusquedaOriginal = '';
       filtroActivo = 'todos';
       (pillNodes || document.querySelectorAll('.mapa-pill')).forEach(function (b) { b.classList.remove('activo'); });
       var todosBtn = els.filtros ? els.filtros.querySelector('.mapa-pill[data-cat="todos"]') : document.querySelector('.mapa-pill[data-cat="todos"]');
@@ -1005,6 +1039,7 @@
     function limpiarSoloBusqueda() {
       if (els.buscador) els.buscador.value = '';
       textoBusqueda = '';
+      textoBusquedaOriginal = '';
       aplicarFiltros();
     }
 
@@ -1045,6 +1080,52 @@
       if (btnSoloBusqueda) btnSoloBusqueda.addEventListener('click', limpiarSoloBusqueda);
       var btnTodo = cont.querySelector('[data-empty-accion="todo"]');
       if (btnTodo) btnTodo.addEventListener('click', limpiarTodoFiltro);
+    }
+
+    // [FIX — AUDITORIA_DONDE_COMER.md, accesibilidad] Etiquetas legibles del
+    // criterio de orden, para el anuncio de #mapa-active-filtros. Coinciden
+    // a propósito con el texto visible de las <option> de #mapa-orden en
+    // index.html — si ese texto cambia algún día, actualizar también acá.
+    var ORDEN_LABEL = {
+      relevancia: 'relevancia',
+      cercania: 'más cerca',
+      recomendados: 'más recomendados',
+      recientes: 'recién agregados'
+    };
+
+    // [FIX — AUDITORIA_DONDE_COMER.md, accesibilidad] Compone y escribe el
+    // texto que un lector de pantalla anuncia cada vez que cambia el
+    // resultado del mapa: cuántos lugares quedaron visibles, y por qué
+    // (categoría, subcategoría, búsqueda y orden actuales). Es el mismo
+    // nodo (#mapa-active-filtros) que index.html ya documenta en el centro
+    // de ayuda como aria-live="polite" — antes declarado pero nunca
+    // poblado por ningún JS. No se muestra visualmente (ver clase
+    // "visually-hidden" en el propio nodo): solo lo recibe un lector de
+    // pantalla, así que no cambia ningún comportamiento visible del sitio.
+    function anunciarEstadoFiltros() {
+      var nodo = els.activeFiltros;
+      if (!nodo || todosLosMarkers.length === 0) return;
+
+      var partes = ['Mostrando ' + ultimoVisibles + ' de ' + todosLosMarkers.length + ' lugares'];
+
+      if (filtroActivo !== 'todos') {
+        var grupoInfo = GRUPOS[filtroActivo];
+        partes.push('en ' + (grupoInfo ? grupoInfo.label : filtroActivo));
+      }
+      if (subFiltroActivo) {
+        partes.push('subcategoría ' + subFiltroActivo);
+      }
+      if (textoBusquedaOriginal) {
+        partes.push('que coinciden con "' + textoBusquedaOriginal + '"');
+      }
+
+      var mensaje = partes.join(', ') + '.';
+      var ordenLabel = ORDEN_LABEL[ordenActual];
+      if (ordenLabel) {
+        mensaje += ' Ordenado por ' + ordenLabel + '.';
+      }
+
+      nodo.textContent = mensaje;
     }
 
     // ─── Filtro combinado (categoría + subcategoría + búsqueda) ───
@@ -1105,6 +1186,8 @@
         });
         visibles = todosLosMarkers.length;
         if (els.count) els.count.textContent = visibles;
+        ultimoVisibles = visibles;
+        anunciarEstadoFiltros();
         if (visibles === 0) renderEmptyState();
         if (els.empty) els.empty.style.display = (visibles === 0) ? 'block' : 'none';
         if (els.mapaDiv) els.mapaDiv.style.display = (visibles === 0) ? 'none' : 'block';
@@ -1171,6 +1254,8 @@
       estadoSinOcultos = esCasoTrivial;
 
       if (els.count) els.count.textContent = visibles;
+      ultimoVisibles = visibles;
+      anunciarEstadoFiltros();
       if (visibles === 0) renderEmptyState();
       if (els.empty) els.empty.style.display = (visibles === 0) ? 'block' : 'none';
       if (els.mapaDiv) els.mapaDiv.style.display = (visibles === 0) ? 'none' : 'block';
@@ -1189,6 +1274,7 @@
       subFiltroActivo = null;
       if (opts.limpiarBusqueda) {
         textoBusqueda = '';
+        textoBusquedaOriginal = '';
         if (els.buscador) els.buscador.value = '';
       }
       aplicarFiltros();
@@ -1654,7 +1740,8 @@
       if (buscador) {
         // [OPTIMIZACIÓN CRÍTICA] Debounce en buscador + normalizar texto para búsquedas coherentes
         var debouncedSearch = utils.debounce(function (e) {
-          textoBusqueda = utils.normalizarTexto(e.target.value.trim());
+          textoBusquedaOriginal = e.target.value.trim();
+          textoBusqueda = utils.normalizarTexto(textoBusquedaOriginal);
           aplicarFiltros();
         }, DEBOUNCE_BUSQUEDA_MS);
         
@@ -1727,6 +1814,7 @@
       if (ordenSelect) {
         ordenSelect.addEventListener('change', function () {
           ordenActual = ordenSelect.value;
+          anunciarEstadoFiltros();
           if (ordenActual === 'cercania' && !posicionUsuario) {
             solicitarUbicacionParaOrden();
           } else if (vistaActual === 'lista') {
@@ -2013,6 +2101,8 @@
       if (e) e.preventDefault();
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
+      if (openBtn) openBtn.setAttribute('aria-expanded', 'true');
+      if (openBtnHeader) openBtnHeader.setAttribute('aria-expanded', 'true');
       if (emptyEl) emptyEl.hidden = true;
       if (!input.value.trim()) renderSugeridos();
       trampa.activar();
@@ -2021,6 +2111,8 @@
     function cerrar() {
       overlay.classList.remove('is-open');
       overlay.setAttribute('aria-hidden', 'true');
+      if (openBtn) openBtn.setAttribute('aria-expanded', 'false');
+      if (openBtnHeader) openBtnHeader.setAttribute('aria-expanded', 'false');
       trampa.desactivar();
     }
     if (openBtn) openBtn.addEventListener('click', abrir);
