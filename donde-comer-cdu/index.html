@@ -633,7 +633,28 @@
       </nav>
     </section>
 
-    <section class="us-section" id="donde-comer-guia" aria-labelledby="title-donde-comer-guia">
+    <!-- [ARQUITECTURA — auditoría de ingeniería, renderizado/carga inicial]
+         Antes, "content-visibility:auto" solo se usaba en #cd-wrap-container,
+         #seo-mount y el <footer> — los únicos tres nodos por debajo del mapa
+         que ya lo tenían. Todo lo demás que vive debajo de #mapa (guía
+         gastronómica extensa, recorridos, favoritos/historial, accesibilidad,
+         centro de ayuda, "sobre uruspot") es contenido 100% estático y largo
+         que la enorme mayoría de las visitas nunca llega a scrollear, pero
+         el navegador igual tenía que calcular layout/estilo/paint de todo
+         ese HTML en el arranque, como si estuviera visible. Se extiende el
+         MISMO patrón (ya probado en este archivo) a esas seis secciones:
+         el navegador salta ese trabajo hasta que cada una esté por entrar en
+         viewport, reduciendo el costo de renderizado inicial sin cambiar en
+         absoluto lo que el usuario ve. contain-intrinsic-size es una
+         estimación de alto de cada sección (para no correr el resto de la
+         página mientras el contenido real todavía no se midió) — si su
+         contenido cambia de forma drástica, ajustar el valor en su propio
+         atributo style. Los anchors (#donde-comer-guia, etc.) siguen
+         funcionando igual: los navegadores fuerzan el render de un elemento
+         content-visibility:auto cuando es el destino de una navegación por
+         fragmento o de un scrollIntoView(), tal como ya lo hacían con el
+         footer antes de este cambio. -->
+    <section class="us-section" id="donde-comer-guia" aria-labelledby="title-donde-comer-guia" style="content-visibility:auto;contain-intrinsic-size:0 2600px;">
       <div class="section-header">
         <div>
           <span class="section-eyebrow">Guía gastronómica</span>
@@ -759,7 +780,7 @@
       <div class="dc-divider" role="separator"><span>Una guía no sirve de nada si no te ayuda a decidir más rápido</span></div>
     </section>
 
-    <section class="us-section" id="recorridos-tematicos" aria-labelledby="title-recorridos-tematicos">
+    <section class="us-section" id="recorridos-tematicos" aria-labelledby="title-recorridos-tematicos" style="content-visibility:auto;contain-intrinsic-size:0 1400px;">
       <div class="section-header">
         <div>
           <span class="section-eyebrow">Dos formas de no planificar todo vos</span>
@@ -836,7 +857,7 @@
       </nav>
     </section>
 
-    <section class="us-section" id="guardar-volver-compartir" aria-labelledby="title-guardar-volver-compartir">
+    <section class="us-section" id="guardar-volver-compartir" aria-labelledby="title-guardar-volver-compartir" style="content-visibility:auto;contain-intrinsic-size:0 1800px;">
       <div class="section-header">
         <div>
           <span class="section-eyebrow">De lugares sueltos a memoria propia</span>
@@ -934,7 +955,7 @@
 
     <div id="seo-mount" style="content-visibility:auto;contain-intrinsic-size:0 800px;"></div>
 
-    <section class="us-section" id="accesibilidad" aria-labelledby="title-accesibilidad">
+    <section class="us-section" id="accesibilidad" aria-labelledby="title-accesibilidad" style="content-visibility:auto;contain-intrinsic-size:0 1300px;">
       <div class="section-header">
         <div>
           <span class="section-eyebrow">Para todos</span>
@@ -1005,7 +1026,7 @@
       </nav>
     </section>
 
-    <section class="us-section" id="centro-ayuda" aria-labelledby="title-centro-ayuda">
+    <section class="us-section" id="centro-ayuda" aria-labelledby="title-centro-ayuda" style="content-visibility:auto;contain-intrinsic-size:0 700px;">
       <div class="section-header">
         <div>
           <span class="section-eyebrow">¿No encontrás algo?</span>
@@ -1042,7 +1063,7 @@
       </nav>
     </section>
 
-    <section class="us-section" id="sobre-uruspot" aria-labelledby="title-sobre-uruspot">
+    <section class="us-section" id="sobre-uruspot" aria-labelledby="title-sobre-uruspot" style="content-visibility:auto;contain-intrinsic-size:0 2400px;">
       <div class="section-header">
         <div>
           <span class="section-eyebrow">Sobre el sitio</span>
