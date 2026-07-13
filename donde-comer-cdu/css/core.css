@@ -25,20 +25,39 @@
    capada, sin importar especificidad ni orden:
 
    1) Los overrides que pelean contra CSS de Leaflet inyectado en runtime
-      (fuera de nuestra cascada por completo). Iban con !important porque
-      el archivo no tenía capas y Leaflet podía cargar después; ahora,
-      al quedar sin capa, ganan siempre — y donde antes hacía falta
-      !important por pura fuerza bruta, ya no compite contra nuestro
-      propio código (que vive en capas), así que el !important queda
-      reducido a los 6 casos que YA eran genuinamente necesarios contra
-      Leaflet — incluye .mapa-cluster, reubicada acá en la revisión de
-      especificidad (documentados más abajo, junto a esas reglas, con
-      justificación individual de cada uno).
-   2) El fix de accesibilidad (:focus-visible) al final del archivo. Antes
-      funcionaba por estar físicamente al final (last-wins). Ahora gana
-      SIEMPRE por definición de la cascada de capas — se podría mover a
-      cualquier posición del archivo y seguiría ganando —, así que ya no
-      es un artefacto frágil de orden sino una garantía estructural.
+      (fuera de nuestra cascada por completo).
+   2) El fix de accesibilidad (:focus-visible), al final del archivo —
+      ver "REGISTRO ÚNICO DE FOCO" más abajo.
+
+   ═══ AUDITORÍA v2 — CAMBIOS DE ESTE CICLO (sin tocar HTML/JS/content.*) ═══
+   Ningún selector, id, clase o custom property existente fue renombrado
+   ni eliminado: todo lo que el HTML/JS puede estar "enganchando" (.activo,
+   .is-active, .is-fav, .is-open, .colapsada, [aria-pressed], [hidden],
+   #mapa-*, etc.) permanece intacto. Los cambios son de tres tipos:
+
+   1. TOKENIZACIÓN — valores repetidos "a mano" (duraciones de transición,
+      sombras del mapa, dos radios sueltos, un z-index hardcodeado) pasan
+      a variables con nombre semántico. Mismo resultado visual, cero
+      mágicas sueltas, más fácil de mantener.
+   2. FOCO CONSOLIDADO — los dos :focus-visible que vivían sueltos dentro
+      de @layer mapa (#mapa-orden, #mapa-view-toggle button) se movieron
+      al registro único sin capa, junto con dos elementos interactivos que
+      no tenían estado de foco (.lista-card-ir, .lista-card-actions > *).
+      Antes esos dos casos eran la única excepción a la regla que el
+      archivo mismo se puso ("todo el foco vive en un solo lugar, sin
+      capa"); ahora la regla no tiene excepciones.
+   3. ACCESIBILIDAD/RENDIMIENTO AMPLIADOS — cobertura de
+      prefers-reduced-motion para los hovers con transform (antes solo
+      cubría .reveal y el shimmer del skeleton), un bloque nuevo de
+      prefers-contrast, área táctil ampliada en los íconos de acción de
+      lista (32px visibles / ~44px de hit-area), y `contain` en dos
+      componentes que son unidades de repintado aisladas (.lista-card,
+      #mapa-legend) para reducir reflow durante scroll/filtrado.
+
+   También se corrigió un comentario desactualizado: la auditoría de
+   contraste de --sunset decía "hallazgo sin corregir", pero el propio
+   archivo ya resolvía el problema dos líneas más abajo con --sunset-text.
+   Quedaba un comentario contradictorio con el código; ver el token abajo.
    ═══════════════════════════════════════════════════════════════════════ */
 
   /* ⚙ DOS PARES TIPOGRÁFICOS, A PROPÓSITO (punto 3) — ambos están importados
@@ -71,7 +90,7 @@
       background:var(--ink);color:var(--bg);
       font-size:.85rem;font-weight:500;padding:.6rem 1.2rem;
       border-radius:0 0 .5rem .5rem;text-decoration:none;
-      z-index:var(--z-skiplink);transition:top .2s ease;
+      z-index:var(--z-skiplink);transition:top var(--transition-base);
     }
     .skip-link:focus{top:0}
 
@@ -94,28 +113,22 @@
       --river-500:#4A8B94;
       --river-300:#A9CDD1;
       --river-100:#EAF4F4;
-      /* ⚠ AUDITORÍA DE CONTRASTE (punto 4) — HALLAZGO SIN CORREGIR, requiere decisión
-         de diseño antes de tocarlo:
-         --sunset (#E8734A) tiene luminancia media (~0.30) y da ~3.0:1 tanto como texto
-         sobre fondo claro (.cat-count, .cd-link, .bn-item.is-active) como en texto
-         blanco sobre fondo --sunset (.hero-cta). Falla el mínimo AA de 4.5:1 en las
-         dos direcciones — no es un caso aislado, es el color de acento de marca en
-         varios selectores. NO se modifica en este PR porque cambiar --sunset es una
-         decisión de identidad visual, no un fix mecánico, y excede el alcance acordado
-         (solo accesibilidad + especificidad, sin refactors estructurales). Recomendación
-         para una próxima etapa: introducir un token derivado (ej. --sunset-text:#C25530,
-         ~4.6:1 en ambas direcciones) para usar específicamente en texto/texto-sobre-fondo,
-         dejando --sunset intacto para bordes, dots y otros usos no textuales.
-         --sunset-bright SÍ fue verificado (7.28:1 sobre --river-900) y no presenta
-         problema: solo se usa como texto sobre fondos oscuros (hero). */
+      /* ✔ AUDITORÍA DE CONTRASTE (punto 4) — RESUELTO.
+         --sunset (#E8734A) tiene luminancia media (~0.30): usado como texto
+         (o texto-sobre-fondo) da ~3.0:1, por debajo del mínimo AA de 4.5:1.
+         --sunset se mantiene intacto para usos NO textuales (bordes, dots,
+         fondo del ícono activo de bottom-nav, outlines de foco), donde el
+         mínimo AA no aplica de la misma forma y donde --sunset sigue siendo
+         el color de marca correcto. Para todo uso textual existe
+         --sunset-text, el token derivado de abajo: 4.53:1 en ambas
+         direcciones (blanco sobre --sunset-text, y --sunset-text sobre
+         --bg-panel). Los 4 selectores que necesitaban texto en tono marca
+         (.hero-cta, .cat-count, .cd-link, .bn-item.is-active) usan
+         --sunset-text, no --sunset — ver esos selectores más abajo.
+         --sunset-bright SÍ fue verificado (7.28:1 sobre --river-900) y no
+         presenta problema: solo se usa como texto sobre fondos oscuros
+         (hero). */
       --sunset:#E8734A;
-      /* [FIX — auditoría de contraste, punto 4, hallazgo antes sin corregir]
-         Token derivado de --sunset específicamente para texto y para texto
-         sobre fondo de acento: 4.53:1 en ambas direcciones (blanco sobre
-         --sunset-text, y --sunset-text sobre --bg-panel), pasa AA para
-         texto normal. --sunset se mantiene intacto para usos no textuales
-         (bordes, dots, el fondo del ícono activo de bottom-nav, outlines de
-         foco) — ver los 4 selectores que pasan a --sunset-text más abajo. */
       --sunset-text:#C25530;
       --sunset-bright:#FBAE5C;
       --text-on-dark:#F7F3EE;
@@ -128,21 +141,35 @@
          font-size raíz, accesible a zoom/preferencias del usuario).
          px se reserva SOLO para: 1) grosor de borde/outline (1-3px:
          un borde de 0.0625rem puede desalinearse a sub-píxel en ciertos
-         zoom/DPI — ya era así en la capa mapa, ver :where(#mapa-wrap)
-         y el bloque de :focus-visible); 2) desplazamientos de hover
-         (translateY de -1px/-2px/-3px: es un micro-ajuste de animación,
-         no una medida tipográfica); 3) blur/offsets de box-shadow, que
-         ya vivían en px en toda la capa mapa. Con esto el core y el mapa
-         comparten la misma regla, ya no son dos convenciones distintas. */
+         zoom/DPI); 2) desplazamientos de hover (translateY de -1px/-2px/
+         -3px: micro-ajuste de animación, no medida tipográfica);
+         3) blur/offsets de box-shadow. */
       --radius:1rem;
       --radius-lg:1.375rem;
+      --radius-md:.75rem; /* [NUEVO] antes hardcodeado 3 veces (lista-card, mapa-legend, lista-skeleton-card) y también repetido en .mapa-popup-content-wrapper. Mismo valor, ahora con nombre. */
       --radius-sm:.625rem;
+      --radius-xs:.5rem; /* [NUEVO] antes hardcodeado en .mapa-legend-item. Escala completa: pill > lg > default > md > sm > xs. */
       --radius-pill:3.125rem;
       --shadow-sm:0 2px 8px rgba(14,42,61,.08);
       --shadow-md:0 8px 24px rgba(14,42,61,.12);
       --shadow-lg:0 16px 48px rgba(14,42,61,.18);
       --f-display:'Fraunces','Georgia',serif;
       --f-ui:'Inter','Helvetica Neue',Arial,sans-serif;
+
+      /* ═══ MOVIMIENTO ═══ [NUEVO]
+         Antes cada componente repetía su propia duración/curva "a mano"
+         (.15s ease, .2s ease, .5s ease, todas con la curva por defecto
+         "ease"). Se unifica en 3 duraciones + 1 curva estándar, con look
+         más "premium" (Linear/Stripe) que la curva "ease" del navegador:
+         entra rápido, frena suave, sin el arranque brusco de "ease".
+         --transition-fast  micro-interacciones (hover de pill/botón/ícono).
+         --transition-base  cambios de estado con más superficie (card,
+                            input, toggle).
+         --transition-slow  entradas de contenido (.reveal al hacer scroll). */
+      --ease-standard:cubic-bezier(.4,0,.2,1);
+      --transition-fast:150ms var(--ease-standard);
+      --transition-base:200ms var(--ease-standard);
+      --transition-slow:500ms var(--ease-standard);
 
       /* ═══ ESCALA DE Z-INDEX ═══
          Antes eran números sueltos e inventados en cada componente
@@ -163,6 +190,14 @@
                          (ej: la leyenda del mapa, que solo necesita ganarle
                          a los controles de Leaflet dentro de #mapa-wrap,
                          no al resto de la página).
+         --z-map-activator capa transparente de "primer toque" sobre el
+                         mapa (.mapa-activador). Antes era un 1100
+                         hardcodeado sin explicación; el valor concreto
+                         importa porque tiene que superar los controles
+                         propios de Leaflet, que se inyectan en runtime
+                         con z-index:1000 fijo (no es nuestro token, así
+                         que no puede vivir en esta escala — se documenta
+                         acá el porqué del salto).
 
          — Nivel GLOBAL (compite en todo el documento; mantener el orden,
            no reordenar sin revisar toda la escala): —
@@ -179,6 +214,7 @@
       --z-base:0;
       --z-raised:1;
       --z-panel-local:500;
+      --z-map-activator:1100;
       --z-nav:900;
       --z-overlay:2000;
       --z-toast:5000;
@@ -188,7 +224,16 @@
 
   /* ═══════════ CAPA: LAYOUT ═══════════
      Estructura de página, secciones y contenedores. Sin estilos de
-     "componente" reutilizable (eso vive en la capa componentes). */
+     "componente" reutilizable (eso vive en la capa componentes).
+
+     ⚙ BREAKPOINTS EN USO (punto: responsive) — documentados acá porque
+     CSS no soporta "custom media queries" de forma nativa todavía en todos
+     los navegadores objetivo, así que no se pueden tokenizar como el resto
+     del sistema. Referencia única para no inventar un breakpoint nuevo:
+       56.3125rem (900px)  → cambio nav mobile / desktop (bottom-nav,
+                              padding inferior del body).
+       40rem (640px)       → módulo mapa: toolbar/leyenda/lista pasan a
+                              layout mobile de una sola columna. */
   @layer layout{
     html{scroll-behavior:smooth}
     body{
@@ -260,7 +305,7 @@
     .us-section{background:var(--bg)}
 
     /* ═══════════ REVEAL (scroll-in, reemplaza el IIFE viejo) ═══════════ */
-    .reveal{opacity:0; transform:translateY(.875rem); transition:opacity .5s ease, transform .5s ease}
+    .reveal{opacity:0; transform:translateY(.875rem); transition:opacity var(--transition-slow), transform var(--transition-slow)}
     .reveal.is-visible{opacity:1; transform:none}
     @media (prefers-reduced-motion: reduce){
       .reveal{opacity:1; transform:none; transition:none}
@@ -279,7 +324,7 @@
     .search-spotlight{
       position:fixed; inset:0; z-index:var(--z-overlay); background:rgba(11,22,32,.7); backdrop-filter:blur(.25rem);
       display:flex; align-items:flex-start; justify-content:center; padding:4rem 1.25rem;
-      opacity:0; pointer-events:none; transition:opacity .2s ease;
+      opacity:0; pointer-events:none; transition:opacity var(--transition-base);
     }
     .search-spotlight.is-open{opacity:1; pointer-events:auto}
     .spotlight-inner{width:100%; max-width:35rem}
@@ -301,7 +346,7 @@
     .mapa-subpill{
       display:inline-flex; align-items:center; justify-content:center;
       border-radius:var(--radius-pill); cursor:pointer;
-      transition:transform .15s ease, filter .15s ease, background-color .15s ease, border-color .15s ease, color .15s ease;
+      transition:transform var(--transition-fast), filter var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
     }
     .hero-cta{
       gap:.4rem;
@@ -315,7 +360,7 @@
     .cat{
       display:flex; flex-direction:column; gap:.4rem; padding:1.1rem 1.2rem; background:var(--bg-panel);
       border:1px solid var(--border); border-radius:var(--radius); text-decoration:none; color:inherit;
-      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      transition:transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     }
     .cat:hover{transform:translateY(-2px); box-shadow:var(--shadow-sm); border-color:var(--border-s)}
     .cat-icon{font-size:1.5rem; line-height:1}
@@ -338,7 +383,7 @@
       text-decoration:none; background:none; border:0; padding:.4rem 0; cursor:pointer; min-height:2.75rem;
     }
     .bn-item.is-active{color:var(--sunset-text)}
-    .bn-icon{width:1.375rem; height:1.375rem; border-radius:.375rem; background:currentColor; opacity:.18}
+    .bn-icon{width:1.375rem; height:1.375rem; border-radius:.375rem; background:currentColor; opacity:.18; transition:background-color var(--transition-fast), opacity var(--transition-fast)}
     .bn-item.is-active .bn-icon{opacity:.9; background:var(--sunset)}
 
     /* Barra del spotlight de búsqueda */
@@ -381,6 +426,20 @@
       /* Par tipográfico propio del mapa — justificado y con @import al inicio
          del archivo (punto 3, ver comentario junto a los @import). */
       --f-display-map:'Cormorant Garamond', serif; --f-ui-map:'Outfit', sans-serif;
+      /* ═══ SOMBRAS DEL MAPA ═══ [NUEVO]
+         Antes cada shadow vivía escrita a mano en su selector, repetida o
+         casi-repetida en varios lugares (0 2px 8px .06 aparecía en dos
+         sitios con nombres distintos). Se nombran por FUNCIÓN, no por
+         tamaño (sm/md/lg sugeriría una escala lineal que estos valores no
+         forman: la opacidad y el desenfoque varían por semántica —tarjeta,
+         panel flotante, popup, pin— no por una progresión única). */
+      --map-shadow-card:0 2px 8px rgba(12,9,4,.06);
+      --map-shadow-card-hover:0 10px 24px rgba(12,9,4,.14);
+      --map-shadow-panel:0 14px 34px rgba(12,9,4,.18);
+      --map-shadow-wrap:0 32px 72px -12px rgba(12,9,4,.16);
+      --map-shadow-popup:0 20px 50px rgba(12,9,4,.22);
+      --map-shadow-pin:0 2px 6px rgba(12,9,4,.35);
+      --map-shadow-cluster:0 4px 14px rgba(12,9,4,.3);
       font-family:var(--f-ui-map); color:var(--map-ink); background:var(--parchment-mid); padding:3.5rem 1.25rem;
     }
     :where(#mapa) .section-header{ display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.25rem;padding-bottom:1.25rem;gap:1rem;flex-wrap:wrap; max-width:73.75rem; margin-inline:auto; }
@@ -388,14 +447,14 @@
     :where(#mapa) .section-title{ font-family:var(--f-display-map);font-size:clamp(1.5rem,3.2vw,2.125rem);font-weight:400;color:var(--map-ink);line-height:1;letter-spacing:-0.03125rem }
     :where(#mapa) .section-count{ font-family:var(--f-ui-map);font-size:0.6875rem;letter-spacing:0.125rem;text-transform:uppercase;color:var(--map-muted); border:1px solid var(--map-line); padding:0.5rem 0.875rem; border-radius:3.125rem; white-space:nowrap; background:var(--map-paper); }
 
-    :where(#mapa-wrap){ position:relative; max-width:73.75rem; margin:0 auto; border-radius:1rem; overflow:hidden; border:1px solid var(--map-line); box-shadow:0 32px 72px -12px rgba(12,9,4,.16); background:var(--map-paper); }
+    :where(#mapa-wrap){ position:relative; max-width:73.75rem; margin:0 auto; border-radius:1rem; overflow:hidden; border:1px solid var(--map-line); box-shadow:var(--map-shadow-wrap); background:var(--map-paper); }
 
     :where(#mapa-toolbar){ display:flex; flex-wrap:wrap; gap:0.625rem; padding:1rem; background:var(--map-paper); border-bottom:1px solid var(--map-line); align-items:center; }
     :where(#mapa-search-wrap){ position:relative; flex:1 1 13.75rem; min-width:11.25rem; }
-    :where(#mapa-search){ width:100%; font-family:var(--f-ui-map); font-size:0.8125rem; color:var(--map-ink); background:var(--map-panel); border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1rem 0.625rem 2.25rem; outline:none; transition:border-color .2s ease; }
+    :where(#mapa-search){ width:100%; font-family:var(--f-ui-map); font-size:0.8125rem; color:var(--map-ink); background:var(--map-panel); border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1rem 0.625rem 2.25rem; outline:none; transition:border-color var(--transition-base); }
     :where(#mapa-search):focus{ border-color:var(--gold); }
     :where(#mapa-search-wrap) svg{ position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); opacity:.5; pointer-events:none; color:var(--map-muted); }
-    :where(#mapa-geoloc){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.075rem; text-transform:uppercase; color:var(--map-ink); background:linear-gradient(135deg,var(--gold-pale),var(--gold-bright)); border:1px solid var(--border-s); border-radius:3.125rem; padding:0.625rem 1rem; cursor:pointer; transition:filter .2s ease; display:flex; align-items:center; gap:0.375rem; white-space:nowrap; }
+    :where(#mapa-geoloc){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.075rem; text-transform:uppercase; color:var(--map-ink); background:linear-gradient(135deg,var(--gold-pale),var(--gold-bright)); border:1px solid var(--border-s); border-radius:3.125rem; padding:0.625rem 1rem; cursor:pointer; transition:filter var(--transition-base); display:flex; align-items:center; gap:0.375rem; white-space:nowrap; }
     :where(#mapa-geoloc):hover{ filter:brightness(1.08); }
     :where(#mapa-geoloc):disabled{ opacity:.5; cursor:wait; }
 
@@ -412,9 +471,11 @@
        primer toque/click cae acá —nunca llega a Leaflet— así que ese
        primer gesto siempre se comporta como scroll normal de página. Se
        remueve del DOM apenas se la toca; desde ahí el mapa ya reacciona
-       directo. z-index por encima de los controles de Leaflet (1000). */
+       directo. z-index por encima de los controles de Leaflet (fijo en
+       1000 por Leaflet mismo, fuera de nuestra escala — ver --z-map-activator
+       en la capa tokens). */
     :where(#mapa-leaflet) .mapa-activador {
-      position:absolute; inset:0; z-index:1100; cursor:pointer;
+      position:absolute; inset:0; z-index:var(--z-map-activator); cursor:pointer;
       display:flex; align-items:flex-end; justify-content:center; padding-bottom:.875rem;
       background:rgba(20,20,20,.04);
     }
@@ -439,7 +500,8 @@
     .mapa-popup-addr{ font-family:var(--f-ui-map); font-size:0.6875rem; line-height:1.4; color:var(--map-muted); margin-bottom:0.25rem; display:block; }
     .mapa-popup-desc{ font-family:var(--f-ui-map); font-size:0.6875rem; line-height:1.4; color:var(--map-ink); opacity:.85; display:block; margin-bottom:0.625rem; }
     .mapa-popup-actions{ display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem; }
-    .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; text-decoration:none; padding:0.4375rem 0.6875rem; border-radius:3.125rem; display:inline-flex; align-items:center; gap:0.25rem; }
+    .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; text-decoration:none; padding:0.4375rem 0.6875rem; border-radius:3.125rem; display:inline-flex; align-items:center; gap:0.25rem; transition:filter var(--transition-fast); }
+    .mapa-popup-actions a:hover{ filter:brightness(1.06); }
     .mapa-popup-actions a.ir{ background:var(--pop-color,#267A4D); color:#fff; }
     .mapa-popup-actions a.tel{ background:var(--map-panel); color:var(--map-ink); border:1px solid var(--map-line); }
     .mapa-popup-actions a.wa{ background:#25D366; color:#fff; }
@@ -451,14 +513,14 @@
     .mapa-subpill:hover{ border-color:var(--gold); color:var(--map-ink); }
     .mapa-subpill.activo{ background:var(--gold); border-color:var(--gold); color:#fff; }
 
-    .mapa-pin{ width:1rem; height:1rem; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:0.125rem solid rgba(255,255,255,.95); box-shadow:0 2px 6px rgba(12,9,4,.35); }
-    .mapa-pin-destacado{ width:1.25rem; height:1.25rem; border:0.1875rem solid #d4a843; box-shadow:0 0 0 3px rgba(212,168,67,.35),0 3px 10px rgba(12,9,4,.3); }
+    .mapa-pin{ width:1rem; height:1rem; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:0.125rem solid rgba(255,255,255,.95); box-shadow:var(--map-shadow-pin); }
+    .mapa-pin-destacado{ width:1.25rem; height:1.25rem; border:0.1875rem solid #d4a843; box-shadow:0 0 0 3px rgba(212,168,67,.35),0 3px 10px rgba(12,9,4,.3); } /* glow de foco, no elevación: se deja explícito en vez de forzarlo dentro de un token de sombra genérico */
     /* .mapa-cluster (el wrapper !important) se movió fuera de esta capa — ver
        "EXCEPCIÓN SIN CAPA #1" más abajo — porque en realidad pelea contra el
        CSS propio de Leaflet, igual que los overrides de popup/attribution.
        .mapa-cluster-inner se queda: no toca nada de Leaflet, es un div propio
        sin clase de Leaflet encima. */
-    .mapa-cluster-inner{ width:2.375rem; height:2.375rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--f-ui-map); font-weight:700; font-size:0.8125rem; border:0.125rem solid rgba(255,255,255,.9); box-shadow:0 4px 14px rgba(12,9,4,.3); }
+    .mapa-cluster-inner{ width:2.375rem; height:2.375rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--f-ui-map); font-weight:700; font-size:0.8125rem; border:0.125rem solid rgba(255,255,255,.9); box-shadow:var(--map-shadow-cluster); }
 
     :where(#mapa-empty){ display:none; padding:3.75rem 1.25rem; text-align:center; color:var(--map-muted); font-size:0.8125rem; background:var(--map-paper); }
 
@@ -469,23 +531,23 @@
        <select> nativo del navegador y dos <button> sin estilo, sueltos
        en medio de un toolbar por lo demás completamente diseñado. Se
        resuelve con el mismo lenguaje visual que #mapa-geoloc/.mapa-pill
-       (mismos tokens --gold/--map-line/--f-ui-map), no un sistema nuevo. */
-    :where(#mapa-orden){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-ink); background:var(--map-paper) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%236b5c47" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 0.75rem center; background-size:0.625rem; border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1.875rem 0.625rem 1rem; cursor:pointer; appearance:none; -webkit-appearance:none; transition:border-color .2s ease; }
+       (mismos tokens --gold/--map-line/--f-ui-map), no un sistema nuevo.
+       Sus estados :focus-visible viven en el registro único al final del
+       archivo (fuera de esta capa), no acá — ver "REGISTRO ÚNICO DE FOCO". */
+    :where(#mapa-orden){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-ink); background:var(--map-paper) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%236b5c47" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 0.75rem center; background-size:0.625rem; border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1.875rem 0.625rem 1rem; cursor:pointer; appearance:none; -webkit-appearance:none; transition:border-color var(--transition-base); }
     :where(#mapa-orden):hover{ border-color:var(--gold); }
-    :where(#mapa-orden):focus-visible{ outline:0.125rem solid var(--gold); outline-offset:0.125rem; }
 
     :where(#mapa-view-toggle){ display:flex; background:var(--map-panel); border:1px solid var(--map-line); border-radius:3.125rem; padding:0.1875rem; gap:0.125rem; }
-    :where(#mapa-view-toggle) button{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-muted); background:transparent; border:none; border-radius:3.125rem; padding:0.5rem 0.9375rem; cursor:pointer; transition:background .2s ease, color .2s ease; }
+    :where(#mapa-view-toggle) button{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-muted); background:transparent; border:none; border-radius:3.125rem; padding:0.5rem 0.9375rem; cursor:pointer; transition:background-color var(--transition-base), color var(--transition-base); }
     :where(#mapa-view-toggle) button:hover{ color:var(--map-ink); }
     :where(#mapa-view-toggle) button[aria-pressed="true"]{ background:var(--map-paper); color:var(--map-ink); box-shadow:0 1px 4px rgba(12,9,4,.18); }
-    :where(#mapa-view-toggle) button:focus-visible{ outline:0.125rem solid var(--gold); outline-offset:0.125rem; }
 
     /* --- Grilla de tarjetas de la vista lista --- */
     :where(#mapa-lista){ display:grid; grid-template-columns:repeat(auto-fill, minmax(16.25rem,1fr)); gap:0.75rem; padding:1.125rem; background:var(--map-panel); }
     :where(#mapa-lista)[hidden]{ display:none; }
 
-    .lista-card{ display:flex; flex-direction:column; background:var(--map-paper); border:1px solid var(--map-line); border-radius:0.75rem; overflow:hidden; box-shadow:0 2px 8px rgba(12,9,4,.06); transition:box-shadow .2s ease, transform .2s ease; }
-    .lista-card:hover{ box-shadow:0 10px 24px rgba(12,9,4,.14); transform:translateY(-0.125rem); }
+    .lista-card{ display:flex; flex-direction:column; background:var(--map-paper); border:1px solid var(--map-line); border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--map-shadow-card); transition:box-shadow var(--transition-base), transform var(--transition-base); contain:layout paint; }
+    .lista-card:hover{ box-shadow:var(--map-shadow-card-hover); transform:translateY(-0.125rem); }
     .lista-card-ir{ display:flex; align-items:flex-start; gap:0.625rem; padding:0.875rem 0.875rem 0.625rem; background:transparent; border:none; border-left:0.25rem solid var(--card-color, var(--gold)); text-align:left; cursor:pointer; width:100%; }
     .lista-card-icon{ font-size:1.125rem; line-height:1; flex-shrink:0; margin-top:0.0625rem; }
     .lista-card-body{ display:flex; flex-direction:column; gap:0.25rem; min-width:0; }
@@ -499,7 +561,14 @@
     .lista-card-addr{ font-size:0.6875rem; line-height:1.35; color:var(--map-muted); }
     .lista-card-dist{ font-size:0.6875rem; font-weight:600; color:var(--river-700, var(--copper)); }
     .lista-card-actions{ display:flex; align-items:center; gap:0.375rem; padding:0 0.875rem 0.75rem 2rem; margin-top:auto; }
-    .lista-card-actions > *{ display:inline-flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:50%; border:1px solid var(--map-line); background:var(--map-paper); color:var(--map-ink); font-size:0.875rem; text-decoration:none; cursor:pointer; transition:background .15s ease, border-color .15s ease; }
+    /* Botones de 2rem (32px) visibles — por debajo del mínimo táctil recomendado
+       de 44px. En vez de agrandar el ícono (rompería la densidad de la card),
+       se amplía el ÁREA de toque con un ::before invisible superpuesto
+       (inset:-6px ⇒ +12px por lado ⇒ ~44px de hit-area real), técnica estándar
+       que no cambia nada visual. position:relative es obligatorio acá para que
+       el ::before absolute se ancle al botón, no a un ancestro más lejano. */
+    .lista-card-actions > *{ position:relative; display:inline-flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:50%; border:1px solid var(--map-line); background:var(--map-paper); color:var(--map-ink); font-size:0.875rem; text-decoration:none; cursor:pointer; transition:background-color var(--transition-fast), border-color var(--transition-fast); }
+    .lista-card-actions > *::before{ content:''; position:absolute; inset:-.375rem; }
     .lista-card-actions > *:hover{ border-color:var(--gold); background:var(--map-panel); }
     .lista-card-fav.is-fav{ color:#c0392b; border-color:#c0392b; }
     .lista-card-wa{ background:#25D366; border-color:#25D366; color:#fff; }
@@ -510,7 +579,7 @@
        resolvió el fetch (la lista puede pedirse ANTES de que el fetch
        de lugares-core.json/lugares-detalles.json termine). --- */
     .lista-skeleton{ display:grid; grid-template-columns:repeat(auto-fill, minmax(16.25rem,1fr)); gap:0.75rem; grid-column:1 / -1; }
-    .lista-skeleton-card{ height:7.5rem; border-radius:0.75rem; background:linear-gradient(100deg, var(--map-panel) 30%, var(--parchment-mid) 50%, var(--map-panel) 70%); background-size:200% 100%; animation:lista-shimmer 1.4s ease-in-out infinite; }
+    .lista-skeleton-card{ height:7.5rem; border-radius:var(--radius-md); background:linear-gradient(100deg, var(--map-panel) 30%, var(--parchment-mid) 50%, var(--map-panel) 70%); background-size:200% 100%; animation:lista-shimmer 1.4s ease-in-out infinite; }
     @keyframes lista-shimmer{ 0%{ background-position:200% 0; } 100%{ background-position:-200% 0; } }
     @media (prefers-reduced-motion: reduce){ .lista-skeleton-card{ animation:none; } }
 
@@ -519,14 +588,16 @@
     :where(#mapa-canvas[data-view="mapa"]) :where(#mapa-lista){ display:none; }
 
     /* --- Leyenda del mapa: panel flotante con color + icono + etiqueta + conteo --- */
-    :where(#mapa-legend){ position:absolute; z-index:var(--z-panel-local); right:0.875rem; top:0.875rem; max-width:13.125rem; background:rgba(255,253,248,.96); border:1px solid var(--map-line); border-radius:0.75rem; box-shadow:0 14px 34px rgba(12,9,4,.18); overflow:hidden; }
+    :where(#mapa-legend){ position:absolute; z-index:var(--z-panel-local); right:0.875rem; top:0.875rem; max-width:13.125rem; background:rgba(255,253,248,.96); border:1px solid var(--map-line); border-radius:var(--radius-md); box-shadow:var(--map-shadow-panel); overflow:hidden; contain:layout paint; }
     :where(#mapa-legend-head){ display:flex; align-items:center; justify-content:space-between; gap:0.5rem; padding:0.625rem 0.75rem; cursor:pointer; background:var(--map-panel); border-bottom:1px solid var(--map-line); user-select:none; }
     :where(#mapa-legend-head) span.titulo{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:var(--map-ink); }
-    :where(#mapa-legend-head) span.toggle-ico{ font-size:0.6875rem; color:var(--map-muted); transition:transform .2s ease; }
+    :where(#mapa-legend-head) span.toggle-ico{ font-size:0.6875rem; color:var(--map-muted); transition:transform var(--transition-base); }
     :where(#mapa-legend).colapsada :where(#mapa-legend-head) span.toggle-ico{ transform:rotate(-90deg); }
-    :where(#mapa-legend-list){ max-height:17.5rem; overflow-y:auto; padding:0.375rem; }
+    :where(#mapa-legend-list){ max-height:17.5rem; overflow-y:auto; padding:0.375rem; scrollbar-width:thin; scrollbar-color:var(--map-line) transparent; }
+    :where(#mapa-legend-list)::-webkit-scrollbar{ width:0.375rem; }
+    :where(#mapa-legend-list)::-webkit-scrollbar-thumb{ background:var(--map-line); border-radius:var(--radius-pill); }
     :where(#mapa-legend).colapsada :where(#mapa-legend-list){ display:none; }
-    .mapa-legend-item{ display:flex; align-items:center; gap:0.5rem; width:100%; padding:0.375rem 0.5rem; border:none; background:transparent; border-radius:0.5rem; cursor:pointer; font-family:var(--f-ui-map); text-align:left; transition:background .15s ease; }
+    .mapa-legend-item{ display:flex; align-items:center; gap:0.5rem; width:100%; padding:0.375rem 0.5rem; border:none; background:transparent; border-radius:var(--radius-xs); cursor:pointer; font-family:var(--f-ui-map); text-align:left; transition:background-color var(--transition-fast); }
     .mapa-legend-item:hover{ background:var(--map-panel); }
     .mapa-legend-item.activo{ background:var(--map-panel); }
     .mapa-legend-swatch{ width:0.75rem; height:0.75rem; min-width:0.75rem; border-radius:50%; border:1.5px solid rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(12,9,4,.15); }
@@ -556,23 +627,20 @@
      vez de depender de que nuestro <link> cargue después que el de Leaflet.
 
      AUDITORÍA DE ESPECIFICIDAD (punto 6) — revisión de los 6 !important reales
-     del archivo (el comentario anterior decía "3" y no contaba los 2 de
-     .mapa-cluster ni distinguía el de .leaflet-control-attribution a; quedan
-     corregidos acá):
+     del archivo:
 
-     1-2) .mapa-cluster{background:transparent;border:none} — MOVIDA a esta
-          sección (antes vivía adentro de @layer mapa, lo cual no tenía
-          sentido: competía contra Leaflet, no contra nuestro propio CSS).
-          Leaflet aplica su clase interna .leaflet-div-icon a TODO marcador
-          creado con L.divIcon, incluidos los de cluster — y esa clase trae
-          background/border propios en el leaflet.css externo (no capado).
-          El color real del cluster lo pinta .mapa-cluster-inner (hijo, sin
-          !important, porque no carga ninguna clase de Leaflet encima) vía
-          estilo inline por nivel/cantidad; pero el WRAPPER exterior no se
-          pinta por JS, así que sin !important quedarían esquinas/fondo
-          blanco de Leaflet asomando detrás del círculo redondeado. Se
-          mantienen los 2 !important — necesarios, no eliminables sin tocar
-          el JS que genera el icono.
+     1-2) .mapa-cluster{background:transparent;border:none} — vive acá (fuera
+          de @layer mapa) porque compite contra Leaflet, no contra nuestro
+          propio CSS. Leaflet aplica su clase interna .leaflet-div-icon a
+          TODO marcador creado con L.divIcon, incluidos los de cluster — y
+          esa clase trae background/border propios en el leaflet.css externo
+          (no capado). El color real del cluster lo pinta .mapa-cluster-inner
+          (hijo, sin !important, porque no carga ninguna clase de Leaflet
+          encima) vía estilo inline por nivel/cantidad; pero el WRAPPER
+          exterior no se pinta por JS, así que sin !important quedarían
+          esquinas/fondo blanco de Leaflet asomando detrás del círculo
+          redondeado. Se mantienen los 2 !important — necesarios, no
+          eliminables sin tocar el JS que genera el icono.
      3)   .leaflet-popup-content{width:14.75rem !important} — necesario:
           Leaflet aplica un ancho inline/propio a su popup que solo un
           !important puede vencer de forma confiable.
@@ -593,27 +661,37 @@
      NO lleva !important: ese selector sí gana solo con :where(#mapa-leaflet)
      + especificidad normal, sin necesitarlo). */
   .mapa-cluster{ background:transparent !important; border:none !important; }
-  .mapa-popup .leaflet-popup-content-wrapper{ background:var(--map-paper); color:var(--map-ink); border-radius:0.75rem; border:1px solid var(--map-line); box-shadow:0 20px 50px rgba(12,9,4,.22); }
+  .mapa-popup .leaflet-popup-content-wrapper{ background:var(--map-paper); color:var(--map-ink); border-radius:var(--radius-md); border:1px solid var(--map-line); box-shadow:var(--map-shadow-popup); }
   .mapa-popup .leaflet-popup-tip{ background:var(--map-paper); }
   .mapa-popup .leaflet-popup-content{ margin:0.875rem 1rem; width:14.75rem !important; }
   :where(#mapa-leaflet) .leaflet-control-zoom a{ background:var(--map-paper); color:var(--map-ink); border-color:var(--map-line); }
   :where(#mapa-leaflet) .leaflet-control-attribution{ background:rgba(255,253,248,.85) !important; color:var(--map-muted) !important; }
   :where(#mapa-leaflet) .leaflet-control-attribution a{ color:var(--copper) !important; }
 
-  /* ═══ EXCEPCIÓN SIN CAPA #2: FIX ACCESIBILIDAD — estados de foco (teclado) ═══
+  /* ═══ EXCEPCIÓN SIN CAPA #2: REGISTRO ÚNICO DE FOCO (teclado) ═══
      Sin @layer, así que gana siempre sobre TODAS las capas de arriba (reset,
      tokens, layout, componentes, mapa), sin importar especificidad ni en qué
-     línea del archivo esté. Antes dependía de estar físicamente al final del
-     archivo (last-wins); ahora esa dependencia desaparece: se podría mover
-     esta sección a cualquier lugar del CSS y el foco de teclado seguiría
-     viéndose siempre.
+     línea del archivo esté. Se puede mover esta sección a cualquier lugar
+     del CSS y el foco de teclado seguiría viéndose siempre.
+
+     [v2] Antes había dos :focus-visible sueltos DENTRO de @layer mapa
+     (#mapa-orden y #mapa-view-toggle button): funcionaban porque nada más
+     los pisaba, pero rompían la regla que el propio archivo se puso ("el
+     foco vive en un único lugar, sin capa"). Se movieron acá. También se
+     agregan dos elementos interactivos que no tenían NINGÚN estado de foco
+     visible: .lista-card-ir (la card entera es clickeable) y
+     .lista-card-actions > * (favorito / llamar / WhatsApp).
 
      COBERTURA (punto 5 — 100% de los interactivos, sin excepciones):
      inventario armado revisando cada cursor:pointer, :hover, <a>/<button>/<input>
      real del archivo. Se agrupa por tratamiento visual, no por capa de origen —
      por eso hay selectores del "core" y del "mapa" mezclados en el mismo grupo
      cuando comparten el mismo tono de foco (así ya lo hacía el archivo original
-     con .mapa-pill/#mapa-geoloc dentro del grupo --sunset).
+     con .mapa-pill/#mapa-geoloc dentro del grupo --sunset). Los elementos nuevos
+     de vista-lista (.lista-card-ir, .lista-card-actions > *, #mapa-orden,
+     #mapa-view-toggle button) se suman al Grupo 2 por ser la misma familia
+     visual que #mapa-geoloc/#mapa-contador a (tono marca --sunset), no al
+     Grupo 3 (--gold), que queda reservado al único campo de texto del mapa.
 
      Nota técnica: --gold y --copper son custom properties LOCALES, declaradas
      dentro de :where(#mapa){...} (ver capa "mapa" arriba) — solo existen para
@@ -636,9 +714,13 @@
   .mapa-subpill:focus-visible,
   .mapa-popup-actions a:focus-visible,
   .mapa-legend-item:focus-visible,
+  .lista-card-ir:focus-visible,
+  .lista-card-actions > *:focus-visible,
   :where(#mapa-geoloc):focus-visible,
   :where(#mapa-contador) a:focus-visible,
-  :where(#mapa-legend-head):focus-visible{
+  :where(#mapa-legend-head):focus-visible,
+  :where(#mapa-orden):focus-visible,
+  :where(#mapa-view-toggle) button:focus-visible{
     outline:2px solid var(--sunset); outline-offset:2px;
   }
 
@@ -650,4 +732,42 @@
   /* Grupo 4 — input fuera de #mapa: usa --sunset (--gold no está disponible acá) */
   #spotlight-input:focus-visible{
     outline:2px solid var(--sunset); outline-offset:2px;
+  }
+
+  /* ═══ EXCEPCIÓN SIN CAPA #3: MOTION Y CONTRASTE DE USUARIO ═══ [NUEVO]
+     Igual que el registro de foco, estas dos preferencias del sistema
+     operativo/navegador no deberían poder ser "tapadas" por ninguna capa
+     de componente futura — por eso van acá, sin @layer, junto a las otras
+     excepciones ya documentadas. */
+
+  /* Antes prefers-reduced-motion solo cubría .reveal (capa layout) y el
+     shimmer del skeleton (capa mapa). Quedaban afuera los 3 hovers con
+     transform del archivo (.cat, .lista-card, .hero-cta): para alguien
+     con esta preferencia activada, el desplazamiento en Y al pasar el
+     mouse es justamente el tipo de movimiento que pidió evitar. No se
+     toca color/filter/box-shadow (no son movimiento posicional) — solo
+     se neutraliza el transform. */
+  @media (prefers-reduced-motion: reduce){
+    .cat:hover, .lista-card:hover, .hero-cta:hover{ transform:none; }
+  }
+
+  /* [NUEVO] prefers-contrast: no introduce color nuevo, intensifica los
+     que ya existen. Bordes más opacos (mejor separación tarjeta/fondo) y
+     anillos de foco más gruesos (más fáciles de ubicar). Es una mejora
+     estrictamente opt-in: solo se activa si el sistema operativo del
+     usuario ya está en modo alto contraste. */
+  @media (prefers-contrast: more){
+    :root{ --border:rgba(14,42,61,.4); --border-s:rgba(14,42,61,.62); }
+    :where(#mapa){ --map-line:rgba(184,135,42,.5); }
+    .hero-cta:focus-visible{ outline-width:3px; }
+    .cat:focus-visible, .bn-item:focus-visible, .cd-link:focus-visible,
+    #spotlight-close:focus-visible, .mapa-pill:focus-visible,
+    .mapa-subpill:focus-visible, .mapa-popup-actions a:focus-visible,
+    .mapa-legend-item:focus-visible, .lista-card-ir:focus-visible,
+    .lista-card-actions > *:focus-visible, :where(#mapa-geoloc):focus-visible,
+    :where(#mapa-contador) a:focus-visible, :where(#mapa-legend-head):focus-visible,
+    :where(#mapa-orden):focus-visible, :where(#mapa-view-toggle) button:focus-visible,
+    :where(#mapa-search):focus-visible, #spotlight-input:focus-visible{
+      outline-width:3px;
+    }
   }
