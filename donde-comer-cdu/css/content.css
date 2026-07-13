@@ -28,7 +28,7 @@
   }
   .visually-hidden {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    overflow: hidden; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0;
   }
 
   /* ═══════════ APP LOADING ═══════════ */
@@ -36,6 +36,7 @@
     position: fixed; inset: 0; z-index: var(--z-overlay);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 1rem; background: var(--bg); transition: opacity .4s ease, visibility .4s ease;
+    contain: layout style;
   }
   .us-app-loading.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
   .us-app-loading-mark {
@@ -51,6 +52,7 @@
     position: fixed; inset: 0; z-index: var(--z-overlay);
     background: rgba(10, 20, 22, .55); backdrop-filter: blur(2px);
     opacity: 0; transition: opacity .25s ease;
+    contain: layout style;
   }
   .us-scrim[hidden] { display: none; }
   .us-scrim:not([hidden]) { opacity: 1; }
@@ -85,13 +87,18 @@
     background: var(--bg-sunk); border: 1px solid var(--border); color: var(--ink-soft);
     border-radius: var(--radius-pill); padding: .55rem 1rem; font-size: .85rem;
     font-family: var(--f-ui); cursor: pointer; text-align: left;
+    transition: border-color .15s ease, background .15s ease;
   }
   .us-app-header-search span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .us-app-header-search:hover { border-color: var(--border-s); }
+  .us-app-header-search:active { filter: brightness(.97); }
   .us-app-header-menu {
-    display: flex; flex-direction: column; gap: .3125rem; align-items: flex-end;
-    width: 2.5rem; height: 2.5rem; justify-content: center; background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; gap: .3125rem; align-items: center; justify-content: center;
+    width: 2.75rem; height: 2.75rem; background: none; border: none; border-radius: var(--radius-sm);
+    cursor: pointer; transition: background .15s ease;
   }
+  .us-app-header-menu:hover { background: var(--bg-sunk); }
+  .us-app-header-menu:active { background: var(--border); }
   .us-app-header-menu-bar,
   .us-app-header-menu-bar::before,
   .us-app-header-menu-bar::after {
@@ -120,6 +127,7 @@
      muerto. El markup (index.html) queda intacto para reactivarlo. */
   #fab-planner { display: none; }
   .us-fab:hover { transform: translateY(-2px); }
+  .us-fab:active { transform: translateY(0) scale(.96); }
   .us-fab-icon {
     width: 1.25rem; height: 1.25rem; position: relative;
   }
@@ -151,6 +159,7 @@
     text-align: left; cursor: pointer; transition: background .15s ease;
   }
   .spotlight-item:hover, .spotlight-item:focus-visible { background: var(--bg-sunk); }
+  .spotlight-item:active { background: var(--border); }
   .spotlight-item-icon { font-size: 1.25rem; flex-shrink: 0; }
   .spotlight-item-info { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
   .spotlight-item-nombre {
@@ -164,6 +173,7 @@
     width: min(20rem, 85vw); background: var(--bg-panel); box-shadow: var(--shadow-lg);
     display: flex; flex-direction: column; transform: translateX(100%);
     transition: transform .3s ease;
+    contain: layout style;
   }
   .us-drawer:not([hidden]) { transform: translateX(0); }
   .us-drawer[hidden] { display: flex; visibility: hidden; }
@@ -172,15 +182,22 @@
     padding: 1.25rem; border-bottom: 1px solid var(--border);
   }
   .us-drawer-header button {
-    background: none; border: none; font-size: 1.1rem; color: var(--ink-soft); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    width: 2rem; height: 2rem; background: none; border: none; border-radius: var(--radius-sm);
+    font-size: 1.1rem; color: var(--ink-soft); cursor: pointer;
+    transition: background .15s ease, color .15s ease;
   }
+  .us-drawer-header button:hover { background: var(--bg-sunk); color: var(--ink); }
+  .us-drawer-header button:active { background: var(--border); }
   .us-drawer-nav { display: flex; flex-direction: column; padding: .5rem; overflow-y: auto; flex: 1; }
   .us-drawer-item {
     display: block; width: 100%; text-align: left; padding: .875rem 1rem;
     border-radius: var(--radius-sm); background: none; border: none; cursor: pointer;
     font-family: var(--f-ui); font-size: .95rem; color: var(--ink); text-decoration: none;
+    transition: background .15s ease;
   }
   .us-drawer-item:hover { background: var(--bg-sunk); }
+  .us-drawer-item:active { background: var(--border); }
   .us-drawer-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); font-size: .8rem; color: var(--muted); }
   .us-drawer-footer:empty { display: none; }
 
@@ -201,20 +218,19 @@
     display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.25rem;
     margin-top: 1.5rem; font-size: .85rem;
   }
-  .footer-links a { text-decoration: none; opacity: .8; }
+  .footer-links a { text-decoration: none; opacity: .8; transition: opacity .15s ease; }
   .footer-links a:hover { opacity: 1; text-decoration: underline; }
+  .footer-links a:active { opacity: .65; }
 
-  /* ═══════════ FOCUS-VISIBLE — mismo tratamiento que el core ═══════════ */
-  .us-drawer-item:focus-visible,
-  .us-app-header-search:focus-visible,
-  .us-fab:focus-visible {
-    outline: 2px solid var(--sunset-bright); outline-offset: 2px;
-  }
-
-  /* ═══════════ RESPONSIVE — escritorio ═══════════ */
+  /* ═══════════ RESPONSIVE — escritorio ═══════════
+     Único breakpoint de escritorio del archivo: agrupa todo lo que
+     cambia a partir de 61rem. Antes estaba repetido en dos @media
+     idénticos (uno para FAB/drawer, otro más abajo solo para el toast);
+     unificado acá, sin cambiar ningún valor. */
   @media (min-width: 61rem) {
     .us-fab { right: 2rem; bottom: 2rem; }
     .us-drawer { width: 20rem; }
+    .us-toast-container { left: auto; right: 1.5rem; bottom: 1.5rem; transform: none; }
   }
 
   /* ═══════════ TOAST / SNACKBAR ═══════════
@@ -231,9 +247,7 @@
     display: flex; flex-direction: column-reverse; gap: .5rem;
     width: calc(100% - 2rem); max-width: 26rem;
     pointer-events: none; /* el contenedor no bloquea clics; cada toast sí */
-  }
-  @media (min-width: 61rem) {
-    .us-toast-container { left: auto; right: 1.5rem; bottom: 1.5rem; transform: none; }
+    contain: layout style;
   }
   .us-toast {
     pointer-events: auto;
@@ -249,24 +263,23 @@
   .us-toast.is-leaving { opacity: 0; transform: translateY(.35rem) scale(.98); }
   .us-toast-msg { flex: 1 1 auto; }
   .us-toast-action {
+    display: inline-flex; align-items: center; justify-content: center;
     flex: 0 0 auto; background: none; border: 0; cursor: pointer;
     color: var(--sunset-bright); font-family: var(--f-ui); font-weight: 700;
-    font-size: .8125rem; letter-spacing: .02em; padding: .25rem .375rem;
+    font-size: .8125rem; letter-spacing: .02em; padding: .375rem .5rem;
+    border-radius: var(--radius-sm); transition: background .15s ease;
   }
   .us-toast-action:hover { text-decoration: underline; }
+  .us-toast-action:active { background: rgba(255, 255, 255, .12); }
   .us-toast-close {
-    flex: 0 0 auto; background: none; border: 0; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto; min-width: 1.75rem; min-height: 1.75rem;
+    background: none; border: 0; cursor: pointer; border-radius: var(--radius-sm);
     color: var(--text-on-dark); opacity: .55; font-size: .8125rem; line-height: 1;
-    padding: .25rem;
+    transition: opacity .15s ease, background .15s ease;
   }
   .us-toast-close:hover { opacity: .9; }
-  .us-toast-action:focus-visible,
-  .us-toast-close:focus-visible {
-    outline: 2px solid var(--sunset-bright); outline-offset: 2px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .us-toast { transition: opacity .01ms; transform: none; }
-  }
+  .us-toast-close:active { background: rgba(255, 255, 255, .12); }
 
   /* ═══════════ ACCIONES DEL POPUP DEL MAPA — favorito / compartir ═══════════
      [NUEVA FUNCIONALIDAD — paridad mapa/lista] .mapa-popup-actions ya
@@ -279,13 +292,15 @@
     letter-spacing: .0625rem; text-transform: uppercase;
     padding: .4375rem .6875rem; border-radius: 3.125rem; border: 0; cursor: pointer;
     display: inline-flex; align-items: center; gap: .25rem;
+    transition: filter .15s ease, transform .15s ease;
   }
+  .mapa-popup-actions button:hover { filter: brightness(1.05); }
+  .mapa-popup-actions button:active { transform: scale(.96); }
   .mapa-popup-actions button.fav {
     background: var(--map-panel); color: var(--map-ink); border: 1px solid var(--map-line);
   }
   .mapa-popup-actions button.fav.is-fav { background: #FBE4E4; color: #B23B3B; border-color: transparent; }
   .mapa-popup-actions button.compartir { background: var(--map-panel); color: var(--map-ink); border: 1px solid var(--map-line); }
-  .mapa-popup-actions button:focus-visible { outline: 2px solid var(--sunset-bright); outline-offset: 2px; }
 
   /* ═══════════ ESTADO VACÍO ACCIONABLE DEL MAPA ═══════════
      [NUEVA FUNCIONALIDAD] #mapa-empty ya tenía posición/tipografía propia
@@ -301,4 +316,84 @@
     transition: filter .15s ease, transform .15s ease;
   }
   .mapa-empty-accion:hover { filter: brightness(1.08); transform: translateY(-1px); }
-  .mapa-empty-accion:focus-visible { outline: 2px solid var(--sunset-bright); outline-offset: 2px; }
+  .mapa-empty-accion:active { filter: brightness(.96); transform: translateY(0); }
+
+  /* ═══════════ FOCUS-VISIBLE — sistema unificado ═══════════
+     Antes este tratamiento estaba repetido en 4 bloques distintos,
+     desperdigados junto a cada componente (drawer, toast, popup del
+     mapa, estado vacío), con cobertura incompleta: el logo, el botón
+     de menú del header, el botón de cerrar el drawer, los ítems del
+     spotlight y los links del footer no tenían ningún anillo de foco
+     propio y dependían del outline por defecto del navegador. Un solo
+     bloque, un solo criterio: mismo color, mismo offset, en todo
+     elemento interactivo de este archivo. */
+  .us-app-brand:focus-visible,
+  .us-app-header-search:focus-visible,
+  .us-app-header-menu:focus-visible,
+  .us-fab:focus-visible,
+  .spotlight-item:focus-visible,
+  .us-drawer-item:focus-visible,
+  .us-drawer-header button:focus-visible,
+  .us-toast-action:focus-visible,
+  .us-toast-close:focus-visible,
+  .mapa-popup-actions button:focus-visible,
+  .mapa-empty-accion:focus-visible,
+  .footer-links a:focus-visible {
+    outline: 2px solid var(--sunset-bright); outline-offset: 2px;
+  }
+
+  /* ═══════════ MOVIMIENTO REDUCIDO ═══════════
+     Antes prefers-reduced-motion cubría solo el toast. Se extiende a
+     todas las transiciones y animaciones basadas en transform/escala
+     de este archivo. El spinner de carga no se elimina — comunica un
+     estado real de la app — pero se hace notablemente más lento para
+     bajar el estímulo. El resto pasa a transición instantánea: sigue
+     funcionando exactamente igual (abre, cierra, cambia de estado),
+     solo sin el desplazamiento animado. */
+  @media (prefers-reduced-motion: reduce) {
+    .us-app-loading-mark { animation-duration: 2.5s; }
+    .us-app-header,
+    .us-scrim,
+    .us-drawer,
+    .us-app-header-search,
+    .us-app-header-menu,
+    .spotlight-item,
+    .us-drawer-header button,
+    .us-drawer-item,
+    .footer-links a,
+    .us-fab,
+    .us-toast,
+    .us-toast-action,
+    .us-toast-close,
+    .mapa-popup-actions button,
+    .mapa-empty-accion {
+      transition-duration: .01ms;
+    }
+    .us-fab:hover,
+    .us-fab:active,
+    .mapa-empty-accion:hover,
+    .mapa-empty-accion:active,
+    .mapa-popup-actions button:active {
+      transform: none;
+    }
+  }
+
+  /* ═══════════ ALTO CONTRASTE FORZADO (Windows High Contrast) ═══════════
+     Los controles que hoy solo se distinguen por un cambio de
+     background (spotlight-item, drawer-item, botón de cerrar el
+     drawer, botón de menú, FAB, botones del popup del mapa, acción del
+     estado vacío) pierden esa señal en forced-colors, porque el modo
+     reemplaza fondos por los colores del sistema. Se les da un borde
+     explícito para que sigan siendo reconocibles como controles,
+     sin tocar su apariencia en modo normal. */
+  @media (forced-colors: active) {
+    .spotlight-item,
+    .us-drawer-item,
+    .us-drawer-header button,
+    .us-app-header-menu,
+    .us-fab,
+    .mapa-popup-actions button,
+    .mapa-empty-accion {
+      border: 1px solid ButtonText;
+    }
+  }
