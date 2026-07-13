@@ -12,6 +12,17 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- El mapa (js/core-engine.js) carga Leaflet/MarkerCluster y los tiles
+     recién cuando la sección se acerca al viewport (lazyInitMapa). Estos
+     preconnect/dns-prefetch no descargan nada por su cuenta: solo dejan la
+     conexión TCP/TLS (o al menos la resolución DNS) lista de antemano para
+     que, en el momento en que el usuario sí llega a #mapa, el primer tile y
+     el primer fetch de datos no paguen ese costo desde cero. -->
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
+<link rel="dns-prefetch" href="https://b.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,480;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════
