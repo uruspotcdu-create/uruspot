@@ -252,6 +252,34 @@
       --muted:#5f6b70; /* verificado en la auditoría de contraste (punto 4): 5.0:1 sobre --bg y 5.49:1 sobre --bg-panel — pasa AA, no requiere cambio */
       --border:rgba(14,42,61,.12);
       --border-s:rgba(14,42,61,.22);
+      /* [FIX — auditoría continua, contraste crítico] Los componentes
+         .dc-* (FAQ, tags, callouts, glosario, cita, panel...) se reutilizan
+         en secciones de tema claro (fuera de #donde-comer-guia) pero cada
+         uno referenciaba --surface/--line/--accent/--accent-strong/
+         --on-accent/--warn/--font-display SOLO vía el valor de repliegue de
+         var(), calibrado exclusivamente para el fondo oscuro de esa
+         sección. Fuera de ella, esas variables no existían en ningún
+         scope — el resultado no era "se ve mal", era directamente CERO
+         separación visual (bordes/fondos a menos del 4% de opacidad,
+         invisibles sobre un fondo claro): el FAQ de #sobre-uruspot, por
+         ejemplo, rendeaba como una pila de filas sin ninguna tarjeta.
+         Se declaran acá con valores para tema CLARO, verificados AA por
+         cálculo de luminancia relativa (WCAG): --accent (#A8451F) da
+         5.94:1 sobre --bg-panel, 5.4:1 sobre --bg y 4.86:1 sobre
+         --bg-sunk — holgado en los tres fondos claros donde puede
+         terminar apareciendo. #donde-comer-guia sigue ganando estos
+         mismos nombres con SU PROPIO valor (declarado en content.css,
+         scoped a su propio selector): la herencia de custom properties
+         resuelve el valor por ancestro más cercano, no por quién lo citó
+         primero, así que ese override local sigue intacto y sin cambios. */
+      --surface:rgba(14,42,61,.035);
+      --surface-hover:rgba(14,42,61,.06);
+      --line:var(--border);
+      --accent:#A8451F;
+      --accent-strong:#8a3618;
+      --on-accent:var(--text-on-dark);
+      --warn:#B3261E; /* 6.54:1 sobre --bg-panel, 5.95:1 sobre --bg */
+      --font-display:var(--f-display);
       /* ⚙ CONVENCIÓN DE UNIDADES (punto 8) — unificada con la capa "mapa":
          rem para tipografía, spacing, tamaños y radios (escala con el
          font-size raíz, accesible a zoom/preferencias del usuario).
@@ -592,7 +620,13 @@
        las secciones no son hermanas directas bajo el mismo padre en el
        HTML, este selector simplemente no aplica nada — no hay forma de
        que rompa el layout existente en ningún escenario. */
-    .us-section{background:var(--bg)}
+    /* [FIX — auditoría continua] .us-section solo alternaba color de
+       fondo; nunca tuvo padding propio. Cada sección dependía de que su
+       contenido interno (.dc-intro-copy, .dc-grid, etc.) aportara su
+       propio espaciado, pero ninguno de esos compensa la ausencia de aire
+       arriba/abajo de la sección en sí ni a los costados en pantallas
+       angostas — el contenido quedaba pegado al borde del viewport. */
+    .us-section{background:var(--bg); padding:clamp(2.5rem,6vw,4.5rem) clamp(1.25rem,4vw,2rem)}
     .us-section:nth-of-type(even){background:var(--bg-sunk)}
 
     /* ═══════════ REVEAL (scroll-in, reemplaza el IIFE viejo) ═══════════ */
@@ -825,6 +859,43 @@
     }
     #spotlight-close:hover{background:var(--border-s)}
     #spotlight-close:active{transform:scale(.9)}
+
+    /* [FIX — auditoría continua, alcance visual crítico] .section-header/
+       .section-eyebrow/.section-title/.section-count se usan en 14
+       lugares del documento (14 <span class="section-eyebrow">, 11
+       <div class="section-header">), pero antes de este fix la ÚNICA
+       definición de estas clases vivía dentro de :where(#mapa) — capa
+       "mapa", exclusiva del módulo de mapa con su propia paleta papel/
+       serif. Las otras 10 secciones de la página (introducción, "cómo
+       explorar", FAQ del mapa, recorridos, accesibilidad, etc.) quedaban
+       renderizando con tipografía y espaciado 100% default del navegador:
+       exactamente el problema reportado ("se ve muy básico"). Se agrega
+       acá la base real, en la capa "componentes" — por diseño de @layer
+       (reset < tokens < layout < componentes < mapa), la capa "mapa"
+       sigue ganando dentro de #mapa sin tocar una sola línea de ese
+       bloque; esta base nueva solo entra a tallar donde nada más la
+       pisa, que es el resto del documento. */
+    .section-header{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      margin-bottom:1.75rem; padding-bottom:1rem; gap:1rem; flex-wrap:wrap;
+      max-width:73.75rem; margin-inline:auto;
+      border-bottom:1px solid var(--border);
+    }
+    .section-eyebrow{
+      font-family:var(--f-ui); font-size:.75rem; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase; color:var(--sunset-text);
+      display:block; margin-bottom:.4rem;
+    }
+    .section-title{
+      font-family:var(--f-display); font-size:clamp(1.5rem,3.4vw,2.25rem);
+      font-weight:600; color:var(--ink); line-height:1.15; letter-spacing:-.01em;
+    }
+    .section-count{
+      font-family:var(--f-ui); font-size:.75rem; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--muted); border:1px solid var(--border-s);
+      padding:.5rem .875rem; border-radius:var(--radius-pill); white-space:nowrap;
+      background:var(--bg-panel);
+    }
   }
 
   /* ─── CAPA: MAPA — Componente: Mapa interactivo (Leaflet) ───
