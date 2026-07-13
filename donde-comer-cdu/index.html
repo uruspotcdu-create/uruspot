@@ -2,1222 +2,550 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0c0904">
-<meta name="robots" content="index, follow">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="format-detection" content="telephone=no">
-<!-- Título, descripción y JSON-LD de página los define el MÓDULO B (contenido) -->
-<title id="doc-title">URU SPOT</title>
-<meta id="doc-description" name="description" content="">
-<link id="doc-canonical" rel="canonical" href="">
-
-<!-- Open Graph / Twitter Card — el MÓDULO B escribe content en estos IDs
-     al renderizar cada lugar/página; nunca se agregan meta nuevas por JS. -->
-<meta id="og-title" property="og:title" content="">
-<meta id="og-description" property="og:description" content="">
-<meta id="og-image" property="og:image" content="">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta id="twitter-title" name="twitter:title" content="">
-<meta id="twitter-description" name="twitter:description" content="">
-<meta id="twitter-image" name="twitter:image" content="">
-
-<!-- JSON-LD estructurado (LocalBusiness / BreadcrumbList) — el MÓDULO B
-     escribe el objeto serializado como textContent de este script. -->
-<script type="application/ld+json" id="ld-json"></script>
-
-<!-- [NUEVO — pasada "Dónde Comer"] FAQPage propio de la guía gastronómica
-     estática (#donde-comer-guia). Es un bloque aparte e independiente del
-     #ld-json dinámico de arriba (que el MÓDULO B reescribe por lugar/página):
-     nunca se pisan entre sí porque tienen ids distintos, y ambos pueden
-     coexistir en el <head> según spec de schema.org. El contenido de este
-     FAQ es 1:1 con el <details>/<summary> visible en #donde-comer-guia más
-     abajo — no se declara nada acá que no esté también en el HTML visible. -->
-<script type="application/ld+json" id="ld-json-faq-donde-comer">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "¿Cómo busco un lugar para comer en Concepción del Uruguay?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Usá el buscador del mapa o el spotlight de búsqueda (lupa del header) para encontrar un lugar por nombre, o filtrá por categoría 'Gastronomía' y por subcategoría/tipo de cocina desde la barra de filtros del mapa." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Puedo ver los lugares para comer según mi presupuesto?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Sí. El centro de recomendaciones (Explorar) incluye colecciones curadas como económicos, premium y gratis, además de opciones por ocasión como familias, parejas o amigos." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Cómo encuentro los lugares mejor puntuados o más nuevos?",
-      "acceptedAnswer": { "@type": "Answer", "text": "En la sección del mapa hay rieles curados de gastronomía: más populares, mejor puntuados, recién agregados y por tipo de cocina, además de un orden configurable (relevancia, cercanía, recomendados o recientes)." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Cómo veo qué lugares para comer tengo cerca?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Tocá el botón 'Cerca de mí' en la barra del mapa para ordenar los resultados por cercanía a tu ubicación, o activá la vista Lista para recorrerlos con scroll en vez de sobre el mapa." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Puedo guardar mis lugares favoritos para comer?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Sí, desde la tarjeta de cada lugar podés marcarlo como favorito; después los encontrás agrupados en Favoritos, accesible desde la barra inferior o el menú lateral." }
-    }
-  ]
-}
-</script>
-
-<!-- [NUEVO — 2ª pasada] Segundo FAQPage, sobre el sitio en general (no
-     sobre gastronomía puntualmente). Id distinto, coexiste con los dos
-     anteriores sin pisarlos. Espejado 1:1 con el <details>/<summary>
-     visible en #sobre-uruspot, al final de <main>. -->
-<script type="application/ld+json" id="ld-json-faq-general">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "¿Qué es URU SPOT?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Es una guía de Concepción del Uruguay que organiza la ciudad en categorías —gastronomía, patrimonio, naturaleza, alojamiento y servicios— con mapa interactivo, filtros y buscador." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Cómo está organizada la información?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Cada lugar pertenece a una categoría y puede tener subcategorías. Desde el mapa se puede filtrar, ordenar, buscar por nombre y cambiar entre vista de mapa o de lista." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Los lugares que aparecen están verificados?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Sí, el contador de resultados del mapa indica explícitamente 'Datos verificados' sobre el total de lugares mostrados." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Puedo guardar lugares para volver a verlos después?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Sí, cualquier lugar se puede marcar como favorito desde su tarjeta y después se encuentra agrupado en la sección Favoritos, accesible desde la barra inferior o el menú lateral." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿URU SPOT funciona bien desde el celular?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Sí, el sitio tiene un diseño responsive con una barra de navegación inferior pensada específicamente para uso mobile." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Qué diferencia hay entre Favoritos e Historial?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Favoritos es lo que guardás a propósito desde la tarjeta de un lugar. Historial se arma solo, con todo lo que ya abriste, para que puedas retomarlo sin buscarlo de nuevo." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Puedo compartir un lugar puntual con alguien?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Sí, cada lugar tiene su propia opción de compartir desde la tarjeta, que arma un link directo a esa ficha en particular, no a la guía en general." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Puedo elegir según cuánto tiempo tengo disponible?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Sí, el centro de recomendaciones (Explorar) tiene colecciones armadas por tiempo disponible —30 minutos, 1 hora, 2 horas, tarde o día completo— además de por clima y momento." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Qué son los Recorridos?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Son itinerarios temáticos ya armados, accesibles desde el menú lateral, pensados para visitar varios lugares en un orden sugerido sin tener que planificarlo desde cero." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Para qué sirve el Planner?",
-      "acceptedAnswer": { "@type": "Answer", "text": "El botón flotante abre un planificador rápido para armar un plan corto al instante, sin necesidad de pasar primero por el mapa completo ni por todos los filtros." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿El sitio es accesible con lector de pantalla o teclado?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Sí, cuenta con enlaces de salto (skip links), etiquetas aria-label en los controles principales, diálogos anunciados correctamente (role dialog) y soporte para movimiento reducido." }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Cómo elijo el orden correcto de los resultados en el mapa?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Depende de tu prioridad: usá 'Más cerca' si te importa la distancia, 'Más recomendados' si preferís calidad, o 'Recién agregados' si ya conocés lo de siempre y buscás algo nuevo." }
-    }
-  ]
-}
-</script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>URU SPOT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com">
-<script src="js/core-engine.js" defer fetchpriority="high"></script>
-<script src="js/content.js" defer fetchpriority="high"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Outfit:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Outfit:wght@400;600;700&display=swap"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAFAF8;
+    --surface:#FFFFFF;
+    --sunken:#F1F0EA;
+    --ink:#14140F;
+    --ink-soft:#68675D;
+    --ink-faint:#9A9A8D;
+    --line:rgba(20,20,15,0.09);
+    --line-strong:rgba(20,20,15,0.16);
+    --accent:#1F4B3F;
+    --accent-soft:#EDF2EF;
+    --accent-ink:#123328;
+    --dark:#121310;
+    --dark-line:rgba(250,250,248,0.12);
+    --dark-ink-soft:#A7A69B;
+    --serif:'Fraunces', serif;
+    --sans:'Inter', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation:none !important; transition:none !important;} }
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .container{max-width:1180px; margin:0 auto; padding:0 48px;}
+  @media (max-width:720px){ .container{padding:0 22px;} }
 
-<link rel="icon" type="image/webp" href="https://uruspot.pages.dev/img/logof.webp" />
+  ::selection{ background:var(--accent); color:#fff; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
 
-<link rel="stylesheet" href="css/core.css">
-<link rel="stylesheet" href="css/content.css">
+  /* progress */
+  #progress{position:fixed; top:0; left:0; height:2px; background:var(--accent); width:0%; z-index:100; transition:width .1s linear;}
+
+  /* reveal */
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+  .reveal.in{opacity:1; transform:none;}
+
+  /* nav */
+  nav.top{position:fixed; top:0; left:0; right:0; z-index:90; padding:22px 0; transition:background .35s ease, border-color .35s ease, padding .35s ease;}
+  nav.top .container{display:flex; align-items:center; justify-content:space-between;}
+  nav.top.solid{background:rgba(250,250,248,0.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:16px 0;}
+  .mark{display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; letter-spacing:-0.01em;}
+  .mark svg{width:22px; height:22px;}
+  .navlinks{display:flex; gap:36px; font-size:14px; color:var(--ink-soft);}
+  .navlinks a{text-decoration:none; position:relative; padding-bottom:3px;}
+  .navlinks a::after{content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:var(--ink); transition:width .25s var(--ease);}
+  .navlinks a:hover::after{width:100%;}
+  .navcta{display:flex; align-items:center; gap:18px;}
+  .btn{font-family:var(--sans); font-weight:600; font-size:14px; padding:10px 18px; border-radius:8px; border:1px solid var(--line-strong); background:var(--surface); cursor:pointer; transition:border-color .2s ease, transform .2s ease, background .2s ease;}
+  .btn.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .btn.primary:hover{transform:translateY(-1px); background:#173d33;}
+  .btn.ghost:hover{border-color:var(--line-strong); background:var(--sunken);}
+
+  /* hero */
+  .hero{padding:190px 0 100px; position:relative;}
+  .kicker{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); padding:7px 12px; border-radius:100px; margin-bottom:28px;}
+  .kicker::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--accent);}
+  h1.h-hero{font-family:var(--sans); font-weight:700; letter-spacing:-0.03em; font-size:clamp(38px,6vw,74px); line-height:1.03; margin:0 0 26px; max-width:900px;}
+  h1.h-hero .accent-line{font-family:var(--serif); font-style:italic; font-weight:500; color:var(--accent); display:block;}
+  .hero-sub{font-size:19px; line-height:1.6; color:var(--ink-soft); max-width:520px; margin:0 0 40px;}
+  .hero-actions{display:flex; align-items:center; gap:20px;}
+  .hero-actions .link{font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px; text-decoration:none;}
+  .hero-actions .link svg{width:15px; height:15px; transition:transform .2s var(--ease);}
+  .hero-actions .link:hover svg{transform:translateX(3px);}
+
+  /* hero mock */
+  .hero-mock{margin-top:76px; background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 30px 70px -30px rgba(20,20,15,0.18); overflow:hidden;}
+  .mock-top{display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--line);}
+  .mock-dot{width:8px; height:8px; border-radius:50%; background:var(--line-strong);}
+  .mock-search{flex:1; margin-left:8px; font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); background:var(--sunken); padding:7px 12px; border-radius:6px;}
+  .mock-body{display:grid; grid-template-columns:220px 1fr; min-height:280px;}
+  .mock-side{border-right:1px solid var(--line); padding:18px 16px; display:flex; flex-direction:column; gap:4px;}
+  .mock-cat{font-size:13px; padding:8px 10px; border-radius:6px; color:var(--ink-soft);}
+  .mock-cat.on{background:var(--accent-soft); color:var(--accent-ink); font-weight:600;}
+  .mock-map{position:relative; background:
+      linear-gradient(var(--sunken) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--sunken) 1px, transparent 1px) 0 0/40px 40px,
+      var(--surface);}
+  .mock-pin{position:absolute; width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 5px var(--accent-soft);}
+  @media (max-width:720px){ .mock-body{grid-template-columns:1fr;} .mock-side{display:none;} }
+
+  /* section frame */
+  section{padding:120px 0;}
+  @media (max-width:720px){ section{padding:76px 0;} }
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:0.09em; text-transform:uppercase; color:var(--accent); margin:0 0 16px;}
+  .s-head{max-width:600px; margin:0 0 70px;}
+  .s-head h2{font-size:clamp(26px,3.6vw,38px); font-weight:700; letter-spacing:-0.02em; margin:0 0 16px; line-height:1.15;}
+  .s-head p{font-size:16.5px; line-height:1.65; color:var(--ink-soft); margin:0;}
+
+  /* editorial break */
+  .statement{padding:130px 0; text-align:center;}
+  .statement p{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(24px,3.6vw,40px); line-height:1.4; max-width:820px; margin:0 auto; color:var(--ink);}
+  .statement .stat{margin-top:56px; display:flex; align-items:center; justify-content:center; gap:56px; flex-wrap:wrap;}
+  .stat-item{text-align:center;}
+  .stat-num{font-family:var(--mono); font-weight:500; font-size:34px; color:var(--accent);}
+  .stat-label{font-size:12.5px; color:var(--ink-soft); margin-top:6px; letter-spacing:0.02em;}
+
+  /* features alternating */
+  .feature-row{display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; padding:64px 0; border-top:1px solid var(--line);}
+  .feature-row:last-child{border-bottom:1px solid var(--line);}
+  .feature-row.rev .f-text{order:2;}
+  .f-text h3{font-size:24px; font-weight:700; letter-spacing:-0.015em; margin:0 0 14px;}
+  .f-text p{font-size:15.5px; line-height:1.7; color:var(--ink-soft); margin:0; max-width:400px;}
+  .f-num{font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-bottom:14px;}
+  .f-mock{background:var(--sunken); border:1px solid var(--line); border-radius:14px; padding:22px; min-height:220px; display:flex; flex-direction:column; justify-content:center; gap:10px;}
+  @media (max-width:820px){ .feature-row{grid-template-columns:1fr; gap:28px;} .feature-row.rev .f-text{order:0;} }
+
+  .chiprow{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{background:var(--surface); border:1px solid var(--line); border-radius:100px; padding:7px 13px; font-size:12.5px; color:var(--ink-soft);}
+  .chip.on{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .rowline{display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:11px 14px;}
+  .rowline .rb{width:26px; height:26px; border-radius:50%; background:var(--accent-soft); color:var(--accent-ink); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none;}
+  .rowline .rt p{margin:0; font-size:13px; font-weight:600;}
+  .rowline .rt span{font-size:11px; color:var(--ink-faint);}
+  .rowline .rstar{margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);}
+  .badgeblock{display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px;}
+  .badgeblock .bi{width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; flex:none;}
+  .badgeblock .bt p{margin:0; font-size:13.5px; font-weight:600;}
+  .badgeblock .bt span{font-size:12px; color:var(--ink-soft);}
+  .tabs{display:flex; gap:4px; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:4px; width:fit-content;}
+  .tab{font-size:12.5px; padding:6px 14px; border-radius:6px; color:var(--ink-soft);}
+  .tab.on{background:var(--accent-soft); color:var(--accent-ink); font-weight:600;}
+  .phonebar{background:var(--surface); border:1px solid var(--line); border-radius:100px; padding:12px 22px; display:flex; justify-content:space-between; width:100%; max-width:260px; margin:0 auto;}
+  .phonebar .pi{width:16px; height:16px; border-radius:4px; background:var(--sunken);}
+  .phonebar .pi.on{background:var(--accent);}
+
+  /* dark categories index */
+  .dark-section{background:var(--dark); color:#F4F3EE;}
+  .dark-section .eyebrow{color:#9FCBB8;}
+  .dark-section .s-head p{color:var(--dark-ink-soft);}
+  .index-row{display:flex; align-items:center; justify-content:space-between; padding:26px 4px; border-top:1px solid var(--dark-line); cursor:default; transition:padding-left .3s var(--ease);}
+  .index-row:last-child{border-bottom:1px solid var(--dark-line);}
+  .index-row:hover{padding-left:18px;}
+  .index-left{display:flex; align-items:baseline; gap:22px;}
+  .index-name{font-family:var(--serif); font-style:italic; font-weight:500; font-size:26px;}
+  .index-desc{font-size:13.5px; color:var(--dark-ink-soft); max-width:360px;}
+  .index-arrow{width:18px; height:18px; opacity:0; transition:opacity .3s ease, transform .3s var(--ease);}
+  .index-row:hover .index-arrow{opacity:1; transform:translateX(4px);}
+
+  /* time/mood matrix */
+  .matrix-label{font-family:var(--mono); font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 14px;}
+  .matrix-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:44px;}
+  .matrix-chip{flex:1 1 140px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px; transition:border-color .2s ease, transform .2s ease;}
+  .matrix-chip:hover{border-color:var(--line-strong); transform:translateY(-3px);}
+  .matrix-chip h5{margin:0 0 8px; font-size:14px; font-weight:600;}
+  .matrix-chip p{margin:0; font-size:12.5px; line-height:1.55; color:var(--ink-soft);}
+
+  /* gastro split */
+  .split{display:grid; grid-template-columns:1fr 1fr; gap:60px; margin-top:56px;}
+  .split h4{font-size:15px; font-weight:700; margin:0 0 18px; display:flex; align-items:center; gap:10px;}
+  .split ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:16px;}
+  .split li{display:flex; gap:12px; font-size:14.5px; line-height:1.6; color:var(--ink-soft);}
+  .split li svg{flex:none; width:16px; height:16px; margin-top:2px;}
+  .split li b{color:var(--ink); font-weight:600;}
+  @media (max-width:820px){ .split{grid-template-columns:1fr;} }
+
+  /* search demo */
+  .search-demo{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 30px 70px -35px rgba(20,20,15,0.2); max-width:600px; margin:0 auto; overflow:hidden;}
+  .sd-input{display:flex; align-items:center; gap:10px; padding:18px 20px; border-bottom:1px solid var(--line);}
+  .sd-input svg{width:18px; height:18px; color:var(--ink-faint); flex:none;}
+  #typed{font-size:15px; color:var(--ink);}
+  #typed::after{content:'|'; animation:blink 1s step-end infinite; color:var(--accent);}
+  @keyframes blink{50%{opacity:0;}}
+  .sd-hint{padding:9px 20px; font-family:var(--mono); font-size:11px; color:var(--accent); background:var(--accent-soft);}
+  .sd-row{display:flex; align-items:center; gap:14px; padding:13px 20px; border-top:1px solid var(--line); transition:opacity .3s ease;}
+  .sd-row .rb{width:30px; height:30px; border-radius:50%; background:var(--sunken); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--ink-soft); flex:none;}
+  .sd-row p{margin:0; font-size:13.5px; font-weight:600;}
+  .sd-row span{font-size:11.5px; color:var(--ink-faint);}
+  .sd-row .rstar{margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);}
+
+  /* faq + glossary */
+  .help-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:80px;}
+  @media (max-width:820px){ .help-grid{grid-template-columns:1fr; gap:50px;} }
+  .faq-item{border-top:1px solid var(--line);}
+  .faq-item:last-child{border-bottom:1px solid var(--line);}
+  .faq-q{display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 0; cursor:pointer; background:none; border:none; width:100%; text-align:left; font-family:var(--sans);}
+  .faq-q p{margin:0; font-size:16px; font-weight:600; color:var(--ink);}
+  .faq-plus{width:20px; height:20px; flex:none; position:relative;}
+  .faq-plus::before, .faq-plus::after{content:''; position:absolute; background:var(--ink); top:50%; left:50%; transform:translate(-50%,-50%);}
+  .faq-plus::before{width:12px; height:1.4px;}
+  .faq-plus::after{width:1.4px; height:12px; transition:transform .25s var(--ease);}
+  .faq-item.open .faq-plus::after{transform:translate(-50%,-50%) rotate(90deg); opacity:0;}
+  .faq-a{max-height:0; overflow:hidden; transition:max-height .35s var(--ease);}
+  .faq-a p{margin:0 0 22px; font-size:14.5px; line-height:1.65; color:var(--ink-soft); max-width:500px;}
+  .faq-item.open .faq-a{max-height:200px;}
+
+  .gloss-item{padding:18px 0; border-top:1px solid var(--line);}
+  .gloss-item:last-child{border-bottom:1px solid var(--line);}
+  .gloss-item dt{font-size:13.5px; font-weight:700; margin-bottom:5px;}
+  .gloss-item dd{margin:0; font-size:13px; line-height:1.55; color:var(--ink-soft);}
+
+  /* footer */
+  footer{background:var(--dark); color:#F4F3EE; padding:90px 0 40px;}
+  .foot-statement{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(22px,3vw,32px); max-width:640px; margin:0 0 60px; line-height:1.35;}
+  .foot-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:32px; border-top:1px solid var(--dark-line); font-size:13px; color:var(--dark-ink-soft); flex-wrap:wrap; gap:16px;}
+  .foot-social{display:flex; gap:18px;}
+</style>
 </head>
 <body>
-  <div class="grain-overlay" aria-hidden="true"></div>
-  <a class="skip-link" href="#main-content">Ir al contenido principal</a>
-  <a class="skip-link" href="#donde-comer-guia">Ir a la guía de Dónde Comer</a>
 
-  <div class="us-app-loading" id="app-loading" role="presentation" aria-hidden="true">
-    <div class="us-app-loading-mark" aria-hidden="true"></div>
-    <div class="us-app-loading-grid" id="app-loading-grid"></div>
-  </div>
+<div id="progress"></div>
 
-  <div class="us-scrim" id="scrim" data-owner="" hidden aria-hidden="true"></div>
-
-  <header class="us-app-header" id="app-header" data-state="top">
-    <div class="us-app-header-inner">
-      <a class="us-app-brand" href="#hero" data-scroll="hero" aria-label="URU SPOT — inicio">
-        <span class="us-app-brand-mark" aria-hidden="true"></span>
-        <span class="us-app-brand-text">URU SPOT</span>
-      </a>
-      <button type="button" class="us-app-header-search" id="header-search-trigger" aria-haspopup="dialog" aria-controls="search-spotlight">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span id="header-search-placeholder">Buscar un lugar en Concepción del Uruguay…</span>
-      </button>
-      <button type="button" class="us-app-header-menu" id="header-drawer-trigger" aria-haspopup="dialog" aria-controls="app-drawer" aria-label="Abrir menú">
-        <span class="us-app-header-menu-bar" aria-hidden="true"></span>
-      </button>
+<nav class="top" id="nav">
+  <div class="container">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 5 6.2 5 10c0 5.2 7 11 7 11s7-5.8 7-11c0-3.8-3-7-7-7Z" stroke="#1F4B3F" stroke-width="1.6"/><circle cx="12" cy="10" r="2.4" fill="#1F4B3F"/></svg>
+      URU SPOT
     </div>
-  </header>
-
-  <nav class="bottom-nav" aria-label="Navegación principal">
-    <a href="#hero" class="bn-item is-active" data-bn="inicio">
-      <span class="bn-icon" aria-hidden="true"></span>
-      <span class="bn-label">Inicio</span>
-    </a>
-    <a href="#explorar-recomendaciones" class="bn-item" data-bn="explorar">
-      <span class="bn-icon" aria-hidden="true"></span>
-      <span class="bn-label">Explorar</span>
-    </a>
-    <a href="#mapa" class="bn-item" data-bn="mapa">
-      <span class="bn-icon" aria-hidden="true"></span>
-      <span class="bn-label">Mapa</span>
-    </a>
-    <button type="button" class="bn-item bn-search" id="bn-buscar" data-bn="buscar">
-      <span class="bn-icon" aria-hidden="true"></span>
-      <span class="bn-label">Buscar</span>
-    </button>
-    <button type="button" class="bn-item" id="bn-favoritos" data-bn="favoritos" data-scroll-target="">
-      <span class="bn-icon" aria-hidden="true"></span>
-      <span class="bn-label">Favoritos</span>
-    </button>
-  </nav>
-
-  <button type="button" class="us-fab" id="fab-planner" data-action="open-planner">
-    <span class="us-fab-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Armar un plan rápido</span>
-  </button>
-
-  <div class="search-spotlight" id="search-spotlight" role="dialog" aria-modal="true" aria-label="Buscar un lugar" aria-hidden="true">
-    <div class="spotlight-inner">
-      <div class="spotlight-bar">
-        <input type="text" id="spotlight-input" placeholder="Buscar un lugar…" autocomplete="off" aria-label="Buscar un lugar" />
-        <button type="button" id="spotlight-close" aria-label="Cerrar búsqueda">✕</button>
-      </div>
-      <div class="spotlight-hint">Escribí y los resultados se sincronizan con el mapa</div>
-      <div class="spotlight-suggestions" id="spotlight-suggestions" aria-label="Sugerencias"></div>
-      <div class="spotlight-results" id="spotlight-results" role="listbox" aria-label="Resultados de búsqueda"></div>
-      <div class="spotlight-empty" id="spotlight-empty" hidden>Sin resultados para esa búsqueda.</div>
+    <div class="navlinks">
+      <a href="#explora">Explorar</a>
+      <a href="#gastronomia">Gastronomía</a>
+      <a href="#ayuda">Ayuda</a>
+    </div>
+    <div class="navcta">
+      <button class="btn ghost">Iniciar sesión</button>
+      <button class="btn primary">Abrir el mapa</button>
     </div>
   </div>
+</nav>
 
-  <aside class="us-drawer" id="app-drawer" role="dialog" aria-modal="true" aria-label="Menú" hidden>
-    <div class="us-drawer-header">
-      <span class="us-app-brand-text">URU SPOT</span>
-      <button type="button" id="drawer-close" aria-label="Cerrar menú">✕</button>
+<section class="hero">
+  <div class="container">
+    <span class="kicker">Concepción del Uruguay, Entre Ríos</span>
+    <h1 class="h-hero">Tu ciudad tiene más lugares<br>de los que tu memoria alcanza.<span class="accent-line">URU SPOT los recuerda por vos.</span></h1>
+    <p class="hero-sub">Un mapa vivo que filtra, verifica y organiza cada rincón de la ciudad — para que dejes de saltar entre pestañas y empieces a recorrer.</p>
+    <div class="hero-actions">
+      <button class="btn primary" style="padding:13px 24px; font-size:15px;">Explorar el mapa</button>
+      <a href="#explora" class="link">Ver cómo funciona <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
     </div>
-    <nav class="us-drawer-nav" aria-label="Secciones">
-      <a href="#hero" class="us-drawer-item" data-drawer-action="inicio">Inicio</a>
-      <a href="#explorar-recomendaciones" class="us-drawer-item" data-drawer-action="explorar">Explorar</a>
-      <a href="#mapa" class="us-drawer-item" data-drawer-action="mapa">Mapa</a>
-      <button type="button" class="us-drawer-item" data-drawer-action="favoritos">Favoritos</button>
-      <button type="button" class="us-drawer-item" data-drawer-action="historial">Historial</button>
-      <button type="button" class="us-drawer-item" data-drawer-action="recorridos">Recorridos</button>
-      <button type="button" class="us-drawer-item" data-drawer-action="planner">Planner</button>
-      <a href="#categorias-detalle" class="us-drawer-item" data-drawer-action="categorias">Categorías</a>
-      <a href="#donde-comer-guia" class="us-drawer-item" data-drawer-action="donde-comer">Dónde comer</a>
-      <a href="#centro-ayuda" class="us-drawer-item" data-drawer-action="ayuda">Centro de ayuda</a>
-    </nav>
-    <div class="us-drawer-footer" id="drawer-footer-mount"></div>
-  </aside>
 
-  <div id="hero-mount">
-    <section class="hero" id="hero">
-      <div class="hero-media" aria-hidden="true">
-        <div class="hero-media-gradient"></div>
-        <div class="hero-media-pattern"></div>
+    <div class="hero-mock reveal">
+      <div class="mock-top">
+        <div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div>
+        <div class="mock-search">⌕ &nbsp;Buscar un lugar en Concepción del Uruguay…</div>
       </div>
-      <div class="hero-inner">
-        <span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Entre Ríos, Argentina</span>
-        <h1 class="hero-title">La Guía de<br><strong>Concepción del Uruguay</strong></h1>
-        <p class="hero-sub">🎯 <strong><span id="hero-total-lugares">···</span> lugares verificados</strong> — curada con precisión: gastronomía, compras, salud, finanzas, patrimonio, naturaleza, alojamiento y mucho más</p>
-        <div class="hero-actions">
-          <a class="hero-cta" href="#mapa">Explorar el mapa ↓</a>
+      <div class="mock-body">
+        <div class="mock-side">
+          <div class="mock-cat on">Gastronomía</div>
+          <div class="mock-cat">Patrimonio</div>
+          <div class="mock-cat">Naturaleza</div>
+          <div class="mock-cat">Alojamiento</div>
+          <div class="mock-cat">Servicios</div>
         </div>
-        <div class="hero-stats" role="list">
-          <div class="hs" role="listitem"><div class="hs-n" id="stat-total-lugares">···</div><div class="hs-l">Lugares</div></div>
-          <div class="hs" role="listitem"><div class="hs-n" id="stat-total-categorias">···</div><div class="hs-l">Categorías</div></div>
-          <div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Entre Ríos, Argentina</div></div>
-          <div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Datos verificados</div></div>
+        <div class="mock-map">
+          <div class="mock-pin" style="top:34%; left:28%;"></div>
+          <div class="mock-pin" style="top:58%; left:52%;"></div>
+          <div class="mock-pin" style="top:22%; left:64%;"></div>
+          <div class="mock-pin" style="top:70%; left:76%;"></div>
+          <div class="mock-pin" style="top:44%; left:18%;"></div>
         </div>
       </div>
-      <div class="hero-wave" aria-hidden="true">
-        <svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="var(--bg)" d="M0,40 C360,90 1080,-10 1440,40 L1440,80 L0,80 Z"></path></svg>
-      </div>
-    </section>
-    <div class="cats-wrap">
-      <div class="cats" id="cats-container"></div>
     </div>
   </div>
+</section>
 
-  <main id="main-content">
+<section class="statement reveal">
+  <div class="container">
+    <p>No es una lista más. Es la diferencia entre buscar un lugar y encontrarlo.</p>
+    <div class="stat">
+      <div class="stat-item"><div class="stat-num" data-count="1240">0</div><div class="stat-label">Lugares verificados</div></div>
+      <div class="stat-item"><div class="stat-num" data-count="5">0</div><div class="stat-label">Categorías curadas</div></div>
+      <div class="stat-item"><div class="stat-num" data-count="18">0</div><div class="stat-label">Formas de filtrar</div></div>
+    </div>
+  </div>
+</section>
 
-    <section class="us-section" id="por-que-uruspot" aria-labelledby="title-por-que-uruspot">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">En una mirada</span>
-          <h2 class="section-title" id="title-por-que-uruspot">Por qué usar URU SPOT para moverte por la ciudad</h2>
-        </div>
+<section id="explora">
+  <div class="container">
+    <div class="s-head reveal">
+      <p class="eyebrow">Por qué usar URU SPOT</p>
+      <h2>Cinco decisiones de diseño, no cinco funciones más.</h2>
+      <p>Cada una resuelve un problema puntual de moverte por una ciudad que crece más rápido de lo que se puede recordar.</p>
+    </div>
+
+    <div class="feature-row reveal">
+      <div class="f-text">
+        <p class="f-num">Un mapa, no seis apps</p>
+        <h3>Gastronomía, patrimonio, naturaleza, alojamiento y servicios — en una sola pantalla.</h3>
+        <p>Filtrás por categoría, subcategoría y orden sin salir del mapa ni perder el contexto de lo que ya mirabas.</p>
       </div>
-
-      <div class="dc-thesis">
-        <div class="dc-thesis-editorial">
-          <p class="dc-thesis-lede"><span class="dc-thesis-cap" aria-hidden="true">C</span>oncepción del Uruguay tiene más lugares de los que entran en la memoria de cualquiera. URU SPOT no es una lista más: es un mapa vivo que ya filtra, verifica y recuerda por vos.</p>
-          <div class="dc-thesis-note">
-            <p>Cuantos más filtros combinás —categoría, subcategoría y orden— más rápido llegás a lo que buscás, en vez de scrollear a ciegas entre cientos de lugares.</p>
-            <cite>— La forma más rápida de usar el mapa</cite>
-          </div>
-        </div>
-        <ol class="dc-ledger" aria-label="Por qué usar URU SPOT, en cinco puntos">
-          <li><span class="dc-ledger-n">01</span><span class="dc-ledger-body"><strong>Un solo mapa</strong>Gastronomía, patrimonio, naturaleza, alojamiento y servicios, agrupados y filtrables desde una sola pantalla en vez de saltar entre apps.</span></li>
-          <li><span class="dc-ledger-n">02</span><span class="dc-ledger-body"><strong>Datos verificados</strong>El contador de resultados del mapa lo marca explícitamente: no es una lista sin curar.</span></li>
-          <li><span class="dc-ledger-n">03</span><span class="dc-ledger-body"><strong>Memoria propia</strong>Favoritos e historial para no tener que buscar lo mismo dos veces.</span></li>
-          <li><span class="dc-ledger-n">04</span><span class="dc-ledger-body"><strong>Pensado para el celular</strong>Barra inferior, búsqueda instantánea y vista de lista para recorrer con el teléfono en la mano.</span></li>
-          <li><span class="dc-ledger-n">05</span><span class="dc-ledger-body"><strong>Búsqueda instantánea</strong>El spotlight del header sincroniza resultados con el mapa mientras escribís.</span></li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="us-section" id="explorar-ciudad" aria-labelledby="title-explorar-ciudad">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">Empezá por acá</span>
-          <h2 class="section-title" id="title-explorar-ciudad">Cómo explorar Concepción del Uruguay</h2>
-        </div>
-      </div>
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        URU SPOT organiza toda la ciudad en cinco grandes categorías. Tocá la que te
-        interesa para saltar directo al mapa ya filtrado, o usá los accesos rápidos
-        de abajo para ir a cualquier otra parte de la guía.
-      </p>
-
-      <div class="dc-grid dc-grid--compact" role="list" aria-label="Categorías de la ciudad">
-        <a class="dc-card dc-card--compact" role="listitem" href="#mapa" data-filtro="gastronomia">
-          <span class="dc-card-icon" aria-hidden="true">🍽️</span>
-          <h3>Gastronomía</h3>
-        </a>
-        <a class="dc-card dc-card--compact" role="listitem" href="#mapa" data-filtro="patrimonio">
-          <span class="dc-card-icon" aria-hidden="true">🏛️</span>
-          <h3>Patrimonio</h3>
-        </a>
-        <a class="dc-card dc-card--compact" role="listitem" href="#mapa" data-filtro="naturaleza">
-          <span class="dc-card-icon" aria-hidden="true">🌳</span>
-          <h3>Naturaleza</h3>
-        </a>
-        <a class="dc-card dc-card--compact" role="listitem" href="#mapa" data-filtro="alojamiento">
-          <span class="dc-card-icon" aria-hidden="true">🛏️</span>
-          <h3>Alojamiento</h3>
-        </a>
-        <a class="dc-card dc-card--compact" role="listitem" href="#mapa" data-filtro="servicios_publicos">
-          <span class="dc-card-icon" aria-hidden="true">🏥</span>
-          <h3>Servicios</h3>
-        </a>
-      </div>
-
-      <h3 class="dc-subhead">¿Vista de mapa o vista de lista?</h3>
-      <div class="dc-preview">
-        <div class="dc-preview-btn">
-          <span class="dc-preview-pill dc-preview-pill--active">🗺️ Mapa</span>
-          <p>Ubicá visualmente qué tan cerca está algo de otra cosa; los clusters agrupan lo cercano para no saturar la pantalla.</p>
-        </div>
-        <div class="dc-preview-btn">
-          <span class="dc-preview-pill">📋 Lista</span>
-          <p>Recorré con scroll cuando ya sabés la categoría y solo falta elegir un lugar puntual.</p>
-        </div>
-      </div>
-
-      <p class="dc-intro-copy u-mt-lg">¿Buscás algo puntual? El <a href="#centro-ayuda">índice completo de la guía</a> junta cada tema en un solo lugar.</p>
-    </section>
-
-    <section class="us-section" id="para-quien-es-esta-guia" aria-labelledby="title-para-quien-es-esta-guia">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">Elegí tu punto de partida</span>
-          <h2 class="section-title" id="title-para-quien-es-esta-guia">¿Qué tipo de visita estás haciendo hoy?</h2>
-        </div>
-      </div>
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        No hace falta que recorras toda la guía de arriba a abajo. Tocá la situación que
-        más se parece a la tuya: la respuesta cambia debajo, sin recargar nada.
-      </p>
-
-      <div class="dc-quiz">
-        <div class="dc-quiz-options" role="radiogroup" aria-label="Elegí tu situación de visita">
-          <input type="radio" name="visita" id="q-paso" class="dc-quiz-input" checked>
-          <label for="q-paso" class="dc-quiz-label"><span aria-hidden="true">⏱️</span>Estás de paso</label>
-
-          <input type="radio" name="visita" id="q-familia" class="dc-quiz-input">
-          <label for="q-familia" class="dc-quiz-label"><span aria-hidden="true">👨‍👩‍👧</span>Vas con la familia</label>
-
-          <input type="radio" name="visita" id="q-local" class="dc-quiz-input">
-          <label for="q-local" class="dc-quiz-label"><span aria-hidden="true">💎</span>Sos de acá</label>
-
-          <input type="radio" name="visita" id="q-dia" class="dc-quiz-input">
-          <label for="q-dia" class="dc-quiz-label"><span aria-hidden="true">📅</span>Día completo</label>
-
-          <input type="radio" name="visita" id="q-pareja" class="dc-quiz-input">
-          <label for="q-pareja" class="dc-quiz-label"><span aria-hidden="true">💑</span>Pareja o grupo chico</label>
-
-          <input type="radio" name="visita" id="q-directo" class="dc-quiz-input">
-          <label for="q-directo" class="dc-quiz-label"><span aria-hidden="true">🎯</span>Ya sabés qué buscás</label>
-        </div>
-
-        <div class="dc-quiz-panels">
-          <div class="dc-quiz-panel" data-panel="paso">
-            <p>Arrancá por las colecciones de <strong>Plan 30 min</strong> y <strong>Cerca tuyo</strong>, y activá "Cerca de mí" en el mapa para no perder tiempo yendo y viniendo.</p>
-            <a class="dc-chip dc-chip--primary" href="#explorar-recomendaciones">Ver colecciones rápidas</a>
-          </div>
-          <div class="dc-quiz-panel" data-panel="familia">
-            <p>Las colecciones de <strong>Familias</strong> y <strong>Con estacionamiento</strong> filtran directo lo que suele funcionar mejor para grupos con chicos.</p>
-            <a class="dc-chip dc-chip--primary" href="#explorar-recomendaciones">Ver colecciones para familias</a>
-          </div>
-          <div class="dc-quiz-panel" data-panel="local">
-            <p>Las colecciones de <strong>Joyas ocultas</strong> y <strong>Recién agregados</strong> están pensadas para no repetir siempre los mismos lugares.</p>
-            <a class="dc-chip dc-chip--primary" href="#explorar-recomendaciones">Ver joyas ocultas</a>
-          </div>
-          <div class="dc-quiz-panel" data-panel="dia">
-            <p>Combiná la colección <strong>Plan de día</strong> con el Planner (botón flotante) o con un recorrido armado desde el menú lateral.</p>
-            <a class="dc-chip dc-chip--primary" href="#recorridos-tematicos">Ver Recorridos y Planner</a>
-          </div>
-          <div class="dc-quiz-panel" data-panel="pareja">
-            <p>Las colecciones de <strong>Parejas</strong> y <strong>Muy recomendados</strong> priorizan opciones pensadas para grupos reducidos, no para volumen.</p>
-            <a class="dc-chip dc-chip--primary" href="#explorar-recomendaciones">Ver colecciones para parejas</a>
-          </div>
-          <div class="dc-quiz-panel" data-panel="directo">
-            <p>Saltá el explorador y andá directo al <strong>buscador del mapa</strong> o al spotlight del header: escribís el nombre y listo.</p>
-            <a class="dc-chip dc-chip--primary" href="#mapa">Ir a buscar directo</a>
-          </div>
-        </div>
-      </div>
-      <p class="dc-intro-copy" style="margin-top:.25rem">Ninguna elección es definitiva: podés cambiar de colección o de vista cuando quieras, sin perder lo que ya guardaste en Favoritos.</p>
-    </section>
-
-
-    <div id="editorial-mount"></div>
-
-    <div class="sec-title reveal" id="explorar-recomendaciones">
-      <span class="section-eyebrow">Explorar</span>
-      <h2>Recomendaciones pensadas para vos</h2>
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        Esta sección arma automáticamente carruseles temáticos a partir de todo
-        lo que hay cargado en la guía: desde lo más recomendado hasta ideas
-        rápidas según cuánto tiempo tengas disponible.
-      </p>
-      <ul class="dc-tags" aria-label="Tipos de colecciones disponibles">
-        <li>🎯 Descubrir hoy</li><li>📍 Cerca tuyo</li><li>⭐ Imperdibles</li>
-        <li>🆕 Recién agregados</li><li>💎 Joyas ocultas</li><li>🟢 Abiertos ahora</li>
-        <li>🅿️ Con estacionamiento</li><li>👍 Muy recomendados</li><li>🔥 Lo más elegido</li>
-        <li>🆓 Gratis</li><li>💰 Económicos</li><li>✨ Premium</li>
-        <li>👨‍👩‍👧 Familias</li><li>💑 Parejas</li><li>👯 Amigos</li>
-        <li>⏱️ Plan 30 min</li><li>🕐 Plan 1 h</li><li>🕑 Plan 2 h</li>
-        <li>🌇 Plan de tarde</li><li>📅 Plan de día</li>
-        <li>🌧️ Días de lluvia</li><li>☀️ Verano</li><li>🕰️ Según el momento</li>
-        <li>▶️ Continuar explorando</li><li>🕓 Últimos vistos</li>
-        <li>❤️ Favoritos</li><li>📜 Historial</li>
-      </ul>
-
-      <div class="dc-callout dc-callout--info">
-        <span class="dc-callout-ico" aria-hidden="true">🎛️</span>
-        <div class="dc-callout-body">
-          <span class="dc-callout-label">Cómo funcionan estas colecciones</span>
-          <p>Cada carrusel de abajo agrupa lugares según un criterio distinto —presupuesto, ocasión, tiempo, novedad—, pero todos parten del mismo mapa de fondo: nada de lo que veas acá es una lista aparte, es el mismo dataset mirado desde otro ángulo.</p>
-        </div>
-      </div>
-      <div class="dc-mini-faq">
-        <details>
-          <summary>¿Puedo estar en varias colecciones a la vez?</summary>
-          <p>Sí, un mismo lugar puede aparecer en más de un carrusel si cumple varios criterios a la vez (por ejemplo, económico y familiar).</p>
-        </details>
-        <details>
-          <summary>¿Estas colecciones reemplazan al mapa?</summary>
-          <p>No, son una forma más rápida de entrar; el mapa completo con todos los filtros sigue disponible más abajo en <a href="#mapa">esta misma página</a>.</p>
-        </details>
+      <div class="f-mock">
+        <div class="chiprow"><span class="chip on">Gastronomía</span><span class="chip">Patrimonio</span><span class="chip">Naturaleza</span></div>
+        <div class="rowline"><div class="rb">P</div><div class="rt"><p>Parrilla del Puerto</p><span>Gastronomía · Costanera</span></div><div class="rstar">★ 4.9</div></div>
+        <div class="rowline"><div class="rb">M</div><div class="rt"><p>Museo Casa de Delio Panizza</p><span>Patrimonio · Centro</span></div><div class="rstar">★ 4.8</div></div>
       </div>
     </div>
-    <section class="us-home-hub" id="home-hub" aria-label="Recomendaciones para vos"
-      data-home-keys="descubrir-hoy,cerca-tuyo,imperdibles,recien-agregados,joyas-ocultas,abiertos-ahora,con-estacionamiento,muy-recomendados,lo-mas-elegido,gratis,economicos,premium,familias,parejas,amigos,plan-30min,plan-1h,plan-2h,plan-tarde,plan-dia,lluvia,verano,segun-momento,continuar-explorando,ultimos-vistos,favoritos,historial">
-    </section>
 
-    <section class="us-section" id="segun-tiempo-y-momento" aria-labelledby="title-segun-tiempo-y-momento">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">Otra forma de elegir</span>
-          <h2 class="section-title" id="title-segun-tiempo-y-momento">Según cuánto tiempo tengas o el momento</h2>
-        </div>
+    <div class="feature-row rev reveal">
+      <div class="f-text">
+        <p class="f-num">Verificado, no supuesto</p>
+        <h3>Cada dato pasa por una revisión antes de sumarse al mapa.</h3>
+        <p>El contador de resultados lo indica de forma explícita: esto no es una lista sin curar, es información confirmada este mes.</p>
       </div>
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        Las mismas colecciones de <a href="#explorar-recomendaciones">Explorar</a> se pueden leer
-        también en dos ejes: cuánto tiempo tenés y qué clima o momento del día es. Cruzarlos entre
-        sí, no elegir uno solo, es lo que más rápido acota las opciones.
-      </p>
-      <div class="dc-panel">
-        <div class="dc-panel-head"><span aria-hidden="true">⏱️</span><strong>Referencia rápida por tiempo y clima</strong></div>
-        <div class="dc-panel-grid">
-          <div class="dc-panel-item"><strong>⏱️ 30 min</strong>Una parada corta entre otra cosa que estés haciendo.</div>
-          <div class="dc-panel-item"><strong>🕐 1 h / 2 h</strong>Un rato más largo, sin ocupar media jornada.</div>
-          <div class="dc-panel-item"><strong>🌇 Tarde</strong>Arrancás después del mediodía y querés aprovechar lo que queda.</div>
-          <div class="dc-panel-item"><strong>📅 Día completo</strong>Jornada libre para recorrer sin apuro.</div>
-          <div class="dc-panel-item"><strong>🌧️ Lluvia</strong>Opciones que no dependen de que el clima acompañe.</div>
-          <div class="dc-panel-item"><strong>☀️ Verano</strong>Pensado para los días de más calor del año.</div>
+      <div class="f-mock">
+        <div class="badgeblock">
+          <div class="bi"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="bt"><p>128 lugares confirmados</p><span>Actualizado esta semana</span></div>
         </div>
+        <div class="badgeblock"><div class="bi" style="background:var(--sunken); color:var(--ink-soft);">＋</div><div class="bt"><p>6 lugares en revisión</p><span>Pendientes de verificación</span></div></div>
       </div>
+    </div>
 
-      <div class="dc-quote">
-        <p>El mejor plan no siempre es el más largo: a veces son treinta minutos bien elegidos.</p>
-        <cite>— Dicho local sobre cómo recorrer Concepción del Uruguay</cite>
+    <div class="feature-row reveal">
+      <div class="f-text">
+        <p class="f-num">Tu memoria, guardada</p>
+        <h3>Favoritos e historial para no buscar lo mismo dos veces.</h3>
+        <p>Todo lo que marcás o visitaste queda a mano, ordenado por fecha o por categoría, listo para la próxima vez.</p>
       </div>
-      <div class="dc-callout dc-callout--tip">
-        <span class="dc-callout-ico" aria-hidden="true">🧩</span>
-        <div class="dc-callout-body">
-          <span class="dc-callout-label">Combinalos</span>
-          <p>Tiempo y clima no son excluyentes: podés cruzar "Plan de tarde" con "Días de lluvia" para llegar a una selección todavía más específica.</p>
-        </div>
+      <div class="f-mock">
+        <div class="tabs"><span class="tab on">Favoritos</span><span class="tab">Historial</span></div>
+        <div class="rowline"><div class="rb">K</div><div class="rt"><p>Costanera Sur</p><span>Naturaleza</span></div></div>
+        <div class="rowline"><div class="rb">Y</div><div class="rt"><p>Yatch Club Uruguay</p><span>Servicios</span></div></div>
       </div>
-      <nav class="dc-intro-actions" aria-label="Seguir explorando">
-        <a class="dc-chip dc-chip--primary" href="#mapa">Ver el mapa completo ↓</a>
-        <a class="dc-chip" href="#explorar-recomendaciones">Volver a Explorar</a>
-      </nav>
-    </section>
+    </div>
 
-    <section class="us-section" id="mapa" aria-labelledby="title-mapa">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">Encontrá rápido</span>
-          <h2 class="section-title" id="title-mapa">Precisión antes que volumen</h2>
-        </div>
-        <span class="section-count" id="mapa-total-badge">cargando…</span>
+    <div class="feature-row rev reveal">
+      <div class="f-text">
+        <p class="f-num">Diseñado para el bolsillo</p>
+        <h3>Barra inferior, búsqueda instantánea, vista de lista.</h3>
+        <p>Pensado para recorrer la ciudad con el teléfono en la mano, no para leerse cómodo desde un escritorio.</p>
       </div>
+      <div class="f-mock" style="align-items:center;">
+        <div class="phonebar"><div class="pi on"></div><div class="pi"></div><div class="pi"></div><div class="pi"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <div class="dc-intro reveal">
-        <span class="section-eyebrow">Cómo usar esta herramienta</span>
-        <h3 class="dc-intro-title">Cinco decisiones que acortan la búsqueda</h3>
-        <ol class="dc-steps">
-          <li><span><strong>Elegí una categoría</strong> desde los filtros de arriba, o dejá todas activas para ver el panorama completo.</span></li>
-          <li><span><strong>Afiná con subcategorías</strong> si ya sabés qué tipo de lugar buscás dentro de esa categoría.</span></li>
-          <li><span><strong>Ordená los resultados</strong> por relevancia, cercanía, recomendados o recién agregados, según qué te importa más en este momento.</span></li>
-          <li><span><strong>Cambiá entre mapa y lista</strong> según prefieras ubicar visualmente cada lugar o recorrerlos con scroll.</span></li>
-          <li><span><strong>Tocá "Cerca de mí"</strong> para reordenar todo por distancia real a tu ubicación actual.</span></li>
-        </ol>
-        <p class="dc-intro-copy" style="margin-bottom:.6rem"><strong>Errores comunes que hacen perder tiempo:</strong></p>
-        <ul class="dc-checklist dc-checklist--warn" style="margin-bottom:0">
-          <li>Dejar todos los filtros apagados y scrollear a ciegas entre cientos de lugares.</li>
-          <li>Buscar por rubro genérico en vez de usar la subcategoría, que acota mucho más rápido.</li>
-          <li>Olvidarse de activar "Cerca de mí" cuando en realidad lo que importa es la distancia.</li>
-          <li>No guardar nada en Favoritos y tener que rehacer la misma búsqueda al rato.</li>
+<section class="dark-section">
+  <div class="container">
+    <div class="s-head reveal">
+      <p class="eyebrow">Cómo explorar la ciudad</p>
+      <h2>Cinco categorías. Ninguna es más importante que otra.</h2>
+      <p>Tocá la que te interesa para saltar directo al mapa ya filtrado.</p>
+    </div>
+    <div class="reveal">
+      <div class="index-row"><div class="index-left"><span class="index-name">Gastronomía</span><span class="index-desc">Sabores de la costa, del asado al café de especialidad.</span></div><svg class="index-arrow" viewBox="0 0 16 16" fill="none" stroke="#F4F3EE" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+      <div class="index-row"><div class="index-left"><span class="index-name">Patrimonio</span><span class="index-desc">Historia viva, de la Basílica a los museos de la Toma de Posesión.</span></div><svg class="index-arrow" viewBox="0 0 16 16" fill="none" stroke="#F4F3EE" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+      <div class="index-row"><div class="index-left"><span class="index-name">Naturaleza</span><span class="index-desc">El río Uruguay, sus costas y los palmares cercanos.</span></div><svg class="index-arrow" viewBox="0 0 16 16" fill="none" stroke="#F4F3EE" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+      <div class="index-row"><div class="index-left"><span class="index-name">Alojamiento</span><span class="index-desc">Desde hostales de mochilero hasta cabañas sobre la costanera.</span></div><svg class="index-arrow" viewBox="0 0 16 16" fill="none" stroke="#F4F3EE" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+      <div class="index-row"><div class="index-left"><span class="index-name">Servicios</span><span class="index-desc">Lo esencial — salud, trámites, transporte — cerca de donde estás.</span></div><svg class="index-arrow" viewBox="0 0 16 16" fill="none" stroke="#F4F3EE" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="s-head reveal">
+      <p class="eyebrow">Otra forma de elegir</p>
+      <h2>Según cuánto tiempo tengas, o el clima que haga.</h2>
+      <p>Las mismas colecciones se leen en dos ejes. Cruzarlos, en vez de elegir uno solo, es lo que más rápido acota las opciones.</p>
+    </div>
+    <div class="reveal">
+      <p class="matrix-label">Tiempo disponible</p>
+      <div class="matrix-row">
+        <div class="matrix-chip"><h5>30 min</h5><p>Una parada corta entre otra cosa que estés haciendo.</p></div>
+        <div class="matrix-chip"><h5>1h / 2h</h5><p>Un rato más largo, sin ocupar media jornada.</p></div>
+        <div class="matrix-chip"><h5>Tarde</h5><p>Arrancás después del mediodía y querés aprovechar lo que queda.</p></div>
+        <div class="matrix-chip"><h5>Día completo</h5><p>Jornada libre para recorrer sin apuro.</p></div>
+      </div>
+      <p class="matrix-label">Clima o momento</p>
+      <div class="matrix-row">
+        <div class="matrix-chip"><h5>Lluvia</h5><p>Opciones que no dependen de que el clima acompañe.</p></div>
+        <div class="matrix-chip"><h5>Verano</h5><p>Pensado para los días de más calor del año.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gastronomia" style="background:var(--sunken);">
+  <div class="container">
+    <div class="s-head reveal">
+      <p class="eyebrow">Guía de gastronomía</p>
+      <h2>El centro de recomendaciones, a tu manera.</h2>
+      <p>Colecciones automáticas sobre la parte gastronómica de la ciudad, armadas por presupuesto, ocasión y momento.</p>
+    </div>
+    <div class="reveal chiprow" style="margin-bottom:16px;">
+      <span class="chip on">Muy recomendados</span><span class="chip on">Lo más elegido</span><span class="chip">Económicos</span><span class="chip">Premium</span><span class="chip">Gratis</span><span class="chip">Familias</span><span class="chip">Parejas</span><span class="chip">Amigos</span><span class="chip">Abiertos ahora</span><span class="chip">Joyas ocultas</span><span class="chip">Recién agregados</span><span class="chip">Con estacionamiento</span>
+    </div>
+
+    <div class="split">
+      <div class="reveal">
+        <h4><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#1F4B3F" stroke-width="1.6"><path d="M2 8h12M8 2l6 6-6 6"/></svg>Guía rápida para elegir</h4>
+        <ul>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="#1F4B3F" stroke-width="1.8"><path d="M3 8.5l3.5 3.5L13 4"/></svg><span>Con poco tiempo, arrancá por <b>más populares</b> y <b>mejor puntuados</b>.</span></li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="#1F4B3F" stroke-width="1.8"><path d="M3 8.5l3.5 3.5L13 4"/></svg><span>¿Ganas de algo distinto? Revisá <b>joyas ocultas</b> antes de repetir siempre lo mismo.</span></li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="#1F4B3F" stroke-width="1.8"><path d="M3 8.5l3.5 3.5L13 4"/></svg><span>En grupo o con niños, mirá <b>familias</b> y <b>estacionamiento</b>.</span></li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="#1F4B3F" stroke-width="1.8"><path d="M3 8.5l3.5 3.5L13 4"/></svg><span>Cuidando el presupuesto, usá directamente <b>económicos</b> o <b>gratis</b>.</span></li>
         </ul>
       </div>
-
-      <div class="dc-panel">
-        <div class="dc-panel-head"><span aria-hidden="true">🧭</span><strong>Antes y después de usar el mapa</strong></div>
-        <div class="dc-panel-grid">
-          <div class="dc-panel-item"><strong>Antes de tocar el mapa</strong>Decidí si te importa más la distancia (usá "Cerca de mí") o la calidad (ordená por "Más recomendados").</div>
-          <div class="dc-panel-item"><strong>Mientras filtrás</strong>Empezá amplio por categoría y andá cerrando con subcategoría recién si el resultado sigue siendo demasiado grande.</div>
-          <div class="dc-panel-item"><strong>Después de encontrar tu lugar</strong>Guardalo en Favoritos antes de seguir mirando: es más fácil sacarlo después que volver a buscarlo.</div>
-          <div class="dc-panel-item"><strong>Si no encontrás nada</strong>Sacá filtros de a uno en vez de resetear todo: casi siempre alcanza con aflojar uno solo.</div>
-        </div>
-      </div>
-
-      <div id="mapa-wrap">
-        <div id="mapa-toolbar">
-          <div id="mapa-search-wrap">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="mapa-search" placeholder="Buscar un lugar…" autocomplete="off" aria-label="Buscar un lugar" />
-          </div>
-          <select id="mapa-orden" aria-label="Ordenar resultados">
-            <option value="relevancia">Más relevantes</option>
-            <option value="cercania">Más cerca</option>
-            <option value="recomendados">Más recomendados</option>
-            <option value="recientes">Recién agregados</option>
-          </select>
-          <div id="mapa-view-toggle" role="group" aria-label="Cambiar vista">
-            <button type="button" id="mapa-view-mapa" data-view="mapa" aria-pressed="true">Mapa</button>
-            <button type="button" id="mapa-view-lista" data-view="lista" aria-pressed="false">Lista</button>
-          </div>
-          <button id="mapa-geoloc" type="button">📍 Cerca de mí</button>
-        </div>
-        <div id="mapa-filtros" role="group" aria-label="Filtrar por categoría"></div>
-        <div id="mapa-subfiltros" role="group" aria-label="Filtrar por subcategoría"></div>
-        <div id="mapa-active-filtros" role="group" aria-label="Filtros activos" aria-live="polite"></div>
-
-        <div class="dc-intro reveal">
-          <span class="section-eyebrow">Dónde Comer</span>
-          <h3 class="dc-intro-title">Restaurantes, bares y cafés de Concepción del Uruguay</h3>
-          <p class="dc-intro-copy">
-            Rieles curados —más populares, mejor puntuados, recién agregados y por tipo
-            de cocina— para descubrir dónde comer. Filtrá por presupuesto, ocasión o
-            cercanía, y guardá tus lugares favoritos para la próxima salida.
-          </p>
-          <div class="dc-intro-actions">
-            <a class="dc-chip dc-chip--primary" href="#mapa" data-filtro="gastronomia">Ver todos los lugares para comer</a>
-            <a class="dc-chip" href="#explorar-recomendaciones">Colecciones por presupuesto y ocasión</a>
-            <a class="dc-chip" href="#donde-comer-guia">Guía completa para elegir ↓</a>
-          </div>
-        </div>
-
-        <div id="donde-comer-rieles" aria-label="Descubrí más lugares para comer"></div>
-
-        <div id="mapa-canvas" data-view="mapa">
-          <div id="mapa-leaflet" role="application" aria-label="Mapa interactivo"></div>
-          <div id="mapa-legend" aria-label="Leyenda de categorías del mapa">
-            <div id="mapa-legend-head">
-              <span class="titulo">🗺️ Leyenda</span>
-              <span class="toggle-ico">▾</span>
-            </div>
-            <div id="mapa-legend-list"></div>
-          </div>
-          <div id="mapa-lista" role="list" aria-label="Lugares en formato lista" hidden></div>
-        </div>
-        <div id="mapa-empty">No encontramos lugares con esa búsqueda o ese filtro. Probá con otra palabra.</div>
-        <div id="mapa-contador">
-          <span>Mostrando <strong id="mapa-count">0</strong> de <strong id="mapa-total">0</strong> lugares</span>
-          <span>Datos verificados · <a id="mapa-reset">ver todos</a></span>
-        </div>
-      </div>
-
-      <h3 class="dc-subhead" style="margin-top:2rem">Qué significa cada color de la leyenda</h3>
-      <dl class="dc-glossary">
-        <div><dt>🍽️ Gastronomía</dt><dd>Restaurantes, bares y cafés de toda la ciudad.</dd></div>
-        <div><dt>🏛️ Patrimonio</dt><dd>Sitios históricos y culturales marcados en el mapa.</dd></div>
-        <div><dt>🌳 Naturaleza</dt><dd>Espacios verdes, costa del río y lugares al aire libre.</dd></div>
-        <div><dt>🛏️ Alojamiento</dt><dd>Opciones para hospedarte dentro de la ciudad.</dd></div>
-        <div><dt>🏥 Servicios</dt><dd>Servicios públicos y de utilidad para moverte mejor.</dd></div>
-      </dl>
-      <details class="dc-deepdive" id="guia-orden-resultados">
-        <summary>
-          <span class="dc-deepdive-eyebrow">Profundizar</span>
-          <span class="dc-deepdive-q">¿Qué orden conviene según lo que estás buscando?</span>
-        </summary>
-        <table class="dc-order-table">
-          <caption>El orden y los filtros de categoría son independientes: cambiar uno no borra el otro.</caption>
-          <thead>
-            <tr><th scope="col">Orden</th><th scope="col">Conviene si…</th><th scope="col">Combinalo con</th></tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">🎯 Más relevantes</th><td>Todavía no tenés una prioridad clara entre distancia o novedad.</td><td>Vista de mapa, para el panorama completo.</td></tr>
-            <tr><th scope="row">📍 Más cerca</th><td>Te importa minimizar caminata o viaje.</td><td>Botón "Cerca de mí" + vista Lista.</td></tr>
-            <tr><th scope="row">👍 Más recomendados</th><td>Preferís calidad por sobre cercanía o novedad.</td><td>Riel "Mejor puntuados" + subcategoría.</td></tr>
-            <tr><th scope="row">🆕 Recién agregados</th><td>Ya conocés lo de siempre y buscás algo que no viste.</td><td>Categoría + subcategoría, para no perderte nada.</td></tr>
-          </tbody>
-        </table>
-        <p class="dc-deepdive-note">El buscador de texto funciona en simultáneo con el orden elegido: tus resultados aparecen ya ordenados según el modo activo, sin ningún paso extra.</p>
-      </details>
-
-      <nav class="dc-intro-actions" aria-label="Seguir explorando desde el mapa">
-        <a class="dc-chip dc-chip--primary" href="#donde-comer-guia">Guía completa: dónde comer</a>
-        <a class="dc-chip" href="#categorias-detalle">Ver categorías en detalle</a>
-        <a class="dc-chip" href="#guardar-volver-compartir">Favoritos e historial</a>
-      </nav>
-    </section>
-
-    <!-- [ARQUITECTURA — auditoría de ingeniería, renderizado/carga inicial]
-         Antes, "content-visibility:auto" solo se usaba en #cd-wrap-container,
-         #seo-mount y el <footer> — los únicos tres nodos por debajo del mapa
-         que ya lo tenían. Todo lo demás que vive debajo de #mapa (guía
-         gastronómica extensa, recorridos, favoritos/historial, accesibilidad,
-         centro de ayuda, "sobre uruspot") es contenido 100% estático y largo
-         que la enorme mayoría de las visitas nunca llega a scrollear, pero
-         el navegador igual tenía que calcular layout/estilo/paint de todo
-         ese HTML en el arranque, como si estuviera visible. Se extiende el
-         MISMO patrón (ya probado en este archivo) a esas seis secciones:
-         el navegador salta ese trabajo hasta que cada una esté por entrar en
-         viewport, reduciendo el costo de renderizado inicial sin cambiar en
-         absoluto lo que el usuario ve. contain-intrinsic-size es una
-         estimación de alto de cada sección (para no correr el resto de la
-         página mientras el contenido real todavía no se midió) — si su
-         contenido cambia de forma drástica, ajustar el valor en su propio
-         atributo style. Los anchors (#donde-comer-guia, etc.) siguen
-         funcionando igual: los navegadores fuerzan el render de un elemento
-         content-visibility:auto cuando es el destino de una navegación por
-         fragmento o de un scrollIntoView(), tal como ya lo hacían con el
-         footer antes de este cambio. -->
-    <section class="us-section" id="donde-comer-guia" aria-labelledby="title-donde-comer-guia" style="content-visibility:auto;contain-intrinsic-size:0 2600px;">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">Guía gastronómica</span>
-          <h2 class="section-title" id="title-donde-comer-guia">Todo lo que necesitás para elegir dónde comer</h2>
-        </div>
-        <span class="section-count">Guía · datos verificados</span>
-      </div>
-
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        Encontrar un lugar para comer no es el problema — con el mapa alcanza. Elegir uno,
-        con cientos de opciones válidas, sí lo es. Esta guía no repite cómo se usa el mapa:
-        parte de ahí y se enfoca en el criterio para decidir según presupuesto, ocasión y
-        cuánto ya conocés de la escena gastronómica local.
-      </p>
-
-      <div class="dc-cols">
-        <div>
-          <h3 class="dc-subhead">Explorá por presupuesto y ocasión</h3>
-          <p class="dc-intro-copy">
-            El centro de recomendaciones (<a href="#explorar-recomendaciones">Explorar</a>) arma colecciones
-            automáticas que también aplican a la parte gastronómica de la ciudad. Además de
-            los rieles de arriba, vas a encontrar:
-          </p>
-          <ul class="dc-tags" aria-label="Colecciones disponibles en Explorar">
-            <li>Económicos</li><li>Premium</li><li>Gratis</li>
-            <li>Familias</li><li>Parejas</li><li>Amigos</li>
-            <li>Abiertos ahora</li><li>Joyas ocultas</li><li>Recién agregados</li>
-            <li>Muy recomendados</li><li>Lo más elegido</li><li>Con estacionamiento</li>
-            <li>Plan 30 min</li><li>Plan 1 h</li><li>Plan de tarde</li><li>Plan de día</li>
-          </ul>
-
-          <h3 class="dc-subhead">Guía rápida para elegir</h3>
-          <ul class="dc-list">
-            <li>Si vas con poco tiempo, arrancá por los rieles de <strong>más populares</strong> y <strong>mejor puntuados</strong>: son el resumen más rápido de lo mejor disponible.</li>
-            <li>¿Ganas de algo distinto? Revisá <strong>joyas ocultas</strong> y <strong>recién agregados</strong> antes de repetir siempre los mismos lugares.</li>
-            <li>Salís en grupo grande o con niños: mirá las colecciones de <strong>familias</strong> y las que tienen <strong>estacionamiento</strong>.</li>
-            <li>Estás recorriendo el centro sin plan fijo: activá <strong>Cerca de mí</strong> y cambiá a vista <strong>Lista</strong> para decidir más rápido.</li>
-            <li>Cuidando el presupuesto: usá directamente las colecciones <strong>económicos</strong> o <strong>gratis</strong> en vez de filtrar a mano.</li>
-          </ul>
-
-          <h3 class="dc-subhead">Errores comunes al elegir</h3>
-          <ul class="dc-checklist dc-checklist--warn">
-            <li>Elegir por el primer nombre que reconocés en vez de comparar rating y tipo de cocina.</li>
-            <li>Definir el lugar antes de confirmar el presupuesto del grupo y tener que cambiar de plan a último momento.</li>
-            <li>Ignorar los rieles de recién agregados y repetir siempre las mismas opciones de siempre.</li>
-            <li>Elegir sin filtrar por ocasión cuando vas en grupo grande o con niños.</li>
-          </ul>
-
-          <h3 class="dc-subhead">Antes de salir</h3>
-          <ul class="dc-checklist">
-            <li>Confirmá el horario del lugar antes de ir, sobre todo fuera del centro.</li>
-            <li>Si van en grupo grande, consultá si conviene avisar con anticipación.</li>
-            <li>Revisá si el lugar cuenta con estacionamiento si vas en auto.</li>
-            <li>Guardá el lugar en <em>Favoritos</em> para no tener que volver a buscarlo.</li>
-            <li>Compartí la ubicación con quien te acompañe antes de salir de casa.</li>
-          </ul>
-
-          <h3 class="dc-subhead">Después de comer</h3>
-          <ul class="dc-checklist">
-            <li>Si te gustó, dejalo en <em>Favoritos</em> antes de que se te mezcle con los demás lugares que viste ese día.</li>
-            <li>Compartí el lugar puntual con quien te lo recomiende la próxima vez, en vez de tratar de explicarlo de memoria.</li>
-            <li>Mirá el riel de <strong>recién agregados</strong> para la próxima salida, así no repetís siempre lo mismo.</li>
-          </ul>
-
-          <h3 class="dc-subhead">Glosario rápido</h3>
-          <dl class="dc-glossary">
-            <div><dt>Carta</dt><dd>El menú completo de un lugar, con todas las opciones disponibles.</dd></div>
-            <div><dt>Menú ejecutivo</dt><dd>Combo de precio fijo, típico del almuerzo entre semana.</dd></div>
-            <div><dt>Take away</dt><dd>Para llevar, sin comer en el lugar.</dd></div>
-            <div><dt>Delivery</dt><dd>Entrega a domicilio, sin necesidad de ir hasta el lugar.</dd></div>
-            <div><dt>Happy hour</dt><dd>Franja horaria con precios especiales, generalmente en bares.</dd></div>
-          </dl>
-        </div>
-
-        <div>
-          <h3 class="dc-subhead">Preguntas frecuentes</h3>
-          <div class="dc-faq">
-            <details>
-              <summary>¿Cómo busco un lugar para comer?</summary>
-              <p class="dc-faq-a">Usá el buscador del mapa o el spotlight del header (ícono de lupa) para encontrar un lugar por nombre, o filtrá por categoría "Gastronomía" y subcategoría desde la barra de filtros.</p>
-            </details>
-            <details>
-              <summary>¿Puedo ver opciones según mi presupuesto?</summary>
-              <p class="dc-faq-a">Sí, el centro de recomendaciones (Explorar) tiene colecciones de económicos, premium y gratis, además de opciones por ocasión como familias, parejas o amigos.</p>
-            </details>
-            <details>
-              <summary>¿Cómo encuentro lo mejor puntuado o lo más nuevo?</summary>
-              <p class="dc-faq-a">Los rieles de gastronomía arriba del mapa muestran más populares, mejor puntuados, recién agregados y por tipo de cocina; también podés ordenar los resultados del mapa por esas mismas variables.</p>
-            </details>
-            <details>
-              <summary>¿Cómo veo qué tengo cerca?</summary>
-              <p class="dc-faq-a">Tocá "Cerca de mí" en la barra del mapa para ordenar por distancia real, o pasá a vista Lista para recorrer los resultados con scroll.</p>
-            </details>
-            <details>
-              <summary>¿Puedo guardar mis lugares favoritos?</summary>
-              <p class="dc-faq-a">Sí, marcá cualquier lugar como favorito desde su tarjeta; después los ves agrupados en Favoritos, accesible desde la barra inferior o el menú lateral.</p>
-            </details>
-          </div>
-
-          <h3 class="dc-subhead">Compartí esta guía</h3>
-          <div class="dc-share">
-            <a href="https://wa.me/?text=Guía%20para%20elegir%20dónde%20comer%20en%20Concepción%20del%20Uruguay%20%E2%80%94%20URU%20SPOT%3A%20https%3A%2F%2Furuspot.pages.dev%2F%23donde-comer-guia" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
-            <a href="https://t.me/share/url?url=https%3A%2F%2Furuspot.pages.dev%2F%23donde-comer-guia&text=Guía%20para%20elegir%20dónde%20comer%20en%20Concepción%20del%20Uruguay" target="_blank" rel="noopener noreferrer">✈️ Telegram</a>
-            <a href="mailto:?subject=Dónde%20comer%20en%20Concepción%20del%20Uruguay&body=Te%20paso%20la%20guía%20de%20URU%20SPOT%20para%20elegir%20dónde%20comer%3A%20https%3A%2F%2Furuspot.pages.dev%2F%23donde-comer-guia">✉️ Email</a>
-          </div>
-
-          <div class="dc-quote">
-            <p>Elegir dónde comer no debería tomar más tiempo que la comida en sí.</p>
-            <cite>— Filosofía detrás de los rieles curados de esta guía</cite>
-          </div>
-
-          <h3 class="dc-subhead u-mt-lg">Seguí explorando</h3>
-          <div class="dc-intro-actions">
-            <a class="dc-chip dc-chip--primary" href="#guardar-volver-compartir">Cómo usar Favoritos e Historial</a>
-            <a class="dc-chip" href="#categorias-detalle">Categorías en detalle</a>
-            <a class="dc-chip" href="#mapa" data-filtro="patrimonio">Patrimonio</a>
-            <a class="dc-chip" href="#mapa" data-filtro="alojamiento">Alojamiento</a>
-            <a class="dc-chip" href="#sobre-uruspot">Sobre URU SPOT</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="dc-divider" role="separator"><span>Una guía no sirve de nada si no te ayuda a decidir más rápido</span></div>
-    </section>
-
-    <section class="us-section" id="recorridos-tematicos" aria-labelledby="title-recorridos-tematicos" style="content-visibility:auto;contain-intrinsic-size:0 1400px;">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">Dos formas de no planificar todo vos</span>
-          <h2 class="section-title" id="title-recorridos-tematicos">Recorridos temáticos y Planner: que decida la guía</h2>
-        </div>
-      </div>
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        Además del mapa libre y las colecciones de Explorar, URU SPOT tiene dos atajos para
-        cuando no querés armar el plan vos mismo: <strong>Recorridos</strong>, itinerarios ya
-        pensados con un hilo conductor propio, y el <strong>Planner</strong>, un botón flotante
-        que arma algo al instante según el tiempo que tengas. No son lo mismo — elegí el camino
-        según lo que te esté pidiendo el momento.
-      </p>
-
-      <div class="dc-path-pair">
-        <details class="dc-path" open>
-          <summary>
-            <span class="dc-path-ico" aria-hidden="true">🧵</span>
-            <span><span class="dc-path-title">Recorridos temáticos</span><span class="dc-path-sub">Seguí un hilo conductor ya armado</span></span>
-          </summary>
-          <p class="dc-intro-copy">Itinerarios con un orden sugerido, accesibles desde el menú lateral. Uno de ellos, <strong>"El Cauce"</strong>, conecta lugares con un hilo propio en vez de agruparlos por categoría suelta — son para cuando preferís seguir una propuesta ya pensada, no decidir el orden vos.</p>
-          <ol class="dc-steps">
-            <li><span>Abrí el <strong>menú lateral</strong> desde el ícono de hamburguesa del header.</span></li>
-            <li><span>Tocá <strong>"Recorridos"</strong> para ver los itinerarios disponibles.</span></li>
-            <li><span>Elegí uno y seguí el orden sugerido, parada por parada — podés salirte cuando quieras y volver al mapa libre.</span></li>
-          </ol>
-        </details>
-        <details class="dc-path" id="planner-guia">
-          <summary>
-            <span class="dc-path-ico" aria-hidden="true">⚡</span>
-            <span><span class="dc-path-title">Planner rápido</span><span class="dc-path-sub">Plan express según tu tiempo disponible</span></span>
-          </summary>
-          <p class="dc-intro-copy">El botón flotante (abajo a la derecha, en cualquier punto de la guía) arma un plan corto al instante — la forma más rápida de salir sin pasar primero por el mapa ni tocar un filtro.</p>
-          <ol class="dc-steps">
-            <li><span>Tocá el <strong>botón flotante</strong>, sin necesidad de estar en una sección puntual.</span></li>
-            <li><span>Elegí cuánto tiempo tenés: 30 min, 1 h, 2 h, tarde o día completo.</span></li>
-            <li><span>Recibís una selección lista; guardá en Favoritos lo que te sirva y descartá el resto.</span></li>
-          </ol>
-        </details>
-      </div>
-
-      <details class="dc-deepdive">
-        <summary>
-          <span class="dc-deepdive-eyebrow">Profundizar</span>
-          <span class="dc-deepdive-q">¿Recorrido, Planner o mapa libre?</span>
-        </summary>
-        <table class="dc-order-table">
-          <caption>Las tres formas de moverte por la ciudad, lado a lado.</caption>
-          <thead><tr><th scope="col">Camino</th><th scope="col">Se organiza por</th><th scope="col">Ideal cuando</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">🧵 Recorrido</th><td>Un hilo conductor ya armado.</td><td>Es tu primera vez y preferís que decidan el orden por vos.</td></tr>
-            <tr><th scope="row">⚡ Planner</th><td>El tiempo disponible que tengas ahora.</td><td>Necesitás una decisión de último momento, no una experiencia armada.</td></tr>
-            <tr><th scope="row">🗺️ Mapa libre</th><td>Tus propios filtros, orden y favoritos.</td><td>Ya conocés algo de la ciudad y buscás algo puntual.</td></tr>
-          </tbody>
-        </table>
-        <p class="dc-deepdive-note">Los tres se pueden combinar: empezar un recorrido, guardar favoritos sobre la marcha y después completar el resto del día con el Planner no tiene ningún costo — todos comparten los mismos Favoritos.</p>
-      </details>
-
-      <div class="dc-mini-faq">
-        <details>
-          <summary>¿Los recorridos son fijos o el menú suma nuevos con el tiempo?</summary>
-          <p>El menú de Recorridos puede sumar nuevas propuestas; lo que ves ahí es siempre la oferta vigente en ese momento.</p>
-        </details>
-        <details>
-          <summary>¿Puedo abrir el Planner varias veces o combinarlo con favoritos de un recorrido?</summary>
-          <p>Sí a las dos: el botón flotante está siempre disponible para abrir las veces que quieras, y marcar un lugar como favorito funciona igual estés dentro de un recorrido, en el Planner o en el mapa libre.</p>
-        </details>
-      </div>
-
-      <nav class="dc-intro-actions" aria-label="Seguir explorando">
-        <a class="dc-chip dc-chip--primary" href="#mapa">Prefiero armar mi propio plan en el mapa</a>
-        <a class="dc-chip" href="#segun-tiempo-y-momento">Ver colecciones por tiempo</a>
-        <a class="dc-chip" href="#guardar-volver-compartir">Guardá lo que elijas</a>
-      </nav>
-    </section>
-
-    <section class="us-section" id="guardar-volver-compartir" aria-labelledby="title-guardar-volver-compartir" style="content-visibility:auto;contain-intrinsic-size:0 1800px;">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">De lugares sueltos a memoria propia</span>
-          <h2 class="section-title" id="title-guardar-volver-compartir">Guardá, volvé y compartí</h2>
-        </div>
-      </div>
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        Cada lugar que marcás y cada uno que ya viste se acumulan en algo más que una lista
-        de resultados: con el tiempo se convierten en un mapa propio de la ciudad, distinto
-        al de cualquier otra persona que use la guía. Favoritos, Historial y compartir son
-        las tres piezas que lo arman.
-      </p>
-      <div class="dc-cols">
-        <div>
-          <h3 class="dc-subhead">Guardar un favorito</h3>
-          <ol class="dc-steps">
-            <li><span>Abrí la tarjeta del lugar que te interesa, desde el mapa, la lista o cualquier carrusel de Explorar.</span></li>
-            <li><span>Tocá el ícono de favorito (❤️) en la tarjeta.</span></li>
-            <li><span>Encontralo agrupado en <strong>Favoritos</strong>, accesible desde la barra inferior o el menú lateral.</span></li>
-          </ol>
-        </div>
-        <div>
-          <h3 class="dc-subhead">Retomar desde el historial</h3>
-          <ol class="dc-steps">
-            <li><span>Cada lugar que abrís queda registrado automáticamente, sin que tengas que guardarlo a mano.</span></li>
-            <li><span>Entrá a <strong>Historial</strong> desde el menú lateral para ver todo lo que ya viste.</span></li>
-            <li><span>Usá <em>Continuar explorando</em> en Recomendaciones para retomar justo donde lo dejaste.</span></li>
-          </ol>
-        </div>
-      </div>
-      <h3 class="dc-subhead">Compartir un lugar</h3>
-      <ol class="dc-steps" style="max-width:62ch">
-        <li><span>Desde la tarjeta de cualquier lugar, usá la opción de compartir.</span></li>
-        <li><span>Se arma un link directo a ese lugar puntual, no a la guía en general.</span></li>
-        <li><span>Mandalo por el canal que prefieras: quien lo reciba entra directo a esa ficha.</span></li>
-      </ol>
-
-      <h3 class="dc-subhead">¿Favoritos o Historial?</h3>
-      <div class="dc-compare">
-        <div class="dc-compare-col dc-compare-col--accent">
-          <h4>❤️ Favoritos</h4>
-          <ul>
-            <li>Lo elegís vos, a propósito, tocando el ícono en la tarjeta.</li>
-            <li>Pensado para lugares que ya sabés que querés volver a ver.</li>
-            <li>No se llena solo: si no lo guardaste, no aparece ahí.</li>
-          </ul>
-        </div>
-        <div class="dc-compare-col">
-          <h4>📜 Historial</h4>
-          <ul>
-            <li>Se arma automáticamente con todo lo que abriste.</li>
-            <li>Pensado para retomar algo que viste pero no llegaste a guardar.</li>
-            <li>Útil como "red de contención" cuando te olvidás de marcar favoritos.</li>
-          </ul>
-        </div>
-      </div>
-      <div class="dc-callout dc-callout--tip">
-        <span class="dc-callout-ico" aria-hidden="true">💡</span>
-        <div class="dc-callout-body">
-          <span class="dc-callout-label">Tip</span>
-          <p>Si dudás si algo te gustó lo suficiente como para guardarlo, no pasa nada: siempre queda registrado en Historial y podés decidir más tarde.</p>
-        </div>
-      </div>
-
-      <nav class="dc-intro-actions" aria-label="Seguir navegando">
-        <a class="dc-chip dc-chip--primary" href="#mapa">Ir al mapa</a>
-        <a class="dc-chip" href="#explorar-recomendaciones">Ver Favoritos e Historial en Explorar</a>
-        <a class="dc-chip" href="#donde-comer-guia">Volver a la guía de dónde comer</a>
-        <a class="dc-chip" href="#categorias-detalle">Categorías en detalle</a>
-      </nav>
-    </section>
-
-    <div class="sec-title reveal" id="categorias-detalle">
-      <h2>Categorías en detalle</h2>
-      <p class="dc-intro-copy dc-intro-copy--wide" style="margin-top:.5rem">
-        Cada categoría de la ciudad tiene su propia ficha con subcategorías y
-        lugares agrupados. Si ya sabés qué estás buscando, saltá directo:
-      </p>
-      <nav class="dc-intro-actions" aria-label="Ir directo a una categoría" style="margin-bottom:1rem">
-        <a class="dc-chip" href="#mapa" data-filtro="gastronomia">🍽️ Gastronomía</a>
-        <a class="dc-chip" href="#mapa" data-filtro="patrimonio">🏛️ Patrimonio</a>
-        <a class="dc-chip" href="#mapa" data-filtro="naturaleza">🌳 Naturaleza</a>
-        <a class="dc-chip" href="#mapa" data-filtro="alojamiento">🛏️ Alojamiento</a>
-        <a class="dc-chip" href="#mapa" data-filtro="servicios_publicos">🏥 Servicios</a>
-      </nav>
-      <div class="dc-callout dc-callout--info" style="margin-top:0">
-        <span class="dc-callout-ico" aria-hidden="true">🗂️</span>
-        <div class="dc-callout-body">
-          <span class="dc-callout-label">Cómo leer esta sección</span>
-          <p>Cada categoría se abre en su propia ficha con subcategorías agrupadas. Si tocás cualquiera de los chips de arriba, te lleva directo al mapa ya filtrado por esa categoría en particular.</p>
-        </div>
+      <div class="reveal">
+        <h4><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#9A5A44" stroke-width="1.6"><path d="M4 4l8 8M12 4l-8 8"/></svg>Errores comunes al elegir</h4>
+        <ul>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="#9A5A44" stroke-width="1.8"><path d="M4 4l8 8M12 4l-8 8"/></svg><span>Elegir por el primer nombre que reconocés, en vez de comparar rating y cocina.</span></li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="#9A5A44" stroke-width="1.8"><path d="M4 4l8 8M12 4l-8 8"/></svg><span>Definir el lugar antes de confirmar el presupuesto del grupo.</span></li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="#9A5A44" stroke-width="1.8"><path d="M4 4l8 8M12 4l-8 8"/></svg><span>Ignorar los recién agregados y repetir siempre lo mismo.</span></li>
+        </ul>
       </div>
     </div>
-    <div id="cd-wrap-container" class="cd-wrap" style="content-visibility:auto;contain-intrinsic-size:0 1200px;"></div>
+  </div>
+</section>
 
-    <div id="seo-mount" style="content-visibility:auto;contain-intrinsic-size:0 800px;"></div>
+<section>
+  <div class="container">
+    <div class="s-head reveal" style="margin:0 auto 60px; text-align:center;">
+      <p class="eyebrow" style="text-align:center;">Búsqueda instantánea</p>
+      <h2>Escribís, y el mapa ya lo sabe.</h2>
+      <p style="margin:0 auto;">El spotlight sincroniza cada letra con los resultados, sin recargar nada.</p>
+    </div>
+    <div class="search-demo reveal">
+      <div class="sd-input"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/></svg><span id="typed"></span></div>
+      <div class="sd-hint">Escribí y los resultados se sincronizan con el mapa</div>
+      <div id="results"></div>
+    </div>
+  </div>
+</section>
 
-    <section class="us-section" id="accesibilidad" aria-labelledby="title-accesibilidad" style="content-visibility:auto;contain-intrinsic-size:0 1300px;">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">Para todos</span>
-          <h2 class="section-title" id="title-accesibilidad">Accesibilidad en URU SPOT</h2>
+<section id="ayuda" style="background:var(--sunken);">
+  <div class="container">
+    <div class="help-grid">
+      <div>
+        <div class="s-head reveal" style="margin-bottom:36px;">
+          <p class="eyebrow">Preguntas frecuentes</p>
+          <h2>Lo esencial, sin fricción.</h2>
         </div>
-      </div>
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        Una guía de ciudad tiene que poder usarse sin importar cómo navegues la web. Estas son
-        las decisiones concretas de este sitio pensadas para eso, no una declaración de
-        intenciones genérica.
-      </p>
-
-      <div class="dc-grid" role="list" aria-label="Características de accesibilidad">
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">⏭️</span>
-          <h3>Enlaces de salto</h3>
-          <p>Dos "skip links" al principio del documento permiten ir directo al contenido principal o a la guía de dónde comer sin atravesar todo el header.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">⌨️</span>
-          <h3>Navegación por teclado</h3>
-          <p>Botones, chips y preguntas frecuentes tienen estados de foco visibles (<code>focus-visible</code>), pensados para quien navega sin mouse.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">🗣️</span>
-          <h3>Etiquetas para lectores de pantalla</h3>
-          <p>Header, drawer, spotlight, bottom nav y barra del mapa tienen <code>aria-label</code> descriptivos en cada botón o región interactiva.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">🪟</span>
-          <h3>Diálogos correctamente anunciados</h3>
-          <p>El menú lateral y el buscador se marcan como <code>role="dialog"</code> con <code>aria-modal="true"</code>, para que un lector de pantalla anuncie el cambio de contexto.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">📢</span>
-          <h3>Regiones que avisan cambios</h3>
-          <p>Los filtros activos del mapa usan <code>aria-live="polite"</code>, para que se anuncien los cambios sin interrumpir lo que estabas escuchando.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">🎞️</span>
-          <h3>Respeta el movimiento reducido</h3>
-          <p>Si tu sistema tiene activado "reducir movimiento", las transiciones de chips y acordeones se desactivan automáticamente.</p>
-        </article>
-      </div>
-
-      <h3 class="dc-subhead">Navegar todo el sitio solo con teclado</h3>
-      <ul class="dc-checklist">
-        <li>Usá <kbd>Tab</kbd> para moverte entre el skip-link, el header, y el contenido principal en orden.</li>
-        <li>Los <em>chips</em> de navegación interna (como los de esta sección) son enlaces normales: se activan con <kbd>Enter</kbd>.</li>
-        <li>Las preguntas frecuentes son elementos <code>&lt;details&gt;</code> nativos: se abren y cierran con <kbd>Enter</kbd> o <kbd>Espacio</kbd> estando enfocadas.</li>
-        <li>El menú lateral y el buscador se pueden cerrar sin usar mouse, al ser diálogos nativos del navegador vía ARIA.</li>
-      </ul>
-
-      <div class="dc-mini-faq">
-        <details>
-          <summary>¿El sitio funciona con lector de pantalla?</summary>
-          <p>Sí, los componentes interactivos principales (header, drawer, spotlight, mapa) tienen roles y etiquetas ARIA declaradas para que un lector de pantalla los identifique correctamente.</p>
-        </details>
-        <details>
-          <summary>¿Puedo usar el sitio con zoom alto del navegador?</summary>
-          <p>El diseño usa unidades relativas y <code>clamp()</code> en la mayoría de los tamaños de texto, lo que ayuda a que el contenido se adapte razonablemente al hacer zoom.</p>
-        </details>
-      </div>
-
-      <nav class="dc-intro-actions" aria-label="Seguir explorando">
-        <a class="dc-chip dc-chip--primary" href="#centro-ayuda">Ir al Centro de ayuda ↓</a>
-        <a class="dc-chip" href="#hero" data-scroll="hero">Volver al inicio</a>
-      </nav>
-    </section>
-
-    <section class="us-section" id="centro-ayuda" aria-labelledby="title-centro-ayuda" style="content-visibility:auto;contain-intrinsic-size:0 700px;">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">¿No encontrás algo?</span>
-          <h2 class="section-title" id="title-centro-ayuda">Centro de ayuda</h2>
-        </div>
-      </div>
-      <p class="dc-intro-copy dc-intro-copy--wide">
-        Esta guía tiene preguntas frecuentes y glosarios repartidos por distintas secciones,
-        cada uno enfocado en su propio tema. Este es el índice que los junta a todos en un
-        solo lugar.
-      </p>
-
-      <ol class="dc-index" aria-label="Índice de temas de ayuda">
-        <li><a href="#mapa"><span class="dc-index-n">01</span><span class="dc-index-body"><strong>Cómo usar el mapa</strong>Microguía de 5 pasos, panel antes/después y glosario de la leyenda.</span></a></li>
-        <li><a href="#guia-orden-resultados"><span class="dc-index-n">02</span><span class="dc-index-body"><strong>Cómo ordenar resultados</strong>Diferencia entre relevancia, cercanía, recomendados y recién agregados.</span></a></li>
-        <li><a href="#donde-comer-guia"><span class="dc-index-n">03</span><span class="dc-index-body"><strong>Dónde comer</strong>FAQ gastronómica, glosario de carta y checklists antes/después de salir.</span></a></li>
-        <li><a href="#recorridos-tematicos"><span class="dc-index-n">04</span><span class="dc-index-body"><strong>Recorridos y Planner</strong>Qué son, en qué se diferencian y cómo empezar cada uno.</span></a></li>
-        <li><a href="#guardar-volver-compartir"><span class="dc-index-n">05</span><span class="dc-index-body"><strong>Favoritos, historial y compartir</strong>Guía paso a paso de las tres funciones.</span></a></li>
-        <li><a href="#accesibilidad"><span class="dc-index-n">06</span><span class="dc-index-body"><strong>Accesibilidad</strong>Navegación por teclado, lectores de pantalla y movimiento reducido.</span></a></li>
-        <li><a href="#sobre-uruspot"><span class="dc-index-n">07</span><span class="dc-index-body"><strong>Sobre el sitio en general</strong>Qué es URU SPOT y glosario de términos propios.</span></a></li>
-      </ol>
-
-      <div class="dc-callout dc-callout--info">
-        <span class="dc-callout-ico" aria-hidden="true">🔎</span>
-        <div class="dc-callout-body">
-          <span class="dc-callout-label">Tip</span>
-          <p>Si buscás algo puntual, probá con el spotlight del header (lupa): además de lugares, es el atajo más rápido para no tener que recorrer toda la guía a mano.</p>
-        </div>
-      </div>
-
-      <nav class="dc-intro-actions" aria-label="Seguir explorando">
-        <a class="dc-chip dc-chip--primary" href="#sobre-uruspot">Sobre URU SPOT ↓</a>
-        <a class="dc-chip" href="#hero" data-scroll="hero">Volver al inicio</a>
-      </nav>
-    </section>
-
-    <section class="us-section" id="sobre-uruspot" aria-labelledby="title-sobre-uruspot" style="content-visibility:auto;contain-intrinsic-size:0 2400px;">
-      <div class="section-header">
-        <div>
-          <span class="section-eyebrow">Sobre el sitio</span>
-          <h2 class="section-title" id="title-sobre-uruspot">Sobre URU SPOT</h2>
-        </div>
-      </div>
-
-      <div class="dc-cols">
-        <div>
-          <p class="dc-intro-copy" style="max-width:66ch">
-            URU SPOT es una guía de Concepción del Uruguay organizada por categorías
-            —gastronomía, patrimonio, naturaleza, alojamiento y servicios— pensada
-            para explorar la ciudad desde el mapa, con filtros, orden, búsqueda y
-            favoritos.
-          </p>
-          <h3 class="dc-subhead">Lo que vas a encontrar</h3>
-          <ul class="dc-list">
-            <li>Un mapa interactivo con todos los lugares agrupados por categoría y subcategoría.</li>
-            <li>Colecciones curadas en Explorar: presupuesto, ocasión, tiempo disponible y momento del año.</li>
-            <li>Búsqueda instantánea desde el header o desde el propio mapa.</li>
-            <li>Favoritos e historial para volver rápido a lo que ya viste.</li>
-            <li>Una guía específica para la parte gastronómica de la ciudad.</li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="dc-subhead">Preguntas frecuentes sobre el sitio</h3>
-          <div class="dc-faq">
-            <details>
-              <summary>¿Qué es URU SPOT?</summary>
-              <p class="dc-faq-a">Es una guía de Concepción del Uruguay que organiza la ciudad en categorías —gastronomía, patrimonio, naturaleza, alojamiento y servicios— con mapa interactivo, filtros y buscador.</p>
-            </details>
-            <details>
-              <summary>¿Cómo está organizada la información?</summary>
-              <p class="dc-faq-a">Cada lugar pertenece a una categoría y puede tener subcategorías. Desde el mapa se puede filtrar, ordenar, buscar por nombre y cambiar entre vista de mapa o de lista.</p>
-            </details>
-            <details>
-              <summary>¿Los lugares que aparecen están verificados?</summary>
-              <p class="dc-faq-a">Sí, el contador de resultados del mapa indica explícitamente "Datos verificados" sobre el total de lugares mostrados.</p>
-            </details>
-            <details>
-              <summary>¿Puedo guardar lugares para volver a verlos después?</summary>
-              <p class="dc-faq-a">Sí, cualquier lugar se puede marcar como favorito desde su tarjeta y después se encuentra agrupado en Favoritos, accesible desde la barra inferior o el menú lateral.</p>
-            </details>
-            <details>
-              <summary>¿URU SPOT funciona bien desde el celular?</summary>
-              <p class="dc-faq-a">Sí, el sitio tiene un diseño responsive con una barra de navegación inferior pensada específicamente para uso mobile.</p>
-            </details>
-            <details>
-              <summary>¿Qué diferencia hay entre Favoritos e Historial?</summary>
-              <p class="dc-faq-a">Favoritos es lo que guardás a propósito desde la tarjeta de un lugar. Historial se arma solo, con todo lo que ya abriste, para que puedas retomarlo sin buscarlo de nuevo.</p>
-            </details>
-            <details>
-              <summary>¿Puedo compartir un lugar puntual con alguien?</summary>
-              <p class="dc-faq-a">Sí, cada lugar tiene su propia opción de compartir desde la tarjeta, que arma un link directo a esa ficha en particular, no a la guía en general.</p>
-            </details>
-            <details>
-              <summary>¿Puedo elegir según cuánto tiempo tengo disponible?</summary>
-              <p class="dc-faq-a">Sí, el centro de recomendaciones (Explorar) tiene colecciones armadas por tiempo disponible —30 minutos, 1 hora, 2 horas, tarde o día completo— además de por clima y momento.</p>
-            </details>
-            <details>
-              <summary>¿Qué son los Recorridos?</summary>
-              <p class="dc-faq-a">Son itinerarios temáticos ya armados, accesibles desde el menú lateral, pensados para visitar varios lugares en un orden sugerido sin tener que planificarlo desde cero.</p>
-            </details>
-            <details>
-              <summary>¿Para qué sirve el Planner?</summary>
-              <p class="dc-faq-a">El botón flotante abre un planificador rápido para armar un plan corto al instante, sin necesidad de pasar primero por el mapa completo ni por todos los filtros.</p>
-            </details>
-            <details>
-              <summary>¿El sitio es accesible con lector de pantalla o teclado?</summary>
-              <p class="dc-faq-a">Sí, cuenta con enlaces de salto (skip links), etiquetas aria-label en los controles principales, diálogos anunciados correctamente (role dialog) y soporte para movimiento reducido.</p>
-            </details>
-            <details>
-              <summary>¿Cómo elijo el orden correcto de los resultados en el mapa?</summary>
-              <p class="dc-faq-a">Depende de tu prioridad: usá "Más cerca" si te importa la distancia, "Más recomendados" si preferís calidad, o "Recién agregados" si ya conocés lo de siempre y buscás algo nuevo.</p>
-            </details>
+        <div class="reveal">
+          <div class="faq-item open">
+            <button class="faq-q"><p>¿Qué diferencia hay entre Favoritos e Historial?</p><span class="faq-plus"></span></button>
+            <div class="faq-a"><p>Favoritos son los lugares que marcás vos a propósito. Historial se arma solo, con todo lo que abriste o visitaste, ordenado por fecha.</p></div>
           </div>
-
-          <h3 class="dc-subhead u-mt-lg">Glosario rápido de URU SPOT</h3>
-          <dl class="dc-glossary">
-            <div><dt>Spotlight</dt><dd>El buscador flotante que se abre desde la lupa del header.</dd></div>
-            <div><dt>Drawer</dt><dd>El menú lateral, con acceso a Favoritos, Historial, Recorridos y Planner.</dd></div>
-            <div><dt>Rieles</dt><dd>Los carruseles horizontales curados (más populares, mejor puntuados, etc.).</dd></div>
-            <div><dt>Colecciones</dt><dd>Los grupos temáticos de Explorar, armados por presupuesto, ocasión, tiempo o clima.</dd></div>
-            <div><dt>Subcategoría</dt><dd>Un nivel más específico dentro de cada categoría, para afinar la búsqueda.</dd></div>
-            <div><dt>Bottom nav</dt><dd>La barra de navegación fija en la parte inferior, pensada para mobile.</dd></div>
-          </dl>
-
-          <h3 class="dc-subhead u-mt-lg">Compartí URU SPOT</h3>
-          <div class="dc-share">
-            <a href="https://wa.me/?text=Descubrí%20URU%20SPOT%2C%20la%20guía%20de%20Concepción%20del%20Uruguay%3A%20https%3A%2F%2Furuspot.pages.dev%2F" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
-            <a href="https://t.me/share/url?url=https%3A%2F%2Furuspot.pages.dev%2F&text=Descubrí%20URU%20SPOT%2C%20la%20guía%20de%20Concepción%20del%20Uruguay" target="_blank" rel="noopener noreferrer">✈️ Telegram</a>
-            <a href="mailto:?subject=URU%20SPOT%20—%20guía%20de%20Concepción%20del%20Uruguay&body=Te%20paso%20esta%20guía%20de%20Concepción%20del%20Uruguay%2C%20está%20buena%3A%20https%3A%2F%2Furuspot.pages.dev%2F">✉️ Email</a>
+          <div class="faq-item">
+            <button class="faq-q"><p>¿Puedo elegir según cuánto tiempo tengo disponible?</p><span class="faq-plus"></span></button>
+            <div class="faq-a"><p>Sí. Las colecciones de Explorar se filtran por tiempo disponible y por clima o momento del día, para cruzar ambos ejes.</p></div>
           </div>
-
-          <nav class="dc-intro-actions" aria-label="Volver a otras secciones">
-            <a class="dc-chip dc-chip--primary" href="#hero" data-scroll="hero">↑ Volver arriba</a>
-            <a class="dc-chip" href="#para-quien-es-esta-guia">¿Qué tipo de visita hacés?</a>
-            <a class="dc-chip" href="#explorar-recomendaciones">Explorar recomendaciones</a>
-            <a class="dc-chip" href="#mapa">Ver el mapa</a>
-            <a class="dc-chip" href="#guia-orden-resultados">Cómo ordenar resultados</a>
-            <a class="dc-chip" href="#donde-comer-guia">Guía: dónde comer</a>
-            <a class="dc-chip" href="#recorridos-tematicos">Recorridos temáticos</a>
-            <a class="dc-chip" href="#planner-guia">Planificador rápido</a>
-            <a class="dc-chip" href="#guardar-volver-compartir">Favoritos, historial y compartir</a>
-            <a class="dc-chip" href="#accesibilidad">Accesibilidad</a>
-            <a class="dc-chip" href="#centro-ayuda">Centro de ayuda</a>
-          </nav>
+          <div class="faq-item">
+            <button class="faq-q"><p>¿Qué son los Recorridos?</p><span class="faq-plus"></span></button>
+            <div class="faq-a"><p>Secuencias de paradas pensadas para un tema o una zona, con tiempos estimados entre lugar y lugar.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q"><p>¿El sitio es accesible con lector de pantalla o teclado?</p><span class="faq-plus"></span></button>
+            <div class="faq-a"><p>Sí, toda la navegación principal y los filtros son operables con teclado y compatibles con lectores de pantalla.</p></div>
+          </div>
         </div>
       </div>
-
-      <div class="dc-divider" role="separator"><span>Fin de la guía · pero la ciudad sigue</span></div>
-      <div class="dc-panel">
-        <div class="dc-panel-head"><span aria-hidden="true">🧭</span><strong>¿Por dónde seguís?</strong></div>
-        <div class="dc-panel-grid">
-          <div class="dc-panel-item"><strong>Tenés poco tiempo</strong>Andá directo a <a href="#mapa">Cerca de mí</a> en el mapa.</div>
-          <div class="dc-panel-item"><strong>Querés comer algo</strong>Volvé a la <a href="#donde-comer-guia">guía gastronómica</a>.</div>
-          <div class="dc-panel-item"><strong>Ya viste todo esto antes</strong>Revisá tu <a href="#guardar-volver-compartir">Historial</a> para retomar donde quedaste.</div>
-          <div class="dc-panel-item"><strong>Querés recomendar el sitio</strong>Usá cualquiera de los botones de compartir de esta página.</div>
+      <div>
+        <div class="s-head reveal" style="margin-bottom:36px;">
+          <p class="eyebrow">Glosario</p>
+          <h2 style="font-size:22px;">Vocabulario de URU SPOT</h2>
         </div>
+        <dl class="reveal">
+          <div class="gloss-item"><dt>Spotlight</dt><dd>El buscador flotante que se abre desde la lupa del header.</dd></div>
+          <div class="gloss-item"><dt>Rieles</dt><dd>Los carruseles curados — más populares, mejor puntuados.</dd></div>
+          <div class="gloss-item"><dt>Colecciones</dt><dd>Grupos temáticos armados por presupuesto, ocasión, tiempo o clima.</dd></div>
+          <div class="gloss-item"><dt>Bottom nav</dt><dd>La barra fija en la parte inferior, pensada para el celular.</dd></div>
+        </dl>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-  </main>
+<footer>
+  <div class="container">
+    <p class="foot-statement">La ciudad no cambió. Cambió la forma en que la recorrés.</p>
+    <div class="foot-bottom">
+      <span>URU SPOT — Concepción del Uruguay, Entre Ríos</span>
+      <div class="foot-social"><span>WhatsApp</span><span>Telegram</span><span>Email</span></div>
+    </div>
+  </div>
+</footer>
 
-  <footer id="site-footer" style="content-visibility:auto;contain-intrinsic-size:0 400px;">
-    <p class="footer-quote">"El mejor lugar es el que no sabías que estaba ahí."</p>
-    <div class="footer-logo">URU SPOT</div>
-    <div class="footer-sub">Guía de Concepción del Uruguay · Entre Ríos · Argentina</div>
-    <nav class="footer-links" aria-label="Navegación del sitio">
-      <a href="#hero" data-scroll="hero">Inicio</a>
-      <a href="#por-que-uruspot">Por qué usarlo</a>
-      <a href="#explorar-ciudad">Cómo explorar</a>
-      <a href="#para-quien-es-esta-guia">Según tu visita</a>
-      <a href="#explorar-recomendaciones">Recomendaciones</a>
-      <a href="#segun-tiempo-y-momento">Según tiempo o momento</a>
-      <a href="#mapa">El mapa</a>
-      <a href="#guia-orden-resultados">Cómo ordenar resultados</a>
-      <a href="#donde-comer-guia">Guía: dónde comer</a>
-      <a href="#recorridos-tematicos">Recorridos temáticos</a>
-      <a href="#planner-guia">Planificador rápido</a>
-      <a href="#guardar-volver-compartir">Favoritos y compartir</a>
-      <a href="#categorias-detalle">Categorías en detalle</a>
-      <a href="#accesibilidad">Accesibilidad</a>
-      <a href="#centro-ayuda">Centro de ayuda</a>
-      <a href="#sobre-uruspot">Sobre el sitio</a>
-    </nav>
-    <nav class="footer-links" aria-label="Categorías del sitio">
-      <a class="footer-filtro" data-filtro="gastronomia" href="#mapa">Gastronomía</a>
-      <a class="footer-filtro" data-filtro="patrimonio" href="#mapa">Patrimonio</a>
-      <a class="footer-filtro" data-filtro="naturaleza" href="#mapa">Naturaleza</a>
-      <a class="footer-filtro" data-filtro="alojamiento" href="#mapa">Alojamiento</a>
-      <a class="footer-filtro" data-filtro="servicios_publicos" href="#mapa">Servicios</a>
-    </nav>
-  </footer>
+<script>
+  // scroll progress + nav solidify
+  const progress = document.getElementById('progress');
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+    nav.classList.toggle('solid', h.scrollTop > 40);
+  });
 
+  // reveal on scroll
+  const items = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  items.forEach(i => io.observe(i));
+
+  // stat counters
+  const stats = document.querySelectorAll('.stat-num');
+  const sio = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target; const target = parseInt(el.dataset.count, 10); let cur = 0;
+        const step = Math.max(1, Math.round(target / 40));
+        const t = setInterval(() => { cur += step; if (cur >= target) { cur = target; clearInterval(t); } el.textContent = cur.toLocaleString('es-AR'); }, 24);
+        sio.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  stats.forEach(s => sio.observe(s));
+
+  // faq accordion
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.parentElement;
+      const wasOpen = item.classList.contains('open');
+      item.parentElement.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // typing search demo
+  const queries = ['kinesiolog', 'parrilla costanera', 'museo centro'];
+  const resultsData = {
+    'kinesiolog': [['R','RENAPER CDR Concepción del Uruguay','Servicios públicos','5.0'],['K','Centro de Kinesiología y Pilates','Salud','5.0'],['I','Instituto de Kinesiología y Fisiatría','Salud','5.0']],
+    'parrilla costanera': [['P','Parrilla del Puerto','Gastronomía','4.9'],['E','El Fogón de la Costa','Gastronomía','4.8']],
+    'museo centro': [['M','Museo Casa de Delio Panizza','Patrimonio','4.8'],['B','Basílica Inmaculada Concepción','Patrimonio','4.9']]
+  };
+  const typedEl = document.getElementById('typed');
+  const resultsEl = document.getElementById('results');
+  let qi = 0, ci = 0, deleting = false;
+  function renderResults(query){
+    const rows = resultsData[query] || [];
+    resultsEl.innerHTML = rows.map(r => `<div class="sd-row"><div class="rb">${r[0]}</div><div><p>${r[1]}</p><span>${r[2]}</span></div><div class="rstar">★ ${r[3]}</div></div>`).join('');
+  }
+  function tick(){
+    const q = queries[qi];
+    if(!deleting){
+      ci++; typedEl.textContent = q.slice(0, ci); renderResults(q.slice(0,ci));
+      if(ci === q.length){ deleting = true; setTimeout(tick, 1600); return; }
+    } else {
+      ci--; typedEl.textContent = q.slice(0, ci); renderResults(q.slice(0,ci));
+      if(ci === 0){ deleting = false; qi = (qi+1) % queries.length; }
+    }
+    setTimeout(tick, deleting ? 40 : 70);
+  }
+  tick();
+</script>
 </body>
 </html>
