@@ -2151,19 +2151,40 @@
       });
     }
     if (!items.length) return;
-    
-    // [OPTIMIZACIÓN] Cachear offsetTop una sola vez en inicialización
-    var targetData = Array.prototype.map.call(items, function (a) {
-      var target = document.querySelector(a.getAttribute('href'));
-      return { element: a, offsetTop: target ? target.offsetTop : 0 };
-    });
 
-    // [OPTIMIZACIÓN] targetData/items no cambian de tamaño después de este
-    // punto: se cachean sus longitudes acá afuera en vez de releer
-    // targetData.length/items.length en cada evento de scroll (que puede
-    // dispararse decenas de veces por segundo).
-    var targetDataLen = targetData.length;
+    // [OPTIMIZACIÓN] Se sigue cacheando offsetTop en vez de leerlo en cada
+    // scroll (siempre fue el costo real a evitar: decenas de reflows por
+    // segundo). items.length tampoco cambia nunca, así que itemsLen queda
+    // fijo — solo targetData (y su .length) se recalculan cuando el layout
+    // puede haber cambiado de verdad.
     var itemsLen = items.length;
+    var targetData = [];
+    var targetDataLen = 0;
+
+    function recalcularTargets() {
+      targetData = Array.prototype.map.call(items, function (a) {
+        var target = document.querySelector(a.getAttribute('href'));
+        return { element: a, offsetTop: target ? target.offsetTop : 0 };
+      });
+      targetDataLen = targetData.length;
+    }
+    recalcularTargets();
+
+    // [FIX — auditoría continua] El cacheo de offsetTop de arriba asumía
+    // implícitamente que el layout ya estaba "quieto" en ese instante, pero
+    // dos cosas lo pueden mover después sin que nada lo recalculara:
+    // (1) las fuentes web (Fraunces/Outfit/Inter) usan display=swap —el
+    //     texto puede re-flowear cuando la fuente real reemplaza al
+    //     fallback, cambiando el offsetTop de todo lo que esté debajo—, y
+    // (2) cualquier resize real (girar el celular, mostrar/ocultar el
+    //     teclado virtual, redimensionar la ventana en desktop).
+    // Sin este recálculo, el ítem "activo" de la barra inferior podía
+    // quedar desincronizado del scroll real después de cualquiera de los
+    // dos casos, indefinidamente, hasta recargar la página.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(recalcularTargets).catch(function () {});
+    }
+    window.addEventListener('resize', utils.debounce(recalcularTargets, 200), { passive: true });
 
     window.addEventListener('scroll', function () {
       var pos = window.scrollY + 120;
