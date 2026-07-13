@@ -136,7 +136,14 @@
       mapCenter: [-32.4836, -58.2335],
       mapZoom: 13,
       tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      tileAttribution: '&copy; OpenStreetMap &copy; CARTO'
+      tileAttribution: '&copy; OpenStreetMap &copy; CARTO',
+      // [ARQUITECTURA — pasada "conectar el motor", 13/07/2026] index.html
+      // ya trae su propio reveal-on-scroll y su propio scroll suave para
+      // anclas internas en su <script> inline (intro/progreso/FAQ) — ver
+      // la nota junto a este flag en core-engine.js/UruSpotCore.init().
+      // Sin esto, el motor agregaría una segunda implementación de ambas
+      // cosas, funcionalmente redundante.
+      paginaConScrollPropio: true
     });
   }
 
