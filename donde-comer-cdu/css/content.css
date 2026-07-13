@@ -45,36 +45,80 @@
     animation: us-spin .8s linear infinite;
   }
   @keyframes us-spin { to { transform: rotate(360deg); } }
-  /* Oculto a propósito: no hay evidencia en este archivo de qué markup
-     lo usa ni de que algo lo necesite visible. No se elimina sin poder
-     confirmar contra index.html que nada lo referencia; ver nota al
-     final de la auditoría. */
+  /* [AUDITORÍA — confirmado contra index.html/core-engine.js/content.js]
+     #app-loading-grid existe en el HTML (dentro de #app-loading) pero
+     ningún script de este proyecto lo lee, lo llena ni lo togglea: no es
+     parte del contrato de datos de ningún módulo. Se mantiene oculto
+     porque no hay ninguna razón visual para mostrar un contenedor vacío
+     durante la carga; no se elimina la clase ni el nodo porque tocar el
+     HTML está fuera del alcance de esta auditoría (content.css). */
   .us-app-loading-grid { display: none; }
 
-  /* ═══════════ SCRIM (backdrop compartido) ═══════════ */
+  /* ═══════════ SCRIM (backdrop compartido) ═══════════
+     [FIX — CAPA 4/5, cierre roto] Antes `.us-scrim[hidden]{display:none}`
+     apagaba el elemento de golpe apenas el motor agregaba el atributo
+     `hidden` para cerrar: la transición de `opacity` (.25s) quedaba
+     declarada pero nunca llegaba a verse en el cierre, porque `display:none`
+     saca el elemento del árbol de render en el mismo frame, antes de que la
+     animación tuviera chance de correr (sí se veía al ABRIR, porque ahí
+     display pasa a visible de entrada — el bug era unidireccional).
+     Se reemplaza `display` por `visibility` en la transición: es la misma
+     técnica que ya usa `.us-app-loading` dos bloques más abajo en este
+     mismo archivo (mismo criterio en todo el sistema, no una excepción),
+     y aprovecha una regla del spec de CSS que ya resuelve esto sin timings
+     a mano: cuando `visibility` está en la lista de `transition` y el
+     valor final es `hidden`, el navegador demora el cambio real hasta que
+     termina la duración (se ve el fade completo); cuando el valor final es
+     `visible`, se aplica de entrada (se ve instantáneo al abrir, como debe
+     ser). display:block explícito es necesario para pisar el `display:none`
+     que el navegador aplica por su cuenta a cualquier `[hidden]` (si no,
+     volveríamos exactamente al mismo problema por otra vía). */
   .us-scrim {
     position: fixed; inset: 0; z-index: var(--z-overlay);
     background: rgba(10, 20, 22, .55); backdrop-filter: blur(2px);
-    opacity: 0; transition: opacity .25s ease;
+    opacity: 0; visibility: hidden;
+    transition: opacity .25s ease, visibility .25s ease;
     contain: layout style;
   }
-  .us-scrim[hidden] { display: none; }
-  .us-scrim:not([hidden]) { opacity: 1; }
+  .us-scrim[hidden] { display: block; }
+  .us-scrim:not([hidden]) { opacity: 1; visibility: visible; }
   /* [FIX] Bloquea el scroll de fondo mientras hay un overlay abierto
      (drawer). Antes no existía: el body scrolleaba detrás. */
   body.no-scroll { overflow: hidden; }
 
   /* ═══════════ APP HEADER ═══════════ */
+  /* [FIX — CAPA 3/10, transición muerta] El header ya declaraba
+     `transition: border-color, box-shadow, padding` para reaccionar a un
+     estado "compacto" al scrollear — index.html documenta explícitamente
+     el contrato (`data-state="top"|"compact"`, togglea el motor Core) —
+     pero ninguna regla llegaba a cambiar esos tres valores: la transición
+     corría siempre hacia el mismo destino, sin ningún efecto visible.
+     Encima `padding` estaba declarado sobre `.us-app-header`, que nunca
+     tuvo padding propio (vive en `.us-app-header-inner`) — un property que
+     ni transicionaba porque no existía en ese elemento. Se completa el
+     estado que faltaba (compacto = borde/sombra más presentes, header más
+     bajo) y se mueve la transición de padding al elemento que realmente lo
+     tiene. 100% aditivo: si el motor nunca setea data-state="compact",
+     esto queda inerte — no cambia nada del comportamiento actual, sólo dej
+     el sistema listo para el estado que el propio HTML ya promete. */
   .us-app-header {
     position: sticky; top: 0; z-index: var(--z-nav);
     background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
     backdrop-filter: blur(10px); border-bottom: 1px solid transparent;
-    transition: border-color .25s ease, box-shadow .25s ease, padding .25s ease;
+    transition: border-color .25s ease, box-shadow .25s ease;
     contain: layout style;
+  }
+  .us-app-header[data-state="compact"] {
+    border-bottom-color: var(--border);
+    box-shadow: var(--shadow-sm);
   }
   .us-app-header-inner {
     display: flex; align-items: center; gap: .75rem;
     max-width: 75rem; margin: 0 auto; padding: .75rem 1.25rem;
+    transition: padding .25s ease;
+  }
+  .us-app-header[data-state="compact"] .us-app-header-inner {
+    padding-block: .5rem;
   }
   .us-app-brand {
     display: flex; align-items: center; gap: .5rem; text-decoration: none;
@@ -118,7 +162,19 @@
 
   /* ═══════════ BOTTOM NAV — piezas que faltaban ═══════════ */
   .bn-label { font-size: .625rem; font-weight: 500; }
-  .bn-search .bn-icon { background: var(--sunset); border-radius: 50%; }
+  /* [FIX — CAPA 3, ícono invisible] core.css fija `.bn-icon{opacity:.18}`
+     como base y solo lo sube a `.9` para `.bn-item.is-active` (el ítem de
+     la sección que está en pantalla). #bn-buscar es un <button>, no un
+     link de sección — initBottomNav() en core-engine.js solo togglea
+     `is-active` sobre `.bn-item[href]`, así que este ítem nunca entra en
+     ese grupo y su ícono queda fijo en opacity:.18 para siempre. Resultado
+     medido: var(--sunset) al 18% sobre el fondo blanco de la bottom-nav
+     da un tono casi idéntico al fondo (#fbe6de) — el círculo de marca que
+     este mismo selector ya pinta de --sunset quedaba, en la práctica,
+     invisible. Se sube la opacidad al mismo valor que el sistema ya usa
+     para "ítem con énfasis" (.is-active), coherente con el resto del
+     lenguaje visual, en vez de inventar un tratamiento nuevo. */
+  .bn-search .bn-icon { background: var(--sunset); border-radius: 50%; opacity: .9; }
 
   /* ═══════════ FAB ═══════════ */
   .us-fab {
@@ -150,6 +206,11 @@
   .spotlight-suggestions, .spotlight-results {
     display: flex; flex-direction: column; gap: .25rem; overflow-y: auto; margin-top: .75rem;
     overscroll-behavior: contain;
+    /* [CAPA 9] Se reconstruyen por completo (innerHTML) en cada tecla
+       debounceada del buscador (ver initSpotlightSearch en core-engine.js);
+       aislar layout/style acá evita que ese repintado obligue a recalcular
+       el resto del overlay del spotlight en cada tecleo. */
+    contain: layout style;
   }
   .spotlight-empty {
     padding: 2rem 1rem; text-align: center; color: var(--muted); font-size: .9rem;
@@ -177,11 +238,26 @@
   .spotlight-item-cat { font-size: .8rem; color: var(--muted); }
 
   /* ═══════════ DRAWER ═══════════ */
+  /* [FIX — CAPA 4/5, cierre roto] Mismo bug de fondo que el scrim de arriba,
+     variante distinta: acá `display:flex` ya estaba correctamente pisado
+     (por eso el drawer SÍ se veía al abrir/cerrar en vez de desaparecer de
+     golpe), pero `visibility` no formaba parte de la lista de `transition`
+     — solo se leía su valor final en `.us-drawer[hidden]`, así que
+     cambiaba de estado en el mismo instante que se agregaba el atributo
+     `hidden`, antes de que el `transform` (.3s) alcanzara a deslizar el
+     panel fuera de pantalla: se ocultaba (visibility:hidden) mientras
+     todavía estaba a mitad de camino del slide-out, invisible el resto de
+     la animación aunque `transform` siguiera interpolando por detrás.
+     Sumar `visibility` a `transition` activa la misma regla del spec ya
+     aprovechada en `.us-app-loading`/`.us-scrim`: al cerrar (destino
+     `hidden`), el cambio real se demora hasta el final de los .3s —el
+     slide-out completo queda visible—; al abrir (destino `visible`), se
+     aplica de entrada, sin retraso perceptible. */
   .us-drawer {
     position: fixed; top: 0; right: 0; bottom: 0; z-index: calc(var(--z-overlay) + 1);
     width: min(20rem, 85vw); background: var(--bg-panel); box-shadow: var(--shadow-lg);
     display: flex; flex-direction: column; transform: translateX(100%);
-    transition: transform .3s ease;
+    transition: transform .3s ease, visibility .3s ease;
     contain: layout style;
   }
   .us-drawer:not([hidden]) { transform: translateX(0); }
