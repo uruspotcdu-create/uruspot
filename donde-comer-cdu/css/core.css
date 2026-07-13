@@ -278,6 +278,17 @@
       --shadow-xs:0 1px 3px rgba(14,42,61,.06);
       --shadow-sm:0 2px 8px rgba(14,42,61,.08);
       --shadow-md:0 8px 24px rgba(14,42,61,.12);
+      /* [AUDITORÍA v5] --shadow-lg quedó sin ningún consumidor dentro de
+         core.css: era el valor de .spotlight-bar hasta que v4 lo migró a
+         --shadow-xl (ver ese selector, capa componentes) para separar la
+         elevación de "card con hover" de la de "overlay de pantalla
+         completa". No se elimina el token: --root es la superficie
+         pública que Módulo B puede consumir vía var(--shadow-lg) para
+         cualquier card/panel editorial propio (el header del archivo es
+         explícito en que el contenido vive en JS/config, no en core.css,
+         así que core.css no puede saber si algo lo referencia desde
+         afuera). Queda documentado como paso intermedio de la escala
+         (xs < sm < md < lg < xl), disponible aunque hoy no se use acá.
       --shadow-lg:0 16px 48px rgba(14,42,61,.18);
       --shadow-glow-cta:0 8px 20px -6px rgba(194,85,48,.55);
       --shadow-glow-cta-hover:0 12px 28px -6px rgba(194,85,48,.7);
@@ -621,12 +632,21 @@
        repetir declaraciones en cada uno.
        .cat queda afuera a propósito: es una card (border-radius:var(--radius),
        1rem), no una pill (3.125rem) — geometría distinta, no forma parte de esta familia. */
+    /* [v5] .hero-cta, .mapa-pill y .mapa-subpill comparten exactamente la
+       misma lista de propiedades en transition — se agrega box-shadow acá,
+       en la regla compartida, en vez de que .hero-cta repita la lista
+       completa solo para sumar una propiedad (como pasaba antes: dos
+       declaraciones de `transition` casi idénticas, una pisando a la
+       otra). Transicionar box-shadow no tiene costo para .mapa-pill/
+       .mapa-subpill porque su box-shadow nunca cambia de valor — una
+       transición declarada sobre una propiedad que no varía simplemente
+       no se dispara nunca, cero overhead real. */
     .hero-cta,
     .mapa-pill,
     .mapa-subpill{
       display:inline-flex; align-items:center; justify-content:center;
       border-radius:var(--radius-pill); cursor:pointer;
-      transition:transform var(--transition-fast), filter var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+      transition:transform var(--transition-fast), filter var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-base);
     }
     .hero-cta{
       gap:.4rem;
@@ -639,7 +659,6 @@
          resplandor cálido (color de marca, no gris) le da presencia sin
          agregar un elemento nuevo. */
       box-shadow:var(--shadow-glow-cta);
-      transition:transform var(--transition-fast), filter var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-base);
     }
     .hero-cta:hover{filter:brightness(1.08); transform:translateY(-1px); box-shadow:var(--shadow-glow-cta-hover)}
     /* [NUEVO] :active — en todo el archivo original no existía NINGÚN
@@ -861,7 +880,7 @@
     :where(#mapa) .section-header{ display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.25rem;padding-bottom:1.25rem;gap:1rem;flex-wrap:wrap; max-width:73.75rem; margin-inline:auto; }
     :where(#mapa) .section-eyebrow{ font-family:var(--f-ui-map);font-size:0.6875rem;font-weight:700;letter-spacing:0.21875rem;text-transform:uppercase;color:var(--copper);display:block;margin-bottom:0.5rem }
     :where(#mapa) .section-title{ font-family:var(--f-display-map);font-size:clamp(1.5rem,3.2vw,2.125rem);font-weight:400;color:var(--map-ink);line-height:1;letter-spacing:-0.03125rem }
-    :where(#mapa) .section-count{ font-family:var(--f-ui-map);font-size:0.6875rem;letter-spacing:0.125rem;text-transform:uppercase;color:var(--map-muted); border:1px solid var(--map-line); padding:0.5rem 0.875rem; border-radius:3.125rem; white-space:nowrap; background:var(--map-paper); }
+    :where(#mapa) .section-count{ font-family:var(--f-ui-map);font-size:0.6875rem;letter-spacing:0.125rem;text-transform:uppercase;color:var(--map-muted); border:1px solid var(--map-line); padding:0.5rem 0.875rem; border-radius:var(--radius-pill); white-space:nowrap; background:var(--map-paper); }
 
     :where(#mapa-wrap){ position:relative; max-width:73.75rem; margin:0 auto; border-radius:1rem; overflow:hidden; border:1px solid var(--map-line); box-shadow:var(--map-shadow-wrap); background:var(--map-paper); }
 
@@ -872,17 +891,17 @@
        secundarias). flex-basis más ancho + un fondo levemente más claro
        que --map-paper lo separan del resto de los controles sin
        necesitar un contenedor nuevo. */
-    :where(#mapa-search-wrap){ position:relative; flex:2 1 16rem; min-width:11.25rem; border-radius:3.125rem; transition:box-shadow var(--transition-base); }
+    :where(#mapa-search-wrap){ position:relative; flex:2 1 16rem; min-width:11.25rem; border-radius:var(--radius-pill); transition:box-shadow var(--transition-base); }
     /* [NUEVO] Anillo en el contenedor vía :focus-within, sumado al cambio
        de borde que ya existía en el input. El ícono de lupa (absoluto,
        superpuesto) quedaba fuera del área que cambiaba de color al
        enfocar — visualmente el campo "completo" no se sentía activo. */
     :where(#mapa-search-wrap):focus-within{ box-shadow:0 0 0 3px rgba(212,168,67,.25); }
-    :where(#mapa-search){ width:100%; font-family:var(--f-ui-map); font-size:0.8125rem; color:var(--map-ink); background:var(--map-panel); border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1rem 0.625rem 2.25rem; outline:none; transition:border-color var(--transition-base); }
+    :where(#mapa-search){ width:100%; font-family:var(--f-ui-map); font-size:0.8125rem; color:var(--map-ink); background:var(--map-panel); border:1px solid var(--map-line); border-radius:var(--radius-pill); padding:0.625rem 1rem 0.625rem 2.25rem; outline:none; transition:border-color var(--transition-base); }
     :where(#mapa-search):focus{ border-color:var(--gold); }
     :where(#mapa-search-wrap) svg{ position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); opacity:.5; pointer-events:none; color:var(--map-muted); transition:opacity var(--transition-base), color var(--transition-base); }
     :where(#mapa-search-wrap):focus-within svg{ opacity:.9; color:var(--copper); }
-    :where(#mapa-geoloc){ position:relative; font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.075rem; text-transform:uppercase; color:var(--map-ink); background:linear-gradient(135deg,var(--gold-pale),var(--gold-bright)); border:1px solid var(--border-s); border-radius:3.125rem; padding:0.625rem 1rem; cursor:pointer; transition:filter var(--transition-base), transform var(--transition-fast); display:flex; align-items:center; gap:0.375rem; white-space:nowrap; }
+    :where(#mapa-geoloc){ position:relative; font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.075rem; text-transform:uppercase; color:var(--map-ink); background:linear-gradient(135deg,var(--gold-pale),var(--gold-bright)); border:1px solid var(--border-s); border-radius:var(--radius-pill); padding:0.625rem 1rem; cursor:pointer; transition:filter var(--transition-base), transform var(--transition-fast); display:flex; align-items:center; gap:0.375rem; white-space:nowrap; }
     :where(#mapa-geoloc):hover{ filter:brightness(1.08); }
     :where(#mapa-geoloc):active{ transform:scale(.96); }
     /* [NUEVO] Spinner real mientras geolocaliza: antes el único feedback
@@ -948,7 +967,7 @@
     :where(#mapa-contador) a{ color:var(--copper); text-decoration:none; cursor:pointer; font-weight:500; }
     :where(#mapa-contador) a:hover{ color:var(--gold); }
 
-    .mapa-popup-destacado{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:#0c0904; background:linear-gradient(135deg,#f0d88a,#d4a843); display:inline-block; padding:0.1875rem 0.5rem; border-radius:3.125rem; margin-bottom:0.375rem; }
+    .mapa-popup-destacado{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:#0c0904; background:linear-gradient(135deg,#f0d88a,#d4a843); display:inline-block; padding:0.1875rem 0.5rem; border-radius:var(--radius-pill); margin-bottom:0.375rem; }
     .mapa-popup-cat{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.125rem; text-transform:uppercase; color:var(--pop-color,#A85A1E); display:block; margin-bottom:0.375rem; }
     .mapa-popup-nombre{ font-family:var(--f-display-map); font-size:1.1875rem; color:var(--map-ink); display:block; margin-bottom:0.3125rem; line-height:1.15; }
     /* color:#a8790f original daba 3.85:1 contra --map-paper (falla AA 4.5:1 en texto de
@@ -960,7 +979,7 @@
     .mapa-popup-addr{ font-family:var(--f-ui-map); font-size:0.6875rem; line-height:1.4; color:var(--map-muted); margin-bottom:0.25rem; display:block; }
     .mapa-popup-desc{ font-family:var(--f-ui-map); font-size:0.6875rem; line-height:1.4; color:var(--map-ink); opacity:.85; display:block; margin-bottom:0.625rem; }
     .mapa-popup-actions{ display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem; }
-    .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; text-decoration:none; padding:0.4375rem 0.6875rem; border-radius:3.125rem; display:inline-flex; align-items:center; gap:0.25rem; transition:filter var(--transition-fast), transform var(--transition-fast); }
+    .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; text-decoration:none; padding:0.4375rem 0.6875rem; border-radius:var(--radius-pill); display:inline-flex; align-items:center; gap:0.25rem; transition:filter var(--transition-fast), transform var(--transition-fast); }
     .mapa-popup-actions a:hover{ filter:brightness(1.06); }
     .mapa-popup-actions a:active{ transform:scale(.95); }
     /* [v4] "Ir" es la acción primaria del popup (llegar al lugar); tel/wa
@@ -1027,11 +1046,11 @@
        (mismos tokens --gold/--map-line/--f-ui-map), no un sistema nuevo.
        Sus estados :focus-visible viven en el registro único al final del
        archivo (fuera de esta capa), no acá — ver "REGISTRO ÚNICO DE FOCO". */
-    :where(#mapa-orden){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-ink); background:var(--map-paper) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%236b5c47" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 0.75rem center; background-size:0.625rem; border:1px solid var(--map-line); border-radius:3.125rem; padding:0.625rem 1.875rem 0.625rem 1rem; cursor:pointer; appearance:none; -webkit-appearance:none; transition:border-color var(--transition-base); }
+    :where(#mapa-orden){ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-ink); background:var(--map-paper) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%236b5c47" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 0.75rem center; background-size:0.625rem; border:1px solid var(--map-line); border-radius:var(--radius-pill); padding:0.625rem 1.875rem 0.625rem 1rem; cursor:pointer; appearance:none; -webkit-appearance:none; transition:border-color var(--transition-base); }
     :where(#mapa-orden):hover{ border-color:var(--gold); }
 
-    :where(#mapa-view-toggle){ display:flex; background:var(--map-panel); border:1px solid var(--map-line); border-radius:3.125rem; padding:0.1875rem; gap:0.125rem; }
-    :where(#mapa-view-toggle) button{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-muted); background:transparent; border:none; border-radius:3.125rem; padding:0.5rem 0.9375rem; cursor:pointer; transition:background-color var(--transition-base), color var(--transition-base); }
+    :where(#mapa-view-toggle){ display:flex; background:var(--map-panel); border:1px solid var(--map-line); border-radius:var(--radius-pill); padding:0.1875rem; gap:0.125rem; }
+    :where(#mapa-view-toggle) button{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.05rem; text-transform:uppercase; color:var(--map-muted); background:transparent; border:none; border-radius:var(--radius-pill); padding:0.5rem 0.9375rem; cursor:pointer; transition:background-color var(--transition-base), color var(--transition-base); }
     :where(#mapa-view-toggle) button:hover{ color:var(--map-ink); }
     :where(#mapa-view-toggle) button[aria-pressed="true"]{ background:var(--map-paper); color:var(--map-ink); box-shadow:0 1px 4px rgba(12,9,4,.18); }
 
@@ -1074,7 +1093,7 @@
     .lista-card-body{ display:flex; flex-direction:column; gap:0.3rem; min-width:0; }
     .lista-card-top{ display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
     .lista-card-cat{ font-family:var(--f-ui-map); font-size:0.5938rem; font-weight:700; letter-spacing:0.1125rem; text-transform:uppercase; color:var(--copper); opacity:.85; }
-    .lista-card-destacado{ font-family:var(--f-ui-map); font-size:0.5625rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; color:#0c0904; background:linear-gradient(135deg,var(--gold-pale),var(--gold)); padding:0.125rem 0.4375rem; border-radius:3.125rem; }
+    .lista-card-destacado{ font-family:var(--f-ui-map); font-size:0.5625rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; color:#0c0904; background:linear-gradient(135deg,var(--gold-pale),var(--gold)); padding:0.125rem 0.4375rem; border-radius:var(--radius-pill); }
     .lista-card-nombre{ font-family:var(--f-display-map); font-size:1.125rem; color:var(--map-ink); line-height:1.2; }
     .lista-card-rating{ font-size:0.75rem; color:var(--copper); }
     .lista-card-rating .cant{ color:var(--map-muted); }
@@ -1157,7 +1176,7 @@
        tonal de la cabecera y el ícono de colapso ahora también atenúa
        su opacidad en el estado colapsado, no solo rota — dos señales en
        vez de una para el mismo cambio de estado. */
-    :where(#mapa-legend){ position:absolute; z-index:var(--z-panel-local); right:0.875rem; top:0.875rem; max-width:13.125rem; background:rgba(255,253,248,.96); border:1px solid var(--map-line); border-radius:var(--radius-md); box-shadow:var(--map-shadow-panel); overflow:hidden; contain:layout paint; }
+    :where(#mapa-legend){ position:absolute; z-index:var(--z-panel-local); right:0.875rem; top:0.875rem; max-width:1var(--radius-pill); background:rgba(255,253,248,.96); border:1px solid var(--map-line); border-radius:var(--radius-md); box-shadow:var(--map-shadow-panel); overflow:hidden; contain:layout paint; }
     :where(#mapa-legend-head){ display:flex; align-items:center; justify-content:space-between; gap:0.5rem; padding:0.6875rem 0.75rem; cursor:pointer; background:var(--map-panel); border-bottom:1px solid var(--map-line); user-select:none; transition:background-color var(--transition-fast); }
     :where(#mapa-legend-head):hover{ background:color-mix(in srgb, var(--gold) 10%, var(--map-panel)); }
     :where(#mapa-legend-head) span.titulo{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:var(--map-ink); }
@@ -1272,7 +1291,7 @@
 
   /* Grupo 1 — pill sobre fondo oscuro/marca, con radio explícito */
   .hero-cta:focus-visible{
-    outline:2px solid var(--sunset-bright); outline-offset:3px; border-radius:3.125rem;
+    outline:2px solid var(--sunset-bright); outline-offset:3px; border-radius:var(--radius-pill);
   }
 
   /* Grupo 2 — tratamiento general (tarjetas, botones, pills, links, mapa) */
