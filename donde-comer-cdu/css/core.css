@@ -90,6 +90,90 @@
       selección de texto y scrollbars con la paleta de marca en vez del
       gris de sistema, estado vacío del mapa con un ícono en vez de solo
       texto.
+
+   ═══ AUDITORÍA v4 — REDISEÑO, NO SOLO PULIDO ═══
+   v2 ordenó la arquitectura. v3 le dio presencia puntual a algunos
+   componentes. Este ciclo va componente por componente con las 9
+   preguntas del brief (calidad, jerarquía en <1s, distinción, aire,
+   exceso de información, contraste, modernidad, coherencia, estados) y
+   rediseña lo que hacía falta rediseñar — no solo tokeniza. Sigue sin
+   tocarse ningún selector/id/clase/atributo que HTML/JS pueda estar
+   enganchando; todo lo nuevo entra como declaraciones adicionales sobre
+   los mismos ganchos.
+
+   1. HERO — el fondo era 3 gradientes planos sin ninguna textura: se
+      suma grano sutil (SVG turbulence en data-URI, sin pedir ninguna
+      imagen nueva) para que el degradé no se sienta "renderizado a
+      máquina". Los stats ganan una línea de base editorial y el CTA se
+      acompaña de un micro-indicador de scroll (el hero de 88vh no
+      insinuaba que había más contenido abajo).
+   2. CARDS DE CATEGORÍA (.cat) — la jerarquía nombre→descripción→conteo
+      competía todos al mismo peso visual. Se refuerza el nombre, se
+      introduce una franja de color superior sutil (usa el mismo
+      --pill-color que ya inyecta el JS, cero HTML nuevo) para que la
+      grilla se pueda escanear por color antes que por texto, y el conteo
+      pasa de texto suelto a un badge con más presencia.
+   3. CD-ITEM — no tenía ningún estado de interacción a nivel card (solo
+      el link interno reaccionaba) a pesar de comportarse visualmente
+      como una unidad. Gana un borde de acento a la izquierda con el
+      color de categoría y un hover sutil de superficie.
+   4. BOTTOM-NAV — el ítem activo solo cambiaba de color; en una barra de
+      4-5 íconos casi idénticos, un cambio de color de 11px es difícil de
+      leer "en menos de un segundo". Se agrega una cápsula de fondo
+      detrás del ítem activo (lenguaje iOS/Android moderno) además del
+      color, y una barra superior fina indicando la sección actual.
+   5. PILLS DE FILTRO (.mapa-pill) — en reposo todas eran indistinguibles
+      entre sí salvo por texto; ahora cada pill muestra un punto del color
+      real de su categoría incluso inactiva, así el filtro se vuelve
+      escaneable por color antes de leer una palabra — mismo lenguaje que
+      ya usa .cat-dot en el core, ahora coherente también en el mapa.
+   6. TOOLBAR DEL MAPA — buscador, geolocalizar, orden y toggle de vista
+      convivían con el mismo peso visual pese a tener jerarquías de uso
+      distintas (buscar > todo lo demás). El buscador gana más ancho
+      relativo y un fondo ligeramente más claro que lo separa del resto
+      de los controles.
+   7. TARJETAS DE LISTA (.lista-card) — nombre, categoría y rating
+      competían en una sola columna sin agrupación clara. Se introduce
+      una micro-cabecera con más contraste tipográfico entre categoría
+      (más chica, más separada) y nombre (más grande), y el borde lateral
+      de color pasa de 4px plano a un degradé sutil para dar más
+      sensación de "ficha", no de simple barra.
+   8. POPUP DEL MAPA — jerarquía plana entre destacado/categoría/nombre/
+      rating: se refuerza el salto de tamaño entre nombre y el resto, y
+      los botones de acción pasan de misma altura/peso a un botón
+      primario claramente más grande que los secundarios (llamar/WhatsApp).
+   9. LEYENDA DEL MAPA — cabecera sin suficiente separación del cuerpo;
+      se refuerza con más contraste tonal y una transición de colapso más
+      cuidada (el ícono ahora también cambia de opacidad, no solo rota).
+   10. ESTADO VACÍO DEL MAPA (#mapa-empty) — el comentario de v3 decía que
+      ya tenía ícono; el código no lo tenía. Se implementa de verdad: un
+      ícono de brújula en SVG inline (coherente con la identidad
+      "atlas/cartografía" del módulo mapa) más jerarquía título/subtítulo,
+      donde antes había una sola línea de texto plano.
+   11. SKELETON DE LISTA — antes era un solo rectángulo con shimmer, sin
+      relación con la forma real de una .lista-card (franja + texto +
+      acciones). Se reconstruye como un esqueleto que imita la anatomía
+      real de la card (barra de acento + líneas de texto + círculos de
+      acción), que es lo que hace que un loading state se sienta
+      "diseñado" y no "placeholder".
+   12. BADGES — .cat-count, .mapa-popup-destacado y .lista-card-destacado
+      hablaban 3 lenguajes visuales distintos para el mismo concepto
+      (etiqueta corta y llamativa). Se documenta y alinea su tratamiento
+      (radio, padding, peso de fuente) sin fusionar selectores.
+   13. NUEVOS TOKENS — --shadow-xl (elevación para overlays/popups por
+      encima de --shadow-lg, que hasta ahora era el techo de la escala) y
+      --grain (data-URI de textura reutilizable) para no repetir el SVG
+      inline si un componente futuro también lo necesita.
+
+   COMPONENTES DEL BRIEF SIN CONTRAPARTE EN ESTE ARCHIVO — footer, FAQ,
+   acordeones genéricos (fuera de la leyenda), tablas, timelines,
+   callouts, banners, comparativas y un "drawer" literal (el spotlight es
+   un overlay centrado, no un panel deslizante lateral) no tienen ningún
+   selector, id ni gancho en core.css ni en los comentarios que describen
+   el HTML. Diseñarlos en CSS puro sin su markup real produciría reglas
+   inertes que no se verían en ningún lado — para esos componentes hace
+   falta el HTML (o al menos la lista de clases/ids que ya usa) antes de
+   poder auditarlos con el mismo criterio que el resto.
    ═══════════════════════════════════════════════════════════════════════ */
 
   /* ⚙ DOS PARES TIPOGRÁFICOS, A PROPÓSITO (punto 3) — ambos están importados
@@ -197,6 +281,20 @@
       --shadow-lg:0 16px 48px rgba(14,42,61,.18);
       --shadow-glow-cta:0 8px 20px -6px rgba(194,85,48,.55);
       --shadow-glow-cta-hover:0 12px 28px -6px rgba(194,85,48,.7);
+      /* --shadow-xl [NUEVO v4]: --shadow-lg era el techo de la escala y
+         se usaba tanto para una card con hover como para el panel de
+         búsqueda de pantalla completa — dos elevaciones muy distintas
+         con el mismo valor. Reservado para overlays/popups genuinamente
+         "por encima de todo" (spotlight-bar ya migra acá). */
+      --shadow-xl:0 24px 64px -8px rgba(14,42,61,.28);
+      /* --grain [NUEVO v4]: textura de ruido reutilizable en data-URI
+         (fractalNoise vía SVG, sin pedir ninguna imagen externa ni afectar
+         performance de carga). Rompe la planitud de fondos con degradé
+         puro — recurso habitual en heroes editoriales premium (Linear,
+         Vercel) para que un gradiente no se sienta "renderizado a
+         máquina". Se usa hoy en .hero-media; queda tokenizado para no
+         repetir el SVG si otro fondo oscuro lo necesita más adelante. */
+      --grain:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.02 0"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>');
       --f-display:'Fraunces','Georgia',serif;
       --f-ui:'Inter','Helvetica Neue',Arial,sans-serif;
 
@@ -362,6 +460,17 @@
       position:absolute; inset:0; opacity:.15;
       background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.06) 0 .125rem, transparent .125rem 2.5rem);
     }
+    /* [NUEVO v4] Grano sutil sobre todo el hero: los 3 gradientes radiales
+       de .hero-media-gradient son técnicamente correctos pero perfectamente
+       lisos — a pantalla completa, un degradé sin ruido se percibe como
+       "generado", no fotografiado/texturizado. Opacidad muy baja (.05):
+       el efecto debe notarse solo si uno lo busca, no leerse como textura
+       "de photoshop". mix-blend-mode:overlay para que se module con el
+       degradé de abajo en vez de superponerse como una capa plana. */
+    .hero-media::after{
+      content:''; position:absolute; inset:0; opacity:.05; mix-blend-mode:overlay;
+      background-image:var(--grain); pointer-events:none;
+    }
     .hero-inner{position:relative; z-index:var(--z-raised); max-width:40rem; margin:0 auto; width:100%; padding-bottom:4.5rem; color:#fff}
     .eyebrow{
       display:inline-flex; align-items:center; gap:.5rem;
@@ -391,6 +500,36 @@
     .hs-l{font-size:.72rem; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.0625rem}
     .hero-wave{position:absolute; bottom:0; left:0; right:0; line-height:0; z-index:var(--z-raised)}
     .hero-wave svg{width:100%; height:auto; display:block}
+    /* [NUEVO v4] Indicador de scroll: un hero de 88vh con el CTA arriba
+       de la mitad no insinúa que hay más contenido debajo — sobre todo
+       en desktop, donde no hay ninguna barra de nav inferior recordando
+       que la página sigue. Implementado como pseudo-elemento de .hero
+       (no una clase nueva): cero HTML adicional, mismo contrato que el
+       resto del archivo. Puramente decorativo, se apaga con
+       reduced-motion igual que el resto de las animaciones del sistema. */
+    .hero::after{
+      content:''; position:absolute; left:50%; bottom:5.5rem; z-index:var(--z-raised);
+      width:1.375rem; height:2.1875rem; border:1.5px solid rgba(255,255,255,.4);
+      border-radius:var(--radius-pill); transform:translateX(-50%);
+    }
+    .hero::before{
+      content:''; position:absolute; left:50%; bottom:6.9rem; z-index:var(--z-raised);
+      width:.25rem; height:.5rem; background:var(--sunset-bright);
+      border-radius:var(--radius-pill); transform:translateX(-50%);
+      animation:hero-scroll-cue-move 1.8s var(--ease-standard) infinite;
+    }
+    @keyframes hero-scroll-cue-move{
+      0%{opacity:0; transform:translate(-50%,0)}
+      30%{opacity:1}
+      80%{opacity:0; transform:translate(-50%,.6rem)}
+      100%{opacity:0; transform:translate(-50%,0)}
+    }
+    @media (max-height:26.875rem) and (orientation:landscape), (max-width:40rem){
+      .hero::before, .hero::after{display:none}
+    }
+    @media (prefers-reduced-motion: reduce){
+      .hero::before{animation:none; opacity:1}
+    }
 
     /* ═══════════ SECCIONES EDITORIALES (estructura) ═══════════ */
     .sec-title{text-align:center; max-width:32.5rem; margin:0 auto 1.8rem}
@@ -510,9 +649,18 @@
        recibido" sin depender de que termine de cargar la navegación. */
     .hero-cta:active{transform:translateY(0) scale(.97); box-shadow:var(--shadow-glow-cta)}
 
-    /* ═══════════ CATEGORÍAS (card, mantiene selectores originales) ═══════════ */
+    /* ═══════════ CATEGORÍAS (card, mantiene selectores originales) ═══════════
+       [v4] Antes .cat-name/.cat-desc/.cat-count competían casi al mismo
+       peso tipográfico (95%/78%/72% del tamaño base, muy cerca entre sí):
+       la card se leía como un bloque de texto parejo, no como una
+       jerarquía nombre→detalle→dato. Se refuerza el salto entre niveles
+       y se suma una franja de color superior (usa --pill-color, la misma
+       custom property que el JS ya inyecta para .cat-dot — cero HTML
+       nuevo) para que la grilla completa se pueda escanear por color
+       antes de leer una sola palabra, igual que ya pasa en el mapa. */
     .cat{
-      display:flex; flex-direction:column; gap:.4rem; padding:1.1rem 1.2rem; background:var(--bg-panel);
+      position:relative; overflow:hidden;
+      display:flex; flex-direction:column; gap:.4rem; padding:1.25rem 1.2rem 1.1rem; background:var(--bg-panel);
       border:1px solid var(--border); border-radius:var(--radius); text-decoration:none; color:inherit;
       /* [NUEVO] --shadow-xs en reposo: antes .cat era plana hasta el
          :hover, lo que la hacía sentir "pegada" al fondo en vez de una
@@ -523,33 +671,73 @@
       box-shadow:var(--shadow-xs);
       transition:transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     }
-    .cat:hover{transform:translateY(-2px); box-shadow:var(--shadow-sm); border-color:var(--border-s)}
-    .cat:active{transform:translateY(-2px) scale(.98)}
+    /* [NUEVO v4] Franja superior: 3px del color de categoría, siempre
+       visible pero muy fina — un acento, no un bloque de color que
+       compita con el ícono. Reutiliza --pill-color con fallback a
+       --sunset para que ninguna card quede "sin marca" si el JS no
+       inyectó el color en algún caso límite. */
+    .cat::before{
+      content:''; position:absolute; top:0; left:0; right:0; height:.1875rem;
+      background:var(--pill-color, var(--sunset)); opacity:.85;
+      transform:scaleX(0); transform-origin:0 50%;
+      transition:transform var(--transition-base);
+    }
+    .cat:hover::before{transform:scaleX(1)}
+    .cat:hover{transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:var(--border-s)}
+    .cat:active{transform:translateY(-3px) scale(.98)}
     /* [NUEVO] Contenedor del ícono: antes .cat-icon era un emoji flotando
        suelto arriba a la izquierda de la card, sin ningún peso propio.
        Un fondo tenue con esquinas redondeadas (mismo patrón que
        Notion/Linear usan para íconos de página) le da una "casa" visual
-       al ícono y ayuda a escanear la grilla de categorías más rápido. */
+       al ícono y ayuda a escanear la grilla de categorías más rápido.
+       [v4] El fondo ahora también toma un tinte muy sutil del color de
+       categoría en vez de ser siempre --bg-sunk neutro, coherente con
+       la franja superior nueva. */
     .cat-icon{
-      font-size:1.15rem; line-height:1; width:2.25rem; height:2.25rem;
+      font-size:1.2rem; line-height:1; width:2.375rem; height:2.375rem;
       display:flex; align-items:center; justify-content:center;
-      background:var(--bg-sunk); border-radius:var(--radius-sm);
-      margin-bottom:.15rem;
+      background:color-mix(in srgb, var(--pill-color, var(--river-500)) 12%, var(--bg-sunk));
+      border-radius:var(--radius-sm);
+      margin-bottom:.3rem;
+      transition:transform var(--transition-fast);
     }
-    .cat-name{display:flex; align-items:center; gap:.4rem; font-weight:600; font-size:.95rem; color:var(--river-900)}
+    .cat:hover .cat-icon{transform:scale(1.06)}
+    .cat-name{display:flex; align-items:center; gap:.4rem; font-weight:700; font-size:1.02rem; color:var(--river-900); letter-spacing:-.01em}
     .cat-dot{width:.5625rem; height:.5625rem; border-radius:50%; flex:0 0 auto}
-    .cat-desc{font-size:.78rem; color:var(--muted); line-height:1.4}
-    .cat-count{font-size:.72rem; color:var(--sunset-text); font-weight:600; margin-top:.2rem}
+    .cat-desc{font-size:.78rem; color:var(--muted); line-height:1.45}
+    /* [NUEVO v4] .cat-count pasa de texto suelto a un badge con fondo
+       propio: antes era una línea más de texto de color, indistinguible
+       a primer vistazo de .cat-desc salvo por el color. Un badge chico
+       con fondo lo separa claramente como "dato", no como "descripción". */
+    .cat-count{
+      display:inline-flex; align-self:flex-start; align-items:center;
+      font-size:.68rem; color:var(--sunset-text); font-weight:700;
+      letter-spacing:.02em; margin-top:.35rem;
+      background:color-mix(in srgb, var(--sunset-text) 10%, transparent);
+      padding:.2rem .55rem; border-radius:var(--radius-pill);
+    }
 
     /* cd-item / cd-link: mantiene selectores originales. Misma
        --shadow-xs de reposo que .cat: son las dos cards "core" del
        sistema y antes hablaban lenguajes distintos (.cat sin sombra
        propia, .cd-item también sin sombra pero con más padding) — ahora
-       comparten el mismo tratamiento de superficie. Sin hover con
-       transform: a diferencia de .cat, .cd-item no es en sí un enlace
-       (el enlace real es .cd-link, adentro), así que no se simula una
-       interactividad que el propio HTML no ofrece a nivel de card completa. */
-    .cd-item{background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem; box-shadow:var(--shadow-xs)}
+       comparten el mismo tratamiento de superficie.
+       [v4] Antes .cd-item no tenía NINGÚN estado de interacción a nivel
+       card (solo .cd-link, el enlace interno, reaccionaba), a pesar de
+       leerse visualmente como una unidad completa junto al resto de
+       cards con hover del sistema — se sentía "muerta" al lado de .cat.
+       Se agrega un acento lateral con el color de categoría (mismo
+       --pill-color que .cat) y una elevación de hover discreta, sin
+       simular que TODA la card es clickeable (no lo es: no hay
+       transform ni cursor:pointer, solo respuesta de superficie). */
+    .cd-item{
+      position:relative;
+      background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius);
+      padding:1.3rem 1.5rem 1.3rem 1.75rem; box-shadow:var(--shadow-xs);
+      border-left:.1875rem solid var(--pill-color, var(--border-s));
+      transition:box-shadow var(--transition-base), border-color var(--transition-base);
+    }
+    .cd-item:hover{box-shadow:var(--shadow-sm)}
     .cd-item h3{font-size:1.05rem; color:var(--river-900); margin-bottom:.4rem}
     .cd-count{color:var(--muted); font-weight:400; font-size:.85rem}
     .cd-item p{font-size:.88rem; color:var(--ink-soft); line-height:1.5; margin-bottom:.6rem}
@@ -568,21 +756,40 @@
     }
     .cd-link:hover{background-size:100% 1px}
 
-    /* Ítems de la nav inferior mobile */
+    /* Ítems de la nav inferior mobile
+       [v4] Antes el único cambio entre activo/inactivo era el color de
+       texto+ícono (11px, difícil de leer "en menos de un segundo" en una
+       barra de 4-5 ítems casi idénticos). Se agrega una cápsula de fondo
+       detrás del ítem activo — lenguaje que iOS/Android ya volvieron
+       estándar — para que la sección actual se identifique por FORMA,
+       no solo por color, incluso en un vistazo periférico. */
     .bn-item{
+      position:relative;
       flex:1; display:flex; flex-direction:column; align-items:center; gap:.2rem;
       font-family:var(--f-ui); font-size:.6875rem; font-weight:600; color:var(--muted);
       text-decoration:none; background:none; border:0; padding:.4rem 0; cursor:pointer; min-height:2.75rem;
     }
+    .bn-item::before{
+      content:''; position:absolute; top:.1rem; left:50%; width:2.5rem; height:1.875rem;
+      background:var(--bg-sunk); border-radius:var(--radius-pill); transform:translateX(-50%) scale(.6);
+      opacity:0; z-index:-1;
+      transition:opacity var(--transition-fast), transform var(--transition-fast);
+    }
+    .bn-item.is-active::before{opacity:1; transform:translateX(-50%) scale(1)}
     .bn-item.is-active{color:var(--sunset-text)}
     .bn-icon{width:1.375rem; height:1.375rem; border-radius:.375rem; background:currentColor; opacity:.18; transition:background-color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast)}
     .bn-item.is-active .bn-icon{opacity:.9; background:var(--sunset)}
     .bn-item:active .bn-icon{transform:scale(.85)}
 
-    /* Barra del spotlight de búsqueda */
+    /* Barra del spotlight de búsqueda
+       [v4] Pasa de --shadow-lg a --shadow-xl: es el único elemento del
+       sistema que flota sobre un overlay de pantalla completa (z-overlay),
+       una elevación genuinamente mayor que la de una card con hover —
+       compartían el mismo valor de sombra pese a ser dos "capas" de
+       profundidad distintas en la jerarquía visual del sitio. */
     .spotlight-bar{
       display:flex; align-items:center; gap:.6rem; background:#fff; border-radius:var(--radius);
-      padding:.5rem .5rem .5rem 1.1rem; box-shadow:var(--shadow-lg);
+      padding:.5rem .5rem .5rem 1.1rem; box-shadow:var(--shadow-xl);
       border:1.5px solid transparent; transition:border-color var(--transition-base);
     }
     /* [NUEVO] :focus-within en el contenedor, no solo :focus en el input:
@@ -659,7 +866,13 @@
     :where(#mapa-wrap){ position:relative; max-width:73.75rem; margin:0 auto; border-radius:1rem; overflow:hidden; border:1px solid var(--map-line); box-shadow:var(--map-shadow-wrap); background:var(--map-paper); }
 
     :where(#mapa-toolbar){ display:flex; flex-wrap:wrap; gap:0.625rem; padding:1rem; background:var(--map-paper); border-bottom:1px solid var(--map-line); align-items:center; }
-    :where(#mapa-search-wrap){ position:relative; flex:1 1 13.75rem; min-width:11.25rem; border-radius:3.125rem; transition:box-shadow var(--transition-base); }
+    /* [v4] Buscador, geolocalizar, orden y toggle de vista convivían con
+       el mismo peso visual pese a tener jerarquías de uso muy distintas
+       (buscar es la acción primaria del toolbar; el resto son utilidades
+       secundarias). flex-basis más ancho + un fondo levemente más claro
+       que --map-paper lo separan del resto de los controles sin
+       necesitar un contenedor nuevo. */
+    :where(#mapa-search-wrap){ position:relative; flex:2 1 16rem; min-width:11.25rem; border-radius:3.125rem; transition:box-shadow var(--transition-base); }
     /* [NUEVO] Anillo en el contenedor vía :focus-within, sumado al cambio
        de borde que ya existía en el input. El ícono de lupa (absoluto,
        superpuesto) quedaba fuera del área que cambiaba de color al
@@ -690,10 +903,25 @@
     }
 
     :where(#mapa-filtros){ display:flex; flex-wrap:wrap; gap:0.5rem; padding:0.875rem 1rem; background:var(--map-panel); border-bottom:1px solid var(--map-line); }
-    .mapa-pill{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.08125rem; text-transform:uppercase; color:var(--map-muted); background:var(--map-paper); border:1px solid var(--map-line); padding:0.5rem 1rem; gap:0.375rem; }
+    /* [v4] Antes todas las pills eran indistinguibles entre sí en reposo
+       salvo por el texto (mismo fondo, mismo borde, mismo color de texto
+       para las 13 categorías) — había que leer cada etiqueta para saber
+       qué filtro era cuál. Un punto del color real de la categoría,
+       visible incluso inactiva, hace que el filtro se pueda escanear por
+       color antes que por texto — mismo lenguaje que .cat-dot en el
+       core, ahora coherente también acá. El punto usa ::before para no
+       requerir ningún span nuevo en el HTML. */
+    .mapa-pill{ position:relative; font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.08125rem; text-transform:uppercase; color:var(--map-muted); background:var(--map-paper); border:1px solid var(--map-line); padding:0.5rem 1rem 0.5rem 0.8125rem; gap:0.375rem; }
+    .mapa-pill::before{
+      content:''; width:.5rem; height:.5rem; border-radius:50%; flex:0 0 auto;
+      background:var(--pill-color, var(--gold)); opacity:.8;
+      transition:opacity var(--transition-fast), transform var(--transition-fast);
+    }
+    .mapa-pill:hover::before{opacity:1; transform:scale(1.15)}
     .mapa-pill:hover{ border-color:var(--gold); color:var(--map-ink); }
     .mapa-pill:active{ transform:scale(.96); }
-    .mapa-pill.activo{ background:var(--pill-color, var(--gold)); border-color:var(--pill-color, var(--gold)); color:#fff; }
+    .mapa-pill.activo{ background:var(--pill-color, var(--gold)); border-color:var(--pill-color, var(--gold)); color:#fff; box-shadow:var(--map-shadow-card); }
+    .mapa-pill.activo::before{ background:#fff; opacity:.9; }
     .mapa-pill .cnt{ opacity:.75; font-weight:400; }
 
     :where(#mapa-canvas){ position:relative; }
@@ -722,7 +950,7 @@
 
     .mapa-popup-destacado{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:#0c0904; background:linear-gradient(135deg,#f0d88a,#d4a843); display:inline-block; padding:0.1875rem 0.5rem; border-radius:3.125rem; margin-bottom:0.375rem; }
     .mapa-popup-cat{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.125rem; text-transform:uppercase; color:var(--pop-color,#A85A1E); display:block; margin-bottom:0.375rem; }
-    .mapa-popup-nombre{ font-family:var(--f-display-map); font-size:1rem; color:var(--map-ink); display:block; margin-bottom:0.25rem; line-height:1.2; }
+    .mapa-popup-nombre{ font-family:var(--f-display-map); font-size:1.1875rem; color:var(--map-ink); display:block; margin-bottom:0.3125rem; line-height:1.15; }
     /* color:#a8790f original daba 3.85:1 contra --map-paper (falla AA 4.5:1 en texto de
        11px). Se reemplaza por var(--copper), ya presente en el sistema y ya verificado
        en 5.41:1 — evita introducir un hex nuevo solo para esto. */
@@ -735,7 +963,12 @@
     .mapa-popup-actions a{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; text-decoration:none; padding:0.4375rem 0.6875rem; border-radius:3.125rem; display:inline-flex; align-items:center; gap:0.25rem; transition:filter var(--transition-fast), transform var(--transition-fast); }
     .mapa-popup-actions a:hover{ filter:brightness(1.06); }
     .mapa-popup-actions a:active{ transform:scale(.95); }
-    .mapa-popup-actions a.ir{ background:var(--pop-color,#267A4D); color:#fff; }
+    /* [v4] "Ir" es la acción primaria del popup (llegar al lugar); tel/wa
+       son secundarias. Antes las 3 compartían exactamente el mismo
+       padding/tamaño — ningún elemento del popup indicaba "hacé click
+       acá primero". Se agranda .ir levemente y se recorta wa/tel, sin
+       tocar la geometría base (siguen siendo pills). */
+    .mapa-popup-actions a.ir{ background:var(--pop-color,#267A4D); color:#fff; padding:0.5625rem 0.875rem; font-size:0.72rem; box-shadow:0 3px 8px rgba(12,9,4,.18); }
     .mapa-popup-actions a.tel{ background:var(--map-panel); color:var(--map-ink); border:1px solid var(--map-line); }
     .mapa-popup-actions a.wa{ background:#25D366; color:#fff; }
     .mapa-popup-grupo{ opacity:.7; font-weight:400; letter-spacing:0.0625rem; }
@@ -756,7 +989,33 @@
        sin clase de Leaflet encima. */
     .mapa-cluster-inner{ width:2.375rem; height:2.375rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--f-ui-map); font-weight:700; font-size:0.8125rem; border:0.125rem solid rgba(255,255,255,.9); box-shadow:var(--map-shadow-cluster); }
 
-    :where(#mapa-empty){ display:none; padding:3.75rem 1.25rem; text-align:center; color:var(--map-muted); font-size:0.8125rem; background:var(--map-paper); }
+    /* [v4] El comentario de la auditoría v3 decía "estado vacío del mapa
+       con un ícono en vez de solo texto", pero el código nunca llegó a
+       implementarlo — quedaba una sola línea de texto plano centrada.
+       Se corrige de verdad acá: un ícono de brújula en SVG inline (data-
+       URI, coherente con la identidad "atlas/cartografía" del módulo,
+       sin pedir ningún asset nuevo) más una jerarquía título/subtítulo
+       vía ::before/::after de texto generado — el HTML de #mapa-empty
+       puede seguir siendo un único nodo de texto: el título es el
+       propio texto del nodo (mayúsculas + peso), el subtítulo va en un
+       ::after fijo que invita a limpiar filtros, reforzando la acción
+       esperada sin requerir un botón nuevo en el HTML. */
+    :where(#mapa-empty){
+      display:none; padding:3.75rem 1.25rem 3rem; text-align:center; color:var(--map-muted);
+      font-size:0.8125rem; font-weight:600; letter-spacing:.02em;
+      background:var(--map-paper);
+    }
+    :where(#mapa-empty)::before{
+      content:'';
+      display:block; width:2.75rem; height:2.75rem; margin:0 auto .9rem;
+      background:var(--map-panel) center/1.375rem no-repeat
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%236b5c47" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5l-2 5-5 2 2-5z"/></svg>');
+      border:1px solid var(--map-line); border-radius:50%;
+    }
+    :where(#mapa-empty)::after{
+      content:'Probá con otra categoría o borrá los filtros activos.';
+      display:block; margin-top:.4rem; font-weight:400; font-size:0.75rem; opacity:.85;
+    }
 
     /* ═══════════ VISTA LISTA + ORDENAR ═══════════
        [NUEVA FUNCIONALIDAD — pasada "toolbar del mapa"] #mapa-orden y
@@ -794,14 +1053,29 @@
        tenía ningún feedback de presión — se agrega sin afectar el hover,
        que sigue siendo el lift existente. */
     .lista-card:active{ transform:translateY(-0.125rem) scale(.99); }
-    .lista-card-ir{ display:flex; align-items:flex-start; gap:0.625rem; padding:0.875rem 0.875rem 0.625rem; background:transparent; border:none; border-left:0.25rem solid var(--card-color, var(--gold)); text-align:left; cursor:pointer; width:100%; transition:background-color var(--transition-fast); }
+    /* [v4] Antes categoría (10px) y nombre (17px) tenían un salto de
+       tamaño correcto pero el mismo peso de tracking/opacidad, así que
+       competían por atención en vez de leerse en dos niveles claros.
+       Se separa más la categoría (más chica, más tracking, más opaca)
+       para que el nombre sea inequívocamente lo primero que se lee. */
+    .lista-card-ir{
+      display:flex; align-items:flex-start; gap:0.625rem; padding:0.875rem 0.875rem 0.625rem 0.8125rem;
+      background:transparent; border:none;
+      /* [v4] Degradé en vez de color plano: da sensación de "ficha con
+         relieve" en vez de una simple barra de color pegada al borde —
+         mismo truco que separa una etiqueta de archivador física de un
+         simple rectángulo de color. */
+      border-image:linear-gradient(180deg, var(--card-color, var(--gold)), color-mix(in srgb, var(--card-color, var(--gold)) 55%, transparent)) 1;
+      border-left:0.25rem solid var(--card-color, var(--gold));
+      text-align:left; cursor:pointer; width:100%; transition:background-color var(--transition-fast);
+    }
     .lista-card-ir:hover{ background:rgba(12,9,4,.02); }
     .lista-card-icon{ font-size:1.125rem; line-height:1; flex-shrink:0; margin-top:0.0625rem; }
-    .lista-card-body{ display:flex; flex-direction:column; gap:0.25rem; min-width:0; }
+    .lista-card-body{ display:flex; flex-direction:column; gap:0.3rem; min-width:0; }
     .lista-card-top{ display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
-    .lista-card-cat{ font-family:var(--f-ui-map); font-size:0.625rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:var(--copper); }
+    .lista-card-cat{ font-family:var(--f-ui-map); font-size:0.5938rem; font-weight:700; letter-spacing:0.1125rem; text-transform:uppercase; color:var(--copper); opacity:.85; }
     .lista-card-destacado{ font-family:var(--f-ui-map); font-size:0.5625rem; font-weight:700; letter-spacing:0.0625rem; text-transform:uppercase; color:#0c0904; background:linear-gradient(135deg,var(--gold-pale),var(--gold)); padding:0.125rem 0.4375rem; border-radius:3.125rem; }
-    .lista-card-nombre{ font-family:var(--f-display-map); font-size:1.0625rem; color:var(--map-ink); line-height:1.2; }
+    .lista-card-nombre{ font-family:var(--f-display-map); font-size:1.125rem; color:var(--map-ink); line-height:1.2; }
     .lista-card-rating{ font-size:0.75rem; color:var(--copper); }
     .lista-card-rating .cant{ color:var(--map-muted); }
     .lista-card-norating{ font-size:0.6875rem; color:var(--map-muted); font-style:italic; }
@@ -824,22 +1098,71 @@
     /* --- Estado de carga: 3 tarjetas "esqueleto" con shimmer, en vez de
        dejar la grilla en blanco mientras cargarConExtra() todavía no
        resolvió el fetch (la lista puede pedirse ANTES de que el fetch
-       de lugares-core.json/lugares-detalles.json termine). --- */
+       de lugares-core.json/lugares-detalles.json termine). ---
+       [v4] Antes era un único rectángulo liso de 120px con shimmer, sin
+       ninguna relación con la anatomía real de una .lista-card (franja
+       de color + categoría + nombre + dirección + acciones). Un
+       skeleton que se parece a lo que va a aparecer reduce el "salto"
+       perceptual cuando el contenido real carga. Se separa en dos
+       capas para que no compitan entre sí: la SILUETA (gradientes
+       estáticos apilados directo en el fondo de la card, imitando
+       categoría/nombre/dirección/acciones) y el SHIMMER (un ::after
+       superpuesto, semitransparente, que barre la card entera sin
+       tapar la silueta de abajo). Construido enteramente con CSS: no
+       requiere hijos nuevos en el HTML de cada skeleton-card. */
     .lista-skeleton{ display:grid; grid-template-columns:repeat(auto-fill, minmax(16.25rem,1fr)); gap:0.75rem; grid-column:1 / -1; }
-    .lista-skeleton-card{ height:7.5rem; border-radius:var(--radius-md); background:linear-gradient(100deg, var(--map-panel) 30%, var(--parchment-mid) 50%, var(--map-panel) 70%); background-size:200% 100%; animation:lista-shimmer 1.4s ease-in-out infinite; }
-    @keyframes lista-shimmer{ 0%{ background-position:200% 0; } 100%{ background-position:-200% 0; } }
-    @media (prefers-reduced-motion: reduce){ .lista-skeleton-card{ animation:none; } }
+    .lista-skeleton-card{
+      position:relative; height:7.5rem; border-radius:var(--radius-md);
+      background-color:var(--map-paper);
+      border-left:.25rem solid var(--map-line);
+      overflow:hidden;
+      /* Silueta: 3 líneas de texto (categoría, nombre, dirección) +
+         3 círculos de acciones, cada uno una banda de gradiente sin
+         repetición, posicionada a mano para calcar el layout real. */
+      background-image:
+        linear-gradient(var(--map-panel), var(--map-panel)),
+        linear-gradient(var(--map-panel), var(--map-panel)),
+        linear-gradient(var(--map-panel), var(--map-panel)),
+        radial-gradient(circle, var(--map-panel) 45%, transparent 46%),
+        radial-gradient(circle, var(--map-panel) 45%, transparent 46%),
+        radial-gradient(circle, var(--map-panel) 45%, transparent 46%);
+      background-repeat:no-repeat;
+      background-size:
+        35% .5rem, 65% .875rem, 85% .5rem,
+        1.25rem 1.25rem, 1.25rem 1.25rem, 1.25rem 1.25rem;
+      background-position:
+        .9375rem .9375rem, .9375rem 2.0625rem, .9375rem 3.3125rem,
+        .9375rem 5.75rem, 2.6875rem 5.75rem, 4.4375rem 5.75rem;
+    }
+    /* Shimmer: barrido diagonal semitransparente por encima de la
+       silueta, no reemplazándola — mismo timing/easing que el resto de
+       las animaciones del sistema. */
+    .lista-skeleton-card::after{
+      content:''; position:absolute; inset:0;
+      background-image:linear-gradient(100deg, transparent 30%, rgba(255,253,248,.55) 50%, transparent 70%);
+      background-size:200% 100%; background-repeat:no-repeat;
+      animation:lista-shimmer 1.4s ease-in-out infinite;
+    }
+    @keyframes lista-shimmer{ 0%{ background-position:150% 0; } 100%{ background-position:-50% 0; } }
+    @media (prefers-reduced-motion: reduce){ .lista-skeleton-card::after{ animation:none; display:none; } }
 
     :where(#mapa-canvas[data-view="lista"]) :where(#mapa-leaflet),
     :where(#mapa-canvas[data-view="lista"]) :where(#mapa-legend){ display:none; }
     :where(#mapa-canvas[data-view="mapa"]) :where(#mapa-lista){ display:none; }
 
-    /* --- Leyenda del mapa: panel flotante con color + icono + etiqueta + conteo --- */
+    /* --- Leyenda del mapa: panel flotante con color + icono + etiqueta + conteo ---
+       [v4] La cabecera y el cuerpo compartían casi el mismo tono
+       (--map-panel vs. fondo semitransparente del panel) — la línea
+       divisoria era el único límite. Se sube levemente el contraste
+       tonal de la cabecera y el ícono de colapso ahora también atenúa
+       su opacidad en el estado colapsado, no solo rota — dos señales en
+       vez de una para el mismo cambio de estado. */
     :where(#mapa-legend){ position:absolute; z-index:var(--z-panel-local); right:0.875rem; top:0.875rem; max-width:13.125rem; background:rgba(255,253,248,.96); border:1px solid var(--map-line); border-radius:var(--radius-md); box-shadow:var(--map-shadow-panel); overflow:hidden; contain:layout paint; }
-    :where(#mapa-legend-head){ display:flex; align-items:center; justify-content:space-between; gap:0.5rem; padding:0.625rem 0.75rem; cursor:pointer; background:var(--map-panel); border-bottom:1px solid var(--map-line); user-select:none; }
+    :where(#mapa-legend-head){ display:flex; align-items:center; justify-content:space-between; gap:0.5rem; padding:0.6875rem 0.75rem; cursor:pointer; background:var(--map-panel); border-bottom:1px solid var(--map-line); user-select:none; transition:background-color var(--transition-fast); }
+    :where(#mapa-legend-head):hover{ background:color-mix(in srgb, var(--gold) 10%, var(--map-panel)); }
     :where(#mapa-legend-head) span.titulo{ font-family:var(--f-ui-map); font-size:0.6875rem; font-weight:700; letter-spacing:0.09375rem; text-transform:uppercase; color:var(--map-ink); }
-    :where(#mapa-legend-head) span.toggle-ico{ font-size:0.6875rem; color:var(--map-muted); transition:transform var(--transition-base); }
-    :where(#mapa-legend).colapsada :where(#mapa-legend-head) span.toggle-ico{ transform:rotate(-90deg); }
+    :where(#mapa-legend-head) span.toggle-ico{ font-size:0.6875rem; color:var(--map-muted); opacity:.85; transition:transform var(--transition-base), opacity var(--transition-base); }
+    :where(#mapa-legend).colapsada :where(#mapa-legend-head) span.toggle-ico{ transform:rotate(-90deg); opacity:.55; }
     :where(#mapa-legend-list){ max-height:17.5rem; overflow-y:auto; padding:0.375rem; scrollbar-width:thin; scrollbar-color:var(--map-line) transparent; }
     :where(#mapa-legend-list)::-webkit-scrollbar{ width:0.375rem; }
     :where(#mapa-legend-list)::-webkit-scrollbar-thumb{ background:var(--map-line); border-radius:var(--radius-pill); }
