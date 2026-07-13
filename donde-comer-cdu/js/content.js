@@ -128,7 +128,14 @@
   // usaba el mapa Leaflet en index.backup (línea ~1726).
   // ─────────────────────────────────────────────────────────────────────
   if (window.UruSpotCore) {
-    window.UruSpotCore.init({
+    // [ARQUITECTURA — pasada "conectar el motor", 13/07/2026] Se guarda la
+    // instancia devuelta por init() en window.uruSpotMotor: index.html trae
+    // su propia sección "Fichas guardadas", que hasta ahora solo conocía
+    // los ids de su vista previa curada (4 lugares por rubro) y no los 862
+    // ids reales que el mapa recién habilita. Exponer el motor acá evita
+    // que index.html necesite reimplementar getLugarPorId/todosLosMarkers
+    // por su cuenta — reutiliza exactamente la misma fuente de datos.
+    window.uruSpotMotor = window.UruSpotCore.init({
       grupos: GRUPOS,
       lugares: [],
       extraDataUrl: 'lugares-core.json',
