@@ -405,31 +405,33 @@
         </div>
       </div>
 
-      <!-- [REDISEÑADO — auditoría de ritmo visual] Esta es la primera
-           sección después del hero: si arranca con el mismo grid de
-           cards que usan casi todas las secciones siguientes, el
-           usuario aprende en el primer scroll que "todo se ve igual" y
-           deja de prestar atención a la forma. Se reemplaza por una tira
-           editorial (lede + lista de manifiesto, sin cards ni íconos
-           grandes) y una cita — dos patrones que no vuelven a repetirse
-           juntos en ningún otro punto del documento. Se eliminan además
-           las dos entradas que apuntaban a Recorridos y Planner: ambos
-           temas ya tienen su propia sección desarrollada más abajo, y
-           repetir el mismo CTA "Ver guía completa →" acá era ruido, no
-           información nueva. -->
-      <p class="dc-lede">Concepción del Uruguay tiene más lugares de los que entran en la memoria de cualquiera. URU SPOT no es una lista más: es un mapa vivo que ya filtra, verifica y recuerda por vos.</p>
-
-      <ul class="dc-manifest">
-        <li><strong>Un solo mapa.</strong> Gastronomía, patrimonio, naturaleza, alojamiento y servicios, agrupados y filtrables desde una sola pantalla en vez de saltar entre apps.</li>
-        <li><strong>Datos verificados.</strong> El contador de resultados del mapa lo marca explícitamente: no es una lista sin curar.</li>
-        <li><strong>Memoria propia.</strong> Favoritos e historial para no tener que buscar lo mismo dos veces.</li>
-        <li><strong>Pensado para el celular.</strong> Barra inferior, búsqueda instantánea y vista de lista para recorrer con el teléfono en la mano.</li>
-        <li><strong>Búsqueda instantánea.</strong> El spotlight del header sincroniza resultados con el mapa mientras escribís.</li>
-      </ul>
-
-      <div class="dc-quote">
-        <p>Cuantos más filtros combinás —categoría, subcategoría y orden— más rápido llegás a lo que buscás, en vez de scrollear a ciegas entre cientos de lugares.</p>
-        <cite>— La forma más rápida de usar el mapa</cite>
+      <!-- [REDISEÑADO — auditoría "arquitectura de la experiencia"] La
+           versión anterior (lede + <ul> + blockquote, apilados en una
+           sola columna) evitaba el grid de cards pero seguía leyéndose
+           como un documento: un párrafo, una lista con negritas, una
+           cita. Se reemplaza por un thesis-split asimétrico de dos
+           columnas que no vuelve a repetirse en el resto del documento:
+           izquierda, la apertura editorial con capitular tipográfica
+           (el recurso de identidad de esta sección puntual) y la cita
+           como nota marginal alineada al texto, no como bloque separado
+           debajo; derecha, el manifiesto convertido en una cartilla
+           numerada (dc-ledger) — cada fila es un talón con código de
+           dos dígitos, no un bullet. Mismo contenido, cero cards. -->
+      <div class="dc-thesis">
+        <div class="dc-thesis-editorial">
+          <p class="dc-thesis-lede"><span class="dc-thesis-cap" aria-hidden="true">C</span>oncepción del Uruguay tiene más lugares de los que entran en la memoria de cualquiera. URU SPOT no es una lista más: es un mapa vivo que ya filtra, verifica y recuerda por vos.</p>
+          <div class="dc-thesis-note">
+            <p>Cuantos más filtros combinás —categoría, subcategoría y orden— más rápido llegás a lo que buscás, en vez de scrollear a ciegas entre cientos de lugares.</p>
+            <cite>— La forma más rápida de usar el mapa</cite>
+          </div>
+        </div>
+        <ol class="dc-ledger" aria-label="Por qué usar URU SPOT, en cinco puntos">
+          <li><span class="dc-ledger-n">01</span><span class="dc-ledger-body"><strong>Un solo mapa</strong>Gastronomía, patrimonio, naturaleza, alojamiento y servicios, agrupados y filtrables desde una sola pantalla en vez de saltar entre apps.</span></li>
+          <li><span class="dc-ledger-n">02</span><span class="dc-ledger-body"><strong>Datos verificados</strong>El contador de resultados del mapa lo marca explícitamente: no es una lista sin curar.</span></li>
+          <li><span class="dc-ledger-n">03</span><span class="dc-ledger-body"><strong>Memoria propia</strong>Favoritos e historial para no tener que buscar lo mismo dos veces.</span></li>
+          <li><span class="dc-ledger-n">04</span><span class="dc-ledger-body"><strong>Pensado para el celular</strong>Barra inferior, búsqueda instantánea y vista de lista para recorrer con el teléfono en la mano.</span></li>
+          <li><span class="dc-ledger-n">05</span><span class="dc-ledger-body"><strong>Búsqueda instantánea</strong>El spotlight del header sincroniza resultados con el mapa mientras escribís.</span></li>
+        </ol>
       </div>
     </section>
 
