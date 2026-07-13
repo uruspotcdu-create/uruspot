@@ -1,5 +1,29 @@
 /* ═══════════════════════════════════════════════════════════════════════
  * URU SPOT — WORKER DE DATOS
+ *
+ * [ESTADO ACTUAL — verificado en esta pasada] Este archivo NO está
+ * conectado: no existe ningún `new Worker(...)` que lo instancie en todo
+ * el proyecto (core-engine.js sigue hociendo fetch + response.json() +
+ * normalizarTexto() en el hilo principal, vía cargarConExtra()/
+ * iniciarFetch()). Los comentarios de más abajo describen la arquitectura
+ * para la que este worker fue escrito, pero eso todavía no está activo en
+ * producción — no asumir lo contrario al leer el resto de este archivo.
+ *
+ * Por qué se deja así, deliberadamente, en vez de conectarlo ahora: con
+ * 862 lugares (~116KB de JSON) el costo de fetch+parse+normalizar en el
+ * hilo principal es de un dígito de milisegundos — imperceptible, tal
+ * como ya documenta el bloque de abajo. Conectar este worker hoy sumaría
+ * complejidad real (mensajería async, manejo de fallo de carga del script
+ * del worker, una ruta de carga completamente distinta a la que ya está
+ * probada en producción) a cambio de un beneficio medible de cero en el
+ * estado actual del dataset. Se mantiene el archivo tal cual —ya
+ * implementado y listo— para el día en que el dataset se acerque a los
+ * miles de lugares y ese costo empiece a sentirse; ese es el disparador
+ * concreto para conectarlo, no una fecha arbitraria.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * URU SPOT — WORKER DE DATOS
  * [ARQUITECTURA — auditoría de escalabilidad "Dónde Comer"] Hasta esta
  * pasada, fetch(lugares-core.json)/fetch(lugares-detalles.json) corrían en
  * el hilo principal: la promesa se resuelve ahí, y CRUCIALMENTE
