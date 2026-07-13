@@ -13,7 +13,7 @@
  *   #cats-container, #cd-wrap-container, #hero-total-lugares,
  *   #stat-total-lugares, #stat-total-categorias, #search-spotlight,
  *   #spotlight-input, #spotlight-close, #bn-buscar, #bn-favoritos,
- *   #toggle-local, #toggle-visitante
+ *   #toggle-local, #toggle-visitante, #mapa-random, #mapa-fav-toggle
  * ═══════════════════════════════════════════════════════════════════════ */
 
 (function (global) {
@@ -52,6 +52,17 @@
   // de recorrer todosLosMarkers en cada evento (ver 2.1 para el problema
   // de fondo, que esta constante no resuelve, solo estandariza).
   var DEBOUNCE_BUSQUEDA_MS = 200;
+
+  // [NUEVA FUNCIONALIDAD — vista previa al pasar el mouse] Se calcula una
+  // sola vez, al cargar el script: no cambia durante la sesión (nadie
+  // conecta/desconecta un mouse a mitad de uso de forma que valga la pena
+  // escuchar el cambio). Solo dispositivos con mouse real (hover:hover) Y
+  // puntero preciso (pointer:fine) reciben el tooltip de vista previa que
+  // agrega agregarLugar() más abajo — en touch, "hover" no es un gesto que
+  // el usuario elija hacer aparte del toque, así que forzarlo ahí solo
+  // metería un parpadeo previo al popup real, nunca información nueva.
+  var SOPORTA_HOVER = typeof window.matchMedia === 'function' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   var utils = {
     // Normaliza acentos/mayúsculas para que "heladeria" encuentre "Heladería".
@@ -356,6 +367,14 @@
     var markersPorGrupo = {};
     var filtroActivo = 'todos';
     var subFiltroActivo = null; // categoria específica dentro del grupo activo, o null = todas
+    // [NUEVA FUNCIONALIDAD — favoritos en el mapa] "Ver solo mis
+    // favoritos" — se combina con filtroActivo/subFiltroActivo/
+    // textoBusqueda en vez de reemplazarlos (mismo criterio que ya usa
+    // lugarAleatorio() para no ignorar lo que el usuario ya eligió
+    // filtrar): si ya estaba viendo "Alojamiento", activar esto muestra
+    // sus favoritos guardados DENTRO de alojamiento, no todos sus
+    // favoritos de cualquier categoría.
+    var soloFavoritos = false;
     var textoBusqueda = '';
     // [FIX — AUDITORIA_DONDE_COMER.md, accesibilidad] textoBusqueda ya está
     // normalizado (sin acentos/mayúsculas, ver normalizarTexto) porque así
@@ -479,6 +498,22 @@
       // simplemente no engancha nada ahí (mismo criterio "opcional" que ya
       // aplica al resto de los nodos de este objeto).
       els.randomBtn = document.getElementById('mapa-random');
+      // [NUEVA FUNCIONALIDAD — favoritos en el mapa] Botón opcional, mismo
+      // criterio "si el HTML anfitrión no lo incluye, no se engancha nada
+      // ahí" que ya aplica a randomBtn.
+      els.favToggleBtn = document.getElementById('mapa-fav-toggle');
+      actualizarBadgeFavoritos();
+    }
+
+    // Refleja en el botón "♥ Favoritos" del toolbar cuántos lugares hay
+    // guardados ahora mismo. Se llama al cachear elementos (para que el
+    // número sea correcto desde el primer render, sin esperar ningún clic)
+    // y cada vez que se guarda/quita un favorito desde CUALQUIER superficie
+    // (popup del mapa, tarjeta de lista) — ver bindAccionesLugar más abajo.
+    function actualizarBadgeFavoritos() {
+      if (!els.favToggleBtn) return;
+      var cntEl = els.favToggleBtn.querySelector('.cnt');
+      if (cntEl) cntEl.textContent = favoritos.get().length;
     }
 
     // ─── Íconos de mapa ───
@@ -626,6 +661,26 @@
       return html;
     }
 
+    // ─── Vista previa al pasar el mouse (solo hover:hover + pointer:fine) ───
+    // [NUEVA FUNCIONALIDAD — reduce clics en desktop] Antes, ver de qué se
+    // trata un pin exigía un clic (abrir popup) aunque el usuario solo
+    // quisiera "pasear" el mouse por el mapa para tener una idea de lo que
+    // hay alrededor — el mismo patrón que ya usan Google/Apple Maps para
+    // vista previa. Deliberadamente más liviano que popupHtml(): sin
+    // acciones (ir/llamar/favorito/compartir) ni dirección/descripción,
+    // porque su único trabajo es decidir si vale la pena el clic real, no
+    // reemplazarlo.
+    function tooltipHtml(lugar, grupoInfo) {
+      var html = '<span class="mapa-tooltip-nombre">' + utils.escapeHtml(lugar.nombre || '') + '</span>';
+      html += '<span class="mapa-tooltip-meta">' + (grupoInfo ? grupoInfo.icon : '📍') + ' ' + utils.escapeHtml(lugar.categoria || '');
+      if (lugar.rating) {
+        var rating = parseFloat(lugar.rating);
+        if (!isNaN(rating)) html += ' · ★ ' + rating.toFixed(1);
+      }
+      html += '</span>';
+      return html;
+    }
+
     // ─── Alta de un lugar en el mapa ───
     function agregarLugar(lugar) {
       // Validación de propiedades requeridas
@@ -668,6 +723,22 @@
           if (popupEl && api.bindAccionesLugar) api.bindAccionesLugar(popupEl);
         }
       });
+      // [NUEVA FUNCIONALIDAD — vista previa al pasar el mouse] Mismo patrón
+      // de "contenido vacío hasta el primer uso real" que ya usa el popup
+      // (ver comentario de popupHtml más arriba): con 862 lugares, generar
+      // el HTML del tooltip para todos de entrada sería trabajo que la
+      // enorme mayoría de sesiones no llega a necesitar nunca. bindTooltip
+      // coexiste sin conflicto con bindPopup (hover abre uno, clic abre el
+      // otro; Leaflet cierra el tooltip antes de que el popup aparezca).
+      if (SOPORTA_HOVER) {
+        marker.bindTooltip('', { direction: 'top', offset: [0, -14], className: 'mapa-tooltip', opacity: 1 });
+        marker.on('tooltipopen', function () {
+          if (!marker._tooltipHtmlListo) {
+            marker._tooltipHtmlListo = true;
+            marker.setTooltipContent(tooltipHtml(lugar, grupoInfo));
+          }
+        });
+      }
       marker.lugarData = lugar;
       // [LOTE 1 — Mejora 1, evidencia] Antes: clusterGroups[grupo].addLayer(marker)
       // acá mismo, uno por uno para cada lugar. Esto anulaba en la práctica
@@ -865,7 +936,7 @@
       var candidatas = entradasCandidatas();
       var tieneSubFiltro = !!subFiltroActivo;
       var tieneBusqueda = (textoBusqueda !== '');
-      if (!tieneSubFiltro && !tieneBusqueda) return candidatas.slice();
+      if (!tieneSubFiltro && !tieneBusqueda && !soloFavoritos) return candidatas.slice();
       var out = [];
       var len = candidatas.length;
       for (var i = 0; i < len; i++) {
@@ -874,7 +945,8 @@
         var pasaBusqueda = !tieneBusqueda ||
           (m.nombreNorm.indexOf(textoBusqueda) > -1) ||
           (m.categoriaNorm.indexOf(textoBusqueda) > -1);
-        if (pasaSubcategoria && pasaBusqueda) out.push(m);
+        var pasaFavorito = !soloFavoritos || favoritos.is(m.lugar.id);
+        if (pasaSubcategoria && pasaBusqueda && pasaFavorito) out.push(m);
       }
       return out;
     }
@@ -1047,6 +1119,8 @@
       textoBusqueda = '';
       textoBusquedaOriginal = '';
       filtroActivo = 'todos';
+      soloFavoritos = false;
+      if (els.favToggleBtn) els.favToggleBtn.setAttribute('aria-pressed', 'false');
       (pillNodes || document.querySelectorAll('.mapa-pill')).forEach(function (b) { b.classList.remove('activo'); });
       var todosBtn = els.filtros ? els.filtros.querySelector('.mapa-pill[data-cat="todos"]') : document.querySelector('.mapa-pill[data-cat="todos"]');
       if (todosBtn) todosBtn.classList.add('activo');
@@ -1070,6 +1144,18 @@
       aplicarFiltros();
     }
 
+    // [NUEVA FUNCIONALIDAD — favoritos en el mapa] Alterna "ver solo mis
+    // favoritos" sin tocar categoría/subcategoría/búsqueda vigentes (ver
+    // nota junto a la declaración de soloFavoritos). "forzar" (booleano
+    // opcional) permite que el estado vacío (renderEmptyState) apague el
+    // filtro de un toque sin necesidad de saber cuál es el estado
+    // contrario al actual.
+    function toggleSoloFavoritos(forzar) {
+      soloFavoritos = (typeof forzar === 'boolean') ? forzar : !soloFavoritos;
+      if (els.favToggleBtn) els.favToggleBtn.setAttribute('aria-pressed', soloFavoritos ? 'true' : 'false');
+      aplicarFiltros();
+    }
+
     // [NUEVA FUNCIONALIDAD — estado vacío accionable] Antes #mapa-empty era
     // un texto fijo idéntico sin importar la causa (búsqueda sin match,
     // filtro de categoría sin resultados, o ambos combinados) y sin ninguna
@@ -1088,25 +1174,43 @@
       var grupoInfo = GRUPOS[filtroActivo];
       var nombreGrupo = grupoInfo ? grupoInfo.label : filtroActivo;
       var mensaje, acciones = '';
-      if (hayBusqueda && hayFiltro) {
-        mensaje = 'Sin resultados para "' + utils.escapeHtml(textoBusqueda) + '" dentro de ' + utils.escapeHtml(nombreGrupo) + '.';
+      // [NUEVA FUNCIONALIDAD — filtro "Solo favoritos"] Caso especial: si
+      // directamente no hay NINGÚN favorito guardado todavía, el motivo
+      // real no es "esa búsqueda/categoría no tiene resultados" (los
+      // demás mensajes de esta función) sino que la lista de favoritos
+      // está vacía — un mensaje distinto, orientado a la acción que sí la
+      // llena (guardar algo desde el ♡ del popup o de una tarjeta).
+      if (soloFavoritos && favoritos.get().length === 0) {
+        mensaje = 'Todavía no guardaste ningún lugar. Tocá el ♡ en un lugar del mapa o la lista para guardarlo acá.';
+        acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="quitar-favoritos">Ver todos los lugares</button>';
+      } else if (hayBusqueda && hayFiltro) {
+        mensaje = 'Sin resultados para "' + utils.escapeHtml(textoBusqueda) + '" dentro de ' + utils.escapeHtml(nombreGrupo) + (soloFavoritos ? ' entre tus favoritos' : '') + '.';
         acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="solo-busqueda">Buscar en todas las categorías</button>';
         acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="todo">Ver todo ' + utils.escapeHtml(nombreGrupo) + '</button>';
       } else if (hayBusqueda) {
-        mensaje = 'Sin resultados para "' + utils.escapeHtml(textoBusqueda) + '".';
+        mensaje = 'Sin resultados para "' + utils.escapeHtml(textoBusqueda) + '"' + (soloFavoritos ? ' entre tus favoritos' : '') + '.';
         acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="solo-busqueda">Borrar búsqueda</button>';
       } else if (hayFiltro) {
-        mensaje = 'Todavía no hay lugares verificados en ' + utils.escapeHtml(nombreGrupo) + '.';
+        mensaje = (soloFavoritos ? 'No guardaste ningún favorito en ' : 'Todavía no hay lugares verificados en ') + utils.escapeHtml(nombreGrupo) + '.';
         acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="todo">Ver todas las categorías</button>';
       } else {
         mensaje = 'No encontramos lugares con esa búsqueda o ese filtro.';
         acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="todo">Ver todos los lugares</button>';
+      }
+      // Acción extra, adicional a las de arriba (no las reemplaza): salir
+      // del filtro de favoritos sin tocar categoría/búsqueda, para el caso
+      // en que sí hay favoritos guardados pero ninguno cae dentro del
+      // filtro/búsqueda actual.
+      if (soloFavoritos && favoritos.get().length > 0) {
+        acciones += '<button type="button" class="mapa-empty-accion" data-empty-accion="quitar-favoritos">Quitar filtro de favoritos</button>';
       }
       cont.innerHTML = '<p class="mapa-empty-msg">' + mensaje + '</p><div class="mapa-empty-acciones">' + acciones + '</div>';
       var btnSoloBusqueda = cont.querySelector('[data-empty-accion="solo-busqueda"]');
       if (btnSoloBusqueda) btnSoloBusqueda.addEventListener('click', limpiarSoloBusqueda);
       var btnTodo = cont.querySelector('[data-empty-accion="todo"]');
       if (btnTodo) btnTodo.addEventListener('click', limpiarTodoFiltro);
+      var btnQuitarFav = cont.querySelector('[data-empty-accion="quitar-favoritos"]');
+      if (btnQuitarFav) btnQuitarFav.addEventListener('click', function (e) { e.preventDefault(); toggleSoloFavoritos(false); });
     }
 
     // [FIX — AUDITORIA_DONDE_COMER.md, accesibilidad] Etiquetas legibles del
@@ -1141,6 +1245,9 @@
       }
       if (subFiltroActivo) {
         partes.push('subcategoría ' + subFiltroActivo);
+      }
+      if (soloFavoritos) {
+        partes.push('solo tus favoritos');
       }
       if (textoBusquedaOriginal) {
         partes.push('que coinciden con "' + textoBusquedaOriginal + '"');
@@ -1206,7 +1313,7 @@
       // agregado, el fast-path solo se activa cuando de verdad no hay
       // trabajo que hacer (carga inicial, o resets consecutivos sin haber
       // filtrado nada en el medio).
-      var esCasoTrivial = esTodos && !subFiltroActivo && (textoBusqueda === '');
+      var esCasoTrivial = esTodos && !subFiltroActivo && (textoBusqueda === '') && !soloFavoritos;
       if (esCasoTrivial && estadoSinOcultos) {
         GRUPO_KEYS.forEach(function (g) {
           if (!map.hasLayer(clusterGroups[g])) map.addLayer(clusterGroups[g]);
@@ -1260,7 +1367,8 @@
           var pasaBusqueda = !tieneBusqueda ||
             (m.nombreNorm.indexOf(textoBusqueda) > -1) ||
             (m.categoriaNorm.indexOf(textoBusqueda) > -1);
-          var mostrar = pasaSubcategoria && pasaBusqueda;
+          var pasaFavorito = !soloFavoritos || favoritos.is(m.lugar.id);
+          var mostrar = pasaSubcategoria && pasaBusqueda && pasaFavorito;
           if (mostrar) {
             visibles++;
             if (!grupoLayer.hasLayer(m.marker)) aAgregar.push(m.marker);
@@ -1821,6 +1929,12 @@
         resetBtn.addEventListener('click', limpiarTodoFiltro);
       }
 
+      // [NUEVA FUNCIONALIDAD — favoritos en el mapa]
+      var favToggleBtn = els.favToggleBtn;
+      if (favToggleBtn) {
+        favToggleBtn.addEventListener('click', function () { toggleSoloFavoritos(); });
+      }
+
       var geolocBtn = els.geolocBtn;
       if (geolocBtn) {
         geolocBtn.addEventListener('click', function () {
@@ -2069,6 +2183,7 @@
             // duplica el camino de guardado/lectura de localStorage.
             var lugarRef = getLugarPorId(id);
             var nombre = lugarRef ? lugarRef.nombre : 'Lugar';
+            actualizarBadgeFavoritos();
             mostrarToast(
               ahoraFav ? '♥ Guardado en favoritos: ' + nombre : 'Quitado de favoritos: ' + nombre,
               {
@@ -2084,9 +2199,18 @@
                       b.textContent = revertido ? '♥' : '♡';
                     }
                   });
+                  actualizarBadgeFavoritos();
+                  // Si el filtro "solo favoritos" está activo y este lugar
+                  // quedó visible/oculto por el deshacer, refleja el cambio
+                  // sin que el usuario tenga que tocar nada más.
+                  if (soloFavoritos) aplicarFiltros();
                 }
               }
             );
+            // Mismo caso que el "Deshacer" de arriba: si el filtro "solo
+            // favoritos" está activo, sacar/agregar un favorito puede
+            // cambiar qué queda visible en el mapa/lista ahora mismo.
+            if (soloFavoritos) aplicarFiltros();
           });
         });
         root.querySelectorAll('[data-share-id]').forEach(function (btn) {
@@ -2539,8 +2663,26 @@
       initSpotlightSearch(motor, config.grupos || {});
       initDrawer();
       initBottomNav();
-      initReveal();
-      initSmoothAnchors();
+      // [FIX — integración con donde-comer-cdu/index.html, pasada
+      // "conectar el motor"] Esta página trae, en su propio <script>
+      // inline (el que arranca el sello de intro / la barra de progreso /
+      // el acordeón de FAQ), su propio reveal-on-scroll (clase ".in", no
+      // ".is-visible") y su propio scroll suave para anclas internas
+      // — ambos ya corrieron para cuando este archivo llega a ejecutarse.
+      // Si initReveal()/initSmoothAnchors() corrieran también acá no
+      // romperían nada visible (clases distintas; los dos listeners de
+      // ancla llaman al mismo scrollIntoView), pero sí crearían un
+      // IntersectionObserver y un listener de click globales enteramente
+      // redundantes — justo la clase de duplicación que esta pasada tiene
+      // instrucción explícita de evitar. config.paginaConScrollPropio deja
+      // esto optativo (default false) para que cualquier otro HTML
+      // anfitrión que SÍ dependa del comportamiento original —sin su
+      // propio reveal ni anclas— lo siga recibiendo exactamente igual que
+      // siempre.
+      if (!config.paginaConScrollPropio) {
+        initReveal();
+        initSmoothAnchors();
+      }
 
       // [ARQUITECTURA — mapa diferido] El overlay #app-loading se saca ACÁ,
       // apenas el app-shell completo ya respondió al tacto (header, drawer,
