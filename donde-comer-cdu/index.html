@@ -145,50 +145,12 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- [ARQUITECTURA — mapa diferido, ver core-engine.js] Leaflet y
-     Leaflet.markercluster (JS y CSS) YA NO se declaran acá como recursos
-     eager. #mapa-leaflet está varias pantallas por debajo del hero, y
-     antes esos ~175KB de JS se ejecutaban de forma síncrona en el
-     arranque —bloqueando incluso el drawer, la búsqueda y la bottom
-     nav, que no usan Leaflet para nada— solo para pintar una sección
-     que buena parte de las visitas ni siquiera llega a scrollear. Ahora
-     se inyectan dinámicamente (script/link creados por JS) recién
-     cuando #mapa-leaflet está por entrar en viewport — ver
-     lazyInitMapa()/arrancarMapaPesado() al final de core-engine.js.
-     Se mantiene el preconnect (gratis, adelanta el DNS/TLS de cdnjs para
-     cuando el navegador sí necesite esos recursos) pero no la descarga
-     ni la ejecución. Los dos <link rel="preload" as="fetch"> de
-     lugares-core.json/lugares-detalles.json también se sacan de acá por
-     la misma razón: precargar un fetch que puede no llegar a pedirse
-     nunca (o pedirse recién minutos después) le resta ancho de banda a
-     lo que sí es crítico ahora mismo (fuentes, core.css, content.css). -->
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <script src="js/core-engine.js" defer fetchpriority="high"></script>
 <script src="js/content.js" defer fetchpriority="high"></script>
-<!-- [OPTIMIZACIÓN — Fase 3, hallazgo Outfit] Outfit cargaba 300;400;500,
-     pero el CSS del mapa pide 400 (base de #mapa) y 700 (.mapa-popup-cat,
-     .mapa-popup-destacado, .mapa-popup-actions a, leyenda) y 600
-     (.mapa-subpill). El peso 700 nunca estuvo cargado: el navegador lo
-     renderizaba con negrita sintética (engrosado algorítmico del glifo
-     regular) en vez del archivo real. No es un peso nuevo — el CSS ya
-     pedía 700, esto corrige la fuente que responde a ese pedido. 300 y
-     500 se quitan por no tener ningún selector que los use. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Outfit:wght@400;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Outfit:wght@400;600;700&display=swap"></noscript>
 
-<!-- [ARQUITECTURA — mapa diferido] Las 3 hojas de estilo de Leaflet/
-     MarkerCluster ya no se declaran acá (ni con el truco print/onload):
-     se inyectan junto con el JS en arrancarMapaPesado() (core-engine.js),
-     en el mismo instante en que se decide cargar el mapa. Sin JS, el mapa
-     nunca se inicializa de todas formas (100% dependiente de Leaflet vía
-     script), así que un <noscript> con estas hojas de estilo no habilita
-     ninguna funcionalidad real — #mapa-leaflet queda con su color de
-     fondo sólido (ver core.css) y el resto del sitio funciona igual. -->
-
-<!-- manifest.webmanifest / icons/favicon.svg / icons/apple-touch-icon.png no
-     existen en este proyecto. Se usa el mismo favicon con URL absoluta que
-     ya usan las demás páginas del sitio (ver los-mejores-restaurantes-cdu),
-     en vez de referenciar archivos inexistentes. -->
 <link rel="icon" type="image/webp" href="https://uruspot.pages.dev/img/logof.webp" />
 
 <link rel="stylesheet" href="css/core.css">
@@ -197,44 +159,15 @@
 <body>
   <div class="grain-overlay" aria-hidden="true"></div>
   <a class="skip-link" href="#main-content">Ir al contenido principal</a>
-  <!-- [NUEVO — pasada "Dónde Comer"] Segundo skip-link, mismo patrón que
-       el de arriba (misma clase, mismo comportamiento de foco): acceso
-       directo por teclado/lector de pantalla a la guía gastronómica sin
-       tener que atravesar hero + home hub + mapa completo primero. -->
   <a class="skip-link" href="#donde-comer-guia">Ir a la guía de Dónde Comer</a>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       APP LOADING — cubre la pantalla brevemente mientras corre el <head>
-       parseando/ejecutando core-engine.js + content.js.
-
-       [ARQUITECTURA — mapa diferido] "is-done" ya NO espera a que el mapa
-       termine de traer/parsear/clusterizar 862 lugares (eso puede tardar
-       segundos, y encima corre recién cuando el usuario scrollea cerca de
-       #mapa — ver lazyInitMapa() en core-engine.js). Ahora se agrega
-       apenas UruSpotCore.init() terminó de enganchar el app-shell (header,
-       drawer, spotlight, bottom nav, hero ya estático desde el HTML): en
-       la práctica, uno o dos frames después de que content.js empieza a
-       ejecutar, en vez de después de un fetch + un loop de 862 elementos +
-       clusterización de Leaflet.
-  ═══════════════════════════════════════════════════════════════ -->
   <div class="us-app-loading" id="app-loading" role="presentation" aria-hidden="true">
     <div class="us-app-loading-mark" aria-hidden="true"></div>
     <div class="us-app-loading-grid" id="app-loading-grid"></div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       SCRIM — backdrop compartido por Bottom Sheet, Full Screen Sheet,
-       Drawer y Sistema de diálogos. Un único overlay evita duplicar
-       capas de fondo; el atributo data-owner indica qué superficie lo
-       activó, así el motor sabe qué cerrar al tocarlo.
-  ═══════════════════════════════════════════════════════════════ -->
   <div class="us-scrim" id="scrim" data-owner="" hidden aria-hidden="true"></div>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       HEADER DINÁMICO — persistente, colapsa/expande según scroll.
-       El MÓDULO B no escribe acá adentro; sólo el motor Core togglea
-       data-state ("top" | "compact") y el estado del buscador.
-  ═══════════════════════════════════════════════════════════════ -->
   <header class="us-app-header" id="app-header" data-state="top">
     <div class="us-app-header-inner">
       <a class="us-app-brand" href="#hero" data-scroll="hero" aria-label="URU SPOT — inicio">
@@ -251,9 +184,6 @@
     </div>
   </header>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       BARRA INFERIOR — navegación primaria mobile.
-  ═══════════════════════════════════════════════════════════════ -->
   <nav class="bottom-nav" aria-label="Navegación principal">
     <a href="#hero" class="bn-item is-active" data-bn="inicio">
       <span class="bn-icon" aria-hidden="true"></span>
@@ -271,26 +201,17 @@
       <span class="bn-icon" aria-hidden="true"></span>
       <span class="bn-label">Buscar</span>
     </button>
-    <!-- data-scroll-target lo define el contenido: a qué sección apunta "Favoritos" -->
     <button type="button" class="bn-item" id="bn-favoritos" data-bn="favoritos" data-scroll-target="">
       <span class="bn-icon" aria-hidden="true"></span>
       <span class="bn-label">Favoritos</span>
     </button>
   </nav>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       FAB — acción rápida flotante. Un solo propósito: armar un plan.
-       Las secciones "Planes rápidos" del Home Hub alimentan la misma
-       superficie (Full Screen Sheet #full-sheet) que abre este botón.
-  ═══════════════════════════════════════════════════════════════ -->
   <button type="button" class="us-fab" id="fab-planner" data-action="open-planner">
     <span class="us-fab-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Armar un plan rápido</span>
   </button>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       OVERLAY DE BÚSQUEDA (SPOTLIGHT)
-  ═══════════════════════════════════════════════════════════════ -->
   <div class="search-spotlight" id="search-spotlight" role="dialog" aria-modal="true" aria-label="Buscar un lugar" aria-hidden="true">
     <div class="spotlight-inner">
       <div class="spotlight-bar">
@@ -298,19 +219,12 @@
         <button type="button" id="spotlight-close" aria-label="Cerrar búsqueda">✕</button>
       </div>
       <div class="spotlight-hint">Escribí y los resultados se sincronizan con el mapa</div>
-      <!-- Antes de tipear: búsquedas recientes + sugeridas del dataset.
-           El motor vacía este bloque apenas hay texto en el input. -->
       <div class="spotlight-suggestions" id="spotlight-suggestions" aria-label="Sugerencias"></div>
-      <!-- Resultados en vivo: el motor Core clona #tpl-place-card acá adentro -->
       <div class="spotlight-results" id="spotlight-results" role="listbox" aria-label="Resultados de búsqueda"></div>
       <div class="spotlight-empty" id="spotlight-empty" hidden>Sin resultados para esa búsqueda.</div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       DRAWER — menú lateral: navegación secundaria, favoritos,
-       historial, recorridos, planner, categorías.
-  ═══════════════════════════════════════════════════════════════ -->
   <aside class="us-drawer" id="app-drawer" role="dialog" aria-modal="true" aria-label="Menú" hidden>
     <div class="us-drawer-header">
       <span class="us-app-brand-text">URU SPOT</span>
@@ -325,39 +239,12 @@
       <button type="button" class="us-drawer-item" data-drawer-action="recorridos">Recorridos</button>
       <button type="button" class="us-drawer-item" data-drawer-action="planner">Planner</button>
       <a href="#categorias-detalle" class="us-drawer-item" data-drawer-action="categorias">Categorías</a>
-      <!-- [NUEVO — pasada "Dónde Comer"] Mismo patrón que el resto: <a>
-           con clase us-drawer-item, sin lógica adicional. -->
       <a href="#donde-comer-guia" class="us-drawer-item" data-drawer-action="donde-comer">Dónde comer</a>
-      <!-- [NUEVO — auditoría "máximo nivel"] Mismo patrón exacto: <a>
-           ancla simple con clase us-drawer-item, sin lógica nueva. -->
       <a href="#centro-ayuda" class="us-drawer-item" data-drawer-action="ayuda">Centro de ayuda</a>
     </nav>
-    <!-- El MÓDULO B puede sumar acá links de contacto/legales sin tocar la nav -->
     <div class="us-drawer-footer" id="drawer-footer-mount"></div>
   </aside>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       HERO
-       [ARQUITECTURA — auditoría hero/footer estático] Antes este bloque
-       era un mount point vacío (<div id="hero-mount"></div>) que
-       content.js llenaba con innerHTML recién después de que la cadena
-       completa de <script defer> (Leaflet, MarkerCluster, core-engine,
-       content) terminaba de ejecutar. Todo este markup es texto/enlaces
-       fijos — no depende de ningún dato del dataset de lugares — así
-       que se lo deja directamente en el HTML, presente desde el primer
-       byte, tal como recomienda la propia auditoría de performance.
-       Los 3 valores que sí son dinámicos (#hero-total-lugares,
-       #stat-total-lugares, #stat-total-categorias) arrancan con el
-       mismo placeholder "···" que ya tenían antes de que corriera JS;
-       core-engine.js los sobrescribe con el valor real en
-       actualizarContadoresHero(), exactamente igual que antes — estos
-       IDs ya estaban documentados como "opcionales" en el contrato de
-       DOM de core-engine.js (no le importa quién los creó). Mismo caso
-       para #cats-container: sigue vacío, renderHeroCards(counts) lo
-       llena una vez que el fetch de lugares-core.json responde (esa
-       parte es imposible de tener estática: los conteos por categoría
-       no existen hasta ese momento).
-  ═══════════════════════════════════════════════════════════════ -->
   <div id="hero-mount">
     <section class="hero" id="hero">
       <div class="hero-media" aria-hidden="true">
@@ -374,8 +261,8 @@
         <div class="hero-stats" role="list">
           <div class="hs" role="listitem"><div class="hs-n" id="stat-total-lugares">···</div><div class="hs-l">Lugares</div></div>
           <div class="hs" role="listitem"><div class="hs-n" id="stat-total-categorias">···</div><div class="hs-l">Categorías</div></div>
-          <div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Ciudad</div></div>
-          <div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Verificado</div></div>
+          <div class="hs" role="listitem"><div class="hs-n">CDU</div><div class="hs-l">Entre Ríos, Argentina</div></div>
+          <div class="hs" role="listitem"><div class="hs-n">✓</div><div class="hs-l">Datos verificados</div></div>
         </div>
       </div>
       <div class="hero-wave" aria-hidden="true">
@@ -389,14 +276,6 @@
 
   <main id="main-content">
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — pasada de contenido] POR QUÉ USAR URU SPOT
-         Franja de valor inmediatamente después del hero. 100% editorial,
-         sin datos de negocios puntuales: describe funcionalidades reales
-         ya presentes en este HTML (mapa, verificación, favoritos/historial,
-         diseño mobile) para dar contexto de confianza antes de que el
-         usuario siga bajando.
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="por-que-uruspot" aria-labelledby="title-por-que-uruspot">
       <div class="section-header">
         <div>
@@ -405,18 +284,6 @@
         </div>
       </div>
 
-      <!-- [REDISEÑADO — auditoría "arquitectura de la experiencia"] La
-           versión anterior (lede + <ul> + blockquote, apilados en una
-           sola columna) evitaba el grid de cards pero seguía leyéndose
-           como un documento: un párrafo, una lista con negritas, una
-           cita. Se reemplaza por un thesis-split asimétrico de dos
-           columnas que no vuelve a repetirse en el resto del documento:
-           izquierda, la apertura editorial con capitular tipográfica
-           (el recurso de identidad de esta sección puntual) y la cita
-           como nota marginal alineada al texto, no como bloque separado
-           debajo; derecha, el manifiesto convertido en una cartilla
-           numerada (dc-ledger) — cada fila es un talón con código de
-           dos dígitos, no un bullet. Mismo contenido, cero cards. -->
       <div class="dc-thesis">
         <div class="dc-thesis-editorial">
           <p class="dc-thesis-lede"><span class="dc-thesis-cap" aria-hidden="true">C</span>oncepción del Uruguay tiene más lugares de los que entran en la memoria de cualquiera. URU SPOT no es una lista más: es un mapa vivo que ya filtra, verifica y recuerda por vos.</p>
@@ -435,19 +302,6 @@
       </div>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — 2ª pasada] CÓMO EXPLORAR LA CIUDAD
-         Overview de categorías + tabla de contenido de acceso rápido.
-         100% estática, sin fetch. Las 5 categorías y su valor
-         data-filtro son exactamente las que ya usa <footer> (única
-         fuente de verdad de categorías presente en este HTML); no se
-         inventa ninguna categoría nueva. Reutiliza dc-grid/dc-card/
-         dc-chip (definidos más abajo en #donde-comer-guia): al ser
-         clases CSS planas, se aplican en todo el documento sin importar
-         en qué punto del HTML esté físicamente el <style> que las
-         declara — así se evita duplicar reglas para un segundo bloque
-         de tarjetas.
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="explorar-ciudad" aria-labelledby="title-explorar-ciudad">
       <div class="section-header">
         <div>
@@ -484,13 +338,6 @@
         </a>
       </div>
 
-      <!-- [REDISEÑADO — auditoría "identidad distinta"] La comparativa
-           de 2 columnas (dc-compare) es el patrón más repetido de todo
-           el documento. Acá se reemplaza por una previsualización real
-           de la UI: los mismos dos botones que el usuario va a tocar
-           en #mapa-view-toggle más abajo, en miniatura, con su
-           resultado esperado debajo de cada uno — funciona como un
-           anticipo visual en vez de una comparación en prosa. -->
       <h3 class="dc-subhead">¿Vista de mapa o vista de lista?</h3>
       <div class="dc-preview">
         <div class="dc-preview-btn">
@@ -503,28 +350,9 @@
         </div>
       </div>
 
-      <!-- [ELIMINADO — auditoría "máximo nivel"] Acá había una <nav> con
-           12 chips repitiendo, en la práctica, el índice completo del
-           sitio — el mismo contenido que ahora vive, mejor organizado y
-           una sola vez, en #centro-ayuda (dc-index). Mantenerlo acá
-           además del footer y del índice era el ejemplo más literal de
-           "CTA sin razón de existir": un enlace más al índice alcanza. -->
-      <p class="dc-intro-copy" style="margin-top:1.5rem">¿Buscás algo puntual? El <a href="#centro-ayuda">índice completo de la guía</a> junta cada tema en un solo lugar.</p>
+      <p class="dc-intro-copy u-mt-lg">¿Buscás algo puntual? El <a href="#centro-ayuda">índice completo de la guía</a> junta cada tema en un solo lugar.</p>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — pasada de contenido] ¿QUÉ TIPO DE VISITA ESTÁS HACIENDO?
-         Descubrimiento por perfil. 100% estática. Cada CTA reutiliza
-         exactamente claves ya declaradas en data-home-keys de #home-hub
-         (no se inventa ninguna colección nueva) o filtros de categoría ya
-         usados en el resto del documento (data-filtro). La tarjeta de "día
-         completo" menciona el planificador flotante (#fab-planner) y el
-         menú lateral como texto plano, no como controles falsos: no se
-         agrega ningún botón nuevo que dispare data-drawer-action fuera del
-         propio <aside id="app-drawer">, porque no hay forma de confirmar
-         desde este archivo si ese binding es delegado globalmente o
-         exclusivo del drawer.
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="para-quien-es-esta-guia" aria-labelledby="title-para-quien-es-esta-guia">
       <div class="section-header">
         <div>
@@ -537,16 +365,6 @@
         más se parece a la tuya: la respuesta cambia debajo, sin recargar nada.
       </p>
 
-      <!-- [CONVERTIDO EN COMPONENTE — auditoría "máximo nivel"] Antes era
-           un dc-grid de 6 cards, el mismo patrón que ya se usó en la
-           sección anterior y se repite varias veces más abajo. Se
-           convierte en un selector real: 6 <input type="radio"> nativos
-           +  :has() en CSS para revelar solo el panel de la opción
-           elegida. 100% HTML/CSS accesible (radiogroup real, navegable
-           por teclado, sin ningún JS nuevo) y es, en toda la página, la
-           única sección que le pide al usuario elegir algo antes de
-           mostrarle contenido — un patrón de interacción que no se
-           repite en ningún otro punto del documento. -->
       <div class="dc-quiz">
         <div class="dc-quiz-options" role="radiogroup" aria-label="Elegí tu situación de visita">
           <input type="radio" name="visita" id="q-paso" class="dc-quiz-input" checked>
@@ -599,31 +417,8 @@
     </section>
 
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         CONTENIDO EDITORIAL (mount point)
-         Lugar del día, imperdibles, recorridos ("El Cauce"), etc. Son
-         funcionalidades 100% de contenido: usan la API pública de
-         UruSpotCore (getLugarPorId, mostrarSoloLugares, bindAccionesLugar,
-         favoritos, compartirLugar) pero su HTML/copy no vive en Core.
-    ═══════════════════════════════════════════════════════════════ -->
     <div id="editorial-mount"></div>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         HOME HUB — la home inteligente. Centro dinámico, no una lista.
-         El motor clona #tpl-carousel-section una vez por cada clave de
-         data-home-keys y llena su track con #tpl-place-card. Agregar una
-         sección nueva es agregar una clave a esta lista: nunca hace falta
-         reorganizar el HTML.
-    ═══════════════════════════════════════════════════════════════ -->
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — 2ª pasada] Cabecera editorial para el Home Hub. El mount
-         point (section#home-hub) queda intacto: el motor sigue
-         encontrándolo por su id sin ningún cambio. Esta cabecera sólo
-         agrega jerarquía semántica (antes no había ningún <h2> anunciando
-         qué es esta sección) y una leyenda de las 27 claves declaradas en
-         data-home-keys, agrupadas por tipo — contenido derivado 1:1 del
-         propio atributo, no inventado.
-    ═══════════════════════════════════════════════════════════════ -->
     <div class="sec-title reveal" id="explorar-recomendaciones">
       <span class="section-eyebrow">Explorar</span>
       <h2>Recomendaciones pensadas para vos</h2>
@@ -645,9 +440,6 @@
         <li>❤️ Favoritos</li><li>📜 Historial</li>
       </ul>
 
-      <!-- [NUEVO — pasada "guía enorme"] Callout + mini-FAQ propios de
-           esta cabecera, para que la franja de transición hacia el mount
-           point dinámico #home-hub no sea solo una lista de tags. -->
       <div class="dc-callout dc-callout--info">
         <span class="dc-callout-ico" aria-hidden="true">🎛️</span>
         <div class="dc-callout-body">
@@ -670,14 +462,6 @@
       data-home-keys="descubrir-hoy,cerca-tuyo,imperdibles,recien-agregados,joyas-ocultas,abiertos-ahora,con-estacionamiento,muy-recomendados,lo-mas-elegido,gratis,economicos,premium,familias,parejas,amigos,plan-30min,plan-1h,plan-2h,plan-tarde,plan-dia,lluvia,verano,segun-momento,continuar-explorando,ultimos-vistos,favoritos,historial">
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — pasada de contenido] ELEGÍ SEGÚN CUÁNTO TIEMPO TENGAS /
-         SEGÚN EL MOMENTO. Desarrolla en contenido real las claves de
-         data-home-keys que hasta ahora solo aparecían como tags sueltos
-         (plan-30min, plan-1h, plan-2h, plan-tarde, plan-dia, lluvia,
-         verano, segun-momento): no se inventa ninguna colección nueva,
-         solo se explica con más detalle lo que ya existe.
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="segun-tiempo-y-momento" aria-labelledby="title-segun-tiempo-y-momento">
       <div class="section-header">
         <div>
@@ -685,61 +469,23 @@
           <h2 class="section-title" id="title-segun-tiempo-y-momento">Según cuánto tiempo tengas o el momento</h2>
         </div>
       </div>
-      <div class="dc-cols">
-        <div>
-          <h3 class="dc-subhead">Por tiempo disponible</h3>
-          <div class="dc-grid" role="list" aria-label="Colecciones por tiempo disponible">
-            <article class="dc-card" role="listitem">
-              <span class="dc-card-icon" aria-hidden="true">⏱️</span>
-              <h3>Plan 30 min</h3>
-              <p>Para una parada corta entre otra cosa que estés haciendo.</p>
-            </article>
-            <article class="dc-card" role="listitem">
-              <span class="dc-card-icon" aria-hidden="true">🕐</span>
-              <h3>Plan 1 h / 2 h</h3>
-              <p>Un rato más largo, sin llegar a ocupar media jornada.</p>
-            </article>
-            <article class="dc-card" role="listitem">
-              <span class="dc-card-icon" aria-hidden="true">🌇</span>
-              <h3>Plan de tarde</h3>
-              <p>Para cuando arrancás después del mediodía y querés aprovechar lo que queda del día.</p>
-            </article>
-            <article class="dc-card" role="listitem">
-              <span class="dc-card-icon" aria-hidden="true">📅</span>
-              <h3>Plan de día</h3>
-              <p>Cuando tenés la jornada completa libre para recorrer sin apuro.</p>
-            </article>
-          </div>
-        </div>
-        <div>
-          <h3 class="dc-subhead">Por clima o momento</h3>
-          <div class="dc-grid" role="list" aria-label="Colecciones por clima o momento">
-            <article class="dc-card" role="listitem">
-              <span class="dc-card-icon" aria-hidden="true">🌧️</span>
-              <h3>Días de lluvia</h3>
-              <p>Opciones que no dependen de que el clima acompañe.</p>
-            </article>
-            <article class="dc-card" role="listitem">
-              <span class="dc-card-icon" aria-hidden="true">☀️</span>
-              <h3>Verano</h3>
-              <p>Pensado para los días de más calor del año.</p>
-            </article>
-            <article class="dc-card" role="listitem">
-              <span class="dc-card-icon" aria-hidden="true">🕰️</span>
-              <h3>Según el momento</h3>
-              <p>Una colección que se ajusta según el momento en el que estés explorando.</p>
-            </article>
-          </div>
-          <p class="dc-intro-copy" style="margin-bottom:0">
-            Todas estas colecciones viven dentro de <a href="#explorar-recomendaciones">Explorar</a>,
-            junto al resto de los carruseles temáticos.
-          </p>
+      <p class="dc-intro-copy dc-intro-copy--wide">
+        Las mismas colecciones de <a href="#explorar-recomendaciones">Explorar</a> se pueden leer
+        también en dos ejes: cuánto tiempo tenés y qué clima o momento del día es. Cruzarlos entre
+        sí, no elegir uno solo, es lo que más rápido acota las opciones.
+      </p>
+      <div class="dc-panel">
+        <div class="dc-panel-head"><span aria-hidden="true">⏱️</span><strong>Referencia rápida por tiempo y clima</strong></div>
+        <div class="dc-panel-grid">
+          <div class="dc-panel-item"><strong>⏱️ 30 min</strong>Una parada corta entre otra cosa que estés haciendo.</div>
+          <div class="dc-panel-item"><strong>🕐 1 h / 2 h</strong>Un rato más largo, sin ocupar media jornada.</div>
+          <div class="dc-panel-item"><strong>🌇 Tarde</strong>Arrancás después del mediodía y querés aprovechar lo que queda.</div>
+          <div class="dc-panel-item"><strong>📅 Día completo</strong>Jornada libre para recorrer sin apuro.</div>
+          <div class="dc-panel-item"><strong>🌧️ Lluvia</strong>Opciones que no dependen de que el clima acompañe.</div>
+          <div class="dc-panel-item"><strong>☀️ Verano</strong>Pensado para los días de más calor del año.</div>
         </div>
       </div>
 
-      <!-- [NUEVO — pasada "guía enorme"] Cita editorial + callout +
-           CTA de cierre, para que la sección no termine en la mitad de
-           una grilla sin invitar a nada más. -->
       <div class="dc-quote">
         <p>El mejor plan no siempre es el más largo: a veces son treinta minutos bien elegidos.</p>
         <cite>— Dicho local sobre cómo recorrer Concepción del Uruguay</cite>
@@ -757,26 +503,18 @@
       </nav>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         MAPA COMPLETO
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="mapa" aria-labelledby="title-mapa">
       <div class="section-header">
         <div>
-          <span class="section-eyebrow">Mapa completo</span>
-          <h2 class="section-title" id="title-mapa">Todo en un mapa</h2>
+          <span class="section-eyebrow">Encontrá rápido</span>
+          <h2 class="section-title" id="title-mapa">Precisión antes que volumen</h2>
         </div>
         <span class="section-count" id="mapa-total-badge">cargando…</span>
       </div>
 
-      <!-- [NUEVO — pasada de contenido] Microguía general de la barra de
-           herramientas del mapa. A diferencia del .dc-intro de más abajo
-           (que es específico de gastronomía), esto describe los controles
-           de #mapa-toolbar para las 5 categorías por igual. No agrega
-           ningún control nuevo, solo explica los que ya existen. -->
       <div class="dc-intro reveal">
         <span class="section-eyebrow">Cómo usar esta herramienta</span>
-        <h3 class="dc-intro-title">Sacale el jugo al mapa en cinco pasos</h3>
+        <h3 class="dc-intro-title">Cinco decisiones que acortan la búsqueda</h3>
         <ol class="dc-steps">
           <li><span><strong>Elegí una categoría</strong> desde los filtros de arriba, o dejá todas activas para ver el panorama completo.</span></li>
           <li><span><strong>Afiná con subcategorías</strong> si ya sabés qué tipo de lugar buscás dentro de esa categoría.</span></li>
@@ -793,9 +531,6 @@
         </ul>
       </div>
 
-      <!-- [NUEVO — pasada "guía enorme"] Panel contextual antes/después,
-           reutiliza dc-panel-grid para condensar dos micro-checklists sin
-           repetir el patrón título+texto+4cards+botón. -->
       <div class="dc-panel">
         <div class="dc-panel-head"><span aria-hidden="true">🧭</span><strong>Antes y después de usar el mapa</strong></div>
         <div class="dc-panel-grid">
@@ -828,37 +563,6 @@
         <div id="mapa-subfiltros" role="group" aria-label="Filtrar por subcategoría"></div>
         <div id="mapa-active-filtros" role="group" aria-label="Filtros activos" aria-live="polite"></div>
 
-        <!-- ═══════════════════════════════════════════════════════════
-             [NUEVA FUNCIONALIDAD — pasada "Dónde Comer"] Rieles curados
-             (Más populares / Mejor puntuados / Recién agregados / por tipo
-             de cocina / Cerca tuyo). Se llenan desde core-engine.js
-             (renderRielesGastronomia(), llamada al final de cargarDatos())
-             apenas el mapa entra en carga — mismo momento en que ya se
-             pinta el resto de #mapa-wrap, sin adelantar ningún fetch nuevo
-             ni tocar el resto de la arquitectura de carga diferida.
-        ═══════════════════════════════════════════════════════════════ -->
-        <!-- ═══════════════════════════════════════════════════════════
-             [NUEVO — pasada "Dónde Comer"] Cabecera editorial que enmarca
-             los rieles de abajo y conecta con la guía completa
-             (#donde-comer-guia, al final de la sección #mapa). No agrega
-             lógica nueva: los tres accesos reutilizan mecanismos ya
-             documentados en este mismo archivo —
-               · data-filtro="gastronomia" → bindFiltroLinks(document)
-                 (ver comentario en <footer>) ya escanea todo el
-                 documento por este atributo, sin importar si el elemento
-                 estaba en el HTML desde el parseo o si lo agregó un
-                 script; así que un enlace nuevo con este atributo queda
-                 enganchado gratis por el motor existente.
-               · href="#explorar-recomendaciones" / href="#donde-comer-guia"
-                 → anchors nativos, mismo patrón que ya usan bottom-nav y
-                 drawer. [Refinamiento] "#explorar-recomendaciones" es el id
-                 de la cabecera <h2> que antecede a la sección#home-hub, no
-                 el mount point en sí — así el scroll revela también el
-                 título en vez de aterrizar directo en los carruseles.
-               · class="reveal" → misma clase de animación de entrada que
-                 ya usa "Categorías en detalle" (ver más abajo) al
-                 scrollear.
-        ═══════════════════════════════════════════════════════════════ -->
         <div class="dc-intro reveal">
           <span class="section-eyebrow">Dónde Comer</span>
           <h3 class="dc-intro-title">Restaurantes, bares y cafés de Concepción del Uruguay</h3>
@@ -894,10 +598,6 @@
         </div>
       </div>
 
-      <!-- [NUEVO — pasada "guía enorme"] Glosario rápido de la leyenda
-           (🗺️ #mapa-legend) + CTA de cierre. Describe categorías ya
-           declaradas en este mismo HTML (footer, #explorar-ciudad), no
-           inventa ninguna nueva. -->
       <h3 class="dc-subhead" style="margin-top:2rem">Qué significa cada color de la leyenda</h3>
       <dl class="dc-glossary">
         <div><dt>🍽️ Gastronomía</dt><dd>Restaurantes, bares y cafés de toda la ciudad.</dd></div>
@@ -906,19 +606,6 @@
         <div><dt>🛏️ Alojamiento</dt><dd>Opciones para hospedarte dentro de la ciudad.</dd></div>
         <div><dt>🏥 Servicios</dt><dd>Servicios públicos y de utilidad para moverte mejor.</dd></div>
       </dl>
-      <!-- [REORGANIZADO — auditoría "máximo nivel"] La antigua sección
-           independiente "Cómo elegir el orden correcto" (id
-           guia-orden-resultados) repetía el mismo esqueleto que ya usan
-           10+ secciones de esta página (grid de 4 cards + comparativa de
-           2 columnas + callout + mini-FAQ + nav de chips) para explicar
-           algo que en esencia es una única decisión con cuatro opciones.
-           Se fusiona acá, junto al selector real #mapa-orden, como una
-           <details> nativa con una tabla real: mismo contenido útil
-           (cuándo conviene cada orden, que orden y filtros son
-           independientes, que combina con la búsqueda), un tercio de las
-           líneas, y un patrón visual — tabla de decisión — que no se
-           repite en ningún otro punto del documento. El id se conserva
-           igual, así que los enlaces existentes siguen funcionando. -->
       <details class="dc-deepdive" id="guia-orden-resultados">
         <summary>
           <span class="dc-deepdive-eyebrow">Profundizar</span>
@@ -946,20 +633,6 @@
       </nav>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — pasada "Dónde Comer"] GUÍA GASTRONÓMICA COMPLETA
-         Sección editorial 100% estática (sin fetch ni dependencia de
-         lugares-core.json/lugares-detalles.json): no inventa datos sobre
-         ningún negocio puntual. Todo lo que describe son funcionalidades
-         reales ya declaradas en este mismo HTML (rieles de
-         #donde-comer-rieles, claves de #home-hub, filtros/orden/vista de
-         #mapa-toolbar, favoritos de la bottom-nav/drawer) — funciona como
-         panel informativo + hub de navegación contextual hacia ellas.
-         Estilos y micro-interacciones van en <style id="dc-guia-styles">
-         más abajo, con variables CSS con valor de reserva incluido para
-         heredar el theming real si core.css define esos custom
-         properties, y degradar con gracia si no.
-    ═══════════════════════════════════════════════════════════════ -->
     <style id="dc-guia-styles">
       #donde-comer-guia{
         padding:clamp(2rem,5vw,4rem) clamp(1rem,4vw,2rem);
@@ -1099,16 +772,6 @@
       }
       .dc-share a:hover, .dc-share a:focus-visible{border-color:var(--accent, #d9a441)}
 
-      /* ═══ [NUEVO — pasada "guía enorme"] Microcomponentes editoriales
-           adicionales. Todos son clases planas nuevas (dc-callout,
-           dc-quote, dc-glossary, dc-compare, dc-divider, dc-panel,
-           dc-mini-faq), no chocan con nada existente y se apoyan en las
-           mismas custom properties con valor de reserva que ya usa el
-           resto de #donde-comer-guia, así que heredan el theming real si
-           core.css las define, y degradan igual si no. Pensados para que
-           cada 250–400px de scroll aparezca algo visualmente distinto a
-           una grilla de tarjetas: una cita, un dato de "sabías que", una
-           comparativa, un glosario, un separador. ═══ */
       .dc-callout{
         display:flex;gap:.85rem;align-items:flex-start;
         margin:1.25rem 0 1.75rem;
@@ -1215,10 +878,11 @@
         .dc-chip,.dc-faq summary::after{transition:none}
       }
 
-      /* ═══ [NUEVO — pasada "máximo nivel"] dc-deepdive: disclosure nativa
-           para profundizar sin alargar el scroll principal; envuelve una
-           tabla de decisión real (dc-order-table), un patrón que no se
-           repite en ningún otro punto del documento. ═══ */
+      /* [Optimización — auditoría "máximo nivel"] Utility para el único
+         valor de margin-top inline que se repetía 4 veces sueltas por el
+         documento (ver auditoría de estilos evitables). */
+      .u-mt-lg{margin-top:1.5rem}
+
       .dc-deepdive{
         margin:1.5rem 0 1.75rem;border-radius:14px;
         border:1px solid var(--line, rgba(245,239,230,.14));
@@ -1264,12 +928,6 @@
         .dc-order-table th, .dc-order-table td{padding:.5rem .5rem}
       }
 
-      /* ═══ [NUEVO — fusión Recorridos+Planner] dc-path-pair: dos
-           <details> lado a lado, cada uno un "camino" completo con su
-           propia intro + pasos. Distinto del grid de cards (no son
-           opciones equivalentes para elegir una sola vez, son mecanismos
-           que se abren/cierran independientemente) y del dc-compare
-           (que es texto corto en columnas, no contenido expandible). ═══ */
       .dc-path-pair{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
       @media (max-width:720px){.dc-path-pair{grid-template-columns:1fr}}
       .dc-path{
@@ -1290,9 +948,6 @@
       .dc-path > p:first-of-type{margin-top:1rem}
       .dc-path > ol.dc-steps{margin-bottom:1.1rem}
 
-      /* ═══ [NUEVO — Centro de ayuda] dc-index: lista numerada para un
-           índice real, deliberadamente sin ícono decorativo ni card para
-           no repetir el patrón de grid+card usado en el resto del sitio. ═══ */
       .dc-index{list-style:none;margin:1.5rem 0;padding:0;border-top:1px solid var(--line, rgba(245,239,230,.12))}
       .dc-index li{border-bottom:1px solid var(--line, rgba(245,239,230,.12))}
       .dc-index a{
@@ -1307,9 +962,6 @@
       .dc-index-body strong{display:block;font-size:.95rem;margin-bottom:.15rem;color:var(--ink, #f3ece0)}
       .dc-index-body{font-size:.85rem;line-height:1.5;color:var(--ink-soft, rgba(243,236,224,.78))}
 
-      /* ═══ [NUEVO — por-que-uruspot] dc-lede + dc-manifest: apertura
-           editorial sin cards, para que la primera sección después del
-           hero no arranque con el mismo patrón que el resto. ═══ */
       .dc-lede{
         font-family:var(--font-display, 'Fraunces', serif);
         font-size:clamp(1.1rem,2.6vw,1.4rem);line-height:1.5;
@@ -1323,10 +975,6 @@
       .dc-manifest li:last-child{border-bottom:1px solid var(--line, rgba(245,239,230,.12))}
       .dc-manifest strong{color:var(--ink, #f3ece0);font-weight:700}
 
-      /* ═══ [NUEVO — explorar-ciudad] Variantes compactas de card (sin
-           párrafo, solo ícono+título) y dc-preview: mockup de los
-           botones reales de #mapa-view-toggle, reemplaza al dc-compare
-           genérico para esta comparación puntual. ═══ */
       .dc-grid--compact{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
       .dc-card--compact{padding:1rem .9rem;text-align:center;align-items:center}
       .dc-card--compact h3{margin:0;font-size:.88rem}
@@ -1347,11 +995,6 @@
       }
       .dc-preview-btn p{margin:0;font-size:.85rem;line-height:1.55;color:var(--ink-soft, rgba(243,236,224,.82))}
 
-      /* ═══ [NUEVO — para-quien-es-esta-guia] dc-quiz: selector real de
-           6 opciones (radio nativos, radiogroup) que revela un panel de
-           respuesta usando :has() — sin JS nuevo, navegable por
-           teclado. Único punto del documento donde el usuario elige
-           antes de leer, en vez de leer todo y elegir al final. ═══ */
       .dc-quiz-options{display:flex;flex-wrap:wrap;gap:.6rem;margin:1.25rem 0 1.5rem;list-style:none;padding:0}
       .dc-quiz-input{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden}
       .dc-quiz-label{
@@ -1377,8 +1020,6 @@
       .dc-quiz:has(#q-dia:checked) .dc-quiz-panel[data-panel="dia"]{display:block}
       .dc-quiz:has(#q-pareja:checked) .dc-quiz-panel[data-panel="pareja"]{display:block}
       .dc-quiz:has(#q-directo:checked) .dc-quiz-panel[data-panel="directo"]{display:block}
-      /* Sin soporte de :has() (muy poco frecuente hoy): se muestran todos
-         los paneles en vez de ninguno, para no dejar la sección vacía. */
       @supports not selector(:has(*)){ .dc-quiz-panel{display:block} }
     </style>
     <section class="us-section" id="donde-comer-guia" aria-labelledby="title-donde-comer-guia">
@@ -1391,49 +1032,11 @@
       </div>
 
       <p class="dc-intro-copy dc-intro-copy--wide">
-        Esta guía reúne, en un solo lugar, las herramientas de URU SPOT pensadas para
-        la parte gastronómica de la ciudad: cómo buscar, cómo filtrar, cómo descubrir
-        algo nuevo y cómo no perder de vista lo que ya te gustó.
+        Encontrar un lugar para comer no es el problema — con el mapa alcanza. Elegir uno,
+        con cientos de opciones válidas, sí lo es. Esta guía no repite cómo se usa el mapa:
+        parte de ahí y se enfoca en el criterio para decidir según presupuesto, ocasión y
+        cuánto ya conocés de la escena gastronómica local.
       </p>
-
-      <!-- Showcase de funcionalidades reales (todas ya declaradas en este HTML) -->
-      <div class="dc-grid" role="list" aria-label="Herramientas para encontrar dónde comer">
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">🔎</span>
-          <h3>Búsqueda instantánea</h3>
-          <p>Escribí el nombre de un lugar en el <a href="#mapa">buscador del mapa</a> o en el spotlight del header y los resultados se sincronizan al instante.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">🏷️</span>
-          <h3>Filtros por tipo</h3>
-          <p>Combiná categoría, subcategoría y orden (relevancia, cercanía, recomendados, recién agregados) desde la barra de filtros del mapa.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">🎢</span>
-          <h3>Rieles curados</h3>
-          <p>Más populares, mejor puntuados, recién agregados y por tipo de cocina, siempre visibles arriba del mapa.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">📍</span>
-          <h3>Cerca de mí</h3>
-          <p>Un toque en <em>"Cerca de mí"</em> reordena todo por distancia real a tu ubicación actual.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">🗂️</span>
-          <h3>Mapa o lista</h3>
-          <p>Cambiá de vista según prefieras explorar visualmente o recorrer los resultados en formato lista.</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">❤️</span>
-          <h3>Favoritos</h3>
-          <p>Guardá cualquier lugar desde su tarjeta y encontralo después agrupado en <em>Favoritos</em> (barra inferior o menú).</p>
-        </article>
-        <article class="dc-card" role="listitem">
-          <span class="dc-card-icon" aria-hidden="true">📤</span>
-          <h3>Compartí lugares</h3>
-          <p>Cada lugar se puede compartir directo desde su tarjeta, sin tener que copiar y pegar el nombre a mano para que alguien más lo encuentre.</p>
-        </article>
-      </div>
 
       <div class="dc-cols">
         <div>
@@ -1462,8 +1065,8 @@
 
           <h3 class="dc-subhead">Errores comunes al elegir</h3>
           <ul class="dc-checklist dc-checklist--warn">
-            <li>Quedarte con el primer resultado sin ordenar por mejor puntuados o más recomendados.</li>
-            <li>No revisar la subcategoría y terminar mirando lugares que no tienen nada que ver con lo que buscabas.</li>
+            <li>Elegir por el primer nombre que reconocés en vez de comparar rating y tipo de cocina.</li>
+            <li>Definir el lugar antes de confirmar el presupuesto del grupo y tener que cambiar de plan a último momento.</li>
             <li>Ignorar los rieles de recién agregados y repetir siempre las mismas opciones de siempre.</li>
             <li>Elegir sin filtrar por ocasión cuando vas en grupo grande o con niños.</li>
           </ul>
@@ -1477,8 +1080,6 @@
             <li>Compartí la ubicación con quien te acompañe antes de salir de casa.</li>
           </ul>
 
-          <!-- [NUEVO — pasada "guía enorme"] Checklist simétrica "después
-               de comer", para cerrar el ciclo que "antes de salir" abre. -->
           <h3 class="dc-subhead">Después de comer</h3>
           <ul class="dc-checklist">
             <li>Si te gustó, dejalo en <em>Favoritos</em> antes de que se te mezcle con los demás lugares que viste ese día.</li>
@@ -1486,10 +1087,6 @@
             <li>Mirá el riel de <strong>recién agregados</strong> para la próxima salida, así no repetís siempre lo mismo.</li>
           </ul>
 
-          <!-- [NUEVO — pasada "guía enorme"] Glosario de vocabulario
-               gastronómico general (no ligado a ningún negocio puntual),
-               útil para quien no está familiarizado con los términos que
-               puede encontrar en las fichas de cada lugar. -->
           <h3 class="dc-subhead">Glosario rápido</h3>
           <dl class="dc-glossary">
             <div><dt>Carta</dt><dd>El menú completo de un lugar, con todas las opciones disponibles.</dd></div>
@@ -1532,15 +1129,12 @@
             <a href="mailto:?subject=Dónde%20comer%20en%20Concepción%20del%20Uruguay&body=Te%20paso%20la%20guía%20de%20URU%20SPOT%20para%20elegir%20dónde%20comer%3A%20https%3A%2F%2Furuspot.pages.dev%2F%23donde-comer-guia">✉️ Email</a>
           </div>
 
-          <!-- [NUEVO — pasada "guía enorme"] Cita editorial de cierre,
-               rompe el patrón "faq + compartir + chips" con algo distinto
-               antes del divisor final. -->
           <div class="dc-quote">
             <p>Elegir dónde comer no debería tomar más tiempo que la comida en sí.</p>
             <cite>— Filosofía detrás de los rieles curados de esta guía</cite>
           </div>
 
-          <h3 class="dc-subhead" style="margin-top:1.5rem">Seguí explorando</h3>
+          <h3 class="dc-subhead u-mt-lg">Seguí explorando</h3>
           <div class="dc-intro-actions">
             <a class="dc-chip dc-chip--primary" href="#guardar-volver-compartir">Cómo usar Favoritos e Historial</a>
             <a class="dc-chip" href="#categorias-detalle">Categorías en detalle</a>
@@ -1554,20 +1148,6 @@
       <div class="dc-divider" role="separator"><span>Una guía no sirve de nada si no te ayuda a decidir más rápido</span></div>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [FUSIONADO — auditoría "máximo nivel"] Las antiguas secciones
-         independientes "Recorridos temáticos" y "El Planificador rápido"
-         repetían, cada una por separado, el mismo esqueleto (grid de 4
-         cards + comparativa de 2 columnas + steps + callout/checklist +
-         mini-FAQ + nav) para responder, en el fondo, a una sola pregunta:
-         "¿dejo que la guía decida el orden, o decido yo?". Se fusionan
-         en una sola sección con dos <details> tipo "camino" (uno por
-         mecanismo), una tabla de decisión compartida (mismo componente
-         dc-order-table ya creado para #mapa, así no se inventa un tercer
-         patrón visual nuevo) y una única mini-FAQ combinada. Ambos ids
-         (recorridos-tematicos, planner-guia) se conservan en su lugar
-         exacto para no romper ningún enlace existente del documento.
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="recorridos-tematicos" aria-labelledby="title-recorridos-tematicos">
       <div class="section-header">
         <div>
@@ -1645,27 +1225,18 @@
       </nav>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — pasada de contenido] GUARDÁ, VOLVÉ Y COMPARTÍ
-         Mini-guías paso a paso para 3 funcionalidades transversales
-         (favoritos, historial, compartir) que hasta ahora solo se
-         mencionaban de forma suelta en la FAQ y en la vitrina de la guía
-         gastronómica. 100% estática, describe únicamente comportamiento
-         ya documentado en otros comentarios de este mismo archivo
-         (favoritos vía bindAccionesLugar/compartirLugar, bottom-nav y
-         drawer con data-bn="favoritos" / data-drawer-action="historial").
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="guardar-volver-compartir" aria-labelledby="title-guardar-volver-compartir">
       <div class="section-header">
         <div>
-          <span class="section-eyebrow">Sacale el jugo</span>
+          <span class="section-eyebrow">De lugares sueltos a memoria propia</span>
           <h2 class="section-title" id="title-guardar-volver-compartir">Guardá, volvé y compartí</h2>
         </div>
       </div>
       <p class="dc-intro-copy dc-intro-copy--wide">
-        Tres funciones chicas que hacen que explorar la ciudad sea mucho menos repetitivo:
-        no perder de vista lo que te gustó, retomar donde dejaste y pasarle un lugar a
-        quien te acompaña sin tener que explicarle dónde queda.
+        Cada lugar que marcás y cada uno que ya viste se acumulan en algo más que una lista
+        de resultados: con el tiempo se convierten en un mapa propio de la ciudad, distinto
+        al de cualquier otra persona que use la guía. Favoritos, Historial y compartir son
+        las tres piezas que lo arman.
       </p>
       <div class="dc-cols">
         <div>
@@ -1692,9 +1263,6 @@
         <li><span>Mandalo por el canal que prefieras: quien lo reciba entra directo a esa ficha.</span></li>
       </ol>
 
-      <!-- [NUEVO — pasada "guía enorme"] Comparativa Favoritos vs
-           Historial: aunque ya estaban explicados en prosa arriba, verlos
-           lado a lado ayuda a decidir cuál usar en cada momento. -->
       <h3 class="dc-subhead">¿Favoritos o Historial?</h3>
       <div class="dc-compare">
         <div class="dc-compare-col dc-compare-col--accent">
@@ -1730,14 +1298,8 @@
       </nav>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         CATEGORÍAS EN DETALLE (SEO, mount point)
-    ═══════════════════════════════════════════════════════════════ -->
     <div class="sec-title reveal" id="categorias-detalle">
       <h2>Categorías en detalle</h2>
-      <!-- [NUEVO — 2ª pasada] Bajada + accesos por categoría. El mount
-           point #cd-wrap-container queda exactamente igual que antes;
-           esto sólo agrega contexto y enlazado interno alrededor. -->
       <p class="dc-intro-copy dc-intro-copy--wide" style="margin-top:.5rem">
         Cada categoría de la ciudad tiene su propia ficha con subcategorías y
         lugares agrupados. Si ya sabés qué estás buscando, saltá directo:
@@ -1759,24 +1321,8 @@
     </div>
     <div id="cd-wrap-container" class="cd-wrap" style="content-visibility:auto;contain-intrinsic-size:0 1200px;"></div>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         SECCIONES EDITORIALES ADICIONALES (mount point)
-    ═══════════════════════════════════════════════════════════════ -->
     <div id="seo-mount" style="content-visibility:auto;contain-intrinsic-size:0 800px;"></div>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — auditoría "máximo nivel"] ACCESIBILIDAD EN URU SPOT
-         Sección editorial nueva que documenta, sin inventar nada, las
-         características de accesibilidad que YA existen físicamente en
-         este mismo archivo: 2 skip-links (líneas ~189/194), aria-label
-         en botones y regiones (header, drawer, spotlight, bottom-nav,
-         mapa-toolbar), role="dialog"/aria-modal en drawer y spotlight,
-         aria-live="polite" en #mapa-active-filtros, focus-visible en
-         .dc-chip/.dc-faq summary (ver <style id="dc-guia-styles">) y el
-         soporte "@media (prefers-reduced-motion:reduce)" ya declarado
-         dos veces en ese mismo bloque de estilos. Cada afirmación de
-         esta sección es verificable leyendo el propio HTML.
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="accesibilidad" aria-labelledby="title-accesibilidad">
       <div class="section-header">
         <div>
@@ -1848,15 +1394,6 @@
       </nav>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — auditoría "máximo nivel"] CENTRO DE AYUDA
-         Hub de navegación puro: conecta TODAS las FAQ y glosarios ya
-         existentes en el documento (donde-comer-guia, sobre-uruspot,
-         home-hub, mapa, guia-orden-resultados, recorridos-tematicos,
-         planner-guia, accesibilidad) en un solo punto, para que ninguna
-         de esas islas de contenido quede aislada del resto. No repite el
-         contenido de cada FAQ: apunta a él por ancla.
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="centro-ayuda" aria-labelledby="title-centro-ayuda">
       <div class="section-header">
         <div>
@@ -1870,13 +1407,6 @@
         solo lugar.
       </p>
 
-      <!-- [REORGANIZADO — auditoría "máximo nivel"] Antes era un
-           dc-grid de 8 dc-card idéntico al patrón repetido en otras 8+
-           secciones de la página — para una sección que en esencia ES
-           un índice, tenía sentido que se *viera* como un índice.
-           dc-index es un patrón nuevo (lista numerada, sin ícono
-           decorativo) que no se repite en ningún otro punto del
-           documento. -->
       <ol class="dc-index" aria-label="Índice de temas de ayuda">
         <li><a href="#mapa"><span class="dc-index-n">01</span><span class="dc-index-body"><strong>Cómo usar el mapa</strong>Microguía de 5 pasos, panel antes/después y glosario de la leyenda.</span></a></li>
         <li><a href="#guia-orden-resultados"><span class="dc-index-n">02</span><span class="dc-index-body"><strong>Cómo ordenar resultados</strong>Diferencia entre relevancia, cercanía, recomendados y recién agregados.</span></a></li>
@@ -1901,12 +1431,6 @@
       </nav>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         [NUEVO — 2ª pasada] SOBRE URU SPOT — sección de cierre de <main>,
-         100% estática. Espejo visible del JSON-LD #ld-json-faq-general
-         del <head>. No repite contenido de #donde-comer-guia (esa FAQ es
-         específica de gastronomía; ésta es sobre el sitio en general).
-    ═══════════════════════════════════════════════════════════════ -->
     <section class="us-section" id="sobre-uruspot" aria-labelledby="title-sobre-uruspot">
       <div class="section-header">
         <div>
@@ -1985,11 +1509,7 @@
             </details>
           </div>
 
-          <!-- [NUEVO — pasada "guía enorme"] Glosario rápido de todos los
-               términos propios del sitio usados a lo largo del HTML
-               (spotlight, drawer, rieles, colecciones, subcategoría),
-               útil como referencia final antes de compartir o cerrar. -->
-          <h3 class="dc-subhead" style="margin-top:1.5rem">Glosario rápido de URU SPOT</h3>
+          <h3 class="dc-subhead u-mt-lg">Glosario rápido de URU SPOT</h3>
           <dl class="dc-glossary">
             <div><dt>Spotlight</dt><dd>El buscador flotante que se abre desde la lupa del header.</dd></div>
             <div><dt>Drawer</dt><dd>El menú lateral, con acceso a Favoritos, Historial, Recorridos y Planner.</dd></div>
@@ -1999,14 +1519,7 @@
             <div><dt>Bottom nav</dt><dd>La barra de navegación fija en la parte inferior, pensada para mobile.</dd></div>
           </dl>
 
-          <!-- [Refinamiento] Compartí el sitio completo: mismo patrón 1:1 que
-               "Compartí esta guía" de #donde-comer-guia (misma clase
-               dc-share, mismos 3 canales), pero apuntando al sitio en
-               general en vez de a la guía gastronómica puntual. Antes solo
-               existía esta acción para la guía de comida; quien termina de
-               leer "de qué se trata todo" es a quien más sentido le hace
-               ofrecerle compartirlo. -->
-          <h3 class="dc-subhead" style="margin-top:1.5rem">Compartí URU SPOT</h3>
+          <h3 class="dc-subhead u-mt-lg">Compartí URU SPOT</h3>
           <div class="dc-share">
             <a href="https://wa.me/?text=Descubrí%20URU%20SPOT%2C%20la%20guía%20de%20Concepción%20del%20Uruguay%3A%20https%3A%2F%2Furuspot.pages.dev%2F" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
             <a href="https://t.me/share/url?url=https%3A%2F%2Furuspot.pages.dev%2F&text=Descubrí%20URU%20SPOT%2C%20la%20guía%20de%20Concepción%20del%20Uruguay" target="_blank" rel="noopener noreferrer">✈️ Telegram</a>
@@ -2029,9 +1542,6 @@
         </div>
       </div>
 
-      <!-- [NUEVO — pasada "guía enorme"] Remate editorial de cierre de
-           toda la guía, antes del footer. Última oportunidad de invitar
-           a un siguiente paso sin repetir literalmente el nav anterior. -->
       <div class="dc-divider" role="separator"><span>Fin de la guía · pero la ciudad sigue</span></div>
       <div class="dc-panel">
         <div class="dc-panel-head"><span aria-hidden="true">🧭</span><strong>¿Por dónde seguís?</strong></div>
@@ -2046,20 +1556,6 @@
 
   </main>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       FOOTER
-       [ARQUITECTURA — auditoría hero/footer estático] Mismo razonamiento
-       que el hero: es copy 100% fija, sin ningún dato del dataset de
-       lugares. Los links con [data-filtro] se enganchan igual que antes
-       vía bindFiltroLinks(document) en core-engine.js, que los busca por
-       atributo en todo el documento — no le importa si existían desde
-       el parseo del HTML o si los acababa de inyectar un script.
-       content-visibility:auto sigue aplicando igual (sigue siendo texto/
-       links planos sin ninguna librería que necesite medir su layout
-       antes de tiempo): el navegador saltea su layout/paint hasta que el
-       usuario scrollea hasta el final de la página, esté el contenido
-       ya presente en el HTML o no.
-  ═══════════════════════════════════════════════════════════════ -->
   <footer id="site-footer" style="content-visibility:auto;contain-intrinsic-size:0 400px;">
     <p class="footer-quote">"El mejor lugar es el que no sabías que estaba ahí."</p>
     <div class="footer-logo">URU SPOT</div>
@@ -2091,15 +1587,5 @@
     </nav>
   </footer>
 
-  <!-- [CORRECCIÓN] Los 4 <script defer> del camino crítico (Leaflet,
-       MarkerCluster, core-engine.js, content.js) ya se cargan desde el
-       <head> (ver líneas ~69-72): con defer, cada <script src> declarado
-       ejecuta su archivo una vez, sin importar que el navegador cachee
-       la descarga, así que tenerlos repetidos acá abajo corría toda la
-       cadena —y con ella motor.init(), L.map() y el resto de init()—
-       DOS veces por carga de página. Se elimina la copia sobrante; el
-       comportamiento observable es el mismo (una sola inicialización,
-       como siempre debió ser) y se corta a la mitad el tiempo de
-       scripting/CPU de estos 4 archivos. -->
 </body>
 </html>
