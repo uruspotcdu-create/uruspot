@@ -329,6 +329,13 @@
     var favoritos = crearFavoritos(config.favoritesKey);
 
     var map = null;
+    // [NUEVA FUNCIONALIDAD — geolocalización real] Marcador "estás acá" y
+    // círculo de precisión del último fix de geolocalización, para poder
+    // limpiarlos si el usuario toca "Cerca de mí" más de una vez en la
+    // misma sesión (si no, cada toque dejaría un pin/círculo viejo
+    // superpuesto en vez de reemplazar al anterior).
+    var userMarker = null;
+    var userAccuracyCircle = null;
     var clusterGroups = {};
     var todosLosMarkers = []; // {marker, grupo, categoria, nombreNorm, categoriaNorm, lugar, color}
     // [ARQUITECTURA — carga core/detalles] Índice id → entry con acceso
@@ -467,6 +474,11 @@
       els.viewListaBtn = document.getElementById('mapa-view-lista');
       els.mapaCanvas = document.getElementById('mapa-canvas');
       els.listaDiv = document.getElementById('mapa-lista');
+      // [NUEVA FUNCIONALIDAD — descubrimiento] Botón opcional; si el HTML
+      // anfitrión no lo incluye, randomBtn queda null y bindControlesMapa
+      // simplemente no engancha nada ahí (mismo criterio "opcional" que ya
+      // aplica al resto de los nodos de este objeto).
+      els.randomBtn = document.getElementById('mapa-random');
     }
 
     // ─── Íconos de mapa ───
@@ -949,6 +961,21 @@
           setTimeout(function () { irALugar(id); }, 260);
         });
       });
+      // [NUEVA FUNCIONALIDAD — vista lista ↔ mapa, sincronía] El hover se
+      // engancha sobre la tarjeta completa (.lista-card), no solo sobre el
+      // botón "ir": así también reacciona si el mouse pasa por los
+      // botones de acción (favorito/compartir) sin salir de la tarjeta.
+      // No depende de que la vista mapa esté visible — resaltarMarcador()
+      // ya es un no-op seguro si el pin no tiene nodo DOM propio en este
+      // instante (adentro de un cluster, o directamente en vista lista).
+      container.querySelectorAll('.lista-card').forEach(function (card) {
+        var id = parseInt(card.getAttribute('data-lugar-id'), 10);
+        if (!id) return;
+        card.addEventListener('mouseenter', function () { resaltarMarcador(id, true); });
+        card.addEventListener('mouseleave', function () { resaltarMarcador(id, false); });
+        card.addEventListener('focusin', function () { resaltarMarcador(id, true); });
+        card.addEventListener('focusout', function () { resaltarMarcador(id, false); });
+      });
       api.bindAccionesLugar(container);
     }
 
@@ -1396,6 +1423,34 @@
       return true;
     }
 
+    // [NUEVA FUNCIONALIDAD — vista lista ↔ mapa, sincronía] Pasar el mouse
+    // sobre una tarjeta de la lista resalta su pin en el mapa (si ese pin
+    // está renderizado como marcador individual — si está adentro de un
+    // cluster todavía colapsado, marker._icon no existe y esto no hace
+    // nada, silenciosamente: no vale la pena forzar un zoom solo para
+    // mostrar un hover). Reversible con el mismo flag; no crea ningún
+    // objeto de Leaflet nuevo, solo alterna una clase CSS sobre el nodo
+    // que Leaflet ya renderizó.
+    function resaltarMarcador(id, activo) {
+      var entry = lugaresPorId[id];
+      if (!entry || !entry.marker._icon) return;
+      var pinEl = entry.marker._icon.querySelector('.mapa-pin');
+      if (pinEl) pinEl.classList.toggle('mapa-pin-resaltado', !!activo);
+      entry.marker.setZIndexOffset(activo ? 2000 : (entry.lugar.destacado ? 1000 : 0));
+    }
+
+    // [NUEVA FUNCIONALIDAD — descubrimiento] "Sorprendeme": un lugar al
+    // azar entre los que respetan el filtro/búsqueda actual (nunca ignora
+    // lo que el usuario ya eligió filtrar). Sin este acotamiento, alguien
+    // mirando solo "Alojamiento" podría recibir una heladería al azar —
+    // técnicamente un lugar real, pero no una sugerencia útil en ese
+    // contexto.
+    function lugarAleatorio() {
+      var candidatos = entradasFiltradas();
+      if (!candidatos.length) return null;
+      return candidatos[Math.floor(Math.random() * candidatos.length)];
+    }
+
     function contarPorGrupo() {
       var counts = {};
       var total = todosLosMarkers.length;
@@ -1731,6 +1786,17 @@
       corePromise.then(function (data) {
         cargarDatos(config.lugares, data || []);
         detallesPromise.then(mergeDetalles);
+        abrirLugarDesdeHash();
+        // [NUEVA FUNCIONALIDAD — favoritos fuera del mapa] Aviso genérico
+        // de "los datos reales ya están cargados" para cualquier otra
+        // parte de la página (fuera de este archivo) que necesite mirar
+        // lugaresPorId a través de la API pública — hoy lo usa el propio
+        // index.html para completar "Fichas guardadas" con favoritos
+        // guardados desde el mapa real, cuyo id no existe en su propia
+        // lista de datos de ejemplo hasta este punto.
+        if (typeof window.dispatchEvent === 'function') {
+          window.dispatchEvent(new CustomEvent('uruspot:datos-listos'));
+        }
       });
     }
 
@@ -1788,9 +1854,33 @@
             clearTimeout(timeoutId);
             var latlng = [pos.coords.latitude, pos.coords.longitude];
             map.setView(latlng, 15);
-            L.marker(latlng, {
-              icon: L.divIcon({ className: '', html: '<div class="mapa-pin" style="background:#3AA0FF"></div>', iconSize: [16, 16], iconAnchor: [8, 16] })
-            }).addTo(map).bindPopup('Estás acá').openPopup();
+            // [NUEVA FUNCIONALIDAD — geolocalización real] Antes cada toque
+            // en "Cerca de mí" agregaba un L.marker nuevo sin sacar el
+            // anterior — dos o más toques en la misma sesión dejaban pines
+            // "estás acá" duplicados y superpuestos. Ahora se reemplaza el
+            // fix anterior (si existe) y se agrega un círculo de precisión
+            // real (pos.coords.accuracy, en metros) detrás del punto, igual
+            // que Google/Apple Maps — comunica que la posición es una
+            // estimación, no un punto exacto.
+            if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
+            if (userAccuracyCircle) { map.removeLayer(userAccuracyCircle); userAccuracyCircle = null; }
+            if (pos.coords.accuracy) {
+              userAccuracyCircle = L.circle(latlng, {
+                radius: pos.coords.accuracy,
+                className: 'mapa-precision-circulo',
+                weight: 1
+              }).addTo(map);
+            }
+            userMarker = L.marker(latlng, {
+              icon: L.divIcon({
+                className: '',
+                html: '<div class="mapa-pin-usuario"><span class="mapa-pin-usuario-pulso" aria-hidden="true"></span></div>',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+              }),
+              zIndexOffset: 5000,
+              keyboard: false
+            }).addTo(map).bindPopup('Estás acá (±' + Math.round(pos.coords.accuracy || 0) + ' m)').openPopup();
             btn.disabled = false;
             btn.textContent = textoOriginal;
             // [NUEVA FUNCIONALIDAD — vista lista] Se comparte la misma
@@ -1825,6 +1915,63 @@
 
       if (els.viewMapaBtn) els.viewMapaBtn.addEventListener('click', function () { cambiarVista('mapa'); });
       if (els.viewListaBtn) els.viewListaBtn.addEventListener('click', function () { cambiarVista('lista'); });
+
+      // [NUEVA FUNCIONALIDAD — descubrimiento] "Sorprendeme": salta a un
+      // lugar al azar dentro del filtro/búsqueda actual. Reutiliza
+      // exactamente el mismo camino que una tarjeta de lista (cambiar a
+      // vista mapa + irALugar con el mismo delay de 260ms para darle
+      // tiempo a invalidateSize() si se venía de la lista) — no duplica
+      // lógica de zoom/popup.
+      if (els.randomBtn) {
+        els.randomBtn.addEventListener('click', function () {
+          var elegido = lugarAleatorio();
+          if (!elegido) { mostrarToast('No hay lugares para sugerir con este filtro.'); return; }
+          if (!map) { mostrarToast('El mapa todavía se está cargando — esperá un instante y probá de nuevo.'); return; }
+          cambiarVista('mapa');
+          setTimeout(function () { irALugar(elegido.lugar.id); }, 260);
+        });
+      }
+
+      // [NUEVA FUNCIONALIDAD — navegación por teclado] "/" enfoca el
+      // buscador del mapa desde cualquier parte de la página (mismo atajo
+      // que Google Maps/GitHub) — se ignora si el usuario ya está
+      // escribiendo en cualquier input/textarea, para no robarle una "/"
+      // que en realidad quería escribir ahí. Escape cierra el popup
+      // abierto del mapa; es un atajo global barato (no depende de que el
+      // mapa tenga el foco) porque no interfiere con ningún otro uso de
+      // Escape en la página (cerrar el spotlight/drawer ya escuchan su
+      // propio Escape, y ambos handlers pueden coexistir sin conflicto).
+      document.addEventListener('keydown', function (e) {
+        if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          var activo = document.activeElement;
+          var enCampo = activo && (activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA' || activo.isContentEditable);
+          if (!enCampo && els.buscador) {
+            e.preventDefault();
+            els.buscador.focus();
+          }
+        } else if (e.key === 'Escape' && map) {
+          map.closePopup();
+        }
+      });
+    }
+
+    // [NUEVA FUNCIONALIDAD — compartir] Si la URL trae "#lugar-<id>"
+    // (generado por compartirLugar(), ver api.compartirLugar más abajo),
+    // abre ese lugar apenas los datos terminaron de cargar — sin esto, un
+    // link compartido llevaba a la página pero nunca mostraba el lugar en
+    // cuestión: "Compartir" prometía algo que no cumplía. Se llama recién
+    // en cargarConExtra() (cuando lugaresPorId ya tiene todo cargado);
+    // irALugar() ya se encarga de limpiar cualquier filtro que pudiera
+    // estar tapando el resultado y de hacer zoom hasta sacarlo del
+    // cluster.
+    function abrirLugarDesdeHash() {
+      var m = /^#lugar-(\d+)/.exec(window.location.hash || '');
+      if (!m) return;
+      var id = parseInt(m[1], 10);
+      // Pequeño delay: el mapa recién terminó de agregar sus capas en
+      // este mismo tick (cargarDatos → addLayers), y zoomToShowLayer()
+      // necesita que Leaflet ya haya calculado bounds/clusters reales.
+      setTimeout(function () { irALugar(id); }, 300);
     }
 
     // ─── API pública del motor ───
@@ -2406,6 +2553,19 @@
       if (appLoading) {
         appLoading.classList.add('is-done');
         appLoading.setAttribute('inert', '');
+      }
+
+      // [NUEVA FUNCIONALIDAD — compartir] Si se llega con "#lugar-<id>"
+      // en la URL, esperar a que el usuario scrollee hasta #mapa por su
+      // cuenta (criterio normal de lazyInitMapa) rompería la promesa de
+      // "Compartir": la sección entera podría no cargar nunca si nadie
+      // llega a bajar tanto. Se adelanta el scroll al contenedor del mapa
+      // ANTES de observarlo — el IntersectionObserver de lazyInitMapa lo
+      // detecta como "ya visible" en su primer chequeo y arranca de
+      // inmediato, sin esperar ningún gesto de scroll real del usuario.
+      if (/^#lugar-\d+/.test(window.location.hash || '')) {
+        var mapaElInicial = document.getElementById('mapa-leaflet');
+        if (mapaElInicial) mapaElInicial.scrollIntoView({ block: 'center' });
       }
 
       // ─── Mapa: recién cuando la sección se acerca al viewport ───
