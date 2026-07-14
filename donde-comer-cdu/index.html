@@ -176,26 +176,66 @@ section{padding:112px 0;}
 @media (max-width:720px){ section{padding:76px 0;} }
 
 /* ---------- hero ---------- */
-.hero{padding:28px 0 40px; position:relative; overflow:hidden;}
-.hero .wrap{display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center;}
-@media (max-width:980px){ .hero .wrap{grid-template-columns:1fr;} .hero{padding-top:24px;} }
-.kicker{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--river-ink); background:var(--river-soft); padding:7px 13px; border-radius:100px; margin-bottom:26px;}
+.hero{padding:26px 0 64px; position:relative; overflow:hidden;}
+.hero::after{content:''; position:absolute; top:-180px; right:-140px; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle, rgba(47,92,104,.12), rgba(47,92,104,0) 68%); pointer-events:none; z-index:0;}
+.hero .wrap{display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:start; position:relative; z-index:1;}
+@media (max-width:980px){ .hero .wrap{grid-template-columns:1fr;} .hero{padding-top:22px;} }
+
+.hero-meta-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px 16px; margin:0 0 26px;}
+.kicker{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--river-ink); background:var(--river-soft); padding:7px 13px; border-radius:100px; margin:0;}
 .kicker::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--river);}
+.status-chip{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; letter-spacing:.03em; color:var(--ink-soft);}
+.status-dot{position:relative; width:6px; height:6px; border-radius:50%; background:#3A8216; flex:none;}
+.status-dot::after{content:''; position:absolute; inset:-5px; border-radius:50%; border:1px solid #3A8216; opacity:.55; animation:statusPulse 2.4s ease-out infinite;}
+@keyframes statusPulse{0%{transform:scale(.5); opacity:.6;}100%{transform:scale(2.1); opacity:0;}}
+@media (max-width:480px){ .status-chip span:last-child{max-width:200px;} }
+
 h1.h-hero{font-family:var(--serif); font-weight:700; letter-spacing:-0.025em; font-size:clamp(34px,4.6vw,54px); line-height:1.09; margin:0 0 22px;}
 h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
-.hero-sub{font-size:17.5px; line-height:1.65; color:var(--ink-soft); max-width:460px; margin:0 0 34px;}
+.hero-sub{font-size:17.5px; line-height:1.65; color:var(--ink-soft); max-width:480px; margin:0 0 30px;}
 .hero-sub b{color:var(--ink); font-weight:600;}
+
+/* ---- ficha de prueba: cifras reales en formato de renglón de libro mayor ---- */
+.hero-proof{display:flex; flex-wrap:wrap; margin:0 0 32px; padding:18px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.proof-item{position:relative; flex:1 1 auto; min-width:112px; padding:0 22px;}
+.proof-item:first-child{padding-left:0;}
+.proof-item:not(:first-child)::before{content:''; position:absolute; left:0; top:1px; bottom:1px; width:1px; background:var(--line-strong);}
+.proof-num{font-family:var(--serif); font-weight:700; font-size:23px; letter-spacing:-0.01em; line-height:1; white-space:nowrap;}
+.proof-label{font-family:var(--mono); font-size:10.5px; letter-spacing:.02em; color:var(--ink-soft); margin-top:7px; line-height:1.35;}
+@media (max-width:560px){ .hero-proof{row-gap:16px;} .proof-item{min-width:44%; padding:0 0 0 16px;} .proof-item:first-child{padding-left:0;} .proof-item:not(:first-child)::before{display:none;} }
+
 .hero-actions{display:flex; align-items:center; gap:24px; flex-wrap:wrap;}
 .hero-actions .btn.primary{padding:13px 22px; font-size:14.5px;}
 .hero-actions .link{font-size:13.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--ink);}
 .hero-actions .link svg{width:14px; height:14px; transition:transform .2s var(--ease);}
 .hero-actions .link:hover svg{transform:translateY(3px);}
-.hero-trust{font-family:var(--mono); font-size:11.5px; letter-spacing:.02em; color:var(--ink-soft); margin:22px 0 0;}
+.hero-trust{font-family:var(--mono); font-size:11.5px; letter-spacing:.02em; color:var(--ink-soft); margin:20px 0 0;}
+
+/* ---- explorador por rubro: cada chip filtra el mapa real (data-filtro) ---- */
+.hero-explore{margin:38px 0 0;}
+.hero-explore-label{font-family:var(--mono); font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 12px;}
+.rubro-scroll{display:flex; gap:8px; overflow-x:auto; margin:0 -4px; padding:2px 4px 8px; scrollbar-width:none; -ms-overflow-style:none;}
+.rubro-scroll::-webkit-scrollbar{display:none;}
+.rubro-chip{flex:none; display:inline-flex; align-items:center; gap:8px; font-family:var(--sans); font-size:13px; font-weight:600; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line); border-radius:100px; padding:8px 14px 8px 11px; text-decoration:none; white-space:nowrap; transition:border-color .2s ease, background .2s ease, transform .18s var(--ease);}
+.rubro-chip:hover, .rubro-chip:focus-visible{border-color:var(--rc, var(--stamp)); background:var(--paper); transform:translateY(-2px);}
+.rc-dot{width:7px; height:7px; border-radius:50%; background:var(--rc, var(--stamp)); flex:none;}
+.rc-count{font-family:var(--mono); font-size:11px; color:var(--ink-soft); font-weight:500;}
+
+/* ---- pista de scroll ---- */
+.hero-scrollcue{position:absolute; left:50%; bottom:10px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px; font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); text-decoration:none; z-index:1;}
+.hero-scrollcue svg{width:13px; height:13px; animation:cueBounce 1.8s ease-in-out infinite;}
+@keyframes cueBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
+@media (max-width:860px){ .hero-scrollcue{display:none;} }
 
 /* ---------- ficha card (hero signature) ---------- */
-.ficha-stage{position:relative; height:420px; min-height:420px;}
-@media (max-width:560px){ .ficha-stage{height:auto; min-height:340px;} }
-.ficha{position:absolute; inset:0; background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:3px; padding:30px 28px 26px; box-shadow:0 1px 1px rgba(32,28,20,.05), 0 30px 60px -28px rgba(32,28,20,.35); opacity:0; transform:translateY(14px) rotate(0deg); transition:opacity .55s var(--ease), transform .55s var(--ease); display:flex; flex-direction:column; overflow:auto;}
+.ficha-column{display:flex; flex-direction:column; align-items:center;}
+.ficha-stage{position:relative; width:100%; height:420px; min-height:420px;}
+@media (max-width:560px){ .ficha-stage{height:auto; min-height:320px;} }
+.ficha-stage::before, .ficha-stage::after{content:''; position:absolute; inset:0; background:var(--paper-raised); border:1px solid var(--line); border-radius:3px;}
+.ficha-stage::before{transform:rotate(-2.4deg) scale(.985); z-index:0;}
+.ficha-stage::after{transform:rotate(2.6deg) scale(.97); z-index:-1; opacity:.65;}
+@media (prefers-reduced-motion:reduce){ .ficha-stage::before, .ficha-stage::after{display:none;} }
+.ficha{position:absolute; inset:0; z-index:1; background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:3px; padding:30px 28px 26px; box-shadow:0 1px 1px rgba(32,28,20,.05), 0 30px 60px -28px rgba(32,28,20,.35); opacity:0; transform:translateY(14px) rotate(0deg); transition:opacity .55s var(--ease), transform .55s var(--ease); display:flex; flex-direction:column; overflow:auto;}
 .ficha.on{opacity:1; transform:translateY(0);}
 .ficha-top{display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px dashed var(--line-strong); padding-bottom:16px; margin-bottom:18px;}
 .ficha-id{font-family:var(--mono); font-size:11px; color:var(--ink-soft); letter-spacing:.04em;}
@@ -208,9 +248,10 @@ h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
 .ficha-rating span{font-family:var(--mono); font-size:11px; color:var(--ink-soft);}
 .ficha-seal{display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10.5px; color:var(--stamp-ink); letter-spacing:.04em;}
 .ficha-seal svg{width:14px; height:14px;}
-.ficha-dots{position:absolute; bottom:-30px; left:0; right:0; display:flex; gap:7px; justify-content:center;}
+.ficha-dots{position:static; margin:26px 0 0; display:flex; gap:7px; justify-content:center;}
 .ficha-dots button{width:6px; height:6px; border-radius:50%; border:none; background:var(--line-strong); padding:0; cursor:pointer;}
 .ficha-dots button.on{background:var(--stamp); width:16px; border-radius:4px; transition:width .3s var(--ease);}
+.ficha-caption{margin:14px 0 0; font-family:var(--mono); font-size:11px; color:var(--ink-faint); text-align:center;}
 
 /* ---------- manifiesto / breakdown ---------- */
 .manifest{background:var(--dark); color:#F4F1E9; position:relative; overflow:hidden;}
@@ -764,27 +805,54 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
 
 <main id="main">
 
-<section class="hero" id="hero" aria-labelledby="title-hero">
+<section class="hero laid" id="hero" aria-labelledby="title-hero">
   <div class="wrap">
     <div>
-      <span class="kicker">Concepción del Uruguay, Entre Ríos</span>
+      <div class="hero-meta-row">
+        <span class="kicker">Concepción del Uruguay, Entre Ríos</span>
+        <span class="status-chip"><span class="status-dot" aria-hidden="true"></span>Padrón activo · actualizado el 13 jul 2026</span>
+      </div>
+
       <h1 class="h-hero" id="title-hero">La ciudad tiene <em>862 fichas</em>.<br>Ninguna la escribió una IA<br>sin pisar la calle primero.</h1>
-      <p class="hero-sub">URU SPOT no es una guía turística: es el padrón comercial y de servicios de la ciudad — <b>862 lugares</b> repartidos en <b>13 rubros</b>, del asado a la escribanía, cada uno con dirección, calificación y estado reales.</p>
+      <p class="hero-sub">URU SPOT no es una guía turística: es el padrón comercial y de servicios de la ciudad, del asado a la escribanía — <b>cada ficha con dirección, calificación y estado reales</b>, verificados a pie de calle.</p>
+
+      <div class="hero-proof" aria-label="El padrón en números">
+        <div class="proof-item"><div class="proof-num">862</div><div class="proof-label">Fichas en el padrón</div></div>
+        <div class="proof-item"><div class="proof-num">13</div><div class="proof-label">Rubros, sin relleno</div></div>
+        <div class="proof-item"><div class="proof-num">0</div><div class="proof-label">Fichas escritas por IA</div></div>
+        <div class="proof-item"><div class="proof-num">13&nbsp;jul</div><div class="proof-label">Última actualización</div></div>
+      </div>
+
       <div class="hero-actions">
         <button class="btn primary" id="heroBtn">Recorrer el padrón</button>
         <a href="#verificacion" class="link">Cómo entra un lugar acá <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4"/></svg></a>
       </div>
       <p class="hero-trust">Sin descargar ninguna app · sin crear cuenta · gratis, como el resto de URU SPOT.</p>
+
+      <nav class="hero-explore" aria-label="Explorar el padrón por rubro">
+        <p class="hero-explore-label" id="rubroExploreLabel">Explorá por rubro</p>
+        <div class="rubro-scroll" id="rubroExplorer" aria-labelledby="rubroExploreLabel">
+          <!-- chips de rubro insertados por JS, a partir de GRUPOS -->
+        </div>
+      </nav>
     </div>
 
-    <div class="ficha-stage reveal" id="fichaStage" aria-hidden="true">
-      <!-- fichas insertadas por JS -->
+    <div class="ficha-column reveal">
+      <div class="ficha-stage" id="fichaStage" aria-hidden="true">
+        <!-- fichas insertadas por JS -->
+      </div>
       <div class="ficha-dots" id="fichaDots"></div>
+      <p class="ficha-caption">Fichas reales del padrón — pasá el mouse para pausar</p>
     </div>
   </div>
+
+  <a class="hero-scrollcue" href="#manifest" aria-label="Bajar para ver qué hay realmente en el padrón">
+    <span>Seguí bajando</span>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg>
+  </a>
 </section>
 
-<section class="manifest reveal" aria-labelledby="title-manifest">
+<section class="manifest reveal" id="manifest" aria-labelledby="title-manifest">
   <div class="wrap">
     <p class="eyebrow" style="color:#CFA495;">Lo que hay realmente ahí adentro</p>
     <h2 id="title-manifest">De las 862 fichas, apenas <b>166 son bares o restaurantes.</b></h2>
@@ -1372,12 +1440,12 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       var el = document.createElement('div');
       el.className = 'ficha' + (i===0 ? ' on' : '');
       el.innerHTML =
-        '<div class="ficha-top"><span class="ficha-id">FICHA N.º '+f.id+'</span><span class="ficha-cat" style="background:'+colorOf(f.cat)+'">'+labelOf(f.cat)+'</span></div>' +
+        '<div class="ficha-top"><span class="ficha-id">FICHA N.º '+f.id+' · de 862</span><span class="ficha-cat" style="background:'+colorOf(f.cat)+'">'+labelOf(f.cat)+'</span></div>' +
         '<p class="ficha-name">'+f.name+'</p>' +
         '<p class="ficha-sub">'+f.sub+'</p>' +
         '<div class="ficha-foot"><div class="ficha-rating"><b>★ '+f.rating.toFixed(1)+'</b><span>'+f.count+'</span></div>' +
         '<div class="ficha-seal"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.2L8 14.2L16 5.2" stroke="#7C2E1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>VERIFICADO</div></div>';
-      stage.insertBefore(el, dots);
+      stage.appendChild(el);
       var dot = document.createElement('button');
       dot.className = i===0 ? 'on' : '';
       dot.setAttribute('aria-label', 'Ver ficha ' + (i+1));
@@ -1405,8 +1473,46 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     var timer;
     function restart(){ clearInterval(timer); if(reduceMotion) return; timer = setInterval(function(){ show((cur+1) % fichaEls.length); }, 4200); }
     restart();
+    /* Pausa al pasar el mouse o al enfocar por teclado: deja leer una
+       ficha completa sin que el carrusel la cambie a mitad de lectura.
+       stage.parentElement es .ficha-column (stage + dots + caption). */
+    var col = stage.parentElement;
+    if(col){
+      col.addEventListener('mouseenter', function(){ clearInterval(timer); });
+      col.addEventListener('mouseleave', restart);
+      col.addEventListener('focusin', function(){ clearInterval(timer); });
+      col.addEventListener('focusout', restart);
+    }
   })();
   }catch(e){ console.error('[URU SPOT] Error en buildHeroFichas:', e); }
+
+  /* ═══ hero: explorador por rubro (chips reales, ligados a GRUPOS) ═══
+     Cada chip lleva href="#padron" (id real de la sección del mapa/
+     lista — mismo destino que usan heroBtn/heroBtnNav; scroll suave
+     nativo vía html{scroll-behavior:smooth}) y data-filtro="<rubro>".
+     Este script
+     corre ANTES de que se carguen core-engine.js/content.js (ver orden
+     de <script> al pie del documento), así que cuando
+     UruSpotCore.init().initShell() llama a bindFiltroLinks(document),
+     estos chips ya existen en el DOM y quedan filtrando el mapa real
+     igual que cualquier otro elemento [data-filtro] del sitio (tarjetas
+     de categoría, footer, etc.) — sin duplicar esa lógica acá. */
+  try{
+  (function buildRubroExplorer(){
+    var cont = document.getElementById('rubroExplorer');
+    if(!cont) return;
+    var sorted = GRUPOS.slice().sort(function(a,b){ return b.count - a.count; });
+    var html = '';
+    sorted.forEach(function(g){
+      html += '<a class="rubro-chip" href="#padron" data-filtro="'+g.key+'" style="--rc:'+g.color+'" aria-label="Ver '+g.label+' en el mapa ('+g.count+' lugares)">' +
+              '<span class="rc-dot" aria-hidden="true"></span>' +
+              '<span aria-hidden="true">'+g.icon+'</span>' + g.label +
+              ' <span class="rc-count">'+g.count+'</span>' +
+              '</a>';
+    });
+    cont.innerHTML = html;
+  })();
+  }catch(e){ console.error('[URU SPOT] Error en buildRubroExplorer:', e); }
 
   /* ═══ manifest breakdown ═══ */
   try{
