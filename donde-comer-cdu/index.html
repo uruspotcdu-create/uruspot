@@ -584,6 +584,183 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
         #mapa-view-toggle{ margin-left:0; justify-content:center; }
         #mapa-geoloc, #mapa-random, #mapa-orden, #mapa-fav-toggle{ justify-content:center; text-align:center; }
       }
+
+      /* ═══════════════════════════════════════════════════════════════
+         ENRIQUECIMIENTO ADITIVO — "El padrón, en el mapa"
+         Todo lo que sigue es 100% agregado: no se modifica ni se quita
+         ninguna regla anterior. Objetivo: que la sección se sienta más
+         viva, más premium y más "hecha a mano", sin tocar la lógica ni
+         los ids/clases de los que depende core-engine.js.
+         ═══════════════════════════════════════════════════════════════ */
+
+      /* ---- fondo con profundidad detrás de toda la sección #padron ---- */
+      #padron{ position:relative; overflow:hidden; isolation:isolate; }
+      #padron::before{
+        content:''; position:absolute; z-index:-2; top:-220px; left:-160px;
+        width:620px; height:620px; border-radius:50%; pointer-events:none;
+        background:radial-gradient(circle, rgba(180,71,45,.09), rgba(180,71,45,0) 70%);
+      }
+      #padron::after{
+        content:''; position:absolute; z-index:-2; bottom:-260px; right:-180px;
+        width:560px; height:560px; border-radius:50%; pointer-events:none;
+        background:radial-gradient(circle, rgba(47,92,104,.10), rgba(47,92,104,0) 70%);
+        animation:padronBlobFloat 14s ease-in-out infinite;
+      }
+      @keyframes padronBlobFloat{
+        0%,100%{ transform:translate(0,0) scale(1); }
+        50%{ transform:translate(-22px,18px) scale(1.06); }
+      }
+      #padron .laid-veil{ position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:.5; background-image:repeating-linear-gradient(rgba(32,28,20,.02) 0 1px, transparent 1px 3px); }
+      @media (prefers-reduced-motion:reduce){ #padron::after{ animation:none; } }
+
+      /* ---- franja de confianza — sellos rápidos antes de la guía ---- */
+      .padron-trust{ display:flex; flex-wrap:wrap; gap:10px; margin:0 0 26px; }
+      .padron-trust-item{ display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-soft); background:var(--paper-raised); border:1px solid var(--line); border-radius:100px; padding:8px 14px 8px 12px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset; transition:border-color .25s ease, transform .2s var(--spring), box-shadow .25s ease; }
+      .padron-trust-item:hover{ border-color:var(--stamp); transform:translateY(-2px); box-shadow:0 12px 24px -14px rgba(32,28,20,.35), 0 1px 0 rgba(255,255,255,.5) inset; }
+      .padron-trust-item svg{ width:13px; height:13px; flex:none; color:var(--stamp-ink); }
+      .padron-trust-item b{ color:var(--ink); font-weight:600; font-family:var(--sans); }
+
+      /* ---- guía de 4 pasos: enriquecida con riel conector, iconos y
+             entrada escalonada, sin tocar la grilla ni el contador CSS
+             que ya identifica cada paso (::before sigue intacto) ---- */
+      .mapa-onboard{ position:relative; }
+      .mapa-onboard-step{ position:relative; overflow:hidden; transition:background .25s ease, transform .2s var(--spring); animation:onboardStepIn .6s var(--ease) backwards; }
+      .mapa-onboard-step:nth-child(1){ animation-delay:.05s; }
+      .mapa-onboard-step:nth-child(2){ animation-delay:.14s; }
+      .mapa-onboard-step:nth-child(3){ animation-delay:.23s; }
+      .mapa-onboard-step:nth-child(4){ animation-delay:.32s; }
+      @keyframes onboardStepIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+      .mapa-onboard-step:hover{ background:var(--paper); }
+      .mapa-onboard-step::after{
+        content:''; position:absolute; right:-30px; top:-30px; width:70px; height:70px; border-radius:50%;
+        background:radial-gradient(circle, var(--stamp-soft), rgba(243,226,219,0) 70%); opacity:0; transition:opacity .3s ease;
+        pointer-events:none;
+      }
+      .mapa-onboard-step:hover::after{ opacity:1; }
+      .mapa-onboard-step::before{ box-shadow:0 0 0 4px var(--stamp-soft); transition:box-shadow .25s var(--spring), transform .25s var(--spring); }
+      .mapa-onboard-step:hover::before{ box-shadow:0 0 0 6px var(--stamp-soft); transform:scale(1.08); }
+      .mapa-onboard-step b{ position:relative; z-index:1; }
+      .mapa-onboard-step span{ position:relative; z-index:1; }
+      @media (prefers-reduced-motion:reduce){ .mapa-onboard-step{ animation:none; } }
+
+      /* ---- pequeño panel "tip"/curiosidad debajo de la guía ---- */
+      .mapa-tip{ display:flex; align-items:flex-start; gap:12px; margin:0 0 22px; padding:14px 16px; border:1px dashed var(--line-strong); border-radius:6px; background:linear-gradient(135deg, var(--river-soft), var(--paper-raised) 60%); position:relative; overflow:hidden; }
+      .mapa-tip::before{ content:''; position:absolute; inset:0; background:radial-gradient(circle at 100% 0%, rgba(47,92,104,.12), transparent 55%); pointer-events:none; }
+      .mapa-tip-ico{ flex:none; width:30px; height:30px; border-radius:50%; background:var(--river); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; box-shadow:0 6px 16px -6px rgba(47,92,104,.6); position:relative; z-index:1; }
+      .mapa-tip-body{ position:relative; z-index:1; min-width:0; }
+      .mapa-tip-body b{ font-family:var(--sans); font-weight:700; font-size:13px; color:var(--river-ink); display:block; margin-bottom:2px; }
+      .mapa-tip-body span{ font-size:12.5px; line-height:1.5; color:var(--ink-soft); }
+      .mapa-tip-swap{ margin-left:auto; flex:none; align-self:center; font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; color:var(--river-ink); background:rgba(255,255,255,.55); border:1px solid var(--line); border-radius:100px; padding:6px 10px; cursor:pointer; transition:background .2s ease, transform .15s var(--spring); }
+      .mapa-tip-swap:hover{ background:#fff; }
+      .mapa-tip-swap:active{ transform:scale(.94); }
+      @media (max-width:560px){ .mapa-tip{ flex-wrap:wrap; } .mapa-tip-swap{ margin-left:44px; } }
+
+      /* ---- #mapa-wrap: marco de "ficha certificada" + cinta de esquina,
+             puramente decorativos, no alteran el layout interno ---- */
+      #mapa-wrap{ transition:box-shadow .35s ease; }
+      #mapa-wrap:hover{ box-shadow:0 1px 1px rgba(32,28,20,.05), 0 46px 90px -30px rgba(32,28,20,.36); }
+      .mapa-wrap-ribbon{ position:absolute; z-index:650; top:14px; left:-1px; display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#fff; background:var(--ink); padding:6px 14px 6px 12px; border-radius:0 100px 100px 0; box-shadow:0 8px 20px -8px rgba(32,28,20,.55); pointer-events:none; }
+      .mapa-wrap-ribbon .dot-live{ width:6px; height:6px; border-radius:50%; background:#6FCB6F; position:relative; flex:none; }
+      .mapa-wrap-ribbon .dot-live::after{ content:''; position:absolute; inset:-4px; border-radius:50%; border:1px solid #6FCB6F; opacity:.6; animation:statusPulse 2.4s ease-out infinite; }
+      @media (max-width:640px){ .mapa-wrap-ribbon{ font-size:9px; padding:5px 11px 5px 10px; } }
+
+      /* corner marks estilo "plano técnico" — puro adorno, sin pointer-events */
+      .mapa-corner-mark{ position:absolute; z-index:640; width:18px; height:18px; pointer-events:none; opacity:.35; }
+      .mapa-corner-mark.tl{ top:10px; left:10px; border-top:2px solid var(--ink); border-left:2px solid var(--ink); }
+      .mapa-corner-mark.tr{ top:10px; right:10px; border-top:2px solid var(--ink); border-right:2px solid var(--ink); }
+      .mapa-corner-mark.bl{ bottom:10px; left:10px; border-bottom:2px solid var(--ink); border-left:2px solid var(--ink); }
+      .mapa-corner-mark.br{ bottom:10px; right:10px; border-bottom:2px solid var(--ink); border-right:2px solid var(--ink); }
+      @media (max-width:640px){ .mapa-corner-mark{ display:none; } }
+
+      /* ---- toolbar: foco/hover más ricos, sin cambiar tamaños ni ids ---- */
+      #mapa-toolbar{ position:relative; }
+      #mapa-search-wrap::after{ content:''; position:absolute; inset:0; border-radius:100px; box-shadow:0 0 0 0 var(--stamp-soft); transition:box-shadow .3s ease; pointer-events:none; }
+      #mapa-search-wrap:focus-within::after{ box-shadow:0 0 0 5px var(--stamp-soft); }
+      #mapa-search:focus{ transform:translateY(-1px); }
+      #mapa-geoloc, #mapa-random, #mapa-fav-toggle{ position:relative; overflow:hidden; }
+      #mapa-geoloc::before, #mapa-random::before, #mapa-fav-toggle::before{
+        content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+        background:linear-gradient(115deg, transparent, rgba(255,255,255,.55), transparent);
+        transform:skewX(-18deg); transition:left .55s ease; pointer-events:none;
+      }
+      #mapa-geoloc:hover::before, #mapa-random:hover::before, #mapa-fav-toggle:hover::before{ left:130%; }
+      #mapa-view-toggle button[aria-pressed="true"]{ animation:viewToggleIn .3s var(--spring); }
+      @keyframes viewToggleIn{ from{ transform:scale(.92); } to{ transform:scale(1); } }
+
+      /* ---- pills de rubro/subrubro: entrada escalonada + micro-shine ---- */
+      #mapa-filtros{ position:relative; }
+      .mapa-pill{ animation:pillPop .45s var(--spring) backwards; }
+      #mapa-filtros .mapa-pill:nth-child(1){ animation-delay:.02s; } #mapa-filtros .mapa-pill:nth-child(2){ animation-delay:.05s; }
+      #mapa-filtros .mapa-pill:nth-child(3){ animation-delay:.08s; } #mapa-filtros .mapa-pill:nth-child(4){ animation-delay:.11s; }
+      #mapa-filtros .mapa-pill:nth-child(5){ animation-delay:.14s; } #mapa-filtros .mapa-pill:nth-child(6){ animation-delay:.17s; }
+      #mapa-filtros .mapa-pill:nth-child(7){ animation-delay:.20s; } #mapa-filtros .mapa-pill:nth-child(8){ animation-delay:.23s; }
+      @keyframes pillPop{ from{ opacity:0; transform:translateY(6px) scale(.9); } to{ opacity:1; transform:none; } }
+      .mapa-pill.activo{ box-shadow:0 6px 16px -8px var(--pill-color, var(--stamp)); }
+      .mapa-pill:hover{ transform:translateY(-1px); }
+      @media (prefers-reduced-motion:reduce){ .mapa-pill{ animation:none; } }
+
+      /* ---- leyenda flotante: transición suave al plegar + resplandor ---- */
+      #mapa-legend{ transition:box-shadow .3s ease, transform .3s var(--spring); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+      #mapa-legend:hover{ box-shadow:0 18px 40px rgba(32,28,20,.26); }
+      #mapa-legend-list{ transition:max-height .3s var(--ease); }
+      .mapa-legend-item{ animation:legendItemIn .35s var(--ease) backwards; }
+      @keyframes legendItemIn{ from{ opacity:0; transform:translateX(6px); } to{ opacity:1; transform:none; } }
+      .mapa-legend-swatch{ transition:transform .2s var(--spring); }
+      .mapa-legend-item:hover .mapa-legend-swatch{ transform:scale(1.25); }
+
+      /* ---- pines y clusters: brillo sutil + sombra más rica al hover,
+             sin tocar la geometría del pin (misma forma / mismo tamaño) ---- */
+      .mapa-pin{ filter:drop-shadow(0 1px 1px rgba(255,255,255,.35)); }
+      .mapa-pin:hover{ filter:drop-shadow(0 1px 1px rgba(255,255,255,.55)) brightness(1.06); }
+      .mapa-cluster-inner{ position:relative; }
+      .mapa-cluster-inner::after{ content:''; position:absolute; inset:-6px; border-radius:50%; border:1px solid currentColor; opacity:.25; animation:clusterRing 2.6s ease-out infinite; }
+      @keyframes clusterRing{ 0%{ transform:scale(.85); opacity:.35; } 100%{ transform:scale(1.28); opacity:0; } }
+      @media (prefers-reduced-motion:reduce){ .mapa-cluster-inner::after{ animation:none; display:none; } }
+
+      /* ---- popups: entrada un poco más viva (Leaflet ya anima opacidad;
+             esto suma una micro-escala sin pisar su transform interno) ---- */
+      .mapa-popup .leaflet-popup-content-wrapper{ animation:popupPop .22s var(--spring); }
+      @keyframes popupPop{ from{ transform:scale(.96); } to{ transform:scale(1); } }
+      .mapa-popup-nombre{ position:relative; display:inline-block; }
+      .mapa-popup-actions a.ir{ position:relative; overflow:hidden; }
+      .mapa-popup-actions a.ir::after{ content:''; position:absolute; inset:0; background:linear-gradient(115deg, transparent, rgba(255,255,255,.35), transparent); transform:translateX(-120%); transition:transform .5s ease; }
+      .mapa-popup-actions a.ir:hover::after{ transform:translateX(120%); }
+
+      /* ---- tarjetas de la vista lista: profundidad extra + esquina viva ---- */
+      .lista-card{ position:relative; }
+      .lista-card::before{ content:''; position:absolute; inset:0; border-radius:inherit; box-shadow:0 0 0 1px transparent; transition:box-shadow .25s ease; pointer-events:none; }
+      .lista-card:hover::before{ box-shadow:0 0 0 1px var(--line-strong) inset; }
+      .lista-card-nombre{ transition:color .2s ease; }
+      .lista-card:hover .lista-card-nombre{ color:var(--stamp-ink); }
+
+      /* ---- estado vacío: pequeña ilustración + halo ---- */
+      #mapa-empty{ position:relative; }
+      #mapa-empty::before{
+        content:'🗺️'; display:block; font-size:34px; line-height:1; margin-bottom:14px; opacity:.7;
+        filter:grayscale(.2); animation:emptyFloat 3.4s ease-in-out infinite;
+      }
+      @keyframes emptyFloat{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-6px);} }
+      @media (prefers-reduced-motion:reduce){ #mapa-empty::before{ animation:none; } }
+
+      /* ---- contador: barra de progreso viva + brillo del link "ver todos" ---- */
+      #mapa-contador{ position:relative; flex-direction:column; align-items:stretch; gap:6px; padding-bottom:15px; }
+      #mapa-contador-track{ height:3px; width:100%; background:var(--sunken); border-radius:100px; overflow:hidden; order:3; }
+      #mapa-contador-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--river), var(--stamp)); border-radius:100px; transition:width .5s var(--ease); }
+      #mapa-contador > span:first-child, #mapa-contador > span:not(:first-child){ order:1; }
+      #mapa-contador a{ position:relative; }
+      #mapa-contador a::after{ content:''; position:absolute; left:0; bottom:-2px; width:0; height:1px; background:var(--stamp); transition:width .25s var(--ease); }
+      #mapa-contador a:hover::after{ width:100%; }
+
+      /* ---- franja final de garantías, debajo del contador ---- */
+      .padron-postscript{ margin-top:22px; display:flex; flex-wrap:wrap; gap:18px 26px; align-items:center; justify-content:center; text-align:center; }
+      .padron-postscript-item{ display:flex; flex-direction:column; align-items:center; gap:6px; max-width:170px; }
+      .padron-postscript-item svg{ width:22px; height:22px; color:var(--stamp-ink); }
+      .padron-postscript-item b{ font-family:var(--sans); font-size:12.5px; font-weight:700; color:var(--ink); }
+      .padron-postscript-item span{ font-size:11.5px; line-height:1.4; color:var(--ink-soft); }
+
+      /* ---- microcopys extra reutilizables (badges tipo "chip" y "ribbon") ---- */
+      .u-chip-new{ display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--river); border-radius:100px; padding:2px 8px; vertical-align:middle; }
+      .u-chip-new::before{ content:'✦'; font-size:9px; }
     </style>
 <noscript><style>.reveal{opacity:1!important;transform:none!important;}#intro{display:none!important;}</style></noscript>
 <script type="application/ld+json">
@@ -877,11 +1054,22 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
 </section>
 
 <section id="padron" aria-labelledby="title-mapa">
+  <div class="laid-veil" aria-hidden="true"></div>
   <div class="wrap">
     <div class="s-head reveal">
       <p class="eyebrow">El padrón, en el mapa</p>
       <h2 id="title-mapa">862 fichas, ubicadas de verdad. Explorá como quieras.</h2>
       <p>Este es el padrón completo, en vivo: buscá un nombre, filtrá por rubro o tocá "Cerca de mí" — y saltá entre el mapa y la lista sin perder el lugar donde estabas.</p>
+    </div>
+
+    <!-- Franja de confianza — enteramente nueva, no reemplaza nada de
+         arriba: son sellos rápidos que refuerzan el "nada inventado"
+         del padrón, antes de que el usuario toque el mapa. -->
+    <div class="padron-trust reveal" aria-hidden="true">
+      <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><b>862</b>&nbsp;fichas verificadas in situ</span>
+      <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Georreferenciado real, no aproximado</span>
+      <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Actualizado el <b>13 jul 2026</b></span>
+      <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Sin registro ni contraseña</span>
     </div>
 
     <ol class="mapa-onboard reveal" aria-label="Cómo explorar el padrón en 4 pasos">
@@ -890,6 +1078,18 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <li class="mapa-onboard-step"><b>Abrí una ficha</b><span>Dirección, calificación real y reseñas verificadas.</span></li>
       <li class="mapa-onboard-step"><b>Guardala</b><span>Un toque en el corazón, sin crear ninguna cuenta.</span></li>
     </ol>
+
+    <!-- Panel "tip" — enteramente nuevo. El texto rota con JS (bloque
+         aditivo al final del documento); si JS está deshabilitado, el
+         primer tip queda fijo y sigue siendo perfectamente legible. -->
+    <div class="mapa-tip reveal" id="mapaTip">
+      <span class="mapa-tip-ico" aria-hidden="true">💡</span>
+      <span class="mapa-tip-body">
+        <b>¿Sabías que…</b>
+        <span id="mapaTipTexto">podés tocar "/" en cualquier parte de la página para saltar directo al buscador del mapa, sin usar el mouse.</span>
+      </span>
+      <button type="button" class="mapa-tip-swap" id="mapaTipSwap" aria-label="Ver otro dato">Otro dato ↻</button>
+    </div>
 
     <!-- CSS del mapa (auditoria de julio 2026, hallazgo "CSS del mapa
          cargado como crítico pese a ser diferido"): el bloque <style>
@@ -900,6 +1100,11 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
          bloque <style>. -->
 
     <div id="mapa-wrap" class="reveal">
+      <span class="mapa-wrap-ribbon" aria-hidden="true"><span class="dot-live"></span>Padrón en vivo</span>
+      <span class="mapa-corner-mark tl" aria-hidden="true"></span>
+      <span class="mapa-corner-mark tr" aria-hidden="true"></span>
+      <span class="mapa-corner-mark bl" aria-hidden="true"></span>
+      <span class="mapa-corner-mark br" aria-hidden="true"></span>
       <div id="mapa-toolbar">
         <div id="mapa-search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -954,7 +1159,32 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
         <span>Mostrando <strong id="mapa-count">0</strong> de <strong id="mapa-total">0</strong> lugares</span>
         <span id="mapa-total-badge">cargando…</span>
         <span><a id="mapa-reset" href="#" role="button">Ver todos</a></span>
+        <!-- Barra de progreso — puramente visual, se completa con JS
+             aditivo al pie del documento leyendo #mapa-count/#mapa-total,
+             sin tocar ninguno de los spans de arriba. -->
+        <div id="mapa-contador-track" aria-hidden="true"><div id="mapa-contador-fill"></div></div>
       </div>
+    </div>
+
+    <!-- Franja final de garantías — completamente nueva, aporta contexto
+         de confianza justo después del mapa/lista, sin alterar nada de
+         lo que hay arriba. -->
+    <div class="padron-postscript reveal" aria-hidden="true">
+      <span class="padron-postscript-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>
+        <b>Sin ranking pago</b>
+        <span>El orden por defecto es por relevancia, no por quién paga más.</span>
+      </span>
+      <span class="padron-postscript-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l6 6L20 6"/></svg>
+        <b>Verificado a pie de calle</b>
+        <span>Cada ficha se contrasta con una visita real, no solo con datos online.</span>
+      </span>
+      <span class="padron-postscript-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <b>Se corrige rápido</b>
+        <span>¿Un dato viejo? Un mail y se actualiza en la próxima revisión.</span>
+      </span>
     </div>
   </div>
 </section>
@@ -1776,5 +2006,63 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
 </script>
 <script src="js/core-engine.js"></script>
 <script src="js/content.js"></script>
+<!-- ═══════════════════════════════════════════════════════════════
+     Bloque 100% aditivo — enriquecimiento visual de "El padrón, en
+     el mapa". No declara variables globales que puedan pisar a las
+     de core-engine.js/content.js (todo vive dentro de una IIFE), no
+     modifica ninguna función existente y se degrada sin errores si
+     algún elemento no está presente. ═══════════════════════════════ -->
+<script>
+(function(){
+  "use strict";
+
+  /* ---- 1) Tips rotativos del panel "¿Sabías que…?" ---- */
+  var TIPS = [
+    'podés tocar "/" en cualquier parte de la página para saltar directo al buscador del mapa, sin usar el mouse.',
+    'el botón "🎲 Sorprendeme" elige un lugar al azar del padrón — ideal si no sabés qué buscar todavía.',
+    'los pines dorados marcan lugares destacados dentro de su rubro, no publicidad paga.',
+    'podés guardar un lugar tocando el corazón y después filtrar el mapa con "♥ Solo favoritos", sin crear ninguna cuenta.',
+    'la vista "☰ Lista" ordena los mismos resultados del mapa por cercanía o por calificación, sin perder el filtro que tenías puesto.',
+    'cada ficha muestra la cantidad real de reseñas junto a la calificación — nunca una sin la otra.'
+  ];
+  (function initTip(){
+    var texto = document.getElementById('mapaTipTexto');
+    var boton = document.getElementById('mapaTipSwap');
+    if(!texto || !boton) return;
+    var i = 0;
+    boton.addEventListener('click', function(){
+      i = (i + 1) % TIPS.length;
+      texto.style.transition = 'opacity .18s ease';
+      texto.style.opacity = '0';
+      setTimeout(function(){
+        texto.textContent = TIPS[i];
+        texto.style.opacity = '1';
+      }, 180);
+    });
+  })();
+
+  /* ---- 2) Barra de progreso viva del contador del mapa ----
+     Observa los nodos de texto de #mapa-count / #mapa-total (que
+     core-engine.js ya actualiza como parte de su propia lógica de
+     render) y solo pinta el ancho de #mapa-contador-fill en función
+     de esos dos números. No lee ni escribe ningún otro estado. */
+  (function initBarraProgreso(){
+    var elCount = document.getElementById('mapa-count');
+    var elTotal = document.getElementById('mapa-total');
+    var elFill = document.getElementById('mapa-contador-fill');
+    if(!elCount || !elTotal || !elFill || !('MutationObserver' in window)) return;
+    function pintar(){
+      var c = parseInt(elCount.textContent, 10) || 0;
+      var t = parseInt(elTotal.textContent, 10) || 0;
+      var pct = t > 0 ? Math.min(100, Math.round((c / t) * 100)) : 0;
+      elFill.style.width = pct + '%';
+    }
+    var mo = new MutationObserver(pintar);
+    mo.observe(elCount, { childList:true, characterData:true, subtree:true });
+    mo.observe(elTotal, { childList:true, characterData:true, subtree:true });
+    pintar();
+  })();
+})();
+</script>
 </body>
 </html>
