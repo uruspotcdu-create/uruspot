@@ -197,7 +197,7 @@ h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
 
 .reg-row{display:flex; align-items:center; gap:16px; padding:16px 4px; border-top:1px solid var(--line);}
 .reg-list .reg-row:last-child{border-bottom:1px solid var(--line);}
-.reg-rank{font-family:var(--mono); font-size:11px; color:var(--ink-faint); width:18px; flex:none;}
+.reg-rank{font-family:var(--mono); font-size:11px; color:var(--ink-soft); width:18px; flex:none;}
 .reg-main{flex:1; min-width:0;}
 .reg-main p{margin:0; font-size:15px; font-weight:600; font-family:var(--serif);}
 .reg-main span{font-size:12px; color:var(--ink-soft);}
@@ -205,7 +205,7 @@ h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
 .reg-link{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center; text-decoration:none; color:var(--ink); transition:background .2s ease, border-color .2s ease, transform .2s var(--ease);}
 .reg-link:hover{background:var(--stamp); border-color:var(--stamp); color:#fff; transform:translateX(2px);}
 .reg-link svg{width:13px; height:13px;}
-.reg-heart{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-faint); transition:color .2s ease, border-color .2s ease, transform .15s var(--spring);}
+.reg-heart{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft); transition:color .2s ease, border-color .2s ease, transform .15s var(--spring);}
 .reg-heart svg{width:14px; height:14px;}
 .reg-heart:hover{border-color:var(--stamp); color:var(--stamp);}
 .reg-heart.on{color:var(--stamp); border-color:var(--stamp);}
@@ -1135,14 +1135,25 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
      pronto. Es aditivo: solo agrega <link rel="preconnect">, nunca
      inicializa Leaflet ni interfiere con lazyInitMapa() en
      core-engine.js. Si el navegador no soporta IntersectionObserver,
-     cae al comportamiento anterior (preconnect inmediato). */
+     cae al comportamiento anterior (preconnect inmediato).
+     [FIX — auditoría, punto A3] Antes se seteaba l.crossOrigin = '' en
+     estos dos preconnect. Ninguno de los dos usos reales de estos
+     dominios pide el recurso en modo CORS: los <script> de Leaflet/
+     MarkerCluster se inyectan sin crossOrigin (ver cargarScriptAsync en
+     core-engine.js) y el tileLayer de Leaflet tampoco lo configura (ver
+     initMapa en core-engine.js) — Leaflet, por defecto, carga los tiles
+     sin ese atributo. Un preconnect en modo CORS anónimo abre una
+     conexión que el fetch real (sin CORS) no puede reutilizar, así que
+     el navegador terminaba pagando el handshake dos veces igual. Se
+     quita crossOrigin para que la conexión precalentada sea la misma
+     que se usa después. */
   (function(){
     var done = false;
     function preconnectMapa(){
       if(done) return; done = true;
       ['https://cdnjs.cloudflare.com','https://a.basemaps.cartocdn.com'].forEach(function(href){
         var l = document.createElement('link');
-        l.rel = 'preconnect'; l.href = href; l.crossOrigin = '';
+        l.rel = 'preconnect'; l.href = href;
         document.head.appendChild(l);
       });
     }
