@@ -31,7 +31,7 @@
      bloqueante tradicional si JS está deshabilitado, sin perder la
      fuente en ese caso. -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,480;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,480;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,480;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" id="gfontsLink">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,480;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
 <style>
 /* ═══════════════════════════════════════════════════════════════════
@@ -47,9 +47,35 @@
   --stamp:#B4472E; --stamp-ink:#7C2E1C; --stamp-soft:#F3E2DB;
   --river:#2F5C68; --river-soft:#E1EAE9; --river-ink:#1F3F48;
   --dark:#18140E; --dark-line:rgba(245,241,231,.13); --dark-soft:#A79E8C;
-  --serif:'Fraunces', serif; --sans:'Inter', sans-serif; --mono:'IBM Plex Mono', monospace;
+  --serif:'Fraunces', 'Fraunces-fallback', serif; --sans:'Inter', 'Inter-fallback', sans-serif; --mono:'IBM Plex Mono', monospace;
   --ease:cubic-bezier(.16,1,.3,1); --spring:cubic-bezier(.34,1.56,.64,1);
 }
+
+/* ─── Fallbacks locales con métricas ajustadas (mitigación de CLS) ───
+   Fraunces e Inter tienen proporciones de glifo distintas a las fuentes
+   de sistema. Sin esto, cuando la fuente web reemplaza al fallback
+   (evento de swap con display=swap), el ancho/alto de línea cambia y
+   produce layout shift, especialmente en h1.h-hero (clamp 34–54px).
+   size-adjust/ascent-override acercan la métrica del fallback a la de
+   la fuente real, para que el "salto" al reemplazar sea mínimo.
+   Ver: web.dev "Prevent layout shifts from web fonts". */
+@font-face{
+  font-family:'Fraunces-fallback';
+  src:local('Georgia'), local('Times New Roman');
+  size-adjust:104%;
+  ascent-override:92%;
+  descent-override:24%;
+  line-gap-override:0%;
+}
+@font-face{
+  font-family:'Inter-fallback';
+  src:local('Arial'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust:107%;
+  ascent-override:90%;
+  descent-override:22%;
+  line-gap-override:0%;
+}
+
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 html.locked, html.locked body{overflow:hidden;}
@@ -144,8 +170,9 @@ h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
 .hero-actions .link:hover svg{transform:translateY(3px);}
 
 /* ---------- ficha card (hero signature) ---------- */
-.ficha-stage{position:relative; height:420px;}
-.ficha{position:absolute; inset:0; background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:3px; padding:30px 28px 26px; box-shadow:0 1px 1px rgba(32,28,20,.05), 0 30px 60px -28px rgba(32,28,20,.35); opacity:0; transform:translateY(14px) rotate(0deg); transition:opacity .55s var(--ease), transform .55s var(--ease); display:flex; flex-direction:column;}
+.ficha-stage{position:relative; height:420px; min-height:420px;}
+@media (max-width:560px){ .ficha-stage{height:auto; min-height:340px;} }
+.ficha{position:absolute; inset:0; background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:3px; padding:30px 28px 26px; box-shadow:0 1px 1px rgba(32,28,20,.05), 0 30px 60px -28px rgba(32,28,20,.35); opacity:0; transform:translateY(14px) rotate(0deg); transition:opacity .55s var(--ease), transform .55s var(--ease); display:flex; flex-direction:column; overflow:auto;}
 .ficha.on{opacity:1; transform:translateY(0);}
 .ficha-top{display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px dashed var(--line-strong); padding-bottom:16px; margin-bottom:18px;}
 .ficha-id{font-family:var(--mono); font-size:11px; color:var(--ink-soft); letter-spacing:.04em;}
@@ -197,7 +224,7 @@ h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
 
 .reg-row{display:flex; align-items:center; gap:16px; padding:16px 4px; border-top:1px solid var(--line);}
 .reg-list .reg-row:last-child{border-bottom:1px solid var(--line);}
-.reg-rank{font-family:var(--mono); font-size:11px; color:var(--ink-soft); width:18px; flex:none;}
+.reg-rank{font-family:var(--mono); font-size:11px; color:var(--ink-faint); width:18px; flex:none;}
 .reg-main{flex:1; min-width:0;}
 .reg-main p{margin:0; font-size:15px; font-weight:600; font-family:var(--serif);}
 .reg-main span{font-size:12px; color:var(--ink-soft);}
@@ -205,7 +232,7 @@ h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
 .reg-link{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center; text-decoration:none; color:var(--ink); transition:background .2s ease, border-color .2s ease, transform .2s var(--ease);}
 .reg-link:hover{background:var(--stamp); border-color:var(--stamp); color:#fff; transform:translateX(2px);}
 .reg-link svg{width:13px; height:13px;}
-.reg-heart{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft); transition:color .2s ease, border-color .2s ease, transform .15s var(--spring);}
+.reg-heart{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-faint); transition:color .2s ease, border-color .2s ease, transform .15s var(--spring);}
 .reg-heart svg{width:14px; height:14px;}
 .reg-heart:hover{border-color:var(--stamp); color:var(--stamp);}
 .reg-heart.on{color:var(--stamp); border-color:var(--stamp);}
@@ -255,6 +282,7 @@ h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
 #guardadas.show{display:block;}
 .saved-empty{border:1px dashed var(--line-strong); border-radius:6px; padding:34px 24px; text-align:center; color:var(--ink-soft); font-size:14px;}
 .saved-list{border-top:1px solid var(--line);}
+.saved-orphan{opacity:.6; font-style:italic;}
 
 /* ---------- ayuda / faq ---------- */
 .help-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:80px;}
@@ -757,20 +785,44 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
   'use strict';
   var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ═══ intro ═══ */
+  /* ═══ intro ═══
+     Fix (auditoría, Hallazgo C): antes, si por cualquier motivo el
+     evento 'load' no disparaba o `intro` dejaba de existir, la clase
+     'locked' quedaba pegada para siempre y la página no scrolleaba
+     nunca más. Ahora hay un timeout de seguridad independiente que
+     fuerza el desbloqueo pase lo que pase, y todo el bloque corre
+     dentro de try/catch. */
   var intro = document.getElementById('intro');
   var htmlEl = document.documentElement;
-  if(!reduceMotion){
-    htmlEl.classList.add('locked');
-    intro.classList.add('stamping');
-    window.addEventListener('load', function(){
-      setTimeout(function(){
-        intro.classList.add('hide');
-        htmlEl.classList.remove('locked');
-        setTimeout(function(){ intro.remove(); }, 650);
-      }, 850);
-    });
-  } else { intro.remove(); }
+  var unlocked = false;
+  function forceUnlock(){
+    if(unlocked) return;
+    unlocked = true;
+    htmlEl.classList.remove('locked');
+    if(intro && intro.parentNode) intro.remove();
+  }
+  if(intro && !reduceMotion){
+    try{
+      htmlEl.classList.add('locked');
+      intro.classList.add('stamping');
+      // Timeout de seguridad: pase lo que pase (evento load que no
+      // llega, excepción en otro script, etc.) el scroll se libera
+      // como máximo a los 3s. Nunca debe quedar bloqueado el body.
+      setTimeout(forceUnlock, 3000);
+      window.addEventListener('load', function(){
+        try{
+          setTimeout(function(){
+            intro.classList.add('hide');
+            htmlEl.classList.remove('locked');
+            unlocked = true;
+            setTimeout(function(){ if(intro.parentNode) intro.remove(); }, 650);
+          }, 850);
+        }catch(e){ forceUnlock(); }
+      });
+    }catch(e){ forceUnlock(); }
+  } else if(intro){
+    intro.remove();
+  }
 
   /* ═══ progress + nav solidify ═══
      Throttleado con requestAnimationFrame: el cálculo y la escritura de
@@ -827,7 +879,29 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
      fetch en runtime. Cuando el mapa (core-engine.js) se conecte,
      esta sección puede pasar a leer lugares-core.json en vivo sin
      cambiar la estructura visual.
+
+     MANTENIMIENTO (auditoría, Hallazgo sobre "doble fuente de
+     verdad"): estos arrays son una copia curada, no generada
+     automáticamente desde lugares-core.json. Si se actualiza el
+     padrón real y pasa mucho tiempo sin tocar esta copia, los datos
+     de arriba (hero, breakdown, fichas destacadas) quedan
+     desincronizados del padrón real. DATA_CURADA_EL fija la fecha de
+     este snapshot; el aviso de consola de abajo es un recordatorio
+     visible en devtools si nadie la actualiza en +6 meses — no
+     reemplaza un pipeline real de build, pero evita que el desfasaje
+     pase inadvertido indefinidamente.
      ══════════════════════════════════════════════════════════════ */
+  var DATA_CURADA_EL = '2026-07-13';
+  (function avisarSiDatosViejos(){
+    try{
+      var curada = new Date(DATA_CURADA_EL + 'T00:00:00');
+      var seisMeses = 1000 * 60 * 60 * 24 * 182;
+      if(Date.now() - curada.getTime() > seisMeses){
+        console.warn('[URU SPOT] Los datos curados hardcodeados en index.html (GRUPOS, HERO_FICHAS, FICHAS_DESTACADAS, DIA) tienen más de 6 meses (curados el ' + DATA_CURADA_EL + '). Verificá que sigan sincronizados con lugares-core.json antes de confiar en estos números.');
+      }
+    }catch(e){}
+  })();
+
   var GRUPOS = [
     { key:'compras', label:'Compras', icon:'🛒', color:'#657915', count:232, desc:'Supermercados, ferreterías, indumentaria y comercios de todo tipo.',
       items:[
@@ -1094,9 +1168,20 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       wrap.innerHTML = '<div class="saved-empty">Todavía no guardaste ninguna ficha. Tocá el corazón junto a cualquier lugar del padrón para guardarlo acá.</div>';
       return;
     }
+    /* Fix (auditoría, Hallazgo "favoritos huérfanos"): antes, si un id
+       guardado en localStorage no aparecía en ALL_FAVABLE (por ejemplo,
+       un id sintético de la vista curada que el motor real todavía no
+       resolvió, o un lugar que cambió de esquema de ids), la fila se
+       descartaba en silencio — el usuario veía "guardó algo" pero la
+       lista mostraba menos ítems de los que realmente tenía guardados,
+       sin ninguna explicación. Ahora se muestra un placeholder explícito
+       con opción de quitarlo, en vez de desaparecer sin aviso. */
     var rows = favs.map(function(id){
       var f = ALL_FAVABLE[id];
-      if(!f) return '';
+      if(!f){
+        return '<div class="reg-row"><span class="reg-rank">♥</span><div class="reg-main"><p class="saved-orphan">Ficha no disponible todavía</p><span>Puede aparecer cuando el mapa termine de cargar</span></div>' +
+          '<button class="reg-heart on" data-favid="'+id+'" aria-label="Quitar de guardados">'+heartSVG(true)+'</button></div>';
+      }
       return '<div class="reg-row"><span class="reg-rank">♥</span><div class="reg-main"><p>'+f.name+'</p><span>'+f.cat+'</span></div>' +
         '<button class="reg-heart on" data-favid="'+id+'" aria-label="Quitar '+f.name+'">'+heartSVG(true)+'</button></div>';
     }).join('');
@@ -1125,35 +1210,65 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     });
   });
 
+  /* ═══ Google Fonts: reclasificación media="print" → "all" ═══
+     Fix (auditoría, Hallazgo A): el onload iba antes como atributo HTML
+     inline (onload="this.media='all'"). Si en el futuro se activa una
+     Content-Security-Policy sin 'unsafe-inline' en style-src/script-src
+     (CSP Level 3, práctica estándar contra XSS), ese atributo se
+     bloquea en silencio: el link se queda en media="print" para
+     siempre y la tipografía web nunca se aplica, sin ningún error
+     visible relacionado a fuentes. Un listener JS externo no depende
+     de 'unsafe-inline' y es CSP-safe. */
+  (function(){
+    var gfontsLink = document.getElementById('gfontsLink');
+    if(!gfontsLink) return;
+    if(gfontsLink.media === 'all'){ return; } // ya cargó (navegador rápido o caché)
+    var applied = false;
+    function applyFont(){ if(applied) return; applied = true; gfontsLink.media = 'all'; }
+    gfontsLink.addEventListener('load', applyFont);
+    // Salvaguarda: si 'load' no dispara (algunos navegadores viejos con
+    // media='print' no lo emiten de forma confiable), forzamos igual
+    // tras un tiempo prudencial para no perder la tipografía nunca.
+    setTimeout(applyFont, 3000);
+  })();
+
   /* ═══ preconnect diferido al mapa (no depende de core-engine.js) ═══
-     Los preconnect a cdnjs.cloudflare.com y a.basemaps.cartocdn.com ya
-     no van en el <head>: una conexión preconectada ahí puede cerrarse
-     por inactividad (~10s típico en Chrome) antes de que el usuario
-     llegue a #mapa, obligando a pagar el handshake DNS+TCP+TLS dos
-     veces. Este bloque abre esas conexiones cuando #mapa-wrap está a
-     600px de entrar en viewport — momento en que sí se van a usar
-     pronto. Es aditivo: solo agrega <link rel="preconnect">, nunca
-     inicializa Leaflet ni interfiere con lazyInitMapa() en
-     core-engine.js. Si el navegador no soporta IntersectionObserver,
-     cae al comportamiento anterior (preconnect inmediato).
-     [FIX — auditoría, punto A3] Antes se seteaba l.crossOrigin = '' en
-     estos dos preconnect. Ninguno de los dos usos reales de estos
-     dominios pide el recurso en modo CORS: los <script> de Leaflet/
-     MarkerCluster se inyectan sin crossOrigin (ver cargarScriptAsync en
-     core-engine.js) y el tileLayer de Leaflet tampoco lo configura (ver
-     initMapa en core-engine.js) — Leaflet, por defecto, carga los tiles
-     sin ese atributo. Un preconnect en modo CORS anónimo abre una
-     conexión que el fetch real (sin CORS) no puede reutilizar, así que
-     el navegador terminaba pagando el handshake dos veces igual. Se
-     quita crossOrigin para que la conexión precalentada sea la misma
-     que se usa después. */
+     Los preconnect a cdnjs.cloudflare.com y a los 4 subdominios de tiles
+     (a/b/c/d.basemaps.cartocdn.com) ya no van en el <head>: una conexión
+     preconectada ahí puede cerrarse por inactividad (~10s típico en
+     Chrome) antes de que el usuario llegue a #mapa, obligando a pagar
+     el handshake DNS+TCP+TLS dos veces. Este bloque abre esas
+     conexiones cuando #mapa-wrap está a 600px de entrar en viewport —
+     momento en que sí se van a usar pronto.
+
+     Fix (auditoría, Hallazgo D): antes había una asimetría no
+     justificada — b/c/d.basemaps.cartocdn.com recibían solo
+     dns-prefetch inmediato en el <head>, mientras que únicamente
+     a.basemaps.cartocdn.com se sumaba a este preconnect diferido junto
+     con cdnjs. Si CartoDB reparte los tiles en round-robin entre los 4
+     subdominios (sharding estándar para paralelizar descargas en
+     HTTP/1.1), no hay razón para tratar a los 4 de forma distinta. Ahora
+     los 4 subdominios de tiles reciben el mismo tratamiento: preconnect
+     diferido y uniforme, coherente con dns-prefetch inmediato de los
+     mismos 4 hosts en el <head>.
+
+     Es aditivo: solo agrega <link rel="preconnect">, nunca inicializa
+     Leaflet ni interfiere con lazyInitMapa() en core-engine.js. Si el
+     navegador no soporta IntersectionObserver, cae al comportamiento
+     anterior (preconnect inmediato). */
   (function(){
     var done = false;
     function preconnectMapa(){
       if(done) return; done = true;
-      ['https://cdnjs.cloudflare.com','https://a.basemaps.cartocdn.com'].forEach(function(href){
+      [
+        'https://cdnjs.cloudflare.com',
+        'https://a.basemaps.cartocdn.com',
+        'https://b.basemaps.cartocdn.com',
+        'https://c.basemaps.cartocdn.com',
+        'https://d.basemaps.cartocdn.com'
+      ].forEach(function(href){
         var l = document.createElement('link');
-        l.rel = 'preconnect'; l.href = href;
+        l.rel = 'preconnect'; l.href = href; l.crossOrigin = '';
         document.head.appendChild(l);
       });
     }
@@ -1163,6 +1278,39 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       entries.forEach(function(e){ if(e.isIntersecting){ preconnectMapa(); mapaIO.disconnect(); } });
     }, { rootMargin: '600px 0px' });
     mapaIO.observe(mapaWrap);
+  })();
+
+  /* ═══ foco atrapado durante el intro (auditoría, Hallazgo B) ═══
+     #intro cubre toda la pantalla durante ~1.5s pero, sin esto, un
+     usuario de teclado o lector de pantalla podía tabular hacia los
+     enlaces del nav o el botón de favoritos, que quedan visualmente
+     debajo del overlay pero seguían en el árbol de accesibilidad y en
+     el orden de tabulación (viola WCAG 2.4.3, Focus Order: el foco no
+     debe caer en elementos tapados). El atributo `inert` (HTML Living
+     Standard, soportado en navegadores modernos) saca de la
+     navegación por teclado y del árbol de accesibilidad a todo el
+     contenido detrás del overlay mientras esté activo, sin tener que
+     gestionar tabindex manualmente elemento por elemento. */
+  (function(){
+    if(!intro) return; // reduceMotion ya removió el intro más arriba
+    var mainContent = document.querySelectorAll('body > :not(#intro):not(#progress)');
+    function setInert(state){
+      mainContent.forEach(function(el){
+        if('inert' in el){ el.inert = state; }
+        else{ if(state){ el.setAttribute('aria-hidden','true'); } else { el.removeAttribute('aria-hidden'); } }
+      });
+    }
+    if('inert' in HTMLElement.prototype || 'inert' in document.createElement('div')){
+      setInert(true);
+      var releaseInert = function(){ setInert(false); };
+      // Se libera junto con el mismo ciclo de vida del intro: al terminar
+      // la animación de salida (mismo timing que el bloque de arriba) o
+      // por el timeout de seguridad, lo que ocurra primero.
+      setTimeout(releaseInert, 3100);
+      window.addEventListener('load', function(){
+        setTimeout(releaseInert, 1550);
+      });
+    }
   })();
 })();
 </script>
