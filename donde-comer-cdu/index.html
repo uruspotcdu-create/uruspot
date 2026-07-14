@@ -119,7 +119,7 @@ button{font:inherit;}
 /* ---------- nav ---------- */
 nav.top{position:fixed; top:0; left:0; right:0; z-index:100; padding:22px 0; transition:background .4s ease, border-color .4s ease, padding .4s ease;}
 nav.top .wrap{display:flex; align-items:center; justify-content:space-between; gap:24px;}
-nav.top.solid{background:rgba(245,241,231,.88); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:14px 0;}
+nav.top.solid{background:rgba(245,241,231,.88); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:14px 0;}
 .mark{display:flex; align-items:center; gap:9px; font-weight:700; font-size:14.5px; letter-spacing:-0.01em; text-decoration:none;}
 .mark svg{width:22px; height:22px; flex:none;}
 .navlinks{display:flex; gap:30px; font-size:13.5px; color:var(--ink-soft); flex:1; justify-content:center;}
@@ -145,8 +145,6 @@ nav.top.solid{background:rgba(245,241,231,.88); backdrop-filter:blur(10px); bord
 /* ---------- shared heads ---------- */
 .eyebrow{display:flex; align-items:center; gap:9px; font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--stamp-ink); margin:0 0 16px;}
 .eyebrow::before{content:''; width:16px; height:1px; background:var(--stamp);}
-.dark-section .eyebrow{color:#CFA495;}
-.dark-section .eyebrow::before{background:#CFA495;}
 .s-head{max-width:640px; margin-bottom:52px;}
 .s-head h2{font-family:var(--serif); font-weight:700; font-size:clamp(26px,3.4vw,40px); line-height:1.14; letter-spacing:-0.01em; margin:0 0 16px;}
 .s-head p{font-size:16px; line-height:1.6; color:var(--ink-soft); margin:0; max-width:520px;}
@@ -202,37 +200,34 @@ h1.h-hero em{font-style:italic; font-weight:500; color:var(--stamp-ink);}
 .bd-num{font-family:var(--serif); font-weight:600; font-size:30px; line-height:1;}
 .bd-label{font-family:var(--mono); font-size:11px; color:var(--dark-soft); margin-top:8px; letter-spacing:.02em;}
 
-/* ---------- padrón: category browser ---------- */
-.cat-tabs{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;}
-.cat-tab{display:flex; align-items:center; gap:8px; font-family:var(--sans); font-size:13px; font-weight:600; padding:9px 14px 9px 11px; border-radius:100px; border:1px solid var(--line-strong); background:var(--paper-raised); cursor:pointer; color:var(--ink-soft); transition:border-color .2s ease, color .2s ease, background .2s ease;}
-.cat-tab .dot{width:9px; height:9px; border-radius:50%; flex:none;}
-.cat-tab .n{font-family:var(--mono); font-size:11px; color:var(--ink-soft);}
-.cat-tab.on{color:var(--ink); border-color:var(--ink-strong,var(--ink)); background:var(--paper);}
-.cat-tab:hover{border-color:var(--ink-faint);}
-.cat-note{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin:20px 0 40px; display:flex; align-items:center; gap:8px;}
-.cat-note svg{width:13px; height:13px; flex:none;}
-
-.cat-panel{display:grid; grid-template-columns:.62fr 1fr; gap:56px; align-items:start;}
-@media (max-width:860px){ .cat-panel{grid-template-columns:1fr;} }
-.cat-desc h3{font-family:var(--serif); font-weight:600; font-size:26px; margin:0 0 12px; display:flex; align-items:center; gap:12px;}
-.cat-desc h3 .icon{font-size:24px;}
-.cat-desc p{font-size:14.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 22px; max-width:340px;}
-.cat-desc .cat-count{font-family:var(--mono); font-size:12px; color:var(--stamp-ink); background:var(--stamp-soft); display:inline-flex; padding:6px 12px; border-radius:100px;}
-.cat-explore{margin-top:26px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--stamp-ink);}
-.cat-explore svg{width:13px; height:13px; transition:transform .2s ease;}
-.cat-explore:hover svg{transform:translateX(3px);}
-
+/* ---------- padrón: fichas guardadas (filas de registro) ----------
+   Nota (auditoría, Hallazgo alto "subsistema de categorías muerto"):
+   este bloque tenía además .cat-tabs/.cat-tab/.cat-note/.cat-panel/
+   .cat-desc/.cat-explore — CSS de un explorador de categorías en
+   pestañas que ningún HTML ni JS de esta página genera (verificado:
+   ninguna de esas clases aparece en el markup ni se crea vía JS). Se
+   eliminó por ser peso muerto. Los datos GRUPOS[].items en el <script>
+   no se tocaron: aunque tampoco alimentan ninguna UI visible hoy,
+   siguen resolviendo nombres para ids de favoritos "g-<rubro>-<n>"
+   que pudieran existir en el localStorage de alguien que usó una
+   versión anterior del sitio (ver ALL_FAVABLE más abajo); quitarlos
+   podía convertir esos favoritos guardados en "no disponibles" para
+   ese caso puntual, así que se optó por el lado conservador. */
 .reg-row{display:flex; align-items:center; gap:16px; padding:16px 4px; border-top:1px solid var(--line);}
 .reg-list .reg-row:last-child{border-bottom:1px solid var(--line);}
 .reg-rank{font-family:var(--mono); font-size:11px; color:var(--ink-faint); width:18px; flex:none;}
 .reg-main{flex:1; min-width:0;}
 .reg-main p{margin:0; font-size:15px; font-weight:600; font-family:var(--serif);}
 .reg-main span{font-size:12px; color:var(--ink-soft);}
-.reg-rating{font-family:var(--mono); font-size:12.5px; color:var(--ink-soft); flex:none; white-space:nowrap;}
-.reg-link{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center; text-decoration:none; color:var(--ink); transition:background .2s ease, border-color .2s ease, transform .2s var(--ease);}
-.reg-link:hover{background:var(--stamp); border-color:var(--stamp); color:#fff; transform:translateX(2px);}
-.reg-link svg{width:13px; height:13px;}
-.reg-heart{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-faint); transition:color .2s ease, border-color .2s ease, transform .15s var(--spring);}
+/* Fix (auditoría, Hallazgo medio "contraste insuficiente en el corazón
+   de favoritos por defecto"): color:var(--ink-faint) sobre --paper
+   daba ≈2.42:1, por debajo del mínimo 3:1 de WCAG 1.4.11 para el
+   estado por defecto de un control interactivo. --ink-soft da ~5:1
+   sobre el mismo fondo. Cambio acotado a .reg-heart únicamente; no se
+   tocó la variable --ink-faint en sí porque la usan otros componentes
+   (p.ej. #mapa-legend-count, .lista-card-rating) fuera del alcance de
+   este hallazgo. */
+.reg-heart{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft); transition:color .2s ease, border-color .2s ease, transform .15s var(--spring);}
 .reg-heart svg{width:14px; height:14px;}
 .reg-heart:hover{border-color:var(--stamp); color:var(--stamp);}
 .reg-heart.on{color:var(--stamp); border-color:var(--stamp);}
@@ -317,86 +312,6 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
 .foot-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:28px; font-size:12.5px; color:var(--dark-soft); flex-wrap:wrap; gap:14px;}
 .foot-bottom a{color:var(--dark-soft); text-decoration:underline; text-underline-offset:2px;}
 </style>
-<noscript><style>.reveal{opacity:1!important;transform:none!important;}#intro{display:none!important;}</style></noscript>
-</head>
-<body>
-
-<div id="intro" aria-hidden="true">
-  <div class="stamp-mark">
-    <svg viewBox="0 0 120 120">
-      <circle class="stamp-ring" cx="60" cy="60" r="52"/>
-      <circle class="stamp-ring" cx="60" cy="60" r="44" stroke-width="1"/>
-      <path id="stampArcTop" d="M 60 16 A 44 44 0 0 1 100 60" fill="none"/>
-      <path id="stampArcBot" d="M 20 60 A 44 44 0 0 1 60 16" fill="none"/>
-      <text class="stamp-word"><textPath href="#stampArcTop" startOffset="4">URU SPOT</textPath></text>
-      <text class="stamp-num" x="60" y="58" text-anchor="middle">FICHA N.º 0862</text>
-      <text class="stamp-word" x="60" y="72" text-anchor="middle" style="font-size:12px;">VERIFICADO</text>
-      <text class="stamp-num" x="60" y="86" text-anchor="middle">CONCEPCIÓN DEL URUGUAY</text>
-    </svg>
-  </div>
-</div>
-
-<div id="progress"></div>
-
-<nav class="top" id="nav">
-  <div class="wrap">
-    <a class="mark" href="#hero">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 5 6.2 5 10c0 5.2 7 11 7 11s7-5.8 7-11c0-3.8-3-7-7-7Z" stroke="#B4472E" stroke-width="1.7"/><circle cx="12" cy="10" r="2.2" fill="#B4472E"/></svg>
-      URU SPOT
-    </a>
-    <div class="navlinks">
-      <a href="#padron">El padrón</a>
-      <a href="#verificacion">Cómo se verifica</a>
-      <a href="#dia">Un día en la ciudad</a>
-      <a href="#fichas">Fichas destacadas</a>
-      <a href="#ayuda">Ayuda</a>
-    </div>
-    <div class="navcta">
-      <button class="favbtn" id="favNavBtn" aria-label="Ver fichas guardadas">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg>
-        Guardadas <span class="fb-count" id="favCount">0</span>
-      </button>
-      <button class="btn primary" id="heroBtnNav">Ver el padrón</button>
-    </div>
-  </div>
-</nav>
-
-<section class="hero" id="hero">
-  <div class="wrap">
-    <div>
-      <span class="kicker">Concepción del Uruguay, Entre Ríos</span>
-      <h1 class="h-hero">La ciudad tiene <em>862 fichas</em>.<br>Ninguna la escribió una IA<br>sin pisar la calle primero.</h1>
-      <p class="hero-sub">URU SPOT no es una guía turística: es el padrón comercial y de servicios de la ciudad — <b>862 lugares</b> repartidos en <b>13 rubros</b>, del asado a la escribanía, cada uno con dirección, calificación y estado reales.</p>
-      <div class="hero-actions">
-        <button class="btn primary" id="heroBtn">Recorrer el padrón</button>
-        <a href="#verificacion" class="link">Cómo entra un lugar acá <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v10M4 9l4 4 4-4"/></svg></a>
-      </div>
-    </div>
-
-    <div class="ficha-stage reveal" id="fichaStage" aria-hidden="true">
-      <!-- fichas insertadas por JS -->
-      <div class="ficha-dots" id="fichaDots"></div>
-    </div>
-  </div>
-</section>
-
-<section class="manifest reveal">
-  <div class="wrap">
-    <p class="eyebrow" style="color:#CFA495;">Lo que hay realmente ahí adentro</p>
-    <h2>De las 862 fichas, apenas <b>166 son bares o restaurantes.</b></h2>
-    <p class="lede">El resto es la ciudad haciendo su vida diaria: comercios, salud, trámites, plata, movilidad, entrenamiento, historia, estudio, estética, techo, mascota y río. Trece rubros, ninguno decorativo.</p>
-    <div class="breakdown" id="breakdown"><!-- JS --></div>
-  </div>
-</section>
-
-<section id="padron" aria-labelledby="title-mapa">
-  <div class="wrap">
-    <div class="s-head reveal">
-      <p class="eyebrow">El padrón, en el mapa</p>
-      <h2 id="title-mapa">862 fichas, ubicadas de verdad. Explorá como quieras.</h2>
-      <p>Este es el padrón completo, en vivo: buscá un nombre, filtrá por rubro o tocá "Cerca de mí" — y saltá entre el mapa y la lista sin perder el lugar donde estabas.</p>
-    </div>
-
     <style>
       /* ═══════════════════════════════════════════════════════════════
          MAPA — el padrón vivo, hecho lienzo. Mismos tokens que el resto
@@ -448,7 +363,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
 
       /* Capa "tocá para interactuar" — primer gesto en mobile no debe
          robarle el scroll a la página (ver core-engine.js/initMapa). */
-      #mapa-leaflet .mapa-activador{ position:absolute; inset:0; z-index:600; display:flex; align-items:center; justify-content:center; background:rgba(32,28,20,.06); backdrop-filter:blur(1px); cursor:pointer; }
+      #mapa-leaflet .mapa-activador{ position:absolute; inset:0; z-index:600; display:flex; align-items:center; justify-content:center; background:rgba(32,28,20,.06); -webkit-backdrop-filter:blur(1px); backdrop-filter:blur(1px); cursor:pointer; }
       #mapa-leaflet .mapa-activador span{ font-family:var(--mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:100px; padding:9px 16px; box-shadow:0 10px 24px -10px rgba(32,28,20,.4); }
 
       #mapa-leaflet .leaflet-control-zoom a{ background:var(--paper-raised); color:var(--ink); border-color:var(--line-strong); }
@@ -593,6 +508,93 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
         #mapa-geoloc, #mapa-random, #mapa-orden, #mapa-fav-toggle{ justify-content:center; text-align:center; }
       }
     </style>
+<noscript><style>.reveal{opacity:1!important;transform:none!important;}#intro{display:none!important;}</style></noscript>
+</head>
+<body>
+
+<div id="intro" aria-hidden="true">
+  <div class="stamp-mark">
+    <svg viewBox="0 0 120 120">
+      <circle class="stamp-ring" cx="60" cy="60" r="52"/>
+      <circle class="stamp-ring" cx="60" cy="60" r="44" stroke-width="1"/>
+      <path id="stampArcTop" d="M 60 16 A 44 44 0 0 1 100 60" fill="none"/>
+      <path id="stampArcBot" d="M 20 60 A 44 44 0 0 1 60 16" fill="none"/>
+      <text class="stamp-word"><textPath href="#stampArcTop" startOffset="4">URU SPOT</textPath></text>
+      <text class="stamp-num" x="60" y="58" text-anchor="middle">FICHA N.º 0862</text>
+      <text class="stamp-word" x="60" y="72" text-anchor="middle" style="font-size:12px;">VERIFICADO</text>
+      <text class="stamp-num" x="60" y="86" text-anchor="middle">CONCEPCIÓN DEL URUGUAY</text>
+    </svg>
+  </div>
+</div>
+
+<div id="progress"></div>
+
+<nav class="top" id="nav">
+  <div class="wrap">
+    <a class="mark" href="#hero">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 5 6.2 5 10c0 5.2 7 11 7 11s7-5.8 7-11c0-3.8-3-7-7-7Z" stroke="#B4472E" stroke-width="1.7"/><circle cx="12" cy="10" r="2.2" fill="#B4472E"/></svg>
+      URU SPOT
+    </a>
+    <div class="navlinks">
+      <a href="#padron">El padrón</a>
+      <a href="#verificacion">Cómo se verifica</a>
+      <a href="#dia">Un día en la ciudad</a>
+      <a href="#fichas">Fichas destacadas</a>
+      <a href="#ayuda">Ayuda</a>
+    </div>
+    <div class="navcta">
+      <button class="favbtn" id="favNavBtn" aria-label="Ver fichas guardadas">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg>
+        Guardadas <span class="fb-count" id="favCount">0</span>
+      </button>
+      <button class="btn primary" id="heroBtnNav">Ver el padrón</button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="wrap">
+    <div>
+      <span class="kicker">Concepción del Uruguay, Entre Ríos</span>
+      <h1 class="h-hero">La ciudad tiene <em>862 fichas</em>.<br>Ninguna la escribió una IA<br>sin pisar la calle primero.</h1>
+      <p class="hero-sub">URU SPOT no es una guía turística: es el padrón comercial y de servicios de la ciudad — <b>862 lugares</b> repartidos en <b>13 rubros</b>, del asado a la escribanía, cada uno con dirección, calificación y estado reales.</p>
+      <div class="hero-actions">
+        <button class="btn primary" id="heroBtn">Recorrer el padrón</button>
+        <a href="#verificacion" class="link">Cómo entra un lugar acá <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v10M4 9l4 4 4-4"/></svg></a>
+      </div>
+    </div>
+
+    <div class="ficha-stage reveal" id="fichaStage" aria-hidden="true">
+      <!-- fichas insertadas por JS -->
+      <div class="ficha-dots" id="fichaDots"></div>
+    </div>
+  </div>
+</section>
+
+<section class="manifest reveal">
+  <div class="wrap">
+    <p class="eyebrow" style="color:#CFA495;">Lo que hay realmente ahí adentro</p>
+    <h2>De las 862 fichas, apenas <b>166 son bares o restaurantes.</b></h2>
+    <p class="lede">El resto es la ciudad haciendo su vida diaria: comercios, salud, trámites, plata, movilidad, entrenamiento, historia, estudio, estética, techo, mascota y río. Trece rubros, ninguno decorativo.</p>
+    <div class="breakdown" id="breakdown"><!-- JS --></div>
+  </div>
+</section>
+
+<section id="padron" aria-labelledby="title-mapa">
+  <div class="wrap">
+    <div class="s-head reveal">
+      <p class="eyebrow">El padrón, en el mapa</p>
+      <h2 id="title-mapa">862 fichas, ubicadas de verdad. Explorá como quieras.</h2>
+      <p>Este es el padrón completo, en vivo: buscá un nombre, filtrá por rubro o tocá "Cerca de mí" — y saltá entre el mapa y la lista sin perder el lugar donde estabas.</p>
+    </div>
+
+    <!-- CSS del mapa (auditoria de julio 2026, hallazgo "CSS del mapa
+         cargado como crítico pese a ser diferido"): el bloque <style>
+         que vivía acá se movió al <head>, junto al resto del CSS
+         crítico, para que el parser HTML no tenga que procesar ~230
+         líneas de CSS en medio del <body> antes de la primera pintura.
+         El HTML del mapa (más abajo) no cambió; solo se trasladó el
+         bloque <style>. -->
 
     <div id="mapa-wrap" class="reveal">
       <div id="mapa-toolbar">
@@ -621,7 +623,18 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <p id="mapa-active-filtros" class="visually-hidden" aria-live="polite"></p>
 
       <div id="mapa-canvas" data-view="mapa">
-        <div id="mapa-leaflet" role="application" aria-label="Mapa interactivo de Concepción del Uruguay"></div>
+        <!-- Fix (auditoría, Hallazgo medio "role=application en el
+             mapa"): role="application" suspende toda la navegación
+             estándar de lectores de pantalla dentro del contenedor y
+             delega el 100% del manejo de teclado a la aplicación; sin
+             confirmar que core-engine.js reimplementa esa navegación
+             por completo, es más seguro usar role="region", que
+             identifica el contenedor como una zona de la página sin
+             quitarle al lector de pantalla su navegación normal.
+             Leaflet aplica sus propios atributos ARIA al inicializarse
+             sobre este mismo div; el cambio de role no afecta esa
+             inicialización porque ocurre por id, no por role. -->
+        <div id="mapa-leaflet" role="region" aria-label="Mapa interactivo de Concepción del Uruguay"></div>
         <div id="mapa-legend" aria-label="Leyenda de categorías del mapa">
           <div id="mapa-legend-head" role="button" tabindex="0" aria-expanded="true">
             <span class="titulo">Leyenda</span>
@@ -713,21 +726,27 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
           <h2>Lo esencial, sin fricción.</h2>
         </div>
         <div class="reveal">
+          <!-- Fix (auditoría, Hallazgo medio "FAQ sin aria-expanded/
+               aria-controls"): cada botón .faq-q ahora anuncia su
+               estado (aria-expanded) y a qué panel controla
+               (aria-controls + id en el .faq-a correspondiente), y el
+               JS de abajo mantiene aria-expanded sincronizado con la
+               clase .open en cada click. -->
           <div class="faq-item open">
-            <button class="faq-q"><p>¿Cuál es la forma más rápida de encontrar un lugar en el mapa?</p><span class="faq-plus"></span></button>
-            <div class="faq-a"><p>Escribí en el buscador (atajo: tocá "/" en cualquier parte de la página) o tocá "📍 Cerca de mí" para ver solo lo que te queda a mano. Si ya guardaste favoritos, "♥ Solo favoritos" filtra el mapa a lo tuyo en un toque, y "☰ Lista" ordena todo por cercanía o calificación sin perder el filtro que tenías puesto.</p></div>
+            <button class="faq-q" aria-expanded="true" aria-controls="faq-a-1"><p>¿Cuál es la forma más rápida de encontrar un lugar en el mapa?</p><span class="faq-plus"></span></button>
+            <div class="faq-a" id="faq-a-1"><p>Escribí en el buscador (atajo: tocá "/" en cualquier parte de la página) o tocá "📍 Cerca de mí" para ver solo lo que te queda a mano. Si ya guardaste favoritos, "♥ Solo favoritos" filtra el mapa a lo tuyo en un toque, y "☰ Lista" ordena todo por cercanía o calificación sin perder el filtro que tenías puesto.</p></div>
           </div>
           <div class="faq-item">
-            <button class="faq-q"><p>¿Cómo se calculan las calificaciones?</p><span class="faq-plus"></span></button>
-            <div class="faq-a"><p>Se toman de la ficha pública de Google Places de cada lugar y se cruzan contra la visita in situ. El número de reseñas se muestra siempre junto a la calificación, no se oculta.</p></div>
+            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-2"><p>¿Cómo se calculan las calificaciones?</p><span class="faq-plus"></span></button>
+            <div class="faq-a" id="faq-a-2"><p>Se toman de la ficha pública de Google Places de cada lugar y se cruzan contra la visita in situ. El número de reseñas se muestra siempre junto a la calificación, no se oculta.</p></div>
           </div>
           <div class="faq-item">
-            <button class="faq-q"><p>¿Qué son las fichas guardadas?</p><span class="faq-plus"></span></button>
-            <div class="faq-a"><p>Tocá el corazón en cualquier lugar del padrón. Queda guardado en este navegador (localStorage), sin cuenta ni contraseña.</p></div>
+            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-3"><p>¿Qué son las fichas guardadas?</p><span class="faq-plus"></span></button>
+            <div class="faq-a" id="faq-a-3"><p>Tocá el corazón en cualquier lugar del padrón. Queda guardado en este navegador (localStorage), sin cuenta ni contraseña.</p></div>
           </div>
           <div class="faq-item">
-            <button class="faq-q"><p>Encontré un dato viejo o un local cerrado, ¿qué hago?</p><span class="faq-plus"></span></button>
-            <div class="faq-a"><p>Escribinos a uruspotcdu@gmail.com con el nombre del lugar y qué cambió. Se corrige en la próxima actualización del padrón.</p></div>
+            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-4"><p>Encontré un dato viejo o un local cerrado, ¿qué hago?</p><span class="faq-plus"></span></button>
+            <div class="faq-a" id="faq-a-4"><p>Escribinos a uruspotcdu@gmail.com con el nombre del lugar y qué cambió. Se corrige en la próxima actualización del padrón.</p></div>
           </div>
         </div>
       </div>
@@ -853,11 +872,29 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
   }, { threshold: 0.12 });
   items.forEach(function(i){ io.observe(i); });
 
-  /* ═══ smooth-scroll for in-page anchors ═══ */
+  /* ═══ smooth-scroll for in-page anchors ═══
+     Fix (auditoría, Hallazgo alto "selector genérico choca con
+     #mapa-reset"): a[href^="#"] también matchea <a id="mapa-reset"
+     href="#">, cuyo id.length es 1 → antes el listener no encontraba
+     target y por lo tanto nunca llamaba preventDefault(), dejando
+     activo el comportamiento nativo del navegador (salto de scroll /
+     cambio de location.hash) en paralelo a lo que sea que
+     core-engine.js le agregue a ese mismo botón. Ahora, para
+     href="#" vacíos, se llama preventDefault() igual (bloquea sólo el
+     salto nativo del navegador) sin hacer scrollIntoView ni tocar
+     ningún otro comportamiento — preventDefault() no cancela otros
+     listeners que core-engine.js pueda tener sobre el mismo elemento,
+     así que su lógica de reset de filtros sigue intacta. No se tocó
+     el markup (<a href="#" role="button">) porque no se puede
+     verificar sin core-engine.js si engancha su listener por id o
+     por selector de tag; cambiarlo a <button> requeriría además
+     actualizar la regla CSS "#mapa-contador a" para no alterar el
+     diseño visual — fuera del alcance de este fix seguro. */
   document.querySelectorAll('a[href^="#"]').forEach(function(a){
     a.addEventListener('click', function(e){
       var id = a.getAttribute('href');
-      var target = id.length > 1 ? document.querySelector(id) : null;
+      if(id.length <= 1){ e.preventDefault(); return; }
+      var target = document.querySelector(id);
       if(target){ e.preventDefault(); target.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'start'}); }
     });
   });
@@ -867,8 +904,12 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     btn.addEventListener('click', function(){
       var item = btn.parentElement;
       var wasOpen = item.classList.contains('open');
-      item.parentElement.querySelectorAll('.faq-item').forEach(function(i){ i.classList.remove('open'); });
-      if(!wasOpen) item.classList.add('open');
+      item.parentElement.querySelectorAll('.faq-item').forEach(function(i){
+        i.classList.remove('open');
+        var q = i.querySelector('.faq-q');
+        if(q) q.setAttribute('aria-expanded', 'false');
+      });
+      if(!wasOpen){ item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
     });
   });
 
@@ -1030,6 +1071,15 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     { id:'0741', cat:'deporte', name:'Gym Lucianos', sub:'Gimnasio · Trato personalizado', rating:4.8, count:'49 reseñas' },
     { id:'0089', cat:'naturaleza', name:'Costanera y Plaza Constitución', sub:'Naturaleza · Río Uruguay', rating:4.4, count:'2.542 reseñas' }
   ];
+  /* Fix (auditoría, Hallazgo crítico "bloque JS monolítico sin
+     aislamiento de errores"): cada build...() se envuelve en su propio
+     try/catch, igual que ya se hace con el bloque del intro y el de
+     inert más abajo. Así, si algo dentro de una sección falla (por
+     ejemplo un elemento que en el futuro cambie de id), el resto del
+     script sigue corriendo: favoritos, fuentes, preconnect y el
+     trampeo de foco del intro no dependen de que estas secciones
+     visuales terminen de construirse sin errores. */
+  try{
   (function buildHeroFichas(){
     var stage = document.getElementById('fichaStage');
     var dots = document.getElementById('fichaDots');
@@ -1048,6 +1098,17 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       var dot = document.createElement('button');
       dot.className = i===0 ? 'on' : '';
       dot.setAttribute('aria-label', 'Ver ficha ' + (i+1));
+      /* Fix (auditoría, Hallazgo crítico "foco atrapado en elemento
+         oculto para lectores de pantalla"): #fichaStage tiene
+         aria-hidden="true" porque el carrusel es decorativo/redundante
+         (las mismas fichas no aportan información que no esté en
+         otro lado accesible de la página), pero aria-hidden por sí
+         solo no saca del tabulado por teclado a estos botones en
+         todos los navegadores. Se usa tabindex="-1" en vez de inert
+         en el contenedor porque los dots siguen siendo clicleables
+         con mouse (funcionalidad existente que no se debe romper);
+         inert en #fichaStage los sacaría también del click. */
+      dot.tabIndex = -1;
       dots.appendChild(dot);
     });
     var fichaEls = stage.querySelectorAll('.ficha');
@@ -1062,8 +1123,10 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     function restart(){ clearInterval(timer); if(reduceMotion) return; timer = setInterval(function(){ show((cur+1) % fichaEls.length); }, 4200); }
     restart();
   })();
+  }catch(e){ console.error('[URU SPOT] Error en buildHeroFichas:', e); }
 
   /* ═══ manifest breakdown ═══ */
+  try{
   (function buildBreakdown(){
     var el = document.getElementById('breakdown');
     var sorted = GRUPOS.slice().sort(function(a,b){ return b.count - a.count; });
@@ -1074,6 +1137,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       el.appendChild(item);
     });
   })();
+  }catch(e){ console.error('[URU SPOT] Error en buildBreakdown:', e); }
 
 
   var DIA = [
@@ -1086,6 +1150,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     { time:'Sábado', text:'Alguien viene de visita y necesita dónde quedarse.', href:'../las-mejores-hosterias-cdu/', color:'#1E57AD' },
     { time:'Domingo', text:'Tu mascota necesita un chequeo antes de fin de mes.', href:'../mejores-veterinarias-cdu/', color:'#168241' }
   ];
+  try{
   (function buildDia(){
     var el = document.getElementById('dayGrid');
     DIA.forEach(function(d){
@@ -1095,6 +1160,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       el.appendChild(a);
     });
   })();
+  }catch(e){ console.error('[URU SPOT] Error en buildDia:', e); }
 
   /* ═══ fichas destacadas ═══ */
   var FICHAS_DESTACADAS = [
@@ -1107,6 +1173,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     { name:'7 Colinas Craft Brewery', cat:'Gastronomía', color:'#AD1E1E', rating:4.4, count:1930, slug:'7-colinas' },
     { name:'Posta Torreón', cat:'Alojamiento', color:'#1E57AD', rating:4.4, count:582, slug:'posta-torreon' }
   ];
+  try{
   (function buildFichas(){
     var el = document.getElementById('fichasGrid');
     FICHAS_DESTACADAS.forEach(function(f, idx){
@@ -1135,6 +1202,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       });
     });
   })();
+  }catch(e){ console.error('[URU SPOT] Error en buildFichas:', e); }
 
   /* ═══ fichas guardadas ═══ */
   var ALL_FAVABLE = {}; // id -> {name, cat, color}
