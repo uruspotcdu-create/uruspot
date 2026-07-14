@@ -7,9 +7,13 @@
 <meta name="description" content="El padrón completo de Concepción del Uruguay: 862 lugares verificados en 13 rubros, con dirección y calificación reales — nada inventado.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="manifest" href="../site.webmanifest">
 <meta property="og:title" content="URU SPOT — El padrón vivo de Concepción del Uruguay">
 <meta property="og:description" content="862 lugares verificados en 13 rubros. Ninguno inventado.">
 <meta property="og:image" content="https://uruspot.pages.dev/img/logof.webp">
+<meta property="og:url" content="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="URU SPOT">
 <meta property="og:locale" content="es_AR">
@@ -17,6 +21,7 @@
 <meta name="twitter:title" content="URU SPOT — El padrón vivo de Concepción del Uruguay">
 <meta name="twitter:description" content="862 lugares verificados en 13 rubros. Ninguno inventado.">
 <meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp">
+<meta name="twitter:image:alt" content="Logo de URU SPOT">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- El mapa (js/core-engine.js) carga Leaflet/MarkerCluster y los tiles
@@ -94,6 +99,8 @@ img{max-width:100%; display:block;}
 @media (max-width:720px){ .wrap{padding:0 22px;} }
 ::selection{background:var(--stamp); color:#fff;}
 :focus-visible{outline:2px solid var(--stamp); outline-offset:3px; border-radius:2px;}
+.skip-link{position:absolute; top:-100%; left:12px; z-index:1000; background:var(--paper-raised); color:var(--ink); font-family:var(--sans); font-weight:600; font-size:13.5px; padding:10px 18px; border:1px solid var(--line-strong); border-radius:7px; text-decoration:none; transition:top .2s var(--ease);}
+.skip-link:focus{top:12px;}
 ::-webkit-scrollbar{width:10px;}
 ::-webkit-scrollbar-track{background:var(--paper);}
 ::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:10px; border:2px solid var(--paper); background-clip:padding-box;}
@@ -412,7 +419,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       .mapa-popup-grupo{ opacity:.65; font-weight:400; }
       .mapa-popup-nombre{ font-family:var(--serif); font-weight:600; font-size:19px; line-height:1.18; color:var(--ink); display:block; margin-bottom:5px; }
       .mapa-popup-rating{ font-family:var(--sans); font-size:12px; color:var(--stamp-ink); margin-bottom:6px; display:flex; align-items:center; gap:4px; }
-      .mapa-popup-rating .cant{ color:var(--ink-faint); font-family:var(--mono); font-size:10.5px; }
+      .mapa-popup-rating .cant{ color:var(--ink-soft); font-family:var(--mono); font-size:10.5px; }
       .mapa-popup-norating{ font-size:11.5px; color:var(--ink-soft); font-style:italic; margin-bottom:6px; display:block; }
       .mapa-popup-addr{ font-family:var(--sans); font-size:11.5px; line-height:1.4; color:var(--ink-soft); margin-bottom:4px; display:block; }
       .mapa-popup-desc{ font-family:var(--sans); font-size:11.5px; line-height:1.45; color:var(--ink); opacity:.8; display:block; margin-bottom:10px; }
@@ -431,7 +438,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       #mapa-legend{ position:absolute; z-index:500; right:12px; top:12px; max-width:200px; background:rgba(251,248,241,.97); border:1px solid var(--line-strong); border-radius:5px; box-shadow:0 14px 34px rgba(32,28,20,.2); overflow:hidden; }
       #mapa-legend-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; cursor:pointer; background:var(--sunken); border-bottom:1px solid var(--line); user-select:none; }
       #mapa-legend-head .titulo{ font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); }
-      #mapa-legend-head .toggle-ico{ font-size:11px; color:var(--ink-faint); transition:transform .2s ease; }
+      #mapa-legend-head .toggle-ico{ font-size:11px; color:var(--ink-soft); transition:transform .2s ease; }
       #mapa-legend.colapsada #mapa-legend-head .toggle-ico{ transform:rotate(-90deg); }
       #mapa-legend-list{ max-height:260px; overflow-y:auto; padding:6px; }
       #mapa-legend.colapsada #mapa-legend-list{ display:none; }
@@ -464,7 +471,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       .lista-card-addr{ font-size:11px; line-height:1.35; color:var(--ink-soft); }
       .lista-card-dist{ font-size:11px; font-weight:600; color:var(--river-ink); }
       .lista-card-actions{ display:flex; align-items:center; gap:6px; padding:0 14px 12px 42px; margin-top:auto; }
-      .lista-card-actions > *{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); background:var(--paper); color:var(--ink-faint); font-size:14px; text-decoration:none; cursor:pointer; transition:border-color .15s ease, color .15s ease, transform .15s var(--spring); }
+      .lista-card-actions > *{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-strong); background:var(--paper); color:var(--ink-soft); font-size:14px; text-decoration:none; cursor:pointer; transition:border-color .15s ease, color .15s ease, transform .15s var(--spring); }
       .lista-card-actions > *:hover{ border-color:var(--stamp); color:var(--stamp); transform:scale(1.08); }
       .lista-card-fav.is-fav{ color:var(--stamp); border-color:var(--stamp); }
       .lista-card-wa{ background:#25D366; border-color:#25D366; color:#fff; }
@@ -531,13 +538,45 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
   "@graph": [
     {
       "@type": "Organization",
+      "@id": "https://uruspotcdu-create.github.io/uruspot/#organization",
       "name": "URU SPOT",
+      "url": "https://uruspotcdu-create.github.io/uruspot/",
+      "logo": "https://uruspot.pages.dev/img/logof.webp",
       "description": "Padrón comercial y de servicios verificado in situ de Concepción del Uruguay, Entre Ríos, Argentina.",
       "email": "uruspotcdu@gmail.com",
       "areaServed": {
         "@type": "City",
         "name": "Concepción del Uruguay"
       }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/#webpage",
+      "url": "https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/",
+      "name": "URU SPOT — El padrón vivo de Concepción del Uruguay",
+      "description": "El padrón completo de Concepción del Uruguay: 862 lugares verificados en 13 rubros, con dirección y calificación reales — nada inventado.",
+      "inLanguage": "es-AR",
+      "dateModified": "2026-07-13",
+      "isPartOf": {
+        "@id": "https://uruspotcdu-create.github.io/uruspot/#organization"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://uruspotcdu-create.github.io/uruspot/inicio/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "El padrón",
+          "item": "https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/"
+        }
+      ]
     },
     {
       "@type": "FAQPage",
@@ -579,6 +618,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     {
       "@type": "ItemList",
       "name": "Las 13 categorías del padrón de URU SPOT",
+      "url": "https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/#padron",
       "numberOfItems": 13,
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Compras", "description": "Supermercados, ferreterías, indumentaria y comercios de todo tipo. 232 lugares verificados." },
@@ -601,6 +641,8 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
 </script>
 </head>
 <body>
+
+<a class="skip-link" href="#main">Saltar al contenido principal</a>
 
 <div id="intro" aria-hidden="true">
   <div class="stamp-mark">
@@ -648,6 +690,8 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     <li aria-current="page">El padrón</li>
   </ol>
 </nav>
+
+<main id="main">
 
 <section class="hero" id="hero" aria-labelledby="title-hero">
   <div class="wrap">
@@ -894,6 +938,8 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="wrap">
