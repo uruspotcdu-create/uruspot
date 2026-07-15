@@ -396,6 +396,92 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
 .foot-col a:hover{opacity:1;}
 .foot-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:28px; font-size:12.5px; color:var(--dark-soft); flex-wrap:wrap; gap:14px;}
 .foot-bottom a{color:var(--dark-soft); text-decoration:underline; text-underline-offset:2px;}
+
+/* ═══════════════════════════════════════════════════════════════════
+   AUDITORÍA — segunda pasada: 4 funcionalidades enteramente nuevas,
+   100% aditivas, construidas solo con datos reales ya presentes en el
+   motor (window.uruSpotMotor) o en localStorage/sessionStorage. Nada
+   de lo que sigue toca IDs, clases ni funciones usadas por
+   js/core-engine.js — cada bloque se engancha desde afuera, con el
+   mismo patrón (polling a window.uruSpotMotor, listeners sobre
+   eventos que el motor ya emite) que ya usan initMapaTrail e
+   initPadronInsights más abajo en este mismo archivo.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ---- 1) Comparador de fichas — bandeja flotante + modal ---- */
+.us-compare-tray{
+  position:fixed; left:50%; bottom:20px; transform:translateX(-50%) translateY(140%);
+  z-index:4800; display:flex; align-items:center; gap:12px;
+  background:var(--ink); color:var(--paper); border-radius:100px;
+  padding:9px 10px 9px 18px; box-shadow:0 24px 60px -14px rgba(32,28,20,.55);
+  font-family:var(--sans); max-width:calc(100% - 32px);
+  transition:transform .38s var(--spring), opacity .3s ease; opacity:0;
+}
+.us-compare-tray.is-visible{ transform:translateX(-50%) translateY(0); opacity:1; }
+.us-compare-tray-label{ font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--dark-soft); white-space:nowrap; }
+.us-compare-chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.us-compare-chip{ display:inline-flex; align-items:center; gap:6px; background:rgba(245,241,231,.1); border:1px solid var(--dark-line); border-radius:100px; padding:5px 6px 5px 12px; font-size:12.5px; max-width:150px; }
+.us-compare-chip span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.us-compare-chip button{ flex:none; width:19px; height:19px; border-radius:50%; border:0; background:rgba(245,241,231,.14); color:var(--paper); cursor:pointer; font-size:11px; line-height:1; display:flex; align-items:center; justify-content:center; }
+.us-compare-chip button:hover{ background:var(--stamp); }
+.us-compare-cta{ flex:none; font-family:var(--sans); font-weight:700; font-size:12.5px; background:var(--stamp); color:#fff; border:0; border-radius:100px; padding:9px 16px; cursor:pointer; white-space:nowrap; transition:box-shadow .2s ease, transform .15s var(--spring); }
+.us-compare-cta:hover{ box-shadow:0 10px 22px -10px rgba(180,71,45,.7); }
+.us-compare-cta:active{ transform:scale(.96); }
+@media (max-width:640px){ .us-compare-tray{ flex-wrap:wrap; justify-content:center; padding:12px; border-radius:20px; } .us-compare-tray-label{ width:100%; text-align:center; } }
+
+.us-compare-overlay{ position:fixed; inset:0; z-index:5100; background:rgba(24,20,14,.6); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+.us-compare-overlay.is-visible{ opacity:1; pointer-events:auto; }
+.us-compare-modal{ background:var(--paper-raised); border-radius:14px; max-width:820px; width:100%; max-height:82vh; overflow:auto; padding:30px 30px 26px; box-shadow:0 60px 120px -30px rgba(0,0,0,.5); transform:translateY(14px) scale(.98); transition:transform .3s var(--spring); }
+.us-compare-overlay.is-visible .us-compare-modal{ transform:none; }
+.us-compare-modal-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px; }
+.us-compare-modal-head h3{ font-family:var(--serif); font-weight:700; font-size:22px; margin:0 0 4px; }
+.us-compare-modal-head p{ margin:0; font-size:13px; color:var(--ink-soft); }
+.us-compare-close{ flex:none; width:34px; height:34px; border-radius:50%; border:1px solid var(--line-strong); background:var(--paper); cursor:pointer; font-size:15px; color:var(--ink-soft); }
+.us-compare-close:hover{ border-color:var(--stamp); color:var(--stamp-ink); }
+.us-compare-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; }
+.us-compare-card{ border:1px solid var(--line); border-radius:10px; padding:18px; background:var(--paper); position:relative; }
+.us-compare-card-cat{ display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:#fff; padding:4px 9px; border-radius:100px; margin-bottom:10px; }
+.us-compare-card h4{ font-family:var(--serif); font-size:17px; margin:0 0 10px; line-height:1.25; }
+.us-compare-row{ display:flex; justify-content:space-between; gap:8px; padding:8px 0; border-top:1px solid var(--line); font-size:12.5px; }
+.us-compare-row span:first-child{ color:var(--ink-soft); }
+.us-compare-row span:last-child{ font-weight:600; text-align:right; }
+.us-compare-card-cta{ display:block; text-align:center; margin-top:14px; font-family:var(--sans); font-weight:600; font-size:12.5px; color:var(--river-ink); background:var(--river-soft); border-radius:8px; padding:9px; text-decoration:none; cursor:pointer; border:0; width:100%; }
+.us-compare-card-cta:hover{ background:#d4e2e0; }
+.us-compare-empty-note{ font-size:12.5px; color:var(--ink-faint); text-align:center; padding:20px; }
+
+/* botón "⚖ Comparar" inyectado dentro de tarjetas de lista/popup ya
+   existentes — mismo tratamiento visual que sus vecinos (fav/compartir)
+   para no desentonar, sin heredar sus estilos ni pisarlos. */
+.us-compare-add{ font-family:inherit; cursor:pointer; }
+.lista-card-actions .us-compare-add{ flex:none; width:30px; height:30px; border-radius:50%; border:1px solid var(--line-strong); background:none; color:var(--ink-soft); font-size:13px; display:flex; align-items:center; justify-content:center; transition:color .2s ease, border-color .2s ease; }
+.lista-card-actions .us-compare-add:hover, .lista-card-actions .us-compare-add.is-on{ border-color:var(--river); color:var(--river-ink); }
+.mapa-popup-actions .us-compare-add{ border:1px solid var(--line-strong); border-radius:100px; padding:8px 12px; background:var(--paper); font-size:12.5px; color:var(--ink-soft); }
+.mapa-popup-actions .us-compare-add:hover, .mapa-popup-actions .us-compare-add.is-on{ border-color:var(--river); color:var(--river-ink); background:var(--river-soft); }
+
+/* ---- 2) Exportar "Mis favoritos" ---- */
+.guardadas-export{ display:flex; flex-wrap:wrap; gap:10px; margin:0 0 28px; }
+.guardadas-export-btn{ display:inline-flex; align-items:center; gap:8px; font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:100px; padding:10px 18px; cursor:pointer; text-decoration:none; transition:border-color .2s ease, background .2s ease, transform .15s var(--spring);}
+.guardadas-export-btn:hover{ border-color:var(--stamp); background:var(--stamp-soft); }
+.guardadas-export-btn:active{ transform:scale(.96); }
+.guardadas-export-btn.wa{ border-color:#3FA24C; color:#1F6B2B; background:#EAF6EC; }
+.guardadas-export-btn.wa:hover{ background:#D9F0DC; }
+.guardadas-export-btn svg{ width:15px; height:15px; }
+
+/* ---- 3) Sugerencias cuando una búsqueda no encuentra nada ---- */
+.mapa-empty-sugerencias{ margin-top:22px; padding-top:20px; border-top:1px dashed var(--line-strong); }
+.mapa-empty-sug-label{ font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 12px; }
+.mapa-empty-sug-list{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.mapa-empty-sug-item{ display:inline-flex; align-items:center; gap:7px; font-family:var(--sans); font-size:13px; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:100px; padding:8px 14px; cursor:pointer; transition:border-color .2s ease, transform .15s var(--spring);}
+.mapa-empty-sug-item:hover{ border-color:var(--river); transform:translateY(-2px); }
+.mapa-empty-sug-item b{ font-weight:600; }
+.mapa-empty-sug-item span{ font-family:var(--mono); font-size:10.5px; color:var(--ink-soft); }
+
+/* ---- 4) Resumen de sesión (footer) ---- */
+.foot-session-recap{ display:none; flex-wrap:wrap; gap:10px 22px; padding:20px 22px; margin-bottom:22px; border:1px dashed var(--dark-line); border-radius:10px; background:rgba(245,241,231,.03); }
+.foot-session-recap.is-visible{ display:flex; }
+.fsr-title{ width:100%; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--dark-soft); margin:0 0 4px; }
+.fsr-item{ display:inline-flex; align-items:baseline; gap:6px; font-size:13px; color:#E4E0D3; }
+.fsr-item b{ font-family:var(--serif); font-size:19px; color:#F0B08C; }
 </style>
     <style>
       /* ═══════════════════════════════════════════════════════════════
@@ -1656,6 +1742,13 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       </div>
 
       <div id="mapa-empty"></div>
+      <!-- Sugerencias inteligentes — completamente nuevo. Nunca es hijo de
+           #mapa-empty (que core-engine.js reescribe entero en cada
+           render): vive al lado, así ninguna de las dos partes se pisa.
+           Se completa solo con nombres reales de motor.todosLosMarkers,
+           nunca con texto inventado; si no encuentra nada parecido, se
+           queda vacío y oculto en vez de forzar una sugerencia floja. -->
+      <div id="mapaEmptySugerencias" class="mapa-empty-sugerencias" hidden aria-live="polite"></div>
 
       <div id="mapa-contador">
         <span>Mostrando <strong id="mapa-count">0</strong> de <strong id="mapa-total">0</strong> lugares</span>
@@ -1841,6 +1934,20 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg>
       <span>Tocá el corazón en cualquier ficha del padrón, del mapa o de esta misma página — se guarda acá al instante, sin cuenta ni sincronización.</span>
     </div>
+    <!-- Exportar/compartir favoritos — completamente nuevo. Oculto hasta
+         que haya al menos un favorito real (lo controla renderSaved() en
+         el <script> final, misma función que ya pinta #savedContent),
+         para no ofrecer "compartir" una lista vacía. -->
+    <div class="guardadas-export reveal" id="guardadasExport" hidden>
+      <button type="button" class="guardadas-export-btn" id="exportCopyBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 012-2h10"/></svg>
+        Copiar lista
+      </button>
+      <a class="guardadas-export-btn wa" id="exportWaBtn" target="_blank" rel="noopener" aria-label="Compartir tus favoritos por WhatsApp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Compartir por WhatsApp
+      </a>
+    </div>
     <div id="savedContent"><!-- JS --></div>
   </div>
 </section>
@@ -1988,6 +2095,18 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>862 fichas verificadas in situ</span>
       <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Concepción del Uruguay, Entre Ríos</span>
       <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Actualizado el 13 jul 2026</span>
+    </div>
+    <!-- Resumen de tu sesión — completamente nuevo. Distinto de "Tu
+         recorrido" (que solo lista fichas vistas en el mapa): acá se
+         cuentan búsquedas y rubros distintos que realmente tocaste,
+         para devolver una lectura de TU forma de explorar, no solo un
+         listado. Empieza oculto: solo se muestra a partir de un mínimo
+         real de interacción (ver initSessionRecap), nunca con ceros. -->
+    <div class="foot-session-recap" id="footSessionRecap" aria-live="polite">
+      <p class="fsr-title">Tu sesión de hoy en el padrón</p>
+      <span class="fsr-item"><b id="fsrBusquedas">0</b> búsquedas distintas</span>
+      <span class="fsr-item"><b id="fsrRubros">0</b> rubros explorados</span>
+      <span class="fsr-item"><b id="fsrFichas">0</b> fichas abiertas</span>
     </div>
     <p class="foot-signature">Hecho a pie de calle, en Concepción del Uruguay.</p>
   </div>
@@ -3019,6 +3138,445 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
         clearInterval(poll);
       }
     }, 500);
+  })();
+
+  /* ─────────────────────────────────────────────────────────────────
+     SEGUNDA PASADA DE AUDITORÍA — 4 funcionalidades nuevas, 100%
+     aditivas. Ninguna toca js/core-engine.js: cada una lee su API
+     pública (motor.getLugarPorId, motor.irALugar, motor.setFiltro,
+     motor.todosLosMarkers, motor.map) o localStorage/sessionStorage ya
+     existentes, exactamente con el mismo patrón (polling a
+     window.uruSpotMotor, MutationObserver sobre nodos que ya existen)
+     que usan initMapaTrail/initPadronInsights arriba. Ninguna inventa
+     datos: si el motor no tiene la información todavía, la pieza
+     correspondiente se queda oculta en vez de mostrar un placeholder.
+     ───────────────────────────────────────────────────────────────── */
+
+  /* ---- 6) Comparador de fichas — hasta 3 lugares, lado a lado ----
+     Bandeja flotante + modal, construidos íntegramente por JS (no
+     dependen de ningún markup nuevo en el body salvo lo que este
+     bloque agrega a sí mismo). Un botón "⚖" se inyecta en cada tarjeta
+     de #mapa-lista (vía MutationObserver, porque core-engine.js
+     reescribe esas tarjetas en cada filtro) y en cada popup del mapa
+     (vía el mismo evento 'popupopen' que ya usa "Tu recorrido"), sin
+     tocar ninguno de los botones que ya viven ahí (favorito/llamar/
+     WhatsApp/compartir). La selección vive solo en memoria de esta
+     pestaña — no se guarda ni se comparte, coherente con ser una
+     herramienta de comparación puntual, no un listado permanente. */
+  (function initComparador(){
+    var MAX = 3;
+    var seleccion = [];
+    var tray, trayChips, trayCta, overlay, modalGrid;
+    var GRUPO_MAP = {};
+    GRUPOS.forEach(function(g){ GRUPO_MAP[g.key] = g; });
+
+    function escapar(s){
+      var d = document.createElement('div');
+      d.textContent = String(s == null ? '' : s);
+      return d.innerHTML;
+    }
+
+    function crearUI(){
+      tray = document.createElement('div');
+      tray.className = 'us-compare-tray';
+      tray.innerHTML = '<span class="us-compare-tray-label">Comparar:</span>' +
+        '<div class="us-compare-chips"></div>' +
+        '<button type="button" class="us-compare-cta">Ver comparación</button>';
+      document.body.appendChild(tray);
+      trayChips = tray.querySelector('.us-compare-chips');
+      trayCta = tray.querySelector('.us-compare-cta');
+
+      overlay = document.createElement('div');
+      overlay.className = 'us-compare-overlay';
+      overlay.innerHTML =
+        '<div class="us-compare-modal" role="dialog" aria-modal="true" aria-label="Comparación de fichas">' +
+        '<div class="us-compare-modal-head"><div><h3>Comparación de fichas</h3><p>Datos reales del padrón, lado a lado — nada redactado a mano.</p></div>' +
+        '<button type="button" class="us-compare-close" aria-label="Cerrar comparación">✕</button></div>' +
+        '<div class="us-compare-grid"></div></div>';
+      document.body.appendChild(overlay);
+      modalGrid = overlay.querySelector('.us-compare-grid');
+
+      trayCta.addEventListener('click', abrirModal);
+      overlay.querySelector('.us-compare-close').addEventListener('click', cerrarModal);
+      overlay.addEventListener('click', function(e){ if(e.target === overlay) cerrarModal(); });
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && overlay.classList.contains('is-visible')) cerrarModal();
+      });
+    }
+
+    function pintarTray(){
+      if(!tray) return;
+      tray.classList.toggle('is-visible', seleccion.length > 0);
+      var motor = window.uruSpotMotor;
+      trayChips.innerHTML = seleccion.map(function(id){
+        var lugar = motor && motor.getLugarPorId ? motor.getLugarPorId(id) : null;
+        var nombre = lugar ? lugar.nombre : ('Ficha ' + id);
+        return '<span class="us-compare-chip"><span>' + escapar(nombre) + '</span>' +
+          '<button type="button" data-quitar="' + id + '" aria-label="Quitar ' + escapar(nombre) + ' de la comparación">✕</button></span>';
+      }).join('');
+      var lista = seleccion.length < 2;
+      trayCta.style.opacity = lista ? '.5' : '1';
+      trayCta.style.pointerEvents = lista ? 'none' : 'auto';
+      trayCta.textContent = lista ? 'Agregá una ficha más' : ('Ver comparación (' + seleccion.length + ')');
+      trayChips.querySelectorAll('[data-quitar]').forEach(function(btn){
+        btn.addEventListener('click', function(){ quitar(parseInt(btn.getAttribute('data-quitar'), 10)); });
+      });
+      actualizarBotonesFicha();
+    }
+
+    function agregar(id){
+      if(seleccion.indexOf(id) !== -1){ quitar(id); return; }
+      if(seleccion.length >= MAX) seleccion.shift();
+      seleccion.push(id);
+      pintarTray();
+    }
+    function quitar(id){
+      var i = seleccion.indexOf(id);
+      if(i !== -1) seleccion.splice(i, 1);
+      pintarTray();
+      if(seleccion.length < 2 && overlay) cerrarModal();
+    }
+    function actualizarBotonesFicha(){
+      document.querySelectorAll('.us-compare-add').forEach(function(btn){
+        var id = parseInt(btn.getAttribute('data-compare-id'), 10);
+        btn.classList.toggle('is-on', seleccion.indexOf(id) !== -1);
+      });
+    }
+
+    function abrirModal(){
+      if(seleccion.length < 2) return;
+      var motor = window.uruSpotMotor;
+      if(!motor || !motor.getLugarPorId) return;
+      var html = seleccion.map(function(id){
+        var lugar = motor.getLugarPorId(id);
+        if(!lugar) return '';
+        var g = GRUPO_MAP[lugar.grupo];
+        var color = g ? g.color : '#B4472E';
+        var label = g ? g.label : (lugar.grupo || '');
+        var out = '<div class="us-compare-card">';
+        out += '<span class="us-compare-card-cat" style="background:' + color + '">' + escapar(lugar.categoria || label) + '</span>';
+        out += '<h4>' + escapar(lugar.nombre || '') + '</h4>';
+        out += '<div class="us-compare-row"><span>Calificación</span><span>' + (lugar.rating ? '★ ' + parseFloat(lugar.rating).toFixed(1) : 'Sin datos') + '</span></div>';
+        out += '<div class="us-compare-row"><span>Reseñas</span><span>' + (lugar.rating_count ? Number(lugar.rating_count).toLocaleString('es-AR') : '—') + '</span></div>';
+        out += '<div class="us-compare-row"><span>Rubro</span><span>' + escapar(label) + '</span></div>';
+        out += '<div class="us-compare-row"><span>Dirección</span><span>' + (lugar.direccion ? escapar(lugar.direccion) : 'No cargada aún') + '</span></div>';
+        out += '<button type="button" class="us-compare-card-cta" data-ir="' + lugar.id + '">Ver en el mapa</button>';
+        out += '</div>';
+        return out;
+      }).join('');
+      modalGrid.innerHTML = html || '<p class="us-compare-empty-note">No pudimos cargar estas fichas todavía. Probá de nuevo en un instante.</p>';
+      modalGrid.querySelectorAll('[data-ir]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var id = parseInt(btn.getAttribute('data-ir'), 10);
+          cerrarModal();
+          if(motor.irALugar) motor.irALugar(id);
+          var destino = document.getElementById('mapa-wrap');
+          if(destino) destino.scrollIntoView({ behavior:'smooth', block:'start' });
+        });
+      });
+      overlay.classList.add('is-visible');
+    }
+    function cerrarModal(){
+      if(overlay) overlay.classList.remove('is-visible');
+    }
+
+    function botonHtml(id){
+      return '<button type="button" class="us-compare-add" data-compare-id="' + id + '" aria-label="Agregar a comparación" title="Agregar a comparación">⚖</button>';
+    }
+
+    function inyectarEnLista(){
+      var lista = document.getElementById('mapa-lista');
+      if(!lista) return;
+      var obs = new MutationObserver(function(){
+        lista.querySelectorAll('.lista-card-actions').forEach(function(actions){
+          if(actions.querySelector('.us-compare-add')) return;
+          var card = actions.closest('.lista-card');
+          if(!card) return;
+          var id = parseInt(card.getAttribute('data-lugar-id'), 10);
+          if(!id) return;
+          var wrapper = document.createElement('div');
+          wrapper.innerHTML = botonHtml(id);
+          var btn = wrapper.firstChild;
+          actions.insertBefore(btn, actions.firstChild);
+          btn.classList.toggle('is-on', seleccion.indexOf(id) !== -1);
+          btn.addEventListener('click', function(e){ e.stopPropagation(); agregar(id); });
+        });
+      });
+      obs.observe(lista, { childList:true, subtree:true });
+    }
+
+    function inyectarEnPopup(motor){
+      motor.map.on('popupopen', function(e){
+        try{
+          var el = e.popup.getElement();
+          var actions = el && el.querySelector('.mapa-popup-actions');
+          if(!actions || actions.querySelector('.us-compare-add')) return;
+          var favBtn = actions.querySelector('[data-fav-id]');
+          var id = favBtn ? parseInt(favBtn.getAttribute('data-fav-id'), 10) : null;
+          if(!id) return;
+          var wrapper = document.createElement('div');
+          wrapper.innerHTML = botonHtml(id);
+          var btn = wrapper.firstChild;
+          actions.appendChild(btn);
+          btn.classList.toggle('is-on', seleccion.indexOf(id) !== -1);
+          btn.addEventListener('click', function(){ agregar(id); });
+        }catch(err){}
+      });
+    }
+
+    crearUI();
+    inyectarEnLista();
+
+    var intentosCmp = 0;
+    var pollCmp = setInterval(function(){
+      intentosCmp++;
+      var motor = window.uruSpotMotor;
+      if(motor && motor.map){
+        clearInterval(pollCmp);
+        inyectarEnPopup(motor);
+      } else if(intentosCmp > 60){
+        clearInterval(pollCmp);
+      }
+    }, 500);
+  })();
+
+  /* ---- 7) Exportar "Mis favoritos" — copiar o mandar por WhatsApp ----
+     Reutiliza getFavs()/ALL_FAVABLE (mismas fuentes de datos que ya
+     arma renderSaved()) sin tocar esa función: observa #savedContent
+     con MutationObserver y reconstruye el texto exportable cada vez
+     que esa función la vuelve a pintar. Nunca inventa un lugar: si
+     ALL_FAVABLE todavía no resolvió algún id guardado, esa línea se
+     omite del texto en vez de mostrar un nombre inventado. */
+  (function initExportFavoritos(){
+    var savedContent = document.getElementById('savedContent');
+    var exportBox = document.getElementById('guardadasExport');
+    var copyBtn = document.getElementById('exportCopyBtn');
+    var waBtn = document.getElementById('exportWaBtn');
+    if(!savedContent || !exportBox || !copyBtn || !waBtn) return;
+
+    function construirTexto(){
+      var favs = getFavs();
+      if(!favs.length) return '';
+      var lineas = favs.map(function(id){
+        var f = ALL_FAVABLE[id];
+        return f ? ('★ ' + f.name + ' — ' + f.cat) : null;
+      }).filter(Boolean);
+      if(!lineas.length) return '';
+      return 'Mis lugares guardados en URU SPOT:\n\n' + lineas.join('\n') +
+        '\n\nEl padrón completo: https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/';
+    }
+
+    function actualizar(){
+      var texto = construirTexto();
+      exportBox.hidden = !texto;
+      if(!texto) return;
+      waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(texto);
+    }
+
+    var toastTimer = null;
+    function avisar(msg){
+      var existente = document.getElementById('usExportToast');
+      if(existente) existente.remove();
+      var el = document.createElement('div');
+      el.id = 'usExportToast';
+      el.className = 'us-toast is-visible';
+      el.setAttribute('role', 'status');
+      el.style.position = 'fixed'; el.style.left = '50%'; el.style.bottom = '20px';
+      el.style.transform = 'translateX(-50%)'; el.style.zIndex = '5200';
+      el.innerHTML = '<span class="us-toast-msg"></span>';
+      el.querySelector('.us-toast-msg').textContent = msg;
+      document.body.appendChild(el);
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){
+        el.classList.add('is-leaving');
+        setTimeout(function(){ if(el.parentNode) el.remove(); }, 260);
+      }, 2400);
+    }
+
+    copyBtn.addEventListener('click', function(){
+      var texto = construirTexto();
+      if(!texto) return;
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(texto)
+          .then(function(){ avisar('Lista copiada — pegala donde quieras.'); })
+          .catch(function(){ avisar('No se pudo copiar. Probá seleccionando el texto a mano.'); });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = texto; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); avisar('Lista copiada — pegala donde quieras.'); }
+        catch(e){ avisar('No se pudo copiar automáticamente.'); }
+        ta.remove();
+      }
+    });
+
+    var obsFav = new MutationObserver(actualizar);
+    obsFav.observe(savedContent, { childList:true });
+    actualizar();
+  })();
+
+  /* ---- 8) Sugerencias inteligentes cuando una búsqueda no da nada ----
+     Nunca es hijo de #mapa-empty (que core-engine.js reescribe entero
+     en cada render, ver renderEmptyState en core-engine.js): vive en
+     #mapaEmptySugerencias, un elemento hermano agregado al lado en el
+     HTML. Se activa observando el atributo style de #mapa-empty (el
+     motor alterna display:none/block ahí) y compara el texto tipeado
+     contra motor.todosLosMarkers con una distancia de edición liviana
+     — nunca contra una lista escrita a mano. Si no hay ningún nombre
+     realmente parecido, se queda oculto: preferible a una sugerencia
+     floja que no tiene nada que ver con lo que se buscó. */
+  (function initSugerenciasBusqueda(){
+    var emptyEl = document.getElementById('mapa-empty');
+    var sugEl = document.getElementById('mapaEmptySugerencias');
+    var searchInput = document.getElementById('mapa-search');
+    if(!emptyEl || !sugEl || !searchInput) return;
+
+    function normalizar(s){
+      return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+    function escaparSug(s){
+      var d = document.createElement('div');
+      d.textContent = String(s == null ? '' : s);
+      return d.innerHTML;
+    }
+    // Distancia de Levenshtein clásica, sin dependencias — liviana para
+    // nombres de lugares (decenas de caracteres), incluso recorriendo
+    // varios cientos de fichas en un único intento fallido de búsqueda.
+    function distancia(a, b){
+      var m = a.length, n = b.length;
+      if(!m) return n;
+      if(!n) return m;
+      var fila = [];
+      for(var j = 0; j <= n; j++) fila[j] = j;
+      for(var i = 1; i <= m; i++){
+        var anterior = fila[0];
+        fila[0] = i;
+        for(var j2 = 1; j2 <= n; j2++){
+          var temp = fila[j2];
+          fila[j2] = Math.min(fila[j2] + 1, fila[j2 - 1] + 1, anterior + (a[i - 1] === b[j2 - 1] ? 0 : 1));
+          anterior = temp;
+        }
+      }
+      return fila[n];
+    }
+
+    function sugerir(){
+      var motor = window.uruSpotMotor;
+      var q = normalizar(searchInput.value);
+      if(!motor || !motor.todosLosMarkers || !motor.todosLosMarkers.length || q.length < 3){
+        sugEl.hidden = true; sugEl.innerHTML = '';
+        return;
+      }
+      var entries = motor.todosLosMarkers;
+      var candidatos = [];
+      var prefijo = q.slice(0, Math.max(3, Math.floor(q.length * 0.6)));
+      var umbral = Math.max(2, Math.round(q.length * 0.42));
+      for(var i = 0; i < entries.length; i++){
+        var l = entries[i].lugar;
+        if(!l) continue;
+        var nombreNorm = entries[i].nombreNorm || normalizar(l.nombre);
+        var coincideToken = nombreNorm.indexOf(prefijo) > -1;
+        var dist = distancia(q, nombreNorm.slice(0, Math.max(q.length + 4, 10)));
+        if(coincideToken || dist <= umbral){
+          candidatos.push({ lugar:l, score: coincideToken ? -1 : dist });
+        }
+      }
+      if(!candidatos.length){ sugEl.hidden = true; sugEl.innerHTML = ''; return; }
+      candidatos.sort(function(a, b){ return a.score - b.score; });
+      var top = candidatos.slice(0, 4);
+      sugEl.innerHTML = '<p class="mapa-empty-sug-label">¿Quisiste decir…?</p><div class="mapa-empty-sug-list">' +
+        top.map(function(c){
+          return '<button type="button" class="mapa-empty-sug-item" data-sug-id="' + c.lugar.id + '">' +
+            '<b>' + escaparSug(c.lugar.nombre) + '</b><span>' + escaparSug(c.lugar.categoria || '') + '</span></button>';
+        }).join('') + '</div>';
+      sugEl.hidden = false;
+      sugEl.querySelectorAll('[data-sug-id]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var id = parseInt(btn.getAttribute('data-sug-id'), 10);
+          if(motor.setFiltro) motor.setFiltro('todos', { limpiarBusqueda:true });
+          if(motor.irALugar) motor.irALugar(id);
+        });
+      });
+    }
+
+    var obsEmpty = new MutationObserver(function(){
+      if(emptyEl.style.display === 'block') sugerir();
+      else { sugEl.hidden = true; sugEl.innerHTML = ''; }
+    });
+    obsEmpty.observe(emptyEl, { attributes:true, attributeFilter:['style'], childList:true });
+  })();
+
+  /* ---- 9) Resumen de tu sesión — búsquedas y rubros que explorás ----
+     Distinto de "Tu recorrido" (que solo lista fichas vistas en el
+     mapa, sessionStorage 'us_trail_v1'): este panel lee esa misma
+     clave para "fichas abiertas" —sin duplicar esa lógica— y suma dos
+     conteos nuevos, ambos de datos 100% reales de esta visita: cuántos
+     términos de búsqueda distintos escribiste (input#mapa-search) y
+     cuántos rubros distintos tocaste (cualquier [data-cat] o
+     [data-filtro] real ya presente en la página — chips de categoría,
+     footer, hero). Aparece recién con un mínimo de interacción real,
+     nunca mostrando ceros vacíos. */
+  (function initSessionRecap(){
+    var recap = document.getElementById('footSessionRecap');
+    var elBusquedas = document.getElementById('fsrBusquedas');
+    var elRubros = document.getElementById('fsrRubros');
+    var elFichas = document.getElementById('fsrFichas');
+    if(!recap || !elBusquedas || !elRubros || !elFichas) return;
+
+    var KEY = 'us_session_recap_v1';
+    function leer(){
+      try{
+        var d = JSON.parse(sessionStorage.getItem(KEY) || '{}');
+        return { busquedas: d.busquedas || [], rubros: d.rubros || [] };
+      }catch(e){ return { busquedas:[], rubros:[] }; }
+    }
+    function guardar(d){ try{ sessionStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
+    var data = leer();
+
+    function fichasVistas(){
+      try{ return JSON.parse(sessionStorage.getItem('us_trail_v1') || '[]').length; }catch(e){ return 0; }
+    }
+
+    function pintar(){
+      var nBusq = data.busquedas.length, nRub = data.rubros.length, nFichas = fichasVistas();
+      elBusquedas.textContent = nBusq;
+      elRubros.textContent = nRub;
+      elFichas.textContent = nFichas;
+      recap.classList.toggle('is-visible', (nBusq + nRub + nFichas) >= 3);
+    }
+
+    var searchInput = document.getElementById('mapa-search');
+    if(searchInput){
+      var debounceTimer;
+      searchInput.addEventListener('input', function(){
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function(){
+          var v = searchInput.value.trim().toLowerCase();
+          if(v.length >= 2 && data.busquedas.indexOf(v) === -1){
+            data.busquedas.push(v);
+            guardar(data);
+            pintar();
+          }
+        }, 900);
+      });
+    }
+
+    document.addEventListener('click', function(e){
+      var el = e.target && e.target.closest ? e.target.closest('[data-cat],[data-filtro]') : null;
+      if(!el) return;
+      var grupo = el.getAttribute('data-cat') || el.getAttribute('data-filtro');
+      if(grupo && grupo !== 'todos' && data.rubros.indexOf(grupo) === -1){
+        data.rubros.push(grupo);
+        guardar(data);
+        pintar();
+      }
+    });
+
+    pintar();
+    // 'fichas abiertas' también crece por initMapaTrail en otro ciclo del
+    // motor; este intervalo solo relee sessionStorage (sin recorrer el
+    // DOM), así que no compite por trabajo con nada del resto del sitio.
+    setInterval(pintar, 4000);
   })();
 })();
 </script>
