@@ -551,9 +551,15 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       #mapa-leaflet .leaflet-control-attribution a{ color:var(--stamp-ink) !important; }
 
       /* ─── Pines y clusters ─── */
-      .mapa-pin{ width:15px; height:15px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid rgba(255,255,255,.95); box-shadow:0 2px 6px rgba(32,28,20,.4); animation:mapaPinIn .3s var(--spring) backwards; transition:transform .18s var(--spring), box-shadow .18s ease; }
+      .mapa-pin{ width:15px; height:15px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid rgba(255,255,255,.95); box-shadow:0 2px 6px rgba(32,28,20,.4); animation:mapaPinIn .3s var(--spring) backwards; transition:transform .18s var(--spring), box-shadow .18s ease, opacity .18s ease; }
       .mapa-pin-destacado{ width:19px; height:19px; border:3px solid #F0D88A; box-shadow:0 0 0 3px rgba(240,216,138,.4), 0 3px 10px rgba(32,28,20,.35); }
       .mapa-pin-resaltado{ transform:rotate(-45deg) scale(1.55); box-shadow:0 0 0 5px rgba(180,71,45,.25), 0 4px 14px rgba(32,28,20,.4); z-index:2000; }
+      /* [NUEVO — hover de la leyenda] Atenúa los pines que NO pertenecen
+         al rubro señalado con el mouse/teclado en #mapa-legend-list, sin
+         tocar filtroActivo ni disparar setFiltro: es una previsualización
+         reversible, no un filtro. Ver bloque JS "10) Vista previa de
+         rubro al pasar el mouse por la leyenda" al pie del documento. */
+      .mapa-pin-atenuado{ opacity:.16; }
       @keyframes mapaPinIn{ from{ transform:rotate(-45deg) scale(0); opacity:0; } to{ transform:rotate(-45deg) scale(1); opacity:1; } }
 
       .mapa-cluster{ background:transparent !important; border:none !important; }
@@ -3577,6 +3583,160 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     // motor; este intervalo solo relee sessionStorage (sin recorrer el
     // DOM), así que no compite por trabajo con nada del resto del sitio.
     setInterval(pintar, 4000);
+  })();
+
+  /* ---- 10) Vista previa de rubro al pasar el mouse por la leyenda ----
+     Gap real detectado tras revisar los 9 bloques aditivos anteriores:
+     la leyenda (#mapa-legend-list) ya es clickeable para FILTRAR (eso
+     ya lo hace core-engine.js), pero no existía ninguna forma de
+     PREVISUALIZAR un rubro antes de comprometerse a ese clic. Este
+     bloque no filtra nada ni llama a motor.setFiltro(): solo atenúa
+     (clase .mapa-pin-atenuado, puramente visual) los pines de los
+     demás rubros mientras el mouse o el foco de teclado están sobre un
+     ítem de la leyenda, y los devuelve a su estado normal al salir —
+     exactamente el mismo patrón ya probado en core-engine.js para
+     resaltarMarcador() (togglear una clase CSS sobre marker._icon, sin
+     crear objetos Leaflet nuevos). Si un pin todavía vive dentro de un
+     cluster colapsado (marker._icon no existe todavía), se lo deja
+     como está en vez de forzar un zoom — mismo criterio ya documentado
+     junto a resaltarMarcador().
+     Se desactiva solo (no hace nada) cuando ya hay un filtro de
+     categoría activo o cuando la vista actual es "lista": en ambos
+     casos atenuar pines no aportaría nada que el usuario no vea ya. */
+  (function initLegendPreview(){
+    var contLegend = document.getElementById('mapa-legend-list');
+    if(!contLegend) return;
+    var catActual = null;
+
+    function puedeAtenuar(){
+      var motor = window.uruSpotMotor;
+      if(!motor || !motor.todosLosMarkers) return false;
+      if(motor.filtroActivo && motor.filtroActivo !== 'todos') return false;
+      var canvas = document.getElementById('mapa-canvas');
+      if(canvas && canvas.getAttribute('data-view') && canvas.getAttribute('data-view') !== 'mapa') return false;
+      return true;
+    }
+
+    function pintarAtenuado(catActiva){
+      var motor = window.uruSpotMotor;
+      var lista = motor && motor.todosLosMarkers;
+      if(!lista) return;
+      for(var i = 0; i < lista.length; i++){
+        var entry = lista[i];
+        if(!entry.marker || !entry.marker._icon) continue;
+        var pin = entry.marker._icon.querySelector('.mapa-pin');
+        if(!pin) continue;
+        pin.classList.toggle('mapa-pin-atenuado', !!catActiva && entry.grupo !== catActiva);
+      }
+    }
+
+    function catDe(el){
+      var item = el && el.closest ? el.closest('.mapa-legend-item') : null;
+      return item ? item.getAttribute('data-cat') : null;
+    }
+
+    function activar(cat){
+      if(!cat || cat === catActual || !puedeAtenuar()) return;
+      catActual = cat;
+      pintarAtenuado(cat);
+    }
+    function desactivar(){
+      if(!catActual) return;
+      catActual = null;
+      pintarAtenuado(null);
+    }
+
+    contLegend.addEventListener('mouseover', function(e){ activar(catDe(e.target)); });
+    contLegend.addEventListener('mouseout', function(e){
+      var item = e.target && e.target.closest ? e.target.closest('.mapa-legend-item') : null;
+      if(item && e.relatedTarget && item.contains(e.relatedTarget)) return;
+      desactivar();
+    });
+    contLegend.addEventListener('focusin', function(e){ activar(catDe(e.target)); });
+    contLegend.addEventListener('focusout', function(e){
+      var item = e.target && e.target.closest ? e.target.closest('.mapa-legend-item') : null;
+      if(item && e.relatedTarget && item.contains(e.relatedTarget)) return;
+      desactivar();
+    });
+    // Un clic real en la leyenda dispara un filtro de verdad (vía
+    // core-engine.js) — la previsualización deja de tener sentido y no
+    // debe quedar una clase de atenuado pegada sobre pines que ya no
+    // están en pantalla tras el re-render del mapa.
+    contLegend.addEventListener('click', desactivar);
+  })();
+
+  /* ---- 11) Prefetch por intención de hover/toque — navegación interna ----
+     Segunda revisión completa del archivo (hero, manifest, padrón,
+     verificación, "un día cualquiera", fichas destacadas, guardadas,
+     ayuda/FAQ, popupHtml de core-engine.js): cada sección ya tiene sus
+     propias capas de contexto, feedback y descubrimiento de pasadas
+     anteriores. El hueco real que quedó, transversal a todo el
+     documento, es de otro tipo: el click en "Ver la guía" (day-grid),
+     en una ficha destacada, en un link del footer a otro rubro, o en
+     una tarjeta de #mapa-lista, siempre paga el costo completo de red
+     recién al soltar el clic — nada se adelanta mientras el usuario
+     todavía está decidiendo si va a tocar ese link.
+     Esto agrega precarga por intención (hover con demora de 120ms para
+     no gastar en pasadas accidentales del mouse, o toque, que ya es
+     intención real) usando <link rel="prefetch">, la técnica estándar
+     de Chrome/Firefox para esto — no XHR ni fetch propios, así que un
+     navegador que no la soporte simplemente ignora la etiqueta sin
+     ningún error. Guardas explícitas para no ser un mal ciudadano de
+     red:
+       · nunca prefetchea si el usuario tiene "Ahorro de datos" activado
+         o su conexión reporta 2G/slow-2g (navigator.connection);
+       · nunca links externos, tel:, mailto:, javascript: ni anclas #
+         (así que "Cómo llegar", "Llamar" y "WhatsApp" del popup del
+         mapa quedan afuera, tal cual corresponde);
+       · máximo 14 URLs distintas por sesión, sin repetir ninguna;
+       · usa delegación de eventos a nivel document, así cubre también
+         los enlaces de #mapa-lista que core-engine.js re-renderiza
+         dinámicamente, sin necesidad de un MutationObserver propio ni
+         de tocar ese archivo. */
+  (function initHoverPrefetch(){
+    if(!('IntersectionObserver' in window) && !document.createElement('link').relList){ /* no-op: navegador muy viejo, se ignora en silencio */ }
+    var conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+    if(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return;
+
+    var LIMITE = 14;
+    var hechos = {};
+    var total = 0;
+
+    function candidato(href){
+      if(!href) return null;
+      if(href.charAt(0) === '#') return null;
+      if(/^[a-z]+:/i.test(href) && !/^https?:\/\//i.test(href)) return null; // tel:, mailto:, javascript:, etc.
+      if(/^https?:\/\//i.test(href) && href.indexOf(location.origin) !== 0) return null; // externo
+      return href;
+    }
+
+    function prefetch(href){
+      if(total >= LIMITE || hechos[href]) return;
+      hechos[href] = true;
+      total++;
+      var link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = href;
+      document.head.appendChild(link);
+    }
+
+    document.addEventListener('mouseover', function(e){
+      var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+      if(!a || a._prefetchT) return;
+      var href = candidato(a.getAttribute('href'));
+      if(!href) return;
+      a._prefetchT = setTimeout(function(){ prefetch(href); }, 120);
+    });
+    document.addEventListener('mouseout', function(e){
+      var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+      if(a && a._prefetchT){ clearTimeout(a._prefetchT); a._prefetchT = null; }
+    });
+    document.addEventListener('touchstart', function(e){
+      var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+      if(!a) return;
+      var href = candidato(a.getAttribute('href'));
+      if(href) prefetch(href);
+    }, { passive: true });
   })();
 })();
 </script>
