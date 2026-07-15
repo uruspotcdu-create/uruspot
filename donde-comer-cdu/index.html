@@ -901,6 +901,8 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       .verif-signature-seal{ flex:none; width:38px; height:38px; border-radius:50%; border:2px solid var(--stamp); color:var(--stamp-ink); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:15px; transform:rotate(-8deg); }
       .verif-signature p{ margin:0; font-size:12.5px; line-height:1.5; color:var(--ink-soft); }
       .verif-signature b{ color:var(--ink); font-family:var(--sans); }
+      .verif-scope{ margin:18px 0 0; font-size:12.5px; line-height:1.65; color:var(--ink-soft); max-width:640px; }
+      .verif-scope em{ font-style:normal; color:var(--ink); font-weight:600; }
       .verif-report-cta{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-family:var(--mono); font-size:11px; color:var(--stamp-ink); text-decoration:none; border-bottom:1px dashed var(--stamp-ink); }
       .verif-report-cta:hover{ color:var(--stamp); border-color:var(--stamp); }
 
@@ -1253,6 +1255,8 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
   .mb-seg::after{ content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%) translateY(4px); font-family:var(--sans); font-size:11.5px; font-weight:600; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line-strong); padding:6px 10px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease; box-shadow:0 10px 24px -12px rgba(0,0,0,.4); z-index:2; }
   .mb-seg:hover::after{ opacity:1; transform:translateX(-50%) translateY(0); }
   @media (max-width:640px){ .mb-seg::after{ display:none; } }
+  .mb-curioso{ margin:12px 0 0; font-family:var(--mono); font-size:11.5px; line-height:1.5; color:var(--dark-soft); }
+  .mb-curioso b{ color:#F0D8C8; font-weight:600; }
 
   /* ---- 12) Micro-feedback honesto en cada respuesta de la FAQ — no
      manda nada a ningún servidor (no hay backend), solo confirma con
@@ -1504,6 +1508,21 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <span class="manifest-insight-ico" aria-hidden="true">🧭</span>
       <p>Mirado de cerca, el padrón cuenta una historia: por cada restaurante hay <b>casi dos comercios más</b> de otro rubro. La ciudad que URU SPOT registra no vive solo de la joda — vive de la farmacia de la esquina, del banco, del taller, del jardín de infantes. Esa es la diferencia entre una guía turística y un padrón real.</p>
     </div>
+
+    <!-- "Los mismos 862, en una sola barra" — segunda lectura visual del
+         breakdown de arriba, en formato de barra apilada con tooltip de
+         porcentaje al pasar el mouse por cada segmento. El CSS de este
+         bloque (.manifest-bars/.mb-track/.mb-seg) ya existía desde una
+         pasada anterior mencionándolo en el comentario de más arriba,
+         pero nunca se llegó a escribir el HTML ni el JS que lo llenan —
+         quedó CSS muerto. Se completa acá: mismos 13 números y colores
+         de GRUPOS (no se inventa ni se recalcula nada), sin tocar
+         buildBreakdown() ni el div#breakdown existente. -->
+    <div class="manifest-bars reveal" id="manifestBars">
+      <p class="mb-label">Los mismos 862, en una sola barra</p>
+      <div class="mb-track" id="mbTrack" role="img" aria-label="Proporción de cada rubro sobre el total de 862 fichas del padrón"></div>
+      <p class="mb-curioso" id="mbCurioso" aria-live="off"></p>
+    </div>
   </div>
 </section>
 
@@ -1742,6 +1761,15 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <p><b>Equipo URU SPOT</b> — recorremos la ciudad a pie, local por local.<br>
       <a class="verif-report-cta" href="mailto:uruspotcdu@gmail.com">¿Encontraste algo desactualizado? Reportalo acá →</a></p>
     </div>
+
+    <!-- Nota de alcance — completamente nueva. Ninguna de las cuatro
+         filtros de arriba explica qué NO cubren; sin esto, alguien podría
+         asumir que "verificado" significa "actualizado al minuto" en todo
+         (horarios, stock, precios), que no es lo que el check-list
+         promete. Decirlo en voz alta suma confianza en vez de restarla:
+         un padrón que es honesto sobre su propio alcance es más creíble,
+         no menos. -->
+    <p class="verif-scope reveal">Lo que el padrón verifica: que el lugar existe, dónde queda, en qué rubro entra y cuál es su calificación pública. Lo que <em>no</em> garantiza: que el horario de hoy, el stock o el precio exacto sigan siendo los mismos que la última vez que alguien de URU SPOT pasó — eso puede cambiar de un día para el otro en cualquier comercio, y conviene confirmarlo por teléfono si es algo que no admite sorpresas.</p>
   </div>
 </section>
 
@@ -1873,6 +1901,19 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
             <button class="faq-q" aria-expanded="false" aria-controls="faq-a-8"><p>¿Necesito activar mi ubicación para usar el mapa?</p><span class="faq-plus"></span></button>
             <div class="faq-a" id="faq-a-8"><p>No. Todo el mapa y la lista funcionan sin geolocalización. "Cerca de mí" y el orden "Más cerca" son un atajo opcional, no un requisito para explorar el padrón.</p></div>
           </div>
+          <!-- Dos preguntas nuevas — completan huecos reales: ninguna
+               pregunta anterior explica qué significan los colores/formas
+               de los pines (la leyenda vive dentro de #mapa-legend, que
+               alguien puede no haber notado todavía), ni la diferencia
+               entre las dos vistas del padrón. -->
+          <div class="faq-item">
+            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-9"><p>¿Qué significan los colores y las formas de los pines?</p><span class="faq-plus"></span></button>
+            <div class="faq-a" id="faq-a-9"><p>Cada color es un rubro — los mismos 13 colores que ya ves en "Fichas destacadas" y en el desglose del padrón, para que el mapa "hable el mismo idioma" que el resto de la página (la leyenda completa está siempre visible al costado del mapa). Un pin con borde dorado es un lugar <b>destacado</b>: elegido por volumen de reseñas verificadas dentro de su rubro, nunca por sorteo ni por pago. Los números en círculo son <b>clusters</b>: varios lugares agrupados por zoom, que se separan solos al acercar el mapa.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-10"><p>¿Cuál es la diferencia entre la vista "Mapa" y la vista "Lista"?</p><span class="faq-plus"></span></button>
+            <div class="faq-a" id="faq-a-10"><p>Ninguna en los datos: son exactamente los mismos resultados, con los mismos filtros aplicados. La vista Mapa ubica cada ficha en el espacio real de la ciudad; la vista Lista ordena esas mismas fichas por cercanía o por calificación, más cómoda si ya sabés qué rubro buscás y solo querés comparar rápido. Cambiar de una a otra no reinicia ningún filtro ni ninguna búsqueda que ya tenías puesta.</p></div>
+          </div>
         </div>
 
         <!-- Tarjeta de contacto — completamente nueva, cierra el bloque
@@ -1895,6 +1936,12 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
           <div class="gloss-item"><dt>Rubro</dt><dd>Cada una de las 13 categorías del padrón: de gastronomía a servicios públicos.</dd></div>
           <div class="gloss-item"><dt>Subrubro</dt><dd>La subcategoría dentro de un rubro (por ejemplo, "Heladería" dentro de Gastronomía) que aparece al filtrar el mapa.</dd></div>
           <div class="gloss-item"><dt>Destacado</dt><dd>Un pin con borde dorado en el mapa: un lugar elegido por volumen de reseñas verificadas, no por sorteo.</dd></div>
+          <!-- Dos entradas nuevas — completan un hueco real: "Tu
+               recorrido" y "El padrón, en cifras vivas" son paneles que
+               ya existen en la sección del mapa desde una pasada
+               anterior, pero ninguno de los dos quedó definido acá. -->
+          <div class="gloss-item"><dt>Tu recorrido</dt><dd>El rastro de fichas que fuiste abriendo en esta visita al mapa. Vive solo en la pestaña abierta — se borra al cerrarla, no se guarda como favorito ni se comparte con nadie.</dd></div>
+          <div class="gloss-item"><dt>Padrón en cifras vivas</dt><dd>Un panel que no escribió nadie a mano: se calcula en tu propio navegador sobre las fichas reales, apenas terminan de cargar.</dd></div>
         </dl>
       </div>
     </div>
@@ -2335,6 +2382,41 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
   })();
   }catch(e){ console.error('[URU SPOT] Error en buildBreakdown:', e); }
 
+  /* ═══ manifest bars — "los mismos 862, en una sola barra" ═══
+     Completa el CSS .manifest-bars que ya existía sin HTML/JS propios
+     (ver comentario en el <style> del <head>). Reutiliza GRUPOS y
+     TOTAL_LUGARES ya declarados arriba en este mismo scope: ningún
+     número nuevo, ninguna llamada a red, ningún recálculo distinto al
+     que ya hace buildBreakdown() con los mismos datos. */
+  try{
+  (function buildManifestBars(){
+    var track = document.getElementById('mbTrack');
+    var curioso = document.getElementById('mbCurioso');
+    if(!track) return;
+    var sorted = GRUPOS.slice().sort(function(a,b){ return b.count - a.count; });
+    sorted.forEach(function(g){
+      var pct = (g.count / TOTAL_LUGARES) * 100;
+      var seg = document.createElement('div');
+      seg.className = 'mb-seg';
+      seg.style.width = pct + '%';
+      seg.style.background = g.textColor || g.color;
+      seg.setAttribute('data-tip', g.label + ' — ' + g.count + ' fichas (' + pct.toFixed(1).replace('.', ',') + '%)');
+      track.appendChild(seg);
+    });
+    // Dato curioso, calculado (no escrito a mano): el rubro más grande
+    // contra el más chico, sobre los mismos 13 números de arriba. Si el
+    // padrón crece o algún rubro cambia de tamaño relativo, este texto
+    // se recalcula solo — no hace falta acordarse de editarlo a mano.
+    if(curioso){
+      var mayor = sorted[0], menor = sorted[sorted.length - 1];
+      var veces = Math.round(mayor.count / menor.count);
+      var pctMayor = ((mayor.count / TOTAL_LUGARES) * 100).toFixed(1).replace('.', ',');
+      curioso.innerHTML = '<b>' + mayor.label + '</b> es el rubro más grande del padrón (' + pctMayor + '% de las 862 fichas) — ' +
+        veces + ' veces más que <b>' + menor.label + '</b>, el más chico, con apenas ' + menor.count + '.';
+    }
+  })();
+  }catch(e){ console.error('[URU SPOT] Error en buildManifestBars:', e); }
+
 
   var DIA = [
     { time:'8:00', text:'Arrancás el día con un café de verdad, no de sobre.', href:'../las-mejores-cafeterias-cdu/', color:'#AD1E1E' },
@@ -2601,7 +2683,10 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     'la vista "☰ Lista" ordena los mismos resultados del mapa por cercanía o por calificación, sin perder el filtro que tenías puesto.',
     'cada ficha muestra la cantidad real de reseñas junto a la calificación — nunca una sin la otra.',
     'el panel "Un rubro a la vez", más arriba, recorre las 13 categorías con su cantidad real de fichas — tocá "Ver en el mapa" para saltar directo a esa categoría.',
-    'la franja "El padrón, en cifras vivas" no la escribió nadie a mano: se calcula en tu navegador sobre las fichas reales apenas terminan de cargar.'
+    'la franja "El padrón, en cifras vivas" no la escribió nadie a mano: se calcula en tu navegador sobre las fichas reales apenas terminan de cargar.',
+    'tocá "?" en cualquier momento (o el botón redondo abajo a la izquierda, en pantallas grandes) para ver todos los atajos de teclado del sitio en un solo panel.',
+    'en pantallas grandes, los puntos de la derecha marcan en qué sección de la página estás — pasá el mouse por uno para ver su nombre sin tener que hacer scroll.',
+    'la barra apilada del manifiesto (más arriba, en la sección oscura) es el mismo desglose de 13 rubros que el bloque de números — pasá el mouse por cada segmento para ver el porcentaje exacto.'
   ];
   (function initTip(){
     var texto = document.getElementById('mapaTipTexto');
