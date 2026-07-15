@@ -6,6 +6,23 @@
 <title>URU SPOT — El padrón vivo de Concepción del Uruguay</title>
 <meta name="description" content="El padrón completo de Concepción del Uruguay: 862 lugares verificados en 13 rubros, con dirección y calificación reales — nada inventado.">
 <meta name="robots" content="index, follow, max-image-preview:large">
+<!-- Pase 4 ("último día", 3ª ronda) — tres <meta> nuevas, cero riesgo:
+     · color-scheme: el sitio es un diseño de papel claro fijo, sin variante
+       oscura. Sin esto, un SO en modo oscuro puede reskinear controles
+       nativos (el <select> de #mapa-orden, la barra de scroll) con colores
+       oscuros que chocan contra --paper, aunque el resto de la UI (toda
+       hecha a mano) se vea intacta.
+     · theme-color: cromo del navegador/tab en Android a juego con --paper,
+       en vez del gris por defecto — el "marco" del sitio deja de sentirse
+       genérico apenas se abre.
+     · format-detection: sin esto, Safari/iOS puede subrayar como "número
+       de teléfono" secuencias sueltas como "862" o "13" en el texto
+       corrido (hero, manifest) y ofrecer "llamar", que no tiene sentido
+       acá y rompe la tipografía cuidada del sitio con un subrayado azul
+       que ningún CSS de la página puede anular. -->
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F5F1E7">
+<meta name="format-detection" content="telephone=no">
 <link rel="canonical" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/">
 <link rel="icon" href="../favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
@@ -1262,6 +1279,81 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     body{ background:#fff; }
     a[href]::after{ content:' (' attr(href) ')'; font-size:11px; color:#666; }
     a[href^="#"]::after{ content:''; }
+  }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BLOQUE 100% ADITIVO — cuarta pasada ("último día antes del
+     lanzamiento", ronda 2). Las tres pasadas anteriores ya cubrieron
+     mapa, resto de la página y una segunda ronda de experiencia; esta
+     revisión parte de cero buscando específicamente lo que esas tres
+     no tocaron: posicionamiento de anclas bajo el nav fijo, tipografía
+     de encabezados (corte de línea), números que no se alinean entre
+     sí, accesibilidad bajo modo de alto contraste forzado y
+     degradación en navegadores sin backdrop-filter. Ninguna regla
+     existente se edita ni se quita — todo lo de abajo suma selectores
+     nuevos o extiende, con reglas adicionales, selectores que ya
+     existían (mismo patrón que las tres pasadas previas). ═══════ */
+<style>
+  /* ---- 1) Posición de ancla bajo el nav fijo — hallazgo real: el nav
+     mide ~85px (sin scroll) / ~69px (con scroll, clase .solid), pero
+     ninguna sección tenía scroll-margin-top. Saltar a "#verificacion"
+     desde el menú, o a #mapa-wrap desde el atajo "/", dejaba el título
+     tapado a medias por el nav. El valor 96px/84px replica a propósito
+     el mismo par que ya usa .breadcrumb (línea ~157) para el mismo
+     problema, así el "aire" bajo el nav es idéntico en todo el sitio. ---- */
+  section[id], #mapa-wrap{ scroll-margin-top:96px; }
+  @media (max-width:720px){ section[id], #mapa-wrap{ scroll-margin-top:84px; } }
+
+  /* ---- 2) Corte de línea en titulares — text-wrap:balance evita que
+     un h1/h2 largo termine con una última línea de una sola palabra
+     huérfana; text-wrap:pretty hace lo mismo, más suave, en párrafos
+     de una sola frase. Ambas son progresivas: en navegadores que no
+     las soportan, el texto sigue exactamente como está hoy. ---- */
+  h1.h-hero, .s-head h2, .manifest h2, .foot-statement, #shortcutsOverlay h3,
+  .rs-label, .dia-cta-panel p{ text-wrap:balance; }
+  .hero-sub, .s-head p, .manifest .lede, .check-row p, .day-card p.scn,
+  .faq-a p, .ayuda-contact-card span{ text-wrap:pretty; }
+
+  /* ---- 3) Cifras alineadas — .proof-num ya tenía tabular-nums desde
+     la 2ª pasada; el resto de los números "vivos" del sitio (contador
+     del mapa, ranking de fichas, calificaciones, favoritos) seguían en
+     proporcional, así que dígitos como "8" y "1" ocupan ancho distinto
+     y un número que cambia (favoritos, contador de resultados) tiembla
+     visualmente en vez de mantenerse quieto en su lugar. ---- */
+  #mapa-count, #mapa-total, .bd-num, .pi-value b, .rs-count strong,
+  .fb-count, #favCount, .check-num, .ficha-rating b, .fcard-rating,
+  .reg-rank{ font-variant-numeric:tabular-nums; }
+
+  /* ---- 4) Modo de alto contraste forzado (Windows) — varios controles
+     del sitio comunican su estado "activo" únicamente con un cambio de
+     color de fondo (.mapa-pill.activo, el toggle de vista del mapa,
+     "solo favoritos", el punto activo del carrusel de rubros, el punto
+     activo de #sectionDots, el pulgar elegido en el feedback del FAQ).
+     forced-colors reemplaza esos fondos personalizados por la paleta
+     del sistema y puede volver indistinguibles el estado activo del
+     inactivo; se agrega un outline extra, solo visible en ese modo,
+     para que la selección siga siendo legible sin rediseñar nada. ---- */
+  @media (forced-colors:active){
+    .mapa-pill.activo, .mapa-subpill.activo,
+    #mapa-view-toggle button[aria-pressed="true"],
+    #mapa-fav-toggle[aria-pressed="true"],
+    .rs-dot.activo, #sectionDots button.activo,
+    .faq-feedback button.elegido, .day-card.es-ahora{
+      outline:2px solid SelectedItem; outline-offset:2px;
+    }
+  }
+
+  /* ---- 5) Degradación sin backdrop-filter — nav.top.solid y el
+     activador táctil del mapa (.mapa-activador) dependen del blur para
+     que el texto/mapa detrás siga siendo legible bajo el fondo
+     semitransparente; en navegadores sin soporte (poco frecuentes hoy,
+     pero existen en gama baja/WebViews viejos) ese fondo se queda
+     translúcido sin desenfoque, y el contraste puede no alcanzar. La
+     regla de respaldo solo sube la opacidad, no cambia ningún color. ---- */
+  @supports not (backdrop-filter:blur(1px)){
+    nav.top.solid{ background:rgba(245,241,231,.97); }
+    #mapa-leaflet .mapa-activador{ background:rgba(32,28,20,.16); }
   }
 </style>
 </head>
