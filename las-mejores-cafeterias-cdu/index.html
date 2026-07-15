@@ -11,6 +11,8 @@
 <meta property="og:locale" content="es_AR" />
 <meta property="og:site_name" content="URU SPOT" />
 <meta name="twitter:card" content="summary_large_image" />
+<meta property="og:image" content="https://uruspot.pages.dev/img/logof-small.webp" />
+<meta property="og:url" content="https://uruspot.pages.dev/las-mejores-cafeterias-cdu/" />
 <title>Mejores Cafés en CdU 2026 · URU SPOT</title>
 
 <link rel="dns-prefetch" href="//fonts.googleapis.com" />
@@ -881,8 +883,243 @@ a:focus-visible { outline: 2px solid rgba(123,74,45,0.72); outline-offset: 3px; 
   .reveal { opacity: 1; transform: none; transition: none; }
   #grain { display: none; }
 }
+
+/* ═══════════════════════════════════════
+   HERO TRUST LINE (aditivo)
+═══════════════════════════════════════ */
+.hero-trust {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--f-ui); font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; color: rgba(242,237,227,0.30);
+  margin-top: 30px;
+}
+.hero-trust-icon { font-size: 13px; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+   USECASE GRID — "según lo que buscás" (aditivo)
+═══════════════════════════════════════ */
+.usecase-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  background: rgba(26,25,22,0.08); border: 1px solid rgba(26,25,22,0.08);
+}
+.usecase-card {
+  background: #fff; padding: 32px 26px;
+  display: flex; flex-direction: column; gap: 10px;
+  text-decoration: none; position: relative; overflow: hidden;
+  transition: background 0.35s ease, transform 0.35s var(--ease), box-shadow 0.35s ease;
+}
+.usecase-card:hover { background: var(--parchment); transform: translateY(-5px); box-shadow: 0 18px 42px -8px rgba(26,25,22,0.12); }
+.usecase-icon { font-size: 24px; line-height: 1; }
+.usecase-label {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2.2px; text-transform: uppercase; color: var(--cafe);
+}
+.usecase-title { font-family: var(--f-display); font-size: 18px; color: var(--ink); letter-spacing: -0.3px; }
+.usecase-desc { font-family: var(--f-italic); font-style: italic; font-size: 13px; color: rgba(26,25,22,0.48); line-height: 1.62; flex: 1; }
+.usecase-link {
+  font-family: var(--f-ui); font-size: 9px; font-weight: 800;
+  letter-spacing: 1.6px; text-transform: uppercase; color: var(--cafe2);
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 4px;
+  transition: gap 0.3s var(--ease);
+}
+.usecase-card:hover .usecase-link { gap: 10px; }
+
+/* ═══════════════════════════════════════
+   GLOSARIO (aditivo)
+═══════════════════════════════════════ */
+.glossary-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  background: rgba(26,25,22,0.08); border: 1px solid rgba(26,25,22,0.08);
+}
+.glossary-card { background: #fff; padding: 28px 26px; transition: background 0.35s ease; }
+.glossary-card:hover { background: var(--parchment); }
+.glossary-term {
+  font-family: var(--f-display); font-size: 17px; color: var(--ink);
+  letter-spacing: -0.3px; display: block; margin-bottom: 9px;
+}
+.glossary-def { font-family: var(--f-italic); font-style: italic; font-size: 13px; color: rgba(26,25,22,0.48); line-height: 1.68; }
+
+/* ═══════════════════════════════════════
+   MÉTODOS DE EXTRACCIÓN (aditivo)
+═══════════════════════════════════════ */
+.method-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.method-item {
+  display: flex; gap: 18px; align-items: flex-start;
+  background: #fff; padding: 24px 26px;
+  border-left: 3px solid rgba(123,74,45,0.14);
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s var(--ease);
+}
+.method-item:hover { border-left-color: var(--cafe); background: var(--parchment); transform: translateX(4px); }
+.method-icon { font-size: 22px; flex-shrink: 0; line-height: 1.2; }
+.method-name { font-family: var(--f-display); font-size: 15.5px; color: var(--ink); display: block; margin-bottom: 6px; }
+.method-desc { font-family: var(--f-italic); font-style: italic; font-size: 13px; color: rgba(26,25,22,0.48); line-height: 1.62; }
+
+/* ═══════════════════════════════════════
+   CURIOSIDADES (aditivo)
+═══════════════════════════════════════ */
+.curio-strip {
+  display: flex; gap: 2px; overflow-x: auto;
+  background: rgba(26,25,22,0.08); border: 1px solid rgba(26,25,22,0.08);
+  scrollbar-width: thin;
+}
+.curio-card { background: #fff; padding: 26px 24px; flex: 1 1 240px; min-width: 240px; }
+.curio-mark {
+  font-family: var(--f-ui); font-size: 8px; font-weight: 700;
+  letter-spacing: 2.2px; text-transform: uppercase; color: var(--cafe);
+  display: block; margin-bottom: 10px;
+}
+.curio-text { font-family: var(--f-italic); font-style: italic; font-size: 13.5px; color: rgba(26,25,22,0.55); line-height: 1.68; }
+
+/* ═══════════════════════════════════════
+   FAQ (aditivo)
+═══════════════════════════════════════ */
+.faq-list { display: flex; flex-direction: column; gap: 2px; background: rgba(26,25,22,0.08); border: 1px solid rgba(26,25,22,0.08); }
+.faq-item { background: #fff; }
+.faq-item summary {
+  list-style: none; cursor: pointer;
+  padding: 26px 30px; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  font-family: var(--f-display); font-size: 16px; color: var(--ink); letter-spacing: -0.2px;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+'; font-family: var(--f-ui); font-size: 20px; color: var(--cafe);
+  flex-shrink: 0; transition: transform 0.3s var(--ease); line-height: 1;
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-answer {
+  padding: 0 30px 28px; font-family: var(--f-italic); font-style: italic;
+  font-size: 14px; color: rgba(26,25,22,0.55); line-height: 1.78; max-width: 640px;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE ADITIVO — nuevos bloques
+═══════════════════════════════════════ */
+@media (max-width: 860px) {
+  .usecase-grid { grid-template-columns: 1fr 1fr; }
+  .glossary-grid { grid-template-columns: 1fr 1fr; }
+  .method-list { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .usecase-grid { grid-template-columns: 1fr; }
+  .glossary-grid { grid-template-columns: 1fr; }
+  .faq-item summary { padding: 20px 20px; font-size: 14.5px; }
+  .faq-answer { padding: 0 20px 22px; }
+  .curio-card { min-width: 210px; padding: 22px 20px; }
+}
 </style>
 <link rel="canonical" href="https://uruspot.pages.dev/las-mejores-cafeterias-cdu/">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Los mejores cafés en Concepción del Uruguay 2026",
+  "description": "Ranking de las mejores cafeterías de Concepción del Uruguay, evaluadas por calidad de producto, consistencia, espacio y precio.",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@type": "CafeOrCoffeeShop",
+        "name": "Nero Café",
+        "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/nero-cafe/",
+        "description": "La referencia indiscutida del café de especialidad en CdU. Granos de origen, métodos de filtrado y el espresso más honesto de la ciudad.",
+        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "bestRating": "5" }
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "item": {
+        "@type": "CafeOrCoffeeShop",
+        "name": "La Ris",
+        "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/la-ris/",
+        "description": "Café artesanal con alma cultural. El lugar donde el arte y el espresso conviven."
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "item": {
+        "@type": "CafeOrCoffeeShop",
+        "name": "Cultura Café",
+        "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/cultura-cafe/",
+        "description": "Café cultural de referencia. Libros, música y un buen cortado en el mismo espacio."
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "item": {
+        "@type": "CafeOrCoffeeShop",
+        "name": "London Café",
+        "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/london-cafe/",
+        "description": "Clásico de la ciudad. Ambiente íntimo, café consistente, el de toda la vida.",
+        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.7", "bestRating": "5" }
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 5,
+      "item": {
+        "@type": "CafeOrCoffeeShop",
+        "name": "Helena",
+        "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/helena-cafe/",
+        "description": "Moderno y cuidado. Café + resto con propuesta gastronómica que acompaña."
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 6,
+      "item": {
+        "@type": "CafeOrCoffeeShop",
+        "name": "Bella Vista",
+        "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/bella-vista/",
+        "description": "Elegancia y café en un solo lugar. Para el desayuno que se merece un marco."
+      }
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Cuál es el mejor café de Concepción del Uruguay?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Según esta guía, Nero Café encabeza el ranking 2026 por su trabajo con café de especialidad, granos de origen y la consistencia de su espresso." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué significa 'café de especialidad'?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Es café evaluado con un puntaje superior a 80 sobre 100 según los estándares de la Specialty Coffee Association, con trazabilidad del origen del grano." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Hay opciones económicas para tomar un buen café en CdU?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sí. La Ris se destaca como la opción más accesible de la guía sin resignar calidad ni identidad propia." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué café conviene elegir para desayunar con tranquilidad?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Bella Vista es la mejor opción para un desayuno con marco elegante, ideal para el fin de semana." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo se armó este ranking de cafeterías?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Cada café fue visitado y evaluado de forma independiente en base a la calidad del producto, la consistencia, el espacio y el precio." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cada cuánto se actualiza esta guía de cafés?",
+      "acceptedAnswer": { "@type": "Answer", "text": "URU SPOT es una guía viva. Esta edición corresponde a mayo de 2026 y se actualiza a medida que aparecen nuevos espacios o cambios relevantes." }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -951,6 +1188,11 @@ a:focus-visible { outline: 2px solid rgba(123,74,45,0.72); outline-offset: 3px; 
       <a class="btn-primary" href="#ranking" aria-label="Ver el ranking completo">☕ Ver el ranking</a>
       <a class="btn-ghost" href="#consejos" aria-label="Leer consejos">Consejos útiles ↓</a>
     </div>
+
+    <p class="hero-trust">
+      <span class="hero-trust-icon" aria-hidden="true">✓</span>
+      Cada café de esta lista fue visitado y evaluado en persona antes de sumarse a la guía.
+    </p>
   </div>
 
   <div class="hero-fade" aria-hidden="true"></div>
@@ -980,6 +1222,10 @@ a:focus-visible { outline: 2px solid rgba(123,74,45,0.72); outline-offset: 3px; 
       <div class="intro-meta-item">
         <span class="intro-meta-icon" aria-hidden="true">✍️</span>
         <div><span class="intro-meta-label">Edición</span><span class="intro-meta-val">Mayo 2026</span></div>
+      </div>
+      <div class="intro-meta-item">
+        <span class="intro-meta-icon" aria-hidden="true">🧭</span>
+        <div><span class="intro-meta-label">Criterio</span><span class="intro-meta-val">Producto + espacio + precio</span></div>
       </div>
     </div>
   </div>
@@ -1082,6 +1328,62 @@ a:focus-visible { outline: 2px solid rgba(123,74,45,0.72); outline-offset: 3px; 
     </div>
   </section>
 
+  <!-- ══ SEGÚN LO QUE BUSCÁS (aditivo) ══ -->
+  <section class="section" id="segun-lo-que-buscas" aria-labelledby="title-segun-lo-que-buscas">
+    <div class="section-header">
+      <div>
+        <span class="section-eyebrow">Guía rápida</span>
+        <h2 class="section-title" id="title-segun-lo-que-buscas">🎯 Qué café elegir según lo que buscás</h2>
+      </div>
+      <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="usecase-grid" role="list" aria-label="Cafés recomendados según ocasión">
+      <a class="usecase-card reveal" role="listitem" href="https://uruspot.pages.dev/donde-comer-cdu/locales/nero-cafe/" aria-label="Nero Café — para café de especialidad">
+        <span class="usecase-icon" aria-hidden="true">☕</span>
+        <span class="usecase-label">Para café de especialidad</span>
+        <span class="usecase-title">Nero Café</span>
+        <span class="usecase-desc">Grano de origen, métodos de filtrado y el espresso más honesto de la ciudad.</span>
+        <span class="usecase-link">Ver café <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="usecase-card reveal" role="listitem" href="https://uruspot.pages.dev/donde-comer-cdu/locales/cultura-cafe/" aria-label="Cultura Café — para leer o trabajar" style="transition-delay:0.05s">
+        <span class="usecase-icon" aria-hidden="true">📚</span>
+        <span class="usecase-label">Para leer o trabajar tranquilo</span>
+        <span class="usecase-title">Cultura Café</span>
+        <span class="usecase-desc">Libros, música y un espacio pensado para quedarse un buen rato.</span>
+        <span class="usecase-link">Ver café <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="usecase-card reveal" role="listitem" href="https://uruspot.pages.dev/donde-comer-cdu/locales/helena-cafe/" aria-label="Helena — para una reunión" style="transition-delay:0.10s">
+        <span class="usecase-icon" aria-hidden="true">🍽️</span>
+        <span class="usecase-label">Para una reunión con algo de comer</span>
+        <span class="usecase-title">Helena</span>
+        <span class="usecase-desc">Café + resto, ideal cuando la charla se extiende más allá de la taza.</span>
+        <span class="usecase-link">Ver café <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="usecase-card reveal" role="listitem" href="https://uruspot.pages.dev/donde-comer-cdu/locales/bella-vista/" aria-label="Bella Vista — para desayunar" style="transition-delay:0.15s">
+        <span class="usecase-icon" aria-hidden="true">🌅</span>
+        <span class="usecase-label">Para un desayuno con marco</span>
+        <span class="usecase-title">Bella Vista</span>
+        <span class="usecase-desc">Elegancia y buena luz, pensado para el desayuno de fin de semana.</span>
+        <span class="usecase-link">Ver café <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="usecase-card reveal" role="listitem" href="https://uruspot.pages.dev/donde-comer-cdu/locales/london-cafe/" aria-label="London Café — el clásico de siempre" style="transition-delay:0.20s">
+        <span class="usecase-icon" aria-hidden="true">🏛️</span>
+        <span class="usecase-label">Para lo de siempre, sin vueltas</span>
+        <span class="usecase-title">London Café</span>
+        <span class="usecase-desc">El clásico de la ciudad: ambiente íntimo y un café consistente.</span>
+        <span class="usecase-link">Ver café <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="usecase-card reveal" role="listitem" href="https://uruspot.pages.dev/donde-comer-cdu/locales/la-ris/" aria-label="La Ris — para descubrir algo distinto" style="transition-delay:0.25s">
+        <span class="usecase-icon" aria-hidden="true">🎨</span>
+        <span class="usecase-label">Para descubrir algo distinto</span>
+        <span class="usecase-title">La Ris</span>
+        <span class="usecase-desc">Café artesanal con alma cultural, donde el arte local también tiene lugar.</span>
+        <span class="usecase-link">Ver café <span aria-hidden="true">→</span></span>
+      </a>
+    </div>
+  </section>
+
   <!-- AD BANNER -->
   <a class="ad-banner reveal" href="mailto:uruspotcdu@gmail.com" aria-label="Publicitar tu café en URU SPOT">
     <div class="ad-left">
@@ -1120,6 +1422,141 @@ a:focus-visible { outline: 2px solid rgba(123,74,45,0.72); outline-offset: 3px; 
         <h3 class="tip-title">Explorá el espacio</h3>
         <p class="tip-desc">Un buen café cuida el ambiente tanto como la taza. La luz, el sonido, los asientos: todo importa. Si el espacio invita a quedarse, es buena señal de una propuesta pensada.</p>
       </div>
+      <div class="tip-card reveal" style="transition-delay:0.22s">
+        <span class="tip-num" aria-hidden="true">04</span>
+        <h3 class="tip-title">Preguntá por el tueste</h3>
+        <p class="tip-desc">El tueste define el perfil de sabor: uno más claro resalta acidez y notas frutales, uno más oscuro suma cuerpo y notas a chocolate o frutos secos. Preguntar no está de más.</p>
+      </div>
+      <div class="tip-card reveal" style="transition-delay:0.28s">
+        <span class="tip-num" aria-hidden="true">05</span>
+        <h3 class="tip-title">Mirá la relación precio-calidad</h3>
+        <p class="tip-desc">Un café más caro no siempre es mejor. Lo importante es que el precio se sienta coherente con el producto, el servicio y el espacio que ofrece cada lugar.</p>
+      </div>
+      <div class="tip-card reveal" style="transition-delay:0.34s">
+        <span class="tip-num" aria-hidden="true">06</span>
+        <h3 class="tip-title">Volvé más de una vez</h3>
+        <p class="tip-desc">Un café puede tener un mal día. La consistencia se nota recién en la segunda o tercera visita: ahí se confirma si un lugar realmente vale la pena.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ GLOSARIO (aditivo) ══ -->
+  <section class="section" id="glosario" aria-labelledby="title-glosario">
+    <div class="section-header">
+      <div>
+        <span class="section-eyebrow">Para entender la carta</span>
+        <h2 class="section-title" id="title-glosario">📖 Glosario básico del café</h2>
+      </div>
+      <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <div class="glossary-grid">
+      <div class="glossary-card reveal">
+        <span class="glossary-term">Espresso</span>
+        <p class="glossary-def">Café concentrado, extraído a presión en pocos segundos. Es la base de casi todas las demás preparaciones y, para muchos, la prueba definitiva de un buen café.</p>
+      </div>
+      <div class="glossary-card reveal" style="transition-delay:0.05s">
+        <span class="glossary-term">Cortado</span>
+        <p class="glossary-def">Un espresso "cortado" con un toque de leche caliente. Clásico infaltable en cualquier café argentino, a media mañana o a media tarde.</p>
+      </div>
+      <div class="glossary-card reveal" style="transition-delay:0.10s">
+        <span class="glossary-term">Lágrima</span>
+        <p class="glossary-def">Mayormente leche con apenas una "lágrima" de café. Ideal para quienes buscan algo suave o recién se están iniciando en el mundo del café.</p>
+      </div>
+      <div class="glossary-card reveal" style="transition-delay:0.15s">
+        <span class="glossary-term">Flat White</span>
+        <p class="glossary-def">Espresso con leche vaporizada y textura de microespuma fina. Popularizado por la tercera ola, más intenso que un latte tradicional.</p>
+      </div>
+      <div class="glossary-card reveal" style="transition-delay:0.20s">
+        <span class="glossary-term">Cold Brew</span>
+        <p class="glossary-def">Café extraído en frío durante varias horas. El resultado es más suave, menos ácido y con notas naturalmente dulces.</p>
+      </div>
+      <div class="glossary-card reveal" style="transition-delay:0.25s">
+        <span class="glossary-term">Café de especialidad</span>
+        <p class="glossary-def">Grano evaluado por encima de los 80 puntos sobre 100 según estándares internacionales, con trazabilidad del origen y del productor.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MÉTODOS DE EXTRACCIÓN (aditivo) ══ -->
+  <section class="section" id="metodos" aria-labelledby="title-metodos">
+    <div class="section-header">
+      <div>
+        <span class="section-eyebrow">Cómo se prepara</span>
+        <h2 class="section-title" id="title-metodos">🫖 Métodos de extracción más comunes</h2>
+      </div>
+      <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <div class="method-list">
+      <div class="method-item reveal">
+        <span class="method-icon" aria-hidden="true">🌀</span>
+        <div><span class="method-name">V60</span><p class="method-desc">Filtro cónico de origen japonés. Extracción manual y controlada que resalta notas florales y frutales del grano.</p></div>
+      </div>
+      <div class="method-item reveal" style="transition-delay:0.06s">
+        <span class="method-icon" aria-hidden="true">⏳</span>
+        <div><span class="method-name">Chemex</span><p class="method-desc">Filtro más grueso que el V60. Da como resultado una taza limpia y liviana, ideal para cafés de perfil claro.</p></div>
+      </div>
+      <div class="method-item reveal" style="transition-delay:0.12s">
+        <span class="method-icon" aria-hidden="true">🫗</span>
+        <div><span class="method-name">Prensa francesa</span><p class="method-desc">Extracción por inmersión total. Cuerpo más denso y notas más intensas, con menos filtrado de aceites naturales.</p></div>
+      </div>
+      <div class="method-item reveal" style="transition-delay:0.18s">
+        <span class="method-icon" aria-hidden="true">💨</span>
+        <div><span class="method-name">AeroPress</span><p class="method-desc">Presión manual con un método rápido y versátil. Un punto medio interesante entre el filtrado y el espresso.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CURIOSIDADES (aditivo) ══ -->
+  <section class="section" id="curiosidades" aria-labelledby="title-curiosidades">
+    <div class="section-header">
+      <div>
+        <span class="section-eyebrow">Cultura cafetera</span>
+        <h2 class="section-title" id="title-curiosidades">💭 Datos y curiosidades</h2>
+      </div>
+      <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <div class="curio-strip reveal">
+      <div class="curio-card"><span class="curio-mark">Tueste</span><p class="curio-text">El grano nace verde. Recién adquiere su color y aroma característico durante el proceso de tueste, minutos antes de ser molido.</p></div>
+      <div class="curio-card"><span class="curio-mark">Tercera ola</span><p class="curio-text">El movimiento de "tercera ola" trata al café como un producto de especialidad, con foco en el origen, el productor y el método de preparación.</p></div>
+      <div class="curio-card"><span class="curio-mark">Tiempo de extracción</span><p class="curio-text">Un espresso bien hecho suele extraerse en unos 25 a 30 segundos. Menos tiempo lo deja ácido; más tiempo, amargo.</p></div>
+      <div class="curio-card"><span class="curio-mark">Frescura</span><p class="curio-text">El café molido pierde aroma rápido. Por eso los cafés de especialidad suelen moler el grano justo antes de cada preparación.</p></div>
+    </div>
+  </section>
+
+  <!-- ══ PREGUNTAS FRECUENTES (aditivo) ══ -->
+  <section class="section" id="faq" aria-labelledby="title-faq">
+    <div class="section-header">
+      <div>
+        <span class="section-eyebrow">Antes de preguntar</span>
+        <h2 class="section-title" id="title-faq">❓ Preguntas frecuentes</h2>
+      </div>
+      <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item reveal">
+        <summary>¿Cuál es el mejor café de Concepción del Uruguay?</summary>
+        <div class="faq-answer">Según esta guía, Nero Café encabeza el ranking 2026 por su trabajo con café de especialidad, granos de origen y la consistencia de su espresso.</div>
+      </details>
+      <details class="faq-item reveal" style="transition-delay:0.05s">
+        <summary>¿Qué significa "café de especialidad"?</summary>
+        <div class="faq-answer">Es café evaluado por encima de los 80 puntos sobre 100 según estándares internacionales, con trazabilidad del origen del grano y del productor.</div>
+      </details>
+      <details class="faq-item reveal" style="transition-delay:0.10s">
+        <summary>¿Hay opciones económicas para tomar un buen café en CdU?</summary>
+        <div class="faq-answer">Sí. La Ris se destaca como la opción más accesible de esta guía, sin resignar calidad ni identidad propia.</div>
+      </details>
+      <details class="faq-item reveal" style="transition-delay:0.15s">
+        <summary>¿Qué café conviene elegir para desayunar con tranquilidad?</summary>
+        <div class="faq-answer">Bella Vista es la mejor opción para un desayuno con marco elegante, especialmente pensado para el fin de semana.</div>
+      </details>
+      <details class="faq-item reveal" style="transition-delay:0.20s">
+        <summary>¿Cómo se armó este ranking de cafeterías?</summary>
+        <div class="faq-answer">Cada café fue visitado y evaluado de forma independiente en base a la calidad del producto, la consistencia, el espacio y el precio.</div>
+      </details>
+      <details class="faq-item reveal" style="transition-delay:0.25s">
+        <summary>¿Cada cuánto se actualiza esta guía de cafés?</summary>
+        <div class="faq-answer">URU SPOT es una guía viva. Esta edición corresponde a mayo de 2026 y se actualiza a medida que aparecen nuevos espacios o cambios relevantes.</div>
+      </details>
     </div>
   </section>
 
@@ -1162,6 +1599,13 @@ a:focus-visible { outline: 2px solid rgba(123,74,45,0.72); outline-offset: 3px; 
     <img src="https://uruspot.pages.dev/img/logof-small.webp" alt="URU SPOT" width="80" height="101" loading="lazy" />
   </a>
   <div class="footer-divider" aria-hidden="true"></div>
+  <nav class="footer-nav" aria-label="Otras guías de URU SPOT">
+    <a href="https://uruspot.pages.dev/los-mejores-restaurantes-cdu/">Restaurantes</a>
+    <a href="https://uruspot.pages.dev/las-mejores-panaderias-cdu/">Panaderías</a>
+    <a href="https://uruspot.pages.dev/las-mejores-heladerias-cdu/">Heladerías</a>
+    <a href="https://uruspot.pages.dev/los-mejores-bares-cdu/">Bares</a>
+    <a href="https://uruspot.pages.dev/las-mejores-hosterias-cdu/">Hosterías</a>
+  </nav>
   <p class="footer-copy">URU SPOT © 2026 — Guía Gastronómica · Concepción del Uruguay</p>
 </footer>
 
