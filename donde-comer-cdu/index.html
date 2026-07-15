@@ -1106,6 +1106,164 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
   ]
 }
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BLOQUE 100% ADITIVO — segunda pasada de experiencia ("último día
+     antes del lanzamiento"), jul 2026. Todo lo que sigue es CSS nuevo:
+     ninguna regla existente se edita ni se quita, esta hoja solo suma
+     selectores nuevos o extiende con reglas adicionales selectores que
+     ya existían (mismo patrón que la barra de progreso del contador
+     o el ribbon "Padrón en vivo" de la pasada anterior). Organizado en
+     un <style> propio, separado de los bloques críticos de arriba,
+     para que quede fácil de ubicar y de mantener. ═══════════════════ */
+<style>
+  /* ---- 1) Grano de fondo del hero — misma técnica que .manifest::before
+     (SVG feTurbulence como data-URI), aplicada acá como elemento propio
+     en vez de pseudo-elemento porque .hero ya usa ::before/::after para
+     otra cosa en algunas variantes de layout responsivo; un <div> nuevo
+     evita cualquier conflicto de especificidad. ---- */
+  .hero-grain{ position:absolute; inset:0; opacity:.4; pointer-events:none; mix-blend-mode:multiply; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E"); z-index:0; }
+  .hero.laid{ position:relative; }
+  .hero .wrap{ position:relative; z-index:1; }
+
+  /* ---- 2) Cuentas regresivas/ascendentes del hero-proof — el número
+     final que ve cualquiera sin JS es exactamente el mismo que ya
+     estaba escrito a mano (data-count-to solo confirma qué mostrar);
+     con JS, el bloque de abajo anima 0 → número al entrar en viewport. ---- */
+  .proof-num{ font-variant-numeric:tabular-nums; }
+  .proof-item.contando .proof-num{ color:var(--stamp-ink); transition:color .5s ease; }
+
+  /* ---- 3) Tilt sutil de la pila de fichas del hero, sobre el mouse ----
+     Pura mejora de percepción de calidad/profundidad: no cambia el
+     tamaño ni el contenido de .ficha-stage, solo inclina levemente su
+     eje 3D siguiendo el puntero (JS aditivo al pie), y se desactiva
+     entera con prefers-reduced-motion. */
+  .ficha-stage{ transform-style:preserve-3d; transition:transform .25s var(--ease); will-change:transform; }
+  @media (prefers-reduced-motion:reduce){ .ficha-stage{ transition:none !important; } }
+  @media (hover:none){ .ficha-stage{ transform:none !important; } }
+
+  /* ---- 4) Chip "✦ nuevo" reutilizando .u-chip-new (ya definida y sin
+     ningún uso en el HTML hasta ahora) para señalar, sin exagerar, los
+     dos paneles agregados en la pasada anterior — ayuda a un visitante
+     recurrente a notar qué cambió sin tener que leer un changelog. ---- */
+  .rs-eyebrow .u-chip-new, .mapa-trail-label .u-chip-new{ margin-left:7px; }
+
+  /* ---- 5) Botón secundario "ghost" en el carrusel de rubros — reusa
+     .btn.ghost (definida en el CSS crítico, sin ningún botón que la
+     usara todavía) para ofrecer una segunda acción de menor jerarquía
+     junto al CTA principal: saltar al desglose completo de las 13
+     categorías en vez de filtrar solo la que se está mostrando. ---- */
+  .rs-actions{ display:flex; align-items:center; gap:8px; flex:none; }
+  .rs-actions .btn{ padding:10px 14px; font-size:12px; border-radius:100px; }
+  @media (max-width:640px){ .rs-actions{ width:100%; } .rs-actions .btn{ flex:1; text-align:center; } }
+
+  /* ---- 6) Estado de carga tipo "shimmer" para el mapa — mientras
+     Leaflet todavía no pintó tiles (carga diferida, ver lazyInitMapa en
+     core-engine.js), #mapa-leaflet es un <div> vacío; sin esto se ve
+     como un rectángulo muerto color paper. El shimmer desaparece solo:
+     en cuanto Leaflet agrega sus propios elementos hijos (tiles/panes),
+     estos quedan pintados ENCIMA (z-index natural por orden en el DOM),
+     tapando visualmente el gradiente sin que haga falta ningún JS que
+     lo quite a mano. */
+  #mapa-leaflet{ position:relative; }
+  #mapa-leaflet::before{ content:''; position:absolute; inset:0; background:linear-gradient(100deg, var(--sunken) 30%, var(--paper-raised) 50%, var(--sunken) 70%); background-size:400% 100%; animation:mapaShimmer 2.6s ease-in-out infinite; z-index:0; }
+  @keyframes mapaShimmer{ 0%{ background-position:100% 0; } 100%{ background-position:0 0; } }
+  @media (prefers-reduced-motion:reduce){ #mapa-leaflet::before{ animation:none; background:var(--sunken); } }
+
+  /* ---- 7) Resplandor "vivo" del contenedor del mapa — un pulso muy
+     sutil en el borde de #mapa-wrap, coherente con el punto verde de
+     .mapa-wrap-ribbon .dot-live (misma idea, distinta superficie): la
+     sección entera respira apenas, sin llegar a distraer. ---- */
+  #mapa-wrap{ animation:mapaWrapVivo 5s ease-in-out infinite; }
+  @keyframes mapaWrapVivo{ 0%,100%{ box-shadow:0 0 0 0 rgba(47,92,104,0); } 50%{ box-shadow:0 0 0 1px rgba(47,92,104,.16); } }
+  @media (prefers-reduced-motion:reduce){ #mapa-wrap{ animation:none; } }
+
+  /* ---- 8) Micro-motion de los íconos de verificación al pasar el
+     mouse por la fila entera (no solo el ícono) — un asentamiento con
+     resorte, coherente con --spring que ya define el resto del sitio. ---- */
+  .check-row{ transition:background .25s ease; }
+  .check-row:hover{ background:rgba(32,28,20,.02); }
+  .check-row:hover .check-ico{ transform:scale(1.12) rotate(-4deg); transition:transform .35s var(--spring); }
+  .check-row:hover .check-num{ color:var(--stamp); transition:color .25s ease; }
+  @media (prefers-reduced-motion:reduce){ .check-row:hover .check-ico{ transform:none; } }
+
+  /* ---- 9) Navegación lateral por puntos — wayfinding de escritorio.
+     Un punto por sección principal; el activo crece y se llena. Oculta
+     en mobile (el pulgar ya tiene el scroll y el nav hamburguesa/; acá
+     agregaría ruido sin aportar). role="navigation" con aria-label
+     propio; cada botón anuncia el nombre real de la sección. ---- */
+  #sectionDots{ position:fixed; right:22px; top:50%; transform:translateY(-50%); z-index:90; display:flex; flex-direction:column; gap:14px; }
+  #sectionDots button{ position:relative; width:9px; height:9px; border-radius:50%; border:1.5px solid var(--line-strong); background:transparent; padding:0; cursor:pointer; transition:background .25s ease, border-color .25s ease, transform .25s var(--spring); }
+  #sectionDots button::after{ content:attr(data-label); position:absolute; right:20px; top:50%; transform:translateY(-50%) translateX(4px); font-family:var(--mono); font-size:10.5px; letter-spacing:.03em; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line); padding:5px 10px; border-radius:5px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; box-shadow:0 8px 20px -10px rgba(32,28,20,.35); }
+  #sectionDots button:hover::after, #sectionDots button:focus-visible::after{ opacity:1; transform:translateY(-50%) translateX(0); }
+  #sectionDots button:hover, #sectionDots button:focus-visible{ border-color:var(--stamp); transform:scale(1.2); }
+  #sectionDots button.activo{ background:var(--stamp); border-color:var(--stamp); transform:scale(1.3); }
+  @media (max-width:1080px){ #sectionDots{ display:none; } }
+
+  /* ---- 10) Panel de atajos de teclado — documenta lo que YA existe
+     ("/", Escape) más el propio atajo nuevo ("?") que lo abre. No
+     reemplaza el hint que ya vive en .hero-trust: lo completa con una
+     referencia siempre disponible, no solo visible en el hero. ---- */
+  #shortcutsBtn{ position:fixed; left:22px; bottom:22px; z-index:90; width:40px; height:40px; border-radius:50%; background:var(--paper-raised); border:1px solid var(--line-strong); color:var(--ink-soft); font-family:var(--mono); font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px -10px rgba(32,28,20,.35); transition:background .2s ease, color .2s ease, transform .2s var(--spring); }
+  #shortcutsBtn:hover{ background:var(--ink); color:#fff; transform:translateY(-2px); }
+  @media (max-width:720px){ #shortcutsBtn{ display:none; } }
+  #shortcutsOverlay{ position:fixed; inset:0; z-index:500; background:rgba(24,20,14,.55); display:flex; align-items:center; justify-content:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+  #shortcutsOverlay.abierto{ opacity:1; pointer-events:auto; }
+  #shortcutsOverlay .panel{ background:var(--paper-raised); border-radius:10px; max-width:420px; width:100%; padding:26px 26px 22px; box-shadow:0 40px 80px -30px rgba(0,0,0,.5); transform:translateY(10px) scale(.97); transition:transform .3s var(--spring); }
+  #shortcutsOverlay.abierto .panel{ transform:none; }
+  #shortcutsOverlay h3{ font-family:var(--serif); font-size:19px; margin:0 0 4px; }
+  #shortcutsOverlay p.sub{ font-size:12.5px; color:var(--ink-soft); margin:0 0 18px; }
+  #shortcutsOverlay dl{ margin:0; display:grid; gap:12px; }
+  #shortcutsOverlay dl div{ display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  #shortcutsOverlay dt{ font-size:13.5px; color:var(--ink); }
+  #shortcutsOverlay dd{ margin:0; }
+  #shortcutsOverlay kbd{ font-family:var(--mono); font-size:11.5px; background:var(--sunken); border:1px solid var(--line-strong); border-bottom-width:2px; border-radius:5px; padding:3px 8px; color:var(--ink); }
+  #shortcutsOverlay .cerrar{ position:absolute; top:16px; right:16px; width:28px; height:28px; border-radius:50%; border:1px solid var(--line); background:var(--paper); cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); }
+  #shortcutsOverlay .cerrar:hover{ background:var(--stamp); color:#fff; border-color:var(--stamp); }
+  @media (prefers-reduced-motion:reduce){ #shortcutsOverlay, #shortcutsOverlay .panel{ transition:none; } }
+
+  /* ---- 11) Barra de proporciones del manifest — visualización de datos
+     nueva, debajo de #breakdown. Mismos 13 números y colores que ya
+     están escritos a mano en #breakdown (no se recalculan ni se
+     inventan): esto es una segunda lectura visual de los mismos datos,
+     en formato de barra apilada, con tooltip de porcentaje al pasar el
+     mouse por cada segmento. ---- */
+  .manifest-bars{ margin-top:34px; }
+  .mb-label{ font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--dark-soft); margin:0 0 10px; }
+  .mb-track{ display:flex; width:100%; height:34px; border-radius:5px; overflow:hidden; background:var(--dark-line); }
+  .mb-seg{ position:relative; height:100%; min-width:2px; transition:filter .2s ease, transform .2s ease; cursor:default; }
+  .mb-seg:hover{ filter:brightness(1.25); transform:scaleY(1.08); z-index:1; }
+  .mb-seg::after{ content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%) translateY(4px); font-family:var(--sans); font-size:11.5px; font-weight:600; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line-strong); padding:6px 10px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease; box-shadow:0 10px 24px -12px rgba(0,0,0,.4); z-index:2; }
+  .mb-seg:hover::after{ opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (max-width:640px){ .mb-seg::after{ display:none; } }
+
+  /* ---- 12) Micro-feedback honesto en cada respuesta de la FAQ — no
+     manda nada a ningún servidor (no hay backend), solo confirma con
+     un mensaje breve que quedó registrado en este navegador; se lo
+     presenta así, sin ambigüedad, para no insinuar analítica que no
+     existe. ---- */
+  .faq-feedback{ display:flex; align-items:center; gap:8px; margin:-10px 0 20px; }
+  .faq-feedback span{ font-size:11.5px; color:var(--ink-faint); }
+  .faq-feedback button{ width:26px; height:26px; border-radius:50%; border:1px solid var(--line); background:var(--paper); cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; transition:background .2s ease, border-color .2s ease, transform .15s var(--spring); color:var(--ink-soft); }
+  .faq-feedback button:hover{ border-color:var(--stamp); color:var(--stamp-ink); transform:translateY(-1px); }
+  .faq-feedback button.elegido{ background:var(--stamp); border-color:var(--stamp); color:#fff; }
+  .faq-feedback .gracias{ font-size:11.5px; color:var(--ink-soft); font-style:italic; opacity:0; transition:opacity .3s ease; }
+  .faq-feedback .gracias.visible{ opacity:1; }
+
+  /* ---- 13) Impresión — nadie va a imprimir el mapa interactivo, la
+     lista de favoritos vacía ni los botones de navegación, pero sí
+     puede querer imprimir el manifiesto de categorías, la explicación
+     de verificación o el FAQ para leerlo sin pantalla. ---- */
+  @media print{
+    nav.top, #backToTop, #progress, #sectionDots, #shortcutsBtn, #shortcutsOverlay,
+    .hero-scrollcue, #mapa-wrap, .mapa-tip, .padron-trust, .padron-postscript,
+    .rubro-spotlight, .padron-insights, .mapa-onboard, .breadcrumb, footer .foot-bottom,
+    #faqSearch, .faq-feedback{ display:none !important; }
+    body{ background:#fff; }
+    a[href]::after{ content:' (' attr(href) ')'; font-size:11px; color:#666; }
+    a[href^="#"]::after{ content:''; }
+  }
+</style>
 </head>
 <body>
 
