@@ -1228,15 +1228,6 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
      un <style> propio, separado de los bloques críticos de arriba,
      para que quede fácil de ubicar y de mantener. ═══════════════════ */
 <style>
-  /* ---- 1) Grano de fondo del hero — misma técnica que .manifest::before
-     (SVG feTurbulence como data-URI), aplicada acá como elemento propio
-     en vez de pseudo-elemento porque .hero ya usa ::before/::after para
-     otra cosa en algunas variantes de layout responsivo; un <div> nuevo
-     evita cualquier conflicto de especificidad. ---- */
-  .hero-grain{ position:absolute; inset:0; opacity:.4; pointer-events:none; mix-blend-mode:multiply; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E"); z-index:0; }
-  .hero.laid{ position:relative; }
-  .hero .wrap{ position:relative; z-index:1; }
-
   /* ---- 2) Cuentas regresivas/ascendentes del hero-proof — el número
      final que ve cualquiera sin JS es exactamente el mismo que ya
      estaba escrito a mano (data-count-to solo confirma qué mostrar);
