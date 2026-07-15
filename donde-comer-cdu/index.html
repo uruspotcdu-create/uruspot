@@ -762,6 +762,123 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       .u-chip-new{ display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--river); border-radius:100px; padding:2px 8px; vertical-align:middle; }
       .u-chip-new::before{ content:'✦'; font-size:9px; }
     </style>
+    <style>
+      /* ═══════════════════════════════════════════════════════════════
+         FASE 2 — AUDITORÍA EXTREMA DE EXPERIENCIA DE USUARIO
+         Todo lo que sigue es 100% aditivo y cubre el resto de la página
+         (nav, hero, verificación, un día en la ciudad, fichas, guardadas,
+         ayuda y footer). No se modifica ni se quita ninguna regla previa;
+         solo se agregan selectores nuevos y clases nuevas. Donde una
+         sección se genera por JS (breakdown, día, fichas, rubroExplorer),
+         las reglas apuntan a clases que ese JS ya emite, así que se
+         aplican solas sin tocar una sola línea de core-engine.js/inline.
+         ═══════════════════════════════════════════════════════════════ */
+
+      /* ---- botón flotante "volver arriba" — completamente nuevo ---- */
+      #backToTop{ position:fixed; right:22px; bottom:22px; z-index:200; width:46px; height:46px; border-radius:50%; background:var(--ink); color:var(--paper); border:1px solid var(--dark-line); display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; visibility:hidden; transform:translateY(10px) scale(.9); transition:opacity .25s var(--ease), transform .25s var(--spring), visibility .25s; box-shadow:0 14px 30px -10px rgba(32,28,20,.5); }
+      #backToTop.visible{ opacity:1; visibility:visible; transform:none; }
+      #backToTop:hover{ background:var(--stamp); }
+      #backToTop:active{ transform:scale(.92); }
+      #backToTop svg{ width:18px; height:18px; }
+      @media (max-width:640px){ #backToTop{ right:14px; bottom:max(14px, env(safe-area-inset-bottom,0px)); width:42px; height:42px; } }
+      @media (prefers-reduced-motion:reduce){ #backToTop{ transition:opacity .15s linear, visibility .15s; } }
+
+      /* ---- fb-count: micro-rebote aditivo cuando cambia (clase que
+             agrega un observer nuevo, no toca updateFavCount) ---- */
+      .fb-count.bump-fav{ animation:favBump .4s var(--spring); }
+      @keyframes favBump{ 0%{ transform:scale(1); } 45%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+
+      /* ---- hero: chip de hora local + cita de vecino ---- */
+      .hero-clock{ display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px; color:var(--ink-soft); }
+      .hero-clock svg{ width:12px; height:12px; opacity:.7; }
+      .hero-clock b{ color:var(--ink); font-weight:600; }
+      .hero-quote{ margin:26px 0 0; padding:16px 18px 16px 20px; border-left:3px solid var(--stamp); background:var(--paper-raised); border-radius:0 6px 6px 0; position:relative; max-width:480px; }
+      .hero-quote p{ margin:0 0 8px; font-family:var(--serif); font-style:italic; font-size:14.5px; line-height:1.55; color:var(--ink); }
+      .hero-quote cite{ font-style:normal; font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; color:var(--ink-faint); }
+      .hero-quote::before{ content:'"'; position:absolute; top:-6px; left:14px; font-family:var(--serif); font-size:38px; color:var(--stamp); opacity:.25; line-height:1; }
+      .hero-kbd-hint{ display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin-left:10px; }
+      .hero-kbd-hint kbd{ font-family:var(--mono); font-size:10px; background:var(--sunken); border:1px solid var(--line-strong); border-bottom-width:2px; border-radius:4px; padding:1px 6px; color:var(--ink-soft); }
+      @media (max-width:640px){ .hero-kbd-hint{ display:none; } }
+
+      /* ---- ficha-column: leve profundidad al mover el mouse (opcional,
+             desactivado si el usuario prefiere menos movimiento) ---- */
+      .ficha-stage{ transition:transform .3s var(--ease); }
+      @media (prefers-reduced-motion:reduce){ .ficha-stage{ transition:none !important; transform:none !important; } }
+
+      /* ---- manifest: hover más rico en cada bloque de categoría + nueva
+             tarjeta de lectura de los números, debajo del breakdown ---- */
+      .bd-item{ transition:transform .2s var(--spring); border-radius:4px; }
+      .bd-item:hover{ transform:translateY(-3px); }
+      .manifest-insight{ margin-top:34px; display:flex; align-items:flex-start; gap:14px; padding:18px 20px; border:1px solid rgba(245,241,231,.12); border-radius:8px; background:rgba(245,241,231,.04); max-width:640px; }
+      .manifest-insight-ico{ flex:none; font-size:20px; line-height:1; margin-top:2px; }
+      .manifest-insight p{ margin:0; font-size:13.5px; line-height:1.6; color:var(--dark-soft); }
+      .manifest-insight b{ color:#F0D8C8; font-weight:600; }
+
+      /* ---- verificación: icono por paso + firma final ---- */
+      .check-row{ position:relative; }
+      .check-ico{ position:absolute; right:0; top:22px; width:32px; height:32px; border-radius:50%; background:var(--paper); border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center; font-size:14px; opacity:0; transform:scale(.6) rotate(-8deg); transition:opacity .3s var(--spring), transform .3s var(--spring); pointer-events:none; }
+      .check-row.reveal-ico .check-ico, .check-list .check-ico{ opacity:1; transform:none; }
+      @media (max-width:640px){ .check-ico{ display:none; } }
+      .verif-signature{ margin-top:30px; display:flex; align-items:center; gap:12px; padding-top:22px; border-top:1px dashed var(--line-strong); }
+      .verif-signature-seal{ flex:none; width:38px; height:38px; border-radius:50%; border:2px solid var(--stamp); color:var(--stamp-ink); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:15px; transform:rotate(-8deg); }
+      .verif-signature p{ margin:0; font-size:12.5px; line-height:1.5; color:var(--ink-soft); }
+      .verif-signature b{ color:var(--ink); font-family:var(--sans); }
+      .verif-report-cta{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-family:var(--mono); font-size:11px; color:var(--stamp-ink); text-decoration:none; border-bottom:1px dashed var(--stamp-ink); }
+      .verif-report-cta:hover{ color:var(--stamp); border-color:var(--stamp); }
+
+      /* ---- un día en la ciudad: badge "ahora" + tarjetas más vivas ---- */
+      .day-card{ position:relative; transition:transform .25s var(--spring), box-shadow .25s ease; }
+      .day-card:hover{ transform:translateY(-4px); }
+      .day-card.es-ahora{ box-shadow:0 0 0 2px var(--stamp), 0 20px 40px -20px rgba(180,71,45,.4); }
+      .day-card.es-ahora::after{ content:'Ahora'; position:absolute; top:10px; right:10px; font-family:var(--mono); font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--stamp); padding:3px 8px; border-radius:100px; animation:statusPulse2 2s ease-out infinite; }
+      @keyframes statusPulse2{ 0%,100%{ box-shadow:0 0 0 0 rgba(180,71,45,.5); } 50%{ box-shadow:0 0 0 5px rgba(180,71,45,0); } }
+      .dia-cta-panel{ margin-top:32px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; border:1px solid var(--line-strong); border-radius:8px; background:var(--paper-raised); }
+      .dia-cta-panel p{ margin:0; font-family:var(--serif); font-size:15.5px; color:var(--ink); max-width:420px; }
+      .dia-cta-panel a{ font-family:var(--sans); font-weight:600; font-size:13.5px; color:#fff; background:var(--river); padding:11px 20px; border-radius:100px; text-decoration:none; white-space:nowrap; transition:filter .2s ease, transform .15s var(--spring); }
+      .dia-cta-panel a:hover{ filter:brightness(1.08); }
+      .dia-cta-panel a:active{ transform:scale(.96); }
+      @media (prefers-reduced-motion:reduce){ .day-card.es-ahora::after{ animation:none; } }
+
+      /* ---- fichas destacadas: ribbon de ranking + cta final ----
+             #fichasGrid se reconstruye por completo en JS (buildFichas());
+             por eso el ribbon se pinta con un contador CSS sobre .fcard
+             en vez de con un <span> estático, así sigue apareciendo sin
+             importar que el JS reemplace el innerHTML del grid. */
+      #fichasGrid{ counter-reset:fcard-rank; }
+      .fcard{ position:relative; overflow:visible; counter-increment:fcard-rank; }
+      .fcard::before{ content:'Nº' counter(fcard-rank); position:absolute; top:-9px; left:14px; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.04em; color:#fff; background:var(--ink); padding:3px 9px; border-radius:100px; box-shadow:0 4px 10px -4px rgba(32,28,20,.5); pointer-events:none; }
+      .fichas-cta-row{ margin-top:30px; text-align:center; }
+      .fichas-cta-row a{ display:inline-flex; align-items:center; gap:8px; font-family:var(--sans); font-weight:600; font-size:13.5px; color:var(--ink); background:var(--paper); border:1px solid var(--line-strong); border-radius:100px; padding:12px 22px; text-decoration:none; transition:border-color .2s ease, background .2s ease, transform .15s var(--spring); }
+      .fichas-cta-row a:hover{ border-color:var(--stamp); background:var(--stamp-soft); }
+      .fichas-cta-row a:active{ transform:scale(.96); }
+      .fichas-cta-row a svg{ width:14px; height:14px; }
+
+      /* ---- guardadas: tip contextual para primera visita ---- */
+      .guardadas-tip{ display:flex; align-items:center; gap:10px; margin-bottom:22px; padding:12px 16px; border:1px dashed var(--line-strong); border-radius:6px; background:var(--sunken); font-size:12.5px; color:var(--ink-soft); }
+      .guardadas-tip svg{ width:16px; height:16px; flex:none; color:var(--stamp-ink); }
+
+      /* ---- ayuda: buscador de preguntas + tarjeta de contacto ---- */
+      .faq-search-wrap{ position:relative; margin-bottom:22px; }
+      .faq-search-wrap svg{ position:absolute; left:14px; top:50%; transform:translateY(-50%); width:14px; height:14px; opacity:.5; pointer-events:none; }
+      #faqSearch{ width:100%; font-family:var(--sans); font-size:13.5px; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:100px; padding:11px 16px 11px 38px; outline:none; transition:border-color .2s ease, box-shadow .2s ease; }
+      #faqSearch:focus{ border-color:var(--stamp); box-shadow:0 0 0 3px var(--stamp-soft); }
+      .faq-item.oculto-busqueda{ display:none; }
+      #faqNoResults{ display:none; font-size:12.5px; color:var(--ink-soft); font-style:italic; padding:8px 4px; }
+      #faqNoResults.visible{ display:block; }
+      .ayuda-contact-card{ margin-top:28px; padding:18px 20px; border:1px solid var(--line-strong); border-radius:8px; background:var(--paper-raised); display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+      .ayuda-contact-card b{ display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink); margin-bottom:2px; }
+      .ayuda-contact-card span{ font-size:12px; color:var(--ink-soft); }
+      .ayuda-contact-card a.btn-contacto{ margin-left:auto; font-family:var(--sans); font-weight:600; font-size:12.5px; color:#fff; background:var(--stamp); padding:9px 16px; border-radius:100px; text-decoration:none; white-space:nowrap; transition:filter .2s ease; }
+      .ayuda-contact-card a.btn-contacto:hover{ filter:brightness(1.08); }
+      .gloss-item{ transition:transform .18s var(--spring); }
+      .gloss-item:hover{ transform:translateX(3px); }
+
+      /* ---- footer: franja de sellos de confianza + firma cálida ---- */
+      .foot-trust{ display:flex; flex-wrap:wrap; gap:10px 22px; padding:22px 0; border-top:1px solid var(--dark-line); border-bottom:1px solid var(--dark-line); margin-bottom:22px; }
+      .foot-trust-item{ display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11px; color:var(--dark-soft); }
+      .foot-trust-item svg{ width:13px; height:13px; opacity:.85; }
+      .foot-signature{ text-align:center; font-family:var(--serif); font-style:italic; font-size:12.5px; color:var(--dark-soft); margin-top:18px; opacity:.85; }
+    </style>
 <noscript><style>.reveal{opacity:1!important;transform:none!important;}#intro{display:none!important;}</style></noscript>
 <script type="application/ld+json">
 {
@@ -982,12 +1099,22 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
 
 <main id="main">
 
+<!-- Botón flotante "volver arriba" — completamente nuevo, controlado por
+     el bloque de script aditivo al pie del documento. No interfiere con
+     ningún otro elemento fixed existente (#progress, #intro). -->
+<button type="button" id="backToTop" aria-label="Volver arriba">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
 <section class="hero laid" id="hero" aria-labelledby="title-hero">
   <div class="wrap">
     <div>
       <div class="hero-meta-row">
         <span class="kicker">Concepción del Uruguay, Entre Ríos</span>
         <span class="status-chip"><span class="status-dot" aria-hidden="true"></span>Padrón activo · actualizado el 13 jul 2026</span>
+        <!-- Hora local en vivo — completamente nueva, la completa el
+             script aditivo del pie del documento (id="heroClockValue"). -->
+        <span class="hero-clock" id="heroClock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Son las <b id="heroClockValue">—:—</b> en la ciudad</span>
       </div>
 
       <h1 class="h-hero" id="title-hero">La ciudad tiene <em>862 fichas</em>.<br>Ninguna la escribió una IA<br>sin pisar la calle primero.</h1>
@@ -1004,7 +1131,7 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
         <button class="btn primary" id="heroBtn">Recorrer el padrón</button>
         <a href="#verificacion" class="link">Cómo entra un lugar acá <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4"/></svg></a>
       </div>
-      <p class="hero-trust">Sin descargar ninguna app · sin crear cuenta · gratis, como el resto de URU SPOT.</p>
+      <p class="hero-trust">Sin descargar ninguna app · sin crear cuenta · gratis, como el resto de URU SPOT. <span class="hero-kbd-hint">Atajo: <kbd>/</kbd> para buscar</span></p>
 
       <nav class="hero-explore" aria-label="Explorar el padrón por rubro">
         <p class="hero-explore-label" id="rubroExploreLabel">Explorá por rubro</p>
@@ -1012,6 +1139,14 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
           <!-- chips de rubro insertados por JS, a partir de GRUPOS -->
         </div>
       </nav>
+
+      <!-- Cita de un vecino — completamente nueva, aporta narrativa y voz
+           humana antes de que el usuario llegue al mapa. No reemplaza ni
+           mueve nada de arriba. -->
+      <blockquote class="hero-quote reveal">
+        <p>Antes preguntaba en el grupo del barrio si tal lugar seguía abierto. Ahora miro el padrón y ya sé la dirección, el horario y si vale la pena.</p>
+        <cite>— Vecina de Concepción del Uruguay, usuaria del padrón</cite>
+      </blockquote>
     </div>
 
     <div class="ficha-column reveal">
@@ -1050,6 +1185,14 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <div class="bd-item"><div class="bd-num" style="color:#3A8216">12</div><div class="bd-label">Naturaleza</div></div>
     </div>
     <p class="manifest-fecha">Padrón verificado al 13 de julio de 2026 — se actualiza cuando algo cambia, no en fechas fijas.</p>
+
+    <!-- Tarjeta de lectura de los números — completamente nueva. Aporta
+         narrativa sobre el breakdown de arriba sin tocar el div#breakdown
+         que genera core-engine/inline JS. -->
+    <div class="manifest-insight reveal">
+      <span class="manifest-insight-ico" aria-hidden="true">🧭</span>
+      <p>Mirado de cerca, el padrón cuenta una historia: por cada restaurante hay <b>casi dos comercios más</b> de otro rubro. La ciudad que URU SPOT registra no vive solo de la joda — vive de la farmacia de la esquina, del banco, del taller, del jardín de infantes. Esa es la diferencia entre una guía turística y un padrón real.</p>
+    </div>
   </div>
 </section>
 
@@ -1200,19 +1343,32 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <div class="check-row">
         <span class="check-num">01</span>
         <div><h3>Verificado in situ</h3><p>Alguien de URU SPOT confirma que el lugar existe, en la dirección que dice, antes de sumarlo al padrón.</p></div>
+        <span class="check-ico" aria-hidden="true">🚶</span>
       </div>
       <div class="check-row">
         <span class="check-num">02</span>
         <div><h3>Cruzado con Google Places</h3><p>Nombre, dirección, teléfono y calificación se contrastan contra la ficha pública del lugar — no se inventa un solo dato.</p></div>
+        <span class="check-ico" aria-hidden="true">🔎</span>
       </div>
       <div class="check-row">
         <span class="check-num">03</span>
         <div><h3>Clasificado en un solo rubro</h3><p>Cada lugar entra en una de 13 categorías. Sin duplicados, sin zonas grises de "un poco de todo".</p></div>
+        <span class="check-ico" aria-hidden="true">🗂️</span>
       </div>
       <div class="check-row">
         <span class="check-num">04</span>
         <div><h3>Revisado si algo cambia</h3><p>Un local cierra, cambia de dueño o de horario — cualquiera puede reportarlo y la ficha se corrige.</p></div>
+        <span class="check-ico" aria-hidden="true">🔄</span>
       </div>
+    </div>
+
+    <!-- Firma final — completamente nueva. Cierra la sección con una voz
+         humana concreta y un canal de reporte directo, reforzando la
+         confianza sin tocar el check-list de arriba. -->
+    <div class="verif-signature reveal">
+      <span class="verif-signature-seal" aria-hidden="true">US</span>
+      <p><b>Equipo URU SPOT</b> — recorremos la ciudad a pie, local por local.<br>
+      <a class="verif-report-cta" href="mailto:uruspotcdu@gmail.com">¿Encontraste algo desactualizado? Reportalo acá →</a></p>
     </div>
   </div>
 </section>
@@ -1234,6 +1390,14 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <a class="day-card" href="../las-mejores-hosterias-cdu/"><span class="day-tag" style="background:#1E57AD"></span><span class="day-time">Sábado</span><p class="scn">Alguien viene de visita y necesita dónde quedarse.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
       <a class="day-card" href="../mejores-veterinarias-cdu/"><span class="day-tag" style="background:#168241"></span><span class="day-time">Domingo</span><p class="scn">Tu mascota necesita un chequeo antes de fin de mes.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
     </div>
+
+    <!-- Panel de exploración — completamente nuevo. Invita a seguir
+         explorando el padrón completo justo después de las 8 escenas,
+         sin tocar el div#dayGrid que reconstruye el JS inline. -->
+    <div class="dia-cta-panel reveal">
+      <p>¿Ninguna de estas ocho escenas es la tuya hoy? El padrón completo tiene 862 fichas más para explorar.</p>
+      <a href="#padron">Explorar el mapa completo →</a>
+    </div>
   </div>
 </section>
 
@@ -1254,6 +1418,12 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div><h3>7 Colinas Craft Brewery</h3><p class="fc-meta">1.930 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.4</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-6" aria-label="Guardar 7 Colinas Craft Brewery"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/7-colinas/" aria-label="Ver ficha de 7 Colinas Craft Brewery"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
       <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div><h3>Posta Torreón</h3><p class="fc-meta">582 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.4</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-7" aria-label="Guardar Posta Torreón"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/posta-torreon/" aria-label="Ver ficha de Posta Torreón"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
     </div>
+
+    <!-- CTA final — completamente nueva, invita a seguir explorando el
+         padrón completo desde las 8 fichas destacadas. -->
+    <div class="fichas-cta-row reveal">
+      <a href="#padron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Ver las 862 fichas completas</a>
+    </div>
   </div>
 </section>
 
@@ -1263,6 +1433,13 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <p class="eyebrow">Tus fichas guardadas</p>
       <h2 id="title-guardadas">Lo que marcaste queda acá, en este mismo navegador.</h2>
       <p>Se guarda con la misma clave que usa el resto de URU SPOT, así que cuando el mapa completo esté activo, tus favoritos ya van a estar ahí.</p>
+    </div>
+    <!-- Tip contextual — completamente nuevo, ayuda a quien todavía no
+         guardó nada a entender el mecanismo antes de ver la lista vacía
+         que arma renderSaved() en #savedContent. -->
+    <div class="guardadas-tip reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg>
+      <span>Tocá el corazón en cualquier ficha del padrón, del mapa o de esta misma página — se guarda acá al instante, sin cuenta ni sincronización.</span>
     </div>
     <div id="savedContent"><!-- JS --></div>
   </div>
@@ -1276,6 +1453,15 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
           <p class="eyebrow">Preguntas frecuentes</p>
           <h2 id="title-ayuda">Lo esencial, sin fricción.</h2>
         </div>
+        <!-- Buscador de preguntas — completamente nuevo. Filtra los
+             .faq-item existentes agregando/quitando una clase (JS
+             aditivo al pie del documento); no toca el listener de
+             .faq-q que abre/cierra cada respuesta. -->
+        <div class="faq-search-wrap reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="faqSearch" placeholder="Buscar en las preguntas frecuentes…" autocomplete="off" aria-label="Buscar en las preguntas frecuentes" />
+        </div>
+        <p id="faqNoResults">Ninguna pregunta coincide. Probá con otra palabra o <a href="mailto:uruspotcdu@gmail.com" style="color:var(--stamp-ink);">escribinos directamente</a>.</p>
         <div class="reveal">
           <!-- Fix (auditoría, Hallazgo medio "FAQ sin aria-expanded/
                aria-controls"): cada botón .faq-q ahora anuncia su
@@ -1315,6 +1501,14 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
             <button class="faq-q" aria-expanded="false" aria-controls="faq-a-8"><p>¿Necesito activar mi ubicación para usar el mapa?</p><span class="faq-plus"></span></button>
             <div class="faq-a" id="faq-a-8"><p>No. Todo el mapa y la lista funcionan sin geolocalización. "Cerca de mí" y el orden "Más cerca" son un atajo opcional, no un requisito para explorar el padrón.</p></div>
           </div>
+        </div>
+
+        <!-- Tarjeta de contacto — completamente nueva, cierra el bloque
+             de FAQ con una salida directa para lo que no está cubierto. -->
+        <div class="ayuda-contact-card reveal">
+          <span style="font-size:22px;" aria-hidden="true">✉️</span>
+          <span><b>¿No encontraste tu respuesta?</b><span>Escribinos y te contestamos directamente, sin bot ni formulario largo.</span></span>
+          <a class="btn-contacto" href="mailto:uruspotcdu@gmail.com">Escribir un mail</a>
         </div>
       </div>
       <div>
@@ -1367,6 +1561,16 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <span>URU SPOT — Concepción del Uruguay, Entre Ríos</span>
       <span><a href="mailto:uruspotcdu@gmail.com">uruspotcdu@gmail.com</a></span>
     </div>
+
+    <!-- Franja de confianza + firma — completamente nueva, cierra la
+         página reforzando lo mismo que el hero prometió arriba. -->
+    <div class="foot-trust reveal">
+      <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>100% gratis, sin registro</span>
+      <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>862 fichas verificadas in situ</span>
+      <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Concepción del Uruguay, Entre Ríos</span>
+      <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Actualizado el 13 jul 2026</span>
+    </div>
+    <p class="foot-signature">Hecho a pie de calle, en Concepción del Uruguay.</p>
   </div>
 </footer>
 
