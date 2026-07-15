@@ -761,6 +761,67 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       /* ---- microcopys extra reutilizables (badges tipo "chip" y "ribbon") ---- */
       .u-chip-new{ display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--river); border-radius:100px; padding:2px 8px; vertical-align:middle; }
       .u-chip-new::before{ content:'✦'; font-size:9px; }
+
+      /* ═══════════════════════════════════════════════════════════════
+         BLOQUE 100% ADITIVO — auditoría de experiencia, jul 2026.
+         Tres componentes nuevos, ninguno reemplaza ni reestiliza nada
+         existente: "Un rubro a la vez" (carrusel de categorías vivo),
+         "El padrón, en cifras vivas" (insights calculados en tiempo
+         real sobre el dataset ya cargado) y "Tu recorrido" (rastro de
+         fichas que el propio usuario visitó en esta sesión). El JS que
+         los alimenta vive en el <script> aditivo al pie del documento,
+         reutilizando window.uruSpotMotor sin tocar core-engine.js ni
+         content.js. ═══════════════════════════════════════════════ */
+
+      /* ---- "Un rubro a la vez": carrusel de rubros ---- */
+      .rubro-spotlight{ border:1px solid var(--line); border-radius:9px; background:var(--paper-raised); padding:18px 20px 20px; margin-bottom:22px; position:relative; overflow:hidden; }
+      .rubro-spotlight::before{ content:''; position:absolute; inset:0; background:radial-gradient(circle at 0% 100%, rgba(180,71,46,.07), transparent 55%); pointer-events:none; }
+      .rs-head{ display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; margin-bottom:12px; }
+      .rs-eyebrow{ font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); }
+      .rs-nav{ display:flex; gap:6px; }
+      .rs-nav button{ width:26px; height:26px; border-radius:50%; border:1px solid var(--line-strong); background:var(--paper); color:var(--ink); cursor:pointer; font-size:14px; line-height:1; display:flex; align-items:center; justify-content:center; transition:background .2s ease, transform .15s var(--spring), border-color .2s ease; }
+      .rs-nav button:hover{ background:var(--stamp); border-color:var(--stamp); color:#fff; }
+      .rs-nav button:active{ transform:scale(.92); }
+      .rs-body{ display:flex; align-items:center; gap:16px; position:relative; z-index:1; }
+      .rs-ico{ flex:none; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; background:var(--sunken); box-shadow:inset 0 0 0 1px var(--line); transition:transform .3s var(--spring); }
+      .rs-body.rs-cycling .rs-ico{ transform:scale(.88) rotate(-6deg); }
+      .rs-info{ min-width:0; flex:1; }
+      .rs-label{ font-family:var(--serif); font-size:19px; font-weight:600; margin:0 0 3px; color:var(--ink); }
+      .rs-desc{ font-size:13px; line-height:1.45; color:var(--ink-soft); margin:0 0 6px; }
+      .rs-count{ font-size:12px; color:var(--ink-faint); margin:0; }
+      .rs-count strong{ color:var(--stamp-ink); font-family:var(--mono); }
+      .rs-cta{ flex:none; font-family:var(--sans); font-weight:600; font-size:12.5px; color:#fff; background:var(--ink); border:none; border-radius:100px; padding:10px 16px; cursor:pointer; transition:background .2s ease, transform .15s var(--spring); white-space:nowrap; }
+      .rs-cta:hover{ background:var(--stamp); }
+      .rs-cta:active{ transform:scale(.95); }
+      .rs-dots{ display:flex; gap:5px; justify-content:center; margin-top:14px; position:relative; z-index:1; flex-wrap:wrap; }
+      .rs-dot{ width:6px; height:6px; border-radius:50%; background:var(--line-strong); transition:background .2s ease, transform .2s var(--spring); cursor:pointer; border:none; padding:0; }
+      .rs-dot.activo{ background:var(--stamp); transform:scale(1.4); }
+      @media (max-width:640px){ .rs-body{ flex-wrap:wrap; } .rs-cta{ width:100%; text-align:center; } }
+      @media (prefers-reduced-motion:reduce){ .rs-body.rs-cycling .rs-ico{ transform:none; } }
+
+      /* ---- "El padrón, en cifras vivas": insights calculados ---- */
+      .padron-insights{ margin-top:26px; }
+      .pi-eyebrow{ font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); text-align:center; margin:0 0 14px; }
+      .pi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+      .pi-card{ display:block; width:100%; text-align:left; font:inherit; background:var(--paper-raised); border:1px solid var(--line); border-radius:8px; padding:16px 16px 15px; cursor:default; transition:border-color .25s ease, transform .2s var(--spring), box-shadow .25s ease; }
+      .pi-card.pi-clickable{ cursor:pointer; }
+      .pi-card.pi-clickable:hover{ border-color:var(--stamp); transform:translateY(-3px); box-shadow:0 14px 28px -16px rgba(32,28,20,.35); }
+      .pi-ico{ display:block; font-size:19px; margin-bottom:8px; }
+      .pi-label{ font-family:var(--sans); font-size:11.5px; color:var(--ink-soft); margin:0 0 5px; line-height:1.35; }
+      .pi-value{ font-family:var(--serif); font-size:15.5px; font-weight:600; color:var(--ink); margin:0; line-height:1.3; }
+      .pi-value b{ color:var(--stamp-ink); font-family:var(--mono); font-weight:600; font-size:13px; }
+      @media (max-width:900px){ .pi-grid{ grid-template-columns:repeat(2,1fr); } }
+      @media (max-width:480px){ .pi-grid{ grid-template-columns:1fr; } }
+
+      /* ---- "Tu recorrido": rastro de fichas vistas en esta sesión ---- */
+      .mapa-trail{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); }
+      .mapa-trail[hidden]{ display:none; }
+      .mapa-trail-label{ font-family:var(--mono); font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); flex:none; }
+      .mapa-trail-chips{ display:flex; gap:7px; flex-wrap:wrap; }
+      .mapa-trail-chip{ display:inline-flex; align-items:center; gap:5px; font-family:var(--sans); font-size:11.5px; color:var(--ink); background:var(--sunken); border:1px solid var(--line); border-radius:100px; padding:5px 12px; cursor:pointer; transition:background .2s ease, border-color .2s ease, transform .15s var(--spring); animation:trailChipIn .35s var(--ease) backwards; }
+      .mapa-trail-chip:hover{ background:var(--paper-raised); border-color:var(--stamp); transform:translateY(-1px); }
+      @keyframes trailChipIn{ from{ opacity:0; transform:translateX(-6px); } to{ opacity:1; transform:translateX(0); } }
+      @media (prefers-reduced-motion:reduce){ .mapa-trail-chip{ animation:none; } }
     </style>
     <style>
       /* ═══════════════════════════════════════════════════════════════
@@ -1222,6 +1283,35 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
       <li class="mapa-onboard-step"><b>Guardala</b><span>Un toque en el corazón, sin crear ninguna cuenta.</span></li>
     </ol>
 
+    <!-- "Un rubro a la vez" — carrusel enteramente nuevo. Ayuda a decidir
+         por dónde empezar a explorar 862 fichas mostrando, de a un rubro,
+         su ícono, su descripción real y su cantidad exacta de fichas (la
+         misma fuente — motor.contarPorGrupo() — que ya usa el mapa para
+         sus propios contadores). El botón "Ver en el mapa" no reemplaza
+         ningún chip de filtro existente: llama a motor.setFiltro(), la
+         misma función pública que ya invocan esos chips. Si JS no corrió
+         todavía, muestra Gastronomía (el primer rubro) como contenido
+         estático perfectamente legible. -->
+    <div class="rubro-spotlight reveal" id="rubroSpotlight" aria-roledescription="carrusel" aria-label="Explorá el padrón, un rubro a la vez">
+      <div class="rs-head">
+        <span class="rs-eyebrow">Un rubro a la vez</span>
+        <div class="rs-nav">
+          <button type="button" id="rsPrev" aria-label="Rubro anterior">‹</button>
+          <button type="button" id="rsNext" aria-label="Rubro siguiente">›</button>
+        </div>
+      </div>
+      <div class="rs-body" id="rsBody">
+        <span class="rs-ico" id="rsIco" aria-hidden="true">🍽️</span>
+        <div class="rs-info">
+          <p class="rs-label" id="rsLabel">Gastronomía</p>
+          <p class="rs-desc" id="rsDesc">Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.</p>
+          <p class="rs-count"><strong id="rsCount">166</strong> fichas en este rubro</p>
+        </div>
+        <button type="button" class="rs-cta" id="rsCta" data-grupo="gastronomia">Ver en el mapa →</button>
+      </div>
+      <div class="rs-dots" id="rsDots" aria-hidden="true"></div>
+    </div>
+
     <!-- Panel "tip" — enteramente nuevo. El texto rota con JS (bloque
          aditivo al final del documento); si JS está deshabilitado, el
          primer tip queda fijo y sigue siendo perfectamente legible. -->
@@ -1306,6 +1396,38 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
              aditivo al pie del documento leyendo #mapa-count/#mapa-total,
              sin tocar ninguno de los spans de arriba. -->
         <div id="mapa-contador-track" aria-hidden="true"><div id="mapa-contador-fill"></div></div>
+      </div>
+
+      <!-- "Tu recorrido" — completamente nuevo. Registra, solo en esta
+           pestaña (sessionStorage, se borra al cerrarla), qué fichas fue
+           abriendo el propio usuario, enganchado al evento 'popupopen'
+           que Leaflet ya emite en el mapa cada vez que se abre una ficha
+           — sea por clic, por el buscador, por "Sorprendeme" o por un
+           link de "Compartir". No agrega ningún listener nuevo sobre los
+           marcadores ni compite con marker.on('popupopen', …) que ya usa
+           core-engine.js para renderizar el contenido del popup: ambos
+           conviven porque uno escucha en cada marcador y este en el mapa.
+           Empieza oculto (hidden) hasta que exista al menos una ficha
+           visitada, para no mostrar una barra vacía en la primera visita. -->
+      <div class="mapa-trail" id="mapaTrail" hidden>
+        <span class="mapa-trail-label">Tu recorrido:</span>
+        <div class="mapa-trail-chips" id="mapaTrailChips"></div>
+      </div>
+    </div>
+
+    <!-- "El padrón, en cifras vivas" — enteramente nuevo. No son números
+         redactados a mano: se calculan en el navegador, una sola vez,
+         recorriendo motor.todosLosMarkers (el mismo array que ya usa el
+         mapa) apenas termina de cargar. Si por lo que sea el dataset no
+         llegara a cargar, las 4 tarjetas simplemente no se completan —
+         no dejan un placeholder roto ni un error en consola. -->
+    <div class="padron-insights reveal" id="padronInsights" aria-label="Datos del padrón, calculados en vivo sobre las fichas cargadas">
+      <p class="pi-eyebrow">El padrón, en cifras vivas</p>
+      <div class="pi-grid" id="piGrid">
+        <div class="pi-card" data-pi="top-rating"><span class="pi-ico" aria-hidden="true">🏆</span><p class="pi-label">Calculando la mejor calificación…</p><p class="pi-value">—</p></div>
+        <div class="pi-card" data-pi="top-reviews"><span class="pi-ico" aria-hidden="true">💬</span><p class="pi-label">Calculando la ficha más reseñada…</p><p class="pi-value">—</p></div>
+        <div class="pi-card" data-pi="top-rubro"><span class="pi-ico" aria-hidden="true">📊</span><p class="pi-label">Calculando el rubro mejor calificado…</p><p class="pi-value">—</p></div>
+        <div class="pi-card" data-pi="top-diverso"><span class="pi-ico" aria-hidden="true">🗂️</span><p class="pi-label">Calculando el rubro más diverso…</p><p class="pi-value">—</p></div>
       </div>
     </div>
 
@@ -2227,7 +2349,9 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     'los pines dorados marcan lugares destacados dentro de su rubro, no publicidad paga.',
     'podés guardar un lugar tocando el corazón y después filtrar el mapa con "♥ Solo favoritos", sin crear ninguna cuenta.',
     'la vista "☰ Lista" ordena los mismos resultados del mapa por cercanía o por calificación, sin perder el filtro que tenías puesto.',
-    'cada ficha muestra la cantidad real de reseñas junto a la calificación — nunca una sin la otra.'
+    'cada ficha muestra la cantidad real de reseñas junto a la calificación — nunca una sin la otra.',
+    'el panel "Un rubro a la vez", más arriba, recorre las 13 categorías con su cantidad real de fichas — tocá "Ver en el mapa" para saltar directo a esa categoría.',
+    'la franja "El padrón, en cifras vivas" no la escribió nadie a mano: se calcula en tu navegador sobre las fichas reales apenas terminan de cargar.'
   ];
   (function initTip(){
     var texto = document.getElementById('mapaTipTexto');
@@ -2265,6 +2389,301 @@ footer{background:var(--dark); color:#F4F1E9; padding:80px 0 32px;}
     mo.observe(elCount, { childList:true, characterData:true, subtree:true });
     mo.observe(elTotal, { childList:true, characterData:true, subtree:true });
     pintar();
+  })();
+
+  /* ---- 3) "Un rubro a la vez" — carrusel de las 13 categorías ----
+     GRUPOS acá es una copia solo-de-presentación (ícono/color/nombre/
+     descripción) de la misma taxonomía que ya vive en content.js —
+     necesaria porque ese archivo la guarda en una IIFE propia y no la
+     expone globalmente. No sustituye a esa fuente: es texto estático,
+     igual que el resto de referencias a "Gastronomía · 166" que ya
+     existen a mano en #breakdown más arriba en este mismo documento.
+     El conteo real y vivo de cada rubro, en cambio, sale siempre de
+     motor.contarPorGrupo(), nunca de un número escrito acá. */
+  (function initRubroSpotlight(){
+    var cont = document.getElementById('rubroSpotlight');
+    if(!cont) return;
+    var GRUPOS_UI = [
+      { key:'gastronomia', label:'Gastronomía', icon:'🍽️', desc:'Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.' },
+      { key:'compras',     label:'Compras',     icon:'🛒', desc:'Supermercados, ferreterías, indumentaria y comercios de todo tipo.' },
+      { key:'salud',       label:'Salud',       icon:'🏥', desc:'Farmacias, clínicas, laboratorios y profesionales de la salud.' },
+      { key:'finanzas',    label:'Finanzas',    icon:'🏦', desc:'Bancos, seguros, abogados, escribanías e inmobiliarias.' },
+      { key:'transporte',  label:'Transporte',  icon:'🚖', desc:'Remiserías, talleres, estaciones de servicio y agencias de viaje.' },
+      { key:'deporte',     label:'Deporte',     icon:'💪', desc:'Gimnasios, clubes deportivos y espacios de entrenamiento.' },
+      { key:'patrimonio',  label:'Patrimonio',  icon:'🏛️', desc:'Museos, plazas, iglesias, centros culturales y edificios históricos.' },
+      { key:'educacion',   label:'Educación',   icon:'🎓', desc:'Universidades, institutos, escuelas y jardines de infantes.' },
+      { key:'belleza',     label:'Belleza',     icon:'💇', desc:'Peluquerías, barberías y centros de estética.' },
+      { key:'alojamiento', label:'Alojamiento', icon:'🏨', desc:'Hoteles, hosterías, cabañas, hostels y apart hotels.' },
+      { key:'servicios_publicos', label:'Servicios públicos', icon:'🏢', desc:'Municipalidad, policía, correo, Registro Civil y más.' },
+      { key:'mascotas',    label:'Mascotas',    icon:'🐾', desc:'Veterinarias y pet shops para el cuidado de tus compañeros.' },
+      { key:'naturaleza',  label:'Naturaleza',  icon:'🌊', desc:'Balnearios, islas, parques y la costanera del río Uruguay.' }
+    ];
+    var body = document.getElementById('rsBody');
+    var elIco = document.getElementById('rsIco');
+    var elLabel = document.getElementById('rsLabel');
+    var elDesc = document.getElementById('rsDesc');
+    var elCount = document.getElementById('rsCount');
+    var elCta = document.getElementById('rsCta');
+    var elDots = document.getElementById('rsDots');
+    var prevBtn = document.getElementById('rsPrev');
+    var nextBtn = document.getElementById('rsNext');
+    if(!body || !elIco || !elLabel || !elDesc || !elCount || !elCta || !elDots || !prevBtn || !nextBtn) return;
+
+    elDots.innerHTML = GRUPOS_UI.map(function(g, i){
+      return '<button type="button" class="rs-dot' + (i === 0 ? ' activo' : '') + '" data-i="' + i + '" aria-label="Ver ' + g.label + '"></button>';
+    }).join('');
+    var dotEls = elDots.querySelectorAll('.rs-dot');
+
+    var idx = 0;
+    var timer = null;
+    var conteos = null; // se completa cuando el motor tenga datos
+
+    function contarFichas(key){
+      if(conteos) return conteos[key] || 0;
+      if(window.uruSpotMotor && typeof window.uruSpotMotor.contarPorGrupo === 'function'){
+        try{
+          var c = window.uruSpotMotor.contarPorGrupo();
+          if(c && Object.keys(c).length){ conteos = c; return conteos[key] || 0; }
+        }catch(e){}
+      }
+      return null;
+    }
+
+    function pintar(){
+      var g = GRUPOS_UI[idx];
+      body.classList.add('rs-cycling');
+      setTimeout(function(){ body.classList.remove('rs-cycling'); }, 300);
+      elIco.textContent = g.icon;
+      elLabel.textContent = g.label;
+      elDesc.textContent = g.desc;
+      elCta.setAttribute('data-grupo', g.key);
+      var n = contarFichas(g.key);
+      elCount.textContent = (n === null) ? '…' : n;
+      for(var i=0;i<dotEls.length;i++){ dotEls[i].classList.toggle('activo', i === idx); }
+    }
+    function ir(nuevoIdx){
+      idx = (nuevoIdx + GRUPOS_UI.length) % GRUPOS_UI.length;
+      pintar();
+    }
+    function reiniciarAuto(){
+      if(timer) clearInterval(timer);
+      timer = setInterval(function(){ ir(idx + 1); }, 6500);
+    }
+
+    prevBtn.addEventListener('click', function(){ ir(idx - 1); reiniciarAuto(); });
+    nextBtn.addEventListener('click', function(){ ir(idx + 1); reiniciarAuto(); });
+    for(var i=0;i<dotEls.length;i++){
+      dotEls[i].addEventListener('click', function(){ ir(parseInt(this.getAttribute('data-i'),10)); reiniciarAuto(); });
+    }
+    elCta.addEventListener('click', function(){
+      var grupo = this.getAttribute('data-grupo');
+      if(window.uruSpotMotor && typeof window.uruSpotMotor.setFiltro === 'function'){
+        window.uruSpotMotor.setFiltro(grupo, { limpiarBusqueda:true });
+      }
+      var destino = document.getElementById('mapa-wrap');
+      if(destino) destino.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+    cont.addEventListener('mouseenter', function(){ if(timer) clearInterval(timer); });
+    cont.addEventListener('mouseleave', reiniciarAuto);
+
+    pintar();
+    reiniciarAuto();
+  })();
+
+  /* ---- 4) "El padrón, en cifras vivas" — insights calculados en vivo ----
+     Espera (sin bloquear nada) a que motor.todosLosMarkers tenga datos
+     y calcula, sobre ese mismo array real, cuatro hechos: la ficha
+     mejor calificada, la más reseñada, el rubro con mejor promedio y
+     el rubro con más subcategorías distintas. Ningún número es
+     inventado ni redactado a mano; si el dataset tarda o no llega a
+     cargar, el panel simplemente deja de intentarlo tras 20s. */
+  (function initPadronInsights(){
+    var grid = document.getElementById('piGrid');
+    if(!grid) return;
+    var cardTop = grid.querySelector('[data-pi="top-rating"]');
+    var cardReviews = grid.querySelector('[data-pi="top-reviews"]');
+    var cardRubro = grid.querySelector('[data-pi="top-rubro"]');
+    var cardDiverso = grid.querySelector('[data-pi="top-diverso"]');
+    if(!cardTop || !cardReviews || !cardRubro || !cardDiverso) return;
+
+    var RUBRO_LABELS = {
+      gastronomia:'Gastronomía', compras:'Compras', salud:'Salud', finanzas:'Finanzas',
+      transporte:'Transporte', deporte:'Deporte', patrimonio:'Patrimonio', educacion:'Educación',
+      belleza:'Belleza', alojamiento:'Alojamiento', servicios_publicos:'Servicios públicos',
+      mascotas:'Mascotas', naturaleza:'Naturaleza'
+    };
+
+    function hacerClickeable(card, onClick){
+      card.classList.add('pi-clickable');
+      card.setAttribute('role','button');
+      card.setAttribute('tabindex','0');
+      card.addEventListener('click', onClick);
+      card.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); onClick(); } });
+    }
+
+    function calcular(){
+      var motor = window.uruSpotMotor;
+      if(!motor || !motor.todosLosMarkers || !motor.todosLosMarkers.length) return false;
+      var entries = motor.todosLosMarkers;
+
+      var mejorRating = null, masResenas = null;
+      var sumaPorRubro = {}, cantPorRubro = {}, subcatsPorRubro = {};
+
+      for(var i=0;i<entries.length;i++){
+        var l = entries[i].lugar;
+        if(!l) continue;
+        if(typeof l.rating === 'number'){
+          if(!mejorRating || l.rating > mejorRating.rating || (l.rating === mejorRating.rating && (l.rating_count||0) > (mejorRating.rating_count||0))){
+            mejorRating = l;
+          }
+          var g = l.grupo;
+          if(g){
+            sumaPorRubro[g] = (sumaPorRubro[g]||0) + l.rating;
+            cantPorRubro[g] = (cantPorRubro[g]||0) + 1;
+          }
+        }
+        if(typeof l.rating_count === 'number' && (!masResenas || l.rating_count > masResenas.rating_count)){
+          masResenas = l;
+        }
+        if(l.grupo && l.categoria){
+          if(!subcatsPorRubro[l.grupo]) subcatsPorRubro[l.grupo] = {};
+          subcatsPorRubro[l.grupo][l.categoria] = true;
+        }
+      }
+
+      if(mejorRating){
+        cardTop.querySelector('.pi-label').textContent = 'Mejor calificado del padrón';
+        cardTop.querySelector('.pi-value').innerHTML = utilsEscapar(mejorRating.nombre) + ' — <b>★ ' + mejorRating.rating.toFixed(1) + '</b>';
+        hacerClickeable(cardTop, function(){ if(motor.irALugar) motor.irALugar(mejorRating.id); irVerMapa(); });
+      }
+      if(masResenas){
+        cardReviews.querySelector('.pi-label').textContent = 'La ficha con más reseñas';
+        cardReviews.querySelector('.pi-value').innerHTML = utilsEscapar(masResenas.nombre) + ' — <b>' + masResenas.rating_count.toLocaleString('es-AR') + '</b>';
+        hacerClickeable(cardReviews, function(){ if(motor.irALugar) motor.irALugar(masResenas.id); irVerMapa(); });
+      }
+      var mejorRubro = null, mejorProm = -1;
+      for(var g2 in sumaPorRubro){
+        var prom = sumaPorRubro[g2] / cantPorRubro[g2];
+        if(prom > mejorProm){ mejorProm = prom; mejorRubro = g2; }
+      }
+      if(mejorRubro){
+        cardRubro.querySelector('.pi-label').textContent = 'Rubro mejor calificado en promedio';
+        cardRubro.querySelector('.pi-value').innerHTML = (RUBRO_LABELS[mejorRubro] || mejorRubro) + ' — <b>★ ' + mejorProm.toFixed(2) + '</b>';
+        hacerClickeable(cardRubro, function(){
+          if(motor.setFiltro) motor.setFiltro(mejorRubro, { limpiarBusqueda:true });
+          irVerMapa();
+        });
+      }
+      var rubroDiverso = null, maxSubcats = -1;
+      for(var g3 in subcatsPorRubro){
+        var n = Object.keys(subcatsPorRubro[g3]).length;
+        if(n > maxSubcats){ maxSubcats = n; rubroDiverso = g3; }
+      }
+      if(rubroDiverso){
+        cardDiverso.querySelector('.pi-label').textContent = 'El rubro con más variedad de subcategorías';
+        cardDiverso.querySelector('.pi-value').innerHTML = (RUBRO_LABELS[rubroDiverso] || rubroDiverso) + ' — <b>' + maxSubcats + '</b> tipos distintos';
+        hacerClickeable(cardDiverso, function(){
+          if(motor.setFiltro) motor.setFiltro(rubroDiverso, { limpiarBusqueda:true });
+          irVerMapa();
+        });
+      }
+      return true;
+    }
+
+    function irVerMapa(){
+      var destino = document.getElementById('mapa-wrap');
+      if(destino) destino.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+    function utilsEscapar(s){
+      var d = document.createElement('div');
+      d.textContent = String(s == null ? '' : s);
+      return d.innerHTML;
+    }
+
+    var intentos = 0;
+    var poll = setInterval(function(){
+      intentos++;
+      if(calcular() || intentos > 40){ clearInterval(poll); } // ~20s máximo (40 × 500ms)
+    }, 500);
+  })();
+
+  /* ---- 5) "Tu recorrido" — rastro de fichas vistas en esta sesión ----
+     Se apoya en el evento 'popupopen' del propio mapa Leaflet
+     (motor.map), disparado cada vez que se abre CUALQUIER popup sobre
+     ese mapa sin importar cómo (clic en un pin, buscador, "Sorprendeme",
+     un link de "Compartir" o el hash #lugar-N). Lee el id desde el
+     mismo atributo [data-fav-id] que ya trae el contenido del popup —
+     no depende de ninguna propiedad interna de Leaflet. Guarda hasta 6
+     lugares únicos en sessionStorage (se borra solo al cerrar la
+     pestaña, coherente con la idea de "recorrido de esta visita"). */
+  (function initMapaTrail(){
+    var wrap = document.getElementById('mapaTrail');
+    var chipsEl = document.getElementById('mapaTrailChips');
+    if(!wrap || !chipsEl) return;
+    var KEY = 'us_trail_v1';
+    var MAX = 6;
+
+    function leer(){
+      try{ return JSON.parse(sessionStorage.getItem(KEY) || '[]'); }catch(e){ return []; }
+    }
+    function guardar(lista){
+      try{ sessionStorage.setItem(KEY, JSON.stringify(lista)); }catch(e){}
+    }
+    function pintar(){
+      var lista = leer();
+      if(!lista.length) return;
+      wrap.hidden = false;
+      chipsEl.innerHTML = lista.map(function(item, i){
+        return '<button type="button" class="mapa-trail-chip" data-id="' + item.id + '" style="animation-delay:' + (i*0.04) + 's">' + escapar(item.nombre) + '</button>';
+      }).join('');
+    }
+    function escapar(s){
+      var d = document.createElement('div');
+      d.textContent = String(s == null ? '' : s);
+      return d.innerHTML;
+    }
+    function registrar(lugar){
+      if(!lugar || lugar.id == null) return;
+      var lista = leer().filter(function(item){ return item.id !== lugar.id; });
+      lista.unshift({ id: lugar.id, nombre: lugar.nombre });
+      if(lista.length > MAX) lista = lista.slice(0, MAX);
+      guardar(lista);
+      pintar();
+    }
+
+    chipsEl.addEventListener('click', function(e){
+      var btn = e.target.closest ? e.target.closest('.mapa-trail-chip') : null;
+      if(!btn) return;
+      var id = parseInt(btn.getAttribute('data-id'), 10);
+      if(window.uruSpotMotor && typeof window.uruSpotMotor.irALugar === 'function'){
+        window.uruSpotMotor.irALugar(id);
+        var destino = document.getElementById('mapa-wrap');
+        if(destino) destino.scrollIntoView({ behavior:'smooth', block:'start' });
+      }
+    });
+
+    pintar(); // por si veía esta misma sesión ya tenía recorrido guardado
+
+    var intentos = 0;
+    var poll = setInterval(function(){
+      intentos++;
+      var motor = window.uruSpotMotor;
+      if(motor && motor.map){
+        clearInterval(poll);
+        motor.map.on('popupopen', function(e){
+          try{
+            var el = e.popup.getElement();
+            var btn = el && el.querySelector('[data-fav-id]');
+            if(!btn) return;
+            var id = parseInt(btn.getAttribute('data-fav-id'), 10);
+            var lugar = motor.getLugarPorId ? motor.getLugarPorId(id) : null;
+            if(lugar) registrar(lugar);
+          }catch(err){}
+        });
+      } else if(intentos > 60){ // ~30s máximo (60 × 500ms)
+        clearInterval(poll);
+      }
+    }, 500);
   })();
 })();
 </script>
