@@ -2274,13 +2274,65 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
   'use strict';
   var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* [FIX — AUDITORIA_URUSPOT_INDEX1.md, hallazgo 10: "Polling setInterval
+     redundante en 4+ features en paralelo"] "Tu recorrido" (initMapaTrail)
+     y el comparador (initComparador) esperaban, cada uno por su cuenta,
+     a que core-engine.js terminara de inicializar el mapa — la MISMA
+     condición (window.uruSpotMotor && window.uruSpotMotor.map),
+     consultada por dos setInterval(…, 500) corriendo en paralelo e
+     independientes entre sí. Cada uno despertaba el hilo principal cada
+     medio segundo por el mismo motivo. Ahora hay un único poller
+     compartido: cualquier función de esta sección que necesite "esperar
+     a que el motor esté listo" se suscribe acá (alMotorListo) en vez de
+     abrir el suyo. Mismo comportamiento observable de antes (mismo
+     máximo de ~30s, mismo intervalo de 500ms, mismo callback recibiendo
+     "motor"), solo que corre UN timer en vez de dos. */
+  var ESPERAR_MOTOR_MAX_INTENTOS = 60; // ~30s máximo (60 × 500ms), igual que el límite individual de antes
+  var esperarMotorCallbacks = [];
+  var esperarMotorTimer = null;
+  var esperarMotorIntentos = 0;
+  function motorListoAhora(){
+    return !!(window.uruSpotMotor && window.uruSpotMotor.map);
+  }
+  function alMotorListo(cb){
+    if(motorListoAhora()){ cb(window.uruSpotMotor); return; }
+    esperarMotorCallbacks.push(cb);
+    if(esperarMotorTimer) return; // ya hay un poller compartido corriendo: no abrir un segundo
+    esperarMotorTimer = setInterval(function(){
+      esperarMotorIntentos++;
+      if(motorListoAhora()){
+        clearInterval(esperarMotorTimer); esperarMotorTimer = null;
+        var motor = window.uruSpotMotor;
+        var pendientes = esperarMotorCallbacks; esperarMotorCallbacks = [];
+        pendientes.forEach(function(cb2){ try{ cb2(motor); }catch(e){} });
+      } else if(esperarMotorIntentos > ESPERAR_MOTOR_MAX_INTENTOS){
+        clearInterval(esperarMotorTimer); esperarMotorTimer = null;
+        esperarMotorCallbacks = []; // igual que el timeout individual de antes: se deja de esperar, sin reintentos
+      }
+    }, 500);
+  }
+
   /* ═══ intro ═══
      Fix (auditoría, Hallazgo C): antes, si por cualquier motivo el
      evento 'load' no disparaba o `intro` dejaba de existir, la clase
      'locked' quedaba pegada para siempre y la página no scrolleaba
      nunca más. Ahora hay un timeout de seguridad independiente que
      fuerza el desbloqueo pase lo que pase, y todo el bloque corre
-     dentro de try/catch. */
+     dentro de try/catch.
+
+     [FIX — AUDITORIA_URUSPOT_INDEX1.md, hallazgo 13/11.5: "Intro
+     bloqueante (html.locked) hasta 3s"] La versión anterior encadenaba
+     el desbloqueo al evento 'load' del window (+850ms extra encima):
+     'load' espera a que TODA la página termine de descargar —imágenes,
+     iframes, fuentes— una condición sin cota real y ajena a la propia
+     animación del sello, que la auditoría señala correctamente como el
+     verdadero costo de tiempo-hasta-interactividad. La animación del
+     sello (.stamp-mark, ver <style>) dura 0.8s en total (delay .15s +
+     .65s). Ahora el desbloqueo se ancla a esa duración real —no a la
+     red— con un colchón chico para que el efecto siga sintiéndose
+     completo, y el timeout de seguridad baja de 3000ms a 1800ms: el
+     peor caso posible se reduce a la mitad, y el caso típico ya no
+     depende de cuántas imágenes tenga la página. */
   var intro = document.getElementById('intro');
   var htmlEl = document.documentElement;
   var unlocked = false;
@@ -2294,20 +2346,19 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
     try{
       htmlEl.classList.add('locked');
       intro.classList.add('stamping');
-      // Timeout de seguridad: pase lo que pase (evento load que no
-      // llega, excepción en otro script, etc.) el scroll se libera
-      // como máximo a los 3s. Nunca debe quedar bloqueado el body.
-      setTimeout(forceUnlock, 3000);
-      window.addEventListener('load', function(){
+      // Timeout de seguridad: pase lo que pase, el scroll se libera como
+      // máximo a los 1.8s. Nunca debe quedar bloqueado el body.
+      setTimeout(forceUnlock, 1800);
+      // 900ms: la propia animación del sello (0.8s) más un colchón chico
+      // de holgura visual — ya no depende del evento 'load'.
+      setTimeout(function(){
         try{
-          setTimeout(function(){
-            intro.classList.add('hide');
-            htmlEl.classList.remove('locked');
-            unlocked = true;
-            setTimeout(function(){ if(intro.parentNode) intro.remove(); }, 650);
-          }, 850);
+          intro.classList.add('hide');
+          htmlEl.classList.remove('locked');
+          unlocked = true;
+          setTimeout(function(){ if(intro.parentNode) intro.remove(); }, 650);
         }catch(e){ forceUnlock(); }
-      });
+      }, 900);
     }catch(e){ forceUnlock(); }
   } else if(intro){
     intro.remove();
@@ -3003,32 +3054,32 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
   })();
 
   /* ---- 3) "Un rubro a la vez" — carrusel de las 13 categorías ----
-     GRUPOS acá es una copia solo-de-presentación (ícono/color/nombre/
-     descripción) de la misma taxonomía que ya vive en content.js —
-     necesaria porque ese archivo la guarda en una IIFE propia y no la
-     expone globalmente. No sustituye a esa fuente: es texto estático,
-     igual que el resto de referencias a "Gastronomía · 166" que ya
-     existen a mano en #breakdown más arriba en este mismo documento.
-     El conteo real y vivo de cada rubro, en cambio, sale siempre de
-     motor.contarPorGrupo(), nunca de un número escrito acá. */
+     [FIX — AUDITORIA_URUSPOT_INDEX1.md, hallazgo 8: "Doble fuente de
+     verdad (GRUPOS/GRUPOS_UI) documentada pero no resuelta"] Antes esta
+     función mantenía su propio array GRUPOS_UI con key/icon/label/desc
+     copiados a mano — una TERCERA copia de la misma taxonomía (además de
+     `GRUPOS`, ya declarado más arriba en este mismo <script> para
+     breakdown/fichas/hero, y de la copia real que vive en content.js).
+     La comparación ya había hecho notar una desincronización real entre
+     copias (la de Alojamiento decía "apart hotels" acá y "apart
+     hoteles" en `GRUPOS`). Como `GRUPOS` ya tiene key/label/icon/desc de
+     los 13 rubros y vive en el mismo scope (misma IIFE, declarado antes
+     de este punto), GRUPOS_UI ahora se DERIVA de `GRUPOS` en el orden
+     que este carrusel siempre mostró — no reemplaza la fuente real de
+     content.js (ese es un problema de arquitectura entre archivos que
+     este cambio no resuelve, ver nota original), pero elimina la tercera
+     copia manual DENTRO de este archivo, la única redundancia que
+     estaba al alcance de un cambio seguro. */
   (function initRubroSpotlight(){
     var cont = document.getElementById('rubroSpotlight');
     if(!cont) return;
-    var GRUPOS_UI = [
-      { key:'gastronomia', label:'Gastronomía', icon:'🍽️', desc:'Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.' },
-      { key:'compras',     label:'Compras',     icon:'🛒', desc:'Supermercados, ferreterías, indumentaria y comercios de todo tipo.' },
-      { key:'salud',       label:'Salud',       icon:'🏥', desc:'Farmacias, clínicas, laboratorios y profesionales de la salud.' },
-      { key:'finanzas',    label:'Finanzas',    icon:'🏦', desc:'Bancos, seguros, abogados, escribanías e inmobiliarias.' },
-      { key:'transporte',  label:'Transporte',  icon:'🚖', desc:'Remiserías, talleres, estaciones de servicio y agencias de viaje.' },
-      { key:'deporte',     label:'Deporte',     icon:'💪', desc:'Gimnasios, clubes deportivos y espacios de entrenamiento.' },
-      { key:'patrimonio',  label:'Patrimonio',  icon:'🏛️', desc:'Museos, plazas, iglesias, centros culturales y edificios históricos.' },
-      { key:'educacion',   label:'Educación',   icon:'🎓', desc:'Universidades, institutos, escuelas y jardines de infantes.' },
-      { key:'belleza',     label:'Belleza',     icon:'💇', desc:'Peluquerías, barberías y centros de estética.' },
-      { key:'alojamiento', label:'Alojamiento', icon:'🏨', desc:'Hoteles, hosterías, cabañas, hostels y apart hotels.' },
-      { key:'servicios_publicos', label:'Servicios públicos', icon:'🏢', desc:'Municipalidad, policía, correo, Registro Civil y más.' },
-      { key:'mascotas',    label:'Mascotas',    icon:'🐾', desc:'Veterinarias y pet shops para el cuidado de tus compañeros.' },
-      { key:'naturaleza',  label:'Naturaleza',  icon:'🌊', desc:'Balnearios, islas, parques y la costanera del río Uruguay.' }
-    ];
+    var ORDEN_RUBRO_SPOTLIGHT = ['gastronomia','compras','salud','finanzas','transporte','deporte',
+      'patrimonio','educacion','belleza','alojamiento','servicios_publicos','mascotas','naturaleza'];
+    var GRUPOS_UI = ORDEN_RUBRO_SPOTLIGHT.map(function(key){
+      var g = null;
+      for(var i = 0; i < GRUPOS.length; i++){ if(GRUPOS[i].key === key){ g = GRUPOS[i]; break; } }
+      return g ? { key:g.key, label:g.label, icon:g.icon, desc:g.desc } : null;
+    }).filter(function(g){ return g; });
     var body = document.getElementById('rsBody');
     var elIco = document.getElementById('rsIco');
     var elLabel = document.getElementById('rsLabel');
@@ -3273,28 +3324,20 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
       }
     });
 
-    pintar(); // por si veía esta misma sesión ya tenía recorrido guardado
+    pintar(); // por si ya en esta misma sesión había recorrido guardado
 
-    var intentos = 0;
-    var poll = setInterval(function(){
-      intentos++;
-      var motor = window.uruSpotMotor;
-      if(motor && motor.map){
-        clearInterval(poll);
-        motor.map.on('popupopen', function(e){
-          try{
-            var el = e.popup.getElement();
-            var btn = el && el.querySelector('[data-fav-id]');
-            if(!btn) return;
-            var id = parseInt(btn.getAttribute('data-fav-id'), 10);
-            var lugar = motor.getLugarPorId ? motor.getLugarPorId(id) : null;
-            if(lugar) registrar(lugar);
-          }catch(err){}
-        });
-      } else if(intentos > 60){ // ~30s máximo (60 × 500ms)
-        clearInterval(poll);
-      }
-    }, 500);
+    alMotorListo(function(motor){
+      motor.map.on('popupopen', function(e){
+        try{
+          var el = e.popup.getElement();
+          var btn = el && el.querySelector('[data-fav-id]');
+          if(!btn) return;
+          var id = parseInt(btn.getAttribute('data-fav-id'), 10);
+          var lugar = motor.getLugarPorId ? motor.getLugarPorId(id) : null;
+          if(lugar) registrar(lugar);
+        }catch(err){}
+      });
+    });
   })();
 
   /* ─────────────────────────────────────────────────────────────────
@@ -3493,17 +3536,7 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
     crearUI();
     inyectarEnLista();
 
-    var intentosCmp = 0;
-    var pollCmp = setInterval(function(){
-      intentosCmp++;
-      var motor = window.uruSpotMotor;
-      if(motor && motor.map){
-        clearInterval(pollCmp);
-        inyectarEnPopup(motor);
-      } else if(intentosCmp > 60){
-        clearInterval(pollCmp);
-      }
-    }, 500);
+    alMotorListo(function(motor){ inyectarEnPopup(motor); });
   })();
 
   /* ---- 7) Exportar "Mis favoritos" — copiar o mandar por WhatsApp ----
