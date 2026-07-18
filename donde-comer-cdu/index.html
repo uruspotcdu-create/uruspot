@@ -75,7 +75,7 @@
      esmeralda profundo. Un único acento saturado (--stamp, bronce), todo
      lo demás vive en valores neutros de alto refinamiento. ── */
   --paper:#F7F4EC; --paper-raised:#FFFFFF; --sunken:#EEE8D9;
-  --ink:#15120F; --ink-soft:#5A5347; --ink-faint:#948C79;
+  --ink:#15120F; --ink-soft:#5A5347; --ink-faint:#746D5C;
   --line:rgba(21,18,15,.09); --line-strong:rgba(21,18,15,.20);
   --stamp:#9C6B2E; --stamp-ink:#6E4A1D; --stamp-soft:#F1E4CC; --stamp-bright:#C79A50;
   --river:#1E3B37; --river-soft:#DEE7E2; --river-ink:#132825;
@@ -1455,6 +1455,33 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
      separación de fondo bajo el anillo; se agrega un leve halo para que
      el foco no quede "flotando" sobre texto claro sin relleno. ---- */
   footer a:focus-visible{ outline-offset:4px; border-radius:4px; background:rgba(217,183,124,.12); }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SEXTA PASADA — release candidate. Aditiva, sin JS/estructura/
+     SEO/Schema. Corrige un vacío real de producto: por debajo de
+     980px .navlinks pasaba a display:none sin ningún reemplazo, así
+     que en celular (la mayoría del tráfico de un padrón local) no
+     había forma de saltar a una sección salvo scrollear a mano —
+     #sectionDots, el otro camino a las secciones, también se oculta
+     por debajo de 1080px. Se restituyen los 5 enlaces como una fila
+     angosta y horizontalmente deslizable (mismo patrón ya usado en
+     .rubro-scroll), sin togglear nada ni requerir JS nuevo. ═══════ -->
+<style>
+  @media (max-width:980px){
+    nav.top .wrap{ flex-wrap:wrap; row-gap:10px; }
+    .navlinks{
+      display:flex; order:3; flex:0 0 100%; justify-content:flex-start;
+      overflow-x:auto; gap:22px; padding:2px 2px 2px; margin:0 -2px;
+      scrollbar-width:none; -ms-overflow-style:none;
+      -webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);
+      mask-image:linear-gradient(90deg,#000 90%,transparent);
+    }
+    .navlinks::-webkit-scrollbar{ display:none; }
+    .navlinks a{ flex:none; }
+    nav.top.solid .wrap{ row-gap:8px; }
+  }
+  @media (max-width:420px){ .navlinks{ gap:18px; font-size:12.5px; } }
 </style>
 
 <!-- ═══════════════════════════════════════════════════════════════
