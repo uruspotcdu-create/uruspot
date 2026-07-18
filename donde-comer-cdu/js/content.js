@@ -26,8 +26,19 @@
   'use strict';
 
   // ─────────────────────────────────────────────────────────────────────
-  // GRUPOS — taxonomía de categorías (13), tal como vivía en index.backup.
+  // GRUPOS — taxonomía de categorías (15), tal como vivía en index.backup,
+  // más "comercios" y "oficios_tecnicos".
   // Paleta verificada con contraste AA (ver nota de auditoría en core.css).
+  //
+  // [FIX — 18/07/2026] El JSON de lugares (lugares-core.json/
+  // lugares-detalles.json) trae 15 valores distintos de "grupo": los 13
+  // que ya estaban acá más "comercios" y "oficios_tecnicos", que no
+  // tenían entrada en este objeto. Cualquier lugar con uno de esos dos
+  // grupos rompía su popup (GRUPOS[lugar.grupo] daba undefined dentro de
+  // popupHtml() en core-engine.js — ver el fix defensivo aplicado ahí el
+  // mismo día) y tampoco tenía color de pin, ícono, ni filtro/leyenda de
+  // categoría propios. Colores elegidos para no repetir ninguno de los ya
+  // usados por el resto de la paleta.
   // ─────────────────────────────────────────────────────────────────────
   var GRUPOS = {
     gastronomia: { color: '#AD1E1E', label: 'Gastronomía', icon: '🍽️', desc: 'Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.' },
@@ -42,7 +53,9 @@
     transporte:  { color: '#AD1E74', label: 'Transporte',  icon: '🚖', desc: 'Remiserías, talleres, estaciones de servicio y agencias de viaje.' },
     belleza:     { color: '#7A1EAD', label: 'Belleza',     icon: '💇', desc: 'Peluquerías, barberías y centros de estética.' },
     servicios_publicos: { color: '#AD5E1E', label: 'Servicios públicos', icon: '🏢', desc: 'Municipalidad, policía, correo, Registro Civil y más.' },
-    educacion:   { color: '#1EAD8C', label: 'Educación',   icon: '🎓', desc: 'Universidades, institutos, escuelas y jardines de infantes.' }
+    educacion:   { color: '#1EAD8C', label: 'Educación',   icon: '🎓', desc: 'Universidades, institutos, escuelas y jardines de infantes.' },
+    comercios:        { color: '#B45309', label: 'Comercios',        icon: '🏪', desc: 'Comercios varios de la ciudad.' },
+    oficios_tecnicos: { color: '#334155', label: 'Oficios técnicos', icon: '🔧', desc: 'Electricistas, plomeros, técnicos y oficios varios.' }
   };
 
   // ─────────────────────────────────────────────────────────────────────
@@ -58,7 +71,7 @@
   var TOTAL_LUGARES_APROX = 862;
 
   var PAGE_TITLE = `Guía completa de Concepción del Uruguay · ${TOTAL_LUGARES_APROX}+ lugares · URU SPOT`;
-  var PAGE_DESCRIPTION = 'La guía urbana completa de Concepción del Uruguay: 13 categorías, cientos de lugares verificados contra Google Places, en un mapa interactivo con filtros por rubro y subcategoría.';
+  var PAGE_DESCRIPTION = 'La guía urbana completa de Concepción del Uruguay: 15 categorías, cientos de lugares verificados contra Google Places, en un mapa interactivo con filtros por rubro y subcategoría.';
 
   function setMeta(id, attr, value) {
     var el = document.getElementById(id);
