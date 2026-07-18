@@ -1485,6 +1485,63 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
 </style>
 
 <!-- ═══════════════════════════════════════════════════════════════
+     SÉPTIMA PASADA — auditoría final. Aditiva, sin JS/estructura/
+     SEO/Schema. Dos defectos confirmados:
+     1) Los controles de #mapa-toolbar comparten fila (align-items:
+        center) pero tenían alturas distintas — buscador ~44px por
+        su padding de 11px, botones/orden/toggle ~41px por su
+        padding de 10px — lo que se nota como un renglón desalineado
+        en vez de una barra homogénea. Se iguala el padding vertical
+        de los cuatro controles al del buscador.
+     2) .us-toast-container y #backToTop comparten la misma esquina
+        (ambos "bottom-right" en desktop; en mobile el toast, centrado
+        y casi a todo el ancho, también cruza esa esquina). Con ambos
+        visibles a la vez — favoritear un lugar mientras se está
+        scrolleado hacia abajo es el caso típico — el toast queda
+        literalmente encima del botón "volver arriba". Se sube el
+        toast lo suficiente para despejar el FAB en todos los anchos.
+     ═══════════════════════════════════════════════════════════════ -->
+<style>
+  #mapa-geoloc, #mapa-random, #mapa-fav-toggle{ padding-top:11px; padding-bottom:11px; }
+  #mapa-orden{ padding-top:11px; padding-bottom:11px; }
+
+  .us-toast-container{ bottom:max(78px, calc(env(safe-area-inset-bottom,0px) + 74px)); }
+  @media (min-width:980px){ .us-toast-container{ bottom:86px; } }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     OCTAVA PASADA — auditoría externa aplicada. Aditiva, CSS/copy
+     puntual, sin tocar JS/SEO/Schema/datos/estructura. Cubre los
+     hallazgos de la auditoría con solución segura sin reescritura:
+     1) Itálica reservada a momentos de peso real (el <em> del H1 y
+        la firma del footer) en vez de repetirse en cada encabezado
+        de sección — antes .s-head h2 la usaba en las ~6 secciones
+        del documento, banalizando el recurso.
+     2) .bd-item (renglón informativo del manifiesto, no accionable)
+        tenía el mismo "levitar -3px" que una card clickeable — se
+        retira el movimiento y se deja solo el resalte de fondo que
+        ya tenía, para que "levanta al hover" vuelva a significar
+        "esto se puede tocar".
+     3) Badges/etiquetas en mono por debajo de 10px (9 / 9.5px) suben
+        a un piso de 10px — legibilidad, sin romper ningún layout
+        (son cápsulas con padding propio, no texto corrido).
+     4) La bandeja del comparador comparte esquina con #backToTop en
+        mobile (ambas ~bottom:20px); se le da margen igual que ya
+        tiene el toast. ═══════════════════════════════════════════ -->
+<style>
+  .s-head h2, .day-card p.scn{ font-style:normal; }
+
+  .bd-item:hover{ transform:none; }
+
+  .mapa-popup-destacado, #mapa-legend-head .titulo, .lista-card-cat,
+  .lista-card-destacado, .u-chip-new, .day-card.es-ahora::after{ font-size:10px; }
+  .mapa-wrap-ribbon{ font-size:10px; }
+  @media (max-width:640px){ .mapa-wrap-ribbon{ font-size:9.5px; } }
+
+  @media (max-width:640px){ .us-compare-tray{ bottom:78px; } }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════
      BLOQUE 100% ADITIVO — cuarta pasada ("último día antes del
      lanzamiento", ronda 2). Las tres pasadas anteriores ya cubrieron
      mapa, resto de la página y una segunda ronda de experiencia; esta
@@ -1630,7 +1687,7 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
         <span class="hero-clock" id="heroClock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Son las <b id="heroClockValue">—:—</b> en la ciudad</span>
       </div>
 
-      <h1 class="h-hero" id="title-hero">La ciudad tiene <em>862 fichas</em>.<br>Ninguna la escribió una IA<br>sin pisar la calle primero.</h1>
+      <h1 class="h-hero" id="title-hero">La ciudad tiene <em>862 fichas</em>.<br>Ninguna la escribió una IA:<br>todas se caminaron primero.</h1>
       <p class="hero-sub">URU SPOT no es una guía turística: es el padrón comercial y de servicios de la ciudad, del asado a la escribanía — <b>cada ficha con dirección, calificación y estado reales</b>, verificados a pie de calle.</p>
 
       <div class="hero-proof" aria-label="El padrón en números">
@@ -1811,7 +1868,7 @@ footer::before{content:''; position:absolute; top:0; left:0; right:0; height:1px
           <input type="text" id="mapa-search" placeholder="Buscar un lugar o rubro… (atajo: /)" autocomplete="off" aria-label="Buscar un lugar" />
         </div>
         <button id="mapa-geoloc" type="button">📍 Cerca de mí</button>
-        <button id="mapa-random" type="button">🎲 Sorprendeme</button>
+        <button id="mapa-random" type="button">🎲 Uno al azar</button>
         <button id="mapa-fav-toggle" type="button" aria-pressed="false">♥ Solo favoritos <span class="cnt">0</span></button>
         <select id="mapa-orden" aria-label="Ordenar resultados">
           <option value="relevancia">Relevancia</option>
