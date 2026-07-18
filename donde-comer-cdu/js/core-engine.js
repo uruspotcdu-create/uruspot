@@ -614,7 +614,21 @@
     // ─── Popup de un lugar ───
     function popupHtml(lugar, color) {
       var html = '';
-      var g = GRUPOS[lugar.grupo];
+      // [FIX — 18/07/2026] Antes: "var g = GRUPOS[lugar.grupo];" sin
+      // fallback. Si lugar.grupo no coincidía con ninguna clave de GRUPOS
+      // (ver la nota junto a GRUPO_DEFECTO más arriba, y content.js donde
+      // se agregaron "comercios"/"oficios_tecnicos" que faltaban), "g"
+      // quedaba undefined y la siguiente línea (g.icon) tiraba
+      // "Cannot read properties of undefined (reading 'icon')". Como el
+      // popup ya se había marcado como "_popupHtmlListo = true" ANTES de
+      // llegar acá (ver agregarLugar/'popupopen' más abajo), ese error
+      // dejaba el popup vacío para siempre en ese pin, sin reintentar.
+      // agregarLugar() ya calculaba un color de respaldo con este mismo
+      // criterio (grupoInfo ? ... : GRUPOS[GRUPO_DEFECTO]...); acá se
+      // aplica el mismo fallback para el objeto completo del grupo, así
+      // que un dato con "grupo" inválido/desconocido ahora muestra el
+      // ícono/etiqueta del grupo por defecto en vez de romper el popup.
+      var g = GRUPOS[lugar.grupo] || GRUPOS[GRUPO_DEFECTO];
       // [NUEVA FUNCIONALIDAD — paridad mapa/lista] La vista lista ya
       // permite guardar en favoritos y compartir cada lugar
       // (cardListaHtml/lista-card-actions); el popup del mapa —la
@@ -983,7 +997,7 @@
     // distintas del mismo dato.
     function cardListaHtml(entry) {
       var lugar = entry.lugar;
-      var g = GRUPOS[entry.grupo];
+      var g = GRUPOS[entry.grupo] || GRUPOS[GRUPO_DEFECTO];
       var esFav = favoritos.is(lugar.id);
       var html = '<article class="lista-card" data-lugar-id="' + lugar.id + '">';
       html += '<button type="button" class="lista-card-ir" data-ir-lista="' + lugar.id + '" style="--card-color:' + entry.color + '">';
