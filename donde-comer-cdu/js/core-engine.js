@@ -108,6 +108,21 @@
       return digitos;
     },
 
+    // [FIX — AUDITORIA_URUSPOT_INDEX1.md, hallazgo 5.4/34: "Favorito
+    // reimplementado en 3 lugares sin función central"] popupHtml,
+    // cardListaHtml y bindAccionesLugar (ver más abajo) construían cada
+    // uno, por su cuenta, el mismo par "aria-label + glifo ♥/♡" a mano —
+    // en bindAccionesLugar incluso dos veces (toggle normal y "Deshacer").
+    // Esta función es ahora la única fuente de verdad de ese texto: quien
+    // pinte o actualice un botón de favorito, lo hace vía favBoton(), no
+    // reescribiendo la condición esFav ? … : … de nuevo.
+    favBoton: function (esFav, compacto) {
+      return {
+        label: esFav ? 'Quitar de favoritos' : 'Guardar en favoritos',
+        texto: compacto ? (esFav ? '♥' : '♡') : (esFav ? '♥ Guardado' : '♡ Guardar')
+      };
+    },
+
     debounce: function (fn, wait) {
       var t;
       return function () {
@@ -407,6 +422,15 @@
     var ordenActual = 'relevancia'; // 'relevancia' | 'cercania' | 'recomendados' | 'recientes'
     var posicionUsuario = null; // {lat, lng} | null
 
+    // [FIX — AUDITORIA_URUSPOT_INDEX1.md, hallazgo 11.3/12] Ver renderLista()
+    // más abajo: LISTA_LOTE_INICIAL/SIGUIENTE controlan cuántas tarjetas se
+    // construyen por tanda; listaLoteObs guarda el IntersectionObserver del
+    // centinela "cargar más" vigente, para poder cortarlo si el usuario
+    // cambia de filtro/vista a mitad de una carga por lotes.
+    var LISTA_LOTE_INICIAL = 60;
+    var LISTA_LOTE_SIGUIENTE = 60;
+    var listaLoteObs = null;
+
     // [OPTIMIZACIÓN] Caché del resultado ordenado por rating que usa
     // lugaresSugeridos(). todosLosMarkers queda fijo apenas termina
     // cargarDatos() en init() (no hay ninguna función pública que agregue
@@ -514,6 +538,32 @@
       if (!els.favToggleBtn) return;
       var cntEl = els.favToggleBtn.querySelector('.cnt');
       if (cntEl) cntEl.textContent = favoritos.get().length;
+    }
+
+    // [FIX — AUDITORIA_URUSPOT_INDEX1.md, hallazgo 5.4/34: "Favorito
+    // reimplementado en 3 lugares sin función central"] bindAccionesLugar
+    // (más abajo) necesita re-pintar TODOS los botones de favorito de un
+    // mismo lugar que estén visibles a la vez (popup + tarjeta de lista
+    // pueden coexistir), y lo necesita dos veces: al togglear y al
+    // "Deshacer". Antes ambos casos repetían la misma condición
+    // esFav ? … : … a mano. Ahora los dos llaman acá.
+    //
+    // Qué texto mostrar (completo "♥ Guardado" vs. compacto "♥") se decide
+    // por data-fav-variant, escrito explícitamente por popupHtml/
+    // cardListaHtml (ver esas funciones). Se conserva el chequeo de la
+    // clase legada "act-btn-lg" como respaldo únicamente para botones de
+    // favorito que pudiera pintar el MÓDULO B de contenido (ej. una ficha
+    // de detalle) y que todavía no declaren data-fav-variant — así ningún
+    // botón de favorito fuera de este archivo deja de sincronizarse.
+    function sincronizarBotonesFavoritoDOM(id, esFavAhora) {
+      document.querySelectorAll('[data-fav-id="' + id + '"]').forEach(function (b) {
+        var variant = b.getAttribute('data-fav-variant');
+        var compacto = variant ? (variant === 'compacto') : !b.classList.contains('act-btn-lg');
+        var fb = utils.favBoton(esFavAhora, compacto);
+        b.classList.toggle('is-fav', esFavAhora);
+        b.setAttribute('aria-label', fb.label);
+        b.textContent = fb.texto;
+      });
     }
 
     // ─── Íconos de mapa ───
@@ -668,8 +718,14 @@
           html += '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/' + waNumero + '">💬 WhatsApp</a>';
         }
       }
-      html += '<button type="button" class="fav' + (esFav ? ' is-fav' : '') + '" data-fav-id="' + lugar.id + '" aria-label="' +
-              (esFav ? 'Quitar de favoritos' : 'Guardar en favoritos') + '">' + (esFav ? '♥ Guardado' : '♡ Guardar') + '</button>';
+      // [FIX — hallazgo 5.4/34] data-fav-variant="completo" identifica de
+      // forma explícita el formato de este botón (texto + glifo), para que
+      // bindAccionesLugar pueda re-sincronizarlo tras un toggle sin tener
+      // que adivinar el formato por su clase CSS (ver nota junto a
+      // sincronizarBotonFavoritoDOM).
+      var favPopup = utils.favBoton(esFav, false);
+      html += '<button type="button" class="fav' + (esFav ? ' is-fav' : '') + '" data-fav-id="' + lugar.id + '" data-fav-variant="completo" aria-label="' +
+              favPopup.label + '">' + favPopup.texto + '</button>';
       html += '<button type="button" class="compartir" data-share-id="' + lugar.id + '" aria-label="Compartir este lugar">↗ Compartir</button>';
       html += '</div>';
       return html;
@@ -1023,8 +1079,11 @@
       }
       html += '</span></button>';
       html += '<div class="lista-card-actions">';
-      html += '<button type="button" class="lista-card-fav' + (esFav ? ' is-fav' : '') + '" data-fav-id="' + lugar.id + '" aria-label="' +
-              (esFav ? 'Quitar de favoritos' : 'Guardar en favoritos') + '">' + (esFav ? '♥' : '♡') + '</button>';
+      // [FIX — hallazgo 5.4/34] data-fav-variant="compacto": ver nota
+      // equivalente en popupHtml.
+      var favLista = utils.favBoton(esFav, true);
+      html += '<button type="button" class="lista-card-fav' + (esFav ? ' is-fav' : '') + '" data-fav-id="' + lugar.id + '" data-fav-variant="compacto" aria-label="' +
+              favLista.label + '">' + favLista.texto + '</button>';
       if (lugar.telefono) {
         html += '<a class="lista-card-tel" href="tel:' + lugar.telefono.replace(/\s+/g, '') + '" aria-label="Llamar">📞</a>';
         var waNumero = utils.telefonoWhatsapp(lugar.telefono);
@@ -1071,9 +1130,38 @@
     // lazyInitMapa), muestra 3 tarjetas esqueleto en vez de una grilla
     // vacía — mismo criterio de "nunca dejar un momento de espera sin
     // feedback" que ya usa #mapa-geoloc con "📍 Buscando…".
+    // [FIX — AUDITORIA_URUSPOT_INDEX1.md, hallazgo 11.3/12: "Vista Lista sin
+    // virtualización para hasta 862 tarjetas"] Antes esta función construía
+    // TODAS las tarjetas del resultado filtrado de una sola vez
+    // (entradas.map(cardListaHtml).join('') + un addEventListener por
+    // tarjeta vía bindListaCards) y las volcaba en un único innerHTML. Con
+    // el filtro "todos" sin búsqueda eso son hasta 862 elementos <article>
+    // completos —cada uno con 2 a 4 botones con su propio listener—
+    // construidos y pegados al DOM en un solo Long Task síncrono: el
+    // candidato directo a INP alto que señala la auditoría, sobre todo en
+    // gama media/baja, justo al cambiar a la vista Lista.
+    //
+    // La solución elegida es "carga por lotes" (renderLoteLista, debajo),
+    // no virtualización con reciclado de nodos: reciclar nodos exigiría
+    // reescribir bindListaCards/bindAccionesLugar (que hoy asumen que cada
+    // tarjeta visible tiene su propio nodo DOM estable, ver resaltarMarcador
+    // y la sincronía hover lista↔mapa) con mucho más riesgo de romper la
+    // paridad de comportamiento con el popup del mapa que este archivo
+    // cuida explícitamente en varios lugares (ver comentario de
+    // cardListaHtml). Con lotes, el primer tramo —suficiente para llenar
+    // la pantalla y un scroll razonable— se pinta de inmediato, y el resto
+    // se agrega en tandas sucesivas a medida que un centinela al final de
+    // la lista entra en viewport, reutilizando el mismo cardListaHtml/
+    // bindListaCards de siempre por tanda. El resultado final (qué
+    // tarjetas existen, con qué contenido y qué listeners) es idéntico al
+    // de antes; cambia únicamente CUÁNDO se crean.
     function renderLista() {
       var cont = els.listaDiv;
       if (!cont) return;
+      // Cualquier carga por lotes de un render anterior (filtro/vista
+      // previa) queda obsoleta: sin este corte, un cambio rápido de filtro
+      // podría seguir agregando tarjetas viejas por encima de las nuevas.
+      if (listaLoteObs) { listaLoteObs.disconnect(); listaLoteObs = null; }
       if (!todosLosMarkers.length) {
         cont.innerHTML = '<div class="lista-skeleton">' +
           '<div class="lista-skeleton-card"></div><div class="lista-skeleton-card"></div><div class="lista-skeleton-card"></div>' +
@@ -1081,8 +1169,57 @@
         return;
       }
       var entradas = ordenarEntradas(entradasFiltradas());
-      cont.innerHTML = entradas.map(cardListaHtml).join('');
-      bindListaCards(cont);
+      cont.innerHTML = '';
+      renderLoteLista(cont, entradas, 0, LISTA_LOTE_INICIAL);
+    }
+
+    // Construye y pega al DOM las tarjetas [desde, desde+cantidad) de
+    // `entradas`, y deja armado el siguiente tramo (centinela + observer) si
+    // todavía queda algo por renderizar.
+    function renderLoteLista(cont, entradas, desde, cantidad) {
+      var hasta = Math.min(desde + cantidad, entradas.length);
+      // bindListaCards espera un contenedor real (usa querySelectorAll); se
+      // arma y se vincula sobre un contenedor temporal ANTES de mover sus
+      // hijos al DOM real, así los listeners quedan atados a los nodos
+      // definitivos y nunca se vinculan dos veces sobre la misma tarjeta.
+      var temp = document.createElement('div');
+      temp.innerHTML = entradas.slice(desde, hasta).map(cardListaHtml).join('');
+      bindListaCards(temp);
+      while (temp.firstChild) cont.appendChild(temp.firstChild);
+
+      if (hasta >= entradas.length) return; // no queda nada más por cargar
+
+      var centinela = document.createElement('div');
+      centinela.className = 'lista-centinela';
+      centinela.setAttribute('aria-hidden', 'true');
+      centinela.style.height = '1px'; // altura mínima: IntersectionObserver necesita un rect real que observar
+      cont.appendChild(centinela);
+
+      if (!('IntersectionObserver' in window)) {
+        // Navegador residual sin IntersectionObserver: preferible pintar el
+        // resto ya mismo que dejar una lista truncada sin ningún camino
+        // (aparte de recargar) para verla completa.
+        centinela.remove();
+        renderLoteLista(cont, entradas, hasta, entradas.length - hasta);
+        return;
+      }
+
+      // rootMargin generoso (600px): el siguiente lote queda listo antes de
+      // que el usuario efectivamente llegue al final visible de la lista,
+      // para que la carga por tandas se sienta continua y no como una
+      // pausa perceptible cada 60 tarjetas.
+      listaLoteObs = new IntersectionObserver(function (entriesObs) {
+        for (var i = 0; i < entriesObs.length; i++) {
+          if (entriesObs[i].isIntersecting) {
+            listaLoteObs.disconnect();
+            listaLoteObs = null;
+            centinela.remove();
+            renderLoteLista(cont, entradas, hasta, LISTA_LOTE_SIGUIENTE);
+            return;
+          }
+        }
+      }, { root: null, rootMargin: '600px 0px', threshold: 0 });
+      listaLoteObs.observe(centinela);
     }
 
     // Único punto de entrada para cambiar entre "Mapa" y "Lista" — lo usan
@@ -1545,18 +1682,39 @@
       return true;
     }
 
+    // [FIX — AUDITORIA_URUSPOT_INDEX1.md, hallazgo 5.6/35: "Acoplamiento a
+    // propiedad privada de Leaflet (marker._icon)"] `_icon` es un detalle
+    // de implementación de Leaflet (prefijo "_", no forma parte de su API
+    // pública) — no hay, en Leaflet 1.x, una forma pública de leer el nodo
+    // DOM de un marcador ya agregado al mapa sin tocarla. Reemplazar el
+    // patrón por completo (p. ej. reconstruyendo el icon vía setIcon() en
+    // cada hover) cambiaría el costo/comportamiento de una interacción que
+    // hoy es deliberadamente barata (ver comentario de resaltarMarcador).
+    // La mitigación real y acotada a este archivo es: (1) todo el acceso a
+    // `_icon` vive en ESTA única función — si una futura versión de
+    // Leaflet cambia esa estructura interna, hay un solo lugar que tocar,
+    // no varios; (2) el acceso queda en try/catch, así que si `_icon`
+    // alguna vez deja de existir o cambia de forma, el hover de sincronía
+    // lista↔mapa simplemente no resalta el pin (degradación silenciosa),
+    // en vez de tirar un error que corte otro código del mismo handler.
+    function getIconElDeMarcador(marker) {
+      try { return marker._icon || null; } catch (e) { return null; }
+    }
+
     // [NUEVA FUNCIONALIDAD — vista lista ↔ mapa, sincronía] Pasar el mouse
     // sobre una tarjeta de la lista resalta su pin en el mapa (si ese pin
     // está renderizado como marcador individual — si está adentro de un
-    // cluster todavía colapsado, marker._icon no existe y esto no hace
-    // nada, silenciosamente: no vale la pena forzar un zoom solo para
-    // mostrar un hover). Reversible con el mismo flag; no crea ningún
-    // objeto de Leaflet nuevo, solo alterna una clase CSS sobre el nodo
-    // que Leaflet ya renderizó.
+    // cluster todavía colapsado, el marcador no tiene nodo DOM propio
+    // todavía y esto no hace nada, silenciosamente: no vale la pena forzar
+    // un zoom solo para mostrar un hover). Reversible con el mismo flag; no
+    // crea ningún objeto de Leaflet nuevo, solo alterna una clase CSS sobre
+    // el nodo que Leaflet ya renderizó (ver getIconElDeMarcador arriba).
     function resaltarMarcador(id, activo) {
       var entry = lugaresPorId[id];
-      if (!entry || !entry.marker._icon) return;
-      var pinEl = entry.marker._icon.querySelector('.mapa-pin');
+      if (!entry) return;
+      var iconEl = getIconElDeMarcador(entry.marker);
+      if (!iconEl) return;
+      var pinEl = iconEl.querySelector('.mapa-pin');
       if (pinEl) pinEl.classList.toggle('mapa-pin-resaltado', !!activo);
       entry.marker.setZIndexOffset(activo ? 2000 : (entry.lugar.destacado ? 1000 : 0));
     }
@@ -2181,15 +2339,7 @@
             // lugar con marcado propio) para que no queden desincronizados
             // entre sí — antes solo se actualizaba el botón exacto que
             // recibió el clic.
-            document.querySelectorAll('[data-fav-id="' + id + '"]').forEach(function (b) {
-              b.classList.toggle('is-fav', ahoraFav);
-              b.setAttribute('aria-label', ahoraFav ? 'Quitar de favoritos' : 'Guardar en favoritos');
-              if (b.classList.contains('act-btn-lg')) {
-                b.textContent = ahoraFav ? '♥ Guardado' : '♡ Guardar';
-              } else {
-                b.textContent = ahoraFav ? '♥' : '♡';
-              }
-            });
+            sincronizarBotonesFavoritoDOM(id, ahoraFav);
             // [NUEVA FUNCIONALIDAD — feedback de favoritos] Confirmación no
             // bloqueante con "Deshacer": un toque accidental en el corazón
             // (mobile, listas densas) ya no obliga a buscar el lugar de
@@ -2204,15 +2354,7 @@
                 accionLabel: 'Deshacer',
                 onAccion: function () {
                   var revertido = favoritos.toggle(id);
-                  document.querySelectorAll('[data-fav-id="' + id + '"]').forEach(function (b) {
-                    b.classList.toggle('is-fav', revertido);
-                    b.setAttribute('aria-label', revertido ? 'Quitar de favoritos' : 'Guardar en favoritos');
-                    if (b.classList.contains('act-btn-lg')) {
-                      b.textContent = revertido ? '♥ Guardado' : '♡ Guardar';
-                    } else {
-                      b.textContent = revertido ? '♥' : '♡';
-                    }
-                  });
+                  sincronizarBotonesFavoritoDOM(id, revertido);
                   actualizarBadgeFavoritos();
                   // Si el filtro "solo favoritos" está activo y este lugar
                   // quedó visible/oculto por el deshacer, refleja el cambio
