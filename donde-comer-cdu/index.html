@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html lang="es-AR">
 <head>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DOCUMENTO — identidad, indexación, dispositivo
+     ══════════════════════════════════════════════════════════════════ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>URU SPOT — El padrón vivo de Concepción del Uruguay</title>
 <meta name="description" content="El padrón completo de Concepción del Uruguay: 862 lugares verificados en 13 rubros, con dirección y calificación reales — nada inventado.">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<!-- Pase 4 ("último día", 3ª ronda) — tres <meta> nuevas, cero riesgo:
-     · color-scheme: el sitio es un diseño de papel claro fijo, sin variante
-       oscura. Sin esto, un SO en modo oscuro puede reskinear controles
-       nativos (el <select> de #mapa-orden, la barra de scroll) con colores
-       oscuros que chocan contra --paper, aunque el resto de la UI (toda
-       hecha a mano) se vea intacta.
-     · theme-color: cromo del navegador/tab en Android a juego con --paper,
-       en vez del gris por defecto — el "marco" del sitio deja de sentirse
-       genérico apenas se abre.
-     · format-detection: sin esto, Safari/iOS puede subrayar como "número
-       de teléfono" secuencias sueltas como "862" o "13" en el texto
-       corrido (hero, manifest) y ofrecer "llamar", que no tiene sentido
-       acá y rompe la tipografía cuidada del sitio con un subrayado azul
-       que ningún CSS de la página puede anular. -->
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#F5F1E7">
 <meta name="format-detection" content="telephone=no">
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ICONOGRAFÍA Y MANIFEST
+     ══════════════════════════════════════════════════════════════════ -->
 <link rel="icon" href="../favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="manifest" href="../site.webmanifest">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     COMPARTIR SOCIAL — Open Graph + Twitter Card
+     ══════════════════════════════════════════════════════════════════ -->
 <meta property="og:title" content="URU SPOT — El padrón vivo de Concepción del Uruguay">
 <meta property="og:description" content="862 lugares verificados en 13 rubros. Ninguno inventado.">
 <meta property="og:image" content="https://uruspot.pages.dev/img/logof.webp">
@@ -40,33 +38,55 @@
 <meta name="twitter:description" content="862 lugares verificados en 13 rubros. Ninguno inventado.">
 <meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp">
 <meta name="twitter:image:alt" content="Logo de URU SPOT">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     RENDIMIENTO — resolución DNS/handshake anticipada. El mapa
+     (Leaflet + tiles) se inicializa de forma diferida cuando #padron
+     entra en viewport; los preconnect a los orígenes de tiles se
+     emiten en runtime desde js/enhancements-aditivas.js, más cerca del
+     momento real de uso. Acá solo va dns-prefetch (sin costo de
+     conexión abierta ociosa que pueda cerrarse antes de llegar al mapa).
+     ══════════════════════════════════════════════════════════════════ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- El mapa (js/core-engine.js) carga Leaflet/MarkerCluster y los tiles
-     recién cuando la sección se acerca al viewport (lazyInitMapa). Los
-     dns-prefetch de abajo solo resuelven DNS (sin costo de conexión
-     abierta ociosa) y quedan listos de antemano. Los preconnect a
-     cdnjs.cloudflare.com y a.basemaps.cartocdn.com se emiten en runtime,
-     más cerca del momento real de uso — ver bloque "preconnect diferido
-     al mapa" al final del <script> inline. Una conexión preconectada
-     desde el <head> puede cerrarse por inactividad (~10s) antes de que
-     el usuario llegue a #mapa, pagando el costo de handshake dos veces. -->
 <link rel="dns-prefetch" href="https://b.basemaps.cartocdn.com">
 <link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com">
 <link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com">
-<!-- Google Fonts: carga no bloqueante (patrón loadCSS/Filament Group).
-     preload la descarga con prioridad alta sin bloquear el render; el
-     link real se carga como media="print" (prioridad baja, no bloquea)
-     y se reclasifica a "all" en onload. El noscript garantiza carga
-     bloqueante tradicional si JS está deshabilitado, sin perder la
-     fuente en ese caso. -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TIPOGRAFÍA — carga no bloqueante (patrón loadCSS/Filament Group).
+     El preload baja el archivo con prioridad alta sin bloquear el
+     render; el <link> real entra como media="print" (prioridad baja)
+     y se reclasifica a "all" en su evento onload, más abajo en el
+     <body>. El <noscript> garantiza carga bloqueante tradicional si
+     JS está deshabilitado, sin perder tipografía en ese caso.
+     ══════════════════════════════════════════════════════════════════ -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" id="gfontsLink">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     HOJAS DE ESTILO — orden de cascada deliberado: tokens/base primero,
+     luego cada capa de componentes en el orden en que fueron
+     incorporadas al sistema. El orden relativo entre archivos es
+     significativo (capas aditivas posteriores dependen de las
+     anteriores) y se mantiene intacto.
+     ══════════════════════════════════════════════════════════════════ -->
 <link rel="stylesheet" href="css/01-tokens-base.css">
 <link rel="stylesheet" href="css/02-mapa.css">
 <link rel="stylesheet" href="css/03-componentes-fase2.css">
 <link rel="stylesheet" href="css/04-noscript-reveal.css">
+<link rel="stylesheet" href="css/09-editorial-polish.css">
+<link rel="stylesheet" href="css/05-utilidades-transversales.css">
+<link rel="stylesheet" href="css/06-responsive-nav.css">
+<link rel="stylesheet" href="css/07-fab-toast.css">
+<link rel="stylesheet" href="css/08-hover-comparador.css">
+<link rel="stylesheet" href="css/10-premium-redesign.css">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DATOS ESTRUCTURADOS — Organization, WebPage, BreadcrumbList,
+     FAQPage, HowTo, Dataset e ItemList en un único @graph enlazado.
+     ══════════════════════════════════════════════════════════════════ -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -233,62 +253,6 @@
 }
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     NOVENA PASADA — consolidación editorial. Reemplaza los dos bloques
-     <style> aditivos anteriores ("segunda pasada de experiencia" y
-     "cuarta pasada, ronda 2") por un único módulo externo, siguiendo el
-     mismo patrón que 05/06/07/08. Cero cambios de HTML/JS/SEO/Schema:
-     mismos selectores, mismo comportamiento observable. ═══════════════ -->
-<link rel="stylesheet" href="css/09-editorial-polish.css">
-
-
-<!-- ═══════════════════════════════════════════════════════════════
-     QUINTA PASADA — pulido editorial fino. 100% aditivo, igual que
-     las cuatro anteriores: ninguna regla existente se edita ni se
-     quita, cero cambios de estructura/JS/SEO/Schema. Cubre lo que
-     las pasadas previas dejaron afuera por ser transversal a todo
-     el documento en vez de propio de una sección: estados disabled
-     genéricos, objetivo táctil mínimo en controles circulares
-     pequeños, un ícono editorial en el estado vacío del mapa, y
-     aire adicional en remates (footer, paneles) para que el ritmo
-     vertical se sienta menos apretado en la última milla de cada
-     bloque. ═══════════════════════════════════════════════════ -->
-<link rel="stylesheet" href="css/05-utilidades-transversales.css">
-
-<!-- ═══════════════════════════════════════════════════════════════
-     SEXTA PASADA — release candidate. Aditiva, sin JS/estructura/
-     SEO/Schema. Corrige un vacío real de producto: por debajo de
-     980px .navlinks pasaba a display:none sin ningún reemplazo, así
-     que en celular (la mayoría del tráfico de un padrón local) no
-     había forma de saltar a una sección salvo scrollear a mano —
-     #sectionDots, el otro camino a las secciones, también se oculta
-     por debajo de 1080px. Se restituyen los 5 enlaces como una fila
-     angosta y horizontalmente deslizable (mismo patrón ya usado en
-     .rubro-scroll), sin togglear nada ni requerir JS nuevo. ═══════ -->
-<link rel="stylesheet" href="css/06-responsive-nav.css">
-
-<!-- ═══════════════════════════════════════════════════════════════
-     SÉPTIMA PASADA — auditoría final. Aditiva, sin JS/estructura/
-     SEO/Schema. Dos defectos confirmados:
-     1) Los controles de #mapa-toolbar comparten fila (align-items:
-        center) pero tenían alturas distintas — buscador ~44px por
-        su padding de 11px, botones/orden/toggle ~41px por su
-        padding de 10px — lo que se nota como un renglón desalineado
-        en vez de una barra homogénea. Se iguala el padding vertical
-        de los cuatro controles al del buscador.
-     2) .us-toast-container y #backToTop comparten la misma esquina
-        (ambos "bottom-right" en desktop; en mobile el toast, centrado
-        y casi a todo el ancho, también cruza esa esquina). Con ambos
-        visibles a la vez — favoritear un lugar mientras se está
-        scrolleado hacia abajo es el caso típico — el toast queda
-        literalmente encima del botón "volver arriba". Se sube el
-        toast lo suficiente para despejar el FAB en todos los anchos.
-     ═══════════════════════════════════════════════════════════════ -->
-<link rel="stylesheet" href="css/07-fab-toast.css">
-
-<link rel="stylesheet" href="css/08-hover-comparador.css">
-<link rel="stylesheet" href="css/10-premium-redesign.css">
-
 </head>
 <body>
 
@@ -311,6 +275,7 @@
 
 <div id="progress"></div>
 
+<header class="site-header">
 <nav class="top" id="nav" aria-label="Navegación principal">
   <div class="wrap">
     <a class="mark" href="#hero">
@@ -340,24 +305,22 @@
     <li aria-current="page">El padrón</li>
   </ol>
 </nav>
+</header>
 
 <main id="main">
 
-<!-- Botón flotante "volver arriba" — completamente nuevo, controlado por
-     el bloque de script aditivo al pie del documento. No interfiere con
-     ningún otro elemento fixed existente (#progress, #intro). -->
 <button type="button" id="backToTop" aria-label="Volver arriba">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
+<!-- HERO — primera impresión + prueba social + acceso a fichas destacadas -->
 <section class="hero laid" id="hero" aria-labelledby="title-hero">
   <div class="wrap">
     <div>
       <div class="hero-meta-row">
         <span class="kicker">Concepción del Uruguay, Entre Ríos</span>
         <span class="status-chip"><span class="status-dot" aria-hidden="true"></span>Padrón activo · actualizado el 13 jul 2026</span>
-        <!-- Hora local en vivo — completamente nueva, la completa el
-             script aditivo del pie del documento (id="heroClockValue"). -->
+
         <span class="hero-clock" id="heroClock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Son las <b id="heroClockValue">—:—</b> en la ciudad</span>
       </div>
 
@@ -380,15 +343,10 @@
       <nav class="hero-explore" aria-label="Explorar el padrón por rubro">
         <p class="hero-explore-label" id="rubroExploreLabel">Explorá por rubro</p>
         <div class="rubro-scroll" id="rubroExplorer" aria-labelledby="rubroExploreLabel">
-          <!-- chips de rubro insertados por JS, a partir de GRUPOS -->
+
         </div>
       </nav>
 
-      <!-- Antes era una cita anónima atribuida a "una vecina" sin nombre
-           ni forma de verificarla — contradicción directa con la promesa
-           de "nada inventado" del resto del sitio (ver auditoría, 1.4).
-           Se reemplaza por una declaración propia de URU SPOT: mismo rol
-           narrativo (voz antes del mapa), sin inventar una fuente. -->
       <blockquote class="hero-quote reveal">
         <p>Cada ficha se visitó a pie antes de publicarse. Si un lugar cerró o cambió de horario, se corrige apenas se detecta — no en una fecha fija.</p>
         <cite>— Cómo se arma el padrón</cite>
@@ -397,7 +355,7 @@
 
     <div class="ficha-column reveal">
       <div class="ficha-stage" id="fichaStage" aria-hidden="true">
-        <!-- fichas insertadas por JS -->
+
       </div>
       <div class="ficha-dots" id="fichaDots"></div>
       <p class="ficha-caption">Fichas reales del padrón — pasá el mouse para pausar</p>
@@ -410,6 +368,7 @@
   </a>
 </section>
 
+<!-- MANIFIESTO — qué es realmente el padrón, desglosado por rubro -->
 <section class="manifest reveal" id="manifest" aria-labelledby="title-manifest">
   <div class="wrap">
     <p class="eyebrow">Lo que hay realmente ahí adentro</p>
@@ -432,23 +391,11 @@
     </div>
     <p class="manifest-fecha">Padrón verificado al 13 de julio de 2026 — se actualiza cuando algo cambia, no en fechas fijas.</p>
 
-    <!-- Tarjeta de lectura de los números — completamente nueva. Aporta
-         narrativa sobre el breakdown de arriba sin tocar el div#breakdown
-         que genera core-engine/inline JS. -->
     <div class="manifest-insight reveal">
       <span class="manifest-insight-ico" aria-hidden="true">🧭</span>
       <p>Mirado de cerca, el padrón cuenta una historia: por cada restaurante hay <b>casi dos comercios más</b> de otro rubro. La ciudad que URU SPOT registra no vive solo de la joda — vive de la farmacia de la esquina, del banco, del taller, del jardín de infantes. Esa es la diferencia entre una guía turística y un padrón real.</p>
     </div>
 
-    <!-- "Los mismos 862, en una sola barra" — segunda lectura visual del
-         breakdown de arriba, en formato de barra apilada con tooltip de
-         porcentaje al pasar el mouse por cada segmento. El CSS de este
-         bloque (.manifest-bars/.mb-track/.mb-seg) ya existía desde una
-         pasada anterior mencionándolo en el comentario de más arriba,
-         pero nunca se llegó a escribir el HTML ni el JS que lo llenan —
-         quedó CSS muerto. Se completa acá: mismos 13 números y colores
-         de GRUPOS (no se inventa ni se recalcula nada), sin tocar
-         buildBreakdown() ni el div#breakdown existente. -->
     <div class="manifest-bars reveal" id="manifestBars">
       <p class="mb-label">Los mismos 862, en una sola barra</p>
       <div class="mb-track" id="mbTrack" role="img" aria-label="Proporción de cada rubro sobre el total de 862 fichas del padrón"></div>
@@ -457,6 +404,7 @@
   </div>
 </section>
 
+<!-- PADRÓN — mapa y lista interactivos, corazón funcional de la página -->
 <section id="padron" aria-labelledby="title-mapa">
   <div class="laid-veil" aria-hidden="true"></div>
   <div class="wrap">
@@ -466,9 +414,6 @@
       <p>Este es el padrón completo, en vivo: buscá un nombre, filtrá por rubro o tocá "Cerca de mí" — y saltá entre el mapa y la lista sin perder el lugar donde estabas.</p>
     </div>
 
-    <!-- Franja de confianza — enteramente nueva, no reemplaza nada de
-         arriba: son sellos rápidos que refuerzan el "nada inventado"
-         del padrón, antes de que el usuario toque el mapa. -->
     <div class="padron-trust reveal" aria-hidden="true">
       <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><b>862</b>&nbsp;fichas verificadas in situ</span>
       <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Georreferenciado real, no aproximado</span>
@@ -483,15 +428,6 @@
       <li class="mapa-onboard-step"><b>Guardala</b><span>Un toque en el corazón, sin crear ninguna cuenta.</span></li>
     </ol>
 
-    <!-- "Un rubro a la vez" — carrusel enteramente nuevo. Ayuda a decidir
-         por dónde empezar a explorar 862 fichas mostrando, de a un rubro,
-         su ícono, su descripción real y su cantidad exacta de fichas (la
-         misma fuente — motor.contarPorGrupo() — que ya usa el mapa para
-         sus propios contadores). El botón "Ver en el mapa" no reemplaza
-         ningún chip de filtro existente: llama a motor.setFiltro(), la
-         misma función pública que ya invocan esos chips. Si JS no corrió
-         todavía, muestra Gastronomía (el primer rubro) como contenido
-         estático perfectamente legible. -->
     <div class="rubro-spotlight reveal" id="rubroSpotlight" aria-roledescription="carrusel" aria-label="Explorá el padrón, un rubro a la vez">
       <div class="rs-head">
         <span class="rs-eyebrow">Un rubro a la vez</span>
@@ -512,9 +448,6 @@
       <div class="rs-dots" id="rsDots" aria-hidden="true"></div>
     </div>
 
-    <!-- Panel "tip" — enteramente nuevo. El texto rota con JS (bloque
-         aditivo al final del documento); si JS está deshabilitado, el
-         primer tip queda fijo y sigue siendo perfectamente legible. -->
     <div class="mapa-tip reveal" id="mapaTip">
       <span class="mapa-tip-ico" aria-hidden="true">💡</span>
       <span class="mapa-tip-body">
@@ -523,14 +456,6 @@
       </span>
       <button type="button" class="mapa-tip-swap" id="mapaTipSwap" aria-label="Ver otro dato">Otro dato ↻</button>
     </div>
-
-    <!-- CSS del mapa (auditoria de julio 2026, hallazgo "CSS del mapa
-         cargado como crítico pese a ser diferido"): el bloque <style>
-         que vivía acá se movió al <head>, junto al resto del CSS
-         crítico, para que el parser HTML no tenga que procesar ~230
-         líneas de CSS en medio del <body> antes de la primera pintura.
-         El HTML del mapa (más abajo) no cambió; solo se trasladó el
-         bloque <style>. -->
 
     <div id="mapa-wrap" class="reveal">
       <span class="mapa-wrap-ribbon" aria-hidden="true"><span class="dot-live"></span>Padrón en vivo</span>
@@ -564,17 +489,7 @@
       <p id="mapa-active-filtros" class="visually-hidden" aria-live="polite"></p>
 
       <div id="mapa-canvas" data-view="mapa">
-        <!-- Fix (auditoría, Hallazgo medio "role=application en el
-             mapa"): role="application" suspende toda la navegación
-             estándar de lectores de pantalla dentro del contenedor y
-             delega el 100% del manejo de teclado a la aplicación; sin
-             confirmar que core-engine.js reimplementa esa navegación
-             por completo, es más seguro usar role="region", que
-             identifica el contenedor como una zona de la página sin
-             quitarle al lector de pantalla su navegación normal.
-             Leaflet aplica sus propios atributos ARIA al inicializarse
-             sobre este mismo div; el cambio de role no afecta esa
-             inicialización porque ocurre por id, no por role. -->
+
         <div id="mapa-leaflet" role="region" aria-label="Mapa interactivo de Concepción del Uruguay"></div>
         <div id="mapa-legend" aria-label="Leyenda de categorías del mapa">
           <div id="mapa-legend-head" role="button" tabindex="0" aria-expanded="true">
@@ -587,47 +502,23 @@
       </div>
 
       <div id="mapa-empty"></div>
-      <!-- Sugerencias inteligentes — completamente nuevo. Nunca es hijo de
-           #mapa-empty (que core-engine.js reescribe entero en cada
-           render): vive al lado, así ninguna de las dos partes se pisa.
-           Se completa solo con nombres reales de motor.todosLosMarkers,
-           nunca con texto inventado; si no encuentra nada parecido, se
-           queda vacío y oculto en vez de forzar una sugerencia floja. -->
+
       <div id="mapaEmptySugerencias" class="mapa-empty-sugerencias" hidden aria-live="polite"></div>
 
       <div id="mapa-contador">
         <span>Mostrando <strong id="mapa-count">0</strong> de <strong id="mapa-total">0</strong> lugares</span>
         <span id="mapa-total-badge">cargando…</span>
         <span><a id="mapa-reset" href="#" role="button">Ver todos</a></span>
-        <!-- Barra de progreso — puramente visual, se completa con JS
-             aditivo al pie del documento leyendo #mapa-count/#mapa-total,
-             sin tocar ninguno de los spans de arriba. -->
+
         <div id="mapa-contador-track" aria-hidden="true"><div id="mapa-contador-fill"></div></div>
       </div>
 
-      <!-- "Tu recorrido" — completamente nuevo. Registra, solo en esta
-           pestaña (sessionStorage, se borra al cerrarla), qué fichas fue
-           abriendo el propio usuario, enganchado al evento 'popupopen'
-           que Leaflet ya emite en el mapa cada vez que se abre una ficha
-           — sea por clic, por el buscador, por "Uno al azar" o por un
-           link de "Compartir". No agrega ningún listener nuevo sobre los
-           marcadores ni compite con marker.on('popupopen', …) que ya usa
-           core-engine.js para renderizar el contenido del popup: ambos
-           conviven porque uno escucha en cada marcador y este en el mapa.
-           Empieza oculto (hidden) hasta que exista al menos una ficha
-           visitada, para no mostrar una barra vacía en la primera visita. -->
       <div class="mapa-trail" id="mapaTrail" hidden>
         <span class="mapa-trail-label">Tu recorrido:</span>
         <div class="mapa-trail-chips" id="mapaTrailChips"></div>
       </div>
     </div>
 
-    <!-- "El padrón, en cifras vivas" — enteramente nuevo. No son números
-         redactados a mano: se calculan en el navegador, una sola vez,
-         recorriendo motor.todosLosMarkers (el mismo array que ya usa el
-         mapa) apenas termina de cargar. Si por lo que sea el dataset no
-         llegara a cargar, las 4 tarjetas simplemente no se completan —
-         no dejan un placeholder roto ni un error en consola. -->
     <div class="padron-insights reveal" id="padronInsights" aria-label="Datos del padrón, calculados en vivo sobre las fichas cargadas">
       <p class="pi-eyebrow">El padrón, en cifras vivas</p>
       <div class="pi-grid" id="piGrid">
@@ -638,9 +529,6 @@
       </div>
     </div>
 
-    <!-- Franja final de garantías — completamente nueva, aporta contexto
-         de confianza justo después del mapa/lista, sin alterar nada de
-         lo que hay arriba. -->
     <div class="padron-postscript reveal" aria-hidden="true">
       <span class="padron-postscript-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>
@@ -661,6 +549,7 @@
   </div>
 </section>
 
+<!-- VERIFICACIÓN — los cuatro filtros que atraviesa cada ficha -->
 <section id="verificacion" style="background:var(--sunken);" aria-labelledby="title-verificacion">
   <div class="wrap">
     <div class="s-head reveal">
@@ -691,26 +580,17 @@
       </div>
     </div>
 
-    <!-- Firma final — completamente nueva. Cierra la sección con una voz
-         humana concreta y un canal de reporte directo, reforzando la
-         confianza sin tocar el check-list de arriba. -->
     <div class="verif-signature reveal">
       <span class="verif-signature-seal" aria-hidden="true">US</span>
       <p><b>Equipo URU SPOT</b> — recorremos la ciudad a pie, local por local.<br>
       <a class="verif-report-cta" href="mailto:uruspotcdu@gmail.com">¿Encontraste algo desactualizado? Reportalo acá →</a></p>
     </div>
 
-    <!-- Nota de alcance — completamente nueva. Ninguna de las cuatro
-         filtros de arriba explica qué NO cubren; sin esto, alguien podría
-         asumir que "verificado" significa "actualizado al minuto" en todo
-         (horarios, stock, precios), que no es lo que el check-list
-         promete. Decirlo en voz alta suma confianza en vez de restarla:
-         un padrón que es honesto sobre su propio alcance es más creíble,
-         no menos. -->
     <p class="verif-scope reveal">Lo que el padrón verifica: que el lugar existe, dónde queda, en qué rubro entra y cuál es su calificación pública. Lo que <em>no</em> garantiza: que el horario de hoy, el stock o el precio exacto sigan siendo los mismos que la última vez que alguien de URU SPOT pasó — eso puede cambiar de un día para el otro en cualquier comercio, y conviene confirmarlo por teléfono si es algo que no admite sorpresas.</p>
   </div>
 </section>
 
+<!-- UN DÍA EN LA CIUDAD — ocho escenas, ocho guías reales enlazadas -->
 <section id="dia" aria-labelledby="title-dia">
   <div class="wrap">
     <div class="s-head reveal">
@@ -719,19 +599,56 @@
       <p>Cada escena de abajo enlaza a la guía real de ese momento — no es un carrusel de ejemplo, son las ocho guías que existen hoy.</p>
     </div>
     <div class="day-grid reveal" id="dayGrid">
-      <a class="day-card" href="../las-mejores-cafeterias-cdu/"><span class="day-tag" style="background:#AD1E1E"></span><span class="day-time">8:00</span><p class="scn">Arrancás el día con un café de verdad, no de sobre.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
-      <a class="day-card" href="../las-mejores-panaderias-cdu/"><span class="day-tag" style="background:#AD1E1E"></span><span class="day-time">9:30</span><p class="scn">El desayuno pide algo dulce recién horneado.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
-      <a class="day-card" href="../los-mejores-restaurantes-cdu/"><span class="day-tag" style="background:#AD1E1E"></span><span class="day-time">13:00</span><p class="scn">Al mediodía, algo serio para comer con el equipo.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
-      <a class="day-card" href="../las-mejores-heladerias-cdu/"><span class="day-tag" style="background:#AD1E1E"></span><span class="day-time">17:00</span><p class="scn">La tarde se estira con 30 grados y ganas de algo frío.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
-      <a class="day-card" href="../los-mejores-gimnasios-cdu/"><span class="day-tag" style="background:#901EAD"></span><span class="day-time">19:00</span><p class="scn">Antes de que se haga tarde, una hora de entrenamiento.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
-      <a class="day-card" href="../los-mejores-bares-cdu/"><span class="day-tag" style="background:#AD1E1E"></span><span class="day-time">21:30</span><p class="scn">A la noche, una birra artesanal con amigos.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
-      <a class="day-card" href="../las-mejores-hosterias-cdu/"><span class="day-tag" style="background:#1E57AD"></span><span class="day-time">Sábado</span><p class="scn">Alguien viene de visita y necesita dónde quedarse.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
-      <a class="day-card" href="../mejores-veterinarias-cdu/"><span class="day-tag" style="background:#168241"></span><span class="day-time">Domingo</span><p class="scn">Tu mascota necesita un chequeo antes de fin de mes.</p><span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+            <a class="day-card" href="../las-mejores-cafeterias-cdu/">
+        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
+        <span class="day-time">8:00</span>
+        <p class="scn">Arrancás el día con un café de verdad, no de sobre.</p>
+        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
+            <a class="day-card" href="../las-mejores-panaderias-cdu/">
+        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
+        <span class="day-time">9:30</span>
+        <p class="scn">El desayuno pide algo dulce recién horneado.</p>
+        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
+            <a class="day-card" href="../los-mejores-restaurantes-cdu/">
+        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
+        <span class="day-time">13:00</span>
+        <p class="scn">Al mediodía, algo serio para comer con el equipo.</p>
+        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
+            <a class="day-card" href="../las-mejores-heladerias-cdu/">
+        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
+        <span class="day-time">17:00</span>
+        <p class="scn">La tarde se estira con 30 grados y ganas de algo frío.</p>
+        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
+            <a class="day-card" href="../los-mejores-gimnasios-cdu/">
+        <span class="day-tag" style="background:#901EAD" aria-hidden="true"></span>
+        <span class="day-time">19:00</span>
+        <p class="scn">Antes de que se haga tarde, una hora de entrenamiento.</p>
+        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
+            <a class="day-card" href="../los-mejores-bares-cdu/">
+        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
+        <span class="day-time">21:30</span>
+        <p class="scn">A la noche, una birra artesanal con amigos.</p>
+        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
+            <a class="day-card" href="../las-mejores-hosterias-cdu/">
+        <span class="day-tag" style="background:#1E57AD" aria-hidden="true"></span>
+        <span class="day-time">Sábado</span>
+        <p class="scn">Alguien viene de visita y necesita dónde quedarse.</p>
+        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
+            <a class="day-card" href="../mejores-veterinarias-cdu/">
+        <span class="day-tag" style="background:#168241" aria-hidden="true"></span>
+        <span class="day-time">Domingo</span>
+        <p class="scn">Tu mascota necesita un chequeo antes de fin de mes.</p>
+        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+      </a>
     </div>
 
-    <!-- Panel de exploración — completamente nuevo. Invita a seguir
-         explorando el padrón completo justo después de las 8 escenas,
-         sin tocar el div#dayGrid que reconstruye el JS inline. -->
     <div class="dia-cta-panel reveal">
       <p>¿Ninguna de estas ocho escenas es la tuya hoy? El padrón completo tiene 862 fichas más para explorar.</p>
       <a href="#padron">Explorar el mapa completo →</a>
@@ -739,6 +656,7 @@
   </div>
 </section>
 
+<!-- FICHAS DESTACADAS — ocho lugares elegidos por volumen de reseñas -->
 <section id="fichas" style="background:var(--sunken);" aria-labelledby="title-fichas">
   <div class="wrap">
     <div class="s-head reveal">
@@ -747,24 +665,111 @@
       <p>Elegidos por volumen de reseñas verificadas contra Google Places, no por sorteo.</p>
     </div>
     <div class="fichas-grid reveal" id="fichasGrid">
-      <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div><h3>Heladería Italia</h3><p class="fc-meta">2.368 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.7</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-0" aria-label="Guardar Heladería Italia"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/italia/" aria-label="Ver ficha de Heladería Italia"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
-      <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div><h3>Hotel Boutique Los Aguaribay</h3><p class="fc-meta">302 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.8</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-1" aria-label="Guardar Hotel Boutique Los Aguaribay"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/los-aguaribay/" aria-label="Ver ficha de Hotel Boutique Los Aguaribay"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
-      <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#901EAD">Deporte</span></div><h3>Power Gym</h3><p class="fc-meta">13 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.8</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-2" aria-label="Guardar Power Gym"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/power-gimnasio/" aria-label="Ver ficha de Power Gym"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
-      <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div><h3>Bella Vista</h3><p class="fc-meta">2.826 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.4</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-3" aria-label="Guardar Bella Vista"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/bella-vista/" aria-label="Ver ficha de Bella Vista"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
-      <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div><h3>Casa del Árbol Hostel</h3><p class="fc-meta">164 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.5</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-4" aria-label="Guardar Casa del Árbol Hostel"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/casa-del-arbol/" aria-label="Ver ficha de Casa del Árbol Hostel"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
-      <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div><h3>Bartolo Bar</h3><p class="fc-meta">3.102 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.1</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-5" aria-label="Guardar Bartolo Bar"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/bartolo-bar/" aria-label="Ver ficha de Bartolo Bar"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
-      <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div><h3>7 Colinas Craft Brewery</h3><p class="fc-meta">1.930 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.4</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-6" aria-label="Guardar 7 Colinas Craft Brewery"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/7-colinas/" aria-label="Ver ficha de 7 Colinas Craft Brewery"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
-      <div class="fcard"><div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div><h3>Posta Torreón</h3><p class="fc-meta">582 reseñas verificadas</p><div class="fcard-foot"><span class="fcard-rating">★ 4.4</span><div class="fcard-actions"><button class="reg-heart fcard-link" data-favid="destacada-7" aria-label="Guardar Posta Torreón"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button><a class="fcard-link" href="locales/posta-torreon/" aria-label="Ver ficha de Posta Torreón"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div></div></div>
+            <article class="fcard">
+        <div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div>
+        <h3>Heladería Italia</h3>
+        <p class="fc-meta">2.368 reseñas verificadas</p>
+        <div class="fcard-foot">
+          <span class="fcard-rating">★ 4.7</span>
+          <div class="fcard-actions">
+            <button class="reg-heart fcard-link" data-favid="destacada-0" aria-label="Guardar Heladería Italia"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
+            <a class="fcard-link" href="locales/italia/" aria-label="Ver ficha de Heladería Italia"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+          </div>
+        </div>
+      </article>
+            <article class="fcard">
+        <div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div>
+        <h3>Hotel Boutique Los Aguaribay</h3>
+        <p class="fc-meta">302 reseñas verificadas</p>
+        <div class="fcard-foot">
+          <span class="fcard-rating">★ 4.8</span>
+          <div class="fcard-actions">
+            <button class="reg-heart fcard-link" data-favid="destacada-1" aria-label="Guardar Hotel Boutique Los Aguaribay"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
+            <a class="fcard-link" href="locales/los-aguaribay/" aria-label="Ver ficha de Hotel Boutique Los Aguaribay"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+          </div>
+        </div>
+      </article>
+            <article class="fcard">
+        <div class="fcard-top"><span class="fcard-tag" style="background:#901EAD">Deporte</span></div>
+        <h3>Power Gym</h3>
+        <p class="fc-meta">13 reseñas verificadas</p>
+        <div class="fcard-foot">
+          <span class="fcard-rating">★ 4.8</span>
+          <div class="fcard-actions">
+            <button class="reg-heart fcard-link" data-favid="destacada-2" aria-label="Guardar Power Gym"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
+            <a class="fcard-link" href="locales/power-gimnasio/" aria-label="Ver ficha de Power Gym"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+          </div>
+        </div>
+      </article>
+            <article class="fcard">
+        <div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div>
+        <h3>Bella Vista</h3>
+        <p class="fc-meta">2.826 reseñas verificadas</p>
+        <div class="fcard-foot">
+          <span class="fcard-rating">★ 4.4</span>
+          <div class="fcard-actions">
+            <button class="reg-heart fcard-link" data-favid="destacada-3" aria-label="Guardar Bella Vista"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
+            <a class="fcard-link" href="locales/bella-vista/" aria-label="Ver ficha de Bella Vista"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+          </div>
+        </div>
+      </article>
+            <article class="fcard">
+        <div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div>
+        <h3>Casa del Árbol Hostel</h3>
+        <p class="fc-meta">164 reseñas verificadas</p>
+        <div class="fcard-foot">
+          <span class="fcard-rating">★ 4.5</span>
+          <div class="fcard-actions">
+            <button class="reg-heart fcard-link" data-favid="destacada-4" aria-label="Guardar Casa del Árbol Hostel"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
+            <a class="fcard-link" href="locales/casa-del-arbol/" aria-label="Ver ficha de Casa del Árbol Hostel"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+          </div>
+        </div>
+      </article>
+            <article class="fcard">
+        <div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div>
+        <h3>Bartolo Bar</h3>
+        <p class="fc-meta">3.102 reseñas verificadas</p>
+        <div class="fcard-foot">
+          <span class="fcard-rating">★ 4.1</span>
+          <div class="fcard-actions">
+            <button class="reg-heart fcard-link" data-favid="destacada-5" aria-label="Guardar Bartolo Bar"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
+            <a class="fcard-link" href="locales/bartolo-bar/" aria-label="Ver ficha de Bartolo Bar"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+          </div>
+        </div>
+      </article>
+            <article class="fcard">
+        <div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div>
+        <h3>7 Colinas Craft Brewery</h3>
+        <p class="fc-meta">1.930 reseñas verificadas</p>
+        <div class="fcard-foot">
+          <span class="fcard-rating">★ 4.4</span>
+          <div class="fcard-actions">
+            <button class="reg-heart fcard-link" data-favid="destacada-6" aria-label="Guardar 7 Colinas Craft Brewery"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
+            <a class="fcard-link" href="locales/7-colinas/" aria-label="Ver ficha de 7 Colinas Craft Brewery"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+          </div>
+        </div>
+      </article>
+            <article class="fcard">
+        <div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div>
+        <h3>Posta Torreón</h3>
+        <p class="fc-meta">582 reseñas verificadas</p>
+        <div class="fcard-foot">
+          <span class="fcard-rating">★ 4.4</span>
+          <div class="fcard-actions">
+            <button class="reg-heart fcard-link" data-favid="destacada-7" aria-label="Guardar Posta Torreón"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
+            <a class="fcard-link" href="locales/posta-torreon/" aria-label="Ver ficha de Posta Torreón"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+          </div>
+        </div>
+      </article>
     </div>
 
-    <!-- CTA final — completamente nueva, invita a seguir explorando el
-         padrón completo desde las 8 fichas destacadas. -->
     <div class="fichas-cta-row reveal">
       <a href="#padron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Ver las 862 fichas completas</a>
     </div>
   </div>
 </section>
 
+<!-- GUARDADAS — favoritos persistidos en localStorage, sin cuenta -->
 <section id="guardadas" aria-labelledby="title-guardadas">
   <div class="wrap">
     <div class="s-head reveal">
@@ -772,17 +777,12 @@
       <h2 id="title-guardadas">Lo que marcaste queda acá, en este mismo navegador.</h2>
       <p>Se guarda con la misma clave que usa el resto de URU SPOT, así que cuando el mapa completo esté activo, tus favoritos ya van a estar ahí.</p>
     </div>
-    <!-- Tip contextual — completamente nuevo, ayuda a quien todavía no
-         guardó nada a entender el mecanismo antes de ver la lista vacía
-         que arma renderSaved() en #savedContent. -->
+
     <div class="guardadas-tip reveal">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg>
       <span>Tocá el corazón en cualquier ficha del padrón, del mapa o de esta misma página — se guarda acá al instante, sin cuenta ni sincronización.</span>
     </div>
-    <!-- Exportar/compartir favoritos — completamente nuevo. Oculto hasta
-         que haya al menos un favorito real (lo controla renderSaved() en
-         el <script> final, misma función que ya pinta #savedContent),
-         para no ofrecer "compartir" una lista vacía. -->
+
     <div class="guardadas-export reveal" id="guardadasExport" hidden>
       <button type="button" class="guardadas-export-btn" id="exportCopyBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 012-2h10"/></svg>
@@ -793,10 +793,11 @@
         Compartir por WhatsApp
       </a>
     </div>
-    <div id="savedContent"><!-- JS --></div>
+    <div id="savedContent"></div>
   </div>
 </section>
 
+<!-- AYUDA — FAQ buscable + glosario, cierre informativo de la página -->
 <section id="ayuda" aria-labelledby="title-ayuda">
   <div class="wrap">
     <div class="help-grid">
@@ -805,22 +806,14 @@
           <p class="eyebrow">Preguntas frecuentes</p>
           <h2 id="title-ayuda">Lo esencial, sin fricción.</h2>
         </div>
-        <!-- Buscador de preguntas — completamente nuevo. Filtra los
-             .faq-item existentes agregando/quitando una clase (JS
-             aditivo al pie del documento); no toca el listener de
-             .faq-q que abre/cierra cada respuesta. -->
+
         <div class="faq-search-wrap reveal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="faqSearch" placeholder="Buscar en las preguntas frecuentes…" autocomplete="off" aria-label="Buscar en las preguntas frecuentes" />
         </div>
         <p id="faqNoResults">Ninguna pregunta coincide. Probá con otra palabra o <a href="mailto:uruspotcdu@gmail.com">escribinos directamente</a>.</p>
         <div class="reveal">
-          <!-- Fix (auditoría, Hallazgo medio "FAQ sin aria-expanded/
-               aria-controls"): cada botón .faq-q ahora anuncia su
-               estado (aria-expanded) y a qué panel controla
-               (aria-controls + id en el .faq-a correspondiente), y el
-               JS de abajo mantiene aria-expanded sincronizado con la
-               clase .open en cada click. -->
+
           <div class="faq-item open">
             <button class="faq-q" aria-expanded="true" aria-controls="faq-a-1"><p>¿Cuál es la forma más rápida de encontrar un lugar en el mapa?</p><span class="faq-plus"></span></button>
             <div class="faq-a" id="faq-a-1"><p>Escribí en el buscador (atajo: tocá "/" en cualquier parte de la página) o tocá "Cerca de mí" para ver solo lo que te queda a mano. Si ya guardaste favoritos, "Solo favoritos" filtra el mapa a lo tuyo en un toque, y "Lista" ordena todo por cercanía o calificación sin perder el filtro que tenías puesto.</p></div>
@@ -853,11 +846,7 @@
             <button class="faq-q" aria-expanded="false" aria-controls="faq-a-8"><p>¿Necesito activar mi ubicación para usar el mapa?</p><span class="faq-plus"></span></button>
             <div class="faq-a" id="faq-a-8"><p>No. Todo el mapa y la lista funcionan sin geolocalización. "Cerca de mí" y el orden "Más cerca" son un atajo opcional, no un requisito para explorar el padrón.</p></div>
           </div>
-          <!-- Dos preguntas nuevas — completan huecos reales: ninguna
-               pregunta anterior explica qué significan los colores/formas
-               de los pines (la leyenda vive dentro de #mapa-legend, que
-               alguien puede no haber notado todavía), ni la diferencia
-               entre las dos vistas del padrón. -->
+
           <div class="faq-item">
             <button class="faq-q" aria-expanded="false" aria-controls="faq-a-9"><p>¿Qué significan los colores y las formas de los pines?</p><span class="faq-plus"></span></button>
             <div class="faq-a" id="faq-a-9"><p>Cada color es un rubro — los mismos 13 colores que ya ves en "Fichas destacadas" y en el desglose del padrón, para que el mapa "hable el mismo idioma" que el resto de la página (la leyenda completa está siempre visible al costado del mapa). Un pin con borde dorado es un lugar <b>destacado</b>: elegido por volumen de reseñas verificadas dentro de su rubro, nunca por sorteo ni por pago. Los números en círculo son <b>clusters</b>: varios lugares agrupados por zoom, que se separan solos al acercar el mapa.</p></div>
@@ -868,8 +857,6 @@
           </div>
         </div>
 
-        <!-- Tarjeta de contacto — completamente nueva, cierra el bloque
-             de FAQ con una salida directa para lo que no está cubierto. -->
         <div class="ayuda-contact-card reveal">
           <span style="font-size:22px;" aria-hidden="true">✉️</span>
           <span><b>¿No encontraste tu respuesta?</b><span>Escribinos y te contestamos directamente, sin bot ni formulario largo.</span></span>
@@ -888,10 +875,7 @@
           <div class="gloss-item"><dt>Rubro</dt><dd>Cada una de las 13 categorías del padrón: de gastronomía a servicios públicos.</dd></div>
           <div class="gloss-item"><dt>Subrubro</dt><dd>La subcategoría dentro de un rubro (por ejemplo, "Heladería" dentro de Gastronomía) que aparece al filtrar el mapa.</dd></div>
           <div class="gloss-item"><dt>Destacado</dt><dd>Un pin con borde dorado en el mapa: un lugar elegido por volumen de reseñas verificadas, no por sorteo.</dd></div>
-          <!-- Dos entradas nuevas — completan un hueco real: "Tu
-               recorrido" y "El padrón, en cifras vivas" son paneles que
-               ya existen en la sección del mapa desde una pasada
-               anterior, pero ninguno de los dos quedó definido acá. -->
+
           <div class="gloss-item"><dt>Tu recorrido</dt><dd>El rastro de fichas que fuiste abriendo en esta visita al mapa. Vive solo en la pestaña abierta — se borra al cerrarla, no se guarda como favorito ni se comparte con nadie.</dd></div>
           <div class="gloss-item"><dt>Padrón en cifras vivas</dt><dd>Un panel que no escribió nadie a mano: se calcula en tu propio navegador sobre las fichas reales, apenas terminan de cargar.</dd></div>
         </dl>
@@ -902,6 +886,7 @@
 
 </main>
 
+<!-- PIE — navegación secundaria, confianza y resumen de sesión -->
 <footer>
   <div class="wrap">
     <div class="foot-top">
@@ -933,20 +918,13 @@
       <span><a href="mailto:uruspotcdu@gmail.com">uruspotcdu@gmail.com</a></span>
     </div>
 
-    <!-- Franja de confianza + firma — completamente nueva, cierra la
-         página reforzando lo mismo que el hero prometió arriba. -->
     <div class="foot-trust reveal">
       <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>100% gratis, sin registro</span>
       <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>862 lugares, cero inventados</span>
       <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Concepción del Uruguay, Entre Ríos</span>
       <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Actualizado el 13 jul 2026</span>
     </div>
-    <!-- Resumen de tu sesión — completamente nuevo. Distinto de "Tu
-         recorrido" (que solo lista fichas vistas en el mapa): acá se
-         cuentan búsquedas y rubros distintos que realmente tocaste,
-         para devolver una lectura de TU forma de explorar, no solo un
-         listado. Empieza oculto: solo se muestra a partir de un mínimo
-         real de interacción (ver initSessionRecap), nunca con ceros. -->
+
     <div class="foot-session-recap" id="footSessionRecap" aria-live="polite">
       <p class="fsr-title">Tu sesión de hoy en el padrón</p>
       <span class="fsr-item"><b id="fsrBusquedas">0</b> búsquedas distintas</span>
@@ -957,15 +935,16 @@
   </div>
 </footer>
 
+<!-- ══════════════════════════════════════════════════════════════════
+     SCRIPTS — orden de carga significativo: interacciones de base,
+     motor de datos/mapa, contenido dinámico y, por último, el módulo
+     de mejoras aditivas (IIFE aislada, degrada sin errores si algún
+     elemento opcional no está presente).
+     ══════════════════════════════════════════════════════════════════ -->
 <script src="js/app-interactions.js"></script>
 <script src="js/core-engine.js"></script>
 <script src="js/content.js"></script>
-<!-- ═══════════════════════════════════════════════════════════════
-     Bloque 100% aditivo — enriquecimiento visual de "El padrón, en
-     el mapa". No declara variables globales que puedan pisar a las
-     de core-engine.js/content.js (todo vive dentro de una IIFE), no
-     modifica ninguna función existente y se degrada sin errores si
-     algún elemento no está presente. ═══════════════════════════════ -->
 <script src="js/enhancements-aditivas.js"></script>
+
 </body>
 </html>
