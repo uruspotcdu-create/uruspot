@@ -1,0 +1,214 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   PREMIUM REDESIGN — INSTRUMENTO DE PRECISIÓN
+   Reemplaza el sistema visual completo (color, tipografía, radios,
+   sombras, movimiento) manteniendo cada id/clase que el motor
+   (core-engine.js, content.js, app-interactions, aditivas) necesita
+   para funcionar: mapa, filtros, comparador, favoritos, spotlight.
+   Se carga último a propósito — gana toda la cascada sin editar los
+   9 módulos anteriores. Cero cambios de JS, cero cambios de datos.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ---- Paleta: instrumento, no revista ------------------------------- */
+  --ink:#0A0A0A;
+  --ink-soft:#4A4A47;
+  --bg:#FFFFFF;
+  --bg-panel:#FFFFFF;
+  --bg-sunk:#F2F2F0;
+  --river-900:#0A0A0A;
+  --river-700:#2A2A28;
+  --river-500:#6B6B67;
+  --river-300:#C8C8C4;
+  --river-100:#F2F2F0;
+
+  --sunset:#1E3AFF;
+  --sunset-text:#1E3AFF;
+  --sunset-bright:#1E3AFF;
+  --text-on-dark:#FFFFFF;
+  --accent-star:#1E3AFF;
+  --muted:#6B6B67;
+  --border:#DCDCD8;
+  --border-s:#B8B8B3;
+  --surface:#F2F2F0;
+  --surface-hover:#E8E8E4;
+  --line:var(--border);
+  --accent:#1E3AFF;
+  --accent-strong:#1530CC;
+  --on-accent:#FFFFFF;
+  --warn:#D32F2F;
+
+  /* ---- Sin curvas, sin decoración ------------------------------------- */
+  --radius:2px;
+  --radius-lg:2px;
+  --radius-md:2px;
+  --radius-sm:2px;
+  --radius-xs:0px;
+  --radius-pill:2px;
+
+  --shadow-xs:none;
+  --shadow-sm:0 1px 0 rgba(10,10,10,.08);
+  --shadow-md:0 1px 0 rgba(10,10,10,.1);
+  --shadow-lg:0 2px 0 rgba(10,10,10,.1);
+  --shadow-xl:0 24px 48px -16px rgba(10,10,10,.18);
+  --shadow-glow-cta:none;
+  --shadow-glow-cta-hover:none;
+  --grain:none;
+
+  --f-display:'Space Grotesk','Helvetica Neue',Arial,sans-serif;
+  --f-ui:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;
+  --font-display:var(--f-display);
+  --f-mono:'IBM Plex Mono','SF Mono',monospace;
+}
+
+/* ---- Base tipográfica: quitar calidez, subir precisión ---------------- */
+body{ background:var(--bg); color:var(--ink); font-family:var(--f-ui); letter-spacing:-.01em; }
+h1,h2,h3,.h-hero,.s-head h2{ font-family:var(--f-display); font-weight:600; letter-spacing:-.03em; }
+
+.kicker, .eyebrow, .proof-label, .bd-label, .hero-explore-label, label,
+.mapa-legend-head, .rubro-scroll a, .btn, .rs-label{
+  font-family:var(--f-mono); text-transform:uppercase; letter-spacing:.12em; font-weight:500;
+}
+
+/* ---- Nav: elimina el "chip" flotante, lo hace regla técnica ----------- */
+nav.top{ background:var(--bg); border-bottom:1px solid var(--border); box-shadow:none; backdrop-filter:none; }
+nav.top .mark{ font-family:var(--f-mono); letter-spacing:.14em; font-weight:600; color:var(--ink); }
+nav.top .navlinks a{ font-family:var(--f-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); }
+nav.top .navlinks a:hover{ color:var(--ink); }
+.btn.primary{ background:var(--ink); color:#fff; border-radius:0; border:1px solid var(--ink); }
+.btn.primary:hover{ background:var(--accent); border-color:var(--accent); }
+.favbtn{ border-radius:0; border:1px solid var(--border); }
+
+/* ---- Breadcrumb: renglón de índice técnico ----------------------------- */
+.breadcrumb ol{ font-family:var(--f-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+
+/* ═══════════════ HERO ═══════════════════════════════════════════════ */
+.hero.laid{ background:var(--bg); border-bottom:1px solid var(--border); }
+.hero .kicker{ color:var(--muted); }
+
+.status-chip{
+  border-radius:0; border:1px solid var(--border); background:transparent;
+  font-family:var(--f-mono); font-size:.68rem; letter-spacing:.08em;
+}
+.status-dot{ background:var(--accent); border-radius:50%; box-shadow:0 0 0 3px rgba(30,58,255,.15); }
+.hero-clock{ border-radius:0; border:1px solid var(--border); font-family:var(--f-mono); font-size:.68rem; }
+
+.h-hero{
+  font-size:clamp(2.6rem, 5.6vw, 5.2rem);
+  line-height:.98; letter-spacing:-.04em; font-weight:600; color:var(--ink);
+  max-width:16ch;
+}
+.h-hero em{ font-style:normal; color:var(--accent); }
+
+.hero-sub{ font-family:var(--f-ui); color:var(--ink-soft); font-size:1.05rem; max-width:46ch; }
+.hero-sub b{ color:var(--ink); font-weight:600; }
+
+/* Estadísticas del hero como panel de mediciones, no tarjetas de color */
+.hero-proof{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+  border:1px solid var(--border); border-radius:0; margin:2rem 0;
+}
+.proof-item{
+  padding:1.1rem 1rem; border-right:1px solid var(--border);
+  display:flex; flex-direction:column; gap:.35rem;
+}
+.proof-item:last-child{ border-right:none; }
+.proof-num{
+  font-family:var(--f-mono); font-size:1.9rem; font-weight:600;
+  letter-spacing:-.02em; color:var(--ink);
+}
+.proof-label{ font-size:.62rem; color:var(--muted); }
+
+.hero-actions .btn.primary{ padding:.95rem 1.8rem; }
+.hero-actions .link{ font-family:var(--f-mono); font-size:.75rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink); }
+.hero-trust{ font-family:var(--f-mono); font-size:.68rem; color:var(--muted); letter-spacing:.02em; }
+.hero-kbd-hint kbd{ border-radius:0; border:1px solid var(--border); font-family:var(--f-mono); }
+
+.rubro-scroll a{
+  border:1px solid var(--border); border-radius:0; background:transparent;
+  color:var(--ink-soft); font-size:.66rem; padding:.5rem .9rem;
+}
+.rubro-scroll a:hover, .rubro-scroll a.is-active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+.hero-quote{ border-left:2px solid var(--ink); border-radius:0; background:transparent; padding-left:1.2rem; }
+.hero-quote p{ font-family:var(--f-display); font-size:1.15rem; font-weight:500; color:var(--ink); font-style:normal; }
+.hero-quote cite{ font-family:var(--f-mono); font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-style:normal; }
+
+/* Carrusel de fichas: sacarle el marco de tarjeta cálida, hacerlo ficha técnica */
+.ficha-stage{ border:1px solid var(--border); border-radius:0; box-shadow:none; }
+.ficha-caption{ font-family:var(--f-mono); font-size:.62rem; letter-spacing:.06em; color:var(--muted); text-transform:uppercase; }
+.hero-scrollcue{ font-family:var(--f-mono); font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+
+/* ═══════════════ MANIFESTO / STATS ════════════════════════════════════ */
+.manifest{ background:var(--bg); }
+.manifest .eyebrow{ color:var(--accent) !important; }
+.manifest h2{ font-size:clamp(2rem,3.6vw,3.2rem); color:var(--ink); letter-spacing:-.03em; }
+.manifest h2 b{ color:var(--accent); font-weight:600; }
+.manifest .lede{ color:var(--ink-soft); max-width:60ch; }
+
+.breakdown{
+  display:grid; grid-template-columns:repeat(6,1fr); gap:0;
+  border:1px solid var(--border); margin-top:2rem;
+}
+.bd-item{
+  padding:1.4rem 1.2rem; border-right:1px solid var(--border); border-top:1px solid var(--border);
+  transform:none !important;
+}
+.bd-num{
+  font-family:var(--f-mono) !important; color:var(--ink) !important;
+  font-size:2.1rem; font-weight:600; letter-spacing:-.02em;
+}
+.bd-label{ color:var(--muted); font-size:.62rem; margin-top:.3rem; }
+
+/* ═══════════════ DÍA EN LA CIUDAD (grilla de escenas) ═════════════════ */
+#dayGrid, .day-grid{ border:1px solid var(--border); border-radius:0; }
+.day-card, [class*="day-card"]{
+  border-radius:0 !important; box-shadow:none !important;
+  border-right:1px solid var(--border); border-top:1px solid var(--border);
+}
+.day-card .time, [class*="hora"]{ font-family:var(--f-mono); color:var(--muted); font-size:.68rem; letter-spacing:.06em; }
+.day-card h3, .day-card p.scn{ font-family:var(--f-display); color:var(--ink); font-weight:600; letter-spacing:-.01em; }
+.day-cta, [class*="day-cta"]{ font-family:var(--f-mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); }
+.day-cta svg{ color:var(--accent); }
+/* puntos de color por rubro → un único punto de tinta, sin arcoíris */
+.day-card [class$="-dot"], .dia-cta-panel [class$="-dot"]{ background:var(--ink) !important; border-radius:50%; }
+
+/* ═══════════════ FICHAS / CARDS EN GENERAL ════════════════════════════ */
+.cat, .lista-card, .mapa-popup-content-wrapper, .rs-body{
+  border-radius:0 !important; box-shadow:none !important; border:1px solid var(--border);
+}
+.cat:hover, .lista-card:hover{ box-shadow:none !important; border-color:var(--ink); transform:none; }
+
+/* Badges de rubro sobre las fichas: de píldora de color a etiqueta técnica */
+[class*="badge"], [class*="tag"], [class*="chip"]:not(.status-chip){
+  border-radius:0 !important; font-family:var(--f-mono); letter-spacing:.06em;
+}
+
+/* ═══════════════ BOTONES / CONTROLES GENERALES ════════════════════════ */
+.btn{ border-radius:0; }
+.btn.secondary, .btn.ghost{ border:1px solid var(--border); background:transparent; color:var(--ink); }
+input, select, textarea{ border-radius:0 !important; border:1px solid var(--border) !important; font-family:var(--f-ui); }
+input:focus, select:focus, textarea:focus{ outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent) !important; }
+
+/* ═══════════════ FOOTER Y VARIOS ═══════════════════════════════════════ */
+footer, .foot-statement{ border-top:1px solid var(--border); }
+.stamp-mark svg{ filter:none; }
+.us-toast-container, .toast{ border-radius:0 !important; }
+
+/* ═══════════════ MOVIMIENTO: mínimo, deliberado ════════════════════════ */
+*{ transition-duration:.15s !important; }
+.cat:hover, .lista-card:hover, .btn:hover{ transform:none !important; }
+
+/* ═══════════════ RESPONSIVE ════════════════════════════════════════════ */
+@media (max-width:900px){
+  .hero-proof{ grid-template-columns:repeat(2,1fr); }
+  .proof-item:nth-child(2n){ border-right:none; }
+  .breakdown{ grid-template-columns:repeat(3,1fr); }
+}
+@media (max-width:560px){
+  .breakdown{ grid-template-columns:repeat(2,1fr); }
+  .h-hero{ max-width:none; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{ transition:none !important; animation:none !important; }
+}
