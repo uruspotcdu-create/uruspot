@@ -1,950 +1,491 @@
 <!DOCTYPE html>
 <html lang="es-AR">
 <head>
-
-<!-- ══════════════════════════════════════════════════════════════════
-     DOCUMENTO — identidad, indexación, dispositivo
-     ══════════════════════════════════════════════════════════════════ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>URU SPOT — El padrón vivo de Concepción del Uruguay</title>
-<meta name="description" content="El padrón completo de Concepción del Uruguay: 862 lugares verificados en 13 rubros, con dirección y calificación reales — nada inventado.">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="color-scheme" content="light">
-<meta name="theme-color" content="#F5F1E7">
-<meta name="format-detection" content="telephone=no">
-<link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/">
-
-<!-- ══════════════════════════════════════════════════════════════════
-     ICONOGRAFÍA Y MANIFEST
-     ══════════════════════════════════════════════════════════════════ -->
-<link rel="icon" href="../favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<link rel="manifest" href="../site.webmanifest">
-
-<!-- ══════════════════════════════════════════════════════════════════
-     COMPARTIR SOCIAL — Open Graph + Twitter Card
-     ══════════════════════════════════════════════════════════════════ -->
-<meta property="og:title" content="URU SPOT — El padrón vivo de Concepción del Uruguay">
-<meta property="og:description" content="862 lugares verificados en 13 rubros. Ninguno inventado.">
-<meta property="og:image" content="https://uruspot.pages.dev/img/logof.webp">
-<meta property="og:image:alt" content="Logo de URU SPOT">
-<meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="URU SPOT">
-<meta property="og:locale" content="es_AR">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="URU SPOT — El padrón vivo de Concepción del Uruguay">
-<meta name="twitter:description" content="862 lugares verificados en 13 rubros. Ninguno inventado.">
-<meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp">
-<meta name="twitter:image:alt" content="Logo de URU SPOT">
-
-<!-- ══════════════════════════════════════════════════════════════════
-     RENDIMIENTO — resolución DNS/handshake anticipada. El mapa
-     (Leaflet + tiles) se inicializa de forma diferida cuando #padron
-     entra en viewport; los preconnect a los orígenes de tiles se
-     emiten en runtime desde js/enhancements-aditivas.js, más cerca del
-     momento real de uso. Acá solo va dns-prefetch (sin costo de
-     conexión abierta ociosa que pueda cerrarse antes de llegar al mapa).
-     ══════════════════════════════════════════════════════════════════ -->
+<title>URU SPOT — el padrón de Concepción del Uruguay</title>
+<meta name="description" content="El padrón completo de Concepción del Uruguay: 1.468 lugares caminados y verificados uno por uno, en 14 rubros — sin ranking, sin relleno.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="dns-prefetch" href="https://b.basemaps.cartocdn.com">
-<link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com">
-<link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
 
-<!-- ══════════════════════════════════════════════════════════════════
-     TIPOGRAFÍA — carga no bloqueante (patrón loadCSS/Filament Group).
-     El preload baja el archivo con prioridad alta sin bloquear el
-     render; el <link> real entra como media="print" (prioridad baja)
-     y se reclasifica a "all" en su evento onload, más abajo en el
-     <body>. El <noscript> garantiza carga bloqueante tradicional si
-     JS está deshabilitado, sin perder tipografía en ese caso.
-     ══════════════════════════════════════════════════════════════════ -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" id="gfontsLink">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
+  /* ═══════════════════════════════════════════════════════════════
+     URU SPOT — Fase 4: ensamblado final
+     Une las tres fases anteriores sobre el mismo manifiesto y las
+     conecta a los datos reales del padrón (1.468 lugares, 14 rubros):
+       1. la totalidad siempre es visible (fracción persistente)
+       2. nada existe sin verificación real
+       3. el tiempo es direccional, el orden de caminata no se
+          desarma (posición antes que nombre)
+       4. el contenido se acumula, nunca se reemplaza sin rastro
+       5. los cambios de estado corresponden a hechos, no a mood
 
-<!-- ══════════════════════════════════════════════════════════════════
-     HOJAS DE ESTILO — orden de cascada deliberado: tokens/base primero,
-     luego cada capa de componentes en el orden en que fueron
-     incorporadas al sistema. El orden relativo entre archivos es
-     significativo (capas aditivas posteriores dependen de las
-     anteriores) y se mantiene intacto.
-     ══════════════════════════════════════════════════════════════════ -->
-<link rel="stylesheet" href="css/01-tokens-base.css">
-<link rel="stylesheet" href="css/02-mapa.css">
-<link rel="stylesheet" href="css/03-componentes-fase2.css">
-<link rel="stylesheet" href="css/04-noscript-reveal.css">
-<link rel="stylesheet" href="css/09-editorial-polish.css">
-<link rel="stylesheet" href="css/05-utilidades-transversales.css">
-<link rel="stylesheet" href="css/06-responsive-nav.css">
-<link rel="stylesheet" href="css/07-fab-toast.css">
-<link rel="stylesheet" href="css/08-hover-comparador.css">
-<link rel="stylesheet" href="css/10-premium-redesign.css">
+     Buscador, chips de rubro y mapa esquemático son el mismo lente
+     de Fase 3 aplicado sobre la secuencia real — ninguno crea una
+     vista paralela, ninguno reordena el padrón. No importa ni toca
+     core-engine.js ni el resto del motor viejo: esta página usa
+     js/fase4-motor.js, aislado.
+     ═══════════════════════════════════════════════════════════════ */
 
-<!-- ══════════════════════════════════════════════════════════════════
-     DATOS ESTRUCTURADOS — Organization, WebPage, BreadcrumbList,
-     FAQPage, HowTo, Dataset e ItemList en un único @graph enlazado.
-     ══════════════════════════════════════════════════════════════════ -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://uruspot.pages.dev/#organization",
-      "name": "URU SPOT",
-      "url": "https://uruspot.pages.dev/",
-      "logo": "https://uruspot.pages.dev/img/logof.webp",
-      "description": "Padrón comercial y de servicios verificado in situ de Concepción del Uruguay, Entre Ríos, Argentina.",
-      "email": "uruspotcdu@gmail.com",
-      "areaServed": {
-        "@type": "City",
-        "name": "Concepción del Uruguay"
-      }
-    },
-    {
-      "@type": "WebPage",
-      "@id": "https://uruspot.pages.dev/donde-comer-cdu/#webpage",
-      "url": "https://uruspot.pages.dev/donde-comer-cdu/",
-      "name": "URU SPOT — El padrón vivo de Concepción del Uruguay",
-      "description": "El padrón completo de Concepción del Uruguay: 862 lugares verificados en 13 rubros, con dirección y calificación reales — nada inventado.",
-      "inLanguage": "es-AR",
-      "dateModified": "2026-07-13",
-      "isPartOf": {
-        "@id": "https://uruspot.pages.dev/#organization"
-      },
-      "mainEntityOfPage": "https://uruspot.pages.dev/donde-comer-cdu/#webpage"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Inicio",
-          "item": "https://uruspot.pages.dev/inicio/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "El padrón",
-          "item": "https://uruspot.pages.dev/donde-comer-cdu/"
-        }
-      ]
-    },
-    {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "¿Cuál es la forma más rápida de encontrar un lugar en el mapa?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Escribí en el buscador (atajo: tocá \"/\" en cualquier parte de la página) o tocá \"Cerca de mí\" para ver solo lo que te queda a mano. Si ya guardaste favoritos, \"Solo favoritos\" filtra el mapa a lo tuyo en un toque, y \"Lista\" ordena todo por cercanía o calificación sin perder el filtro que tenías puesto."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Cómo se calculan las calificaciones?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Se toman de la ficha pública de Google Places de cada lugar y se cruzan contra la visita in situ. El número de reseñas se muestra siempre junto a la calificación, no se oculta."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Qué son las fichas guardadas?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Tocá el corazón en cualquier lugar del padrón. Queda guardado en este navegador (localStorage), sin cuenta ni contraseña."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Encontré un dato viejo o un local cerrado, ¿qué hago?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Escribinos a uruspotcdu@gmail.com con el nombre del lugar y qué cambió. Se corrige en la próxima actualización del padrón."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Puedo compartir la ficha de un lugar puntual?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Sí. Cada lugar del mapa y de la lista tiene su propio botón de compartir, así podés mandar el lugar exacto por WhatsApp o donde prefieras sin explicar cómo llegar."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Mis favoritos se guardan si cambio de celular o borro el navegador?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No: se guardan solo en este navegador (localStorage), sin cuenta ni servidor de por medio. Si cambiás de dispositivo o borrás los datos de navegación, hay que volver a marcarlos."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Qué pasa si busco algo y no aparece ningún resultado?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "El padrón nunca se queda en blanco sin explicación: muestra un aviso con la opción de limpiar filtros o volver a ver las 862 fichas completas en un toque."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Necesito activar mi ubicación para usar el mapa?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No. Todo el mapa y la lista funcionan sin geolocalización. \"Cerca de mí\" y el orden \"Más cerca\" son un atajo opcional, no un requisito para explorar el padrón."
-          }
-        }
-      ]
-    },
-    {
-      "@type": "HowTo",
-      "name": "Cómo explorar el padrón de URU SPOT",
-      "description": "Los cuatro pasos para pasar de las 862 fichas completas a un lugar puntual guardado en tus favoritos.",
-      "step": [
-        { "@type": "HowToStep", "position": 1, "name": "Buscá o filtrá", "text": "Escribí un nombre o rubro en el buscador, o tocá una de las 13 categorías del mapa para acotar el padrón." },
-        { "@type": "HowToStep", "position": 2, "name": "Elegí mapa o lista", "text": "Explorá los pines en el mapa o cambiá a la vista en lista para ordenar por cercanía o calificación." },
-        { "@type": "HowToStep", "position": 3, "name": "Abrí una ficha", "text": "Tocá un pin o una fila para ver dirección, calificación real y las reseñas verificadas de ese lugar." },
-        { "@type": "HowToStep", "position": 4, "name": "Guardala si te sirve", "text": "Tocá el corazón para guardar la ficha en \"Tus fichas guardadas\", sin necesidad de crear una cuenta." }
-      ]
-    },
-    {
-      "@type": "Dataset",
-      "name": "Padrón comercial y de servicios de Concepción del Uruguay",
-      "description": "862 lugares verificados in situ y cruzados con Google Places, clasificados en 13 rubros: dirección, calificación y cantidad de reseñas de cada uno.",
-      "url": "https://uruspot.pages.dev/donde-comer-cdu/#padron",
-      "keywords": ["Concepción del Uruguay", "Entre Ríos", "padrón comercial", "guía de lugares", "gastronomía", "servicios"],
-      "variableMeasured": ["Nombre", "Rubro", "Dirección", "Calificación", "Cantidad de reseñas"],
-      "creator": { "@id": "https://uruspot.pages.dev/#organization" },
-      "temporalCoverage": "2026-07-13",
-      "spatialCoverage": {
-        "@type": "City",
-        "name": "Concepción del Uruguay"
-      }
-    },
-    {
-      "@type": "ItemList",
-      "name": "Las 13 categorías del padrón de URU SPOT",
-      "url": "https://uruspot.pages.dev/donde-comer-cdu/#padron",
-      "numberOfItems": 13,
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Compras", "description": "Supermercados, ferreterías, indumentaria y comercios de todo tipo. 232 lugares verificados." },
-        { "@type": "ListItem", "position": 2, "name": "Gastronomía", "description": "Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías. 166 lugares verificados." },
-        { "@type": "ListItem", "position": 3, "name": "Salud", "description": "Farmacias, clínicas, laboratorios y profesionales de la salud. 112 lugares verificados." },
-        { "@type": "ListItem", "position": 4, "name": "Finanzas", "description": "Bancos, seguros, abogados, escribanías e inmobiliarias. 66 lugares verificados." },
-        { "@type": "ListItem", "position": 5, "name": "Transporte", "description": "Remiserías, talleres, estaciones de servicio y agencias de viaje. 65 lugares verificados." },
-        { "@type": "ListItem", "position": 6, "name": "Deporte", "description": "Gimnasios, clubes deportivos y espacios de entrenamiento. 46 lugares verificados." },
-        { "@type": "ListItem", "position": 7, "name": "Patrimonio", "description": "Museos, plazas, iglesias, centros culturales y edificios históricos. 38 lugares verificados." },
-        { "@type": "ListItem", "position": 8, "name": "Educación", "description": "Universidades, institutos, escuelas y jardines de infantes. 34 lugares verificados." },
-        { "@type": "ListItem", "position": 9, "name": "Belleza", "description": "Peluquerías, barberías y centros de estética. 28 lugares verificados." },
-        { "@type": "ListItem", "position": 10, "name": "Alojamiento", "description": "Hoteles, hosterías, cabañas, hostels y apart hoteles. 25 lugares verificados." },
-        { "@type": "ListItem", "position": 11, "name": "Servicios públicos", "description": "Municipalidad, policía, correo, Registro Civil y más. 22 lugares verificados." },
-        { "@type": "ListItem", "position": 12, "name": "Mascotas", "description": "Veterinarias y pet shops para el cuidado de tus compañeros. 16 lugares verificados." },
-        { "@type": "ListItem", "position": 13, "name": "Naturaleza", "description": "Balnearios, islas, parques y la costanera del río Uruguay. 12 lugares verificados." }
-      ]
-    }
-  ]
-}
-</script>
+  :root{
+    --tinta:      #ECEDEF;
+    --tinta-60:   rgba(236,237,239,.62);
+    --tinta-30:   rgba(236,237,239,.26);
+    --fondo:      #0A0D13;
+    --fondo-2:    #10141C;
+    --linea:      rgba(148,155,171,.16);
+    --linea-fuerte: rgba(148,155,171,.30);
+    --granate:    #9C3A46;
+    --granate-clara: #C97A83;
 
+    --f-display: 'Fraunces', serif;
+    --f-ui:      'IBM Plex Sans', sans-serif;
+    --f-dato:    'IBM Plex Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--fondo); color:var(--tinta);
+    font-family:var(--f-ui); line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--granate); color:var(--tinta); }
+  a{ color:inherit; }
+
+  .envoltorio{ max-width:1180px; margin:0 auto; padding:0 40px; }
+  .envoltorio--angosta{ max-width:920px; }
+  @media (max-width:720px){ .envoltorio{ padding:0 20px; } }
+
+  /* ─── CABECERA — fracción persistente: coordenada, no progreso ─── */
+  header{
+    position:sticky; top:0; z-index:20;
+    background:rgba(10,13,19,.88); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--linea);
+  }
+  .membrete{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 0;
+  }
+  .marca{ font-family:var(--f-ui); font-weight:600; font-size:13px; letter-spacing:.14em; }
+  .marca span{
+    display:block; font-family:var(--f-dato); font-weight:400;
+    font-size:10px; letter-spacing:.02em; color:var(--tinta-30); margin-top:3px;
+  }
+  .fraccion{ font-family:var(--f-dato); font-size:13px; color:var(--tinta-60); text-align:right; white-space:nowrap; }
+  .fraccion b{ color:var(--tinta); font-weight:500; }
+  .fraccion .etiqueta{
+    display:block; font-size:9.5px; color:var(--tinta-30);
+    letter-spacing:.08em; text-transform:uppercase; margin-top:2px;
+  }
+
+  /* ─── APERTURA ─── */
+  .apertura{ padding:76px 0 54px; max-width:700px; }
+  .apertura .eyebrow{
+    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--granate-clara); margin-bottom:24px;
+  }
+  .apertura h1{
+    font-family:var(--f-display); font-weight:500; font-style:normal;
+    font-size:clamp(1.7rem, 4vw, 2.7rem); line-height:1.32; letter-spacing:-.01em;
+  }
+  .apertura h1 .num{ font-family:var(--f-dato); font-weight:400; font-size:.72em; color:var(--granate-clara); }
+  .apertura p{ margin-top:22px; font-size:15.5px; color:var(--tinta-60); max-width:56ch; }
+  .apertura p b{ color:var(--tinta); font-weight:600; }
+  .senial{
+    margin-top:44px; font-family:var(--f-dato); font-size:10.5px;
+    letter-spacing:.06em; color:var(--tinta-30); display:flex; align-items:center; gap:10px;
+  }
+  .senial::before{ content:''; width:16px; height:1px; background:var(--tinta-30); }
+
+  /* ─── TÍTULO DE VISTA (motor) ─── */
+  .titulo-vista{ padding:36px 0 4px; max-width:640px; }
+  .titulo-vista .eyebrow{
+    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--granate-clara); margin-bottom:14px;
+  }
+  .titulo-vista h2{
+    font-family:var(--f-display); font-weight:500; font-size:clamp(1.4rem,3vw,1.9rem); line-height:1.3;
+  }
+  .titulo-vista p{ margin-top:12px; font-size:14px; color:var(--tinta-60); max-width:56ch; }
+
+  /* ─── HERRAMIENTAS — buscador, chips de rubro, favoritos ─── */
+  .herramientas{ padding:26px 0 6px; }
+  .buscador{
+    display:flex; align-items:center; gap:10px;
+    border:1px solid var(--linea-fuerte); border-radius:2px;
+    padding:11px 14px; max-width:440px;
+  }
+  .buscador input{
+    flex:1; background:none; border:none; outline:none;
+    font-family:var(--f-ui); font-size:14px; color:var(--tinta);
+  }
+  .buscador input::placeholder{ color:var(--tinta-30); }
+  .buscador .lupa{ font-family:var(--f-dato); color:var(--tinta-30); font-size:13px; }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .chip{
+    font-family:var(--f-dato); font-size:10.5px; letter-spacing:.03em;
+    color:var(--tinta-60); background:none;
+    border:1px solid var(--linea-fuerte); border-radius:20px;
+    padding:7px 13px; cursor:pointer;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .chip:hover{ border-color:var(--tinta-60); color:var(--tinta); }
+  .chip.activo{ border-color:var(--granate); color:var(--tinta); background:rgba(156,58,70,.16); }
+  .chip.chip-fav.activo{ border-color:var(--granate-clara); }
+  .chip.chip-fav::before{ content:'☆ '; }
+  .chip.chip-fav.activo::before{ content:'★ '; color:var(--granate-clara); }
+
+  .estado-resultados{
+    margin-top:20px; font-family:var(--f-dato); font-size:11px; color:var(--tinta-30);
+    padding-bottom:8px; border-bottom:1px solid var(--linea);
+  }
+  .estado-resultados b{ color:var(--tinta-60); font-weight:500; }
+
+  /* ─── ÁREA — lista y mapa, la misma secuencia en dos lentes ─── */
+  .area{ display:grid; grid-template-columns:1fr 380px; gap:0; }
+  @media (max-width:900px){
+    .area{ grid-template-columns:1fr; }
+    .panel-mapa{ order:-1; }
+  }
+
+  .panel-lista{ padding:6px 0 80px; }
+
+  .paso{
+    display:grid; grid-template-rows:1fr; overflow:hidden;
+    border-bottom:1px solid var(--linea);
+    transition:grid-template-rows .38s ease, opacity .4s ease, padding .38s ease, transform .4s ease;
+    opacity:0; transform:translateY(6px);
+    /* content-visibility: el navegador salta el trabajo de layout/paint
+       de filas fuera de pantalla — clave con 1.468 registros. */
+    content-visibility:auto; contain-intrinsic-size:auto 84px;
+  }
+  .paso.visible{ opacity:1; transform:none; }
+  .paso-inner{
+    display:grid; grid-template-columns:64px 1fr auto; gap:18px;
+    align-items:start; padding:18px 0; min-height:0;
+  }
+  .paso.oculto{ grid-template-rows:0fr; opacity:0; padding-top:0; padding-bottom:0; border-color:transparent; }
+  .paso.oculto .paso-inner{ padding:0; overflow:hidden; }
+
+  .paso .pos{ font-family:var(--f-dato); font-size:12.5px; color:var(--tinta-30); padding-top:2px; }
+  .paso.activa{ background:rgba(156,58,70,.07); }
+  .paso.activa .pos{ color:var(--granate-clara); }
+  .paso.paso--activa{ background:rgba(156,58,70,.05); }
+  .paso.paso--activa .pos{ color:var(--granate-clara); }
+
+  .paso .rubro{
+    font-family:var(--f-dato); font-size:9.5px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--granate-clara);
+  }
+  .paso .nombre{ font-family:var(--f-display); font-weight:500; font-size:17px; margin-top:6px; }
+  .paso .direccion{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-60); margin-top:4px; }
+  .paso .constancia{
+    font-family:var(--f-dato); font-size:10px; color:var(--tinta-30); margin-top:8px; letter-spacing:.02em;
+  }
+  .paso .constancia::before{ content:'✓ '; color:var(--granate-clara); }
+  .paso .constancia.constancia--pendiente{ color:var(--granate-clara); }
+  .paso .constancia.constancia--pendiente::before{ content:'· '; color:var(--tinta-30); }
+
+  .btn-fav{
+    background:none; border:none; cursor:pointer; font-size:16px;
+    color:var(--tinta-30); padding:2px 4px; line-height:1;
+    transition:color .2s ease, transform .2s ease;
+  }
+  .btn-fav:hover{ color:var(--granate-clara); }
+  .btn-fav.activo{ color:var(--granate-clara); }
+
+  .sin-resultados{ padding:60px 10px; font-family:var(--f-ui); color:var(--tinta-60); max-width:44ch; }
+  .sin-resultados b{ display:block; font-family:var(--f-display); font-size:19px; color:var(--tinta); margin-bottom:8px; font-weight:500; }
+
+  /* ─── MAPA ESQUEMÁTICO ─── */
+  .panel-mapa{
+    position:sticky; top:96px; align-self:start;
+    padding:20px 0 40px 30px; border-left:1px solid var(--linea); height:fit-content;
+  }
+  @media (max-width:900px){
+    .panel-mapa{ position:static; border-left:none; padding-left:0; margin-bottom:10px; }
+  }
+  .mapa-etiqueta{
+    font-family:var(--f-dato); font-size:10px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--tinta-30); margin-bottom:12px;
+  }
+  .mapa-lienzo{ width:100%; aspect-ratio:1/1; position:relative; border:1px solid var(--linea-fuerte); }
+  .mapa-lienzo .eje{ position:absolute; font-family:var(--f-dato); font-size:9px; color:var(--tinta-30); }
+  .mapa-lienzo .eje-n{ top:6px; left:50%; transform:translateX(-50%); }
+  .mapa-lienzo .eje-s{ bottom:6px; left:50%; transform:translateX(-50%); }
+  .mapa-lienzo .eje-e{ right:6px; top:50%; transform:translateY(-50%); }
+  .mapa-lienzo .eje-o{ left:6px; top:50%; transform:translateY(-50%); }
+  .mapa-lienzo .central{ position:absolute; left:50%; top:50%; width:1px; height:1px; background:var(--linea-fuerte); }
+
+  .punto{
+    position:absolute; width:5px; height:5px; margin:-2.5px 0 0 -2.5px;
+    border-radius:50%; background:var(--tinta-30);
+    cursor:pointer; transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
+  }
+  .punto:hover{ background:var(--tinta-60); transform:scale(1.6); }
+  .punto.activo{ background:var(--granate-clara); transform:scale(2); box-shadow:0 0 0 4px rgba(201,122,131,.18); }
+  .punto.favorito::after{
+    content:''; position:absolute; inset:-3px; border:1px solid var(--granate-clara); border-radius:50%; opacity:.6;
+  }
+  .mapa-nota{ margin-top:16px; font-family:var(--f-ui); font-size:11.5px; color:var(--tinta-30); }
+
+  /* ─── MANIFIESTO ─── */
+  .manifiesto{ padding:70px 0 20px; max-width:700px; }
+  .manifiesto .eyebrow{
+    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--granate-clara); margin-bottom:22px;
+  }
+  .manifiesto h2{
+    font-family:var(--f-display); font-weight:500; font-size:clamp(1.4rem,3vw,1.9rem);
+    line-height:1.36; letter-spacing:-.005em; max-width:22ch;
+  }
+  .manifiesto > p{ margin-top:22px; font-size:15px; color:var(--tinta-60); max-width:58ch; }
+  .manifiesto > p b{ color:var(--tinta); font-weight:600; }
+  .principios{ margin-top:40px; }
+  .principio{
+    display:grid; grid-template-columns:110px 1fr; gap:22px;
+    padding:20px 0; border-top:1px solid var(--linea);
+  }
+  .principio:last-child{ border-bottom:1px solid var(--linea); }
+  .principio .tag{
+    font-family:var(--f-dato); font-size:10px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--tinta-30); padding-top:2px;
+  }
+  .principio p{ font-size:14.5px; color:var(--tinta-60); }
+  .principio p b{ color:var(--tinta); font-weight:600; }
+  @media (max-width:560px){ .principio{ grid-template-columns:1fr; gap:8px; } }
+
+  /* ─── ÍNDICE DE RUBROS ─── */
+  .indice{ padding:60px 0 90px; max-width:640px; }
+  .indice-cab{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding-bottom:14px; border-bottom:1px solid var(--linea-fuerte); margin-bottom:2px;
+  }
+  .indice-cab h2{ font-family:var(--f-display); font-weight:500; font-size:17px; }
+  .indice-cab span{ font-family:var(--f-dato); font-size:10px; color:var(--tinta-30); }
+  .indice-nota{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-30); margin:14px 0 6px; max-width:50ch; }
+  .fila-rubro{ display:grid; grid-template-columns:1fr auto; gap:16px; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--linea); }
+  .fila-rubro .col-izq{ display:flex; flex-direction:column; }
+  .fila-rubro .nombre{ font-family:var(--f-ui); font-size:14.5px; color:var(--tinta-60); }
+  .fila-rubro .desc{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-30); margin-top:4px; max-width:46ch; }
+  .fila-rubro .cifra{ font-family:var(--f-dato); font-size:12px; color:var(--tinta-30); white-space:nowrap; }
+
+  /* ─── FAQ ─── */
+  .faq{ padding:60px 0 90px; max-width:700px; }
+  .pregunta{ border-bottom:1px solid var(--linea); }
+  .pregunta:first-of-type{ border-top:1px solid var(--linea-fuerte); }
+  .pregunta-cabecera{
+    width:100%; display:flex; align-items:baseline; gap:18px;
+    background:none; border:none; text-align:left; cursor:pointer;
+    padding:20px 0; color:var(--tinta); font-family:var(--f-ui);
+  }
+  .pregunta-cabecera .num{ font-family:var(--f-dato); font-size:11px; color:var(--tinta-30); white-space:nowrap; }
+  .pregunta-cabecera .texto{ flex:1; font-size:15px; font-weight:500; }
+  .pregunta-cabecera .icono{ font-family:var(--f-dato); font-size:14px; color:var(--tinta-30); transition:transform .3s ease; }
+  .pregunta.abierta .pregunta-cabecera .icono{ transform:rotate(45deg); color:var(--granate-clara); }
+  .pregunta.abierta .pregunta-cabecera .num{ color:var(--granate-clara); }
+  .pregunta-cuerpo{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s ease; }
+  .pregunta.abierta .pregunta-cuerpo{ grid-template-rows:1fr; }
+  .pregunta-cuerpo-inner{ overflow:hidden; }
+  .pregunta-cuerpo p{ font-size:14px; color:var(--tinta-60); max-width:56ch; padding-bottom:22px; padding-right:30px; }
+
+  /* ─── FOOTER ─── */
+  footer.pie{ padding:56px 0 40px; border-top:1px solid var(--linea-fuerte); }
+  .footer-grillado{ display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px; padding-bottom:36px; }
+  .footer-marca .marca{ font-size:13px; }
+  .footer-marca p{ margin-top:14px; font-size:13px; color:var(--tinta-30); max-width:32ch; }
+  .footer-col h4{ font-family:var(--f-dato); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--tinta-30); margin-bottom:14px; }
+  .footer-col a{ display:block; font-size:13.5px; color:var(--tinta-60); text-decoration:none; padding:6px 0; transition:color .2s ease; }
+  .footer-col a:hover{ color:var(--granate-clara); }
+  .footer-base{
+    padding-top:22px; border-top:1px solid var(--linea);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-family:var(--f-dato); font-size:9.5px; color:var(--tinta-30);
+  }
+  @media (max-width:640px){ .footer-grillado{ grid-template-columns:1fr; gap:28px; } }
+
+  :focus-visible{ outline:1.5px solid var(--granate-clara); outline-offset:2px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+    .paso{ opacity:1 !important; transform:none !important; }
+  }
+
+</style>
 </head>
 <body>
 
-<a class="skip-link" href="#main">Saltar al contenido principal</a>
-
-<div id="intro" aria-hidden="true">
-  <div class="stamp-mark">
-    <svg viewBox="0 0 120 120">
-      <circle class="stamp-ring" cx="60" cy="60" r="52"/>
-      <circle class="stamp-ring" cx="60" cy="60" r="44" stroke-width="1"/>
-      <path id="stampArcTop" d="M 60 16 A 44 44 0 0 1 100 60" fill="none"/>
-      <path id="stampArcBot" d="M 20 60 A 44 44 0 0 1 60 16" fill="none"/>
-      <text class="stamp-word"><textPath href="#stampArcTop" startOffset="4">URU SPOT</textPath></text>
-      <text class="stamp-num" x="60" y="58" text-anchor="middle">FICHA N.º 0862</text>
-      <text class="stamp-word" x="60" y="72" text-anchor="middle" style="font-size:12px;">VERIFICADO</text>
-      <text class="stamp-num" x="60" y="86" text-anchor="middle">CONCEPCIÓN DEL URUGUAY</text>
-    </svg>
-  </div>
-</div>
-
-<div id="progress"></div>
-
-<header class="site-header">
-<nav class="top" id="nav" aria-label="Navegación principal">
-  <div class="wrap">
-    <a class="mark" href="#hero">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3C8 3 5 6.2 5 10c0 5.2 7 11 7 11s7-5.8 7-11c0-3.8-3-7-7-7Z" stroke="#9C6B2E" stroke-width="1.7"/><circle cx="12" cy="10" r="2.2" fill="#9C6B2E"/></svg>
-      URU SPOT
-    </a>
-    <div class="navlinks">
-      <a href="#padron">El padrón</a>
-      <a href="#verificacion">Cómo se verifica</a>
-      <a href="#dia">Un día en la ciudad</a>
-      <a href="#fichas">Fichas destacadas</a>
-      <a href="#ayuda">Ayuda</a>
+<header>
+  <div class="envoltorio membrete">
+    <div class="marca">URU SPOT
+      <span>32°29'S 58°14'O — Concepción del Uruguay</span>
     </div>
-    <div class="navcta">
-      <button class="favbtn" id="favNavBtn" aria-label="Ver fichas guardadas">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg>
-        Guardadas <span class="fb-count" id="favCount">0</span>
-      </button>
-      <button class="btn primary" id="heroBtnNav">Ver el padrón</button>
+    <div class="fraccion">
+      <b id="fraccionNum">0000</b> / <span id="fraccionTotal">1468</span>
+      <span class="etiqueta">del padrón</span>
     </div>
   </div>
-</nav>
-
-<nav class="breadcrumb wrap" aria-label="Ubicación actual">
-  <ol>
-    <li><a href="../inicio/">Inicio</a></li>
-    <li aria-current="page">El padrón</li>
-  </ol>
-</nav>
 </header>
 
-<main id="main">
+<div class="envoltorio envoltorio--angosta">
 
-<button type="button" id="backToTop" aria-label="Volver arriba">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-</button>
+  <section class="apertura">
+    <div class="eyebrow">un registro, no un catálogo</div>
+    <h1>Esto tiene un tamaño exacto: <span class="num" id="aperturaNum">1.468</span> lugares, caminados uno por uno.</h1>
+    <p>
+      No hay ranking, no hay algoritmo, no hay orden por relevancia.
+      Cada lugar entró al padrón porque <b>alguien golpeó esa puerta</b>
+      después de haber golpeado la anterior. El orden en que aparece
+      acá abajo es el orden real en que se caminó Concepción del
+      Uruguay — nada se reordena para verse mejor.
+    </p>
+    <div class="senial">bajá para recorrerlo, buscalo o filtralo — es la misma secuencia</div>
+  </section>
 
-<!-- HERO — primera impresión + prueba social + acceso a fichas destacadas -->
-<section class="hero laid" id="hero" aria-labelledby="title-hero">
-  <div class="wrap">
-    <div>
-      <div class="hero-meta-row">
-        <span class="kicker">Concepción del Uruguay, Entre Ríos</span>
-        <span class="status-chip"><span class="status-dot" aria-hidden="true"></span>Padrón activo · actualizado el 13 jul 2026</span>
+</div>
 
-        <span class="hero-clock" id="heroClock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Son las <b id="heroClockValue">—:—</b> en la ciudad</span>
-      </div>
+<div class="envoltorio">
 
-      <h1 class="h-hero" id="title-hero">La ciudad tiene <em>862 fichas</em>. Ninguna la escribió una IA: todas se caminaron primero.</h1>
-      <p class="hero-sub">URU SPOT no es una guía turística: es el padrón comercial y de servicios de la ciudad, del asado a la escribanía — <b>cada ficha con dirección, calificación y estado reales</b>, verificados a pie de calle.</p>
+  <section class="titulo-vista">
+    <div class="eyebrow">un lente, no una vista nueva</div>
+    <h2>Buscar, filtrar o mirar el mapa es lo mismo: recortar la secuencia.</h2>
+    <p>Nada de esto reordena el padrón. Un lugar filtrado conserva su
+      posición real — la que tenía cuando se caminó — aunque hoy lo
+      estés viendo a través de un filtro de rubro, una búsqueda de
+      texto o el mapa.</p>
+  </section>
 
-      <div class="hero-proof" aria-label="El padrón en números">
-        <div class="proof-item"><div class="proof-num">862</div><div class="proof-label">Fichas en el padrón</div></div>
-        <div class="proof-item"><div class="proof-num">13</div><div class="proof-label">Rubros, sin relleno</div></div>
-        <div class="proof-item"><div class="proof-num">0</div><div class="proof-label">Fichas escritas por IA</div></div>
-        <div class="proof-item"><div class="proof-num">13&nbsp;jul</div><div class="proof-label">Última actualización</div></div>
-      </div>
-
-      <div class="hero-actions">
-        <button class="btn primary" id="heroBtn">Recorrer el padrón</button>
-        <a href="#verificacion" class="link">Cómo entra un lugar acá <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4"/></svg></a>
-      </div>
-      <p class="hero-trust">Sin descargar ninguna app · sin crear cuenta · gratis, como el resto de URU SPOT. <span class="hero-kbd-hint">Atajo: <kbd>/</kbd> para buscar</span></p>
-
-      <nav class="hero-explore" aria-label="Explorar el padrón por rubro">
-        <p class="hero-explore-label" id="rubroExploreLabel">Explorá por rubro</p>
-        <div class="rubro-scroll" id="rubroExplorer" aria-labelledby="rubroExploreLabel">
-
-        </div>
-      </nav>
-
-      <blockquote class="hero-quote reveal">
-        <p>Cada ficha se visitó a pie antes de publicarse. Si un lugar cerró o cambió de horario, se corrige apenas se detecta — no en una fecha fija.</p>
-        <cite>— Cómo se arma el padrón</cite>
-      </blockquote>
+  <section class="herramientas">
+    <div class="buscador">
+      <span class="lupa">buscar</span>
+      <input id="inputBuscar" type="text" placeholder="por nombre, rubro o dirección…" autocomplete="off">
     </div>
-
-    <div class="ficha-column reveal">
-      <div class="ficha-stage" id="fichaStage" aria-hidden="true">
-
-      </div>
-      <div class="ficha-dots" id="fichaDots"></div>
-      <p class="ficha-caption">Fichas reales del padrón — pasá el mouse para pausar</p>
+    <div class="chips" id="chipsRubros"></div>
+    <div class="chips">
+      <button class="chip chip-fav" id="chipFav" type="button">favoritos</button>
+      <button class="chip" id="chipLimpiar" type="button">limpiar filtros</button>
     </div>
-  </div>
+    <div class="estado-resultados" id="estadoResultados">cargando el padrón…</div>
+  </section>
 
-  <a class="hero-scrollcue" href="#manifest" aria-label="Bajar para ver qué hay realmente en el padrón">
-    <span>Seguí bajando</span>
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg>
-  </a>
-</section>
-
-<!-- MANIFIESTO — qué es realmente el padrón, desglosado por rubro -->
-<section class="manifest reveal" id="manifest" aria-labelledby="title-manifest">
-  <div class="wrap">
-    <p class="eyebrow">Lo que hay realmente ahí adentro</p>
-    <h2 id="title-manifest">De las 862 fichas, apenas <b>166 son bares o restaurantes.</b></h2>
-    <p class="lede">El resto es la ciudad haciendo su vida diaria: comercios, salud, trámites, plata, movilidad, entrenamiento, historia, estudio, estética, techo, mascota y río. Trece rubros, ninguno decorativo.</p>
-    <div class="breakdown" id="breakdown">
-      <div class="bd-item"><div class="bd-num">232</div><div class="bd-label">Compras</div></div>
-      <div class="bd-item"><div class="bd-num">166</div><div class="bd-label">Gastronomía</div></div>
-      <div class="bd-item"><div class="bd-num">112</div><div class="bd-label">Salud</div></div>
-      <div class="bd-item"><div class="bd-num">66</div><div class="bd-label">Finanzas</div></div>
-      <div class="bd-item"><div class="bd-num">65</div><div class="bd-label">Transporte</div></div>
-      <div class="bd-item"><div class="bd-num">46</div><div class="bd-label">Deporte</div></div>
-      <div class="bd-item"><div class="bd-num">38</div><div class="bd-label">Patrimonio</div></div>
-      <div class="bd-item"><div class="bd-num">34</div><div class="bd-label">Educación</div></div>
-      <div class="bd-item"><div class="bd-num">28</div><div class="bd-label">Belleza</div></div>
-      <div class="bd-item"><div class="bd-num">25</div><div class="bd-label">Alojamiento</div></div>
-      <div class="bd-item"><div class="bd-num">22</div><div class="bd-label">Servicios públicos</div></div>
-      <div class="bd-item"><div class="bd-num">16</div><div class="bd-label">Mascotas</div></div>
-      <div class="bd-item"><div class="bd-num">12</div><div class="bd-label">Naturaleza</div></div>
-    </div>
-    <p class="manifest-fecha">Padrón verificado al 13 de julio de 2026 — se actualiza cuando algo cambia, no en fechas fijas.</p>
-
-    <div class="manifest-insight reveal">
-      <span class="manifest-insight-ico" aria-hidden="true">🧭</span>
-      <p>Mirado de cerca, el padrón cuenta una historia: por cada restaurante hay <b>casi dos comercios más</b> de otro rubro. La ciudad que URU SPOT registra no vive solo de la joda — vive de la farmacia de la esquina, del banco, del taller, del jardín de infantes. Esa es la diferencia entre una guía turística y un padrón real.</p>
-    </div>
-
-    <div class="manifest-bars reveal" id="manifestBars">
-      <p class="mb-label">Los mismos 862, en una sola barra</p>
-      <div class="mb-track" id="mbTrack" role="img" aria-label="Proporción de cada rubro sobre el total de 862 fichas del padrón"></div>
-      <p class="mb-curioso" id="mbCurioso" aria-live="off"></p>
-    </div>
-  </div>
-</section>
-
-<!-- PADRÓN — mapa y lista interactivos, corazón funcional de la página -->
-<section id="padron" aria-labelledby="title-mapa">
-  <div class="laid-veil" aria-hidden="true"></div>
-  <div class="wrap">
-    <div class="s-head reveal">
-      <p class="eyebrow">El padrón, en el mapa</p>
-      <h2 id="title-mapa">862 fichas, ubicadas de verdad. Explorá como quieras.</h2>
-      <p>Este es el padrón completo, en vivo: buscá un nombre, filtrá por rubro o tocá "Cerca de mí" — y saltá entre el mapa y la lista sin perder el lugar donde estabas.</p>
-    </div>
-
-    <div class="padron-trust reveal" aria-hidden="true">
-      <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg><b>862</b>&nbsp;fichas verificadas in situ</span>
-      <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Georreferenciado real, no aproximado</span>
-      <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Actualizado el <b>13 jul 2026</b></span>
-      <span class="padron-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>13 rubros distintos</span>
-    </div>
-
-    <ol class="mapa-onboard reveal" aria-label="Cómo explorar el padrón en 4 pasos">
-      <li class="mapa-onboard-step"><b>Buscá o filtrá</b><span>Un nombre, un rubro o una de las 13 categorías.</span></li>
-      <li class="mapa-onboard-step"><b>Mapa o lista</b><span>Los mismos resultados, en la vista que prefieras.</span></li>
-      <li class="mapa-onboard-step"><b>Abrí una ficha</b><span>Dirección, calificación real y reseñas verificadas.</span></li>
-      <li class="mapa-onboard-step"><b>Guardala</b><span>Un toque en el corazón, sin crear ninguna cuenta.</span></li>
-    </ol>
-
-    <div class="rubro-spotlight reveal" id="rubroSpotlight" aria-roledescription="carrusel" aria-label="Explorá el padrón, un rubro a la vez">
-      <div class="rs-head">
-        <span class="rs-eyebrow">Un rubro a la vez</span>
-        <div class="rs-nav">
-          <button type="button" id="rsPrev" aria-label="Rubro anterior">‹</button>
-          <button type="button" id="rsNext" aria-label="Rubro siguiente">›</button>
-        </div>
-      </div>
-      <div class="rs-body" id="rsBody">
-        <span class="rs-ico" id="rsIco" aria-hidden="true">🍽️</span>
-        <div class="rs-info">
-          <p class="rs-label" id="rsLabel">Gastronomía</p>
-          <p class="rs-desc" id="rsDesc">Restaurantes, parrillas, bares, cafeterías, panaderías, heladerías y pizzerías.</p>
-          <p class="rs-count"><strong id="rsCount">166</strong> fichas en este rubro</p>
-        </div>
-        <button type="button" class="rs-cta" id="rsCta" data-grupo="gastronomia">Ver en el mapa →</button>
-      </div>
-      <div class="rs-dots" id="rsDots" aria-hidden="true"></div>
-    </div>
-
-    <div class="mapa-tip reveal" id="mapaTip">
-      <span class="mapa-tip-ico" aria-hidden="true">💡</span>
-      <span class="mapa-tip-body">
-        <b>¿Sabías que…</b>
-        <span id="mapaTipTexto">podés tocar "/" en cualquier parte de la página para saltar directo al buscador del mapa, sin usar el mouse.</span>
-      </span>
-      <button type="button" class="mapa-tip-swap" id="mapaTipSwap" aria-label="Ver otro dato">Otro dato ↻</button>
-    </div>
-
-    <div id="mapa-wrap" class="reveal">
-      <span class="mapa-wrap-ribbon" aria-hidden="true"><span class="dot-live"></span>Padrón en vivo</span>
-      <span class="mapa-corner-mark tl" aria-hidden="true"></span>
-      <span class="mapa-corner-mark tr" aria-hidden="true"></span>
-      <span class="mapa-corner-mark bl" aria-hidden="true"></span>
-      <span class="mapa-corner-mark br" aria-hidden="true"></span>
-      <div id="mapa-toolbar">
-        <div id="mapa-search-wrap">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="mapa-search" placeholder="Buscar un lugar o rubro… (atajo: /)" autocomplete="off" aria-label="Buscar un lugar" />
-        </div>
-        <button id="mapa-geoloc" type="button"><svg class="mapa-toolbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Cerca de mí</button>
-        <button id="mapa-random" type="button"><svg class="mapa-toolbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.3" fill="currentColor" stroke="none"/></svg>Uno al azar</button>
-        <button id="mapa-fav-toggle" type="button" aria-pressed="false"><svg class="mapa-toolbar-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg>Solo favoritos <span class="cnt">0</span></button>
-        <select id="mapa-orden" aria-label="Ordenar resultados">
-          <option value="relevancia">Relevancia</option>
-          <option value="recomendados">Más recomendados</option>
-          <option value="recientes">Recién agregados</option>
-          <option value="cercania">Más cerca</option>
-        </select>
-        <div id="mapa-view-toggle" role="group" aria-label="Cambiar vista">
-          <button id="mapa-view-mapa" type="button" aria-pressed="true"><svg class="mapa-toolbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 3L3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg>Mapa</button>
-          <button id="mapa-view-lista" type="button" aria-pressed="false"><svg class="mapa-toolbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Lista</button>
-        </div>
-      </div>
-
-      <div id="mapa-filtros" role="group" aria-label="Filtrar por categoría"></div>
-      <div id="mapa-subfiltros" role="group" aria-label="Filtrar por subcategoría"></div>
-
-      <p id="mapa-active-filtros" class="visually-hidden" aria-live="polite"></p>
-
-      <div id="mapa-canvas" data-view="mapa">
-
-        <div id="mapa-leaflet" role="region" aria-label="Mapa interactivo de Concepción del Uruguay"></div>
-        <div id="mapa-legend" aria-label="Leyenda de categorías del mapa">
-          <div id="mapa-legend-head" role="button" tabindex="0" aria-expanded="true">
-            <span class="titulo">Leyenda</span>
-            <span class="toggle-ico" aria-hidden="true">▾</span>
-          </div>
-          <div id="mapa-legend-list"></div>
-        </div>
-        <div id="mapa-lista" hidden></div>
-      </div>
-
-      <div id="mapa-empty"></div>
-
-      <div id="mapaEmptySugerencias" class="mapa-empty-sugerencias" hidden aria-live="polite"></div>
-
-      <div id="mapa-contador">
-        <span>Mostrando <strong id="mapa-count">0</strong> de <strong id="mapa-total">0</strong> lugares</span>
-        <span id="mapa-total-badge">cargando…</span>
-        <span><a id="mapa-reset" href="#" role="button">Ver todos</a></span>
-
-        <div id="mapa-contador-track" aria-hidden="true"><div id="mapa-contador-fill"></div></div>
-      </div>
-
-      <div class="mapa-trail" id="mapaTrail" hidden>
-        <span class="mapa-trail-label">Tu recorrido:</span>
-        <div class="mapa-trail-chips" id="mapaTrailChips"></div>
+  <section class="area" id="secuencia">
+    <div class="panel-lista" id="panelLista">
+      <div class="sin-resultados" id="sinResultados" hidden>
+        <b>Ningún lugar coincide con este filtro.</b>
+        No es un error de carga: dentro del padrón completo, nadie
+        cumple esa combinación todavía. Probá con otro rubro o borrá
+        la búsqueda.
       </div>
     </div>
 
-    <div class="padron-insights reveal" id="padronInsights" aria-label="Datos del padrón, calculados en vivo sobre las fichas cargadas">
-      <p class="pi-eyebrow">El padrón, en cifras vivas</p>
-      <div class="pi-grid" id="piGrid">
-        <div class="pi-card" data-pi="top-rating"><span class="pi-ico" aria-hidden="true">🏆</span><p class="pi-label">Calculando la mejor calificación…</p><p class="pi-value">—</p></div>
-        <div class="pi-card" data-pi="top-reviews"><span class="pi-ico" aria-hidden="true">💬</span><p class="pi-label">Calculando la ficha más reseñada…</p><p class="pi-value">—</p></div>
-        <div class="pi-card" data-pi="top-rubro"><span class="pi-ico" aria-hidden="true">📊</span><p class="pi-label">Calculando el rubro mejor calificado…</p><p class="pi-value">—</p></div>
-        <div class="pi-card" data-pi="top-diverso"><span class="pi-ico" aria-hidden="true">🗂️</span><p class="pi-label">Calculando el rubro más diverso…</p><p class="pi-value">—</p></div>
+    <aside class="panel-mapa">
+      <div class="mapa-etiqueta">mapa esquemático — misma secuencia, otro lente</div>
+      <div class="mapa-lienzo" id="mapaLienzo">
+        <span class="eje eje-n">N</span>
+        <span class="eje eje-s">S</span>
+        <span class="eje eje-e">E</span>
+        <span class="eje eje-o">O</span>
+        <div class="central"></div>
+      </div>
+      <p class="mapa-nota">Las posiciones son las coordenadas reales de
+        cada lugar, escaladas al recuadro — no es un mapa de calles,
+        es la misma lógica de la secuencia aplicada a otro eje.</p>
+    </aside>
+  </section>
+
+</div>
+
+<div class="envoltorio envoltorio--angosta">
+
+  <section class="manifiesto" id="manifiesto">
+    <div class="eyebrow">cómo pensamos esto</div>
+    <h2>Un catálogo se llena. Un registro se completa.</h2>
+    <p>
+      Cualquier plataforma de lugares puede sumar contenido para
+      siempre. Nosotros no. <b>URU SPOT tiene un final</b>: el día
+      que se camine la última dirección de Concepción del Uruguay,
+      el padrón está terminado. No hay incentivo para inflarlo, ni
+      apuro por publicar algo sin confirmar.
+    </p>
+    <div class="principios">
+      <div class="principio">
+        <div class="tag">sin ranking</div>
+        <p><b>El orden nunca es una opinión.</b> No medimos "mejor" ni
+          "más popular". El único orden que respetamos es el orden en
+          que se relevó cada dirección — por eso cada lugar tiene una
+          posición, no una calificación.</p>
+      </div>
+      <div class="principio">
+        <div class="tag">sin relleno</div>
+        <p><b>Lo que no está verificado, no se muestra como si lo
+          estuviera.</b> Preferimos marcar una ficha "pendiente de
+          confirmación" antes que una ficha adivinada. Es más lento.
+          También es lo único que nos distingue de un scraper.</p>
+      </div>
+      <div class="principio">
+        <div class="tag">sin vencimiento oculto</div>
+        <p><b>Una vez verificado, un lugar queda en el padrón</b> hasta
+          que alguien vuelva a confirmarlo o desmentirlo — nunca porque
+          dejó de pagar, ni porque bajó su actividad.</p>
       </div>
     </div>
+  </section>
 
-    <div class="padron-postscript reveal" aria-hidden="true">
-      <span class="padron-postscript-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>
-        <b>Sin ranking pago</b>
-        <span>El orden por defecto es por relevancia, no por quién paga más.</span>
-      </span>
-      <span class="padron-postscript-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l6 6L20 6"/></svg>
-        <b>Verificado a pie de calle</b>
-        <span>Cada ficha se contrasta con una visita real, no solo con datos online.</span>
-      </span>
-      <span class="padron-postscript-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-        <b>Se corrige rápido</b>
-        <span>¿Un dato viejo? Un mail y se actualiza en la próxima revisión.</span>
-      </span>
+  <section class="indice" id="rubros">
+    <div class="indice-cab">
+      <h2>Los rubros del padrón</h2>
+      <span>14 categorías</span>
     </div>
-  </div>
-</section>
+    <p class="indice-nota">
+      Orden alfabético, no por cantidad — ordenar por cantidad sería
+      ordenar por importancia, y eso es justamente lo que este
+      registro no hace.
+    </p>
+    <div id="listaRubros"></div>
+  </section>
 
-<!-- VERIFICACIÓN — los cuatro filtros que atraviesa cada ficha -->
-<section id="verificacion" style="background:var(--sunken);" aria-labelledby="title-verificacion">
-  <div class="wrap">
-    <div class="s-head reveal">
-      <p class="eyebrow">Cómo entra un lugar al padrón</p>
-      <h2 id="title-verificacion">Ninguna ficha se sube sin pisar la vereda primero.</h2>
-      <p>Cuatro filtros, en orden, antes de que algo cuente como "verificado".</p>
+  <section class="faq" id="preguntas">
+    <div class="indice-cab">
+      <h2>Preguntas</h2>
+      <span>7</span>
     </div>
-    <div class="check-list reveal">
-      <div class="check-row">
-        <span class="check-num">01</span>
-        <div><h3>Verificado in situ</h3><p>Alguien de URU SPOT confirma que el lugar existe, en la dirección que dice, antes de sumarlo al padrón.</p></div>
-        <span class="check-ico" aria-hidden="true">🚶</span>
+    <div id="listaPreguntas"></div>
+  </section>
+
+</div>
+
+<footer class="pie">
+  <div class="envoltorio envoltorio--angosta">
+    <div class="footer-grillado">
+      <div class="footer-marca">
+        <div class="marca">URU SPOT</div>
+        <p>Un registro caminado, no scrapeado. 1.468 lugares de
+          Concepción del Uruguay, verificados uno por uno.</p>
       </div>
-      <div class="check-row">
-        <span class="check-num">02</span>
-        <div><h3>Cruzado con Google Places</h3><p>Nombre, dirección, teléfono y calificación se contrastan contra la ficha pública del lugar — no se inventa un solo dato.</p></div>
-        <span class="check-ico" aria-hidden="true">🔎</span>
+      <div class="footer-col">
+        <h4>Recorrer</h4>
+        <a href="#secuencia">La secuencia</a>
+        <a href="#manifiesto">Cómo pensamos esto</a>
+        <a href="#rubros">Rubros</a>
+        <a href="#preguntas">Preguntas</a>
       </div>
-      <div class="check-row">
-        <span class="check-num">03</span>
-        <div><h3>Clasificado en un solo rubro</h3><p>Cada lugar entra en una de 13 categorías. Sin duplicados, sin zonas grises de "un poco de todo".</p></div>
-        <span class="check-ico" aria-hidden="true">🗂️</span>
-      </div>
-      <div class="check-row">
-        <span class="check-num">04</span>
-        <div><h3>Revisado si algo cambia</h3><p>Un local cierra, cambia de dueño o de horario — cualquiera puede reportarlo y la ficha se corrige.</p></div>
-        <span class="check-ico" aria-hidden="true">🔄</span>
+      <div class="footer-col">
+        <h4>Sumar un dato</h4>
+        <a href="mailto:padron@uruspot.com.ar">Falta un lugar</a>
+        <a href="mailto:padron@uruspot.com.ar">Corregir una ficha</a>
       </div>
     </div>
-
-    <div class="verif-signature reveal">
-      <span class="verif-signature-seal" aria-hidden="true">US</span>
-      <p><b>Equipo URU SPOT</b> — recorremos la ciudad a pie, local por local.<br>
-      <a class="verif-report-cta" href="mailto:uruspotcdu@gmail.com">¿Encontraste algo desactualizado? Reportalo acá →</a></p>
+    <div class="footer-base">
+      <span>URU SPOT — registro completo, fase 4</span>
+      <span>32°29'S 58°14'O · Concepción del Uruguay, Entre Ríos</span>
     </div>
-
-    <p class="verif-scope reveal">Lo que el padrón verifica: que el lugar existe, dónde queda, en qué rubro entra y cuál es su calificación pública. Lo que <em>no</em> garantiza: que el horario de hoy, el stock o el precio exacto sigan siendo los mismos que la última vez que alguien de URU SPOT pasó — eso puede cambiar de un día para el otro en cualquier comercio, y conviene confirmarlo por teléfono si es algo que no admite sorpresas.</p>
-  </div>
-</section>
-
-<!-- UN DÍA EN LA CIUDAD — ocho escenas, ocho guías reales enlazadas -->
-<section id="dia" aria-labelledby="title-dia">
-  <div class="wrap">
-    <div class="s-head reveal">
-      <p class="eyebrow">Un día cualquiera en la ciudad</p>
-      <h2 id="title-dia">La misma persona, ocho momentos, ocho decisiones distintas.</h2>
-      <p>Cada escena de abajo enlaza a la guía real de ese momento — no es un carrusel de ejemplo, son las ocho guías que existen hoy.</p>
-    </div>
-    <div class="day-grid reveal" id="dayGrid">
-            <a class="day-card" href="../las-mejores-cafeterias-cdu/">
-        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
-        <span class="day-time">8:00</span>
-        <p class="scn">Arrancás el día con un café de verdad, no de sobre.</p>
-        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
-      </a>
-            <a class="day-card" href="../las-mejores-panaderias-cdu/">
-        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
-        <span class="day-time">9:30</span>
-        <p class="scn">El desayuno pide algo dulce recién horneado.</p>
-        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
-      </a>
-            <a class="day-card" href="../los-mejores-restaurantes-cdu/">
-        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
-        <span class="day-time">13:00</span>
-        <p class="scn">Al mediodía, algo serio para comer con el equipo.</p>
-        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
-      </a>
-            <a class="day-card" href="../las-mejores-heladerias-cdu/">
-        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
-        <span class="day-time">17:00</span>
-        <p class="scn">La tarde se estira con 30 grados y ganas de algo frío.</p>
-        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
-      </a>
-            <a class="day-card" href="../los-mejores-gimnasios-cdu/">
-        <span class="day-tag" style="background:#901EAD" aria-hidden="true"></span>
-        <span class="day-time">19:00</span>
-        <p class="scn">Antes de que se haga tarde, una hora de entrenamiento.</p>
-        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
-      </a>
-            <a class="day-card" href="../los-mejores-bares-cdu/">
-        <span class="day-tag" style="background:#AD1E1E" aria-hidden="true"></span>
-        <span class="day-time">21:30</span>
-        <p class="scn">A la noche, una birra artesanal con amigos.</p>
-        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
-      </a>
-            <a class="day-card" href="../las-mejores-hosterias-cdu/">
-        <span class="day-tag" style="background:#1E57AD" aria-hidden="true"></span>
-        <span class="day-time">Sábado</span>
-        <p class="scn">Alguien viene de visita y necesita dónde quedarse.</p>
-        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
-      </a>
-            <a class="day-card" href="../mejores-veterinarias-cdu/">
-        <span class="day-tag" style="background:#168241" aria-hidden="true"></span>
-        <span class="day-time">Domingo</span>
-        <p class="scn">Tu mascota necesita un chequeo antes de fin de mes.</p>
-        <span class="day-cta">Ver la guía <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
-      </a>
-    </div>
-
-    <div class="dia-cta-panel reveal">
-      <p>¿Ninguna de estas ocho escenas es la tuya hoy? El padrón completo tiene 862 fichas más para explorar.</p>
-      <a href="#padron">Explorar el mapa completo →</a>
-    </div>
-  </div>
-</section>
-
-<!-- FICHAS DESTACADAS — ocho lugares elegidos por volumen de reseñas -->
-<section id="fichas" style="background:var(--sunken);" aria-labelledby="title-fichas">
-  <div class="wrap">
-    <div class="s-head reveal">
-      <p class="eyebrow">Fichas destacadas</p>
-      <h2 id="title-fichas">Ocho lugares reales, con ficha propia y calificación real.</h2>
-      <p>Elegidos por volumen de reseñas verificadas contra Google Places, no por sorteo.</p>
-    </div>
-    <div class="fichas-grid reveal" id="fichasGrid">
-            <article class="fcard">
-        <div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div>
-        <h3>Heladería Italia</h3>
-        <p class="fc-meta">2.368 reseñas verificadas</p>
-        <div class="fcard-foot">
-          <span class="fcard-rating">★ 4.7</span>
-          <div class="fcard-actions">
-            <button class="reg-heart fcard-link" data-favid="destacada-0" aria-label="Guardar Heladería Italia"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
-            <a class="fcard-link" href="locales/italia/" aria-label="Ver ficha de Heladería Italia"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          </div>
-        </div>
-      </article>
-            <article class="fcard">
-        <div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div>
-        <h3>Hotel Boutique Los Aguaribay</h3>
-        <p class="fc-meta">302 reseñas verificadas</p>
-        <div class="fcard-foot">
-          <span class="fcard-rating">★ 4.8</span>
-          <div class="fcard-actions">
-            <button class="reg-heart fcard-link" data-favid="destacada-1" aria-label="Guardar Hotel Boutique Los Aguaribay"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
-            <a class="fcard-link" href="locales/los-aguaribay/" aria-label="Ver ficha de Hotel Boutique Los Aguaribay"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          </div>
-        </div>
-      </article>
-            <article class="fcard">
-        <div class="fcard-top"><span class="fcard-tag" style="background:#901EAD">Deporte</span></div>
-        <h3>Power Gym</h3>
-        <p class="fc-meta">13 reseñas verificadas</p>
-        <div class="fcard-foot">
-          <span class="fcard-rating">★ 4.8</span>
-          <div class="fcard-actions">
-            <button class="reg-heart fcard-link" data-favid="destacada-2" aria-label="Guardar Power Gym"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
-            <a class="fcard-link" href="locales/power-gimnasio/" aria-label="Ver ficha de Power Gym"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          </div>
-        </div>
-      </article>
-            <article class="fcard">
-        <div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div>
-        <h3>Bella Vista</h3>
-        <p class="fc-meta">2.826 reseñas verificadas</p>
-        <div class="fcard-foot">
-          <span class="fcard-rating">★ 4.4</span>
-          <div class="fcard-actions">
-            <button class="reg-heart fcard-link" data-favid="destacada-3" aria-label="Guardar Bella Vista"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
-            <a class="fcard-link" href="locales/bella-vista/" aria-label="Ver ficha de Bella Vista"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          </div>
-        </div>
-      </article>
-            <article class="fcard">
-        <div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div>
-        <h3>Casa del Árbol Hostel</h3>
-        <p class="fc-meta">164 reseñas verificadas</p>
-        <div class="fcard-foot">
-          <span class="fcard-rating">★ 4.5</span>
-          <div class="fcard-actions">
-            <button class="reg-heart fcard-link" data-favid="destacada-4" aria-label="Guardar Casa del Árbol Hostel"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
-            <a class="fcard-link" href="locales/casa-del-arbol/" aria-label="Ver ficha de Casa del Árbol Hostel"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          </div>
-        </div>
-      </article>
-            <article class="fcard">
-        <div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div>
-        <h3>Bartolo Bar</h3>
-        <p class="fc-meta">3.102 reseñas verificadas</p>
-        <div class="fcard-foot">
-          <span class="fcard-rating">★ 4.1</span>
-          <div class="fcard-actions">
-            <button class="reg-heart fcard-link" data-favid="destacada-5" aria-label="Guardar Bartolo Bar"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
-            <a class="fcard-link" href="locales/bartolo-bar/" aria-label="Ver ficha de Bartolo Bar"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          </div>
-        </div>
-      </article>
-            <article class="fcard">
-        <div class="fcard-top"><span class="fcard-tag" style="background:#AD1E1E">Gastronomía</span></div>
-        <h3>7 Colinas Craft Brewery</h3>
-        <p class="fc-meta">1.930 reseñas verificadas</p>
-        <div class="fcard-foot">
-          <span class="fcard-rating">★ 4.4</span>
-          <div class="fcard-actions">
-            <button class="reg-heart fcard-link" data-favid="destacada-6" aria-label="Guardar 7 Colinas Craft Brewery"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
-            <a class="fcard-link" href="locales/7-colinas/" aria-label="Ver ficha de 7 Colinas Craft Brewery"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          </div>
-        </div>
-      </article>
-            <article class="fcard">
-        <div class="fcard-top"><span class="fcard-tag" style="background:#1E57AD">Alojamiento</span></div>
-        <h3>Posta Torreón</h3>
-        <p class="fc-meta">582 reseñas verificadas</p>
-        <div class="fcard-foot">
-          <span class="fcard-rating">★ 4.4</span>
-          <div class="fcard-actions">
-            <button class="reg-heart fcard-link" data-favid="destacada-7" aria-label="Guardar Posta Torreón"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg></button>
-            <a class="fcard-link" href="locales/posta-torreon/" aria-label="Ver ficha de Posta Torreón"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          </div>
-        </div>
-      </article>
-    </div>
-
-    <div class="fichas-cta-row reveal">
-      <a href="#padron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Ver las 862 fichas completas</a>
-    </div>
-  </div>
-</section>
-
-<!-- GUARDADAS — favoritos persistidos en localStorage, sin cuenta -->
-<section id="guardadas" aria-labelledby="title-guardadas">
-  <div class="wrap">
-    <div class="s-head reveal">
-      <p class="eyebrow">Tus fichas guardadas</p>
-      <h2 id="title-guardadas">Lo que marcaste queda acá, en este mismo navegador.</h2>
-      <p>Se guarda con la misma clave que usa el resto de URU SPOT, así que cuando el mapa completo esté activo, tus favoritos ya van a estar ahí.</p>
-    </div>
-
-    <div class="guardadas-tip reveal">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 17s-6.5-4-6.5-9A3.8 3.8 0 0110 5.3 3.8 3.8 0 0116.5 8c0 5-6.5 9-6.5 9z"/></svg>
-      <span>Tocá el corazón en cualquier ficha del padrón, del mapa o de esta misma página — se guarda acá al instante, sin cuenta ni sincronización.</span>
-    </div>
-
-    <div class="guardadas-export reveal" id="guardadasExport" hidden>
-      <button type="button" class="guardadas-export-btn" id="exportCopyBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 012-2h10"/></svg>
-        Copiar lista
-      </button>
-      <a class="guardadas-export-btn wa" id="exportWaBtn" target="_blank" rel="noopener" aria-label="Compartir tus favoritos por WhatsApp">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-        Compartir por WhatsApp
-      </a>
-    </div>
-    <div id="savedContent"></div>
-  </div>
-</section>
-
-<!-- AYUDA — FAQ buscable + glosario, cierre informativo de la página -->
-<section id="ayuda" aria-labelledby="title-ayuda">
-  <div class="wrap">
-    <div class="help-grid">
-      <div>
-        <div class="s-head reveal" style="margin-bottom:36px;">
-          <p class="eyebrow">Preguntas frecuentes</p>
-          <h2 id="title-ayuda">Lo esencial, sin fricción.</h2>
-        </div>
-
-        <div class="faq-search-wrap reveal">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="faqSearch" placeholder="Buscar en las preguntas frecuentes…" autocomplete="off" aria-label="Buscar en las preguntas frecuentes" />
-        </div>
-        <p id="faqNoResults">Ninguna pregunta coincide. Probá con otra palabra o <a href="mailto:uruspotcdu@gmail.com">escribinos directamente</a>.</p>
-        <div class="reveal">
-
-          <div class="faq-item open">
-            <button class="faq-q" aria-expanded="true" aria-controls="faq-a-1"><p>¿Cuál es la forma más rápida de encontrar un lugar en el mapa?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-1"><p>Escribí en el buscador (atajo: tocá "/" en cualquier parte de la página) o tocá "Cerca de mí" para ver solo lo que te queda a mano. Si ya guardaste favoritos, "Solo favoritos" filtra el mapa a lo tuyo en un toque, y "Lista" ordena todo por cercanía o calificación sin perder el filtro que tenías puesto.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-2"><p>¿Cómo se calculan las calificaciones?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-2"><p>Se toman de la ficha pública de Google Places de cada lugar y se cruzan contra la visita in situ. El número de reseñas se muestra siempre junto a la calificación, no se oculta.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-3"><p>¿Qué son las fichas guardadas?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-3"><p>Tocá el corazón en cualquier lugar del padrón. Queda guardado en este navegador (localStorage), sin cuenta ni contraseña.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-4"><p>Encontré un dato viejo o un local cerrado, ¿qué hago?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-4"><p>Escribinos a uruspotcdu@gmail.com con el nombre del lugar y qué cambió. Se corrige en la próxima actualización del padrón.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-5"><p>¿Puedo compartir la ficha de un lugar puntual?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-5"><p>Sí. Cada lugar del mapa y de la lista tiene su propio botón de compartir, así podés mandar el lugar exacto por WhatsApp o donde prefieras, sin explicar cómo llegar.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-6"><p>¿Mis favoritos se guardan si cambio de celular o borro el navegador?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-6"><p>No: se guardan solo en este navegador (localStorage), sin cuenta ni servidor de por medio. Si cambiás de dispositivo o borrás los datos de navegación, hay que volver a marcarlos.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-7"><p>¿Qué pasa si busco algo y no aparece ningún resultado?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-7"><p>El padrón nunca se queda en blanco sin explicación: muestra un aviso con la opción de limpiar filtros o volver a ver las 862 fichas completas en un toque.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-8"><p>¿Necesito activar mi ubicación para usar el mapa?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-8"><p>No. Todo el mapa y la lista funcionan sin geolocalización. "Cerca de mí" y el orden "Más cerca" son un atajo opcional, no un requisito para explorar el padrón.</p></div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-9"><p>¿Qué significan los colores y las formas de los pines?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-9"><p>Cada color es un rubro — los mismos 13 colores que ya ves en "Fichas destacadas" y en el desglose del padrón, para que el mapa "hable el mismo idioma" que el resto de la página (la leyenda completa está siempre visible al costado del mapa). Un pin con borde dorado es un lugar <b>destacado</b>: elegido por volumen de reseñas verificadas dentro de su rubro, nunca por sorteo ni por pago. Los números en círculo son <b>clusters</b>: varios lugares agrupados por zoom, que se separan solos al acercar el mapa.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" aria-expanded="false" aria-controls="faq-a-10"><p>¿Cuál es la diferencia entre la vista "Mapa" y la vista "Lista"?</p><span class="faq-plus"></span></button>
-            <div class="faq-a" id="faq-a-10"><p>Ninguna en los datos: son exactamente los mismos resultados, con los mismos filtros aplicados. La vista Mapa ubica cada ficha en el espacio real de la ciudad; la vista Lista ordena esas mismas fichas por cercanía o por calificación, más cómoda si ya sabés qué rubro buscás y solo querés comparar rápido. Cambiar de una a otra no reinicia ningún filtro ni ninguna búsqueda que ya tenías puesta.</p></div>
-          </div>
-        </div>
-
-        <div class="ayuda-contact-card reveal">
-          <span style="font-size:22px;" aria-hidden="true">✉️</span>
-          <span><b>¿No encontraste tu respuesta?</b><span>Escribinos y te contestamos directamente, sin bot ni formulario largo.</span></span>
-          <a class="btn-contacto" href="mailto:uruspotcdu@gmail.com">Escribir un mail</a>
-        </div>
-      </div>
-      <div>
-        <div class="s-head reveal" style="margin-bottom:36px;">
-          <p class="eyebrow">Glosario</p>
-          <h2 style="font-size:21px;">Vocabulario de URU SPOT</h2>
-        </div>
-        <dl class="reveal">
-          <div class="gloss-item"><dt>Ficha</dt><dd>El registro individual de un lugar: nombre, rubro, dirección y calificación verificados.</dd></div>
-          <div class="gloss-item"><dt>Padrón</dt><dd>El conjunto completo de fichas de la ciudad — las 862, no una selección.</dd></div>
-          <div class="gloss-item"><dt>Verificado in situ</dt><dd>Confirmado presencialmente por URU SPOT, no solo tomado de una fuente externa.</dd></div>
-          <div class="gloss-item"><dt>Rubro</dt><dd>Cada una de las 13 categorías del padrón: de gastronomía a servicios públicos.</dd></div>
-          <div class="gloss-item"><dt>Subrubro</dt><dd>La subcategoría dentro de un rubro (por ejemplo, "Heladería" dentro de Gastronomía) que aparece al filtrar el mapa.</dd></div>
-          <div class="gloss-item"><dt>Destacado</dt><dd>Un pin con borde dorado en el mapa: un lugar elegido por volumen de reseñas verificadas, no por sorteo.</dd></div>
-
-          <div class="gloss-item"><dt>Tu recorrido</dt><dd>El rastro de fichas que fuiste abriendo en esta visita al mapa. Vive solo en la pestaña abierta — se borra al cerrarla, no se guarda como favorito ni se comparte con nadie.</dd></div>
-          <div class="gloss-item"><dt>Padrón en cifras vivas</dt><dd>Un panel que no escribió nadie a mano: se calcula en tu propio navegador sobre las fichas reales, apenas terminan de cargar.</dd></div>
-        </dl>
-      </div>
-    </div>
-  </div>
-</section>
-
-</main>
-
-<!-- PIE — navegación secundaria, confianza y resumen de sesión -->
-<footer>
-  <div class="wrap">
-    <div class="foot-top">
-      <div>
-        <div class="foot-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3C8 3 5 6.2 5 10c0 5.2 7 11 7 11s7-5.8 7-11c0-3.8-3-7-7-7Z" stroke="#E7B29F" stroke-width="1.7"/><circle cx="12" cy="10" r="2.2" fill="#E7B29F"/></svg>URU SPOT</div>
-        <p class="foot-statement">La ciudad no cambió. Lo que cambió es que ahora tiene ficha.</p>
-      </div>
-      <div class="foot-col">
-        <p class="foot-col-title">El padrón</p>
-        <a href="#padron">Las 13 categorías</a>
-        <a href="#verificacion">Cómo se verifica</a>
-        <a href="#fichas">Fichas destacadas</a>
-      </div>
-      <div class="foot-col">
-        <p class="foot-col-title">Guías del día a día</p>
-        <a href="../los-mejores-restaurantes-cdu/">Restaurantes</a>
-        <a href="../las-mejores-cafeterias-cdu/">Cafeterías</a>
-        <a href="../las-mejores-hosterias-cdu/">Alojamiento</a>
-        <a href="../los-mejores-gimnasios-cdu/">Gimnasios</a>
-      </div>
-      <div class="foot-col">
-        <p class="foot-col-title">URU SPOT</p>
-        <a href="../inicio/">Inicio</a>
-        <a href="mailto:uruspotcdu@gmail.com">Reportar un cambio</a>
-      </div>
-    </div>
-    <div class="foot-bottom">
-      <span>URU SPOT — Concepción del Uruguay, Entre Ríos</span>
-      <span><a href="mailto:uruspotcdu@gmail.com">uruspotcdu@gmail.com</a></span>
-    </div>
-
-    <div class="foot-trust reveal">
-      <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>100% gratis, sin registro</span>
-      <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>862 lugares, cero inventados</span>
-      <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Concepción del Uruguay, Entre Ríos</span>
-      <span class="foot-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Actualizado el 13 jul 2026</span>
-    </div>
-
-    <div class="foot-session-recap" id="footSessionRecap" aria-live="polite">
-      <p class="fsr-title">Tu sesión de hoy en el padrón</p>
-      <span class="fsr-item"><b id="fsrBusquedas">0</b> búsquedas distintas</span>
-      <span class="fsr-item"><b id="fsrRubros">0</b> rubros explorados</span>
-      <span class="fsr-item"><b id="fsrFichas">0</b> fichas abiertas</span>
-    </div>
-    <p class="foot-signature">Hecho a pie de calle, en Concepción del Uruguay.</p>
   </div>
 </footer>
 
-<!-- ══════════════════════════════════════════════════════════════════
-     SCRIPTS — orden de carga significativo: interacciones de base,
-     motor de datos/mapa, contenido dinámico y, por último, el módulo
-     de mejoras aditivas (IIFE aislada, degrada sin errores si algún
-     elemento opcional no está presente).
-     ══════════════════════════════════════════════════════════════════ -->
-<script src="js/app-interactions.js"></script>
-<script src="js/core-engine.js"></script>
-<script src="js/content.js"></script>
-<script src="js/enhancements-aditivas.js"></script>
+<script src="js/fase4-motor.js"></script>
 
 </body>
 </html>
