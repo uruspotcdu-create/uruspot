@@ -1,0 +1,175 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Capa transversal — utilidades de sistema
+   ----------------------------------------------------------------
+   Se declara como una @layer nueva, agregada al final de la cadena
+   de capas ya establecida en el resto del proyecto (tokens, fonts,
+   reset, base, chrome, hero, content, footer, features). Por orden
+   de capas, esta hoja gana cualquier disputa de cascada contra ellas
+   sin depender de especificidad — por eso puede usar :where() en
+   selectores compuestos (incluyendo IDs) sin arriesgar perder una
+   pelea de especificidad que antes ganaba por ser un selector "duro".
+
+   Cubre exactamente los cinco problemas ya resueltos en el archivo
+   original — disabled, ergonomía táctil, ícono de estado vacío,
+   ritmo de remate y contraste de foco. No se fabrica cobertura para
+   estados (loading, selected, warning, success…) que no tienen hoy
+   ningún hook en el HTML: la convención de nombres de abajo
+   (--u-*, agrupación por número de problema) ya deja el lugar listo
+   para sumarlos cuando exista markup real que los necesite.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@layer utilities;
+
+@layer utilities {
+  :root{
+    /* Tokens propios de esta capa. No redeclaran ni derivan de los
+       tokens del sistema (--sp-*, --stamp*) salvo donde el valor es
+       genuinamente el mismo concepto — ver notas puntuales abajo. */
+    --u-disabled-opacity: .45;
+    --u-tap-target: 44px;      /* mínimo de área táctil, WCAG 2.5.5 AA */
+    --u-seal-size: 44px;       /* tamaño visual del sello editorial — coincide
+                                   en valor con --u-tap-target por coincidencia
+                                   de diseño, no por acoplamiento: se mantienen
+                                   separados a propósito para poder divergir. */
+    --u-gap-close-lg: var(--sp-8);  /* 40px — coincide con la escala de 8pt */
+    --u-gap-close-sm: 30px;         /* fuera de escala a propósito, ver §4 */
+    --u-focus-halo-gold: rgba(217,183,124,.12); /* acento editorial dorado
+       puntual (misma familia que el brillo del sello de intro y el número
+       del resumen de sesión). No deriva de --stamp/--stamp-bright: esas
+       variables son el índigo de marca del sistema V2, un color distinto. */
+  }
+
+  /* ==============================================================
+     §1 — Disabled / aria-disabled
+     Un mismo lenguaje visual para todo control interactivo del
+     sistema, con aria-disabled como equivalente semántico de
+     :disabled en elementos que no son nativamente deshabilitables
+     (chips, botones sobre <a>/<div>). Extender la cobertura de
+     aria-disabled a .btn/.favbtn/.mapa-pill/.mapa-subpill no cambia
+     ningún render actual — hoy solo .rubro-chip lo usa — pero deja
+     los cuatro componentes listos para adoptarlo sin volver a tocar
+     esta hoja.
+     ============================================================== */
+  :where(.btn, .favbtn, .mapa-pill, .mapa-subpill):is(:disabled, [aria-disabled="true"]),
+  .rubro-chip[aria-disabled="true"],
+  button:disabled{
+    opacity: var(--u-disabled-opacity);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none !important;
+  }
+
+  :where(.btn, .favbtn):is(:disabled, [aria-disabled="true"]):hover{
+    border-color: var(--line-strong);
+    background: var(--paper-raised);
+    box-shadow: none;
+    transform: none;
+  }
+
+  .btn.primary:is(:disabled, [aria-disabled="true"]){
+    background: var(--ink-faint);
+    box-shadow: none;
+  }
+
+  @media (prefers-contrast: more){
+    :where(.btn, .favbtn, .mapa-pill, .mapa-subpill):is(:disabled, [aria-disabled="true"]),
+    .rubro-chip[aria-disabled="true"],
+    button:disabled{ opacity: .6; }
+  }
+
+  /* ==============================================================
+     §2 — Ergonomía táctil: objetivo mínimo de 44px
+     Bajo puntero grueso, un ::after invisible amplía el área real
+     de toque sin mover el layout ni el tamaño visible del control.
+     En desktop con puntero fino el tamaño visual compacto queda
+     intacto porque toda la regla vive dentro de pointer:coarse.
+
+     #mapa-legend-head y .mapa-tip-swap solo reciben el contexto de
+     posicionamiento — igual que en el original, no se les agrega el
+     expansor de toque, porque ya cumplen el mínimo por su propio
+     tamaño visual.
+     ============================================================== */
+  @media (pointer: coarse){
+    :where(
+      .lista-card-actions > *,
+      #shortcutsOverlay .cerrar,
+      .faq-feedback button,
+      #mapa-legend-head,
+      .mapa-tip-swap
+    ){ position: relative; }
+
+    :where(
+      .lista-card-actions > *,
+      #shortcutsOverlay .cerrar,
+      .faq-feedback button
+    )::after{
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      inline-size: var(--u-tap-target);
+      block-size: var(--u-tap-target);
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  /* ==============================================================
+     §3 — Ícono editorial del estado vacío del mapa
+     Mismo lenguaje visual que .ficha-seal y el sello de intro: un
+     sello circular en vez de texto plano, para que el bloque no se
+     lea como un error genérico de sistema.
+     ============================================================== */
+  #mapa-empty .mapa-empty-msg{
+    position: relative;
+    padding-top: 52px;
+
+    &::before{
+      content: '⌕';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      inline-size: var(--u-seal-size);
+      block-size: var(--u-seal-size);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif);
+      font-size: 20px;
+      font-style: normal;
+      color: var(--stamp-ink);
+      background: var(--stamp-soft);
+      border: 1px dashed var(--stamp);
+    }
+  }
+
+  /* ==============================================================
+     §4 — Ritmo de remate
+     Separa "fin de sección" de "fin de ítem" en vez de reutilizar
+     el margen interno entre hermanos. Los tres paneles de cierre
+     comparten el mismo remate (--u-gap-close-lg, 40px, ya en escala);
+     la firma del footer necesita menos aire y por eso usa un valor
+     propio fuera de escala (--u-gap-close-sm, 30px) — colapsarlo a
+     --sp-7 (32px) para "entrar en la grilla" cambiaría el remate
+     visible, así que se documenta como excepción en vez de forzarlo.
+     ============================================================== */
+  .foot-signature{ margin-top: var(--u-gap-close-sm); padding-top: 2px; }
+  .dia-cta-panel, .ayuda-contact-card, .fichas-cta-row{ margin-top: var(--u-gap-close-lg); }
+
+  /* ==============================================================
+     §5 — Contraste de foco sobre fondo oscuro
+     El anillo global (--focus-ring) ya rinde bien sobre --dark, pero
+     los enlaces de texto plano del footer no tienen relleno propio
+     bajo el anillo. Un halo sutil evita que el foco quede flotando
+     sobre texto claro sin superficie.
+     ============================================================== */
+  footer a:focus-visible{
+    outline-offset: 4px;
+    border-radius: 4px;
+    background: var(--u-focus-halo-gold);
+  }
+
+  @media (prefers-contrast: more){
+    footer a:focus-visible{ outline-width: 3px; }
+  }
+}
