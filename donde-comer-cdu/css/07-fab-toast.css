@@ -1,0 +1,352 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   EDITORIAL & INTERACTION POLISH MODULE
+   Reconstrucción unificada de las dos pasadas aditivas que antes vivían
+   como <style> embebidos en el <head> ("segunda pasada de experiencia" y
+   "cuarta pasada — ronda 2"). Mismo contrato que 07-fab-toast.css y
+   08-hover-comparador.css: cero cambios de HTML/JS/SEO/Schema, solo
+   selectores que ya existían en el documento. Organizado en capas, no en
+   orden cronológico de cuándo se escribió cada regla.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ---- Layout / Scroll Anchoring --------------------------------------
+     Alto real del nav fijo en cada breakpoint (con y sin scroll). Un solo
+     par de valores alimenta tanto el scroll-margin de las secciones como
+     — ya en .breadcrumb, fuera de este módulo — cualquier otro cálculo
+     que dependa de "cuánto tapa el nav". */
+  --nav-clearance: 96px;
+  --nav-clearance-compact: 84px;
+
+  /* ---- Elevation — sombras nombradas, derivadas de --ink ------------- */
+  --shadow-float-sm: 0 8px 20px -10px color-mix(in srgb, var(--ink) 35%, transparent);
+  --shadow-tooltip:  0 10px 24px -12px rgba(0, 0, 0, .4);
+  --shadow-modal:    0 40px 80px -30px rgba(0, 0, 0, .5);
+  --overlay-scrim:   rgba(24, 20, 14, .55);
+
+  /* ---- Motion — timing/easing propios de este módulo, apoyados en los
+     tokens globales --ease / --spring del sistema base. --------------- */
+  --motion-fast: .15s;
+  --motion-base: .25s;
+  --motion-slow: .35s;
+
+  /* ---- Floating UI — posicionamiento de la navegación lateral por
+     puntos y del disparador de atajos de teclado, ambos fixed y en
+     esquinas opuestas a #backToTop / .us-toast-container. ------------- */
+  --dots-inset: 22px;
+  --shortcuts-inset: 22px;
+  --shortcuts-size: 40px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --motion-fast: 0s; --motion-base: 0s; --motion-slow: 0s; }
+}
+
+/* ── Layout / Scroll Anchoring ────────────────────────────────────────── */
+/* El nav fijo mide ~85px sin scroll / ~69px con la clase .solid; sin
+   scroll-margin-top, cualquier salto por anchor (menú, atajo "/") deja
+   el título tapado a medias. Mismo par que ya usa .breadcrumb, así el
+   "aire" bajo el nav es idéntico en todo el sitio. */
+:where(section[id], #mapa-wrap){ scroll-margin-top: var(--nav-clearance); }
+@media (max-width: 720px){
+  :where(section[id], #mapa-wrap){ scroll-margin-top: var(--nav-clearance-compact); }
+}
+
+/* ── Typography Rhythm ─────────────────────────────────────────────────── */
+/* Corte de línea: evita huérfanas en titulares y suaviza párrafos de una
+   sola frase. Progresivo — sin soporte, el texto se ve exactamente igual
+   que hoy. */
+:where(h1.h-hero, .s-head h2, .manifest h2, .foot-statement, #shortcutsOverlay h3,
+       .rs-label, .dia-cta-panel p){ text-wrap: balance; }
+:where(.hero-sub, .s-head p, .manifest .lede, .check-row p, .day-card p.scn,
+       .faq-a p, .ayuda-contact-card span){ text-wrap: pretty; }
+
+/* Cifras que cambian en vivo (contador de mapa, ranking, favoritos,
+   calificaciones) usan ancho tabular para no "temblar" al actualizarse. */
+:where(.proof-num, #mapa-count, #mapa-total, .bd-num, .pi-value b, .rs-count strong,
+       .fb-count, #favCount, .check-num, .ficha-rating b, .fcard-rating,
+       .reg-rank){ font-variant-numeric: tabular-nums; }
+.proof-item.contando .proof-num{ color: var(--stamp-ink); transition: color calc(var(--motion-base) * 2) ease; }
+
+/* ── Component Extensions ─────────────────────────────────────────────── */
+/* Chip "✦ nuevo" (.u-chip-new ya definida en el core) sobre los dos
+   paneles agregados en la pasada anterior, para que un visitante
+   recurrente note qué cambió sin leer un changelog. */
+.rs-eyebrow .u-chip-new,
+.mapa-trail-label .u-chip-new{ margin-inline-start: 7px; }
+
+/* Acción secundaria "ghost" del carrusel de rubros (.btn.ghost ya vive en
+   el CSS crítico): salta al desglose completo de las 13 categorías en
+   vez de filtrar solo la que se está mostrando. */
+.rs-actions{ display: flex; align-items: center; gap: 8px; flex: none; }
+.rs-actions .btn{ padding: 10px 14px; font-size: 12px; border-radius: 100px; }
+@media (max-width: 640px){
+  .rs-actions{ width: 100%; }
+  .rs-actions .btn{ flex: 1; text-align: center; }
+}
+
+/* ── Motion System — interacción ergonómica ──────────────────────────── */
+/* Tilt sutil de la pila de fichas del hero, siguiendo el puntero (JS
+   aditivo). Se apaga entera con reduced-motion y en dispositivos sin
+   hover real, donde no aporta nada y solo costaría composición. */
+.ficha-stage{
+  transform-style: preserve-3d;
+  transition: transform var(--motion-base) var(--ease);
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce){ .ficha-stage{ transition: none !important; } }
+@media (hover: none){ .ficha-stage{ transform: none !important; } }
+
+/* Fila de verificación: el resorte se siente en toda la fila al pasar el
+   mouse, no solo en el ícono — feedback funcional, no decorativo. */
+.check-row{ transition: background var(--motion-base) ease; }
+.check-row:hover{ background: color-mix(in srgb, var(--ink) 2%, transparent); }
+.check-row:hover .check-ico{ transform: scale(1.12) rotate(-4deg); transition: transform var(--motion-slow) var(--spring); }
+.check-row:hover .check-num{ color: var(--stamp); transition: color var(--motion-base) ease; }
+@media (prefers-reduced-motion: reduce){ .check-row:hover .check-ico{ transform: none; } }
+
+/* Tooltip de segmento del mapa: reveal por transform + opacity, nunca
+   por display, para que la transición sea real y no un corte abrupto. */
+.mb-seg{ position: relative; }
+.mb-seg::after{
+  content: attr(data-tip);
+  position: absolute;
+  inset-block-end: calc(100% + 8px);
+  inset-inline-start: 50%;
+  transform: translateX(-50%) translateY(4px);
+  padding: 6px 10px;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: var(--shadow-tooltip);
+  transition: opacity var(--motion-fast) ease, transform var(--motion-fast) ease;
+  z-index: 2;
+}
+.mb-seg:hover::after{ opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (max-width: 640px){ .mb-seg::after{ display: none; } }
+.mb-curioso{ margin: 12px 0 0; font-family: var(--mono); font-size: 11.5px; line-height: 1.5; color: var(--dark-soft); }
+.mb-curioso b{ color: #E9D2A8; font-weight: 600; }
+
+/* Feedback honesto del FAQ: no hay backend, solo confirma que quedó
+   registrado en este navegador. El estado elegido y el agradecimiento
+   comunican eso sin ambigüedad. */
+.faq-feedback{ display: flex; align-items: center; gap: 8px; margin-block: -10px 20px; }
+.faq-feedback span{ font-size: 11.5px; color: var(--ink-faint); }
+.faq-feedback button{
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--motion-base) ease, border-color var(--motion-base) ease, transform calc(var(--motion-fast) + .05s) var(--spring);
+}
+.faq-feedback button:hover{ border-color: var(--stamp); color: var(--stamp-ink); transform: translateY(-1px); }
+.faq-feedback button.elegido{ background: var(--stamp); border-color: var(--stamp); color: #fff; }
+.faq-feedback .gracias{ font-size: 11.5px; font-style: italic; color: var(--ink-soft); opacity: 0; transition: opacity calc(var(--motion-base) + .05s) ease; }
+.faq-feedback .gracias.visible{ opacity: 1; }
+
+/* ── Surfaces — estados de carga y superficies "vivas" ───────────────── */
+/* #mapa-leaflet es un <div> vacío hasta que Leaflet pinta sus tiles
+   (carga diferida). El shimmer desaparece solo: los hijos que agrega
+   Leaflet quedan pintados encima por orden natural del DOM, sin JS que
+   lo quite a mano. */
+#mapa-leaflet{ position: relative; }
+#mapa-leaflet::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(100deg, var(--sunken) 30%, var(--paper-raised) 50%, var(--sunken) 70%);
+  background-size: 400% 100%;
+  animation: mapaShimmer 2.6s ease-in-out infinite;
+}
+@keyframes mapaShimmer{ from{ background-position: 100% 0; } to{ background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce){
+  #mapa-leaflet::before{ animation: none; background: var(--sunken); }
+}
+
+/* Resplandor "vivo" del contenedor del mapa: pulso muy sutil, coherente
+   con el punto verde de .mapa-wrap-ribbon .dot-live — la sección entera
+   respira apenas, sin distraer. */
+#mapa-wrap{ animation: mapaWrapVivo 5s ease-in-out infinite; }
+@keyframes mapaWrapVivo{
+  0%, 100%{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--river) 0%, transparent); }
+  50%{ box-shadow: 0 0 0 1px color-mix(in srgb, var(--river) 16%, transparent); }
+}
+@media (prefers-reduced-motion: reduce){ #mapa-wrap{ animation: none; } }
+
+/* ── Floating UI — navegación lateral y atajos de teclado ─────────────── */
+/* Wayfinding de escritorio: un punto por sección principal, el activo
+   crece y se llena. Se oculta en mobile, donde el pulgar ya controla el
+   scroll y el nav hamburguesa cubre la misma necesidad. */
+#sectionDots{
+  position: fixed;
+  inset-inline-end: var(--dots-inset);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+#sectionDots button{
+  position: relative;
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  background: transparent;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--motion-base) ease, border-color var(--motion-base) ease, transform var(--motion-base) var(--spring);
+}
+#sectionDots button::after{
+  content: attr(data-label);
+  position: absolute;
+  inset-inline-end: 20px;
+  inset-block-start: 50%;
+  transform: translateY(-50%) translateX(4px);
+  padding: 5px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .03em;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: var(--shadow-float-sm);
+  transition: opacity var(--motion-base) ease, transform var(--motion-base) ease;
+}
+#sectionDots button:hover::after,
+#sectionDots button:focus-visible::after{ opacity: 1; transform: translateY(-50%) translateX(0); }
+#sectionDots button:hover,
+#sectionDots button:focus-visible{ border-color: var(--stamp); transform: scale(1.2); }
+#sectionDots button.activo{ background: var(--stamp); border-color: var(--stamp); transform: scale(1.3); }
+@media (max-width: 1080px){ #sectionDots{ display: none; } }
+
+/* Panel de atajos de teclado: documenta lo que ya existe ("/", Escape)
+   más el atajo que abre este mismo panel ("?"). Complementa el hint de
+   .hero-trust con una referencia siempre disponible. */
+#shortcutsBtn{
+  position: fixed;
+  inset-inline-start: var(--shortcuts-inset);
+  inset-block-end: var(--shortcuts-inset);
+  z-index: 90;
+  width: var(--shortcuts-size);
+  height: var(--shortcuts-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--paper-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: var(--shadow-float-sm);
+  transition: background var(--motion-base) ease, color var(--motion-base) ease, transform var(--motion-base) var(--spring);
+}
+#shortcutsBtn:hover{ background: var(--ink); color: #fff; transform: translateY(-2px); }
+@media (max-width: 720px){ #shortcutsBtn{ display: none; } }
+
+#shortcutsOverlay{
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--overlay-scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-base) ease;
+}
+#shortcutsOverlay.abierto{ opacity: 1; pointer-events: auto; }
+#shortcutsOverlay .panel{
+  width: 100%;
+  max-width: 420px;
+  padding: 26px 26px 22px;
+  background: var(--paper-raised);
+  border-radius: 10px;
+  box-shadow: var(--shadow-modal);
+  transform: translateY(10px) scale(.97);
+  transition: transform var(--motion-slow) var(--spring);
+}
+#shortcutsOverlay.abierto .panel{ transform: none; }
+#shortcutsOverlay h3{ margin: 0 0 4px; font-family: var(--serif); font-size: 19px; }
+#shortcutsOverlay p.sub{ margin: 0 0 18px; font-size: 12.5px; color: var(--ink-soft); }
+#shortcutsOverlay dl{ margin: 0; display: grid; gap: 12px; }
+#shortcutsOverlay dl div{ display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+#shortcutsOverlay dt{ font-size: 13.5px; color: var(--ink); }
+#shortcutsOverlay dd{ margin: 0; }
+#shortcutsOverlay kbd{
+  padding: 3px 8px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink);
+  background: var(--sunken);
+  border: 1px solid var(--line-strong);
+  border-block-end-width: 2px;
+  border-radius: 5px;
+}
+
+/* ── Accessibility Layer ───────────────────────────────────────────────── */
+/* Alto contraste forzado (Windows): varios controles solo comunican su
+   estado activo con un color de fondo, que forced-colors reemplaza por
+   la paleta del sistema. Un outline extra, visible solo en este modo,
+   mantiene la selección legible sin rediseñar nada. */
+@media (forced-colors: active){
+  :where(
+    .mapa-pill.activo, .mapa-subpill.activo,
+    #mapa-view-toggle button[aria-pressed="true"],
+    #mapa-fav-toggle[aria-pressed="true"],
+    .rs-dot.activo, #sectionDots button.activo,
+    .faq-feedback button.elegido, .day-card.es-ahora
+  ){
+    outline: 2px solid SelectedItem;
+    outline-offset: 2px;
+  }
+}
+
+/* Degradación sin backdrop-filter: nav.top.solid y el activador táctil
+   del mapa dependen del blur para mantener contraste sobre el fondo
+   semitransparente. Sin soporte, solo se sube la opacidad — ningún color
+   cambia. */
+@supports not (backdrop-filter: blur(1px)){
+  nav.top.solid{ background: color-mix(in srgb, var(--paper) 97%, transparent); }
+  #mapa-leaflet .mapa-activador{ background: color-mix(in srgb, var(--ink) 16%, transparent); }
+}
+
+/* ── Print ─────────────────────────────────────────────────────────────── */
+/* Nadie imprime el mapa interactivo, favoritos vacíos ni la navegación,
+   pero sí puede querer el manifiesto, la verificación o el FAQ en papel. */
+@media print{
+  :where(
+    nav.top, #backToTop, #progress, #sectionDots, #shortcutsBtn, #shortcutsOverlay,
+    .hero-scrollcue, #mapa-wrap, .mapa-tip, .padron-trust, .padron-postscript,
+    .rubro-spotlight, .padron-insights, .mapa-onboard, .breadcrumb, footer .foot-bottom,
+    #faqSearch, .faq-feedback
+  ){ display: none !important; }
+
+  body{ background: #fff; }
+  a[href]::after{ content: ' (' attr(href) ')'; font-size: 11px; color: #666; }
+  a[href^="#"]::after{ content: ''; }
+}

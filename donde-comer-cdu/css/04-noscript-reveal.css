@@ -1,0 +1,429 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FASE 2 — SISTEMA DE COMPONENTES
+   Reconstrucción completa sobre el Design System existente. Capa aditiva:
+   ningún selector fue renombrado ni eliminado, por lo que sigue enganchando
+   con el HTML y el JS ya emitidos (backToTop, fb-count, breakdown, día,
+   fichas, rubroExplorer, FAQ, footer). Todo el lenguaje visual — timing,
+   easing, radios, elevación, espaciado — deriva de los tokens del sistema
+   base y de un pequeño set de tokens locales de Fase 2 definidos abajo.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* Tokens locales de Fase 2: build sobre el sistema base, nunca lo pisan */
+  --f2-ease-out:      cubic-bezier(.16,1,.3,1);
+  --f2-ease-in-out:    cubic-bezier(.65,0,.35,1);
+  --f2-spring:        var(--spring, cubic-bezier(.34,1.56,.64,1));
+  --f2-fast:            140ms;
+  --f2-base:            220ms;
+  --f2-slow:            360ms;
+  --f2-lift:            0 18px 40px -16px color-mix(in srgb, var(--ink) 42%, transparent);
+  --f2-lift-sm:         0 8px 20px -10px color-mix(in srgb, var(--ink) 32%, transparent);
+  --f2-ring:            0 0 0 3px color-mix(in srgb, var(--stamp) 22%, transparent);
+  --f2-hairline:        1px solid var(--line-strong);
+}
+
+@media (prefers-reduced-motion:reduce){
+  :root{ --f2-fast:0ms; --f2-base:0ms; --f2-slow:0ms; }
+}
+
+/* Foco accesible unificado para todo elemento interactivo de Fase 2 */
+:where(#backToTop,#faqSearch,.verif-report-cta,.dia-cta-panel a,.fichas-cta-row a,.ayuda-contact-card a.btn-contacto,.gloss-item):focus-visible{
+  outline: 2px solid var(--stamp);
+  outline-offset: 3px;
+  border-radius: var(--r-xs);
+}
+
+/* ── Botón flotante "volver arriba" ─────────────────────────────────── */
+#backToTop{
+  position: fixed;
+  inset-block-end: clamp(16px, 4vw, 22px);
+  inset-inline-end: clamp(16px, 4vw, 22px);
+  z-index: 200;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--dark-line);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(.86);
+  box-shadow: var(--f2-lift);
+  transition:
+    opacity var(--f2-base) var(--f2-ease-out),
+    transform var(--f2-base) var(--f2-spring),
+    background var(--f2-fast) var(--f2-ease-in-out),
+    visibility var(--f2-base);
+}
+#backToTop.visible{ opacity: 1; visibility: visible; transform: none; }
+#backToTop:hover{ background: var(--stamp); box-shadow: var(--f2-lift), 0 0 0 6px color-mix(in srgb, var(--stamp) 14%, transparent); }
+#backToTop:active{ transform: scale(.9); transition-duration: var(--f2-fast); }
+#backToTop svg{ width: 18px; height: 18px; }
+
+@media (max-width:640px){
+  #backToTop{
+    width: 42px;
+    height: 42px;
+    inset-inline-end: 14px;
+    inset-block-end: max(14px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ── Contador de favoritos: micro-rebote al actualizarse ────────────── */
+.fb-count.bump-fav{ animation: favBump var(--f2-slow) var(--f2-spring); }
+@keyframes favBump{
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.42); }
+  70%  { transform: scale(.94); }
+  100% { transform: scale(1); }
+}
+
+/* ── Hero: hora local + cita de vecino + atajo de teclado ────────────── */
+.hero-clock{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.hero-clock svg{ width: 12px; height: 12px; opacity: .7; }
+.hero-clock b{ color: var(--ink); font-weight: 600; }
+
+.hero-quote{
+  margin-block: clamp(28px, 5vw, var(--sp-9)) 0;
+  padding-inline-start: var(--sp-6);
+  max-width: min(480px, 100%);
+  border-inline-start: 2px solid var(--stamp);
+}
+.hero-quote::before{ content: none; }
+.hero-quote p{
+  margin: 0 0 var(--sp-3);
+  font-family: var(--serif);
+  font-weight: 500;
+  font-style: normal;
+  font-size: clamp(17px, 1.4vw + 13px, 19px);
+  line-height: var(--lh-snug);
+  color: var(--ink);
+}
+.hero-quote cite{
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--ink-faint);
+}
+
+.hero-kbd-hint{
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-inline-start: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+.hero-kbd-hint kbd{
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  padding: 1px 6px;
+  border: 1px solid var(--line-strong);
+  border-block-end-width: 2px;
+  border-radius: 4px;
+  background: var(--sunken);
+}
+@media (max-width:640px){ .hero-kbd-hint{ display: none; } }
+
+/* ── Columna de ficha: leve profundidad al interactuar ───────────────── */
+.ficha-stage{ transition: transform var(--f2-slow) var(--f2-ease-out); }
+@media (prefers-reduced-motion:reduce){
+  .ficha-stage{ transition: none !important; transform: none !important; }
+}
+
+/* ── Manifiesto: hover en categorías + lectura de cifras ─────────────── */
+.bd-item{ transition: background var(--f2-base) var(--f2-ease-in-out); }
+
+.manifest-insight{
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 640px;
+  margin-block-start: 34px;
+  padding-block-start: 22px;
+  border: none;
+  border-block-start: 1px solid color-mix(in srgb, var(--paper) 16%, transparent);
+}
+.manifest-insight-ico{ flex: none; margin-block-start: 2px; font-size: 20px; line-height: 1; }
+.manifest-insight p{ margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--dark-soft); }
+.manifest-insight b{ color: var(--stamp-bright); font-weight: 600; }
+
+/* ── Verificación: icono por paso + firma final ──────────────────────── */
+.check-row{ position: relative; }
+.check-ico{
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 22px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xs);
+  background: var(--paper);
+  opacity: 0;
+  transform: scale(.6) rotate(-8deg);
+  pointer-events: none;
+  transition: opacity var(--f2-slow) var(--f2-spring), transform var(--f2-slow) var(--f2-spring);
+}
+.check-row.reveal-ico .check-ico,
+.check-list .check-ico{ opacity: 1; transform: none; }
+@media (max-width:640px){ .check-ico{ display: none; } }
+
+.verif-signature{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block-start: 30px;
+  padding-block-start: 22px;
+  border-block-start: var(--f2-hairline);
+}
+.verif-signature-seal{
+  flex: none;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--stamp-ink);
+  border: 2px solid var(--stamp);
+  border-radius: var(--r-xs);
+}
+.verif-signature p{ margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); }
+.verif-signature b{ color: var(--ink); font-family: var(--sans); }
+
+.verif-scope{ max-width: 640px; margin: 18px 0 0; font-size: 12.5px; line-height: 1.65; color: var(--ink-soft); }
+.verif-scope em{ font-style: normal; font-weight: 600; color: var(--ink); }
+
+.verif-report-cta{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--stamp-ink);
+  text-decoration: none;
+  border-block-end: 1px dashed var(--stamp-ink);
+  transition: color var(--f2-fast) var(--f2-ease-in-out), border-color var(--f2-fast) var(--f2-ease-in-out);
+}
+.verif-report-cta:hover{ color: var(--stamp); border-color: var(--stamp); }
+
+/* ── Un día en la ciudad: badge "ahora" + tarjetas vivas ─────────────── */
+.day-card{ position: relative; transition: background var(--f2-base) var(--f2-ease-in-out); }
+.day-card.es-ahora{ box-shadow: inset 0 0 0 2px var(--stamp); }
+.day-card.es-ahora::after{
+  content: 'Ahora';
+  position: absolute;
+  inset-block-start: 10px;
+  inset-inline-end: 10px;
+  padding: 3px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--stamp);
+  border-radius: var(--r-xs);
+  animation: statusPulse2 2.2s var(--f2-ease-in-out) infinite;
+}
+@keyframes statusPulse2{
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--river) 50%, transparent); }
+  50%      { box-shadow: 0 0 0 5px color-mix(in srgb, var(--river) 0%, transparent); }
+}
+@media (prefers-reduced-motion:reduce){ .day-card.es-ahora::after{ animation: none; } }
+
+.dia-cta-panel{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block-start: 32px;
+  padding-block-start: var(--sp-6);
+  border-block-start: var(--f2-hairline);
+}
+.dia-cta-panel p{ margin: 0; max-width: 420px; font-family: var(--serif); font-size: 15.5px; color: var(--ink); }
+.dia-cta-panel a{
+  padding: 12px 20px;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 12px;
+  color: #fff;
+  background: var(--river);
+  border-radius: var(--r-xs);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: filter var(--f2-base) var(--f2-ease-in-out), transform var(--f2-fast) var(--f2-spring);
+}
+.dia-cta-panel a:hover{ filter: brightness(1.08); }
+.dia-cta-panel a:active{ transform: scale(.96); }
+
+/* ── Fichas destacadas: ribbon de ranking + CTA final ─────────────────
+   #fichasGrid se reconstruye por completo en JS (buildFichas()); el
+   ribbon se dibuja con un contador CSS sobre .fcard, así que sigue
+   apareciendo aunque el JS reemplace el innerHTML del grid. */
+#fichasGrid{ counter-reset: fcard-rank; }
+.fcard{ position: relative; overflow: visible; counter-increment: fcard-rank; }
+.fcard::before{
+  content: 'Nº' counter(fcard-rank);
+  position: absolute;
+  inset-block-start: -9px;
+  inset-inline-start: 14px;
+  padding: 3px 9px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #fff;
+  background: var(--ink);
+  border-radius: var(--r-xs);
+  box-shadow: var(--f2-lift-sm);
+  pointer-events: none;
+}
+
+.fichas-cta-row{ margin-block-start: 30px; text-align: center; }
+.fichas-cta-row a{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xs);
+  text-decoration: none;
+  transition: border-color var(--f2-base) var(--f2-ease-in-out), background var(--f2-base) var(--f2-ease-in-out), transform var(--f2-fast) var(--f2-spring);
+}
+.fichas-cta-row a:hover{ border-color: var(--stamp); background: var(--surface-accent); }
+.fichas-cta-row a:active{ transform: scale(.96); }
+.fichas-cta-row a svg{ width: 14px; height: 14px; }
+
+/* ── Guardadas: tip contextual para primera visita ───────────────────── */
+.guardadas-tip{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 22px;
+  padding: 14px 16px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  background: var(--surface-accent);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xs);
+}
+.guardadas-tip svg{ flex: none; width: 16px; height: 16px; color: var(--stamp-ink); }
+
+/* ── Ayuda: buscador de preguntas + tarjeta de contacto ──────────────── */
+.faq-search-wrap{ position: relative; margin-block-end: 22px; }
+.faq-search-wrap svg{
+  position: absolute;
+  inset-inline-start: 14px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  opacity: .5;
+  pointer-events: none;
+}
+#faqSearch{
+  width: 100%;
+  padding: 12px 16px 12px 38px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xs);
+  outline: none;
+  transition: border-color var(--f2-base) var(--f2-ease-in-out), box-shadow var(--f2-base) var(--f2-ease-in-out);
+}
+#faqSearch:focus{ border-color: var(--stamp); box-shadow: var(--f2-ring); }
+
+.faq-item.oculto-busqueda{ display: none; }
+#faqNoResults{ display: none; padding: 8px 4px; font-size: 12.5px; font-style: italic; color: var(--ink-soft); }
+#faqNoResults.visible{ display: block; }
+
+.ayuda-contact-card{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-block-start: 28px;
+  padding-block-start: var(--sp-6);
+  border: none;
+  border-block-start: var(--f2-hairline);
+}
+.ayuda-contact-card b{ display: block; margin-block-end: 2px; font-family: var(--sans); font-size: 13.5px; color: var(--ink); }
+.ayuda-contact-card span{ font-size: 12px; color: var(--ink-soft); }
+.ayuda-contact-card a.btn-contacto{
+  margin-inline-start: auto;
+  padding: 10px 18px;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 12px;
+  color: #fff;
+  background: var(--stamp);
+  border-radius: var(--r-xs);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: filter var(--f2-base) var(--f2-ease-in-out);
+}
+.ayuda-contact-card a.btn-contacto:hover{ filter: brightness(1.08); }
+
+.gloss-item{ transition: transform var(--f2-fast) var(--f2-spring); }
+.gloss-item:hover,
+.gloss-item:focus-visible{ transform: translateX(3px); }
+
+/* ── Footer: sellos de confianza + firma cálida ──────────────────────── */
+.foot-trust{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-block-end: 22px;
+  padding-block: 22px;
+  border-block: 1px solid var(--dark-line);
+}
+.foot-trust-item{
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dark-soft);
+}
+.foot-trust-item svg{ width: 13px; height: 13px; opacity: .85; }
+
+.foot-signature{
+  margin-block-start: 18px;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--dark-soft);
+  opacity: .85;
+}
