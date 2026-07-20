@@ -204,7 +204,7 @@
     } else if (reg.nombre === 'accionDirecta') {
       var resultados = EXPO.resultadosPorAccionExplicita(REGISTRO, consultaActual);
       pintarTarjetas(resultados, favoritos, { origen: 'accion_explicita', narrativa: false });
-      if (MAPA.debeMostrarHerramienta('accionDirecta', consultaActual)) {
+      if (MAPA.debeMostrarHerramienta('accionDirecta', resultados)) {
         mostrarHerramienta(MAPA.puntosHerramienta(resultados));
       } else {
         ocultarHerramienta();
@@ -267,6 +267,10 @@
   function slug(lugar) { return lugar.id.toLowerCase(); } // ajustar si el slug real difiere del id
 
   /* ── 6. Mapa de doble rol ── */
+  var mapaLeaflet = null;
+  var capaMarcadores = null;
+  var leafletCargando = null;
+
   function actualizarMapaTextura() {
     if (!DOM.mapaTextura || !REGISTRO.length) return;
     if (!window.URU_CONFIG.mapa.texturaSiempreVisible) return;
@@ -285,11 +289,71 @@
     DOM.mapaTextura.dataset.pintado = '1';
   }
 
+  // Carga Leaflet (CSS + JS) una sola vez, solo cuando hace falta.
+  // No se pide en Guía/Exploración/Curaduría — solo si Acción Directa
+  // efectivamente necesita mostrar el mapa-herramienta.
+  function cargarLeaflet() {
+    if (window.L) return Promise.resolve();
+    if (leafletCargando) return leafletCargando;
+    leafletCargando = new Promise(function (resolve, reject) {
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(css);
+
+      var script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    return leafletCargando;
+  }
+
+  // La instancia de Leaflet se crea una sola vez y se reutiliza en
+  // cada render subsiguiente (clearLayers en vez de recrear el mapa).
+  function inicializarMapaLeaflet() {
+    if (mapaLeaflet || !DOM.mapaHerramienta) return;
+    var contenedor = document.createElement('div');
+    contenedor.id = 'mapaLeafletContenedor';
+    contenedor.style.height = '320px';
+    contenedor.style.borderRadius = '8px';
+    DOM.mapaHerramienta.innerHTML = '';
+    DOM.mapaHerramienta.appendChild(contenedor);
+
+    mapaLeaflet = L.map(contenedor, { preferCanvas: true }).setView([-32.4833, -58.2333], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapaLeaflet);
+    capaMarcadores = L.layerGroup().addTo(mapaLeaflet);
+  }
+
   function mostrarHerramienta(puntos) {
     if (!DOM.mapaHerramienta) return;
     DOM.mapaHerramienta.hidden = false;
-    DOM.mapaHerramienta.innerHTML = '<p class="mapa-herramienta-nota">' + puntos.length + ' resultado(s) cercano(s) — mapa interactivo real: pendiente de integración de Leaflet/Places en esta pasada.</p>';
+    cargarLeaflet().then(function () {
+      inicializarMapaLeaflet();
+      capaMarcadores.clearLayers();
+      var bounds = [];
+      puntos.forEach(function (p) {
+        if (typeof p.lat !== 'number' || typeof p.lng !== 'number') return;
+        L.marker([p.lat, p.lng]).addTo(capaMarcadores).bindPopup(
+          '<strong>' + escapeHTML(p.nombre) + '</strong><br>' +
+          (p.direccion ? escapeHTML(p.direccion) : '') +
+          '<br><a href="locales/' + slug(p) + '/">ver ficha</a>'
+        );
+        bounds.push([p.lat, p.lng]);
+      });
+      if (bounds.length === 1) mapaLeaflet.setView(bounds[0], 16);
+      else if (bounds.length > 1) mapaLeaflet.fitBounds(bounds, { padding: [24, 24] });
+      requestAnimationFrame(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); });
+    }).catch(function (e) {
+      console.warn('No se pudo cargar Leaflet', e);
+      DOM.mapaHerramienta.innerHTML = '<p class="mapa-herramienta-nota">No se pudo cargar el mapa.</p>';
+    });
   }
+
   function ocultarHerramienta() {
     if (DOM.mapaHerramienta) DOM.mapaHerramienta.hidden = true;
   }
