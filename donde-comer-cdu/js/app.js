@@ -24,7 +24,7 @@
 
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
-   'mapaTextura', 'mapaHerramienta', 'mapaInfo', 'contadorCuraduria', 'btnVerGuardados']
+   'mapaTextura', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
   /* ── 1. Arranque de contexto ── */
@@ -329,6 +329,7 @@
     if (!debeMostrar) {
       DOM.mapaHerramienta.hidden = true;
       if (DOM.mapaInfo) DOM.mapaInfo.hidden = true;
+      if (DOM.mapaLeyenda) DOM.mapaLeyenda.hidden = true;
       return;
     }
 
@@ -340,10 +341,33 @@
     var conCoordenadas = lista.filter(function (l) { return typeof l.lat === 'number' && typeof l.lng === 'number'; });
     var recorte = MAPA.puntosHerramienta(conCoordenadas);
     var puntos = recorte.map(function (l) {
-      return { id: l.id, lat: l.lat, lng: l.lng, nombre: l.nombre, direccion: l.direccion, href: 'locales/' + slug(l) + '/' };
+      var meta = window.URU_RUBROS_META && window.URU_RUBROS_META[l.grupo];
+      return {
+        id: l.id, lat: l.lat, lng: l.lng, nombre: l.nombre, direccion: l.direccion,
+        href: 'locales/' + slug(l) + '/',
+        color: meta ? meta[2] : '#C97A83',
+        rubroNombre: meta ? meta[0] : l.categoria
+      };
     });
     motorMapa.establecerPuntos(puntos);
     motorMapa.encuadrarTodos(48);
+    pintarLeyenda(puntos);
+  }
+
+  function pintarLeyenda(puntos) {
+    if (!DOM.mapaLeyenda) return;
+    var vistos = Object.create(null);
+    var unicos = [];
+    puntos.forEach(function (p) {
+      if (vistos[p.rubroNombre]) return;
+      vistos[p.rubroNombre] = true;
+      unicos.push(p);
+    });
+    if (unicos.length < 2) { DOM.mapaLeyenda.hidden = true; return; } // con un solo rubro, el color no aporta nada
+    DOM.mapaLeyenda.innerHTML = unicos.map(function (p) {
+      return '<span class="mapa-leyenda-chip"><span class="mapa-leyenda-punto" style="background:' + p.color + '"></span>' + escapeHTML(p.rubroNombre) + '</span>';
+    }).join('');
+    DOM.mapaLeyenda.hidden = false;
   }
 
   function escapeHTML(s) {
