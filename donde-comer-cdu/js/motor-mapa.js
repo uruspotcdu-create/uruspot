@@ -1,16 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════
    URU SPOT — motor-mapa.js
-   Blueprint v2, sección 4c: el mapa no es una sola decisión binaria
-   (aparece/desaparece) — son DOS roles independientes.
-   1) Mapa-herramienta: interactivo, control real. Aparece en Acción
-      Directa siempre que haya al menos un resultado georreferenciado.
-      Recorte acotado, igual que el resto del sistema — nunca el
-      universo completo de puntos.
-   2) Mapa-textura: capa ambiental, no interactiva, de baja densidad.
-      Puede estar presente en Guía o Exploración — su función no es
-      responder "dónde", es dar la certeza subconsciente de que esto
-      es un lugar real. Por eso nunca compite por atención ni se
-      comporta como control (sin hover, sin click, sin tooltip).
+   El mapa-herramienta ya no es exclusivo de Acción Directa: participa
+   de las cuatro regiones (Guía, Exploración, Acción Directa,
+   Curaduría), mostrando siempre el mismo recorte que ya está en
+   pantalla como tarjetas — nunca un conjunto aparte. La única
+   condición real es que haya algo georreferenciado para mostrar.
+   El mapa-textura (capa ambiental de motor-render/app.js) sigue
+   siendo la única pieza no interactiva, de baja densidad.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -27,18 +23,19 @@
     return out;
   }
 
-  // Puntos herramienta: los del recorte activo de Acción Directa,
-  // acotados por el mismo tipo de límite (mapa.herramientaRecorte).
+  // Puntos herramienta: los del recorte activo de la región actual,
+  // acotados por el mismo tipo de límite (mapa.herramientaRecorte) —
+  // el mapa nunca muestra más lugares que los que ya están como
+  // tarjetas en pantalla.
   function puntosHerramienta(recorteActivo) {
     return recorteActivo.slice(0, CFG.mapa.herramientaRecorte);
   }
 
-  // Criterio único: Acción Directa + al menos un resultado con
-  // coordenadas. El presupuesto de exposición (motor-exposicion.js)
-  // ya se encarga de que "resultados" nunca sea el padrón entero, así
-  // que este criterio no necesita filtrar por texto de consulta.
+  // Criterio único: que haya al menos un resultado con coordenadas.
+  // El presupuesto de exposición (motor-exposicion.js) ya se encarga
+  // de que "resultados" nunca sea el padrón entero, en ninguna
+  // región — así que este criterio no necesita distinguir por región.
   function debeMostrarHerramienta(nombreRegion, resultados) {
-    if (nombreRegion !== 'accionDirecta') return false;
     if (!resultados || !resultados.length) return false;
     return resultados.some(function (r) { return typeof r.lat === 'number' && typeof r.lng === 'number'; });
   }
