@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>URU SPOT — el padrón de Concepción del Uruguay</title>
-<meta name="description" content="El padrón completo de Concepción del Uruguay: 1.468 lugares caminados y verificados uno por uno, en 14 rubros — sin ranking, sin relleno.">
+<title>URU SPOT — descubrí Concepción del Uruguay</title>
+<meta name="description" content="Cada vez que abrís URU SPOT te mostramos unos pocos lugares, no un padrón entero. Cuanto más lo usás, más se ajusta a vos — y si ya sabés lo que buscás, lo encontrás directo.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#F5F1E7">
 <meta name="format-detection" content="telephone=no">
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/">
 <link rel="manifest" href="../manifest.json">
-<meta property="og:title" content="URU SPOT — el padrón de Concepción del Uruguay">
-<meta property="og:description" content="1.468 lugares caminados y verificados uno por uno, en 14 rubros — sin ranking, sin relleno.">
+<meta property="og:title" content="URU SPOT — descubrí Concepción del Uruguay">
+<meta property="og:description" content="Unos pocos lugares por vez, verificados uno por uno. No un directorio para scrollear — un motor que aprende cuánto guiarte.">
 <meta property="og:image" content="https://uruspot.pages.dev/img/logof.webp">
 <meta property="og:image:alt" content="Logo de URU SPOT">
 <meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/">
@@ -20,696 +20,141 @@
 <meta property="og:site_name" content="URU SPOT">
 <meta property="og:locale" content="es_AR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="URU SPOT — el padrón de Concepción del Uruguay">
-<meta name="twitter:description" content="1.468 lugares caminados y verificados uno por uno, en 14 rubros — sin ranking, sin relleno.">
+<meta name="twitter:title" content="URU SPOT — descubrí Concepción del Uruguay">
+<meta name="twitter:description" content="Unos pocos lugares por vez, verificados uno por uno.">
 <meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp">
-<meta name="twitter:image:alt" content="Logo de URU SPOT">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com">
-<link rel="dns-prefetch" href="https://b.basemaps.cartocdn.com">
-<link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com">
-<link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com">
-<link rel="dns-prefetch" href="https://unpkg.com">
-<!-- Carga no bloqueante de Google Fonts (patrón loadCSS/Filament Group),
-     recuperado de index.backup: preload de alta prioridad sin bloquear
-     el render; el link real entra como media="print" y se reclasifica
-     a "all" en onload. El noscript garantiza carga si JS está apagado. -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" id="gfontsLink" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
-
   /* ═══════════════════════════════════════════════════════════════
-     URU SPOT — el padrón completo, conectado a los datos reales
-     (1.468 lugares, 14 rubros), sobre un único manifiesto:
-       1. la totalidad siempre es visible (fracción persistente)
-       2. nada existe sin verificación real
-       3. el tiempo es direccional, el orden de caminata no se
-          desarma (posición antes que nombre)
-       4. el contenido se acumula, nunca se reemplaza sin rastro
-       5. los cambios de estado corresponden a hechos, no a mood
-
-     Buscador, chips de rubro y mapa son el mismo lente aplicado sobre
-     la secuencia real — ninguno crea una vista paralela, ninguno
-     reordena el padrón. Motor modular en src/ (ver src/main.js):
-     filter-store (estado de filtros + selección), url-state (Etapa 1:
-     esos filtros/selección reflejados en la URL — deep-linking,
-     "atrás" funcional), list-controller (la lista) y, desde la
-     Etapa 3, map-controller (mapa Leaflet real + clustering, en vez
-     del mapa esquemático de las Etapas 1-2). Etapa 4: selección y
-     mapa/lista sincronizados en ambos sentidos + \"buscar en esta
-     área\" (filterStore.setArea). Etapa 6: en mobile,
-     ui/mobile-sheet.js convierte el bloque #secuencia en una vista
-     contenida tipo app: mapa de fondo + lista como hoja inferior
-     arrastrable, con un toggle \"mapa\"/\"lista\" como atajo, sin
-     tocar list-controller ni map-controller (ninguno de los dos
-     sabe que existe la hoja). No importa ni toca core-engine.js ni
-     el resto del motor viejo archivado.
+     URU SPOT — implementación del Blueprint de Producto v2 +
+     Vocabulario de Interacción (Architecture Freeze v1.0).
+     El núcleo NO es esta hoja de estilos ni este HTML: es
+     js/motor-plano.js (plano continuo), js/motor-exposicion.js
+     (presupuesto de exposición) y js/motor-mapa.js (doble rol del
+     mapa). Este documento solo traduce esos módulos a DOM.
+     Paleta y tipografía heredadas de la versión anterior a propósito
+     — el rediseño visual queda como paso aparte, ya acordado.
      ═══════════════════════════════════════════════════════════════ */
-
   :root{
-    --tinta:      #ECEDEF;
-    --tinta-60:   rgba(236,237,239,.62);
-    --tinta-30:   rgba(236,237,239,.26);
-    --fondo:      #0A0D13;
-    --fondo-2:    #10141C;
-    --linea:      rgba(148,155,171,.16);
-    --linea-fuerte: rgba(148,155,171,.30);
-    --granate:    #9C3A46;
-    --granate-clara: #C97A83;
-
-    --f-display: 'Fraunces', serif;
-    --f-ui:      'IBM Plex Sans', sans-serif;
-    --f-dato:    'IBM Plex Mono', monospace;
+    --tinta: #ECEDEF; --tinta-60: rgba(236,237,239,.62); --tinta-30: rgba(236,237,239,.26);
+    --fondo: #0A0D13; --fondo-2: #10141C;
+    --linea: rgba(148,155,171,.16); --linea-fuerte: rgba(148,155,171,.30);
+    --granate: #9C3A46; --granate-clara: #C97A83;
+    --f-display: 'Fraunces', serif; --f-ui: 'IBM Plex Sans', sans-serif; --f-dato: 'IBM Plex Mono', monospace;
   }
-
   *{ box-sizing:border-box; margin:0; padding:0; }
   html{ scroll-behavior:smooth; }
-  body{
-    background:var(--fondo); color:var(--tinta);
-    font-family:var(--f-ui); line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-  }
-  ::selection{ background:var(--granate); color:var(--tinta); }
+  body{ background:var(--fondo); color:var(--tinta); font-family:var(--f-ui); line-height:1.6; -webkit-font-smoothing:antialiased; }
   a{ color:inherit; }
-
-  .envoltorio{ max-width:1180px; margin:0 auto; padding:0 40px; }
-  .envoltorio--angosta{ max-width:920px; }
+  .envoltorio{ max-width:1000px; margin:0 auto; padding:0 40px; }
   @media (max-width:720px){ .envoltorio{ padding:0 20px; } }
 
-  /* ─── CABECERA — fracción persistente: coordenada, no progreso ─── */
-  header{
-    position:sticky; top:0; z-index:20;
-    background:rgba(10,13,19,.88); backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--linea);
-  }
-  .membrete{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:18px 0;
-  }
+  header{ position:sticky; top:0; z-index:20; background:rgba(10,13,19,.9); backdrop-filter:blur(6px); border-bottom:1px solid var(--linea); }
+  .membrete{ display:flex; justify-content:space-between; align-items:center; padding:16px 0; }
   .marca{ font-family:var(--f-ui); font-weight:600; font-size:13px; letter-spacing:.14em; }
-  .marca span{
-    display:block; font-family:var(--f-dato); font-weight:400;
-    font-size:10px; letter-spacing:.02em; color:var(--tinta-30); margin-top:3px;
-  }
-  .fraccion{ font-family:var(--f-dato); font-size:13px; color:var(--tinta-60); text-align:right; white-space:nowrap; }
-  .fraccion b{ color:var(--tinta); font-weight:500; }
-  .fraccion .etiqueta{
-    display:block; font-size:9.5px; color:var(--tinta-30);
-    letter-spacing:.08em; text-transform:uppercase; margin-top:2px;
-  }
+  .marca span{ display:block; font-family:var(--f-dato); font-weight:400; font-size:10px; letter-spacing:.02em; color:var(--tinta-30); margin-top:3px; }
+  .rol{ font-family:var(--f-dato); font-size:12px; color:var(--tinta-60); text-align:right; }
+  .rol b{ color:var(--tinta); font-weight:500; }
 
-  /* ─── APERTURA ─── */
-  .apertura{ padding:76px 0 54px; max-width:700px; }
-  .apertura .eyebrow{
-    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--granate-clara); margin-bottom:24px;
-  }
-  .apertura h1{
-    font-family:var(--f-display); font-weight:500; font-style:normal;
-    font-size:clamp(1.7rem, 4vw, 2.7rem); line-height:1.32; letter-spacing:-.01em;
-  }
-  .apertura h1 .num{ font-family:var(--f-dato); font-weight:400; font-size:.72em; color:var(--granate-clara); }
-  .apertura p{ margin-top:22px; font-size:15.5px; color:var(--tinta-60); max-width:56ch; }
-  .apertura p b{ color:var(--tinta); font-weight:600; }
-  .senial{
-    margin-top:44px; font-family:var(--f-dato); font-size:10.5px;
-    letter-spacing:.06em; color:var(--tinta-30); display:flex; align-items:center; gap:10px;
-  }
-  .senial::before{ content:''; width:16px; height:1px; background:var(--tinta-30); }
+  .hero{ padding:56px 0 32px; border-bottom:1px solid var(--linea); }
+  .hero h1{ font-family:var(--f-display); font-weight:500; font-size:clamp(28px,4vw,42px); max-width:720px; }
+  .hero p{ color:var(--tinta-60); margin-top:14px; max-width:560px; }
 
-  /* ─── TÍTULO DE VISTA (motor) ─── */
-  .titulo-vista{ padding:36px 0 4px; max-width:640px; }
-  .titulo-vista .eyebrow{
-    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--granate-clara); margin-bottom:14px;
-  }
-  .titulo-vista h2{
-    font-family:var(--f-display); font-weight:500; font-size:clamp(1.4rem,3vw,1.9rem); line-height:1.3;
-  }
-  .titulo-vista p{ margin-top:12px; font-size:14px; color:var(--tinta-60); max-width:56ch; }
+  .buscador{ margin-top:28px; display:flex; gap:10px; }
+  #inputBuscar{ flex:1; background:var(--fondo-2); border:1px solid var(--linea-fuerte); border-radius:8px; color:var(--tinta); padding:14px 16px; font-family:var(--f-ui); font-size:15px; }
+  #inputBuscar:focus{ outline:2px solid var(--granate-clara); outline-offset:1px; }
+  #btnVerGuardados{ background:transparent; border:1px solid var(--linea-fuerte); border-radius:8px; color:var(--tinta-60); padding:0 18px; font-family:var(--f-ui); cursor:pointer; white-space:nowrap; }
+  #btnVerGuardados:hover{ color:var(--tinta); border-color:var(--granate-clara); }
 
-  /* ─── HERRAMIENTAS — buscador, chips de rubro, favoritos ─── */
-  .herramientas{ padding:26px 0 6px; }
-  .buscador{
-    display:flex; align-items:center; gap:10px;
-    border:1px solid var(--linea-fuerte); border-radius:2px;
-    padding:11px 14px; max-width:440px;
-  }
-  .buscador input{
-    flex:1; background:none; border:none; outline:none;
-    font-family:var(--f-ui); font-size:14px; color:var(--tinta);
-  }
-  .buscador input::placeholder{ color:var(--tinta-30); }
-  .buscador .lupa{ font-family:var(--f-dato); color:var(--tinta-30); font-size:13px; }
+  .region-encabezado{ padding:36px 0 8px; }
+  .region-encabezado h2{ font-family:var(--f-display); font-weight:500; font-size:22px; }
+  .region-encabezado p{ color:var(--tinta-60); margin-top:4px; font-size:14px; }
 
-  .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
-  .chip{
-    font-family:var(--f-dato); font-size:10.5px; letter-spacing:.03em;
-    color:var(--tinta-60); background:none;
-    border:1px solid var(--linea-fuerte); border-radius:20px;
-    padding:7px 13px; cursor:pointer;
-    transition:border-color .2s ease, color .2s ease, background .2s ease;
-  }
-  .chip:hover{ border-color:var(--tinta-60); color:var(--tinta); }
-  .chip.activo{ border-color:var(--granate); color:var(--tinta); background:rgba(156,58,70,.16); }
-  .chip.chip-fav.activo{ border-color:var(--granate-clara); }
-  .chip.chip-fav::before{ content:'☆ '; }
-  .chip.chip-fav.activo::before{ content:'★ '; color:var(--granate-clara); }
-  /* Etapa 4: chip de "área del mapa" — solo visible cuando hay un
-     recorte geográfico activo (ver ui/chips.js + map-controller.js) */
-  .chip.chip-area{ border-color:var(--granate-clara); color:var(--granate-clara); }
-  .chip.chip-area:hover{ border-color:var(--tinta); color:var(--tinta); }
+  #mapaHerramienta{ margin:16px 0; padding:14px 16px; background:var(--fondo-2); border:1px solid var(--linea); border-radius:8px; font-size:13px; color:var(--tinta-60); }
 
-  .estado-resultados{
-    margin-top:20px; font-family:var(--f-dato); font-size:11px; color:var(--tinta-30);
-    padding-bottom:8px; border-bottom:1px solid var(--linea);
-  }
-  .estado-resultados b{ color:var(--tinta-60); font-weight:500; }
+  #panelDescubrimiento{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; padding:16px 0 48px; position:relative; z-index:1; }
+  .tarjeta{ background:var(--fondo-2); border:1px solid var(--linea); border-radius:10px; padding:18px; transition:opacity .2s, transform .2s; }
+  .tarjeta--narrativa{ grid-column:span 2; }
+  @media (max-width:720px){ .tarjeta--narrativa{ grid-column:span 1; } }
+  .tarjeta.descartada{ opacity:.25; transform:scale(.98); pointer-events:none; }
+  .tarjeta-rubro{ font-family:var(--f-dato); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--granate-clara); }
+  .tarjeta-nombre{ font-family:var(--f-display); font-weight:500; font-size:19px; margin-top:6px; }
+  .tarjeta-direccion{ color:var(--tinta-60); font-size:13.5px; margin-top:6px; }
+  .tarjeta-acciones{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+  .tarjeta-btn{ font-family:var(--f-ui); font-size:12.5px; border:1px solid var(--linea-fuerte); background:transparent; color:var(--tinta-60); padding:7px 12px; border-radius:6px; cursor:pointer; text-decoration:none; }
+  .tarjeta-btn:hover{ color:var(--tinta); border-color:var(--granate-clara); }
+  .tarjeta-btn--fav.activo{ color:var(--granate-clara); border-color:var(--granate-clara); }
+  .vacio{ color:var(--tinta-60); padding:24px 0; grid-column:1/-1; }
 
-  /* ─── ÁREA — lista y mapa, la misma secuencia en dos lentes ───
-     Desktop: grid de dos columnas, sin cambios desde la Etapa 3.
-     Mobile (Etapa 6): ya no es "mapa arriba, lista abajo, apilados en
-     el flujo normal" (así era hasta la Etapa 5) — `.area` pasa a ser
-     un contenedor de alto fijo tipo app (mapa de fondo + hoja
-     arrastrable encima), ver ui/mobile-sheet.js. El resto de la
-     página (apertura, manifiesto, índice de rubros, FAQ) sigue
-     siendo scroll normal antes y después de este bloque. */
-  .area{ display:grid; grid-template-columns:1fr 380px; gap:0; }
-  @media (max-width:900px){
-    .area{
-      position:relative; overflow:hidden;
-      height:min(680px, calc(100svh - 88px));
-      min-height:420px;
-      border:1px solid var(--linea); border-radius:6px;
-    }
-  }
+  /* mapa-textura: ambiental, no interactivo, baja densidad — nunca el universo completo */
+  #mapaTextura{ position:relative; height:110px; margin:20px 0; border-radius:10px; overflow:hidden; background:linear-gradient(180deg,var(--fondo-2),var(--fondo)); border:1px solid var(--linea); pointer-events:none; }
+  .punto-textura{ position:absolute; width:3px; height:3px; border-radius:50%; background:var(--tinta-30); }
 
-  /* Antes: columna única — con 1.468 fichas de ~84px cada una, eso son
-     ~123.000px de scroll vertical dentro del panel. Multi-columna con
-     CSS multi-col (no CSS Grid): la secuencia sigue intacta — se lee
-     primero toda la columna 1 de arriba a abajo, después la columna 2,
-     como en un padrón impreso a dos o tres columnas — y el ancho
-     disponible ahora se usa entero en vez de dejar ~2/3 vacíos.
-     Se eligió multi-col en vez de Grid porque un ítem oculto por un
-     filtro (.paso.oculto, ver más abajo) colapsa su propia altura de
-     forma independiente; en un Grid con auto-flow, la fila entera no
-     se achica hasta que TODOS los ítems de esa fila estén ocultos —
-     rompería la animación de colapso al buscar/filtrar. */
-  .panel-lista{
-    padding:6px 0 80px;
-    column-width:340px; column-gap:36px;
-  }
-  @media (max-width:900px){
-    /* la hoja inferior (Etapa 6) es angosta — multi-col no aporta ahí */
-    .panel-lista{ column-width:auto; column-count:1; }
-  }
-
-
-  .paso{
-    display:grid; grid-template-rows:1fr; overflow:hidden;
-    border-bottom:1px solid var(--linea);
-    transition:grid-template-rows .38s ease, opacity .4s ease, padding .38s ease, transform .4s ease;
-    opacity:0; transform:translateY(6px);
-    /* content-visibility: el navegador salta el trabajo de layout/paint
-       de filas fuera de pantalla — clave con 1.468 registros. */
-    content-visibility:auto; contain-intrinsic-size:auto 84px;
-    /* multi-col: que una ficha nunca quede partida entre dos columnas */
-    break-inside:avoid;
-  }
-  .paso.visible{ opacity:1; transform:none; }
-  .paso-inner{
-    display:grid; grid-template-columns:64px 1fr auto; gap:18px;
-    align-items:start; padding:18px 0; min-height:0;
-  }
-  .paso.oculto{ grid-template-rows:0fr; opacity:0; padding-top:0; padding-bottom:0; border-color:transparent; }
-  .paso.oculto .paso-inner{ padding:0; overflow:hidden; }
-
-  .paso .pos{ font-family:var(--f-dato); font-size:12.5px; color:var(--tinta-30); padding-top:2px; }
-  .paso.activa{ background:rgba(156,58,70,.07); }
-  .paso.activa .pos{ color:var(--granate-clara); }
-  .paso.paso--activa{ background:rgba(156,58,70,.05); }
-  .paso.paso--activa .pos{ color:var(--granate-clara); }
-
-  .paso .rubro{
-    font-family:var(--f-dato); font-size:9.5px; letter-spacing:.08em;
-    text-transform:uppercase; color:var(--granate-clara);
-  }
-  .paso .nombre{ font-family:var(--f-display); font-weight:500; font-size:17px; margin-top:6px; }
-  .paso .direccion{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-60); margin-top:4px; }
-  .paso .constancia{
-    font-family:var(--f-dato); font-size:10px; color:var(--tinta-30); margin-top:8px; letter-spacing:.02em;
-  }
-  .paso .constancia::before{ content:'✓ '; color:var(--granate-clara); }
-  .paso .constancia.constancia--pendiente{ color:var(--granate-clara); }
-  .paso .constancia.constancia--pendiente::before{ content:'· '; color:var(--tinta-30); }
-
-  .btn-fav{
-    background:none; border:none; cursor:pointer; font-size:16px;
-    color:var(--tinta-30); padding:2px 4px; line-height:1;
-    transition:color .2s ease, transform .2s ease;
-  }
-  .btn-fav:hover{ color:var(--granate-clara); }
-  .btn-fav.activo{ color:var(--granate-clara); }
-
-  .sin-resultados{ column-span:all; padding:60px 10px; font-family:var(--f-ui); color:var(--tinta-60); max-width:44ch; }
-  .sin-resultados b{ display:block; font-family:var(--f-display); font-size:19px; color:var(--tinta); margin-bottom:8px; font-weight:500; }
-
-  /* ─── MAPA REAL — Leaflet + clustering (Etapa 3) ───
-     Reemplaza el mapa esquemático de puntos por porcentaje de las
-     Etapas 1-2. Leaflet inyecta su propio CSS (unpkg) cuando el
-     contenedor entra en viewport; lo que sigue son overrides para que
-     su cromado (zoom, atribución, popups, clusters) hable el mismo
-     idioma visual que el resto del sitio en vez de verse como un
-     widget insertado. */
-  .panel-mapa{
-    position:sticky; top:96px; align-self:start;
-    padding:20px 0 40px 30px; border-left:1px solid var(--linea); height:fit-content;
-  }
-  @media (max-width:900px){
-    /* Etapa 6: dentro de `.area` (ahora con alto fijo, ver arriba), el
-       mapa pasa a ser el fondo completo del contenedor — la hoja de
-       la lista se arrastra encima. La etiqueta y la nota de texto se
-       ocultan: no hay lugar para ellas y son redundantes con el
-       toggle "mapa"/"lista". */
-    .panel-mapa{
-      position:absolute; inset:0; z-index:1;
-      padding:0; margin:0; border:none; height:100%;
-    }
-    .panel-mapa .mapa-etiqueta, .panel-mapa .mapa-nota{ display:none; }
-  }
-  .mapa-etiqueta{
-    font-family:var(--f-dato); font-size:10px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--tinta-30); margin-bottom:12px;
-  }
-  .mapa-real{
-    width:100%; aspect-ratio:1/1; border:1px solid var(--linea-fuerte);
-    background:var(--fondo-2);
-  }
-  @media (max-width:900px){
-    .mapa-real{ height:100%; aspect-ratio:auto; border:none; }
-  }
-  .mapa-nota{ margin-top:16px; font-family:var(--f-ui); font-size:11.5px; color:var(--tinta-30); }
-
-  /* ─── TOGGLE "mapa"/"lista" — atajo directo, solo mobile (Etapa 6) ─── */
-  .vista-movil-toggle{ display:none; }
-  @media (max-width:900px){
-    .vista-movil-toggle{
-      display:flex; gap:2px; position:absolute; z-index:20;
-      top:12px; left:50%; transform:translateX(-50%);
-      background:rgba(10,13,19,.86); backdrop-filter:blur(6px);
-      border:1px solid var(--linea-fuerte); border-radius:20px; padding:3px;
-    }
-  }
-  .toggle-vista{
-    font-family:var(--f-dato); font-size:10.5px; letter-spacing:.04em;
-    color:var(--tinta-60); background:none; border:none; border-radius:16px;
-    padding:7px 16px; cursor:pointer; transition:background .2s ease, color .2s ease;
-  }
-  .toggle-vista.activo{ background:var(--granate); color:var(--tinta); }
-
-  /* ─── HOJA INFERIOR (bottom sheet) — solo mobile (Etapa 6) ───
-     Contenida dentro de `.area` (que ya tiene `position:relative` y
-     alto fijo en mobile), no de la ventana entera: por eso el resto
-     del sitio, arriba y abajo, sigue scrolleando normal. Los tres
-     estados ('peek'/'media'/'full') mueven la hoja con `translateY`;
-     ui/mobile-sheet.js los aplica como `data-estado` y, mientras se
-     arrastra, pisa esa transición con un `transform` inline (ver
-     `.arrastrando`, que apaga la transición para que siga al dedo). */
-  .hoja-lista{ display:contents; } /* desktop: vuelve a ser un hijo normal del grid */
-  /* `display:contents` deja también a `.hoja-agarre` como hijo suelto
-     del grid en desktop (no solo a `.panel-lista`) — sin esto
-     aparecería como una tercera columna fantasma. Solo existe en mobile. */
-  .hoja-agarre{ display:none; }
-  @media (max-width:900px){
-    .hoja-lista{
-      display:flex; flex-direction:column;
-      position:absolute; left:0; right:0; bottom:0; z-index:10;
-      height:100%;
-      background:var(--fondo-2); border-top:1px solid var(--linea-fuerte);
-      border-radius:14px 14px 0 0; box-shadow:0 -14px 30px -8px rgba(0,0,0,.55);
-      transform:translateY(calc(100% - 58px));
-      transition:transform .32s cubic-bezier(.22,.8,.24,1);
-    }
-    .hoja-lista[data-estado="media"]{ transform:translateY(42%); }
-    .hoja-lista[data-estado="full"]{ transform:translateY(4%); }
-    .hoja-lista.arrastrando{ transition:none; }
-
-    .hoja-agarre{
-      flex:none; width:100%; background:none; border:none; cursor:grab;
-      display:flex; flex-direction:column; align-items:center; gap:8px;
-      padding:11px 16px 13px; touch-action:none;
-    }
-    .hoja-agarre:active{ cursor:grabbing; }
-    .hoja-agarre-barra{ width:36px; height:4px; border-radius:2px; background:var(--linea-fuerte); }
-    .hoja-agarre-texto{ font-family:var(--f-dato); font-size:11px; color:var(--tinta-60); text-align:center; }
-
-    .hoja-lista .panel-lista{
-      flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
-      padding:0 0 40px;
-    }
-  }
-
-  /* cromado de Leaflet, adaptado al tema oscuro */
-  .mapa-real .leaflet-control-zoom a{
-    background:var(--fondo-2); color:var(--tinta); border-color:var(--linea-fuerte);
-  }
-  .mapa-real .leaflet-control-zoom a:hover{ background:var(--fondo); }
-  .mapa-real .leaflet-control-attribution{
-    background:rgba(10,13,19,.78) !important; color:var(--tinta-30) !important;
-    font-family:var(--f-dato); font-size:9.5px !important;
-  }
-  .mapa-real .leaflet-control-attribution a{ color:var(--granate-clara) !important; }
-
-  /* control "buscar en esta área" (Etapa 4) — oculto hasta que el
-     usuario arrastra o hace zoom a mano (ver map-controller.js) */
-  .mapa-control-area.oculto{ display:none; }
-  .btn-buscar-area{
-    font-family:var(--f-dato); font-size:10.5px; letter-spacing:.03em;
-    color:var(--tinta); background:var(--granate);
-    border:1px solid var(--granate-clara); border-radius:20px;
-    padding:8px 14px; cursor:pointer; white-space:nowrap;
-    box-shadow:0 6px 16px -6px rgba(0,0,0,.5);
-    transition:background .2s ease, color .2s ease;
-  }
-  .btn-buscar-area:hover{ background:var(--granate-clara); color:var(--fondo); }
-
-  /* pin por lugar — un color por rubro (ver src/map/colores-rubro.js) */
-  .padron-pin span{
-    display:block; width:14px; height:14px; margin:1px; border-radius:50% 50% 50% 0;
-    transform:rotate(-45deg); background:var(--pin-color); border:1.5px solid var(--fondo-2);
-    box-shadow:0 2px 6px rgba(0,0,0,.35);
-  }
-  .padron-pin--activo span{
-    transform:rotate(-45deg) scale(1.35); box-shadow:0 0 0 4px rgba(201,122,131,.22), 0 2px 6px rgba(0,0,0,.35);
-  }
-
-  /* cluster — un racimo de lugares agrupados por proximidad */
-  .mapa-cluster-inner{
-    display:flex; align-items:center; justify-content:center;
-    width:34px; height:34px; border-radius:50%;
-    background:var(--granate); color:var(--tinta); border:2px solid var(--fondo-2);
-    font-family:var(--f-dato); font-size:12px; font-weight:500;
-    box-shadow:0 3px 10px rgba(0,0,0,.35);
-  }
-
-  /* popup — misma ficha que la lista, en miniatura */
-  .mapa-real .leaflet-popup-content-wrapper{
-    background:var(--fondo-2); color:var(--tinta); border:1px solid var(--linea-fuerte);
-    border-radius:2px; box-shadow:0 14px 30px -10px rgba(0,0,0,.5);
-  }
-  .mapa-real .leaflet-popup-tip{ background:var(--fondo-2); }
-  .mapa-real .leaflet-popup-content{ margin:14px 16px; width:auto !important; min-width:180px; }
-  .popup-uruspot{ position:relative; }
-  .popup-pos{ font-family:var(--f-dato); font-size:10.5px; color:var(--tinta-30); }
-  .popup-fav{ position:absolute; top:0; right:0; color:var(--granate-clara); font-size:13px; }
-  .popup-rubro{
-    font-family:var(--f-dato); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
-    color:var(--granate-clara); margin-top:6px;
-  }
-  .popup-nombre{ font-family:var(--f-display); font-weight:500; font-size:15px; margin-top:4px; }
-  .popup-dir{ font-family:var(--f-ui); font-size:12px; color:var(--tinta-60); margin-top:5px; }
-  .popup-dir--pendiente{ color:var(--tinta-30); }
-  .popup-constancia{
-    display:block; font-family:var(--f-dato); font-size:10px; color:var(--tinta-30); margin-top:7px;
-  }
-  .popup-constancia::before{ content:'✓ '; color:var(--granate-clara); }
-  .popup-constancia--pendiente{ color:var(--granate-clara); }
-  .popup-constancia--pendiente::before{ content:'· '; color:var(--tinta-30); }
-
-  /* ─── MANIFIESTO ─── */
-  .manifiesto{ padding:70px 0 20px; max-width:700px; }
-  .manifiesto .eyebrow{
-    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--granate-clara); margin-bottom:22px;
-  }
-  .manifiesto h2{
-    font-family:var(--f-display); font-weight:500; font-size:clamp(1.4rem,3vw,1.9rem);
-    line-height:1.36; letter-spacing:-.005em; max-width:22ch;
-  }
-  .manifiesto > p{ margin-top:22px; font-size:15px; color:var(--tinta-60); max-width:58ch; }
-  .manifiesto > p b{ color:var(--tinta); font-weight:600; }
-  .principios{ margin-top:40px; }
-  .principio{
-    display:grid; grid-template-columns:110px 1fr; gap:22px;
-    padding:20px 0; border-top:1px solid var(--linea);
-  }
-  .principio:last-child{ border-bottom:1px solid var(--linea); }
-  .principio .tag{
-    font-family:var(--f-dato); font-size:10px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--tinta-30); padding-top:2px;
-  }
-  .principio p{ font-size:14.5px; color:var(--tinta-60); }
-  .principio p b{ color:var(--tinta); font-weight:600; }
-  @media (max-width:560px){ .principio{ grid-template-columns:1fr; gap:8px; } }
-
-  /* ─── ÍNDICE DE RUBROS ─── */
-  .indice{ padding:60px 0 90px; max-width:640px; }
-  .indice-cab{
-    display:flex; justify-content:space-between; align-items:baseline;
-    padding-bottom:14px; border-bottom:1px solid var(--linea-fuerte); margin-bottom:2px;
-  }
-  .indice-cab h2{ font-family:var(--f-display); font-weight:500; font-size:17px; }
-  .indice-cab span{ font-family:var(--f-dato); font-size:10px; color:var(--tinta-30); }
-  .indice-nota{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-30); margin:14px 0 6px; max-width:50ch; }
-  .fila-rubro{ display:grid; grid-template-columns:1fr auto; gap:16px; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--linea); }
-  .fila-rubro .col-izq{ display:flex; flex-direction:column; }
-  .fila-rubro .nombre{ font-family:var(--f-ui); font-size:14.5px; color:var(--tinta-60); }
-  .fila-rubro .desc{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-30); margin-top:4px; max-width:46ch; }
-  .fila-rubro .cifra{ font-family:var(--f-dato); font-size:12px; color:var(--tinta-30); white-space:nowrap; }
-
-  /* ─── FAQ ─── */
-  .faq{ padding:60px 0 90px; max-width:700px; }
-  .pregunta{ border-bottom:1px solid var(--linea); }
-  .pregunta:first-of-type{ border-top:1px solid var(--linea-fuerte); }
-  .pregunta-cabecera{
-    width:100%; display:flex; align-items:baseline; gap:18px;
-    background:none; border:none; text-align:left; cursor:pointer;
-    padding:20px 0; color:var(--tinta); font-family:var(--f-ui);
-  }
-  .pregunta-cabecera .num{ font-family:var(--f-dato); font-size:11px; color:var(--tinta-30); white-space:nowrap; }
-  .pregunta-cabecera .texto{ flex:1; font-size:15px; font-weight:500; }
-  .pregunta-cabecera .icono{ font-family:var(--f-dato); font-size:14px; color:var(--tinta-30); transition:transform .3s ease; }
-  .pregunta.abierta .pregunta-cabecera .icono{ transform:rotate(45deg); color:var(--granate-clara); }
-  .pregunta.abierta .pregunta-cabecera .num{ color:var(--granate-clara); }
-  .pregunta-cuerpo{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s ease; }
-  .pregunta.abierta .pregunta-cuerpo{ grid-template-rows:1fr; }
-  .pregunta-cuerpo-inner{ overflow:hidden; }
-  .pregunta-cuerpo p{ font-size:14px; color:var(--tinta-60); max-width:56ch; padding-bottom:22px; padding-right:30px; }
-
-  /* ─── FOOTER ─── */
-  footer.pie{ padding:56px 0 40px; border-top:1px solid var(--linea-fuerte); }
-  .footer-grillado{ display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px; padding-bottom:36px; }
-  .footer-marca .marca{ font-size:13px; }
-  .footer-marca p{ margin-top:14px; font-size:13px; color:var(--tinta-30); max-width:32ch; }
-  .footer-col h4{ font-family:var(--f-dato); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--tinta-30); margin-bottom:14px; }
-  .footer-col a{ display:block; font-size:13.5px; color:var(--tinta-60); text-decoration:none; padding:6px 0; transition:color .2s ease; }
-  .footer-col a:hover{ color:var(--granate-clara); }
-  .footer-base{
-    padding-top:22px; border-top:1px solid var(--linea);
-    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
-    font-family:var(--f-dato); font-size:9.5px; color:var(--tinta-30);
-  }
-  @media (max-width:640px){ .footer-grillado{ grid-template-columns:1fr; gap:28px; } }
-
-  :focus-visible{ outline:1.5px solid var(--granate-clara); outline-offset:2px; }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; }
-    .paso{ opacity:1 !important; transform:none !important; }
-  }
-
+  .manifiesto, .indice, .faq{ padding:40px 0; border-top:1px solid var(--linea); }
+  .manifiesto h2, .indice h2, .faq h2{ font-family:var(--f-display); font-weight:500; font-size:22px; margin-bottom:12px; }
+  .manifiesto p{ color:var(--tinta-60); max-width:640px; margin-bottom:10px; }
+  footer{ padding:32px 0; color:var(--tinta-30); font-size:12px; border-top:1px solid var(--linea); }
 </style>
 </head>
 <body>
 
 <header>
   <div class="envoltorio membrete">
-    <div class="marca">URU SPOT
-      <span>32°29'S 58°14'O — Concepción del Uruguay</span>
-    </div>
-    <div class="fraccion">
-      <b id="fraccionNum">0000</b> / <span id="fraccionTotal">1468</span>
-      <span class="etiqueta">del padrón</span>
-    </div>
+    <div class="marca">URU SPOT<span>Concepción del Uruguay</span></div>
+    <div class="rol">tu relación con esta ciudad<br><b id="rolActual">—</b></div>
   </div>
 </header>
 
-<div class="envoltorio envoltorio--angosta">
-
-  <section class="apertura">
-    <div class="eyebrow">un registro, no un catálogo</div>
-    <h1>Esto tiene un tamaño exacto: <span class="num" id="aperturaNum">1.468</span> lugares, caminados uno por uno.</h1>
-    <p>
-      No hay ranking, no hay algoritmo, no hay orden por relevancia.
-      Cada lugar entró al padrón porque <b>alguien golpeó esa puerta</b>
-      después de haber golpeado la anterior. El orden en que aparece
-      acá abajo es el orden real en que se caminó Concepción del
-      Uruguay — nada se reordena para verse mejor.
-    </p>
-    <div class="senial">bajá para recorrerlo, buscalo o filtralo — es la misma secuencia</div>
-  </section>
-
-</div>
-
-<div class="envoltorio">
-
-  <section class="titulo-vista">
-    <div class="eyebrow">un lente, no una vista nueva</div>
-    <h2>Buscar, filtrar o mirar el mapa es lo mismo: recortar la secuencia.</h2>
-    <p>Nada de esto reordena el padrón. Un lugar filtrado conserva su
-      posición real — la que tenía cuando se caminó — aunque hoy lo
-      estés viendo a través de un filtro de rubro, una búsqueda de
-      texto o el mapa.</p>
-  </section>
-
-  <section class="herramientas">
-    <div class="buscador">
-      <span class="lupa">buscar</span>
-      <input id="inputBuscar" type="text" placeholder="por nombre, rubro o dirección…" autocomplete="off">
-    </div>
-    <div class="chips" id="chipsRubros"></div>
-    <div class="chips">
-      <button class="chip chip-fav" id="chipFav" type="button">favoritos</button>
-      <button class="chip" id="chipLimpiar" type="button">limpiar filtros</button>
-      <button class="chip chip-area" id="chipArea" type="button" hidden>área del mapa ✕</button>
-    </div>
-    <div class="estado-resultados" id="estadoResultados">cargando el padrón…</div>
-  </section>
-
-  <section class="area" id="secuencia">
-
-    <!-- Etapa 6, solo mobile: atajo directo a la hoja colapsada
-         ('peek', mapa a la vista) o casi completa ('full', la lista).
-         En desktop no se ve (display:none) — ahí lista y mapa ya
-         están los dos a la vista todo el tiempo, no hace falta elegir. -->
-    <div class="vista-movil-toggle" id="vistaMovilToggle" role="tablist" aria-label="Cambiar entre mapa y lista">
-      <button class="toggle-vista" id="toggleVistaMapa" type="button" role="tab" aria-selected="true">mapa</button>
-      <button class="toggle-vista" id="toggleVistaLista" type="button" role="tab" aria-selected="false">lista</button>
-    </div>
-
-    <aside class="panel-mapa">
-      <div class="mapa-etiqueta">el mapa — misma secuencia, otro lente</div>
-      <div class="mapa-real" id="mapaReal" role="region" aria-label="Mapa de Concepción del Uruguay con los lugares del padrón"></div>
-      <p class="mapa-nota">Los pines usan las coordenadas reales de
-        cada lugar y se agrupan por cercanía al alejar el zoom — es el
-        mismo filtro de la lista, aplicado sobre calles reales en vez
-        de sobre texto. Un clic en una fila centra el mapa en su pin;
-        movete por el mapa y usá "buscar en esta área" para recortar
-        la lista a lo que estás viendo.</p>
-    </aside>
-
-    <!-- Etapa 6: en desktop, `.hoja-lista{ display:contents }` la saca
-         de en medio y `#panelLista` vuelve a ser un hijo normal del
-         grid (igual que hasta la Etapa 5). En mobile es la hoja que
-         se arrastra desde `.hoja-agarre` (ver ui/mobile-sheet.js). -->
-    <div class="hoja-lista" id="hojaLista" data-estado="peek">
-      <button class="hoja-agarre" id="hojaAgarre" type="button" aria-expanded="false" aria-controls="panelLista">
-        <span class="hoja-agarre-barra"></span>
-        <span class="hoja-agarre-texto" id="hojaAgarreTexto">cargando el padrón…</span>
-      </button>
-      <div class="panel-lista" id="panelLista">
-        <div class="sin-resultados" id="sinResultados" hidden>
-          <b>Ningún lugar coincide con este filtro.</b>
-          No es un error de carga: dentro del padrón completo, nadie
-          cumple esa combinación todavía. Probá con otro rubro o borrá
-          la búsqueda.
-        </div>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<div class="envoltorio envoltorio--angosta">
-
-  <section class="manifiesto" id="manifiesto">
-    <div class="eyebrow">cómo pensamos esto</div>
-    <h2>Un catálogo se llena. Un registro se completa.</h2>
-    <p>
-      Cualquier plataforma de lugares puede sumar contenido para
-      siempre. Nosotros no. <b>URU SPOT tiene un final</b>: el día
-      que se camine la última dirección de Concepción del Uruguay,
-      el padrón está terminado. No hay incentivo para inflarlo, ni
-      apuro por publicar algo sin confirmar.
-    </p>
-    <div class="principios">
-      <div class="principio">
-        <div class="tag">sin ranking</div>
-        <p><b>El orden nunca es una opinión.</b> No medimos "mejor" ni
-          "más popular". El único orden que respetamos es el orden en
-          que se relevó cada dirección — por eso cada lugar tiene una
-          posición, no una calificación.</p>
-      </div>
-      <div class="principio">
-        <div class="tag">sin relleno</div>
-        <p><b>Lo que no está verificado, no se muestra como si lo
-          estuviera.</b> Preferimos marcar una ficha "pendiente de
-          confirmación" antes que una ficha adivinada. Es más lento.
-          También es lo único que nos distingue de un scraper.</p>
-      </div>
-      <div class="principio">
-        <div class="tag">sin vencimiento oculto</div>
-        <p><b>Una vez verificado, un lugar queda en el padrón</b> hasta
-          que alguien vuelva a confirmarlo o desmentirlo — nunca porque
-          dejó de pagar, ni porque bajó su actividad.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="indice" id="rubros">
-    <div class="indice-cab">
-      <h2>Los rubros del padrón</h2>
-      <span>14 categorías</span>
-    </div>
-    <p class="indice-nota">
-      Orden alfabético, no por cantidad — ordenar por cantidad sería
-      ordenar por importancia, y eso es justamente lo que este
-      registro no hace.
-    </p>
-    <div id="listaRubros"></div>
-  </section>
-
-  <section class="faq" id="preguntas">
-    <div class="indice-cab">
-      <h2>Preguntas</h2>
-      <span>7</span>
-    </div>
-    <div id="listaPreguntas"></div>
-  </section>
-
-</div>
-
-<footer class="pie">
-  <div class="envoltorio envoltorio--angosta">
-    <div class="footer-grillado">
-      <div class="footer-marca">
-        <div class="marca">URU SPOT</div>
-        <p>Un registro caminado, no scrapeado. 1.468 lugares de
-          Concepción del Uruguay, verificados uno por uno.</p>
-      </div>
-      <div class="footer-col">
-        <h4>Recorrer</h4>
-        <a href="#secuencia">La secuencia</a>
-        <a href="#manifiesto">Cómo pensamos esto</a>
-        <a href="#rubros">Rubros</a>
-        <a href="#preguntas">Preguntas</a>
-      </div>
-      <div class="footer-col">
-        <h4>Sumar un dato</h4>
-        <a href="mailto:padron@uruspot.com.ar">Falta un lugar</a>
-        <a href="mailto:padron@uruspot.com.ar">Corregir una ficha</a>
-      </div>
-    </div>
-    <div class="footer-base">
-      <span>URU SPOT — registro completo, fase 4</span>
-      <span>32°29'S 58°14'O · Concepción del Uruguay, Entre Ríos</span>
-    </div>
+<section class="hero envoltorio">
+  <h1>No te mostramos el padrón entero. Te mostramos lo que corresponde ahora.</h1>
+  <p>URU SPOT arranca guiando poco y, a medida que lo usás, suelta el control. Si ya sabés lo que buscás, escribilo y vas directo — sin narrativa, sin vueltas.</p>
+  <div class="buscador">
+    <input id="inputBuscar" type="text" placeholder="buscá por nombre, rubro o dirección…" autocomplete="off">
+    <button id="btnVerGuardados" type="button">tu lista guardada</button>
   </div>
+</section>
+
+<main class="envoltorio">
+  <div id="mapaTextura" aria-hidden="true"></div>
+
+  <div class="region-encabezado">
+    <h2 id="tituloRegion">Para empezar</h2>
+    <p id="subtituloRegion">Cargando…</p>
+  </div>
+
+  <div id="mapaHerramienta" hidden></div>
+
+  <div id="panelDescubrimiento">
+    <p class="vacio">Cargando lugares…</p>
+  </div>
+</main>
+
+<section class="manifiesto envoltorio" id="manifiesto">
+  <h2>Cómo funciona</h2>
+  <p>Cada lugar que ves fue caminado y verificado por alguien del equipo, en fuentes oficiales, Google Places o en el lugar mismo — nunca se completa a ojo.</p>
+  <p>El orden no es un ranking pago: nadie compra su posición. El dinero puede financiar una mejor ficha (fotos, verificación más profunda) — nunca puede comprar aparecer antes que otro lugar.</p>
+  <p>Si rechazás algo puntual, esa señal pesa poco y se va apagando sola con el tiempo. Solo un patrón que se repite cambia lo que te mostramos.</p>
+  <p>¿Encontraste un error o un lugar que falta? Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a>.</p>
+</section>
+
+<section class="indice envoltorio" id="rubros">
+  <h2>Por rubro</h2>
+  <div id="listaRubros"></div>
+</section>
+
+<footer class="envoltorio">
+  URU SPOT — Concepción del Uruguay, Entre Ríos.
 </footer>
 
-<script type="module" src="src/main.js"></script>
-
+<script src="js/motor-config.js"></script>
+<script src="js/rubros-meta.js"></script>
+<script src="js/motor-plano.js"></script>
+<script src="js/motor-exposicion.js"></script>
+<script src="js/motor-mapa.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
