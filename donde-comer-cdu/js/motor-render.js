@@ -19,8 +19,8 @@
   var TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
   var SUBDOMINIOS = ['a', 'b', 'c', 'd'];
   var TAM_TILE = PROY.TAM_TILE;
-  var RADIO_MARCADOR = 9;
-  var RADIO_CLUSTER_PX = 34;
+  var RADIO_MARCADOR = 10;
+  var RADIO_CLUSTER_PX = 36;
   var ZOOM_MIN = 4, ZOOM_MAX = 18;
 
   var cacheTiles = Object.create(null);
@@ -86,9 +86,15 @@
     popup.hidden = true;
     contenedor.appendChild(popup);
 
+    var etiqueta = document.createElement('div');
+    etiqueta.className = 'uru-mapa-etiqueta';
+    etiqueta.hidden = true;
+    contenedor.appendChild(etiqueta);
+
     var viewport = { lat: opciones.lat || -32.4833, lng: opciones.lng || -58.2333, zoom: opciones.zoom || 14, ancho: 0, alto: 0 };
     var puntos = [];
     var idResaltado = null;
+    var puntoResaltado = null;
     var idAbierto = null;
     var dpr = Math.max(1, global.devicePixelRatio || 1);
     var animacionZoom = null;
@@ -119,6 +125,7 @@
       var clusters = agruparEnClusters(proyectados);
       dibujarMarcadores(clusters);
       posicionarPopupAbierto(proyectados);
+      posicionarEtiqueta(proyectados);
     }
 
     function dibujarTiles() {
@@ -189,28 +196,59 @@
         if (c.tipo === 'cluster') { dibujarCluster(c); return; }
         var esResaltado = c.punto.id === idResaltado;
         var esAbierto = c.punto.id === idAbierto;
-        dibujarMarcador(c.x, c.y, esResaltado || esAbierto);
+        dibujarMarcador(c.x, c.y, c.punto.color || '#C97A83', esResaltado || esAbierto);
       });
     }
 
-    function dibujarMarcador(x, y, activo) {
-      var r = activo ? RADIO_MARCADOR + 3 : RADIO_MARCADOR;
+    // Pin con forma de gota — silueta reconocible de "lugar en un mapa",
+    // no una bolita genérica. El color codifica el rubro (ver
+    // rubros-meta.js) para que de un vistazo se distinga qué es qué,
+    // igual que la franja de color de la etiqueta de rubro en las
+    // tarjetas.
+    function dibujarMarcador(x, y, color, activo) {
+      var r = activo ? RADIO_MARCADOR + 2.5 : RADIO_MARCADOR;
+      ctx.save();
       if (activo) {
         ctx.beginPath();
-        ctx.arc(x, y, r + 7, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(201,122,131,.18)';
+        ctx.arc(x, y, r + 9, 0, Math.PI * 2);
+        ctx.fillStyle = hexARgba(color, 0.22);
         ctx.fill();
       }
-      var grad = ctx.createLinearGradient(x, y - r, x, y + r);
-      grad.addColorStop(0, '#C97A83');
-      grad.addColorStop(1, '#9C3A46');
+      ctx.translate(x, y);
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
+      // Cabeza circular del pin + punta triangular hacia abajo
+      ctx.arc(0, -r * 0.35, r, Math.PI * 0.08, Math.PI * 0.92, true);
+      ctx.lineTo(0, r * 1.55);
+      ctx.closePath();
+      var grad = ctx.createLinearGradient(0, -r * 1.3, 0, r * 1.55);
+      grad.addColorStop(0, aclarar(color, 18));
+      grad.addColorStop(1, color);
       ctx.fillStyle = grad;
+      ctx.shadowColor = 'rgba(0,0,0,.45)';
+      ctx.shadowBlur = activo ? 10 : 5;
+      ctx.shadowOffsetY = 2;
       ctx.fill();
-      ctx.lineWidth = 2.5;
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = activo ? 2.5 : 2;
       ctx.strokeStyle = '#ECEDEF';
       ctx.stroke();
+      // Centro claro: hace de "ventana" del pin, referencia visual de
+      // mapas profesionales (Google/Apple Maps usan el mismo recurso)
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.35, r * 0.36, 0, Math.PI * 2);
+      ctx.fillStyle = '#0A0D13';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function hexARgba(hex, alpha) {
+      var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+      return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+    }
+    function aclarar(hex, pct) {
+      var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+      r = Math.min(255, r + pct * 2.55); g = Math.min(255, g + pct * 2.55); b = Math.min(255, b + pct * 2.55);
+      return 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
     }
 
     function dibujarCluster(c) {
@@ -243,9 +281,9 @@
       if (!arrastrando) {
         var cerca = buscarMarcadorEn(e, clusters);
         if (cerca && cerca.tipo === 'punto') {
-          if (cerca.punto.id !== idResaltado) { idResaltado = cerca.punto.id; lienzo.style.cursor = 'pointer'; emisor.emitir('hover', cerca.punto); redibujar(); }
+          if (cerca.punto.id !== idResaltado) { idResaltado = cerca.punto.id; puntoResaltado = cerca.punto; lienzo.style.cursor = 'pointer'; emisor.emitir('hover', cerca.punto); redibujar(); }
         } else if (idResaltado !== null) {
-          idResaltado = null; lienzo.style.cursor = 'grab'; emisor.emitir('hoverOut'); redibujar();
+          idResaltado = null; puntoResaltado = null; lienzo.style.cursor = 'grab'; emisor.emitir('hoverOut'); redibujar();
         }
         return;
       }
@@ -382,6 +420,7 @@
       var link = popup.querySelector('.uru-mapa-popup-link');
       link.href = punto.href || '#';
       popup.hidden = false;
+      popup.style.borderLeft = '3px solid ' + (punto.color || 'var(--granate-clara)');
       popup.querySelector('.uru-mapa-popup-cerrar').addEventListener('click', cerrarPopup);
       redibujar();
     }
@@ -394,6 +433,18 @@
       popup.style.top = p.y + 'px';
     }
 
+    function posicionarEtiqueta(proyectados) {
+      // No mostrar la etiqueta liviana sobre el mismo punto que ya
+      // tiene el popup completo abierto — sería redundante.
+      if (!puntoResaltado || puntoResaltado.id === idAbierto) { etiqueta.hidden = true; return; }
+      var p = proyectados.filter(function (pr) { return pr.punto.id === puntoResaltado.id; })[0];
+      if (!p) { etiqueta.hidden = true; return; }
+      etiqueta.textContent = puntoResaltado.nombre;
+      etiqueta.style.left = p.x + 'px';
+      etiqueta.style.top = p.y + 'px';
+      etiqueta.hidden = false;
+    }
+
     /* ── Lista accesible en paralelo (teclado / lectores de pantalla) ── */
     function reconstruirListaAccesible() {
       listaAccesible.innerHTML = '';
@@ -403,8 +454,8 @@
         btn.type = 'button';
         btn.className = 'uru-mapa-item-accesible';
         btn.textContent = p.nombre + (p.direccion ? ' — ' + p.direccion : '');
-        btn.addEventListener('focus', function () { idResaltado = p.id; emisor.emitir('hover', p); redibujar(); });
-        btn.addEventListener('blur', function () { idResaltado = null; emisor.emitir('hoverOut'); redibujar(); });
+        btn.addEventListener('focus', function () { idResaltado = p.id; puntoResaltado = p; emisor.emitir('hover', p); redibujar(); });
+        btn.addEventListener('blur', function () { idResaltado = null; puntoResaltado = null; emisor.emitir('hoverOut'); redibujar(); });
         btn.addEventListener('click', function () { enfocar(p.id); abrirPopup(p); emisor.emitir('click', p); });
         li.appendChild(btn);
         listaAccesible.appendChild(li);
@@ -431,8 +482,12 @@
       animarA(p.lat, p.lng, Math.max(viewport.zoom, 15));
     }
 
-    function resaltar(id) { idResaltado = id; redibujar(); }
-    function quitarResaltado() { idResaltado = null; redibujar(); }
+    function resaltar(id) {
+      idResaltado = id;
+      puntoResaltado = puntos.filter(function (p) { return p.id === id; })[0] || null;
+      redibujar();
+    }
+    function quitarResaltado() { idResaltado = null; puntoResaltado = null; redibujar(); }
 
     var resizeObs = new ResizeObserver(function () { medir(); redibujar(); });
     resizeObs.observe(contenedor);
