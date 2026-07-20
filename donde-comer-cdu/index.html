@@ -28,16 +28,12 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" id="gfontsLink" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+
+<!-- Leaflet CSS para el mapa -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
   /* ═══════════════════════════════════════════════════════════════
-     URU SPOT — implementación del Blueprint de Producto v2 +
-     Vocabulario de Interacción (Architecture Freeze v1.0).
-     El núcleo NO es esta hoja de estilos ni este HTML: es
-     js/motor-plano.js (plano continuo), js/motor-exposicion.js
-     (presupuesto de exposición) y js/motor-mapa.js (doble rol del
-     mapa). Este documento solo traduce esos módulos a DOM.
-     Paleta y tipografía heredadas de la versión anterior a propósito
-     — el rediseño visual queda como paso aparte, ya acordado.
+     URU SPOT v2 MEJORADO — Mapa Premium 24/7
      ═══════════════════════════════════════════════════════════════ */
   :root{
     --tinta: #ECEDEF; --tinta-60: rgba(236,237,239,.62); --tinta-30: rgba(236,237,239,.26);
@@ -74,7 +70,84 @@
   .region-encabezado h2{ font-family:var(--f-display); font-weight:500; font-size:22px; }
   .region-encabezado p{ color:var(--tinta-60); margin-top:4px; font-size:14px; }
 
-  #mapaHerramienta{ margin:16px 0; padding:14px 16px; background:var(--fondo-2); border:1px solid var(--linea); border-radius:8px; font-size:13px; color:var(--tinta-60); }
+  /* CAMBIO: Mapa ahora NO está oculto y tiene altura fija con estilos premium */
+  #mapaHerramienta{ 
+    margin:24px 0 32px; 
+    padding:0;
+    background:var(--fondo-2); 
+    border:1px solid var(--linea); 
+    border-radius:12px; 
+    overflow:hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    min-height:380px;
+  }
+  
+  /* Estilos para el contenedor del mapa Leaflet */
+  #mapaLeafletContenedor{ 
+    width:100%; 
+    height:100%; 
+    border-radius:12px;
+  }
+
+  /* Estilos para los marcadores del mapa */
+  .mapa-marcador {
+    background: none;
+    border: none;
+  }
+  .mapa-marcador-punto {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, var(--granate), var(--granate-clara));
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(156, 58, 70, 0.4);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .mapa-marcador-punto:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 16px rgba(156, 58, 70, 0.6);
+  }
+
+  /* Popup del mapa */
+  .mapa-popup-container.leaflet-popup-content-wrapper {
+    background: var(--fondo-2);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: 8px;
+    color: var(--tinta);
+  }
+  .mapa-popup-container .leaflet-popup-tip {
+    background: var(--fondo-2);
+    border-color: var(--linea-fuerte);
+  }
+  .mapa-popup {
+    font-size: 13px;
+  }
+  .mapa-popup strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--tinta);
+    font-weight: 600;
+  }
+  .mapa-popup a {
+    display: inline-block;
+    margin-top: 8px;
+  }
+
+  /* Info didáctica sobre el mapa */
+  .mapa-info { 
+    display:flex; 
+    gap:16px; 
+    margin:16px 0; 
+    padding:14px 16px; 
+    background:rgba(201,122,131,.1); 
+    border:1px solid rgba(201,122,131,.3);
+    border-radius:8px; 
+    font-size:13px; 
+    color:var(--tinta-60);
+    align-items:center;
+  }
+  .mapa-info::before { content:"🗺️"; font-size:18px; }
 
   #panelDescubrimiento{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; padding:16px 0 48px; position:relative; z-index:1; }
   .tarjeta{ background:var(--fondo-2); border:1px solid var(--linea); border-radius:10px; padding:18px; transition:opacity .2s, transform .2s; }
@@ -85,12 +158,11 @@
   .tarjeta-nombre{ font-family:var(--f-display); font-weight:500; font-size:19px; margin-top:6px; }
   .tarjeta-direccion{ color:var(--tinta-60); font-size:13.5px; margin-top:6px; }
   .tarjeta-acciones{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
-  .tarjeta-btn{ font-family:var(--f-ui); font-size:12.5px; border:1px solid var(--linea-fuerte); background:transparent; color:var(--tinta-60); padding:7px 12px; border-radius:6px; cursor:pointer; text-decoration:none; }
+  .tarjeta-btn{ font-family:var(--f-ui); font-size:12.5px; border:1px solid var(--linea-fuerte); background:transparent; color:var(--tinta-60); padding:7px 12px; border-radius:6px; cursor:pointer; text-decoration:none; transition: all 0.2s; }
   .tarjeta-btn:hover{ color:var(--tinta); border-color:var(--granate-clara); }
   .tarjeta-btn--fav.activo{ color:var(--granate-clara); border-color:var(--granate-clara); }
   .vacio{ color:var(--tinta-60); padding:24px 0; grid-column:1/-1; }
 
-  /* mapa-textura: ambiental, no interactivo, baja densidad — nunca el universo completo */
   #mapaTextura{ position:relative; height:110px; margin:20px 0; border-radius:10px; overflow:hidden; background:linear-gradient(180deg,var(--fondo-2),var(--fondo)); border:1px solid var(--linea); pointer-events:none; }
   .punto-textura{ position:absolute; width:3px; height:3px; border-radius:50%; background:var(--tinta-30); }
 
@@ -98,6 +170,10 @@
   .manifiesto h2, .indice h2, .faq h2{ font-family:var(--f-display); font-weight:500; font-size:22px; margin-bottom:12px; }
   .manifiesto p{ color:var(--tinta-60); max-width:640px; margin-bottom:10px; }
   footer{ padding:32px 0; color:var(--tinta-30); font-size:12px; border-top:1px solid var(--linea); }
+
+  @media (max-width:720px) {
+    #mapaHerramienta { min-height:300px; }
+  }
 </style>
 </head>
 <body>
@@ -126,7 +202,12 @@
     <p id="subtituloRegion">Cargando…</p>
   </div>
 
-  <div id="mapaHerramienta" hidden></div>
+  <!-- CAMBIO CRUCIAL: Mapa NO está oculto (sin 'hidden') -->
+  <div class="mapa-info">
+    Clickeá un lugar en el mapa para ver su ficha completa, o buscá por nombre arriba
+  </div>
+  
+  <div id="mapaHerramienta"></div>
 
   <div id="panelDescubrimiento">
     <p class="vacio">Cargando lugares…</p>
@@ -155,6 +236,7 @@
 <script src="js/motor-plano.js"></script>
 <script src="js/motor-exposicion.js"></script>
 <script src="js/motor-mapa.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
