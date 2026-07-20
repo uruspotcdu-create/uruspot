@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Mamma Mía en Concepción del Uruguay.">
+<meta name="theme-color" content="#0d0d0d">
+<meta property="og:title" content="Mamma Mía · URU SPOT">
+<meta property="og:description" content="El arte de la pasta hecha a mano y el sabor de hogar en la esquina más clásica del puerto.">
+<meta property="og:image" content="https://i.imgur.com/iNPqmwy.png">
+<meta property="og:type" content="article">
+
+<title>Mamma Mía — URU SPOT</title>
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../ficha.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" role="navigation" aria-label="URU SPOT">
+  <a href="../../" class="nav-logo">URU SPOT</a>
+  <span class="nav-tag">Guía gastronómica · Concepción del Uruguay</span>
+  <span class="nav-badge">🍝 Tradición pura</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero " aria-label="Mamma Mía">
+  
+  <img class="hero-img" src="https://i.imgur.com/iNPqmwy.png" alt="Interior y platos de Mamma Mía, pastas artesanales en Concepción del Uruguay" fetchpriority="high" loading="eager" width="1200" height="800" />
+  
+  <div class="hero-overlay" aria-hidden="true"></div>
+  <div class="hero-content">
+    
+    <div class="hero-eyebrow">
+      <span class="eyebrow-line" aria-hidden="true"></span>
+      <span class="eyebrow-text">La Cocina del Corazón</span>
+    </div>
+    
+    <h1 class="hero-title">Mamma <em>Mía</em></h1>
+    <p class="hero-subtitle">El arte de la pasta hecha a mano y el sabor de hogar en la esquina más clásica del puerto.</p>
+    <div class="hero-chips">
+      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><span class="chip ">España 160</span><span class="chip ">Lun–Sáb 12:00 – 23:00</span><span class="chip ">$25k – $40k ARS</span>
+    </div>
+  </div>
+  
+  <div class="hero-score" aria-label="Puntuación URU SPOT: 9.0 de 10">
+    <div class="score-num">9.0</div>
+    <div class="score-label">URU SPOT Score</div>
+    <div class="score-stars" aria-hidden="true">★★★★★</div>
+  </div>
+  
+</section>
+
+<!-- INFO STRIP -->
+
+<div class="info-strip" role="complementary" aria-label="Información rápida">
+  
+  <div class="info-cell">
+    <span class="info-cell-label">Estado actual</span>
+    
+    <span class="info-cell-value" id="statusValue">—</span>
+    <span class="info-cell-sub" id="statusSub" aria-live="polite"></span>
+    
+    
+  </div>
+  
+  <div class="info-cell">
+    <span class="info-cell-label">Ubicación</span>
+    
+    <span class="info-cell-value">España 160</span>
+    <span class="info-cell-sub">🚢 Concepción del Uruguay · Zona del puerto</span>
+    
+    
+  </div>
+  
+  <div class="info-cell">
+    <span class="info-cell-label">Reservar mesa</span>
+    
+    <span class="info-cell-value">03442 42-8753</span>
+    <span class="info-cell-sub">📈 Alta demanda — conviene reservar antes</span>
+    
+    
+    <div class="action-row" style="margin-top:12px">
+      <a href="tel:+543442428753" class="btn btn-primary" target="_self" rel="noopener noreferrer">📞 Llamar</a>
+    </div>
+    
+  </div>
+  
+</div>
+
+
+<!-- ABOUT -->
+
+<section class="page" aria-labelledby="about-heading">
+  <div class="section-header">
+    <span class="section-label">Sobre el lugar</span>
+    <span class="section-line" aria-hidden="true"></span>
+  </div>
+  <div class="about-grid">
+    <div>
+      <h2 class="about-title" id="about-heading">Tradición en cada <strong>hebra</strong> frente al puerto</h2>
+      <p class="about-body"><strong>Mamma Mía</strong> se ha consolidado como un pilar fundamental de la gastronomía en Concepción del Uruguay. Es el refugio donde las recetas de la abuela cobran vida con ingredientes frescos y un toque contemporáneo.</p><p class="about-body">Su maestría en pastas artesanales, la calidez del ambiente y la generosidad de las porciones lo convierten en un clásico imbatible de la ciudad, ideal para quienes buscan calidad y autenticidad.</p>
+      
+      <div class="pullquote" role="blockquote"><p>"Ideal para quienes buscan pastas artesanales auténticas y un ambiente cálido frente a la zona portuaria."</p></div>
+      
+      
+      <div class="tags-row" aria-label="Características del lugar">
+        <span class="tag">Pastas artesanales</span><span class="tag">Cocina italiana</span><span class="tag">Zona del puerto</span><span class="tag">Porciones generosas</span><span class="tag">Salsas de autor</span>
+      </div>
+      
+    </div>
+    
+    <div>
+      <div class="gallery" aria-label="Galería de fotos de Mamma Mía">
+        
+        <div class="gallery-item gallery-main">
+          <img src="https://i.imgur.com/wuKM2Y4.png" alt="Plato de pasta Mamma Mía" loading="lazy" decoding="async" />
+        </div>
+        
+        <div class="gallery-item ">
+          <img src="https://i.imgur.com/5Nn4Cjo.png" alt="Pasta artesanal Mamma Mía" loading="lazy" decoding="async" />
+        </div>
+        
+        <div class="gallery-item ">
+          <img src="https://i.imgur.com/kDzfW4v.png" alt="Ambiente de Mamma Mía" loading="lazy" decoding="async" />
+        </div>
+        
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+
+<!-- HIGHLIGHTS -->
+
+<div class="highlights-grid" role="list" aria-label="Lo mejor del lugar">
+  
+  <div class="highlight-card" role="listitem">
+    <div class="highlight-num" aria-hidden="true">01</div>
+    <div class="highlight-title">Pastas Artesanales</div>
+    <p class="highlight-text">Sorrentinos, ravioles y formas de la casa elaboradas a mano con ingredientes frescos todos los días.</p>
+  </div>
+  
+  <div class="highlight-card" role="listitem">
+    <div class="highlight-num" aria-hidden="true">02</div>
+    <div class="highlight-title">Sabor de Hogar</div>
+    <p class="highlight-text">Las recetas de la abuela cobran vida con un toque contemporáneo. Un clásico imbatible del puerto.</p>
+  </div>
+  
+  <div class="highlight-card" role="listitem">
+    <div class="highlight-num" aria-hidden="true">03</div>
+    <div class="highlight-title">Porciones Generosas</div>
+    <p class="highlight-text">Relación calidad-cantidad excepcional. La apuesta segura de Concepción del Uruguay.</p>
+  </div>
+  
+</div>
+
+
+<!-- AMENITIES -->
+
+
+<!-- SCORES -->
+
+<section class="scores-section" aria-labelledby="scores-heading">
+  <div class="scores-inner">
+    <div class="section-header">
+      <span class="section-label" id="scores-heading">URU SPOT Score</span>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <div class="scores-grid">
+      <div class="score-big" aria-label="Puntuación total: 9.0 de 10">
+        <div class="score-big-num">9.0</div>
+        <div class="score-big-den">/ 10</div>
+        <div class="score-big-label">Puntuación URU SPOT</div>
+        
+      </div>
+      <div class="score-bars">
+        
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">🍽️ Comida</span>
+            <span class="score-val">9.2</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" data-width="92%" role="meter" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" aria-label="🍽️ Comida: 9.2 de 10"></div>
+          </div>
+        </div>
+        
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">🌍 Ambiente</span>
+            <span class="score-val">9.0</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" data-width="90%" role="meter" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="🌍 Ambiente: 9.0 de 10"></div>
+          </div>
+        </div>
+        
+        <div class="score-row">
+          <div class="score-row-top">
+            <span class="score-name">⚡ Servicio</span>
+            <span class="score-val">8.9</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" data-width="89%" role="meter" aria-valuenow="89" aria-valuemin="0" aria-valuemax="100" aria-label="⚡ Servicio: 8.9 de 10"></div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- HORARIOS -->
+
+<div class="schedule-block" aria-labelledby="schedule-heading">
+  <div>
+    <h2 class="schedule-title" id="schedule-heading">Horarios & Precio</h2>
+    
+    <div class="schedule-row">
+      <span class="schedule-day">Lunes a Sábados</span>
+      <span class="schedule-time">12:00 p.m. – 23:00 hs</span>
+    </div>
+    
+    <div class="schedule-row">
+      <span class="schedule-day">Domingos</span>
+      <span class="schedule-time-closed">Cerrado</span>
+    </div>
+    
+    
+    <div class="schedule-note" style="margin-top:24px">
+      <div class="schedule-note-label">Precio estimado por persona</div>
+      <div class="schedule-note-val">$25.000 – $40.000 ARS</div>
+      <div class="schedule-note-sub">~U$D 25–40 · menú completo con bebida</div>
+    </div>
+    
+    
+    <ul class="adn-list" aria-label="Características" style="margin-top:28px">
+      <li>Pastas artesanales elaboradas a mano todos los días</li><li>Salsas de la casa: bolognesa clásica y de autor</li><li>Porciones generosas frente a la zona del puerto</li>
+    </ul>
+    
+    <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:16px;letter-spacing:0.05em">Información actualizada recientemente</p>
+  </div>
+  <div>
+    <div style="margin-bottom:24px" aria-live="polite">
+      <div id="schedStatusPill" class="status-pill" style="background:rgba(64,145,108,0.15);color:#40916c">
+        <span class="status-dot" id="schedDot" aria-hidden="true" style="background:#40916c"></span>
+        <span id="schedStatusText">Cargando…</span>
+      </div>
+      <p id="schedInfo" style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px"></p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <a href="https://www.google.com/maps/place/Mamma+Mia/@-32.4872395,-58.2358781,17z/data=!3m1!4b1!4m6!3m5!1s0x95afdb0738c85557:0x3880ff2ef22ea88b!8m2!3d-32.4872395!4d-58.2332978!16s%2Fg%2F11gbwqmyty" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🗺️ Cómo llegar</a>
+      <button id="share-btn" class="btn btn-ghost" aria-label="Compartir esta página">📤 Compartir</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MAPA -->
+
+<section class="map-section" aria-labelledby="map-heading">
+  <div class="map-inner">
+    <div class="section-header">
+      <span class="section-label">Cómo llegar</span>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <div class="map-grid">
+      <div class="map-frame">
+        <iframe title="Ubicación de Mamma Mía en Google Maps" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3310.879!2d-58.2358781!3d-32.4872395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95afdb0738c85557%3A0x3880ff2ef22ea88b!2sMamma%20Mia!5e0!3m2!1ses!2sar!4v1716000000000!5m2!1ses!2sar" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+      <div>
+        <h2 class="map-info-title" id="map-heading">España 160, zona del puerto</h2>
+        <strong>Dirección:</strong> España 160, Concepción del Uruguay, Entre Ríos<strong>Zona:</strong> Esquina más clásica del puerto — fácil acceso y estacionamiento<strong>Alta demanda:</strong> Recomendamos reservar mesa con anticipación, especialmente los fines de semana.
+        <div style="margin-top:28px;display:flex;flex-direction:column;gap:10px">
+          <a href="https://www.google.com/maps/place/Mamma+Mia/@-32.4872395,-58.2358781,17z/data=!3m1!4b1!4m6!3m5!1s0x95afdb0738c85557:0x3880ff2ef22ea88b!8m2!3d-32.4872395!4d-58.2332978!16s%2Fg%2F11gbwqmyty" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🗺️ Cómo llegar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- REVIEWS -->
+
+
+<!-- VERDICT -->
+
+<section class="verdict-section" aria-labelledby="verdict-heading">
+  <div class="verdict-inner">
+    <div class="section-header">
+      <span class="section-label">Veredicto URU SPOT</span>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <div class="verdict-card">
+      <div class="verdict-accent" aria-hidden="true"></div>
+      <div class="verdict-content">
+        <div class="verdict-label" id="verdict-heading">🟢 Recomendado</div>
+        <p class="verdict-text">Mamma Mía es la apuesta segura para quien busca calidad y porciones generosas. Su ubicación frente al puerto y su maestría en las pastas artesanales lo convierten en un clásico imbatible de Concepción del Uruguay.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+  <a href="../../" class="footer-logo">URU SPOT</a>
+  <span>Guía gastronómica de Concepción del Uruguay</span>
+  <span>Información actualizada recientemente</span>
+</footer>
+
+<script id="ficha-data" type="application/json">
+{"nombre": "Mamma M\u00eda", "schedule_rows": [{"closed": false, "day": "Lunes a S\u00e1bados", "time": "12:00 p.m. \u2013 23:00 hs"}, {"closed": true, "day": "Domingos", "time": "Cerrado"}], "share_text": "El arte de la pasta hecha a mano y el sabor de hogar en la esquina m\u00e1s cl\u00e1sica del puerto."}
+</script>
+<script src="../ficha.js"></script>
+</body>
+</html>
