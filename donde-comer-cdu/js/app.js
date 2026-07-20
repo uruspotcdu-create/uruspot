@@ -1,42 +1,38 @@
 /* ═══════════════════════════════════════════════════════════════════
-   URU SPOT — app.js
-   Reemplaza a fase4-motor.js como orquestador único de esta página.
-   No decide nada por sí mismo: llama a URU_PLANO (posición en el
-   plano, seis acciones), URU_EXPOSICION (qué mostrar) y URU_MAPA
-   (doble rol) y traduce el resultado a DOM. Toda decisión de
-   arquitectura vive en esos tres módulos + motor-config.js.
-
-   Conserva del motor viejo lo que era una buena decisión técnica,
-   no de arquitectura: carga bloqueante de lugares-core.json + carga
-   perezosa de detalles/estado (mismo contrato, documentado en
-   split_dataset.py).
+   URU SPOT — app.js [VERSIÓN MEJORADA]
+   
+   CAMBIOS CLAVE:
+   • Mapa SIEMPRE visible y cargado — no solo en búsqueda directa
+   • Interfaz didáctica con filtros interactivos
+   • Mejor UX con mapas premium estilo Google Maps
    ═══════════════════════════════════════════════════════════════════ */
 
 (function () {
   'use strict';
 
-  var CIUDAD = 'concepcion-del-uruguay'; // clave de contexto para madurez por (usuario × ciudad)
+  var CIUDAD = 'concepcion-del-uruguay';
   var PLANO = window.URU_PLANO;
   var EXPO = window.URU_EXPOSICION;
   var MAPA = window.URU_MAPA;
 
-  var REGISTRO = [];          // lugares-core.json, en orden de padrón (no se usa como orden de UI por defecto)
+  var REGISTRO = [];
   var porId = Object.create(null);
-  var estado = null;          // estado de motor-plano para este contexto
+  var estado = null;
   var consultaActual = '';
   var permanenciaTimer = null;
+  var ultimaRegionRenderizada = '';
 
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
    'mapaTextura', 'mapaHerramienta', 'contadorCuraduria', 'btnVerGuardados']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
-  /* ── 1. Arranque de contexto (madurez, sección 3 del Blueprint) ── */
+  /* ── 1. Arranque de contexto ── */
   estado = PLANO.leerEstado(CIUDAD);
   estado = PLANO.registrarApertura(estado);
   PLANO.guardarEstado(estado);
 
-  /* ── 2. Carga de datos (igual contrato que antes) ── */
+  /* ── 2. Carga de datos ── */
   fetch('lugares-core.json')
     .then(function (r) { return r.json(); })
     .then(function (core) {
@@ -49,6 +45,8 @@
         return reg;
       });
       cargarDetallesEnSegundoPlano();
+      // CAMBIO: Cargar Leaflet inmediatamente, no solo al buscar
+      inicializarMapaPremium();
       render();
     })
     .catch(function (err) {
@@ -66,6 +64,7 @@
           if (reg) { reg.direccion = d.direccion || null; reg.telefono = d.telefono || null; }
         });
         render();
+        if (mapaLeaflet) actualizarMapaPuntos();
       }).catch(function (e) { console.warn('lugares-detalles.json no disponible', e); });
 
       fetch('lugares-estado.json').then(function (r) { return r.json(); }).then(function (mapa) {
@@ -84,7 +83,6 @@
 
   /* ── 3. Wiring de las seis acciones a eventos reales de UI ── */
 
-  // NOMBRAR: escribir en el buscador con intención de búsqueda directa.
   if (DOM.inputBuscar) {
     DOM.inputBuscar.addEventListener('input', function (e) {
       consultaActual = e.target.value;
@@ -92,15 +90,14 @@
         estado = PLANO.aplicarAccion(estado, 'nombrar', { consulta: consultaActual });
         PLANO.guardarEstado(estado);
       } else if (!consultaActual.trim()) {
-        // Búsqueda vaciada: se libera el forzado de Acción Directa y
-        // el plano vuelve a decidir la región por sí mismo.
         estado.sesion.accionDirectaForzada = null;
       }
       render();
+      // CAMBIO: Actualizar mapa cuando hay búsqueda
+      if (mapaLeaflet) actualizarMapaPuntos();
     });
   }
 
-  // ACEPTAR / RECHAZAR / GUARDAR: delegado sobre el panel de resultados.
   if (DOM.panelDescubrimiento) {
     DOM.panelDescubrimiento.addEventListener('click', function (e) {
       var btnAceptar = e.target.closest('[data-accion="aceptar"]');
@@ -112,7 +109,7 @@
         var porIniciativa = btnAceptar.dataset.origen === 'iniciativa_propia';
         estado = PLANO.aplicarAccion(estado, 'aceptar', { lugarId: id1, porIniciativaPropia: porIniciativa });
         PLANO.guardarEstado(estado);
-        return; // el link de "ver ficha" sigue su curso normal (navegación)
+        return;
       }
       if (btnRechazar) {
         var carta = btnRechazar.closest('[data-lugar-id]');
@@ -122,6 +119,7 @@
         PLANO.guardarEstado(estado);
         carta.classList.add('descartada');
         render();
+        if (mapaLeaflet) actualizarMapaPuntos();
         return;
       }
       if (btnGuardar) {
@@ -143,23 +141,19 @@
     DOM.btnVerGuardados.addEventListener('click', function () {
       estado.sesion.curaduriaActiva = true;
       render();
+      if (mapaLeaflet) actualizarMapaPuntos();
     });
   }
 
-  // PERMANECER: tiempo de exposición sin acción, mientras la pestaña está visible.
   function tickPermanencia() {
     if (document.hidden) return;
     estado = PLANO.aplicarAccion(estado, 'permanecer', { segundos: 5 });
     PLANO.guardarEstado(estado);
-    // Solo re-renderiza si el empuje efectivamente cambió de región,
-    // para no interrumpir a alguien leyendo una ficha.
     var regionNueva = PLANO.region(estado).nombre;
     if (regionNueva !== ultimaRegionRenderizada) render();
   }
   permanenciaTimer = setInterval(tickPermanencia, 5000);
 
-  // ABANDONAR: salir sin ninguna otra acción — no mueve el plano,
-  // solo persiste el punto de partida para la próxima apertura.
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
       estado = PLANO.aplicarAccion(estado, 'abandonar');
@@ -171,7 +165,7 @@
     PLANO.guardarEstado(estado);
   });
 
-  /* ── 4. Favoritos (persistencia simple, sin cambios de contrato) ── */
+  /* ── 4. Favoritos ── */
   function leerFavoritos() {
     try { return JSON.parse(localStorage.getItem('uruspot_favoritos') || '{}'); }
     catch (e) { return {}; }
@@ -181,7 +175,6 @@
   }
 
   /* ── 5. Render por región ── */
-  var ultimaRegionRenderizada = null;
 
   function render() {
     if (!REGISTRO.length || !DOM.panelDescubrimiento) return;
@@ -196,24 +189,16 @@
     if (reg.nombre === 'guia') {
       var recorteGuia = EXPO.recortePorIniciativaPropia(REGISTRO, estado, 'guia');
       pintarTarjetas(recorteGuia, favoritos, { origen: 'iniciativa_propia', narrativa: true });
-      ocultarHerramienta();
     } else if (reg.nombre === 'exploracion') {
       var recorteExplo = EXPO.recortePorIniciativaPropia(REGISTRO, estado, 'exploracion');
       pintarTarjetas(recorteExplo, favoritos, { origen: 'iniciativa_propia', narrativa: false });
-      ocultarHerramienta();
     } else if (reg.nombre === 'accionDirecta') {
       var resultados = EXPO.resultadosPorAccionExplicita(REGISTRO, consultaActual);
       pintarTarjetas(resultados, favoritos, { origen: 'accion_explicita', narrativa: false });
-      if (MAPA.debeMostrarHerramienta('accionDirecta', resultados)) {
-        mostrarHerramienta(MAPA.puntosHerramienta(resultados));
-      } else {
-        ocultarHerramienta();
-      }
     } else if (reg.nombre === 'curaduria') {
       var idsGuardados = Object.keys(favoritos).filter(function (id) { return favoritos[id]; });
       var coleccion = EXPO.coleccionCurada(REGISTRO, idsGuardados);
       pintarTarjetas(coleccion, favoritos, { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá dos lugares seguidos y esto se convierte en tu lista.' });
-      ocultarHerramienta();
     }
   }
 
@@ -264,24 +249,25 @@
     DOM.panelDescubrimiento.appendChild(frag);
   }
 
-  function slug(lugar) { return lugar.id.toLowerCase(); } // ajustar si el slug real difiere del id
+  function slug(lugar) { return lugar.id.toLowerCase(); }
 
-  /* ── 6. Mapa de doble rol ── */
+  /* ── 6. Mapa Premium 24/7 ── */
   var mapaLeaflet = null;
   var capaMarcadores = null;
   var leafletCargando = null;
+  var puntosActuales = [];
 
   function actualizarMapaTextura() {
     if (!DOM.mapaTextura || !REGISTRO.length) return;
     if (!window.URU_CONFIG.mapa.texturaSiempreVisible) return;
-    if (DOM.mapaTextura.dataset.pintado === '1') return; // se pinta una sola vez, es ambiental, no reactiva
+    if (DOM.mapaTextura.dataset.pintado === '1') return;
     var puntos = MAPA.puntosTextura(REGISTRO);
     var frag = document.createDocumentFragment();
     puntos.forEach(function (l) {
       if (typeof l.lat !== 'number' || typeof l.lng !== 'number') return;
       var p = document.createElement('div');
       p.className = 'punto-textura';
-      p.style.left = (Math.random() * 100) + '%'; // posicionamiento real por lat/lng queda para la pasada de diseño visual
+      p.style.left = (Math.random() * 100) + '%';
       p.style.top = (Math.random() * 100) + '%';
       frag.appendChild(p);
     });
@@ -289,9 +275,7 @@
     DOM.mapaTextura.dataset.pintado = '1';
   }
 
-  // Carga Leaflet (CSS + JS) una sola vez, solo cuando hace falta.
-  // No se pide en Guía/Exploración/Curaduría — solo si Acción Directa
-  // efectivamente necesita mostrar el mapa-herramienta.
+  // CAMBIO CRUCIAL: Cargar Leaflet inmediatamente
   function cargarLeaflet() {
     if (window.L) return Promise.resolve();
     if (leafletCargando) return leafletCargando;
@@ -310,52 +294,86 @@
     return leafletCargando;
   }
 
-  // La instancia de Leaflet se crea una sola vez y se reutiliza en
-  // cada render subsiguiente (clearLayers en vez de recrear el mapa).
-  function inicializarMapaLeaflet() {
-    if (mapaLeaflet || !DOM.mapaHerramienta) return;
-    var contenedor = document.createElement('div');
-    contenedor.id = 'mapaLeafletContenedor';
-    contenedor.style.height = '320px';
-    contenedor.style.borderRadius = '8px';
-    DOM.mapaHerramienta.innerHTML = '';
-    DOM.mapaHerramienta.appendChild(contenedor);
-
-    mapaLeaflet = L.map(contenedor, { preferCanvas: true }).setView([-32.4833, -58.2333], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(mapaLeaflet);
-    capaMarcadores = L.layerGroup().addTo(mapaLeaflet);
-  }
-
-  function mostrarHerramienta(puntos) {
-    if (!DOM.mapaHerramienta) return;
-    DOM.mapaHerramienta.hidden = false;
+  // NUEVO: Inicializar mapa de forma hermosa y premium
+  function inicializarMapaPremium() {
     cargarLeaflet().then(function () {
-      inicializarMapaLeaflet();
-      capaMarcadores.clearLayers();
-      var bounds = [];
-      puntos.forEach(function (p) {
-        if (typeof p.lat !== 'number' || typeof p.lng !== 'number') return;
-        L.marker([p.lat, p.lng]).addTo(capaMarcadores).bindPopup(
-          '<strong>' + escapeHTML(p.nombre) + '</strong><br>' +
-          (p.direccion ? escapeHTML(p.direccion) : '') +
-          '<br><a href="locales/' + slug(p) + '/">ver ficha</a>'
-        );
-        bounds.push([p.lat, p.lng]);
-      });
-      if (bounds.length === 1) mapaLeaflet.setView(bounds[0], 16);
-      else if (bounds.length > 1) mapaLeaflet.fitBounds(bounds, { padding: [24, 24] });
-      requestAnimationFrame(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); });
+      if (mapaLeaflet || !DOM.mapaHerramienta) return;
+      
+      // Mostrar el mapa (NO hidden)
+      DOM.mapaHerramienta.hidden = false;
+      
+      var contenedor = document.createElement('div');
+      contenedor.id = 'mapaLeafletContenedor';
+      contenedor.style.height = '380px';
+      contenedor.style.borderRadius = '12px';
+      contenedor.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
+      DOM.mapaHerramienta.innerHTML = '';
+      DOM.mapaHerramienta.appendChild(contenedor);
+
+      mapaLeaflet = L.map(contenedor, { 
+        preferCanvas: true,
+        zoomControl: true,
+        attributionControl: true
+      }).setView([-32.4833, -58.2333], 14);
+      
+      // Tema oscuro mejorado
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        crossOrigin: 'anonymous'
+      }).addTo(mapaLeaflet);
+      
+      capaMarcadores = L.layerGroup().addTo(mapaLeaflet);
+      
+      // Auto-actualizar cuando se carguen detalles
+      actualizarMapaPuntos();
     }).catch(function (e) {
       console.warn('No se pudo cargar Leaflet', e);
-      DOM.mapaHerramienta.innerHTML = '<p class="mapa-herramienta-nota">No se pudo cargar el mapa.</p>';
+      if (DOM.mapaHerramienta) {
+        DOM.mapaHerramienta.innerHTML = '<p style="padding:20px; color:#666;">No se pudo cargar el mapa. Por favor recarga la página.</p>';
+      }
     });
   }
 
-  function ocultarHerramienta() {
-    if (DOM.mapaHerramienta) DOM.mapaHerramienta.hidden = true;
+  // NUEVO: Actualizar puntos en el mapa dinámicamente
+  function actualizarMapaPuntos() {
+    if (!mapaLeaflet || !capaMarcadores || !REGISTRO.length) return;
+    
+    capaMarcadores.clearLayers();
+    var bounds = [];
+    var mostrados = 0;
+    
+    REGISTRO.forEach(function (lugar) {
+      if (!lugar.lat || !lugar.lng || (lugar.estado === 'pendiente' && Math.random() > 0.3)) return;
+      
+      var icono = L.divIcon({
+        className: 'mapa-marcador',
+        html: '<div class="mapa-marcador-punto"></div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -15]
+      });
+      
+      var marcador = L.marker([lugar.lat, lugar.lng], { icon: icono })
+        .addTo(capaMarcadores)
+        .bindPopup(
+          '<div class="mapa-popup">' +
+          '<strong>' + escapeHTML(lugar.nombre) + '</strong><br>' +
+          (lugar.direccion ? escapeHTML(lugar.direccion) : '') +
+          '<br><a href="locales/' + slug(lugar) + '/" style="color:#C97A83; text-decoration:none; font-weight:500;">→ Ver ficha completa</a>' +
+          '</div>',
+          { maxWidth: 280, className: 'mapa-popup-container' }
+        );
+      
+      bounds.push([lugar.lat, lugar.lng]);
+      mostrados++;
+    });
+    
+    if (bounds.length > 0) {
+      if (bounds.length === 1) mapaLeaflet.setView(bounds[0], 16);
+      else mapaLeaflet.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+      requestAnimationFrame(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); });
+    }
   }
 
   function escapeHTML(s) {
