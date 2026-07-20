@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
-   URU SPOT — app.js [VERSIÓN MEJORADA]
-   
-   CAMBIOS CLAVE:
-   • Mapa SIEMPRE visible y cargado — no solo en búsqueda directa
-   • Interfaz didáctica con filtros interactivos
-   • Mejor UX con mapas premium estilo Google Maps
+   URU SPOT — app.js
+   El mapa dejó de ser una capa aparte cargada por su cuenta: ahora es
+   una vista más del mismo estado que alimenta las tarjetas. Región,
+   recorte y presupuesto de exposición se calculan una sola vez por
+   render() y de ahí se derivan tanto las tarjetas como los puntos que
+   entran al mapa — nunca dos fuentes de verdad para "qué se muestra".
    ═══════════════════════════════════════════════════════════════════ */
 
 (function () {
@@ -24,7 +24,7 @@
 
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
-   'mapaTextura', 'mapaHerramienta', 'contadorCuraduria', 'btnVerGuardados']
+   'mapaTextura', 'mapaHerramienta', 'mapaInfo', 'contadorCuraduria', 'btnVerGuardados']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
   /* ── 1. Arranque de contexto ── */
@@ -45,8 +45,6 @@
         return reg;
       });
       cargarDetallesEnSegundoPlano();
-      // CAMBIO: Cargar Leaflet inmediatamente, no solo al buscar
-      inicializarMapaPremium();
       render();
     })
     .catch(function (err) {
@@ -64,7 +62,6 @@
           if (reg) { reg.direccion = d.direccion || null; reg.telefono = d.telefono || null; }
         });
         render();
-        if (mapaLeaflet) actualizarMapaPuntos();
       }).catch(function (e) { console.warn('lugares-detalles.json no disponible', e); });
 
       fetch('lugares-estado.json').then(function (r) { return r.json(); }).then(function (mapa) {
@@ -93,8 +90,6 @@
         estado.sesion.accionDirectaForzada = null;
       }
       render();
-      // CAMBIO: Actualizar mapa cuando hay búsqueda
-      if (mapaLeaflet) actualizarMapaPuntos();
     });
   }
 
@@ -103,6 +98,7 @@
       var btnAceptar = e.target.closest('[data-accion="aceptar"]');
       var btnRechazar = e.target.closest('[data-accion="rechazar"]');
       var btnGuardar = e.target.closest('[data-accion="guardar"]');
+      var carta0 = e.target.closest('[data-lugar-id]');
 
       if (btnAceptar) {
         var id1 = btnAceptar.closest('[data-lugar-id]').dataset.lugarId;
@@ -119,7 +115,6 @@
         PLANO.guardarEstado(estado);
         carta.classList.add('descartada');
         render();
-        if (mapaLeaflet) actualizarMapaPuntos();
         return;
       }
       if (btnGuardar) {
@@ -134,6 +129,23 @@
         render();
         return;
       }
+      // Click en la tarjeta (no en un botón): si el lugar está en el
+      // mapa activo, centralo y abrí su ficha — selección sincronizada
+      // en el sentido tarjeta → mapa.
+      if (carta0 && motorMapa) {
+        motorMapa.enfocar(carta0.dataset.lugarId);
+      }
+    });
+
+    // Hover/focus de tarjeta → resalta el punto correspondiente en el
+    // mapa. Delegado con capture porque mouseover/mouseout no burbujean.
+    DOM.panelDescubrimiento.addEventListener('mouseover', function (e) {
+      var carta = e.target.closest('[data-lugar-id]');
+      if (carta && motorMapa) motorMapa.resaltar(carta.dataset.lugarId);
+    });
+    DOM.panelDescubrimiento.addEventListener('mouseout', function (e) {
+      var carta = e.target.closest('[data-lugar-id]');
+      if (carta && motorMapa) motorMapa.quitarResaltado();
     });
   }
 
@@ -141,7 +153,6 @@
     DOM.btnVerGuardados.addEventListener('click', function () {
       estado.sesion.curaduriaActiva = true;
       render();
-      if (mapaLeaflet) actualizarMapaPuntos();
     });
   }
 
@@ -174,7 +185,9 @@
     try { localStorage.setItem('uruspot_favoritos', JSON.stringify(f)); } catch (e) { /* no-op */ }
   }
 
-  /* ── 5. Render por región ── */
+  /* ── 5. Render por región ──
+     Una sola lista por región alimenta tarjetas y mapa: así se
+     garantiza que nunca puedan mostrar conjuntos distintos.        */
 
   function render() {
     if (!REGISTRO.length || !DOM.panelDescubrimiento) return;
@@ -186,20 +199,22 @@
     actualizarCabecera(reg);
     actualizarMapaTextura();
 
+    var lista;
     if (reg.nombre === 'guia') {
-      var recorteGuia = EXPO.recortePorIniciativaPropia(REGISTRO, estado, 'guia');
-      pintarTarjetas(recorteGuia, favoritos, { origen: 'iniciativa_propia', narrativa: true });
+      lista = EXPO.recortePorIniciativaPropia(REGISTRO, estado, 'guia');
+      pintarTarjetas(lista, favoritos, { origen: 'iniciativa_propia', narrativa: true });
     } else if (reg.nombre === 'exploracion') {
-      var recorteExplo = EXPO.recortePorIniciativaPropia(REGISTRO, estado, 'exploracion');
-      pintarTarjetas(recorteExplo, favoritos, { origen: 'iniciativa_propia', narrativa: false });
+      lista = EXPO.recortePorIniciativaPropia(REGISTRO, estado, 'exploracion');
+      pintarTarjetas(lista, favoritos, { origen: 'iniciativa_propia', narrativa: false });
     } else if (reg.nombre === 'accionDirecta') {
-      var resultados = EXPO.resultadosPorAccionExplicita(REGISTRO, consultaActual);
-      pintarTarjetas(resultados, favoritos, { origen: 'accion_explicita', narrativa: false });
+      lista = EXPO.resultadosPorAccionExplicita(REGISTRO, consultaActual);
+      pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false });
     } else if (reg.nombre === 'curaduria') {
       var idsGuardados = Object.keys(favoritos).filter(function (id) { return favoritos[id]; });
-      var coleccion = EXPO.coleccionCurada(REGISTRO, idsGuardados);
-      pintarTarjetas(coleccion, favoritos, { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá dos lugares seguidos y esto se convierte en tu lista.' });
+      lista = EXPO.coleccionCurada(REGISTRO, idsGuardados);
+      pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá dos lugares seguidos y esto se convierte en tu lista.' });
     }
+    actualizarMapaHerramienta(reg.nombre, lista || []);
   }
 
   function actualizarCabecera(reg) {
@@ -251,11 +266,7 @@
 
   function slug(lugar) { return lugar.id.toLowerCase(); }
 
-  /* ── 6. Mapa Premium 24/7 ── */
-  var mapaLeaflet = null;
-  var capaMarcadores = null;
-  var leafletCargando = null;
-  var puntosActuales = [];
+  /* ── 6. Textura ambiental (sin cambios de fondo, no es interactiva) ── */
 
   function actualizarMapaTextura() {
     if (!DOM.mapaTextura || !REGISTRO.length) return;
@@ -275,105 +286,64 @@
     DOM.mapaTextura.dataset.pintado = '1';
   }
 
-  // CAMBIO CRUCIAL: Cargar Leaflet inmediatamente
-  function cargarLeaflet() {
-    if (window.L) return Promise.resolve();
-    if (leafletCargando) return leafletCargando;
-    leafletCargando = new Promise(function (resolve, reject) {
-      var css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(css);
+  /* ── 7. Mapa-herramienta: motor propio, gobernado por motor-mapa.js ──
+     Este bloque no decide nada por su cuenta — solo traduce lo que
+     motor-mapa.js ya resolvió (¿corresponde mostrar el mapa? ¿con qué
+     recorte?) al motor de render. Ver motor-mapa.js: el mapa-
+     herramienta es exclusivo de Acción Directa con resultados
+     georreferenciados, con el mismo tipo de recorte acotado que el
+     resto del sistema — nunca el padrón completo.                    */
+  var motorMapa = null;
 
-      var script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
+  function inicializarMotorMapa() {
+    if (motorMapa || !DOM.mapaHerramienta || !window.URU_MOTOR_MAPA_RENDER) return;
+    motorMapa = window.URU_MOTOR_MAPA_RENDER.crear(DOM.mapaHerramienta, {
+      lat: -32.4833, lng: -58.2333, zoom: 14,
+      ariaLabel: 'Mapa de los resultados de tu búsqueda'
     });
-    return leafletCargando;
-  }
-
-  // NUEVO: Inicializar mapa de forma hermosa y premium
-  function inicializarMapaPremium() {
-    cargarLeaflet().then(function () {
-      if (mapaLeaflet || !DOM.mapaHerramienta) return;
-      
-      // Mostrar el mapa (NO hidden)
-      DOM.mapaHerramienta.hidden = false;
-      
-      var contenedor = document.createElement('div');
-      contenedor.id = 'mapaLeafletContenedor';
-      contenedor.style.height = '380px';
-      contenedor.style.borderRadius = '12px';
-      contenedor.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
-      DOM.mapaHerramienta.innerHTML = '';
-      DOM.mapaHerramienta.appendChild(contenedor);
-
-      mapaLeaflet = L.map(contenedor, { 
-        preferCanvas: true,
-        zoomControl: true,
-        attributionControl: true
-      }).setView([-32.4833, -58.2333], 14);
-      
-      // Tema oscuro mejorado
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        crossOrigin: 'anonymous'
-      }).addTo(mapaLeaflet);
-      
-      capaMarcadores = L.layerGroup().addTo(mapaLeaflet);
-      
-      // Auto-actualizar cuando se carguen detalles
-      actualizarMapaPuntos();
-    }).catch(function (e) {
-      console.warn('No se pudo cargar Leaflet', e);
-      if (DOM.mapaHerramienta) {
-        DOM.mapaHerramienta.innerHTML = '<p style="padding:20px; color:#666;">No se pudo cargar el mapa. Por favor recarga la página.</p>';
-      }
+    motorMapa.on('hover', function (punto) { resaltarTarjeta(punto.id, true); });
+    motorMapa.on('hoverOut', function () { resaltarTarjeta(null, false); });
+    motorMapa.on('click', function (punto) {
+      var el = DOM.panelDescubrimiento.querySelector('[data-lugar-id="' + cssEscape(punto.id) + '"]');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
 
-  // NUEVO: Actualizar puntos en el mapa dinámicamente
-  function actualizarMapaPuntos() {
-    if (!mapaLeaflet || !capaMarcadores || !REGISTRO.length) return;
-    
-    capaMarcadores.clearLayers();
-    var bounds = [];
-    var mostrados = 0;
-    
-    REGISTRO.forEach(function (lugar) {
-      if (!lugar.lat || !lugar.lng || (lugar.estado === 'pendiente' && Math.random() > 0.3)) return;
-      
-      var icono = L.divIcon({
-        className: 'mapa-marcador',
-        html: '<div class="mapa-marcador-punto"></div>',
-        iconSize: [30, 30],
-        iconAnchor: [15, 15],
-        popupAnchor: [0, -15]
-      });
-      
-      var marcador = L.marker([lugar.lat, lugar.lng], { icon: icono })
-        .addTo(capaMarcadores)
-        .bindPopup(
-          '<div class="mapa-popup">' +
-          '<strong>' + escapeHTML(lugar.nombre) + '</strong><br>' +
-          (lugar.direccion ? escapeHTML(lugar.direccion) : '') +
-          '<br><a href="locales/' + slug(lugar) + '/" style="color:#C97A83; text-decoration:none; font-weight:500;">→ Ver ficha completa</a>' +
-          '</div>',
-          { maxWidth: 280, className: 'mapa-popup-container' }
-        );
-      
-      bounds.push([lugar.lat, lugar.lng]);
-      mostrados++;
-    });
-    
-    if (bounds.length > 0) {
-      if (bounds.length === 1) mapaLeaflet.setView(bounds[0], 16);
-      else mapaLeaflet.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-      requestAnimationFrame(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); });
+  function resaltarTarjeta(id, activo) {
+    var previa = DOM.panelDescubrimiento.querySelector('.tarjeta--resaltada');
+    if (previa) previa.classList.remove('tarjeta--resaltada');
+    if (activo && id) {
+      var el = DOM.panelDescubrimiento.querySelector('[data-lugar-id="' + cssEscape(id) + '"]');
+      if (el) el.classList.add('tarjeta--resaltada');
     }
+  }
+
+  function cssEscape(s) {
+    return window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+  }
+
+  function actualizarMapaHerramienta(nombreRegion, lista) {
+    if (!DOM.mapaHerramienta) return;
+    var debeMostrar = MAPA.debeMostrarHerramienta(nombreRegion, lista);
+
+    if (!debeMostrar) {
+      DOM.mapaHerramienta.hidden = true;
+      if (DOM.mapaInfo) DOM.mapaInfo.hidden = true;
+      return;
+    }
+
+    DOM.mapaHerramienta.hidden = false;
+    if (DOM.mapaInfo) DOM.mapaInfo.hidden = false;
+    inicializarMotorMapa();
+    if (!motorMapa) return;
+
+    var conCoordenadas = lista.filter(function (l) { return typeof l.lat === 'number' && typeof l.lng === 'number'; });
+    var recorte = MAPA.puntosHerramienta(conCoordenadas);
+    var puntos = recorte.map(function (l) {
+      return { id: l.id, lat: l.lat, lng: l.lng, nombre: l.nombre, direccion: l.direccion, href: 'locales/' + slug(l) + '/' };
+    });
+    motorMapa.establecerPuntos(puntos);
+    motorMapa.encuadrarTodos(48);
   }
 
   function escapeHTML(s) {
