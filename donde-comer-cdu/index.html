@@ -5,17 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>URU SPOT — el padrón de Concepción del Uruguay</title>
 <meta name="description" content="El padrón completo de Concepción del Uruguay: 1.468 lugares caminados y verificados uno por uno, en 14 rubros — sin ranking, sin relleno.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F5F1E7">
+<meta name="format-detection" content="telephone=no">
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/">
+<link rel="manifest" href="../manifest.json">
+<meta property="og:title" content="URU SPOT — el padrón de Concepción del Uruguay">
+<meta property="og:description" content="1.468 lugares caminados y verificados uno por uno, en 14 rubros — sin ranking, sin relleno.">
+<meta property="og:image" content="https://uruspot.pages.dev/img/logof.webp">
+<meta property="og:image:alt" content="Logo de URU SPOT">
+<meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="URU SPOT">
+<meta property="og:locale" content="es_AR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="URU SPOT — el padrón de Concepción del Uruguay">
+<meta name="twitter:description" content="1.468 lugares caminados y verificados uno por uno, en 14 rubros — sin ranking, sin relleno.">
+<meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp">
+<meta name="twitter:image:alt" content="Logo de URU SPOT">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
+<link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://b.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<!-- Carga no bloqueante de Google Fonts (patrón loadCSS/Filament Group),
+     recuperado de index.backup: preload de alta prioridad sin bloquear
+     el render; el link real entra como media="print" y se reclasifica
+     a "all" en onload. El noscript garantiza carga si JS está apagado. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" id="gfontsLink" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
 
   /* ═══════════════════════════════════════════════════════════════
-     URU SPOT — Fase 4: ensamblado final
-     Une las tres fases anteriores sobre el mismo manifiesto y las
-     conecta a los datos reales del padrón (1.468 lugares, 14 rubros):
+     URU SPOT — el padrón completo, conectado a los datos reales
+     (1.468 lugares, 14 rubros), sobre un único manifiesto:
        1. la totalidad siempre es visible (fracción persistente)
        2. nada existe sin verificación real
        3. el tiempo es direccional, el orden de caminata no se
@@ -23,11 +50,22 @@
        4. el contenido se acumula, nunca se reemplaza sin rastro
        5. los cambios de estado corresponden a hechos, no a mood
 
-     Buscador, chips de rubro y mapa esquemático son el mismo lente
-     de Fase 3 aplicado sobre la secuencia real — ninguno crea una
-     vista paralela, ninguno reordena el padrón. No importa ni toca
-     core-engine.js ni el resto del motor viejo: esta página usa
-     js/fase4-motor.js, aislado.
+     Buscador, chips de rubro y mapa son el mismo lente aplicado sobre
+     la secuencia real — ninguno crea una vista paralela, ninguno
+     reordena el padrón. Motor modular en src/ (ver src/main.js):
+     filter-store (estado de filtros + selección), url-state (Etapa 1:
+     esos filtros/selección reflejados en la URL — deep-linking,
+     "atrás" funcional), list-controller (la lista) y, desde la
+     Etapa 3, map-controller (mapa Leaflet real + clustering, en vez
+     del mapa esquemático de las Etapas 1-2). Etapa 4: selección y
+     mapa/lista sincronizados en ambos sentidos + \"buscar en esta
+     área\" (filterStore.setArea). Etapa 6: en mobile,
+     ui/mobile-sheet.js convierte el bloque #secuencia en una vista
+     contenida tipo app: mapa de fondo + lista como hoja inferior
+     arrastrable, con un toggle \"mapa\"/\"lista\" como atajo, sin
+     tocar list-controller ni map-controller (ninguno de los dos
+     sabe que existe la hoja). No importa ni toca core-engine.js ni
+     el resto del motor viejo archivado.
      ═══════════════════════════════════════════════════════════════ */
 
   :root{
@@ -139,6 +177,10 @@
   .chip.chip-fav.activo{ border-color:var(--granate-clara); }
   .chip.chip-fav::before{ content:'☆ '; }
   .chip.chip-fav.activo::before{ content:'★ '; color:var(--granate-clara); }
+  /* Etapa 4: chip de "área del mapa" — solo visible cuando hay un
+     recorte geográfico activo (ver ui/chips.js + map-controller.js) */
+  .chip.chip-area{ border-color:var(--granate-clara); color:var(--granate-clara); }
+  .chip.chip-area:hover{ border-color:var(--tinta); color:var(--tinta); }
 
   .estado-resultados{
     margin-top:20px; font-family:var(--f-dato); font-size:11px; color:var(--tinta-30);
@@ -146,14 +188,44 @@
   }
   .estado-resultados b{ color:var(--tinta-60); font-weight:500; }
 
-  /* ─── ÁREA — lista y mapa, la misma secuencia en dos lentes ─── */
+  /* ─── ÁREA — lista y mapa, la misma secuencia en dos lentes ───
+     Desktop: grid de dos columnas, sin cambios desde la Etapa 3.
+     Mobile (Etapa 6): ya no es "mapa arriba, lista abajo, apilados en
+     el flujo normal" (así era hasta la Etapa 5) — `.area` pasa a ser
+     un contenedor de alto fijo tipo app (mapa de fondo + hoja
+     arrastrable encima), ver ui/mobile-sheet.js. El resto de la
+     página (apertura, manifiesto, índice de rubros, FAQ) sigue
+     siendo scroll normal antes y después de este bloque. */
   .area{ display:grid; grid-template-columns:1fr 380px; gap:0; }
   @media (max-width:900px){
-    .area{ grid-template-columns:1fr; }
-    .panel-mapa{ order:-1; }
+    .area{
+      position:relative; overflow:hidden;
+      height:min(680px, calc(100svh - 88px));
+      min-height:420px;
+      border:1px solid var(--linea); border-radius:6px;
+    }
   }
 
-  .panel-lista{ padding:6px 0 80px; }
+  /* Antes: columna única — con 1.468 fichas de ~84px cada una, eso son
+     ~123.000px de scroll vertical dentro del panel. Multi-columna con
+     CSS multi-col (no CSS Grid): la secuencia sigue intacta — se lee
+     primero toda la columna 1 de arriba a abajo, después la columna 2,
+     como en un padrón impreso a dos o tres columnas — y el ancho
+     disponible ahora se usa entero en vez de dejar ~2/3 vacíos.
+     Se eligió multi-col en vez de Grid porque un ítem oculto por un
+     filtro (.paso.oculto, ver más abajo) colapsa su propia altura de
+     forma independiente; en un Grid con auto-flow, la fila entera no
+     se achica hasta que TODOS los ítems de esa fila estén ocultos —
+     rompería la animación de colapso al buscar/filtrar. */
+  .panel-lista{
+    padding:6px 0 80px;
+    column-width:340px; column-gap:36px;
+  }
+  @media (max-width:900px){
+    /* la hoja inferior (Etapa 6) es angosta — multi-col no aporta ahí */
+    .panel-lista{ column-width:auto; column-count:1; }
+  }
+
 
   .paso{
     display:grid; grid-template-rows:1fr; overflow:hidden;
@@ -163,6 +235,8 @@
     /* content-visibility: el navegador salta el trabajo de layout/paint
        de filas fuera de pantalla — clave con 1.468 registros. */
     content-visibility:auto; contain-intrinsic-size:auto 84px;
+    /* multi-col: que una ficha nunca quede partida entre dos columnas */
+    break-inside:avoid;
   }
   .paso.visible{ opacity:1; transform:none; }
   .paso-inner{
@@ -199,40 +273,170 @@
   .btn-fav:hover{ color:var(--granate-clara); }
   .btn-fav.activo{ color:var(--granate-clara); }
 
-  .sin-resultados{ padding:60px 10px; font-family:var(--f-ui); color:var(--tinta-60); max-width:44ch; }
+  .sin-resultados{ column-span:all; padding:60px 10px; font-family:var(--f-ui); color:var(--tinta-60); max-width:44ch; }
   .sin-resultados b{ display:block; font-family:var(--f-display); font-size:19px; color:var(--tinta); margin-bottom:8px; font-weight:500; }
 
-  /* ─── MAPA ESQUEMÁTICO ─── */
+  /* ─── MAPA REAL — Leaflet + clustering (Etapa 3) ───
+     Reemplaza el mapa esquemático de puntos por porcentaje de las
+     Etapas 1-2. Leaflet inyecta su propio CSS (unpkg) cuando el
+     contenedor entra en viewport; lo que sigue son overrides para que
+     su cromado (zoom, atribución, popups, clusters) hable el mismo
+     idioma visual que el resto del sitio en vez de verse como un
+     widget insertado. */
   .panel-mapa{
     position:sticky; top:96px; align-self:start;
     padding:20px 0 40px 30px; border-left:1px solid var(--linea); height:fit-content;
   }
   @media (max-width:900px){
-    .panel-mapa{ position:static; border-left:none; padding-left:0; margin-bottom:10px; }
+    /* Etapa 6: dentro de `.area` (ahora con alto fijo, ver arriba), el
+       mapa pasa a ser el fondo completo del contenedor — la hoja de
+       la lista se arrastra encima. La etiqueta y la nota de texto se
+       ocultan: no hay lugar para ellas y son redundantes con el
+       toggle "mapa"/"lista". */
+    .panel-mapa{
+      position:absolute; inset:0; z-index:1;
+      padding:0; margin:0; border:none; height:100%;
+    }
+    .panel-mapa .mapa-etiqueta, .panel-mapa .mapa-nota{ display:none; }
   }
   .mapa-etiqueta{
     font-family:var(--f-dato); font-size:10px; letter-spacing:.06em;
     text-transform:uppercase; color:var(--tinta-30); margin-bottom:12px;
   }
-  .mapa-lienzo{ width:100%; aspect-ratio:1/1; position:relative; border:1px solid var(--linea-fuerte); }
-  .mapa-lienzo .eje{ position:absolute; font-family:var(--f-dato); font-size:9px; color:var(--tinta-30); }
-  .mapa-lienzo .eje-n{ top:6px; left:50%; transform:translateX(-50%); }
-  .mapa-lienzo .eje-s{ bottom:6px; left:50%; transform:translateX(-50%); }
-  .mapa-lienzo .eje-e{ right:6px; top:50%; transform:translateY(-50%); }
-  .mapa-lienzo .eje-o{ left:6px; top:50%; transform:translateY(-50%); }
-  .mapa-lienzo .central{ position:absolute; left:50%; top:50%; width:1px; height:1px; background:var(--linea-fuerte); }
-
-  .punto{
-    position:absolute; width:5px; height:5px; margin:-2.5px 0 0 -2.5px;
-    border-radius:50%; background:var(--tinta-30);
-    cursor:pointer; transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
+  .mapa-real{
+    width:100%; aspect-ratio:1/1; border:1px solid var(--linea-fuerte);
+    background:var(--fondo-2);
   }
-  .punto:hover{ background:var(--tinta-60); transform:scale(1.6); }
-  .punto.activo{ background:var(--granate-clara); transform:scale(2); box-shadow:0 0 0 4px rgba(201,122,131,.18); }
-  .punto.favorito::after{
-    content:''; position:absolute; inset:-3px; border:1px solid var(--granate-clara); border-radius:50%; opacity:.6;
+  @media (max-width:900px){
+    .mapa-real{ height:100%; aspect-ratio:auto; border:none; }
   }
   .mapa-nota{ margin-top:16px; font-family:var(--f-ui); font-size:11.5px; color:var(--tinta-30); }
+
+  /* ─── TOGGLE "mapa"/"lista" — atajo directo, solo mobile (Etapa 6) ─── */
+  .vista-movil-toggle{ display:none; }
+  @media (max-width:900px){
+    .vista-movil-toggle{
+      display:flex; gap:2px; position:absolute; z-index:20;
+      top:12px; left:50%; transform:translateX(-50%);
+      background:rgba(10,13,19,.86); backdrop-filter:blur(6px);
+      border:1px solid var(--linea-fuerte); border-radius:20px; padding:3px;
+    }
+  }
+  .toggle-vista{
+    font-family:var(--f-dato); font-size:10.5px; letter-spacing:.04em;
+    color:var(--tinta-60); background:none; border:none; border-radius:16px;
+    padding:7px 16px; cursor:pointer; transition:background .2s ease, color .2s ease;
+  }
+  .toggle-vista.activo{ background:var(--granate); color:var(--tinta); }
+
+  /* ─── HOJA INFERIOR (bottom sheet) — solo mobile (Etapa 6) ───
+     Contenida dentro de `.area` (que ya tiene `position:relative` y
+     alto fijo en mobile), no de la ventana entera: por eso el resto
+     del sitio, arriba y abajo, sigue scrolleando normal. Los tres
+     estados ('peek'/'media'/'full') mueven la hoja con `translateY`;
+     ui/mobile-sheet.js los aplica como `data-estado` y, mientras se
+     arrastra, pisa esa transición con un `transform` inline (ver
+     `.arrastrando`, que apaga la transición para que siga al dedo). */
+  .hoja-lista{ display:contents; } /* desktop: vuelve a ser un hijo normal del grid */
+  /* `display:contents` deja también a `.hoja-agarre` como hijo suelto
+     del grid en desktop (no solo a `.panel-lista`) — sin esto
+     aparecería como una tercera columna fantasma. Solo existe en mobile. */
+  .hoja-agarre{ display:none; }
+  @media (max-width:900px){
+    .hoja-lista{
+      display:flex; flex-direction:column;
+      position:absolute; left:0; right:0; bottom:0; z-index:10;
+      height:100%;
+      background:var(--fondo-2); border-top:1px solid var(--linea-fuerte);
+      border-radius:14px 14px 0 0; box-shadow:0 -14px 30px -8px rgba(0,0,0,.55);
+      transform:translateY(calc(100% - 58px));
+      transition:transform .32s cubic-bezier(.22,.8,.24,1);
+    }
+    .hoja-lista[data-estado="media"]{ transform:translateY(42%); }
+    .hoja-lista[data-estado="full"]{ transform:translateY(4%); }
+    .hoja-lista.arrastrando{ transition:none; }
+
+    .hoja-agarre{
+      flex:none; width:100%; background:none; border:none; cursor:grab;
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      padding:11px 16px 13px; touch-action:none;
+    }
+    .hoja-agarre:active{ cursor:grabbing; }
+    .hoja-agarre-barra{ width:36px; height:4px; border-radius:2px; background:var(--linea-fuerte); }
+    .hoja-agarre-texto{ font-family:var(--f-dato); font-size:11px; color:var(--tinta-60); text-align:center; }
+
+    .hoja-lista .panel-lista{
+      flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+      padding:0 0 40px;
+    }
+  }
+
+  /* cromado de Leaflet, adaptado al tema oscuro */
+  .mapa-real .leaflet-control-zoom a{
+    background:var(--fondo-2); color:var(--tinta); border-color:var(--linea-fuerte);
+  }
+  .mapa-real .leaflet-control-zoom a:hover{ background:var(--fondo); }
+  .mapa-real .leaflet-control-attribution{
+    background:rgba(10,13,19,.78) !important; color:var(--tinta-30) !important;
+    font-family:var(--f-dato); font-size:9.5px !important;
+  }
+  .mapa-real .leaflet-control-attribution a{ color:var(--granate-clara) !important; }
+
+  /* control "buscar en esta área" (Etapa 4) — oculto hasta que el
+     usuario arrastra o hace zoom a mano (ver map-controller.js) */
+  .mapa-control-area.oculto{ display:none; }
+  .btn-buscar-area{
+    font-family:var(--f-dato); font-size:10.5px; letter-spacing:.03em;
+    color:var(--tinta); background:var(--granate);
+    border:1px solid var(--granate-clara); border-radius:20px;
+    padding:8px 14px; cursor:pointer; white-space:nowrap;
+    box-shadow:0 6px 16px -6px rgba(0,0,0,.5);
+    transition:background .2s ease, color .2s ease;
+  }
+  .btn-buscar-area:hover{ background:var(--granate-clara); color:var(--fondo); }
+
+  /* pin por lugar — un color por rubro (ver src/map/colores-rubro.js) */
+  .padron-pin span{
+    display:block; width:14px; height:14px; margin:1px; border-radius:50% 50% 50% 0;
+    transform:rotate(-45deg); background:var(--pin-color); border:1.5px solid var(--fondo-2);
+    box-shadow:0 2px 6px rgba(0,0,0,.35);
+  }
+  .padron-pin--activo span{
+    transform:rotate(-45deg) scale(1.35); box-shadow:0 0 0 4px rgba(201,122,131,.22), 0 2px 6px rgba(0,0,0,.35);
+  }
+
+  /* cluster — un racimo de lugares agrupados por proximidad */
+  .mapa-cluster-inner{
+    display:flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%;
+    background:var(--granate); color:var(--tinta); border:2px solid var(--fondo-2);
+    font-family:var(--f-dato); font-size:12px; font-weight:500;
+    box-shadow:0 3px 10px rgba(0,0,0,.35);
+  }
+
+  /* popup — misma ficha que la lista, en miniatura */
+  .mapa-real .leaflet-popup-content-wrapper{
+    background:var(--fondo-2); color:var(--tinta); border:1px solid var(--linea-fuerte);
+    border-radius:2px; box-shadow:0 14px 30px -10px rgba(0,0,0,.5);
+  }
+  .mapa-real .leaflet-popup-tip{ background:var(--fondo-2); }
+  .mapa-real .leaflet-popup-content{ margin:14px 16px; width:auto !important; min-width:180px; }
+  .popup-uruspot{ position:relative; }
+  .popup-pos{ font-family:var(--f-dato); font-size:10.5px; color:var(--tinta-30); }
+  .popup-fav{ position:absolute; top:0; right:0; color:var(--granate-clara); font-size:13px; }
+  .popup-rubro{
+    font-family:var(--f-dato); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--granate-clara); margin-top:6px;
+  }
+  .popup-nombre{ font-family:var(--f-display); font-weight:500; font-size:15px; margin-top:4px; }
+  .popup-dir{ font-family:var(--f-ui); font-size:12px; color:var(--tinta-60); margin-top:5px; }
+  .popup-dir--pendiente{ color:var(--tinta-30); }
+  .popup-constancia{
+    display:block; font-family:var(--f-dato); font-size:10px; color:var(--tinta-30); margin-top:7px;
+  }
+  .popup-constancia::before{ content:'✓ '; color:var(--granate-clara); }
+  .popup-constancia--pendiente{ color:var(--granate-clara); }
+  .popup-constancia--pendiente::before{ content:'· '; color:var(--tinta-30); }
 
   /* ─── MANIFIESTO ─── */
   .manifiesto{ padding:70px 0 20px; max-width:700px; }
@@ -369,33 +573,51 @@
     <div class="chips">
       <button class="chip chip-fav" id="chipFav" type="button">favoritos</button>
       <button class="chip" id="chipLimpiar" type="button">limpiar filtros</button>
+      <button class="chip chip-area" id="chipArea" type="button" hidden>área del mapa ✕</button>
     </div>
     <div class="estado-resultados" id="estadoResultados">cargando el padrón…</div>
   </section>
 
   <section class="area" id="secuencia">
-    <div class="panel-lista" id="panelLista">
-      <div class="sin-resultados" id="sinResultados" hidden>
-        <b>Ningún lugar coincide con este filtro.</b>
-        No es un error de carga: dentro del padrón completo, nadie
-        cumple esa combinación todavía. Probá con otro rubro o borrá
-        la búsqueda.
-      </div>
+
+    <!-- Etapa 6, solo mobile: atajo directo a la hoja colapsada
+         ('peek', mapa a la vista) o casi completa ('full', la lista).
+         En desktop no se ve (display:none) — ahí lista y mapa ya
+         están los dos a la vista todo el tiempo, no hace falta elegir. -->
+    <div class="vista-movil-toggle" id="vistaMovilToggle" role="tablist" aria-label="Cambiar entre mapa y lista">
+      <button class="toggle-vista" id="toggleVistaMapa" type="button" role="tab" aria-selected="true">mapa</button>
+      <button class="toggle-vista" id="toggleVistaLista" type="button" role="tab" aria-selected="false">lista</button>
     </div>
 
     <aside class="panel-mapa">
-      <div class="mapa-etiqueta">mapa esquemático — misma secuencia, otro lente</div>
-      <div class="mapa-lienzo" id="mapaLienzo">
-        <span class="eje eje-n">N</span>
-        <span class="eje eje-s">S</span>
-        <span class="eje eje-e">E</span>
-        <span class="eje eje-o">O</span>
-        <div class="central"></div>
-      </div>
-      <p class="mapa-nota">Las posiciones son las coordenadas reales de
-        cada lugar, escaladas al recuadro — no es un mapa de calles,
-        es la misma lógica de la secuencia aplicada a otro eje.</p>
+      <div class="mapa-etiqueta">el mapa — misma secuencia, otro lente</div>
+      <div class="mapa-real" id="mapaReal" role="region" aria-label="Mapa de Concepción del Uruguay con los lugares del padrón"></div>
+      <p class="mapa-nota">Los pines usan las coordenadas reales de
+        cada lugar y se agrupan por cercanía al alejar el zoom — es el
+        mismo filtro de la lista, aplicado sobre calles reales en vez
+        de sobre texto. Un clic en una fila centra el mapa en su pin;
+        movete por el mapa y usá "buscar en esta área" para recortar
+        la lista a lo que estás viendo.</p>
     </aside>
+
+    <!-- Etapa 6: en desktop, `.hoja-lista{ display:contents }` la saca
+         de en medio y `#panelLista` vuelve a ser un hijo normal del
+         grid (igual que hasta la Etapa 5). En mobile es la hoja que
+         se arrastra desde `.hoja-agarre` (ver ui/mobile-sheet.js). -->
+    <div class="hoja-lista" id="hojaLista" data-estado="peek">
+      <button class="hoja-agarre" id="hojaAgarre" type="button" aria-expanded="false" aria-controls="panelLista">
+        <span class="hoja-agarre-barra"></span>
+        <span class="hoja-agarre-texto" id="hojaAgarreTexto">cargando el padrón…</span>
+      </button>
+      <div class="panel-lista" id="panelLista">
+        <div class="sin-resultados" id="sinResultados" hidden>
+          <b>Ningún lugar coincide con este filtro.</b>
+          No es un error de carga: dentro del padrón completo, nadie
+          cumple esa combinación todavía. Probá con otro rubro o borrá
+          la búsqueda.
+        </div>
+      </div>
+    </div>
   </section>
 
 </div>
@@ -487,7 +709,7 @@
   </div>
 </footer>
 
-<script src="js/fase4-motor.js"></script>
+<script type="module" src="src/main.js"></script>
 
 </body>
 </html>
