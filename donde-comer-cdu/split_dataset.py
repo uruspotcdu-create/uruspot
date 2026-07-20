@@ -44,7 +44,6 @@ BASE_DIR = Path(__file__).resolve().parent
 SRC = BASE_DIR / "lugares-mapa.json"
 OUT_CORE = BASE_DIR / "lugares-core.json"
 OUT_DETAILS = BASE_DIR / "lugares-detalles.json"
-OUT_ESTADO = BASE_DIR / "lugares-estado.json"
 
 # Campos que necesita el arranque (pin en el mapa, filtros, búsqueda,
 # spotlight "mejor puntuados"). rating/rating_count son opcionales: la
@@ -54,13 +53,6 @@ CORE_FIELDS_OPTIONAL = ("rating", "rating_count")
 
 # Campos que solo se leen dentro de un popup ya abierto por el usuario.
 DETAIL_FIELDS_OPTIONAL = ("direccion", "descripcion", "telefono", "place_id")
-
-# Campo que hoy solo lee js/fase4-motor.js (badge "pendiente de
-# verificación"), en segundo plano vía requestIdleCallback. Antes de este
-# archivo, fase4-motor.js pedía lugares-mapa.json ENTERO (13 campos, 1.468
-# registros) solo para leer este único campo — el resto se ignoraba a
-# propósito (ver comentario en fase4-motor.js sobre "grupo" desincronizado).
-ESTADO_FIELD = "estado_verificacion"
 
 
 def build_core(lugar):
@@ -85,13 +77,6 @@ def build_detail(lugar):
     return out if tiene_algo else None
 
 
-def build_estado(lugar):
-    v = lugar.get(ESTADO_FIELD)
-    if not v:
-        return None
-    return {"id": lugar["id"], ESTADO_FIELD: v}
-
-
 def main():
     if not SRC.exists():
         print(f"ERROR: no se encontró {SRC}", file=sys.stderr)
@@ -112,29 +97,22 @@ def main():
 
     core = [build_core(o) for o in data]
     details = [d for d in (build_detail(o) for o in data) if d is not None]
-    estado = [e for e in (build_estado(o) for o in data) if e is not None]
 
     core_json = json.dumps(core, ensure_ascii=False, separators=(",", ":"))
     details_json = json.dumps(details, ensure_ascii=False, separators=(",", ":"))
-    estado_json = json.dumps(estado, ensure_ascii=False, separators=(",", ":"))
 
     OUT_CORE.write_text(core_json, encoding="utf-8")
     OUT_DETAILS.write_text(details_json, encoding="utf-8")
-    OUT_ESTADO.write_text(estado_json, encoding="utf-8")
 
     src_bytes = len(SRC.read_text(encoding="utf-8").encode("utf-8"))
     core_bytes = len(core_json.encode("utf-8"))
     details_bytes = len(details_json.encode("utf-8"))
-    estado_bytes = len(estado_json.encode("utf-8"))
 
     print(f"OK — {len(data)} lugares procesados")
     print(f"  {SRC.name:24s} {src_bytes:>8,} bytes  (fuente, sin cambios)")
     print(f"  {OUT_CORE.name:24s} {core_bytes:>8,} bytes  (bloqueante — {len(core)} registros)")
     print(f"  {OUT_DETAILS.name:24s} {details_bytes:>8,} bytes  (segundo plano — {len(details)} registros)")
-    print(f"  {OUT_ESTADO.name:24s} {estado_bytes:>8,} bytes  (segundo plano — {len(estado)} registros)")
     print(f"  Payload bloqueante: {(1 - core_bytes / src_bytes) * 100:.1f}% menor que la fuente")
-    print(f"  lugares-estado.json es {(1 - estado_bytes / src_bytes) * 100:.1f}% menor que lugares-mapa.json "
-          f"(reemplaza al fetch de fase4-motor.js que traía el archivo completo por 1 solo campo)")
 
 
 if __name__ == "__main__":

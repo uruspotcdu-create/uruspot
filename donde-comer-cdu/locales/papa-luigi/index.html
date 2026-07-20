@@ -4,346 +4,470 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Papa Luigi — Pizzería & Cocina Italiana Clásica. 21 de Noviembre 38, Concepción del Uruguay. Score URU SPOT: 8.4">
-<meta name="theme-color" content="#0d0d0d">
+<meta name="theme-color" content="#0c0904">
 <meta property="og:title" content="Papa Luigi · URU SPOT">
 <meta property="og:description" content="El sabor clásico que nunca falla. 21 de Noviembre 38, CDU.">
 <meta property="og:image" content="https://i.imgur.com/x9AxwMH.jpeg">
 <meta property="og:type" content="article">
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/locales/papa-luigi/">
 <title>Papa Luigi · URU SPOT — Guía Gastronómica CDU</title>
-
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../ficha.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0c0904;--parchment:#f8f3ea;--parchment-mid:#f0e8d4;
+  --white:#fff;--gold:#b8872a;--gold-bright:#d4a843;--gold-pale:#f0d88a;
+  --copper:#9a5c2a;--forest:#1b3320;--muted:#8a7a62;
+  --border:rgba(184,135,42,.18);--border-s:rgba(184,135,42,.35);
+  --radius:16px;--accent:#c0392b;
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--parchment);color:var(--ink);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.5}
+
+/* NAV */
+.topnav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.5rem;background:rgba(12,9,4,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(184,135,42,.12)}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;font-style:italic;color:var(--gold-bright);text-decoration:none}
+.nav-back{display:flex;align-items:center;gap:.4rem;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(240,216,138,.45);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--gold-bright)}
+.nav-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* HERO */
+.ficha-hero{position:relative;min-height:70vh;display:flex;flex-direction:column;justify-content:flex-end;padding:7rem 1.5rem 3rem;background:var(--ink);overflow:hidden}
+.fh-img{position:absolute;inset:0;background:url('https://i.imgur.com/x9AxwMH.jpeg') center/cover no-repeat;opacity:.45;will-change:transform}
+.fh-grad{position:absolute;inset:0;background:linear-gradient(0deg,rgba(12,9,4,.97) 0%,rgba(12,9,4,.6) 45%,rgba(12,9,4,.2) 100%)}
+.fh-inner{position:relative;z-index:2;max-width:860px}
+
+.fh-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);color:#e8a090;font-size:.6rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;padding:.35rem .85rem;border-radius:999px;margin-bottom:1.2rem}
+.fh-badge-dot{width:6px;height:6px;border-radius:50%;background:#e8a090}
+
+.fh-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,8vw,5.5rem);font-weight:300;line-height:.92;color:var(--parchment);letter-spacing:-.02em;margin-bottom:.6rem}
+.fh-title em{font-style:italic;font-weight:700;background:linear-gradient(135deg,var(--gold-pale),var(--gold-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.fh-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(.95rem,2vw,1.15rem);color:rgba(248,243,234,.45);margin-bottom:1.8rem;letter-spacing:.04em}
+
+.fh-meta{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
+.fh-chip{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.06);border:1px solid rgba(184,135,42,.2);color:rgba(248,243,234,.6);font-size:.65rem;letter-spacing:.08em;padding:.35rem .8rem;border-radius:999px}
+.fh-chip strong{color:var(--gold-bright);font-weight:500}
+.score-pill{display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,rgba(184,135,42,.2),rgba(184,135,42,.08));border:1px solid var(--border-s);padding:.4rem 1rem;border-radius:999px}
+.score-n{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--gold-bright);line-height:1}
+.score-l{font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(248,243,234,.35)}
+
+/* MAIN */
+main{background:var(--parchment)}
+.content-wrap{max-width:860px;margin:0 auto;padding:0 1.2rem}
+
+.quick-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:2rem 0}
+.qb-item{background:var(--white);padding:1.2rem 1rem;transition:background .2s}
+.qb-item:hover{background:var(--parchment-mid)}
+.qb-icon{font-size:1.2rem;margin-bottom:.4rem}
+.qb-label{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem}
+.qb-val{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--ink);line-height:1.3}
+
+.s-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.3rem,3vw,1.9rem);font-weight:400;color:var(--ink);margin-bottom:.8rem;padding-top:2.5rem}
+.s-divider{width:36px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin-bottom:1.4rem}
+
+.desc-block{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;margin-bottom:1.5rem}
+.desc-block p{font-size:.85rem;color:#4a3f30;line-height:1.9;margin-bottom:1rem}
+.desc-block p:last-child{margin-bottom:0}
+.desc-quote{border-left:2px solid var(--gold);padding-left:1.2rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;color:var(--muted);line-height:1.7;margin:1.2rem 0}
+
+.tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2rem}
+.tag{background:var(--parchment-mid);border:1px solid var(--border);color:var(--muted);font-size:.65rem;letter-spacing:.1em;padding:.3rem .75rem;border-radius:999px}
+
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;border-radius:var(--radius);overflow:hidden;margin-bottom:2rem}
+.photo-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;transition:transform .4s ease}
+.photo-grid img:hover{transform:scale(1.03)}
+.photo-grid .photo-wide{grid-column:1/-1;aspect-ratio:16/7}
+
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem}
+.feat{background:var(--white);padding:1.5rem 1.2rem;transition:background .2s}
+.feat:hover{background:var(--parchment-mid)}
+.feat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--border-s);line-height:1;margin-bottom:.5rem}
+.feat-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:.4rem}
+.feat-text{font-size:.7rem;color:var(--muted);line-height:1.7}
+
+.score-card{background:var(--ink);border-radius:var(--radius);padding:2rem;margin-bottom:2rem;box-shadow:0 0 0 1px var(--border-s),0 20px 50px rgba(12,9,4,.15)}
+.sc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.sc-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--gold-pale);letter-spacing:.05em}
+.sc-score{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:700;color:var(--gold-bright);line-height:1}
+.sc-score span{font-size:1.2rem;color:rgba(240,216,138,.4)}
+.sc-bars{display:flex;flex-direction:column;gap:.9rem}
+.sc-bar-row{display:flex;align-items:center;gap:.8rem}
+.sc-bar-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(248,243,234,.4);width:90px;flex-shrink:0}
+.sc-bar-track{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.sc-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold-bright));transition:width 1s cubic-bezier(.16,1,.3,1)}
+.sc-bar-val{font-size:.72rem;font-weight:500;color:var(--gold-bright);width:28px;text-align:right;flex-shrink:0}
+
+.hours-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem}
+.hours-head{background:var(--ink);padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between}
+.hours-head-title{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-pale)}
+.hours-row{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.4rem;border-bottom:1px solid var(--border);transition:background .15s}
+.hours-row:last-child{border-bottom:none}
+.hours-row:hover{background:var(--parchment-mid)}
+.hours-day{font-size:.78rem;font-weight:500;color:var(--ink)}
+.hours-time{font-size:.75rem;color:var(--muted)}
+.hours-closed{color:#c0392b;font-size:.72rem;font-weight:500}
+.price-row{padding:1.2rem 1.4rem;border-top:2px solid var(--border);background:var(--parchment-mid);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.price-label{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.price-val{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--ink)}
+
+.map-card{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:2rem}
+.map-card iframe{display:block;width:100%;height:280px;border:none}
+.map-info{padding:1.2rem 1.4rem;background:var(--white);border-top:1px solid var(--border)}
+.map-addr{font-size:.78rem;color:var(--ink);margin-bottom:.3rem;font-weight:500}
+.map-zone{font-size:.68rem;color:var(--muted)}
+
+.cta-row{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.75rem 1.4rem;border-radius:999px;font-size:.72rem;font-weight:500;letter-spacing:.08em;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-bright));color:var(--ink)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(184,135,42,.35)}
+.btn-outline{background:transparent;color:var(--ink);border:1px solid var(--border-s)}
+.btn-outline:hover{background:var(--parchment-mid)}
+
+.veredicto{background:linear-gradient(135deg,rgba(27,51,32,.08),rgba(27,51,32,.03));border:1px solid rgba(27,51,32,.2);border-left:3px solid #27ae60;border-radius:var(--radius);padding:1.5rem 1.6rem;margin-bottom:2rem}
+.veredicto-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:#27ae60;margin-bottom:.7rem}
+.veredicto p{font-size:.82rem;color:#3d4a3d;line-height:1.8}
+
+.share-section{border-top:1px solid var(--border);padding:2rem 0 3rem;text-align:center}
+.share-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--muted);margin-bottom:1rem;font-style:italic}
+.share-btn{display:inline-flex;align-items:center;gap:.5rem;background:var(--ink);color:var(--gold-bright);padding:.7rem 1.6rem;border-radius:999px;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s}
+.share-btn:hover{background:#1e1710;transform:translateY(-1px)}
+
+footer{background:var(--ink);padding:2.5rem 1.5rem;text-align:center}
+.footer-logo{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;font-style:italic;color:var(--gold-bright);margin-bottom:.3rem}
+.footer-sub{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(248,243,234,.18)}
+.footer-back{display:inline-flex;align-items:center;gap:.4rem;margin-top:1rem;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(184,135,42,.4);text-decoration:none;transition:color .2s}
+.footer-back:hover{color:var(--gold-bright)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:none}
+.rd1{transition-delay:.1s}.rd2{transition-delay:.2s}
+
+/* OPEN/CLOSED BADGE */
+.open-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.62rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .8rem;border-radius:999px;margin-bottom:1rem}
+.open-badge.open{background:rgba(39,174,96,.15);border:1px solid rgba(39,174,96,.35);color:#27ae60}
+.open-badge.closed{background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.3);color:#c0392b}
+.open-badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+@media(max-width:500px){
+  .fh-title{font-size:2.6rem}
+  .photo-grid{grid-template-columns:1fr}
+  .photo-grid .photo-wide{grid-column:auto;aspect-ratio:4/3}
+  .quick-bar{grid-template-columns:1fr 1fr}
+  .cta-row{flex-direction:column}
+  .btn{justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav" role="navigation" aria-label="URU SPOT">
+<nav class="topnav">
+  <a href="../../" class="nav-back">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    Volver a la guía
+  </a>
   <a href="../../" class="nav-logo">URU SPOT</a>
-  <span class="nav-tag">Guía local · Concepción del Uruguay</span>
-  
 </nav>
 
-<!-- HERO -->
-<section class="hero " aria-label="Papa Luigi">
-  
-  <img class="hero-img" src="https://i.imgur.com/x9AxwMH.jpeg" alt="Papa Luigi" fetchpriority="high" loading="eager" width="1200" height="800" />
-  
-  <div class="hero-overlay" aria-hidden="true"></div>
-  <div class="hero-content">
-    
-    <div class="hero-eyebrow">
-      <span class="eyebrow-line" aria-hidden="true"></span>
-      <span class="eyebrow-text">🇮🇹 Tradición Italiana · Pizzería</span>
-    </div>
-    
-    <h1 class="hero-title">Papa <em>Luigi</em></h1>
-    <p class="hero-subtitle">Pizzería & Cocina Clásica Italiana · El sabor que nunca falla</p>
-    <div class="hero-chips">
-      <span class="chip chip-gold">📍 21 de Noviembre 38 · Centro</span><span class="chip ">🕗 19:00 – 00:00</span><span class="chip ">💰 $15k – $40k ARS</span>
+<section class="ficha-hero" aria-label="Papa Luigi — encabezado">
+  <div class="fh-img" role="img" aria-label="Fachada de Papa Luigi"></div>
+  <div class="fh-grad" aria-hidden="true"></div>
+  <div class="fh-inner">
+    <div class="fh-badge"><div class="fh-badge-dot" aria-hidden="true"></div>🇮🇹 Tradición Italiana · Pizzería</div>
+    <h1 class="fh-title">Papa <em>Luigi</em></h1>
+    <p class="fh-sub">Pizzería &amp; Cocina Clásica Italiana · El sabor que nunca falla</p>
+    <div class="fh-meta">
+      <div class="score-pill" aria-label="URU SPOT Score: 8.4 sobre 10">
+        <div>
+          <div class="score-n">8.4</div>
+          <div class="score-l">URU SPOT Score</div>
+        </div>
+      </div>
+      <div class="fh-chip">📍 <strong>21 de Noviembre 38</strong> · Centro</div>
+      <div class="fh-chip">🕗 19:00 – 00:00</div>
+      <div class="fh-chip">💰 $15k – $40k ARS</div>
     </div>
   </div>
-  
-  <div class="hero-score" aria-label="Puntuación URU SPOT: 8.4 de 10">
-    <div class="score-num">8.4</div>
-    <div class="score-label">URU SPOT Score</div>
-    <div class="score-stars" aria-hidden="true">★★★★★</div>
-  </div>
-  
 </section>
 
-<!-- INFO STRIP -->
+<main>
+<div class="content-wrap">
 
-<div class="info-strip" role="complementary" aria-label="Información rápida">
-  
-  <div class="info-cell">
-    <span class="info-cell-label">Estado actual</span>
-    
-    <span class="info-cell-value" id="statusValue">—</span>
-    <span class="info-cell-sub" id="statusSub" aria-live="polite"></span>
-    
-    
-  </div>
-  
-  <div class="info-cell">
-    <span class="info-cell-label">Ubicación</span>
-    
-    <span class="info-cell-value">21 de Noviembre 38</span>
-    
-    
-    
-  </div>
-  
-  <div class="info-cell">
-    <span class="info-cell-label">Contacto</span>
-    
-    
-    
-    
-    
-    <div class="action-row" style="margin-top:12px">
-      <a href="tel:+543442433624" class="btn btn-primary" target="_self" rel="noopener noreferrer">📞 Llamar al 03442 43-3624</a>
+  <!-- Badge abierto/cerrado dinámico -->
+  <div id="open-status" class="open-badge" role="status" aria-live="polite" style="margin-top:1.5rem"></div>
+
+  <div class="quick-bar reveal">
+    <div class="qb-item">
+      <div class="qb-icon" aria-hidden="true">📍</div>
+      <div class="qb-label">Dirección</div>
+      <div class="qb-val">21 de Noviembre 38</div>
     </div>
-    
+    <div class="qb-item">
+      <div class="qb-icon" aria-hidden="true">🕗</div>
+      <div class="qb-label">Horario</div>
+      <div class="qb-val">Mar–Dom 19:00–00:00</div>
+    </div>
+    <div class="qb-item">
+      <div class="qb-icon" aria-hidden="true">📞</div>
+      <div class="qb-label">Pedidos &amp; Reservas</div>
+      <div class="qb-val">03442 43-3624</div>
+    </div>
+    <div class="qb-item">
+      <div class="qb-icon" aria-hidden="true">💰</div>
+      <div class="qb-label">Precio por persona</div>
+      <div class="qb-val">$15.000 – $40.000</div>
+    </div>
   </div>
-  
+
+  <h2 class="s-title reveal">Sobre el lugar</h2>
+  <div class="s-divider reveal" aria-hidden="true"></div>
+
+  <div class="desc-block reveal rd1">
+    <p>Papa Luigi representa la esencia de la cocina italiana clásica en la ciudad. Su propuesta gira en torno a recetas familiares, ingredientes frescos y una ejecución constante que lo convierten en una referencia obligada para los amantes de la pizza tradicional.</p>
+    <div class="desc-quote">"Ideal para una cena clásica, sin sorpresas, pero con sabor garantizado."</div>
+    <p>Ideal para familias, cenas clásicas y quienes buscan ese sabor genuino sin sorpresas: una experiencia confiable y deliciosa en cada visita.</p>
+  </div>
+
+  <div class="tags reveal" aria-label="Etiquetas">
+    <span class="tag">Pizzería</span>
+    <span class="tag">Cocina Italiana</span>
+    <span class="tag">Familias</span>
+    <span class="tag">Pasta</span>
+    <span class="tag">Tradición</span>
+    <span class="tag">Para llevar</span>
+  </div>
+
+  <h2 class="s-title reveal">Galería</h2>
+  <div class="s-divider reveal" aria-hidden="true"></div>
+  <div class="photo-grid reveal rd1">
+    <img class="photo-wide" src="https://i.imgur.com/x9AxwMH.jpeg" alt="Fachada y pizzas de Papa Luigi" loading="lazy" decoding="async">
+    <img src="https://i.imgur.com/9nR67Yn.png" alt="Plato de pasta tradicional" loading="lazy" decoding="async">
+    <img src="https://i.imgur.com/HrfGxqb.png" alt="Pizza clásica de Papa Luigi" loading="lazy" decoding="async">
+    <img src="https://i.imgur.com/GBDoQ0Y.png" alt="Interior del local" loading="lazy" decoding="async" style="grid-column:1/-1;aspect-ratio:16/6">
+  </div>
+
+  <div class="features reveal rd1">
+    <div class="feat">
+      <div class="feat-num" aria-hidden="true">01</div>
+      <div class="feat-title">Tradición Italiana</div>
+      <div class="feat-text">Recetas familiares e ingredientes frescos fieles a la cocina clásica italiana de siempre.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-num" aria-hidden="true">02</div>
+      <div class="feat-title">Ideal para Familias</div>
+      <div class="feat-text">Ambiente perfecto para cenas tranquilas, encuentros familiares y amantes de la pizza tradicional.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-num" aria-hidden="true">03</div>
+      <div class="feat-title">Ejecución Constante</div>
+      <div class="feat-text">Calidad consistente en cada visita. El sabor clásico que nunca decepciona.</div>
+    </div>
+  </div>
+
+  <h2 class="s-title reveal">Puntuación URU SPOT</h2>
+  <div class="s-divider reveal" aria-hidden="true"></div>
+  <div class="score-card reveal rd1" aria-label="Puntuaciones URU SPOT">
+    <div class="sc-header">
+      <div class="sc-title">URU SPOT Score</div>
+      <div class="sc-score" aria-label="Puntaje total: 8.4 sobre 10">8.4<span>/10</span></div>
+    </div>
+    <div class="sc-bars">
+      <div class="sc-bar-row">
+        <div class="sc-bar-label">🍽️ Comida</div>
+        <div class="sc-bar-track" role="progressbar" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100" aria-label="Comida: 8.6"><div class="sc-bar-fill" style="width:86%"></div></div>
+        <div class="sc-bar-val">8.6</div>
+      </div>
+      <div class="sc-bar-row">
+        <div class="sc-bar-label">💰 Precio</div>
+        <div class="sc-bar-track" role="progressbar" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" aria-label="Precio: 8.4"><div class="sc-bar-fill" style="width:84%"></div></div>
+        <div class="sc-bar-val">8.4</div>
+      </div>
+      <div class="sc-bar-row">
+        <div class="sc-bar-label">🌍 Ambiente</div>
+        <div class="sc-bar-track" role="progressbar" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100" aria-label="Ambiente: 8.3"><div class="sc-bar-fill" style="width:83%"></div></div>
+        <div class="sc-bar-val">8.3</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="s-title reveal">Horarios &amp; Precios</h2>
+  <div class="s-divider reveal" aria-hidden="true"></div>
+  <div class="hours-card reveal rd1">
+    <div class="hours-head">
+      <span class="hours-head-title">Horario semanal</span>
+      <span style="font-size:.6rem;color:rgba(240,216,138,.3);letter-spacing:.1em">Verificar antes de visitar</span>
+    </div>
+    <div class="hours-row">
+      <span class="hours-day">Lunes</span>
+      <span class="hours-closed">Cerrado</span>
+    </div>
+    <div class="hours-row">
+      <span class="hours-day">Martes</span>
+      <span class="hours-time">19:00 – 00:00</span>
+    </div>
+    <div class="hours-row">
+      <span class="hours-day">Miércoles</span>
+      <span class="hours-time">19:00 – 00:00</span>
+    </div>
+    <div class="hours-row">
+      <span class="hours-day">Jueves</span>
+      <span class="hours-time">19:00 – 00:00</span>
+    </div>
+    <div class="hours-row">
+      <span class="hours-day">Viernes</span>
+      <span class="hours-time">19:00 – 00:00</span>
+    </div>
+    <div class="hours-row">
+      <span class="hours-day">Sábado</span>
+      <span class="hours-time">19:00 – 00:00</span>
+    </div>
+    <div class="hours-row">
+      <span class="hours-day">Domingo</span>
+      <span class="hours-time">19:00 – 00:00</span>
+    </div>
+    <div class="price-row">
+      <span class="price-label">Precio estimado por persona</span>
+      <span class="price-val">$15.000 – $40.000 ARS · ~U$D 15–40</span>
+    </div>
+  </div>
+
+  <h2 class="s-title reveal">Cómo llegar</h2>
+  <div class="s-divider reveal" aria-hidden="true"></div>
+  <div class="map-card reveal rd1">
+    <iframe
+      src="https://maps.google.com/maps?q=Papa+Luigi,+21+de+Noviembre+38,+Concepcion+del+Uruguay,+Entre+Rios,+Argentina&output=embed&hl=es&z=17"
+      title="Ubicación de Papa Luigi en Google Maps"
+      allowfullscreen
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+    <div class="map-info">
+      <div class="map-addr">📍 21 de Noviembre 38, Concepción del Uruguay, Entre Ríos</div>
+      <div class="map-zone">Zona céntrica · Fácil acceso · Recomendamos llamar para reservas en fines de semana</div>
+    </div>
+  </div>
+
+  <div class="cta-row reveal">
+    <a href="https://www.google.com/maps/place/Papa+Luigi/@-32.4857237,-58.235359,17z/data=!4m6!3m5!1s0x95afdbaa0db3304f:0x5dd0b865cbc35cd3!8m2!3d-32.4857328!4d-58.235359!16s%2Fg%2F11c6s4d3ck?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🗺️ Abrir en Google Maps</a>
+    <a href="tel:+543442433624" class="btn btn-outline">📞 Llamar al 03442 43-3624</a>
+  </div>
+
+  <div class="veredicto reveal">
+    <div class="veredicto-badge">🟢 Recomendado por URU SPOT</div>
+    <p>Una apuesta segura dentro de la gastronomía clásica local, donde la tradición pesa más que la innovación. Una experiencia confiable y deliciosa, ideal para quienes valoran la cocina italiana auténtica en Concepción del Uruguay.</p>
+  </div>
+
+  <div class="share-section reveal">
+    <p class="share-title">¿Te gustó este lugar? Compartilo</p>
+    <button class="share-btn" id="share-btn" aria-label="Compartir esta ficha">📤 Compartir ficha</button>
+  </div>
+
 </div>
+</main>
 
-
-<!-- ABOUT -->
-
-<section class="page" aria-labelledby="about-heading">
-  <div class="section-header">
-    <span class="section-label">Sobre el lugar</span>
-    <span class="section-line" aria-hidden="true"></span>
-  </div>
-  <div class="about-grid">
-    <div>
-      
-      <p class="about-body">Papa Luigi representa la esencia de la cocina italiana clásica en la ciudad. Su propuesta gira en torno a recetas familiares, ingredientes frescos y una ejecución constante que lo convierten en una referencia obligada para los amantes de la pizza tradicional.</p><p class="about-body">Ideal para familias, cenas clásicas y quienes buscan ese sabor genuino sin sorpresas: una experiencia confiable y deliciosa en cada visita.</p>
-      
-      <div class="pullquote" role="blockquote"><p>Ideal para una cena clásica, sin sorpresas, pero con sabor garantizado.</p></div>
-      
-      
-      <div class="tags-row" aria-label="Características del lugar">
-        <span class="tag">Pizzería</span><span class="tag">Cocina Italiana</span><span class="tag">Familias</span><span class="tag">Pasta</span><span class="tag">Tradición</span><span class="tag">Para llevar</span>
-      </div>
-      
-    </div>
-    
-    <div>
-      <div class="gallery" aria-label="Galería de fotos de Papa Luigi">
-        
-        <div class="gallery-item gallery-main">
-          <img src="https://i.imgur.com/x9AxwMH.jpeg" alt="Fachada y pizzas de Papa Luigi" loading="lazy" decoding="async" />
-        </div>
-        
-        <div class="gallery-item ">
-          <img src="https://i.imgur.com/9nR67Yn.png" alt="Plato de pasta tradicional" loading="lazy" decoding="async" />
-        </div>
-        
-        <div class="gallery-item ">
-          <img src="https://i.imgur.com/HrfGxqb.png" alt="Pizza clásica de Papa Luigi" loading="lazy" decoding="async" />
-        </div>
-        
-        <div class="gallery-item ">
-          <img src="https://i.imgur.com/GBDoQ0Y.png" alt="Interior del local" loading="lazy" decoding="async" />
-        </div>
-        
-      </div>
-    </div>
-    
-  </div>
-</section>
-
-
-<!-- HIGHLIGHTS -->
-
-<div class="highlights-grid" role="list" aria-label="Lo mejor del lugar">
-  
-  <div class="highlight-card" role="listitem">
-    <div class="highlight-num" aria-hidden="true">01</div>
-    <div class="highlight-title">Tradición Italiana</div>
-    <p class="highlight-text">Recetas familiares e ingredientes frescos fieles a la cocina clásica italiana de siempre.</p>
-  </div>
-  
-  <div class="highlight-card" role="listitem">
-    <div class="highlight-num" aria-hidden="true">02</div>
-    <div class="highlight-title">Ideal para Familias</div>
-    <p class="highlight-text">Ambiente perfecto para cenas tranquilas, encuentros familiares y amantes de la pizza tradicional.</p>
-  </div>
-  
-  <div class="highlight-card" role="listitem">
-    <div class="highlight-num" aria-hidden="true">03</div>
-    <div class="highlight-title">Ejecución Constante</div>
-    <p class="highlight-text">Calidad consistente en cada visita. El sabor clásico que nunca decepciona.</p>
-  </div>
-  
-</div>
-
-
-<!-- AMENITIES -->
-
-
-<!-- SCORES -->
-
-<section class="scores-section" aria-labelledby="scores-heading">
-  <div class="scores-inner">
-    <div class="section-header">
-      <span class="section-label" id="scores-heading">URU SPOT Score</span>
-      <span class="section-line" aria-hidden="true"></span>
-    </div>
-    <div class="scores-grid">
-      <div class="score-big" aria-label="Puntuación total: 8.4 de 10">
-        <div class="score-big-num">8.4</div>
-        <div class="score-big-den">/ 10</div>
-        <div class="score-big-label">Puntuación URU SPOT</div>
-        
-      </div>
-      <div class="score-bars">
-        
-        <div class="score-row">
-          <div class="score-row-top">
-            <span class="score-name">🍽️ Comida</span>
-            <span class="score-val">8.6</span>
-          </div>
-          <div class="score-track">
-            <div class="score-fill" data-width="86%" role="meter" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100" aria-label="🍽️ Comida: 8.6 de 10"></div>
-          </div>
-        </div>
-        
-        <div class="score-row">
-          <div class="score-row-top">
-            <span class="score-name">💰 Precio</span>
-            <span class="score-val">8.4</span>
-          </div>
-          <div class="score-track">
-            <div class="score-fill" data-width="84%" role="meter" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" aria-label="💰 Precio: 8.4 de 10"></div>
-          </div>
-        </div>
-        
-        <div class="score-row">
-          <div class="score-row-top">
-            <span class="score-name">🌍 Ambiente</span>
-            <span class="score-val">8.3</span>
-          </div>
-          <div class="score-track">
-            <div class="score-fill" data-width="83%" role="meter" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100" aria-label="🌍 Ambiente: 8.3 de 10"></div>
-          </div>
-        </div>
-        
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- HORARIOS -->
-
-<div class="schedule-block" aria-labelledby="schedule-heading">
-  <div>
-    <h2 class="schedule-title" id="schedule-heading">Horario semanal</h2>
-    
-    <div class="schedule-row">
-      <span class="schedule-day">Lunes</span>
-      <span class="schedule-time-closed">Cerrado</span>
-    </div>
-    
-    <div class="schedule-row">
-      <span class="schedule-day">Martes</span>
-      <span class="schedule-time">19:00 – 00:00</span>
-    </div>
-    
-    <div class="schedule-row">
-      <span class="schedule-day">Miércoles</span>
-      <span class="schedule-time">19:00 – 00:00</span>
-    </div>
-    
-    <div class="schedule-row">
-      <span class="schedule-day">Jueves</span>
-      <span class="schedule-time">19:00 – 00:00</span>
-    </div>
-    
-    <div class="schedule-row">
-      <span class="schedule-day">Viernes</span>
-      <span class="schedule-time">19:00 – 00:00</span>
-    </div>
-    
-    <div class="schedule-row">
-      <span class="schedule-day">Sábado</span>
-      <span class="schedule-time">19:00 – 00:00</span>
-    </div>
-    
-    <div class="schedule-row">
-      <span class="schedule-day">Domingo</span>
-      <span class="schedule-time">19:00 – 00:00</span>
-    </div>
-    
-    
-    <div class="schedule-note" style="margin-top:24px">
-      <div class="schedule-note-label">Precio estimado por persona</div>
-      <div class="schedule-note-val">$15.000 – $40.000 ARS · ~U$D 15–40</div>
-      
-    </div>
-    
-    
-    <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:16px;letter-spacing:0.05em">Información actualizada recientemente</p>
-  </div>
-  <div>
-    <div style="margin-bottom:24px" aria-live="polite">
-      <div id="schedStatusPill" class="status-pill" style="background:rgba(64,145,108,0.15);color:#40916c">
-        <span class="status-dot" id="schedDot" aria-hidden="true" style="background:#40916c"></span>
-        <span id="schedStatusText">Cargando…</span>
-      </div>
-      <p id="schedInfo" style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px"></p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <a href="https://www.google.com/maps/place/Papa+Luigi/@-32.4857237,-58.235359,17z/data=!4m6!3m5!1s0x95afdbaa0db3304f:0x5dd0b865cbc35cd3!8m2!3d-32.4857328!4d-58.235359!16s%2Fg%2F11c6s4d3ck?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🗺️ Abrir en Google Maps</a>
-      <button id="share-btn" class="btn btn-ghost" aria-label="Compartir esta página">📤 Compartir</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- MAPA -->
-
-<section class="map-section" aria-labelledby="map-heading">
-  <div class="map-inner">
-    <div class="section-header">
-      <span class="section-label">Cómo llegar</span>
-      <span class="section-line" aria-hidden="true"></span>
-    </div>
-    <div class="map-grid">
-      <div class="map-frame">
-        <iframe title="Ubicación de Papa Luigi en Google Maps" src="https://maps.google.com/maps?q=Papa+Luigi,+21+de+Noviembre+38,+Concepcion+del+Uruguay,+Entre+Rios,+Argentina&output=embed&hl=es&z=17" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-      <div>
-        <h2 class="map-info-title" id="map-heading">21 de Noviembre 38, Concepción del Uruguay, Entre Ríos</h2>
-        <p class="map-detail"><strong>Dirección:</strong> 21 de Noviembre 38, Concepción del Uruguay, Entre Ríos</p><p class="map-detail">Zona céntrica · Fácil acceso · Recomendamos llamar para reservas en fines de semana</p>
-        <div style="margin-top:28px;display:flex;flex-direction:column;gap:10px">
-          <a href="https://www.google.com/maps/place/Papa+Luigi/@-32.4857237,-58.235359,17z/data=!4m6!3m5!1s0x95afdbaa0db3304f:0x5dd0b865cbc35cd3!8m2!3d-32.4857328!4d-58.235359!16s%2Fg%2F11c6s4d3ck?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🗺️ Abrir en Google Maps</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- REVIEWS -->
-
-
-<!-- VERDICT -->
-
-<section class="verdict-section" aria-labelledby="verdict-heading">
-  <div class="verdict-inner">
-    <div class="section-header">
-      <span class="section-label">Veredicto URU SPOT</span>
-      <span class="section-line" aria-hidden="true"></span>
-    </div>
-    <div class="verdict-card">
-      <div class="verdict-accent" aria-hidden="true"></div>
-      <div class="verdict-content">
-        <div class="verdict-label" id="verdict-heading">🟢 Recomendado por URU SPOT</div>
-        <p class="verdict-text">Una apuesta segura dentro de la gastronomía clásica local, donde la tradición pesa más que la innovación. Una experiencia confiable y deliciosa, ideal para quienes valoran la cocina italiana auténtica en Concepción del Uruguay.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- FOOTER -->
-<footer class="footer">
-  <a href="../../" class="footer-logo">URU SPOT</a>
-  <span>Guía Gastronómica · Concepción del Uruguay · Entre Ríos</span>
-  <span>Información actualizada recientemente</span>
+<footer>
+  <div class="footer-logo">URU SPOT</div>
+  <div class="footer-sub">Guía Gastronómica · Concepción del Uruguay · Entre Ríos</div>
+  <a href="../../" class="footer-back">← Ver todos los lugares</a>
 </footer>
 
-<script id="ficha-data" type="application/json">
-{"nombre": "Papa Luigi", "schedule_rows": [{"closed": true, "day": "Lunes", "time": "Cerrado"}, {"closed": false, "day": "Martes", "time": "19:00 \u2013 00:00"}, {"closed": false, "day": "Mi\u00e9rcoles", "time": "19:00 \u2013 00:00"}, {"closed": false, "day": "Jueves", "time": "19:00 \u2013 00:00"}, {"closed": false, "day": "Viernes", "time": "19:00 \u2013 00:00"}, {"closed": false, "day": "S\u00e1bado", "time": "19:00 \u2013 00:00"}, {"closed": false, "day": "Domingo", "time": "19:00 \u2013 00:00"}], "share_text": "Pizzer\u00eda \u0026 Cocina Cl\u00e1sica Italiana \u00b7 El sabor que nunca falla"}
+<script>
+(function(){
+  'use strict';
+
+  /* ── REVEAL con IntersectionObserver ── */
+  var els=document.querySelectorAll('.reveal');
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.08,rootMargin:'0px 0px -32px 0px'});
+  els.forEach(function(el){io.observe(el);});
+
+  /* Fallback por si IO no dispara */
+  setTimeout(function(){
+    document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){
+      el.classList.add('visible');
+    });
+  },900);
+
+  /* ── BARRAS de puntaje: animar al entrar en viewport ── */
+  var bars=document.querySelectorAll('.sc-bar-fill');
+  var widths=[];
+  bars.forEach(function(b){widths.push(b.style.width);b.style.width='0';});
+  var scoreCard=document.querySelector('.score-card');
+  if(scoreCard){
+    var sio=new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting){
+        bars.forEach(function(b,i){
+          setTimeout(function(){b.style.width=widths[i];},i*150);
+        });
+        sio.disconnect();
+      }
+    },{threshold:.3});
+    sio.observe(scoreCard);
+  }
+
+  /* ── BADGE ABIERTO / CERRADO (hora Argentina) ── */
+  (function(){
+    var badge=document.getElementById('open-status');
+    if(!badge)return;
+    try{
+      var now=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Argentina/Buenos_Aires'}));
+      var day=now.getDay(); // 0=Dom,1=Lun,...
+      var cur=now.getHours()*60+now.getMinutes();
+      // Abre Mar(2)-Dom(0): 19:00-24:00, y Dom madrugada antes de 00:00 conta como mismo turno
+      var open19=19*60, close24=24*60;
+      var isOpenDay=(day>=2&&day<=6)||day===0;
+      var isOpen=isOpenDay&&cur>=open19&&cur<close24;
+      // También cubre si es Dom(0) o cualquier día Lun(1) madrugada: el local cierra a medianoche exacta
+      if(isOpen){
+        badge.className='open-badge open';
+        badge.innerHTML='<span class="open-badge-dot" aria-hidden="true"></span>Abierto ahora';
+      } else if(day===1){
+        badge.className='open-badge closed';
+        badge.innerHTML='<span class="open-badge-dot" aria-hidden="true"></span>Cerrado hoy — abre mañana a las 19:00';
+      } else {
+        badge.className='open-badge closed';
+        badge.innerHTML='<span class="open-badge-dot" aria-hidden="true"></span>Cerrado ahora — abre hoy a las 19:00';
+      }
+    }catch(e){badge.style.display='none';}
+  })();
+
+  /* ── SHARE ── */
+  var shareBtn=document.getElementById('share-btn');
+  if(shareBtn){
+    shareBtn.addEventListener('click',function(){
+      if(navigator.share){
+        navigator.share({
+          title:'Papa Luigi · URU SPOT',
+          text:'Encontré este lugar en URU SPOT, la guía gastronómica de CDU.',
+          url:window.location.href
+        }).catch(function(){});
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(function(){
+          shareBtn.textContent='✓ Link copiado';
+          setTimeout(function(){shareBtn.textContent='📤 Compartir ficha';},2000);
+        }).catch(function(){
+          shareBtn.textContent='✓ Link copiado';
+          setTimeout(function(){shareBtn.textContent='📤 Compartir ficha';},2000);
+        });
+      }
+    });
+  }
+
+})();
 </script>
-<script src="../ficha.js"></script>
 </body>
 </html>
