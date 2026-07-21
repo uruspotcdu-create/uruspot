@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════════════
+   design-system/componentes/tarjeta-lugar.css
+   La tarjeta de descubrimiento (Guía/Exploración/Acción Directa/
+   Curaduría). Mismas clases que ya emite app.js — esto es una
+   consolidación, no un rename, para no romper nada del motor.
+
+   Extensión preparada para Fase 1.5: .tarjeta__imagen y
+   .tarjeta__estado existen y están listas, pero HOY no las genera
+   app.js (lugares-core.json no tiene foto ni horario estructurado
+   todavía) — quedan documentadas acá para cuando ese dato exista,
+   en vez de inventarse de nuevo en ese momento.
+   Requiere tokens.css cargado antes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+#panelDescubrimiento{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:var(--esp-4); padding:var(--esp-4) 0 var(--esp-12); position:relative; z-index:1;
+}
+
+.tarjeta{
+  background:var(--color-fondo-2); border:1px solid var(--color-linea);
+  border-radius:var(--radio-lg); padding:var(--esp-4);
+  transition:opacity var(--dur-media), transform var(--dur-media),
+             border-color var(--dur-media), box-shadow var(--dur-media);
+}
+.tarjeta--narrativa{ grid-column:span 2; }
+@media (max-width:720px){ .tarjeta--narrativa{ grid-column:span 1; } }
+.tarjeta.descartada{ opacity:.25; transform:scale(.98); pointer-events:none; }
+
+/* Selección sincronizada con el mapa: misma tarjeta que corresponde
+   al punto resaltado/enfocado, mismo lenguaje visual que :hover. */
+.tarjeta--resaltada{
+  border-color:var(--color-granate-clara);
+  box-shadow:var(--sombra-foco);
+  transform:translateY(-1px);
+}
+
+.tarjeta-rubro{
+  font:var(--tipo-dato-xs); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-granate-clara);
+}
+.tarjeta-nombre{ font:var(--tipo-display-sm); margin-top:var(--esp-1); }
+.tarjeta-direccion{ color:var(--color-tinta-60); font-size:13.5px; margin-top:var(--esp-1); }
+
+.tarjeta-acciones{ display:flex; gap:var(--esp-2); margin-top:var(--esp-4); flex-wrap:wrap; }
+
+/* app.js emite class="tarjeta-btn" directamente (no "btn") — mismo
+   componente visual que boton.css, pero declarado acá explícitamente
+   para no depender de que el markup lleve dos clases. */
+.tarjeta-btn{
+  font-family:var(--f-ui); font-size:12.5px; border:1px solid var(--color-linea-fuerte);
+  background:transparent; color:var(--color-tinta-60); padding:7px var(--esp-3);
+  border-radius:var(--radio-sm); cursor:pointer; text-decoration:none;
+  transition:color var(--dur-media), border-color var(--dur-media);
+}
+.tarjeta-btn:hover{ color:var(--color-tinta); border-color:var(--color-granate-clara); }
+.tarjeta-btn--fav.activo{ color:var(--color-granate-clara); border-color:var(--color-granate-clara); }
+
+.vacio{ color:var(--color-tinta-60); padding:var(--esp-6) 0; grid-column:1/-1; }
+
+/* ── Preparado para cuando haya foto por lugar (Fase 1.5) ── */
+.tarjeta--con-imagen{ padding:0; overflow:hidden; }
+.tarjeta__imagen{
+  width:100%; aspect-ratio:16/10; object-fit:cover; display:block;
+  background:var(--color-fondo);
+}
+.tarjeta__cuerpo{ padding:var(--esp-4); }
+
+/* ── Preparado para estado abierto/cerrado por lugar (Fase 1.5) ── */
+.tarjeta__estado{
+  position:absolute; top:var(--esp-2); right:var(--esp-2);
+}
