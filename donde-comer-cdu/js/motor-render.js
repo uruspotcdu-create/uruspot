@@ -16,7 +16,10 @@
   'use strict';
 
   var PROY = global.URU_PROYECCION;
-  var TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  // Voyager en vez de dark_all: mismo proveedor (CARTO/OSM), pero un
+  // basemap claro con calles, nombres y puntos de referencia legibles
+  // — dark_all a este tamaño quedaba casi negro y sin contraste.
+  var TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
   var SUBDOMINIOS = ['a', 'b', 'c', 'd'];
   var TAM_TILE = PROY.TAM_TILE;
   var RADIO_MARCADOR = 10;
