@@ -99,6 +99,32 @@
     var idResaltado = null;
     var puntoResaltado = null;
     var idAbierto = null;
+    var clusterResaltadoKey = null;
+    var ondas = []; // feedback de toque: cada clic dispara un anillo que se expande y se apaga
+
+    function dispararOnda(x, y, color) {
+      ondas.push({ x: x, y: y, inicio: performance.now(), color: color || '#ECEDEF' });
+      animarOndas();
+    }
+    function animarOndas() {
+      if (!ondas.length) return;
+      var ahora = performance.now();
+      ondas = ondas.filter(function (o) { return ahora - o.inicio < 550; });
+      dibujar();
+      if (ondas.length) requestAnimationFrame(animarOndas);
+    }
+    function dibujarOndas() {
+      var ahora = performance.now();
+      ondas.forEach(function (o) {
+        var t = Math.min(1, (ahora - o.inicio) / 550);
+        var e = 1 - Math.pow(1 - t, 2);
+        ctx.beginPath();
+        ctx.arc(o.x, o.y, 6 + e * 34, 0, Math.PI * 2);
+        ctx.strokeStyle = hexARgba(o.color, (1 - t) * 0.65);
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      });
+    }
     var dpr = Math.max(1, global.devicePixelRatio || 1);
     var animacionZoom = null;
 
@@ -127,6 +153,7 @@
       var proyectados = proyectarPuntos();
       var clusters = agruparEnClusters(proyectados);
       dibujarMarcadores(clusters);
+      dibujarOndas();
       posicionarPopupAbierto(proyectados);
       posicionarEtiqueta(proyectados);
     }
@@ -286,9 +313,27 @@
       var esUnRubro = colores.length === 1;
 
       var r = 16;
+      var esResaltado = clusterResaltadoKey === (Math.round(c.x) + ':' + Math.round(c.y));
+      var rGlow = r + (esResaltado ? 11 : 7);
+      // Halo de luz detrás del cluster — sin esto el círculo quedaba
+      // plano contra el tile pálido del basemap y se perdía. Con el
+      // halo, el mismo cluster "flota" sobre el mapa.
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, rGlow, 0, Math.PI * 2);
+      ctx.fillStyle = hexARgba(colorDominante, esResaltado ? 0.35 : 0.22);
+      ctx.fill();
+
       ctx.beginPath();
       ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = esUnRubro ? colorDominante : 'rgba(16,20,28,.92)';
+      var gradCluster = ctx.createRadialGradient(c.x - r * 0.3, c.y - r * 0.3, 1, c.x, c.y, r);
+      if (esUnRubro) {
+        gradCluster.addColorStop(0, aclarar(colorDominante, 22));
+        gradCluster.addColorStop(1, colorDominante);
+      } else {
+        gradCluster.addColorStop(0, 'rgba(32,38,50,.96)');
+        gradCluster.addColorStop(1, 'rgba(14,17,24,.96)');
+      }
+      ctx.fillStyle = gradCluster;
       ctx.shadowColor = 'rgba(0,0,0,.4)';
       ctx.shadowBlur = 6;
       ctx.shadowOffsetY = 1;
@@ -318,9 +363,16 @@
       if (!arrastrando) {
         var cerca = buscarMarcadorEn(e, clusters);
         if (cerca && cerca.tipo === 'punto') {
-          if (cerca.punto.id !== idResaltado) { idResaltado = cerca.punto.id; puntoResaltado = cerca.punto; lienzo.style.cursor = 'pointer'; emisor.emitir('hover', cerca.punto); redibujar(); }
-        } else if (idResaltado !== null) {
-          idResaltado = null; puntoResaltado = null; lienzo.style.cursor = 'grab'; emisor.emitir('hoverOut'); redibujar();
+          lienzo.style.cursor = 'pointer';
+          if (cerca.punto.id !== idResaltado) { idResaltado = cerca.punto.id; puntoResaltado = cerca.punto; emisor.emitir('hover', cerca.punto); redibujar(); }
+          if (clusterResaltadoKey !== null) { clusterResaltadoKey = null; redibujar(); }
+        } else if (cerca && cerca.tipo === 'cluster') {
+          lienzo.style.cursor = 'pointer';
+          var key = Math.round(cerca.x) + ':' + Math.round(cerca.y);
+          if (clusterResaltadoKey !== key) { clusterResaltadoKey = key; redibujar(); }
+          if (idResaltado !== null) { idResaltado = null; puntoResaltado = null; emisor.emitir('hoverOut'); redibujar(); }
+        } else if (idResaltado !== null || clusterResaltadoKey !== null) {
+          idResaltado = null; puntoResaltado = null; clusterResaltadoKey = null; lienzo.style.cursor = 'grab'; emisor.emitir('hoverOut'); redibujar();
         }
         return;
       }
@@ -362,10 +414,13 @@
 
     function manejarClick(c) {
       if (c.tipo === 'cluster') {
+        dispararOnda(c.x, c.y, c.miembros[0] && c.miembros[0].color);
         var enc = PROY.encuadrar(c.miembros, viewport.ancho, viewport.alto, 50, ZOOM_MAX);
-        animarA(enc.lat, enc.lng, Math.min(viewport.zoom + 2, enc.zoom));
+        var zoomDestino = Math.max(viewport.zoom + 1.2, Math.min(viewport.zoom + 2.4, enc.zoom));
+        animarA(enc.lat, enc.lng, PROY.clamp(zoomDestino, ZOOM_MIN, ZOOM_MAX));
         return;
       }
+      dispararOnda(c.x, c.y, c.punto && c.punto.color);
       abrirPopup(c.punto);
       emisor.emitir('click', c.punto);
     }
@@ -451,11 +506,11 @@
         '<div class="uru-mapa-popup-cerrar" role="button" tabindex="0" aria-label="Cerrar">×</div>' +
         '<strong class="uru-mapa-popup-nombre"></strong>' +
         '<div class="uru-mapa-popup-direccion"></div>' +
-        '<a class="uru-mapa-popup-link">Ver ficha completa →</a>';
+        (punto.href ? '<a class="uru-mapa-popup-link">Ver ficha completa →</a>' : '');
       popup.querySelector('.uru-mapa-popup-nombre').textContent = punto.nombre;
       popup.querySelector('.uru-mapa-popup-direccion').textContent = punto.direccion || '';
       var link = popup.querySelector('.uru-mapa-popup-link');
-      link.href = punto.href || '#';
+      if (link) link.href = punto.href;
       popup.hidden = false;
       popup.style.borderLeft = '3px solid ' + (punto.color || 'var(--granate-clara)');
       popup.querySelector('.uru-mapa-popup-cerrar').addEventListener('click', cerrarPopup);
