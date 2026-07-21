@@ -20,6 +20,8 @@
   var estado = null;
   var consultaActual = '';
   var filtroRubroActivo = null; // grupo activo del índice "Por rubro", o null = todos
+  var TARJETAS_POR_PAGINA = 30;
+  var paginaTarjetas = 1; // cuántas páginas de TARJETAS_POR_PAGINA hay reveladas
   var permanenciaTimer = null;
   var ultimaRegionRenderizada = '';
 
@@ -86,6 +88,7 @@
   if (DOM.inputBuscar) {
     DOM.inputBuscar.addEventListener('input', function (e) {
       consultaActual = e.target.value;
+      paginaTarjetas = 1;
       if (consultaActual.trim().length >= 2) {
         estado = PLANO.aplicarAccion(estado, 'nombrar', { consulta: consultaActual });
         PLANO.guardarEstado(estado);
@@ -101,8 +104,14 @@
       var btnAceptar = e.target.closest('[data-accion="aceptar"]');
       var btnRechazar = e.target.closest('[data-accion="rechazar"]');
       var btnGuardar = e.target.closest('[data-accion="guardar"]');
+      var btnCargarMas = e.target.closest('[data-accion="cargar-mas"]');
       var carta0 = e.target.closest('[data-lugar-id]');
 
+      if (btnCargarMas) {
+        paginaTarjetas++;
+        render();
+        return;
+      }
       if (btnAceptar) {
         var id1 = btnAceptar.closest('[data-lugar-id]').dataset.lugarId;
         var porIniciativa = btnAceptar.dataset.origen === 'iniciativa_propia';
@@ -158,6 +167,7 @@
       if (!chip) return;
       var rubro = chip.dataset.rubro;
       filtroRubroActivo = (filtroRubroActivo === rubro) ? null : rubro;
+      paginaTarjetas = 1;
       estado.sesion.curaduriaActiva = false; // filtrar por rubro siempre vuelve a la vista "todos"
       pintarRubros();
       render();
@@ -168,6 +178,7 @@
   if (DOM.btnVerGuardados) {
     DOM.btnVerGuardados.addEventListener('click', function () {
       estado.sesion.curaduriaActiva = true;
+      paginaTarjetas = 1;
       render();
     });
   }
@@ -293,8 +304,12 @@
       DOM.panelDescubrimiento.innerHTML = '<p class="vacio">' + (opts.vacioTexto || 'No encontramos nada con esa búsqueda.') + '</p>';
       return;
     }
+    var limite = TARJETAS_POR_PAGINA * paginaTarjetas;
+    var visible = lista.slice(0, limite);
+    var restantes = lista.length - visible.length;
+
     var frag = document.createDocumentFragment();
-    lista.forEach(function (lugar) {
+    visible.forEach(function (lugar) {
       var art = document.createElement('article');
       art.className = 'tarjeta' + (opts.narrativa ? ' tarjeta--narrativa' : '');
       art.dataset.lugarId = lugar.id;
@@ -312,6 +327,15 @@
       frag.appendChild(art);
     });
     DOM.panelDescubrimiento.appendChild(frag);
+
+    if (restantes > 0) {
+      var piePagina = document.createElement('div');
+      piePagina.className = 'paginacion';
+      piePagina.innerHTML =
+        '<button type="button" class="btn" data-accion="cargar-mas">Cargar ' + Math.min(restantes, TARJETAS_POR_PAGINA) + ' más</button>' +
+        '<span class="paginacion-conteo">' + visible.length + ' de ' + lista.length + '</span>';
+      DOM.panelDescubrimiento.appendChild(piePagina);
+    }
   }
 
   function slug(lugar) { return lugar.id.toLowerCase(); }
