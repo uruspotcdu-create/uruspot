@@ -131,17 +131,21 @@
       // compiten por atención — solo dan la certeza subconsciente de
       // que esto es un lugar real. No necesita mostrar todo el
       // universo para cumplir esa función.
-      herramientaRecorte: 300
-      // Antes en 10, acoplado al recorte de tarjetas de 4-10 lugares
-      // que existía en Guía/Exploración (ver app.js: ese recorte se
-      // sacó, la lista de tarjetas ahora muestra el padrón completo
-      // salvo búsqueda/filtro/guardados). 300 es un techo de
-      // rendimiento para el <canvas> del mapa, no una decisión de
-      // producto: motor-render.js clusteriza por superposición real
-      // en pantalla, así que un número más alto sigue siendo legible.
-      // Si en el futuro un rubro/búsqueda devuelve más de 300 puntos
-      // georreferenciados, el mapa mostrará los primeros 300 del
-      // recorte — recalibrar acá si eso resulta notorio.
+      herramientaRecorte: 2000
+      // Antes en 10 (recorte viejo de tarjetas) y después en 300 —
+      // ese 300 todavía truncaba el mapa a una fracción del catálogo
+      // real (+1400 lugares): con "todos" sin filtrar, el mapa
+      // clusterizaba solo esos 300 y mostraba números de cluster que
+      // no representaban el total. 2000 cubre el catálogo actual
+      // (1468) con margen de crecimiento y en la práctica funciona
+      // como "sin techo": motor-render.js clusteriza por superposición
+      // real en pantalla (agruparEnClusters, O(n²) por frame), así que
+      // ir de 300 a 1468 puntos no cambia lo que se VE — sigue
+      // agrupando en los mismos clusters visuales — pero si el
+      // catálogo crece mucho más allá de unos pocos miles y se nota
+      // lag al mover/zoomear el mapa, ahí es cuando conviene indexar
+      // espacialmente (grid/quadtree) en vez de seguir subiendo este
+      // número.
     },
 
     /* ── 7. Frontera con la monetización (Blueprint v2, sección 2) ──
