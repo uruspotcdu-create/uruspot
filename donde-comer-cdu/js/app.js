@@ -22,6 +22,8 @@
   var filtroRubroActivo = null; // grupo activo del índice "Por rubro", o null = todos
   var TARJETAS_POR_PAGINA = 8;
   var paginaTarjetas = 1; // cuántas páginas de TARJETAS_POR_PAGINA hay reveladas
+  var ubicacionUsuario = null; // {lat,lng} — solo si el usuario lo pide y el navegador lo concede
+  var cercaTuyoActivo = false;
   var permanenciaTimer = null;
   var ultimaRegionRenderizada = '';
 
@@ -377,6 +379,7 @@
       var miniTexto = lugar.descripcion ||
         (lugar.categoria && rubro !== lugar.categoria ? rubro + ' · ' + lugar.categoria : lugar.categoria || rubro);
       var miniEsGenerica = !lugar.descripcion;
+      var slugLugar = slug(lugar);
       art.innerHTML =
         '<div class="tarjeta-rubro">' + escapeHTML(rubro) + '</div>' +
         '<h3 class="tarjeta-nombre">' + escapeHTML(lugar.nombre) + '</h3>' +
@@ -384,11 +387,11 @@
           ? '<div class="tarjeta-mini' + (miniEsGenerica ? ' tarjeta-mini--generica' : '') + '">' + escapeHTML(miniTexto) + '</div>'
           : '<div class="tarjeta-direccion">' + (lugar.direccion ? escapeHTML(lugar.direccion) : 'cargando dirección…') + '</div>') +
         '<div class="tarjeta-acciones">' +
-          '<a class="tarjeta-btn" data-accion="aceptar" data-origen="' + opts.origen + '" href="locales/' + slug(lugar) + '/">ver ficha</a>' +
+          (slugLugar ? '<a class="tarjeta-btn" data-accion="aceptar" data-origen="' + opts.origen + '" href="locales/' + slugLugar + '/">ver ficha</a>' : '') +
           (linkMaps ? '<a class="tarjeta-btn tarjeta-btn--maps" data-accion="maps" href="' + linkMaps + '" target="_blank" rel="noopener" aria-label="Abrir en Google Maps">📍 mapa</a>' : '') +
           (linkTel ? '<a class="tarjeta-btn tarjeta-btn--tel" data-accion="llamar" href="' + linkTel + '" aria-label="Llamar">📞 llamar</a>' : '') +
           '<button class="tarjeta-btn tarjeta-btn--fav' + (favoritos[lugar.id] ? ' activo' : '') + '" type="button" data-accion="guardar" aria-label="Guardar">' + (favoritos[lugar.id] ? '★ guardado' : '☆ guardar') + '</button>' +
-          '<button class="tarjeta-btn tarjeta-btn--compartir" type="button" data-accion="compartir" aria-label="Compartir">🔗</button>' +
+          (slugLugar ? '<button class="tarjeta-btn tarjeta-btn--compartir" type="button" data-accion="compartir" aria-label="Compartir">🔗</button>' : '') +
           '<button class="tarjeta-btn tarjeta-btn--descartar" type="button" data-accion="rechazar">no me interesa</button>' +
         '</div>';
       frag.appendChild(art);
@@ -405,7 +408,16 @@
     }
   }
 
-  function slug(lugar) { return lugar.id.toLowerCase(); }
+  // BUG REAL corregido: antes esto devolvía lugar.id.toLowerCase()
+  // ("uru-00187"), pero las carpetas de locales/ están nombradas por
+  // el negocio ("bartolo-bar"), no por ID — todo enlace "ver ficha"
+  // del sitio apuntaba a una URL inexistente. Ver js/locales-slugs.js.
+  // Devuelve null si ese lugar todavía no tiene ficha propia — así
+  // el botón se puede ocultar en vez de llevar a un 404.
+  function slug(lugar) {
+    var mapa = window.URU_LOCALES_SLUGS;
+    return (mapa && mapa[lugar.id]) || null;
+  }
 
   // Un solo toque, ubicación exacta: coordenada si existe (siempre la
   // hay desde lugares-core.json), dirección como respaldo si algún
@@ -418,6 +430,22 @@
       return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lugar.nombre + ', ' + lugar.direccion);
     }
     return null;
+  }
+
+  // Distancia real (Haversine), no una estimación inventada — solo se
+  // usa cuando el propio navegador del usuario entregó su posición.
+  function distanciaMetros(lat1, lng1, lat2, lng2) {
+    var R = 6371000;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+  function formatoDistancia(m) {
+    if (m < 1000) return Math.round(m / 10) * 10 + ' m';
+    return (m / 1000).toFixed(1).replace('.0', '') + ' km';
   }
 
   /* ── 6. Textura ambiental (sin cambios de fondo, no es interactiva) ── */
@@ -496,9 +524,10 @@
     var recorte = MAPA.puntosHerramienta(conCoordenadas);
     var puntos = recorte.map(function (l) {
       var meta = window.URU_RUBROS_META && window.URU_RUBROS_META[l.grupo];
+      var slugL = slug(l);
       return {
         id: l.id, lat: l.lat, lng: l.lng, nombre: l.nombre, direccion: l.direccion,
-        href: 'locales/' + slug(l) + '/',
+        href: slugL ? 'locales/' + slugL + '/' : null,
         color: meta ? meta[2] : '#C97A83',
         rubroNombre: meta ? meta[0] : l.categoria
       };
