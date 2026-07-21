@@ -94,6 +94,30 @@
      nuevos) ── */
   --bp-mobile: 720px;
   --bp-tablet: 960px;
+
+  /* ── Fase 1 (rediseño): superficie de vidrio + gradientes ──
+     Capa nueva sobre el sistema existente, no lo reemplaza. Todo lo
+     de arriba (--color-*, --tipo-*, --esp-*) sigue siendo la fuente
+     de verdad; esto añade el vocabulario de "vidrio" y gradiente que
+     usan tarjeta/chip/mapa/boton a partir de ahora. */
+  --glass-bg:          rgba(16,20,28,.55);
+  --glass-bg-fuerte:   rgba(16,20,28,.78);
+  --glass-borde:       rgba(236,237,239,.10);
+  --glass-borde-hover: rgba(201,122,131,.45);
+  --glass-blur:        14px;
+  --glass-blur-fuerte: 24px;
+
+  --gradiente-marca:   linear-gradient(135deg,#9C3A46 0%,#C97A83 55%,#E0A5AC 100%);
+  --gradiente-halo:    radial-gradient(60% 60% at 30% 20%, rgba(201,122,131,.35), transparent 70%),
+                        radial-gradient(50% 50% at 85% 0%, rgba(126,166,224,.20), transparent 65%);
+  --gradiente-superficie: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%);
+  --gradiente-borde-top:  linear-gradient(90deg, var(--chip-color, var(--color-granate-clara)), transparent 85%);
+
+  --sombra-vidrio:  0 1px 1px rgba(255,255,255,.05) inset, 0 20px 40px -16px rgba(0,0,0,.55);
+  --sombra-glow:    0 0 0 1px var(--color-granate-clara), 0 0 24px rgba(201,122,131,.35);
+
+  --dur-lentisima: .6s;
+  --easing-rebote: cubic-bezier(.22,1,.36,1);
 }
 
 /* ── Reset mínimo compartido ── */
@@ -118,3 +142,43 @@ a{ color:inherit; }
     scroll-behavior:auto !important;
   }
 }
+
+/* ── Keyframes compartidas (Fase 1) ──
+   Un único vocabulario de movimiento para todo el sitio: nadie
+   declara un @keyframes propio dentro de un componente. */
+@keyframes uru-fade-up{
+  from{ opacity:0; transform:translateY(14px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+@keyframes uru-scale-in{
+  from{ opacity:0; transform:scale(.94); }
+  to{ opacity:1; transform:scale(1); }
+}
+@keyframes uru-shimmer{
+  from{ background-position:-200% 0; }
+  to{ background-position:200% 0; }
+}
+@keyframes uru-pulso-suave{
+  0%,100%{ opacity:1; } 50%{ opacity:.55; }
+}
+@keyframes uru-flotar{
+  0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); }
+}
+
+/* Revelado al hacer scroll: visible por defecto (si JS no corre o
+   falla, el contenido nunca queda oculto). app.js agrega
+   .u-reveal--armado recién cuando confirma que puede observar la
+   sección y va a revelarla al entrar en viewport; solo ahí se anima. */
+.u-reveal{ opacity:1; transform:none; transition:opacity var(--dur-lentisima) var(--easing-rebote), transform var(--dur-lentisima) var(--easing-rebote); }
+.u-reveal.u-reveal--armado{ opacity:0; transform:translateY(18px); }
+.u-reveal.u-reveal--armado.visible{ opacity:1; transform:translateY(0); }
+@media (prefers-reduced-motion: reduce){ .u-reveal.u-reveal--armado{ opacity:1; transform:none; } }
+
+/* Skeleton loading: placeholder de carga reutilizable */
+.u-skeleton{
+  background:linear-gradient(90deg, var(--color-fondo-2) 25%, rgba(236,237,239,.08) 50%, var(--color-fondo-2) 75%);
+  background-size:200% 100%;
+  animation:uru-shimmer 1.4s ease-in-out infinite;
+  border-radius:var(--radio-md);
+}
+@media (prefers-reduced-motion: reduce){ .u-skeleton{ animation:none; background:var(--color-fondo-2); } }
