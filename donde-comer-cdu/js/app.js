@@ -20,7 +20,7 @@
   var estado = null;
   var consultaActual = '';
   var filtroRubroActivo = null; // grupo activo del índice "Por rubro", o null = todos
-  var TARJETAS_POR_PAGINA = 30;
+  var TARJETAS_POR_PAGINA = 8;
   var paginaTarjetas = 1; // cuántas páginas de TARJETAS_POR_PAGINA hay reveladas
   var permanenciaTimer = null;
   var ultimaRegionRenderizada = '';
@@ -44,7 +44,7 @@
       REGISTRO = core.map(function (l) {
         var reg = {
           id: l.id, nombre: l.nombre, categoria: l.categoria, grupo: l.grupo,
-          lat: l.lat, lng: l.lng, direccion: null, telefono: null, estado: 'verificado'
+          lat: l.lat, lng: l.lng, direccion: null, telefono: null, descripcion: null, estado: 'verificado'
         };
         porId[l.id] = reg;
         return reg;
@@ -97,7 +97,7 @@
       fetch('lugares-detalles.json').then(function (r) { return r.json(); }).then(function (det) {
         det.forEach(function (d) {
           var reg = porId[d.id];
-          if (reg) { reg.direccion = d.direccion || null; reg.telefono = d.telefono || null; }
+          if (reg) { reg.direccion = d.direccion || null; reg.telefono = d.telefono || null; reg.descripcion = d.descripcion || null; }
         });
         render();
       }).catch(function (e) { console.warn('lugares-detalles.json no disponible', e); });
@@ -137,9 +137,26 @@
       var btnAceptar = e.target.closest('[data-accion="aceptar"]');
       var btnRechazar = e.target.closest('[data-accion="rechazar"]');
       var btnGuardar = e.target.closest('[data-accion="guardar"]');
+      var btnCompartir = e.target.closest('[data-accion="compartir"]');
       var btnCargarMas = e.target.closest('[data-accion="cargar-mas"]');
       var carta0 = e.target.closest('[data-lugar-id]');
 
+      if (btnCompartir) {
+        var cartaC = btnCompartir.closest('[data-lugar-id]');
+        var lugarC = porId[cartaC.dataset.lugarId];
+        var urlFicha = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'locales/' + slug(lugarC) + '/';
+        var payload = { title: lugarC.nombre + ' — URU SPOT', text: lugarC.categoria || '', url: urlFicha };
+        if (navigator.share) {
+          navigator.share(payload).catch(function () {});
+        } else if (navigator.clipboard) {
+          navigator.clipboard.writeText(urlFicha).then(function () {
+            var txtOriginal = btnCompartir.innerHTML;
+            btnCompartir.innerHTML = '✓';
+            setTimeout(function () { btnCompartir.innerHTML = txtOriginal; }, 1600);
+          });
+        }
+        return;
+      }
       if (btnCargarMas) {
         paginaTarjetas++;
         render();
@@ -352,13 +369,26 @@
       // Stagger acotado a las primeras ~24 tarjetas visibles en pantalla:
       // más allá de eso el delay ya no se percibe y solo demora el resto.
       art.style.animationDelay = (Math.min(i, 24) * 0.03) + 's';
+      var linkMaps = mapsHref(lugar);
+      var linkTel = lugar.telefono ? 'tel:' + lugar.telefono.replace(/[^\d+]/g, '') : null;
+      // Mini-línea: descripción real del lugar si la tenemos; si no,
+      // un genérico "grupo · categoría" (nunca una frase inventada
+      // sobre el negocio en sí, como "no acepta turnos" o similar).
+      var miniTexto = lugar.descripcion ||
+        (lugar.categoria && rubro !== lugar.categoria ? rubro + ' · ' + lugar.categoria : lugar.categoria || rubro);
+      var miniEsGenerica = !lugar.descripcion;
       art.innerHTML =
         '<div class="tarjeta-rubro">' + escapeHTML(rubro) + '</div>' +
         '<h3 class="tarjeta-nombre">' + escapeHTML(lugar.nombre) + '</h3>' +
-        '<div class="tarjeta-direccion">' + (lugar.direccion ? escapeHTML(lugar.direccion) : 'cargando dirección…') + '</div>' +
+        (miniTexto
+          ? '<div class="tarjeta-mini' + (miniEsGenerica ? ' tarjeta-mini--generica' : '') + '">' + escapeHTML(miniTexto) + '</div>'
+          : '<div class="tarjeta-direccion">' + (lugar.direccion ? escapeHTML(lugar.direccion) : 'cargando dirección…') + '</div>') +
         '<div class="tarjeta-acciones">' +
           '<a class="tarjeta-btn" data-accion="aceptar" data-origen="' + opts.origen + '" href="locales/' + slug(lugar) + '/">ver ficha</a>' +
-          '<button class="tarjeta-btn tarjeta-btn--fav' + (favoritos[lugar.id] ? ' activo' : '') + '" type="button" data-accion="guardar">' + (favoritos[lugar.id] ? '★ guardado' : '☆ guardar') + '</button>' +
+          (linkMaps ? '<a class="tarjeta-btn tarjeta-btn--maps" data-accion="maps" href="' + linkMaps + '" target="_blank" rel="noopener" aria-label="Abrir en Google Maps">📍 mapa</a>' : '') +
+          (linkTel ? '<a class="tarjeta-btn tarjeta-btn--tel" data-accion="llamar" href="' + linkTel + '" aria-label="Llamar">📞 llamar</a>' : '') +
+          '<button class="tarjeta-btn tarjeta-btn--fav' + (favoritos[lugar.id] ? ' activo' : '') + '" type="button" data-accion="guardar" aria-label="Guardar">' + (favoritos[lugar.id] ? '★ guardado' : '☆ guardar') + '</button>' +
+          '<button class="tarjeta-btn tarjeta-btn--compartir" type="button" data-accion="compartir" aria-label="Compartir">🔗</button>' +
           '<button class="tarjeta-btn tarjeta-btn--descartar" type="button" data-accion="rechazar">no me interesa</button>' +
         '</div>';
       frag.appendChild(art);
@@ -376,6 +406,19 @@
   }
 
   function slug(lugar) { return lugar.id.toLowerCase(); }
+
+  // Un solo toque, ubicación exacta: coordenada si existe (siempre la
+  // hay desde lugares-core.json), dirección como respaldo si algún
+  // registro llegara sin lat/lng.
+  function mapsHref(lugar) {
+    if (typeof lugar.lat === 'number' && typeof lugar.lng === 'number') {
+      return 'https://www.google.com/maps/search/?api=1&query=' + lugar.lat + ',' + lugar.lng;
+    }
+    if (lugar.direccion) {
+      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lugar.nombre + ', ' + lugar.direccion);
+    }
+    return null;
+  }
 
   /* ── 6. Textura ambiental (sin cambios de fondo, no es interactiva) ── */
 
