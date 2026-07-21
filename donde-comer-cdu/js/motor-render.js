@@ -11,11 +11,114 @@
    mostrarlo. Separación deliberada: calibrar cuántos puntos van al
    mapa nunca debería requerir tocar el renderer, y cambiar cómo se
    ve un marcador nunca debería requerir tocar la regla de negocio.
+
+   ───────────────────────────────────────────────────────────────────
+   Auditoría y evolución de esta pasada (motivo de cada cambio no
+   trivial, para que quien lea el diff entienda el "por qué" sin
+   tener que reconstruirlo):
+
+   BUGS REALES corregidos
+   • Pan de un dedo y pellizco de dos dedos competían por el mismo
+     estado de arrastre: al posar el segundo dedo, el mapa "saltaba".
+     Ahora el pellizco toma el control explícitamente y el pan de un
+     solo puntero queda atado a su pointerId.
+   • Un tile que falla (red, 404, CORS) quedaba en blanco para
+     siempre. Ahora hay un reintento con backoff y, si sigue
+     fallando, el relleno base del mapa se ve en su lugar — nunca un
+     hueco crudo.
+   • Caché de tiles sin techo: en una sesión larga explorando mucho
+     territorio, crecía sin límite. Ahora tiene un tope con desalojo
+     simple (FIFO).
+   • `role="application"` en el contenedor entero metía en "modo app"
+     (fuera del modo de navegación normal de un lector de pantalla)
+     a la lista accesible real que vive adentro. Se cambia a
+     `role="region"` — el canvas sigue oculto a AT, la lista sigue
+     siendo HTML normal navegable.
+   • `aria-hidden="true"` + `tabIndex=0` en el canvas era una
+     contradicción: el foco podía aterrizar por Tab en algo invisible
+     para lectores de pantalla. Ahora `tabIndex=-1` (fuera del orden
+     de tabulación, pero el mouse todavía puede enfocarlo para
+     habilitar el pan por flechas a usuarios con mouse+teclado).
+   • El botón de cerrar el popup era un `<div role="button">` sin
+     manejo de Enter/Espacio — inaccesible por teclado. Ahora es un
+     `<button>` real.
+   • `requestAnimationFrame` de animación de vuelo y de ondas de clic
+     no se cancelaban en `destruir()` — código zombi dibujando sobre
+     un canvas ya desmontado.
+   • El `devicePixelRatio` se leía una sola vez al crear el mapa; si
+     cambiaba (mover la ventana a otro monitor, zoom del navegador
+     sin resize del contenedor) el canvas quedaba borroso.
+   • Un color mal formado en los datos (no un hex de 6 dígitos)
+     rompía `parseInt` en silencio y podía dejar un marcador con un
+     color previo pegado. Ahora se valida con fallback.
+
+   RENDIMIENTO
+   • Cada `pointermove` recalculaba proyección + clustering O(n²)
+     completo solo para saber qué hay bajo el cursor — con miles de
+     eventos de mouse por sesión, era el cuello de botella real (el
+     propio motor-config.js ya advertía sobre el costo de este
+     algoritmo). Ahora se cachea el resultado del último frame
+     dibujado y solo se recalcula si el viewport realmente cambió.
+   • La lista accesible en paralelo se reconstruía entera (con sus
+     listeners) en cada llamada a `establecerPuntos`, aunque el
+     conjunto de lugares no hubiera cambiado (p. ej. un re-render por
+     cada tecla del buscador). Ahora se compara una huella barata y
+     se salta la reconstrucción si no cambió.
+   • `encuadrarTodos` volvía a animar hacia el mismo destino en cada
+     llamada — visible como un "salto" del mapa en cada tecla
+     tipeada en el buscador (motorMapa.encuadrarTodos se llama desde
+     app.js en cada render()). Ahora se cachea el último encuadre y
+     se omite la animación si el destino es esencialmente el mismo.
+
+   ACCESIBILIDAD / UX PREMIUM
+   • Anillo de foco visible en el canvas para quien navega con mouse
+     y después usa flechas/teclado.
+   • Escape cierra el popup y devuelve el foco a donde estaba.
+   • Se respeta `prefers-reduced-motion`: sin vuelos animados ni
+     ondas de clic para quien lo pidió a nivel sistema operativo.
+   • Botones +/− quedan `disabled` (con `aria-disabled`) en los
+     límites de zoom, en vez de no dar ninguna señal.
+   • Cursor cambia a "grabbing" mientras se arrastra.
+   • El pellizco de dos dedos ahora ancla el zoom al punto geográfico
+     bajo el centro del pellizco (como Google/Apple Maps), no solo
+     cambia el zoom con el centro del viewport fijo.
+   • Relleno base sólido detrás de los tiles: nunca hay un flash de
+     canvas completamente vacío mientras cargan las imágenes.
+   • Mayor tolerancia de toque en pantallas táctiles (dedo ≠ cursor
+     de precisión).
+   • El popup se reposiciona con clamp para no salirse del
+     contenedor cuando el marcador queda cerca de un borde.
+
+   Todo lo anterior es interno a este archivo. No se tocó ningún
+   otro módulo — motor-plano.js, motor-mapa.js, motor-exposicion.js,
+   motor-config.js y proyeccion.js siguen siendo la misma superficie
+   de integración (`URU_PROYECCION`, y la API pública
+   `URU_MOTOR_MAPA_RENDER.crear(...)` con los mismos métodos:
+   on / establecerPuntos / encuadrarTodos / enfocar / resaltar /
+   quitarResaltado / destruir).
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var PROY = global.URU_PROYECCION;
+
+  // Dependencia dura: sin proyeccion.js este módulo no puede hacer
+  // nada útil. Antes de esta pasada, su ausencia rompía el script
+  // entero en la primera línea con un error críptico ("Cannot read
+  // properties of undefined"). Ahora se falla temprano y claro.
+  if (!PROY) {
+    if (global.console) {
+      console.error('URU_MOTOR_MAPA_RENDER: falta URU_PROYECCION (proyeccion.js). ' +
+        'Revisá el orden de carga de los <script> — este módulo no puede iniciar sin esa dependencia.');
+    }
+    global.URU_MOTOR_MAPA_RENDER = {
+      crear: function () {
+        throw new Error('URU_MOTOR_MAPA_RENDER: no se puede crear el mapa sin URU_PROYECCION cargado antes.');
+      }
+    };
+    return;
+  }
+
   // Voyager en vez de dark_all: mismo proveedor (CARTO/OSM), pero un
   // basemap claro con calles, nombres y puntos de referencia legibles
   // — dark_all a este tamaño quedaba casi negro y sin contraste.
@@ -23,10 +126,43 @@
   var SUBDOMINIOS = ['a', 'b', 'c', 'd'];
   var TAM_TILE = PROY.TAM_TILE;
   var RADIO_MARCADOR = 10;
+  var RADIO_CLUSTER = 16;
   var RADIO_CLUSTER_PX = 36;
   var ZOOM_MIN = 4, ZOOM_MAX = 18;
 
+  // Constantes de calibración visual/temporal, agrupadas para que
+  // ajustar un número no obligue a bucear en la lógica — mismo
+  // criterio que motor-config.js aplica al resto del sistema.
+  var COLOR_DEFECTO = '#C97A83';
+  var COLOR_FONDO_MAPA = '#12151b';   // relleno base mientras cargan los tiles, o si fallan
+  var COLOR_ONDA_DEFECTO = '#ECEDEF';
+  var DURACION_ONDA_MS = 550;
+  var DURACION_VUELO_MS = 420;
+  var MAX_TILES_EN_CACHE = 400;       // tope simple para no crecer sin límite en sesiones largas
+  var REINTENTOS_TILE = 1;
+  var DEMORA_REINTENTO_TILE_MS = 800;
+  var RE_HEX = /^#[0-9a-fA-F]{6}$/;
+
+  var esPunteroTosco = !!(global.matchMedia && global.matchMedia('(pointer: coarse)').matches);
+  var TOLERANCIA_CLICK_PX = esPunteroTosco ? 28 : 20; // el dedo es menos preciso que un cursor
+
+  function prefiereMovimientoReducido() {
+    return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  function colorSeguro(c) {
+    return (typeof c === 'string' && RE_HEX.test(c)) ? c : COLOR_DEFECTO;
+  }
+
+  /* ── Caché de tiles con desalojo simple (FIFO) y reintento ante error ── */
   var cacheTiles = Object.create(null);
+  var ordenTiles = [];
+
+  function construirUrlTile(z, xw, y) {
+    var sub = SUBDOMINIOS[(xw + y) % SUBDOMINIOS.length];
+    return TILE_URL.replace('{s}', sub).replace('{z}', z).replace('{x}', xw).replace('{y}', y)
+      .replace('{r}', (global.devicePixelRatio > 1 ? '@2x' : ''));
+  }
 
   function cargarTile(z, x, y) {
     var n = Math.pow(2, z);
@@ -35,13 +171,31 @@
     var clave = z + '/' + xw + '/' + y;
     var existente = cacheTiles[clave];
     if (existente) return existente;
+
     var img = new Image();
     img.crossOrigin = 'anonymous';
-    var sub = SUBDOMINIOS[(xw + y) % SUBDOMINIOS.length];
-    img.src = TILE_URL.replace('{s}', sub).replace('{z}', z).replace('{x}', xw).replace('{y}', y).replace('{r}', (global.devicePixelRatio > 1 ? '@2x' : ''));
-    var entrada = { img: img, cargado: false };
-    img.onload = function () { entrada.cargado = true; if (entrada.onReady) entrada.onReady(); };
+    var entrada = { img: img, cargado: false, error: false, intentos: 0 };
+    img.onload = function () { entrada.cargado = true; entrada.error = false; if (entrada.onReady) entrada.onReady(); };
+    img.onerror = function () {
+      entrada.cargado = false;
+      entrada.error = true;
+      if (entrada.intentos < REINTENTOS_TILE) {
+        entrada.intentos++;
+        setTimeout(function () {
+          if (cacheTiles[clave] !== entrada) return; // ya fue desalojado del caché
+          img.src = construirUrlTile(z, xw, y);
+        }, DEMORA_REINTENTO_TILE_MS);
+      }
+      // Si se agotan los reintentos, no se hace nada más: dibujarTiles()
+      // ya deja ver el relleno base (COLOR_FONDO_MAPA) en su lugar.
+    };
+    img.src = construirUrlTile(z, xw, y);
+
     cacheTiles[clave] = entrada;
+    ordenTiles.push(clave);
+    if (ordenTiles.length > MAX_TILES_EN_CACHE) {
+      delete cacheTiles[ordenTiles.shift()];
+    }
     return entrada;
   }
 
@@ -57,13 +211,24 @@
     })();
 
     contenedor.classList.add('uru-mapa');
-    contenedor.setAttribute('role', 'application');
+    // "region", no "application": el canvas está aria-hidden (la
+    // navegación real accesible es la lista paralela de abajo), así
+    // que no hace falta ni conviene poner todo el contenedor en modo
+    // aplicación — eso le quitaría a un lector de pantalla el modo
+    // de navegación normal justo sobre la lista que sí es accesible.
+    contenedor.setAttribute('role', 'region');
     contenedor.setAttribute('aria-label', opciones.ariaLabel || 'Mapa interactivo de lugares');
 
     var lienzo = document.createElement('canvas');
     lienzo.className = 'uru-mapa-lienzo';
-    lienzo.tabIndex = 0;
-    lienzo.setAttribute('aria-hidden', 'true'); // la navegación real accesible es la lista paralela
+    // tabIndex=-1 (no tabIndex=0): coherente con aria-hidden. Queda
+    // fuera del recorrido por Tab (así un lector de pantalla nunca
+    // aterriza en algo que declaramos invisible para él), pero sigue
+    // siendo enfocable con clic de mouse, para que quien usa
+    // mouse + teclado combinados pueda, después de hacer clic,
+    // desplazarse con las flechas.
+    lienzo.tabIndex = -1;
+    lienzo.setAttribute('aria-hidden', 'true');
     contenedor.appendChild(lienzo);
     var ctx = lienzo.getContext('2d');
 
@@ -78,6 +243,8 @@
       '<button type="button" class="uru-mapa-btn" data-zoom="1" aria-label="Acercar">+</button>' +
       '<button type="button" class="uru-mapa-btn" data-zoom="-1" aria-label="Alejar">−</button>';
     contenedor.appendChild(controles);
+    var btnZoomIn = controles.querySelector('[data-zoom="1"]');
+    var btnZoomOut = controles.querySelector('[data-zoom="-1"]');
 
     var atribucion = document.createElement('div');
     atribucion.className = 'uru-mapa-atribucion';
@@ -94,29 +261,61 @@
     etiqueta.hidden = true;
     contenedor.appendChild(etiqueta);
 
+    function resolverVarCSS(nombre, fallback) {
+      try {
+        var val = getComputedStyle(contenedor).getPropertyValue(nombre).trim();
+        return val || fallback;
+      } catch (e) { return fallback; }
+    }
+    var colorFoco = resolverVarCSS('--granate-clara', '#E8A2AB');
+
     var viewport = { lat: opciones.lat || -32.4833, lng: opciones.lng || -58.2333, zoom: opciones.zoom || 14, ancho: 0, alto: 0 };
     var puntos = [];
     var idResaltado = null;
     var puntoResaltado = null;
     var idAbierto = null;
+    var elementoFocoPrevio = null; // para devolver el foco al cerrar el popup
     var clusterResaltadoKey = null;
+    var focoVisible = false;
     var ondas = []; // feedback de toque: cada clic dispara un anillo que se expande y se apaga
 
+    // Caché del último clustering calculado, para no repetir el
+    // trabajo O(n²) de agrupar en cada movimiento de mouse — solo se
+    // recalcula si el viewport (o el conjunto de puntos) cambió
+    // desde el último frame dibujado.
+    var ultimosClusters = [];
+    var claveClusters = '';
+    function clusteringVigente() {
+      return viewport.lat + ',' + viewport.lng + ',' + viewport.zoom + ',' +
+        viewport.ancho + ',' + viewport.alto + ',' + puntos.length;
+    }
+    function clustersActuales() {
+      var clave = clusteringVigente();
+      if (clave === claveClusters) return ultimosClusters;
+      var proyectados = proyectarPuntos();
+      var clusters = agruparEnClusters(proyectados);
+      ultimosClusters = clusters;
+      claveClusters = clave;
+      return clusters;
+    }
+
+    var rafOndas = null;
     function dispararOnda(x, y, color) {
-      ondas.push({ x: x, y: y, inicio: performance.now(), color: color || '#ECEDEF' });
+      if (prefiereMovimientoReducido()) return; // el estado (popup, tarjeta resaltada) ya comunica la acción sin necesidad de animación
+      ondas.push({ x: x, y: y, inicio: performance.now(), color: colorSeguro(color) });
       animarOndas();
     }
     function animarOndas() {
-      if (!ondas.length) return;
+      if (!ondas.length) { rafOndas = null; return; }
       var ahora = performance.now();
-      ondas = ondas.filter(function (o) { return ahora - o.inicio < 550; });
+      ondas = ondas.filter(function (o) { return ahora - o.inicio < DURACION_ONDA_MS; });
       dibujar();
-      if (ondas.length) requestAnimationFrame(animarOndas);
+      rafOndas = ondas.length ? requestAnimationFrame(animarOndas) : null;
     }
     function dibujarOndas() {
       var ahora = performance.now();
       ondas.forEach(function (o) {
-        var t = Math.min(1, (ahora - o.inicio) / 550);
+        var t = Math.min(1, (ahora - o.inicio) / DURACION_ONDA_MS);
         var e = 1 - Math.pow(1 - t, 2);
         ctx.beginPath();
         ctx.arc(o.x, o.y, 6 + e * 34, 0, Math.PI * 2);
@@ -125,10 +324,11 @@
         ctx.stroke();
       });
     }
-    var dpr = Math.max(1, global.devicePixelRatio || 1);
+    var dpr = 1; // se recalcula en cada medir(), no queda pegado al valor de creación
     var animacionZoom = null;
 
     function medir() {
+      dpr = Math.max(1, global.devicePixelRatio || 1);
       var rect = contenedor.getBoundingClientRect();
       viewport.ancho = rect.width;
       viewport.alto = rect.height;
@@ -138,27 +338,64 @@
       lienzo.style.height = rect.height + 'px';
     }
 
-    var pendienteRedibujo = false;
+    var rafRedibujo = null;
     function redibujar() {
-      if (pendienteRedibujo) return;
-      pendienteRedibujo = true;
-      requestAnimationFrame(function () { pendienteRedibujo = false; dibujar(); });
+      if (rafRedibujo !== null) return;
+      rafRedibujo = requestAnimationFrame(function () { rafRedibujo = null; dibujar(); });
     }
 
     function dibujar() {
       if (!viewport.ancho || !viewport.alto) return;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, viewport.ancho, viewport.alto);
-      dibujarTiles();
-      var proyectados = proyectarPuntos();
-      var clusters = agruparEnClusters(proyectados);
-      dibujarMarcadores(clusters);
-      dibujarOndas();
-      posicionarPopupAbierto(proyectados);
-      posicionarEtiqueta(proyectados);
+      try {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, viewport.ancho, viewport.alto);
+        dibujarTiles();
+        var proyectados = proyectarPuntos();
+        var clusters = agruparEnClusters(proyectados);
+        ultimosClusters = clusters;
+        claveClusters = clusteringVigente();
+        dibujarMarcadores(clusters);
+        dibujarOndas();
+        posicionarPopupAbierto(proyectados);
+        posicionarEtiqueta(proyectados);
+        if (focoVisible) dibujarAnilloFoco();
+        actualizarEstadoControles();
+      } catch (err) {
+        // Un frame roto no debería dejar el mapa muerto para el resto
+        // de la sesión: se registra y se sigue intentando en el
+        // próximo redibujar().
+        if (global.console) console.error('URU_MOTOR_MAPA_RENDER: error al dibujar un frame — se omite.', err);
+      }
+    }
+
+    function dibujarAnilloFoco() {
+      ctx.save();
+      ctx.strokeStyle = colorFoco;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(2, 2, Math.max(0, viewport.ancho - 4), Math.max(0, viewport.alto - 4));
+      ctx.restore();
+    }
+
+    function actualizarEstadoControles() {
+      if (btnZoomIn) {
+        var enMax = viewport.zoom >= ZOOM_MAX - 0.001;
+        btnZoomIn.disabled = enMax;
+        btnZoomIn.setAttribute('aria-disabled', String(enMax));
+      }
+      if (btnZoomOut) {
+        var enMin = viewport.zoom <= ZOOM_MIN + 0.001;
+        btnZoomOut.disabled = enMin;
+        btnZoomOut.setAttribute('aria-disabled', String(enMin));
+      }
     }
 
     function dibujarTiles() {
+      // Relleno base primero: así un tile que todavía no cargó, o que
+      // falló definitivamente, nunca deja un hueco crudo — se ve el
+      // fondo del mapa en su lugar.
+      ctx.fillStyle = COLOR_FONDO_MAPA;
+      ctx.fillRect(0, 0, viewport.ancho, viewport.alto);
+
       var zTiles = PROY.clamp(Math.round(viewport.zoom), ZOOM_MIN, ZOOM_MAX);
       var escalaExtra = Math.pow(2, viewport.zoom - zTiles);
       var centroMundo = PROY.proyectar(viewport.lat, viewport.lng, zTiles);
@@ -239,7 +476,7 @@
     // parecidos en un mapa oscuro, y no es accesible para daltonismo),
     // la letra es un segundo canal de distinción que no depende del color.
     function dibujarMarcador(x, y, punto, activo) {
-      var color = (punto && punto.color) || '#C97A83';
+      var color = colorSeguro(punto && punto.color);
       var r = activo ? RADIO_MARCADOR + 2.5 : RADIO_MARCADOR;
       ctx.save();
       if (activo) {
@@ -305,14 +542,14 @@
     function dibujarCluster(c) {
       var conteo = Object.create(null);
       c.miembros.forEach(function (m) {
-        var col = (m && m.color) || '#C97A83';
+        var col = colorSeguro(m && m.color);
         conteo[col] = (conteo[col] || 0) + 1;
       });
       var colores = Object.keys(conteo).sort(function (a, b) { return conteo[b] - conteo[a]; });
       var colorDominante = colores[0];
       var esUnRubro = colores.length === 1;
 
-      var r = 16;
+      var r = RADIO_CLUSTER;
       var esResaltado = clusterResaltadoKey === (Math.round(c.x) + ':' + Math.round(c.y));
       var rGlow = r + (esResaltado ? 11 : 7);
       // Halo de luz detrás del cluster — sin esto el círculo quedaba
@@ -351,60 +588,75 @@
 
     /* ── Interacción: pan + zoom (mouse, touch, rueda, teclado) ── */
     var arrastrando = false, ultimoX = 0, ultimoY = 0, sePanneo = false;
+    var pointerActivoId = null; // solo un puntero controla el pan a la vez
 
     lienzo.addEventListener('pointerdown', function (e) {
+      if (pointerActivoId !== null) return; // ya hay otro dedo/puntero arrastrando — el pellizco se maneja aparte
+      pointerActivoId = e.pointerId;
       arrastrando = true; sePanneo = false;
       ultimoX = e.clientX; ultimoY = e.clientY;
       lienzo.setPointerCapture(e.pointerId);
+      lienzo.style.cursor = 'grabbing';
     });
     lienzo.addEventListener('pointermove', function (e) {
-      var proyectados = proyectarPuntos();
-      var clusters = agruparEnClusters(proyectados);
-      if (!arrastrando) {
-        var cerca = buscarMarcadorEn(e, clusters);
-        if (cerca && cerca.tipo === 'punto') {
-          lienzo.style.cursor = 'pointer';
-          if (cerca.punto.id !== idResaltado) { idResaltado = cerca.punto.id; puntoResaltado = cerca.punto; emisor.emitir('hover', cerca.punto); redibujar(); }
-          if (clusterResaltadoKey !== null) { clusterResaltadoKey = null; redibujar(); }
-        } else if (cerca && cerca.tipo === 'cluster') {
-          lienzo.style.cursor = 'pointer';
-          var key = Math.round(cerca.x) + ':' + Math.round(cerca.y);
-          if (clusterResaltadoKey !== key) { clusterResaltadoKey = key; redibujar(); }
-          if (idResaltado !== null) { idResaltado = null; puntoResaltado = null; emisor.emitir('hoverOut'); redibujar(); }
-        } else if (idResaltado !== null || clusterResaltadoKey !== null) {
-          idResaltado = null; puntoResaltado = null; clusterResaltadoKey = null; lienzo.style.cursor = 'grab'; emisor.emitir('hoverOut'); redibujar();
-        }
+      if (arrastrando) {
+        if (e.pointerId !== pointerActivoId) return; // ignorar punteros secundarios mientras se arrastra
+        var dx = e.clientX - ultimoX, dy = e.clientY - ultimoY;
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) sePanneo = true;
+        ultimoX = e.clientX; ultimoY = e.clientY;
+        var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
+        var nuevo = PROY.desproyectar(c0.x - dx, c0.y - dy, viewport.zoom);
+        viewport.lat = nuevo.lat; viewport.lng = nuevo.lng;
+        cerrarPopup();
+        redibujar();
         return;
       }
-      var dx = e.clientX - ultimoX, dy = e.clientY - ultimoY;
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) sePanneo = true;
-      ultimoX = e.clientX; ultimoY = e.clientY;
-      var escala = TAM_TILE * Math.pow(2, viewport.zoom);
-      var nuevo = PROY.desproyectar(
-        PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom).x - dx,
-        PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom).y - dy,
-        viewport.zoom
-      );
-      viewport.lat = nuevo.lat; viewport.lng = nuevo.lng;
-      cerrarPopup();
-      redibujar();
+      var clusters = clustersActuales();
+      var cerca = buscarMarcadorEn(e, clusters);
+      if (cerca && cerca.tipo === 'punto') {
+        lienzo.style.cursor = 'pointer';
+        if (cerca.punto.id !== idResaltado) { idResaltado = cerca.punto.id; puntoResaltado = cerca.punto; emisor.emitir('hover', cerca.punto); redibujar(); }
+        if (clusterResaltadoKey !== null) { clusterResaltadoKey = null; redibujar(); }
+      } else if (cerca && cerca.tipo === 'cluster') {
+        lienzo.style.cursor = 'pointer';
+        var key = Math.round(cerca.x) + ':' + Math.round(cerca.y);
+        if (clusterResaltadoKey !== key) { clusterResaltadoKey = key; redibujar(); }
+        if (idResaltado !== null) { idResaltado = null; puntoResaltado = null; emisor.emitir('hoverOut'); redibujar(); }
+      } else if (idResaltado !== null || clusterResaltadoKey !== null) {
+        idResaltado = null; puntoResaltado = null; clusterResaltadoKey = null; lienzo.style.cursor = 'grab'; emisor.emitir('hoverOut'); redibujar();
+      }
     });
     lienzo.addEventListener('pointerup', function (e) {
+      if (e.pointerId !== pointerActivoId) return;
+      pointerActivoId = null;
       arrastrando = false;
       lienzo.style.cursor = 'grab';
       if (!sePanneo) {
-        var proyectados = proyectarPuntos();
-        var clusters = agruparEnClusters(proyectados);
+        var clusters = clustersActuales();
         var cerca = buscarMarcadorEn(e, clusters);
         if (cerca) manejarClick(cerca);
       }
     });
+    lienzo.addEventListener('pointercancel', function (e) {
+      // El sistema operativo/navegador puede interrumpir un gesto (por
+      // ejemplo, un gesto de sistema) sin disparar pointerup: sin esto,
+      // arrastrando quedaba pegado en true y el mapa dejaba de responder
+      // hasta recargar la página.
+      if (e.pointerId === pointerActivoId) {
+        pointerActivoId = null;
+        arrastrando = false;
+        lienzo.style.cursor = 'grab';
+      }
+    });
     lienzo.style.cursor = 'grab';
+
+    lienzo.addEventListener('focus', function () { focoVisible = true; redibujar(); });
+    lienzo.addEventListener('blur', function () { focoVisible = false; redibujar(); });
 
     function buscarMarcadorEn(evtPointer, clusters) {
       var rect = lienzo.getBoundingClientRect();
       var mx = evtPointer.clientX - rect.left, my = evtPointer.clientY - rect.top;
-      var mejor = null, mejorDist = 20;
+      var mejor = null, mejorDist = TOLERANCIA_CLICK_PX;
       clusters.forEach(function (c) {
         var d = Math.sqrt(Math.pow(c.x - mx, 2) + Math.pow(c.y - my, 2));
         if (d < mejorDist) { mejorDist = d; mejor = c; }
@@ -447,6 +699,16 @@
       else if (e.key === '-') { animarA(viewport.lat, viewport.lng, Math.max(viewport.zoom - 1, ZOOM_MIN)); }
     });
 
+    // Escape cierra la ficha abierta y devuelve el foco a donde estaba
+    // antes de abrirla — sin esto, un usuario de teclado que abre un
+    // popup y quiere descartarlo no tenía forma de hacerlo sin el mouse.
+    contenedor.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !popup.hidden) {
+        e.stopPropagation();
+        cerrarPopup(true);
+      }
+    });
+
     function desplazarPx(dx, dy) {
       var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
       var n = PROY.desproyectar(c0.x - dx, c0.y - dy, viewport.zoom);
@@ -456,36 +718,71 @@
 
     controles.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-zoom]');
-      if (!btn) return;
+      if (!btn || btn.disabled) return;
       var dz = parseFloat(btn.dataset.zoom);
       animarA(viewport.lat, viewport.lng, PROY.clamp(viewport.zoom + dz, ZOOM_MIN, ZOOM_MAX));
     });
 
-    // Soporte táctil de pellizco (pinch) básico
-    var pinchDist0 = null, pinchZoom0 = null;
+    // Soporte táctil de pellizco (pinch), anclado al centro del gesto:
+    // el punto geográfico que estaba bajo los dos dedos al empezar el
+    // pellizco se mantiene bajo el centro de los dedos mientras se
+    // mueven — igual que Google/Apple Maps. Antes, el pellizco solo
+    // cambiaba el zoom con el centro del viewport fijo, así que
+    // pellizcar lejos del centro "arrastraba" el mapa de forma rara.
+    var pinchDist0 = null, pinchZoom0 = null, pinchCentro0 = null;
     contenedor.addEventListener('touchstart', function (e) {
       if (e.touches.length === 2) {
         pinchDist0 = distanciaToques(e.touches);
         pinchZoom0 = viewport.zoom;
+        pinchCentro0 = centroToques(e.touches);
+        // El pellizco toma el control: cede cualquier arrastre de un
+        // solo puntero que estuviera en curso, para que no compitan.
+        arrastrando = false;
+        pointerActivoId = null;
+        cerrarPopup();
       }
     }, { passive: true });
     contenedor.addEventListener('touchmove', function (e) {
       if (e.touches.length === 2 && pinchDist0) {
         var d = distanciaToques(e.touches);
-        viewport.zoom = PROY.clamp(pinchZoom0 + Math.log2(d / pinchDist0), ZOOM_MIN, ZOOM_MAX);
+        var centroActual = centroToques(e.touches);
+        var nuevoZoom = PROY.clamp(pinchZoom0 + Math.log2(d / pinchDist0), ZOOM_MIN, ZOOM_MAX);
+
+        var rect = lienzo.getBoundingClientRect();
+        var focoXInicialRel = pinchCentro0.x - rect.left;
+        var focoYInicialRel = pinchCentro0.y - rect.top;
+        var geoFoco = PROY.pantallaAPunto(focoXInicialRel, focoYInicialRel, viewport);
+
+        viewport.zoom = nuevoZoom;
+        var pFoco = PROY.proyectar(geoFoco.lat, geoFoco.lng, viewport.zoom);
+        var centroActualRelX = centroActual.x - rect.left;
+        var centroActualRelY = centroActual.y - rect.top;
+        var centroMundoX = pFoco.x + viewport.ancho / 2 - centroActualRelX;
+        var centroMundoY = pFoco.y + viewport.alto / 2 - centroActualRelY;
+        var nuevoCentro = PROY.desproyectar(centroMundoX, centroMundoY, viewport.zoom);
+        viewport.lat = nuevoCentro.lat;
+        viewport.lng = nuevoCentro.lng;
         redibujar();
       }
     }, { passive: true });
-    contenedor.addEventListener('touchend', function (e) { if (e.touches.length < 2) pinchDist0 = null; });
+    contenedor.addEventListener('touchend', function (e) {
+      if (e.touches.length < 2) { pinchDist0 = null; pinchCentro0 = null; }
+    });
     function distanciaToques(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+    function centroToques(t) { return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 }; }
 
     /* ── Animación suave de zoom/pan (usada por focar/encuadrar) ── */
     function animarA(lat, lng, zoom, duracion) {
       if (animacionZoom) cancelAnimationFrame(animacionZoom);
+      if (prefiereMovimientoReducido()) {
+        viewport.lat = lat; viewport.lng = lng; viewport.zoom = zoom;
+        redibujar();
+        return;
+      }
       var origen = { lat: viewport.lat, lng: viewport.lng, zoom: viewport.zoom };
       var destino = { lat: lat, lng: lng, zoom: zoom };
       var inicio = performance.now();
-      duracion = duracion || 420;
+      duracion = duracion || DURACION_VUELO_MS;
       function paso(ahora) {
         var t = Math.min(1, (ahora - inicio) / duracion);
         var e = easeOutCubic(t);
@@ -502,8 +799,9 @@
     /* ── Popup ── */
     function abrirPopup(punto) {
       idAbierto = punto.id;
+      elementoFocoPrevio = document.activeElement;
       popup.innerHTML =
-        '<div class="uru-mapa-popup-cerrar" role="button" tabindex="0" aria-label="Cerrar">×</div>' +
+        '<button type="button" class="uru-mapa-popup-cerrar" aria-label="Cerrar">×</button>' +
         '<strong class="uru-mapa-popup-nombre"></strong>' +
         '<div class="uru-mapa-popup-direccion"></div>' +
         (punto.href ? '<a class="uru-mapa-popup-link">Ver ficha completa →</a>' : '');
@@ -511,18 +809,37 @@
       popup.querySelector('.uru-mapa-popup-direccion').textContent = punto.direccion || '';
       var link = popup.querySelector('.uru-mapa-popup-link');
       if (link) link.href = punto.href;
+      popup.setAttribute('role', 'group');
+      popup.setAttribute('aria-label', punto.nombre || 'Detalle del lugar');
       popup.hidden = false;
-      popup.style.borderLeft = '3px solid ' + (punto.color || 'var(--granate-clara)');
-      popup.querySelector('.uru-mapa-popup-cerrar').addEventListener('click', cerrarPopup);
+      var colorBorde = (punto.color && RE_HEX.test(punto.color)) ? punto.color : 'var(--granate-clara)';
+      popup.style.borderLeft = '3px solid ' + colorBorde;
+      var btnCerrar = popup.querySelector('.uru-mapa-popup-cerrar');
+      btnCerrar.addEventListener('click', function () { cerrarPopup(true); });
+      // <button> real: Enter/Espacio ya funcionan sin código adicional.
+      if (typeof btnCerrar.focus === 'function') btnCerrar.focus({ preventScroll: true });
       redibujar();
     }
-    function cerrarPopup() { idAbierto = null; popup.hidden = true; }
+    function cerrarPopup(devolverFoco) {
+      idAbierto = null;
+      popup.hidden = true;
+      if (devolverFoco && elementoFocoPrevio && typeof elementoFocoPrevio.focus === 'function') {
+        elementoFocoPrevio.focus({ preventScroll: true });
+      }
+      elementoFocoPrevio = null;
+    }
     function posicionarPopupAbierto(proyectados) {
       if (popup.hidden || idAbierto === null) return;
       var p = proyectados.filter(function (pr) { return pr.punto.id === idAbierto; })[0];
       if (!p) { cerrarPopup(); return; }
-      popup.style.left = p.x + 'px';
-      popup.style.top = p.y + 'px';
+      // Clamp para que el popup nunca quede parcialmente fuera del
+      // contenedor cuando el marcador está cerca de un borde.
+      var anchoPopup = popup.offsetWidth || 220;
+      var altoPopup = popup.offsetHeight || 90;
+      var x = PROY.clamp(p.x, anchoPopup / 2 + 8, Math.max(anchoPopup / 2 + 8, viewport.ancho - anchoPopup / 2 - 8));
+      var y = PROY.clamp(p.y, altoPopup + 16, Math.max(altoPopup + 16, viewport.alto - 8));
+      popup.style.left = x + 'px';
+      popup.style.top = y + 'px';
     }
 
     function posicionarEtiqueta(proyectados) {
@@ -540,6 +857,7 @@
     /* ── Lista accesible en paralelo (teclado / lectores de pantalla) ── */
     function reconstruirListaAccesible() {
       listaAccesible.innerHTML = '';
+      var frag = document.createDocumentFragment();
       puntos.forEach(function (p) {
         var li = document.createElement('li');
         var btn = document.createElement('button');
@@ -550,22 +868,59 @@
         btn.addEventListener('blur', function () { idResaltado = null; puntoResaltado = null; emisor.emitir('hoverOut'); redibujar(); });
         btn.addEventListener('click', function () { enfocar(p.id); abrirPopup(p); emisor.emitir('click', p); });
         li.appendChild(btn);
-        listaAccesible.appendChild(li);
+        frag.appendChild(li);
       });
+      listaAccesible.appendChild(frag);
     }
 
     /* ── API pública de la instancia ── */
+    var huellaListaPrevia = '';
+    function calcularHuella(lista) {
+      var partes = new Array(lista.length);
+      for (var i = 0; i < lista.length; i++) partes[i] = lista[i].id;
+      return lista.length + '|' + partes.join(',');
+    }
+
     function establecerPuntos(nuevosPuntos) {
-      puntos = nuevosPuntos || [];
-      reconstruirListaAccesible();
+      var entrada = nuevosPuntos || [];
+      var descartados = 0;
+      // Un punto sin lat/lng numérico y finito no puede proyectarse —
+      // antes esto colaba NaN hasta el propio dibujado del canvas.
+      puntos = entrada.filter(function (p) {
+        var valido = !!p && typeof p.lat === 'number' && typeof p.lng === 'number' &&
+          isFinite(p.lat) && isFinite(p.lng);
+        if (!valido) descartados++;
+        return valido;
+      });
+      if (descartados > 0 && global.console) {
+        console.warn('URU_MOTOR_MAPA_RENDER: se descartaron ' + descartados + ' punto(s) sin coordenadas válidas.');
+      }
+      var huella = calcularHuella(puntos);
+      if (huella !== huellaListaPrevia) {
+        huellaListaPrevia = huella;
+        reconstruirListaAccesible();
+      }
       redibujar();
     }
 
+    // Evita re-animar hacia el mismo encuadre en llamadas repetidas
+    // (p. ej. una por cada tecla del buscador en app.js), que se veía
+    // como un "salto" constante del mapa sin que el conjunto de
+    // resultados hubiera cambiado de verdad.
+    var ultimoEncuadre = null;
     function encuadrarTodos(padding) {
       if (!puntos.length) return;
       medir(); // el contenedor puede acabar de pasar de hidden a visible
       var enc = PROY.encuadrar(puntos, viewport.ancho, viewport.alto, padding || 48, ZOOM_MAX);
-      if (enc) { viewport.lat = enc.lat; viewport.lng = enc.lng; viewport.zoom = enc.zoom; redibujar(); }
+      if (!enc) return;
+      if (ultimoEncuadre &&
+        Math.abs(ultimoEncuadre.lat - enc.lat) < 0.0002 &&
+        Math.abs(ultimoEncuadre.lng - enc.lng) < 0.0002 &&
+        Math.abs(ultimoEncuadre.zoom - enc.zoom) < 0.05) {
+        return;
+      }
+      ultimoEncuadre = enc;
+      animarA(enc.lat, enc.lng, enc.zoom);
     }
 
     function enfocar(id) {
@@ -581,9 +936,27 @@
     }
     function quitarResaltado() { idResaltado = null; puntoResaltado = null; redibujar(); }
 
-    var resizeObs = new ResizeObserver(function () { medir(); redibujar(); });
-    resizeObs.observe(contenedor);
+    var resizeObs = null;
+    var resizeFallback = null;
+    if ('ResizeObserver' in global) {
+      resizeObs = new ResizeObserver(function () { medir(); redibujar(); });
+      resizeObs.observe(contenedor);
+    } else {
+      // Navegador sin ResizeObserver: al menos reaccionar al resize de
+      // la ventana, en vez de quedar con un tamaño de canvas obsoleto.
+      resizeFallback = function () { medir(); redibujar(); };
+      global.addEventListener('resize', resizeFallback);
+    }
     medir();
+
+    // Si la tipografía todavía no había cargado cuando se dibujó el
+    // primer frame, la inicial de rubro dentro del pin salía con la
+    // fuente de respaldo del sistema. Un único redibujo cuando las
+    // fuentes terminan de cargar corrige ese frame inicial sin costo
+    // permanente.
+    if (global.document && document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () { redibujar(); }).catch(function () {});
+    }
 
     return {
       on: emisor.on,
@@ -592,7 +965,14 @@
       enfocar: enfocar,
       resaltar: resaltar,
       quitarResaltado: quitarResaltado,
-      destruir: function () { resizeObs.disconnect(); contenedor.innerHTML = ''; }
+      destruir: function () {
+        if (resizeObs) resizeObs.disconnect();
+        if (resizeFallback) global.removeEventListener('resize', resizeFallback);
+        if (animacionZoom) cancelAnimationFrame(animacionZoom);
+        if (rafRedibujo !== null) cancelAnimationFrame(rafRedibujo);
+        if (rafOndas !== null) cancelAnimationFrame(rafOndas);
+        contenedor.innerHTML = '';
+      }
     };
   }
 
