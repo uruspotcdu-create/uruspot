@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — design-system/tokens.css
+   Única fuente de verdad de color, tipografía, espaciado, radio,
+   sombra y movimiento. Ninguna pantalla define estos valores por su
+   cuenta — si algo no está acá, se agrega acá primero, nunca inline
+   en una página.
+
+   Cómo se usa: <link rel="stylesheet" href="/design-system/tokens.css">
+   antes que cualquier otro CSS del sitio (motor, componentes o
+   estilos propios de una página).
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root{
+
+  /* ── Color: superficie e ink (modo oscuro, el modo real del producto) ── */
+  --color-fondo:        #0A0D13;
+  --color-fondo-2:      #10141C;
+  --color-tinta:        #ECEDEF;
+  --color-tinta-60:     rgba(236,237,239,.62);
+  --color-tinta-30:     rgba(236,237,239,.26);
+  --color-linea:        rgba(148,155,171,.16);
+  --color-linea-fuerte: rgba(148,155,171,.30);
+
+  /* Color de marca */
+  --color-granate:        #9C3A46;
+  --color-granate-clara:  #C97A83;
+
+  /* Color por rubro (ver rubros-meta.js — misma paleta, una sola vez) */
+  --color-rubro-alojamiento:        #E0C46C;
+  --color-rubro-belleza:            #C58FCE;
+  --color-rubro-compras:            #D9A05B;
+  --color-rubro-deporte:            #E8A33D;
+  --color-rubro-educacion:          #7EA6E0;
+  --color-rubro-finanzas:           #6FA8DC;
+  --color-rubro-gastronomia:        #C97A83;
+  --color-rubro-mascotas:           #8FBF7F;
+  --color-rubro-naturaleza:         #6FBF8B;
+  --color-rubro-oficios-tecnicos:   #ABAFB8;
+  --color-rubro-patrimonio:         #C9A15A;
+  --color-rubro-salud:              #7FC8A9;
+  --color-rubro-servicios-publicos: #8296B0;
+  --color-rubro-transporte:         #D98B5F;
+
+  /* Semántico: estado abierto/cerrado — el único uso legítimo de
+     verde/rojo puro en toda la plataforma, reservado para esto. */
+  --color-estado-abierto:        #40916C;
+  --color-estado-abierto-fondo:  rgba(64,145,108,.15);
+  --color-estado-cerrado:        #C1121F;
+  --color-estado-cerrado-fondo:  rgba(193,18,31,.12);
+
+  /* ── Tipografía ── */
+  --f-display: 'Fraunces', serif;       /* títulos, nombres de lugar */
+  --f-ui:      'IBM Plex Sans', sans-serif; /* interfaz, cuerpo */
+  --f-dato:    'IBM Plex Mono', monospace;  /* metadatos: rubro, hora, distancia */
+
+  --tipo-display-lg: 500 clamp(28px,4vw,42px)/1.15 var(--f-display);
+  --tipo-display-md: 500 22px/1.25 var(--f-display);
+  --tipo-display-sm: 500 19px/1.3 var(--f-display);
+  --tipo-cuerpo:      400 15px/1.6 var(--f-ui);
+  --tipo-cuerpo-sm:   400 13.5px/1.5 var(--f-ui);
+  --tipo-dato:        400 12px/1.4 var(--f-dato);
+  --tipo-dato-xs:     400 10.5px/1.3 var(--f-dato);
+
+  /* ── Espaciado: escala 4/8/12/16/24/32/48/64 — nada fuera de esta escala ── */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+  --esp-12: 48px;
+  --esp-16: 64px;
+
+  /* ── Radio ── */
+  --radio-sm: 6px;
+  --radio-md: 8px;
+  --radio-lg: 10px;
+  --radio-full: 999px;
+
+  /* ── Sombra ── */
+  --sombra-baja:  0 4px 14px rgba(0,0,0,.4);
+  --sombra-media: 0 8px 20px rgba(0,0,0,.35);
+  --sombra-foco:  0 0 0 1px var(--color-granate-clara), 0 8px 20px rgba(156,58,70,.18);
+
+  /* ── Movimiento ── */
+  --dur-rapido: .15s;
+  --dur-media:  .2s;
+  --dur-lenta:  .42s;
+  --easing-estandar: cubic-bezier(.33,1,.68,1);
+
+  /* ── Breakpoints (documentales — no usables como var() dentro de
+     @media, se repiten como literal 720px/960px donde haga falta,
+     pero quedan documentados acá para que no se inventen valores
+     nuevos) ── */
+  --bp-mobile: 720px;
+  --bp-tablet: 960px;
+}
+
+/* ── Reset mínimo compartido ── */
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  background:var(--color-fondo); color:var(--color-tinta);
+  font-family:var(--f-ui); line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+a{ color:inherit; }
+
+/* ── Contenedor compartido por toda página del producto ── */
+.envoltorio{ max-width:1000px; margin:0 auto; padding:0 var(--esp-8); }
+@media (max-width:720px){ .envoltorio{ padding:0 var(--esp-4); } }
+
+/* ── Respeto por reduced-motion en toda la plataforma ── */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+}
