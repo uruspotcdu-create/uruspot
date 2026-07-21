@@ -1,0 +1,45 @@
+/* ═══════════════════════════════════════════════════════════════════
+   css/boton.css
+   Reemplaza: #btnVerGuardados, .tarjeta-btn, .uru-mapa-btn, .btn/.btn-*
+   de las fichas de local — eran cuatro sistemas de botón distintos
+   para la misma idea. Ahora es uno, con variantes.
+   Requiere tokens.css cargado antes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--esp-2);
+  font-family:var(--f-ui); font-size:12.5px; font-weight:500;
+  padding:7px var(--esp-3); border-radius:var(--radio-sm);
+  border:1px solid var(--color-linea-fuerte); background:transparent; color:var(--color-tinta-60);
+  cursor:pointer; text-decoration:none; white-space:nowrap;
+  transition:color var(--dur-media) var(--easing-estandar),
+             border-color var(--dur-media) var(--easing-estandar),
+             background var(--dur-media) var(--easing-estandar),
+             transform var(--dur-rapido) var(--easing-estandar);
+}
+.btn:hover{ color:var(--color-tinta); border-color:var(--color-granate-clara); }
+.btn:active{ transform:translateY(1px); }
+.btn:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:1px; }
+
+/* Variante principal: acción de mayor jerarquía en la pantalla
+   (ej. "tu lista guardada", "cómo llegar") */
+.btn--primario{ background:var(--color-granate); border-color:var(--color-granate); color:var(--color-tinta); }
+.btn--primario:hover{ background:var(--color-granate-clara); border-color:var(--color-granate-clara); color:var(--color-fondo); }
+
+/* Variante activa/marcada (ej. favorito guardado) */
+.btn--activo{ color:var(--color-granate-clara); border-color:var(--color-granate-clara); }
+
+/* Variante ícono cuadrado (ej. controles de zoom del mapa) */
+.btn--icono{
+  width:34px; height:34px; padding:0; border-radius:0;
+  background:rgba(16,20,28,.92); color:var(--color-tinta); border:none;
+  font-size:16px; line-height:1;
+}
+.btn--icono:hover{ background:rgba(201,122,131,.22); }
+.btn--icono:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:-2px; }
+
+/* Grupo de íconos pegados (ej. +/- del mapa) */
+.btn-grupo--icono{
+  display:flex; flex-direction:column; gap:1px; border-radius:var(--radio-md);
+  overflow:hidden; box-shadow:var(--sombra-baja);
+}
