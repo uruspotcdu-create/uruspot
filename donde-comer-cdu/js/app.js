@@ -19,12 +19,14 @@
   var porId = Object.create(null);
   var estado = null;
   var consultaActual = '';
+  var filtroRubroActivo = null; // grupo activo del índice "Por rubro", o null = todos
   var permanenciaTimer = null;
   var ultimaRegionRenderizada = '';
 
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
-   'mapaTextura', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados']
+   'mapaTextura', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados',
+   'listaRubros']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
   /* ── 1. Arranque de contexto ── */
@@ -45,6 +47,7 @@
         return reg;
       });
       cargarDetallesEnSegundoPlano();
+      pintarRubros();
       render();
     })
     .catch(function (err) {
@@ -149,6 +152,19 @@
     });
   }
 
+  if (DOM.listaRubros) {
+    DOM.listaRubros.addEventListener('click', function (e) {
+      var chip = e.target.closest('[data-rubro]');
+      if (!chip) return;
+      var rubro = chip.dataset.rubro;
+      filtroRubroActivo = (filtroRubroActivo === rubro) ? null : rubro;
+      estado.sesion.curaduriaActiva = false; // filtrar por rubro siempre vuelve a la vista "todos"
+      pintarRubros();
+      render();
+      if (DOM.tituloRegion) DOM.tituloRegion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
   if (DOM.btnVerGuardados) {
     DOM.btnVerGuardados.addEventListener('click', function () {
       estado.sesion.curaduriaActiva = true;
@@ -200,19 +216,26 @@
     actualizarMapaTextura();
 
     var lista;
-    if (reg.nombre === 'guia') {
-      lista = EXPO.recortePorIniciativaPropia(REGISTRO, estado, 'guia');
-      pintarTarjetas(lista, favoritos, { origen: 'iniciativa_propia', narrativa: true });
-    } else if (reg.nombre === 'exploracion') {
-      lista = EXPO.recortePorIniciativaPropia(REGISTRO, estado, 'exploracion');
-      pintarTarjetas(lista, favoritos, { origen: 'iniciativa_propia', narrativa: false });
-    } else if (reg.nombre === 'accionDirecta') {
-      lista = EXPO.resultadosPorAccionExplicita(REGISTRO, consultaActual);
-      pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false });
-    } else if (reg.nombre === 'curaduria') {
+    if (reg.nombre === 'curaduria') {
       var idsGuardados = Object.keys(favoritos).filter(function (id) { return favoritos[id]; });
       lista = EXPO.coleccionCurada(REGISTRO, idsGuardados);
-      pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá dos lugares seguidos y esto se convierte en tu lista.' });
+      pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.' });
+    } else {
+      // Antes acá se recortaba a 4-10 lugares "por iniciativa propia"
+      // (motor-exposicion.js: recortePorIniciativaPropia). Se retiró
+      // a pedido: el catálogo completo (+1400 lugares) tiene que verse
+      // siempre, no solo cuando alguien escribe una búsqueda. Ahora
+      // se muestra siempre el padrón entero, acotado únicamente por lo
+      // que el usuario pide de forma explícita: texto de búsqueda y/o
+      // rubro elegido en "Por rubro". recortePorIniciativaPropia() y
+      // el presupuesto de exposición (motor-config.js) quedan sin usar
+      // acá — no se borraron por si en el futuro se quiere retomar
+      // una vista "sugerido" separada de esta.
+      lista = EXPO.resultadosPorAccionExplicita(REGISTRO, consultaActual);
+      if (filtroRubroActivo) {
+        lista = lista.filter(function (l) { return l.grupo === filtroRubroActivo; });
+      }
+      pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false });
     }
     actualizarMapaHerramienta(reg.nombre, lista || []);
   }
@@ -224,17 +247,44 @@
       DOM.rolActual.textContent = NOMBRES[rol];
     }
     if (!DOM.tituloRegion || !DOM.subtituloRegion) return;
-    var COPY = {
-      guia: ['Para empezar', 'Cuatro lugares para arrancar. Cuantas más veces vuelvas, menos hace falta que te los muestre así.'],
-      exploracion: ['Para explorar', 'Un poco más de margen para que algo te sorprenda.'],
-      accionDirecta: reg.variante === 'nombrada'
-        ? ['Resultados', 'Esto es lo que coincide con lo que escribiste.']
-        : ['Directo al grano', 'Nada de narrativa: la respuesta más clara que tenemos.'],
-      curaduria: ['Tu lista', 'Lo que guardaste, sin recorte ni rotación.']
-    };
-    var c = COPY[reg.nombre] || COPY.guia;
-    DOM.tituloRegion.textContent = c[0];
-    DOM.subtituloRegion.textContent = c[1];
+
+    if (reg.nombre === 'curaduria') {
+      DOM.tituloRegion.textContent = 'Tu lista';
+      DOM.subtituloRegion.textContent = 'Lo que guardaste, sin recorte ni rotación.';
+      return;
+    }
+
+    var rubroMeta = filtroRubroActivo && window.URU_RUBROS_META ? window.URU_RUBROS_META[filtroRubroActivo] : null;
+    if (consultaActual.trim()) {
+      DOM.tituloRegion.textContent = 'Resultados';
+      DOM.subtituloRegion.textContent = rubroMeta
+        ? 'Coincidencias con "' + consultaActual.trim() + '" en ' + rubroMeta[0] + '.'
+        : 'Esto es lo que coincide con lo que escribiste.';
+    } else if (rubroMeta) {
+      DOM.tituloRegion.textContent = rubroMeta[0];
+      DOM.subtituloRegion.textContent = 'Todos los lugares verificados de este rubro.';
+    } else {
+      DOM.tituloRegion.textContent = 'Todos los lugares';
+      DOM.subtituloRegion.textContent = 'El padrón completo, siempre visible. Buscá o filtrá por rubro para acotar.';
+    }
+  }
+
+  function pintarRubros() {
+    if (!DOM.listaRubros || !REGISTRO.length || !window.URU_RUBROS_META) return;
+    var conteo = Object.create(null);
+    REGISTRO.forEach(function (l) { conteo[l.grupo] = (conteo[l.grupo] || 0) + 1; });
+    var claves = Object.keys(window.URU_RUBROS_META)
+      .filter(function (k) { return conteo[k]; })
+      .sort(function (a, b) { return conteo[b] - conteo[a]; });
+
+    DOM.listaRubros.innerHTML = claves.map(function (k) {
+      var meta = window.URU_RUBROS_META[k];
+      var activo = filtroRubroActivo === k;
+      return '<button type="button" class="chip' + (activo ? ' chip--activo' : '') + '" data-rubro="' + k + '" style="--chip-color:' + meta[2] + '">' +
+        '<span class="chip__punto" style="background:' + meta[2] + '"></span>' +
+        escapeHTML(meta[0]) + '<span class="chip__conteo">' + conteo[k] + '</span>' +
+        '</button>';
+    }).join('');
   }
 
   function pintarTarjetas(lista, favoritos, opts) {
