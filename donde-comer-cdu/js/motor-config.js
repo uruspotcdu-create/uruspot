@@ -131,13 +131,17 @@
       // compiten por atención — solo dan la certeza subconsciente de
       // que esto es un lugar real. No necesita mostrar todo el
       // universo para cumplir esa función.
-      herramientaRecorte: 10
-      // El mapa-herramienta aparece en cualquier región (Guía,
-      // Exploración, Acción Directa, Curaduría) apenas el recorte
-      // activo tenga algo georreferenciado — ver motor-mapa.js:
-      // debeMostrarHerramienta(). Nunca depende de que haya búsqueda,
-      // y nunca muestra más pines que el mismo recorte acotado que ya
-      // está en pantalla como tarjetas — nunca 1.468 pines.
+      herramientaRecorte: 300
+      // Antes en 10, acoplado al recorte de tarjetas de 4-10 lugares
+      // que existía en Guía/Exploración (ver app.js: ese recorte se
+      // sacó, la lista de tarjetas ahora muestra el padrón completo
+      // salvo búsqueda/filtro/guardados). 300 es un techo de
+      // rendimiento para el <canvas> del mapa, no una decisión de
+      // producto: motor-render.js clusteriza por superposición real
+      // en pantalla, así que un número más alto sigue siendo legible.
+      // Si en el futuro un rubro/búsqueda devuelve más de 300 puntos
+      // georreferenciados, el mapa mostrará los primeros 300 del
+      // recorte — recalibrar acá si eso resulta notorio.
     },
 
     /* ── 7. Frontera con la monetización (Blueprint v2, sección 2) ──
