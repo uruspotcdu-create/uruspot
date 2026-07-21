@@ -19,6 +19,24 @@
   transform:rotate(-45deg); flex:none;
 }
 
+/* Variante clicable: índice "Por rubro" (#listaRubros, ver app.js:
+   pintarRubros). Mismo .chip/.chip__punto de arriba, como <button>. */
+button.chip{
+  appearance:none; cursor:pointer; background:var(--color-fondo-2);
+  border:1px solid var(--color-linea-fuerte); border-radius:var(--radio-full);
+  padding:7px var(--esp-3); color:var(--color-tinta-60); font:var(--tipo-dato);
+  transition:border-color var(--dur-rapido), color var(--dur-rapido), background var(--dur-rapido);
+}
+button.chip:hover{ color:var(--color-tinta); border-color:var(--chip-color,var(--color-granate-clara)); }
+button.chip:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:1px; }
+button.chip.chip--activo{
+  color:var(--color-tinta); background:var(--color-fondo);
+  border-color:var(--chip-color,var(--color-granate-clara));
+  box-shadow:0 0 0 1px var(--chip-color,var(--color-granate-clara)) inset;
+}
+.chip__conteo{ color:var(--color-tinta-30); font-variant-numeric:tabular-nums; }
+button.chip.chip--activo .chip__conteo{ color:var(--color-tinta-60); }
+
 .mapa-leyenda{ display:flex; flex-wrap:wrap; gap:var(--esp-2) 14px; margin:14px 0 var(--esp-8); }
 .mapa-leyenda[hidden]{ display:none; }
 
