@@ -62,7 +62,30 @@
 .tarjeta-nombre{ font:var(--tipo-display-sm); margin-top:var(--esp-1); }
 .tarjeta-direccion{ color:var(--color-tinta-60); font-size:13.5px; margin-top:var(--esp-1); }
 
+/* Mini-descripción específica del lugar (lugares-detalles.json →
+   descripcion). Reemplaza la dirección en la tarjeta cuando existe:
+   una sola línea, más útil para decidir en menos de 5 segundos que
+   la calle y el número. Si no hay descripción propia todavía, la
+   tarjeta sigue mostrando la dirección — nunca un texto inventado. */
+.tarjeta-mini{
+  color:var(--color-tinta-80, var(--color-tinta-60)); font-size:13.5px;
+  margin-top:var(--esp-1); font-style:italic;
+}
+/* Genérica (grupo · categoría, sin descripción propia todavía):
+   sin cursiva y algo más apagada — para que quede claro, con solo
+   mirarla, que es dato de categoría y no una frase escrita para
+   ese lugar puntual. */
+.tarjeta-mini--generica{ font-style:normal; opacity:.75; }
+
 .tarjeta-acciones{ display:flex; gap:var(--esp-2); margin-top:var(--esp-4); flex-wrap:wrap; }
+
+/* Acciones de un solo toque con datos reales (mapa exacto por
+   coordenada, teléfono real, compartir el link de ficha). Mismo
+   componente .tarjeta-btn, con un acento de color sutil por tipo de
+   acción para que se distingan de un vistazo sin gritar. */
+.tarjeta-btn--maps:hover{ color:#7fb8e0; border-color:#7fb8e0; background:rgba(127,184,224,.12); }
+.tarjeta-btn--tel:hover{ color:#8fd0a0; border-color:#8fd0a0; background:rgba(143,208,160,.12); }
+.tarjeta-btn--compartir{ padding-left:10px; padding-right:10px; }
 
 /* app.js emite class="tarjeta-btn" directamente (no "btn") — mismo
    componente visual que boton.css, pero declarado acá explícitamente
