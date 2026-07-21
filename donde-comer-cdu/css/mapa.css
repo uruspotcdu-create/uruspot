@@ -14,13 +14,25 @@
   border:1px solid var(--glass-borde);
   border-radius:18px;
   overflow:hidden;
-  box-shadow:var(--sombra-vidrio);
+  box-shadow:var(--sombra-vidrio), 0 0 60px -24px rgba(201,122,131,.35);
   height:420px;
   position:relative;
   animation:uru-scale-in var(--dur-lentisima) var(--easing-rebote) backwards;
+  transition:box-shadow var(--dur-media);
 }
+#mapaHerramienta:hover{ box-shadow:var(--sombra-vidrio), 0 0 70px -20px rgba(201,122,131,.5); }
 #mapaHerramienta[hidden]{ display:none; }
 @media (max-width:720px){ #mapaHerramienta{ min-height:300px; } }
+
+/* Viñeta suave en los bordes del canvas: sin esto el basemap claro
+   (Voyager) corta seco contra el marco oscuro de la tarjeta y se ve
+   plano/apagado. Con la viñeta, el mapa "flota" dentro del marco en
+   vez de quedar pegado — mismo recurso que usan Google/Apple Maps
+   quality dentro de tarjetas oscuras. */
+.uru-mapa::after{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
+  box-shadow:inset 0 0 46px 6px rgba(6,8,12,.55);
+}
 
 .uru-mapa{ position:relative; width:100%; height:100%; }
 .uru-mapa-lienzo{
