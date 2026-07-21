@@ -1,0 +1,101 @@
+/* ═══════════════════════════════════════════════════════════════════
+   design-system/componentes/mapa.css
+   El motor de mapa propio (js/motor-render.js) sigue viviendo en
+   /motor — esto es solo su piel visual, movida acá para que cualquier
+   pantalla que en el futuro use el mapa (home, landing de rubro) la
+   reciba gratis en vez de copiar este bloque de nuevo.
+   Requiere tokens.css cargado antes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+#mapaHerramienta{
+  margin:var(--esp-6) 0 var(--esp-8);
+  padding:0;
+  background:var(--color-fondo-2);
+  border:1px solid var(--color-linea);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--sombra-media);
+  height:420px;
+  position:relative;
+}
+#mapaHerramienta[hidden]{ display:none; }
+@media (max-width:720px){ #mapaHerramienta{ min-height:300px; } }
+
+.uru-mapa{ position:relative; width:100%; height:100%; }
+.uru-mapa-lienzo{
+  display:block; width:100%; height:100%; touch-action:none; outline:none;
+  filter:brightness(1.1) saturate(1.2) contrast(1.04);
+}
+.uru-mapa-lienzo:focus-visible{ box-shadow:inset 0 0 0 2px var(--color-granate-clara); }
+
+.uru-mapa-controles{
+  position:absolute; top:var(--esp-3); right:var(--esp-3);
+  display:flex; flex-direction:column; gap:1px; border-radius:var(--radio-md);
+  overflow:hidden; box-shadow:var(--sombra-baja);
+}
+.uru-mapa-btn{
+  width:32px; height:32px; border:none; background:var(--color-fondo-2); color:var(--color-tinta);
+  font-family:var(--f-ui); font-size:17px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:background var(--dur-rapido);
+}
+.uru-mapa-btn:hover{ background:rgba(201,122,131,.22); }
+.uru-mapa-btn:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:-2px; }
+
+.uru-mapa-atribucion{
+  position:absolute; bottom:6px; right:10px; font:var(--tipo-dato-xs);
+  color:var(--color-tinta-30); background:rgba(10,13,19,.55); padding:2px 6px; border-radius:4px; pointer-events:none;
+}
+.uru-mapa-atribucion a{ pointer-events:auto; color:var(--color-tinta-30); }
+
+.uru-mapa-popup{
+  position:absolute; transform:translate(-50%,calc(-100% - 18px)); min-width:200px; max-width:260px;
+  background:var(--color-fondo-2); border:1px solid var(--color-linea-fuerte); border-radius:var(--radio-lg);
+  padding:var(--esp-3) var(--esp-4); box-shadow:0 10px 28px rgba(0,0,0,.45); font-size:13px;
+  animation:uru-popup-in .16s ease-out; z-index:5;
+}
+@keyframes uru-popup-in{ from{ opacity:0; transform:translate(-50%,calc(-100% - 8px)); } to{ opacity:1; transform:translate(-50%,calc(-100% - 18px)); } }
+.uru-mapa-popup::after{
+  content:""; position:absolute; left:50%; bottom:-7px; transform:translateX(-50%);
+  width:12px; height:12px; background:var(--color-fondo-2);
+  border-right:1px solid var(--color-linea-fuerte); border-bottom:1px solid var(--color-linea-fuerte);
+  clip-path:polygon(0 0, 100% 0, 50% 100%);
+}
+.uru-mapa-popup-cerrar{ position:absolute; top:6px; right:8px; cursor:pointer; color:var(--color-tinta-60); font-size:16px; line-height:1; padding:2px 4px; }
+.uru-mapa-popup-cerrar:hover{ color:var(--color-tinta); }
+.uru-mapa-popup-nombre{ display:block; font:var(--tipo-display-sm); font-size:15px; color:var(--color-tinta); padding-right:16px; }
+.uru-mapa-popup-direccion{ color:var(--color-tinta-60); margin-top:4px; font-size:12.5px; }
+.uru-mapa-popup-link{ display:inline-block; margin-top:10px; color:var(--color-granate-clara); text-decoration:none; font-weight:500; font-size:12.5px; }
+.uru-mapa-popup-link:hover{ text-decoration:underline; }
+
+.uru-mapa-etiqueta{
+  position:absolute; transform:translate(-50%,calc(-100% - 16px)); pointer-events:none;
+  background:rgba(10,13,19,.92); color:var(--color-tinta); font-family:var(--f-ui); font-weight:500;
+  font-size:12px; padding:5px 10px; border-radius:var(--radio-sm); white-space:nowrap;
+  border:1px solid var(--color-linea-fuerte); z-index:4;
+}
+
+/* Lista paralela accesible: invisible visualmente, navegable por
+   teclado y lectores de pantalla. Es el puente de accesibilidad al
+   canvas — no tocar, es de lo mejor resuelto del repo. */
+.uru-mapa-lista-accesible{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+.uru-mapa-item-accesible:focus{
+  position:fixed; width:auto; height:auto; clip:auto; white-space:normal; z-index:50;
+  top:8px; left:8px; background:var(--color-fondo-2); color:var(--color-tinta); border:1px solid var(--color-granate-clara);
+  border-radius:var(--radio-sm); padding:8px 12px; font-size:13px;
+}
+
+/* Info didáctica sobre el mapa */
+.mapa-info{
+  display:flex; gap:var(--esp-4); margin:var(--esp-4) 0; padding:14px var(--esp-4);
+  background:rgba(201,122,131,.1); border:1px solid rgba(201,122,131,.3);
+  border-radius:var(--radio-md); font-size:13px; color:var(--color-tinta-60); align-items:center;
+}
+.mapa-info[hidden]{ display:none; }
+.mapa-info::before{ content:"🗺️"; font-size:18px; }
+
+/* Textura ambiental de fondo (no interactiva, ver motor-mapa.js) */
+#mapaTextura{
+  position:relative; height:110px; margin:var(--esp-6) 0; border-radius:var(--radio-lg); overflow:hidden;
+  background:linear-gradient(180deg,var(--color-fondo-2),var(--color-fondo)); border:1px solid var(--color-linea); pointer-events:none;
+}
+.punto-textura{ position:absolute; width:3px; height:3px; border-radius:50%; background:var(--color-tinta-30); }
