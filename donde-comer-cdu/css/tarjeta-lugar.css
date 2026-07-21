@@ -18,26 +18,46 @@
 }
 
 .tarjeta{
-  background:var(--color-fondo-2); border:1px solid var(--color-linea);
+  position:relative; isolation:isolate; overflow:hidden;
+  background:var(--glass-bg); border:1px solid var(--glass-borde);
   border-radius:var(--radio-lg); padding:var(--esp-4);
-  transition:opacity var(--dur-media), transform var(--dur-media),
-             border-color var(--dur-media), box-shadow var(--dur-media);
+  backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
+  box-shadow:var(--sombra-vidrio);
+  animation:uru-fade-up var(--dur-lenta) var(--easing-rebote) backwards;
+  transition:opacity var(--dur-media), transform var(--dur-media) var(--easing-estandar),
+             border-color var(--dur-media), box-shadow var(--dur-media) var(--easing-estandar);
+}
+/* Franja superior con el color del rubro (app.js fija --chip-color
+   inline por tarjeta) — mismo idioma visual que el pin del mapa y el
+   chip de la leyenda. */
+.tarjeta::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:3px;
+  background:linear-gradient(90deg, var(--chip-color, var(--color-granate-clara)), transparent 85%);
+  opacity:.9;
+}
+.tarjeta::after{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:-1;
+  background:var(--gradiente-superficie);
+}
+.tarjeta:hover{
+  transform:translateY(-4px); border-color:var(--glass-borde-hover);
+  box-shadow:var(--sombra-vidrio), 0 0 28px -10px var(--chip-color, rgba(201,122,131,.5));
 }
 .tarjeta--narrativa{ grid-column:span 2; }
 @media (max-width:720px){ .tarjeta--narrativa{ grid-column:span 1; } }
-.tarjeta.descartada{ opacity:.25; transform:scale(.98); pointer-events:none; }
+.tarjeta.descartada{ opacity:0; transform:scale(.92); pointer-events:none; }
 
 /* Selección sincronizada con el mapa: misma tarjeta que corresponde
    al punto resaltado/enfocado, mismo lenguaje visual que :hover. */
 .tarjeta--resaltada{
   border-color:var(--color-granate-clara);
-  box-shadow:var(--sombra-foco);
-  transform:translateY(-1px);
+  box-shadow:var(--sombra-vidrio), var(--sombra-glow);
+  transform:translateY(-4px);
 }
 
 .tarjeta-rubro{
   font:var(--tipo-dato-xs); letter-spacing:.08em; text-transform:uppercase;
-  color:var(--color-granate-clara);
+  color:var(--chip-color, var(--color-granate-clara));
 }
 .tarjeta-nombre{ font:var(--tipo-display-sm); margin-top:var(--esp-1); }
 .tarjeta-direccion{ color:var(--color-tinta-60); font-size:13.5px; margin-top:var(--esp-1); }
@@ -48,15 +68,26 @@
    componente visual que boton.css, pero declarado acá explícitamente
    para no depender de que el markup lleve dos clases. */
 .tarjeta-btn{
-  font-family:var(--f-ui); font-size:12.5px; border:1px solid var(--color-linea-fuerte);
-  background:transparent; color:var(--color-tinta-60); padding:7px var(--esp-3);
-  border-radius:var(--radio-sm); cursor:pointer; text-decoration:none;
-  transition:color var(--dur-media), border-color var(--dur-media);
+  font-family:var(--f-ui); font-size:12.5px; border:1px solid var(--glass-borde);
+  background:rgba(10,13,19,.35); color:var(--color-tinta-60); padding:7px var(--esp-3);
+  border-radius:var(--radio-full); cursor:pointer; text-decoration:none;
+  transition:color var(--dur-media), border-color var(--dur-media), transform var(--dur-rapido), background var(--dur-media);
 }
-.tarjeta-btn:hover{ color:var(--color-tinta); border-color:var(--color-granate-clara); }
-.tarjeta-btn--fav.activo{ color:var(--color-granate-clara); border-color:var(--color-granate-clara); }
+.tarjeta-btn:hover{ color:var(--color-tinta); border-color:var(--color-granate-clara); transform:translateY(-1px); background:rgba(201,122,131,.12); }
+.tarjeta-btn--fav.activo{ color:var(--color-granate-clara); border-color:var(--color-granate-clara); background:rgba(201,122,131,.14); }
 
-.vacio{ color:var(--color-tinta-60); padding:var(--esp-6) 0; grid-column:1/-1; }
+.vacio{ color:var(--color-tinta-60); padding:var(--esp-6) 0; grid-column:1/-1; animation:uru-fade-up var(--dur-lenta) var(--easing-rebote); }
+
+/* Estado de carga: tarjetas fantasma mientras llega lugares-core.json
+   (ver app.js: pintarEsqueleto). Mismo grid, sin layout shift al
+   reemplazarlas por tarjetas reales. */
+.tarjeta--esqueleto{ animation:none; }
+.tarjeta--esqueleto .u-skeleton + .u-skeleton{ margin-top:var(--esp-2); }
+.esqueleto-linea{ height:11px; margin-top:var(--esp-1); }
+.esqueleto-linea--rubro{ width:40%; height:9px; }
+.esqueleto-linea--nombre{ width:75%; height:16px; margin-top:var(--esp-2); }
+.esqueleto-linea--direccion{ width:55%; }
+.esqueleto-linea--acciones{ width:90%; height:26px; margin-top:var(--esp-4); border-radius:var(--radio-full); }
 
 /* ── Preparado para cuando haya foto por lugar (Fase 1.5) ── */
 .tarjeta--con-imagen{ padding:0; overflow:hidden; }
