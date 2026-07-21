@@ -28,7 +28,7 @@
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
    'mapaTextura', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados',
-   'listaRubros']
+   'listaRubros', 'statLugares', 'statRubros', 'faqLista']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
   /* ── 1. Arranque de contexto ── */
@@ -37,6 +37,7 @@
   PLANO.guardarEstado(estado);
 
   /* ── 2. Carga de datos ── */
+  pintarEsqueleto();
   fetch('lugares-core.json')
     .then(function (r) { return r.json(); })
     .then(function (core) {
@@ -50,6 +51,7 @@
       });
       cargarDetallesEnSegundoPlano();
       pintarRubros();
+      pintarStatsRapidas();
       render();
     })
     .catch(function (err) {
@@ -58,6 +60,37 @@
         DOM.panelDescubrimiento.innerHTML = '<p class="error">No se pudo cargar la información. Probá recargar la página.</p>';
       }
     });
+
+  // Placeholder visual mientras llega el fetch: mismo grid que las
+  // tarjetas reales, para que no haya salto de layout al reemplazarlas.
+  function pintarEsqueleto() {
+    if (!DOM.panelDescubrimiento) return;
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < 6; i++) {
+      var art = document.createElement('div');
+      art.className = 'tarjeta tarjeta--esqueleto';
+      art.innerHTML =
+        '<div class="u-skeleton esqueleto-linea esqueleto-linea--rubro"></div>' +
+        '<div class="u-skeleton esqueleto-linea esqueleto-linea--nombre"></div>' +
+        '<div class="u-skeleton esqueleto-linea esqueleto-linea--direccion"></div>' +
+        '<div class="u-skeleton esqueleto-linea esqueleto-linea--acciones"></div>';
+      frag.appendChild(art);
+    }
+    DOM.panelDescubrimiento.innerHTML = '';
+    DOM.panelDescubrimiento.appendChild(frag);
+  }
+
+  // Estadísticas rápidas del hero: conteo real de REGISTRO, nunca un
+  // número inventado — si REGISTRO todavía no cargó, no se pinta nada.
+  function pintarStatsRapidas() {
+    if (!REGISTRO.length) return;
+    if (DOM.statLugares) DOM.statLugares.textContent = REGISTRO.length.toLocaleString('es-AR');
+    if (DOM.statRubros) {
+      var grupos = Object.create(null);
+      REGISTRO.forEach(function (l) { grupos[l.grupo] = true; });
+      DOM.statRubros.textContent = Object.keys(grupos).length;
+    }
+  }
 
   function cargarDetallesEnSegundoPlano() {
     var lanzar = function () {
@@ -309,12 +342,16 @@
     var restantes = lista.length - visible.length;
 
     var frag = document.createDocumentFragment();
-    visible.forEach(function (lugar) {
+    visible.forEach(function (lugar, i) {
       var art = document.createElement('article');
       art.className = 'tarjeta' + (opts.narrativa ? ' tarjeta--narrativa' : '');
       art.dataset.lugarId = lugar.id;
-      var rubro = window.URU_RUBROS_META && window.URU_RUBROS_META[lugar.grupo]
-        ? window.URU_RUBROS_META[lugar.grupo][0] : lugar.categoria;
+      var metaRubro = window.URU_RUBROS_META && window.URU_RUBROS_META[lugar.grupo];
+      var rubro = metaRubro ? metaRubro[0] : lugar.categoria;
+      if (metaRubro) art.style.setProperty('--chip-color', metaRubro[2]);
+      // Stagger acotado a las primeras ~24 tarjetas visibles en pantalla:
+      // más allá de eso el delay ya no se percibe y solo demora el resto.
+      art.style.animationDelay = (Math.min(i, 24) * 0.03) + 's';
       art.innerHTML =
         '<div class="tarjeta-rubro">' + escapeHTML(rubro) + '</div>' +
         '<h3 class="tarjeta-nombre">' + escapeHTML(lugar.nombre) + '</h3>' +
@@ -449,5 +486,55 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+
+  /* ── 8. FAQ (accordion) ── */
+  if (DOM.faqLista) {
+    DOM.faqLista.addEventListener('click', function (e) {
+      var pregunta = e.target.closest('.faq-pregunta');
+      if (!pregunta) return;
+      var item = pregunta.closest('.faq-item');
+      var abierta = pregunta.getAttribute('aria-expanded') === 'true';
+      pregunta.setAttribute('aria-expanded', String(!abierta));
+      item.classList.toggle('faq-item--abierta', !abierta);
+    });
+  }
+
+  /* ── 9. Revelado al hacer scroll (progressive enhancement) ──
+     Si el navegador no soporta IntersectionObserver, .u-reveal ya
+     queda visible por CSS (ver tokens.css .no-js), así que esto nunca
+     puede dejar contenido oculto. */
+  if ('IntersectionObserver' in window) {
+    var observador = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (entrada) {
+        if (entrada.isIntersecting) {
+          entrada.target.classList.add('visible');
+          observador.unobserve(entrada.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.u-reveal').forEach(function (el) {
+      el.classList.add('u-reveal--armado'); // recién ahora puede quedar oculta: ya hay observer que la va a revelar
+      observador.observe(el);
+    });
+  }
+  // Sin soporte de IntersectionObserver: .u-reveal queda visible por
+  // defecto (ver tokens.css), no hace falta ninguna acción acá.
+
+  /* ── 10. Ripple sutil en botones (.btn) — puramente decorativo,
+     nunca reemplaza el click real, que sigue disparando por el
+     listener normal del elemento. ── */
+  document.addEventListener('pointerdown', function (e) {
+    var btn = e.target.closest('.btn');
+    if (!btn) return;
+    var rect = btn.getBoundingClientRect();
+    var span = document.createElement('span');
+    var lado = Math.max(rect.width, rect.height);
+    span.className = 'btn__ripple';
+    span.style.width = span.style.height = lado + 'px';
+    span.style.left = (e.clientX - rect.left - lado / 2) + 'px';
+    span.style.top = (e.clientY - rect.top - lado / 2) + 'px';
+    btn.appendChild(span);
+    span.addEventListener('animationend', function () { span.remove(); });
+  });
 
 })();
