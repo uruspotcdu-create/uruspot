@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════════════════════
+   donde-comer-cdu/css/descubrimiento.css
+
+   NOTA DE ORIGEN: este archivo estaba referenciado en index.html pero
+   no existía en el repositorio (ni en el working tree ni en el
+   historial de git) — no es una restauración, es una reconstrucción
+   mínima y funcional a partir de lo que index.html/app.js ya esperan.
+   Cubre únicamente el layout de página que tokens.css / tarjeta-lugar.css
+   / mapa.css / chip.css / badge-estado.css no definen. No introduce
+   colores, tipografías ni valores fuera de los tokens existentes en
+   tokens.css — es intencionalmente conservador para no tomar
+   decisiones estéticas que te corresponden a vos.
+   Requiere tokens.css cargado antes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Header ── */
+header{ border-bottom:1px solid var(--color-linea); }
+header .membrete{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--esp-4); padding:var(--esp-4) 0; flex-wrap:wrap;
+}
+.marca{ font:var(--tipo-display-sm); color:var(--color-tinta); }
+.marca span{ display:block; font:var(--tipo-dato-xs); color:var(--color-tinta-60); font-weight:400; letter-spacing:.04em; }
+.rol{ font:var(--tipo-dato-xs); color:var(--color-tinta-60); text-align:right; }
+.rol b{ font:var(--tipo-dato); color:var(--color-tinta); }
+
+/* ── Hero / buscador ── */
+.hero{ padding:var(--esp-12) 0 var(--esp-8); }
+.hero h1{ font:var(--tipo-display-lg); color:var(--color-tinta); max-width:640px; }
+.hero p{ font:var(--tipo-cuerpo); color:var(--color-tinta-60); max-width:560px; margin-top:var(--esp-3); }
+.buscador{ display:flex; gap:var(--esp-2); margin-top:var(--esp-6); flex-wrap:wrap; }
+.buscador input{
+  flex:1 1 260px; min-width:0; background:var(--color-fondo-2);
+  border:1px solid var(--color-linea-fuerte); border-radius:var(--radio-md);
+  padding:var(--esp-3); color:var(--color-tinta); font:var(--tipo-cuerpo);
+}
+.buscador input::placeholder{ color:var(--color-tinta-30); }
+.buscador input:focus-visible{ outline:none; box-shadow:var(--sombra-foco); }
+.buscador button{
+  flex:none; background:transparent; border:1px solid var(--color-linea-fuerte);
+  border-radius:var(--radio-md); padding:0 var(--esp-4); color:var(--color-tinta-60);
+  font:var(--tipo-cuerpo-sm); cursor:pointer;
+}
+.buscador button:hover{ color:var(--color-tinta); border-color:var(--color-granate-clara); }
+
+/* ── Mapa-textura (capa ambiental de baja densidad) ── */
+#mapaTextura{
+  position:relative; height:120px; margin:var(--esp-6) 0;
+  overflow:hidden; border-radius:var(--radio-lg);
+  background:var(--color-fondo-2);
+}
+
+/* ── Encabezado de región ── */
+.region-encabezado{ padding:var(--esp-6) 0 var(--esp-2); }
+#tituloRegion{ font:var(--tipo-display-md); color:var(--color-tinta); }
+#subtituloRegion{ font:var(--tipo-cuerpo-sm); color:var(--color-tinta-60); margin-top:var(--esp-1); }
+
+/* ── Mapa-herramienta (interactivo) ── */
+#mapaHerramienta{
+  position:relative; width:100%; height:360px;
+  margin:var(--esp-4) 0; border-radius:var(--radio-lg);
+  overflow:hidden; background:var(--color-fondo-2);
+  border:1px solid var(--color-linea);
+}
+#mapaHerramienta[hidden]{ display:none; }
+
+/* ── Estado vacío del panel de resultados ── */
+#panelDescubrimiento .vacio{
+  grid-column:1/-1; color:var(--color-tinta-60); font:var(--tipo-cuerpo-sm);
+  padding:var(--esp-8) 0; text-align:center;
+}
+
+/* ── Manifiesto ── */
+.manifiesto{ padding:var(--esp-16) 0; border-top:1px solid var(--color-linea); }
+.manifiesto h2{ font:var(--tipo-display-md); color:var(--color-tinta); margin-bottom:var(--esp-4); }
+.manifiesto p{ font:var(--tipo-cuerpo-sm); color:var(--color-tinta-60); max-width:640px; margin-bottom:var(--esp-3); }
+.manifiesto a{ color:var(--color-granate-clara); }
+
+/* ── Índice por rubro ── */
+.indice{ padding:0 0 var(--esp-16); border-top:1px solid var(--color-linea); }
+.indice h2{ font:var(--tipo-display-md); color:var(--color-tinta); padding-top:var(--esp-8); margin-bottom:var(--esp-4); }
+#listaRubros{ display:flex; flex-wrap:wrap; gap:var(--esp-2); }
+
+/* ── Footer ── */
+footer{
+  padding:var(--esp-8) 0 var(--esp-12); border-top:1px solid var(--color-linea);
+  color:var(--color-tinta-30); font:var(--tipo-dato-xs);
+}
+
+@media (max-width:720px){
+  .hero{ padding:var(--esp-8) 0 var(--esp-6); }
+  #mapaHerramienta{ height:280px; }
+}
