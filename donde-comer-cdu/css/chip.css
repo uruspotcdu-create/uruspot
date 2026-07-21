@@ -1,0 +1,29 @@
+/* ═══════════════════════════════════════════════════════════════════
+   design-system/componentes/chip.css
+   Reemplaza: .mapa-leyenda-chip (index.html) — generalizado para que
+   sea el mismo componente que, en Fase 3, va a mostrar el rubro en
+   las landing pages y en el índice "Por rubro".
+   Requiere tokens.css cargado antes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.chip{
+  display:inline-flex; align-items:center; gap:var(--esp-2);
+  font:var(--tipo-dato); color:var(--color-tinta-60);
+}
+
+/* El punto de color: misma silueta de "gota" que usa el pin del mapa
+   (motor-render.js) para que leyenda y mapa hablen el mismo idioma
+   visual, no dos convenciones de color distintas. */
+.chip__punto{
+  width:9px; height:9px; border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg); flex:none;
+}
+
+.mapa-leyenda{ display:flex; flex-wrap:wrap; gap:var(--esp-2) 14px; margin:14px 0 var(--esp-8); }
+.mapa-leyenda[hidden]{ display:none; }
+
+/* app.js (pintarLeyenda) emite estas dos clases literalmente — mismo
+   componente que .chip/.chip__punto de arriba, declarado con su
+   nombre real para no depender de que el markup cambie. */
+.mapa-leyenda-chip{ display:flex; align-items:center; gap:6px; font:var(--tipo-dato); font-size:11.5px; color:var(--color-tinta-60); }
+.mapa-leyenda-punto{ width:9px; height:9px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); flex:none; }
