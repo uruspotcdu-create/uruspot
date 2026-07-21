@@ -5,6 +5,53 @@
    recorte y presupuesto de exposición se calculan una sola vez por
    render() y de ahí se derivan tanto las tarjetas como los puntos que
    entran al mapa — nunca dos fuentes de verdad para "qué se muestra".
+
+   ───────────────────────────────────────────────────────────────────
+   Auditoría y evolución de esta pasada:
+
+   BUGS REALES corregidos
+   • Al borrar la búsqueda hasta dejar exactamente 1 carácter (ni
+     ≥2 ni vacío), ninguna rama del `if` limpiaba
+     `accionDirectaForzada` — quedaba pegado en "nombrada" desde una
+     búsqueda anterior más larga. Ahora la condición cubre los dos
+     casos con un solo `else`.
+   • Tres mutaciones directas de `estado.sesion` (limpiar búsqueda,
+     activar Curaduría desde "ver guardados", desactivarla al elegir
+     un rubro) nunca llamaban `PLANO.guardarEstado(estado)` —
+     inconsistente con el resto del archivo, que siempre persiste
+     después de mutar. Se agregó el guardado que faltaba en los tres
+     casos.
+   • `ubicacionUsuario`, `cercaTuyoActivo`, `distanciaMetros` y
+     `formatoDistancia` estaban completamente implementados pero sin
+     ningún control que los disparara — el motor de "cerca de mí"
+     existía pero no estaba enchufado a nada. Se completa la función:
+     un botón (creado por JS, con detección de soporte de
+     geolocalización) que activa el orden por cercanía y una insignia
+     de distancia en cada tarjeta.
+   • `DOM.mapaInfo` y `DOM.contadorCuraduria` se mostraban/ocultaban
+     pero nunca tenían contenido — cajas vacías. Ahora informan
+     "mostrando X de Y en el mapa" y la cantidad de guardados.
+
+   RENDIMIENTO
+   • Cada tecla en el buscador disparaba un render() completo sobre
+     hasta 1.468 lugares. Se agrega un debounce corto (160ms): el
+     estado se actualiza al instante, el render pesado se posterga.
+
+   ACCESIBILIDAD
+   • Chips de rubro con `aria-pressed` para comunicar su estado.
+   • Región `aria-live="polite"` que anuncia cuántos resultados hay
+     tras cada búsqueda/filtro, para quien no puede ver la grilla.
+   • Stagger de tarjetas, ripple de botones y revelado al hacer
+     scroll respetan `prefers-reduced-motion`.
+
+   ROBUSTEZ
+   • Si falla la carga inicial del catálogo, ahora hay un botón
+     "Reintentar" en el propio mensaje de error.
+
+   No se tocó ningún otro archivo: la superficie que usa este módulo
+   (URU_PLANO, URU_EXPOSICION, URU_MAPA, URU_MOTOR_MAPA_RENDER,
+   URU_LOCALES_SLUGS, URU_RUBROS_META) sigue siendo exactamente la
+   misma.
    ═══════════════════════════════════════════════════════════════════ */
 
 (function () {
@@ -14,6 +61,10 @@
   var PLANO = window.URU_PLANO;
   var EXPO = window.URU_EXPOSICION;
   var MAPA = window.URU_MAPA;
+
+  function prefiereMovimientoReducido() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
 
   var REGISTRO = [];
   var porId = Object.create(null);
@@ -26,6 +77,7 @@
   var cercaTuyoActivo = false;
   var permanenciaTimer = null;
   var ultimaRegionRenderizada = '';
+  var debounceBuscarId = null;
 
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
@@ -37,31 +89,45 @@
   estado = PLANO.leerEstado(CIUDAD);
   estado = PLANO.registrarApertura(estado);
   PLANO.guardarEstado(estado);
+  actualizarContadorGuardados(); // los favoritos no dependen del catálogo: se puede pintar de inmediato
 
   /* ── 2. Carga de datos ── */
   pintarEsqueleto();
-  fetch('lugares-core.json')
-    .then(function (r) { return r.json(); })
-    .then(function (core) {
-      REGISTRO = core.map(function (l) {
-        var reg = {
-          id: l.id, nombre: l.nombre, categoria: l.categoria, grupo: l.grupo,
-          lat: l.lat, lng: l.lng, direccion: null, telefono: null, descripcion: null, estado: 'verificado'
-        };
-        porId[l.id] = reg;
-        return reg;
+  cargarCatalogo();
+
+  function cargarCatalogo() {
+    fetch('lugares-core.json')
+      .then(function (r) { return r.json(); })
+      .then(function (core) {
+        REGISTRO = core.map(function (l) {
+          var reg = {
+            id: l.id, nombre: l.nombre, categoria: l.categoria, grupo: l.grupo,
+            lat: l.lat, lng: l.lng, direccion: null, telefono: null, descripcion: null, estado: 'verificado'
+          };
+          porId[l.id] = reg;
+          return reg;
+        });
+        cargarDetallesEnSegundoPlano();
+        pintarRubros();
+        pintarStatsRapidas();
+        render();
+      })
+      .catch(function (err) {
+        console.error('No se pudo cargar lugares-core.json', err);
+        if (DOM.panelDescubrimiento) {
+          DOM.panelDescubrimiento.innerHTML =
+            '<p class="error">No se pudo cargar la información. ' +
+            '<button type="button" class="btn" data-accion="reintentar-carga">Reintentar</button></p>';
+          var btnReintentar = DOM.panelDescubrimiento.querySelector('[data-accion="reintentar-carga"]');
+          if (btnReintentar) {
+            btnReintentar.addEventListener('click', function () {
+              pintarEsqueleto();
+              cargarCatalogo();
+            });
+          }
+        }
       });
-      cargarDetallesEnSegundoPlano();
-      pintarRubros();
-      pintarStatsRapidas();
-      render();
-    })
-    .catch(function (err) {
-      console.error('No se pudo cargar lugares-core.json', err);
-      if (DOM.panelDescubrimiento) {
-        DOM.panelDescubrimiento.innerHTML = '<p class="error">No se pudo cargar la información. Probá recargar la página.</p>';
-      }
-    });
+  }
 
   // Placeholder visual mientras llega el fetch: mismo grid que las
   // tarjetas reales, para que no haya salto de layout al reemplazarlas.
@@ -124,13 +190,25 @@
     DOM.inputBuscar.addEventListener('input', function (e) {
       consultaActual = e.target.value;
       paginaTarjetas = 1;
+      // Antes: solo se limpiaba accionDirectaForzada cuando la caja
+      // quedaba totalmente vacía. Si el usuario borraba hasta dejar
+      // exactamente 1 carácter, no entraba en ninguna de las dos
+      // ramas y el estado de "búsqueda forzada" de una consulta
+      // anterior más larga quedaba pegado. Un solo if/else que cubre
+      // ambos casos (0 o 1 carácter = "no hay búsqueda real") evita
+      // el hueco.
       if (consultaActual.trim().length >= 2) {
         estado = PLANO.aplicarAccion(estado, 'nombrar', { consulta: consultaActual });
-        PLANO.guardarEstado(estado);
-      } else if (!consultaActual.trim()) {
+      } else {
         estado.sesion.accionDirectaForzada = null;
       }
-      render();
+      PLANO.guardarEstado(estado);
+      // El render es la parte cara (filtra hasta ~1.400 lugares,
+      // reconstruye tarjetas y mapa): se posterga un poco para no
+      // repetirlo en cada tecla de una tipeada rápida. El estado en
+      // sí (arriba) se persiste de inmediato, sin esperar.
+      clearTimeout(debounceBuscarId);
+      debounceBuscarId = setTimeout(render, 160);
     });
   }
 
@@ -190,6 +268,7 @@
         estado = PLANO.aplicarAccion(estado, 'guardar', { lugarId: id3 });
         PLANO.guardarEstado(estado);
         btnGuardar.classList.toggle('activo', !!favoritos[id3]);
+        actualizarContadorGuardados();
         render();
         return;
       }
@@ -221,6 +300,7 @@
       filtroRubroActivo = (filtroRubroActivo === rubro) ? null : rubro;
       paginaTarjetas = 1;
       estado.sesion.curaduriaActiva = false; // filtrar por rubro siempre vuelve a la vista "todos"
+      PLANO.guardarEstado(estado);
       pintarRubros();
       render();
       if (DOM.tituloRegion) DOM.tituloRegion.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -230,6 +310,7 @@
   if (DOM.btnVerGuardados) {
     DOM.btnVerGuardados.addEventListener('click', function () {
       estado.sesion.curaduriaActiva = true;
+      PLANO.guardarEstado(estado);
       paginaTarjetas = 1;
       render();
     });
@@ -264,6 +345,17 @@
     try { localStorage.setItem('uruspot_favoritos', JSON.stringify(f)); } catch (e) { /* no-op */ }
   }
 
+  // Antes: DOM.contadorCuraduria se buscaba en el DOM pero nunca se
+  // le asignaba contenido — una caja vacía. Ahora refleja cuántos
+  // lugares hay guardados, y se oculta sola si no hay ninguno.
+  function actualizarContadorGuardados() {
+    if (!DOM.contadorCuraduria) return;
+    var favoritos = leerFavoritos();
+    var cantidad = Object.keys(favoritos).filter(function (id) { return favoritos[id]; }).length;
+    DOM.contadorCuraduria.textContent = cantidad ? String(cantidad) : '';
+    DOM.contadorCuraduria.hidden = cantidad === 0;
+  }
+
   /* ── 5. Render por región ──
      Una sola lista por región alimenta tarjetas y mapa: así se
      garantiza que nunca puedan mostrar conjuntos distintos.        */
@@ -282,6 +374,7 @@
     if (reg.nombre === 'curaduria') {
       var idsGuardados = Object.keys(favoritos).filter(function (id) { return favoritos[id]; });
       lista = EXPO.coleccionCurada(REGISTRO, idsGuardados);
+      lista = ordenarPorCercania(lista);
       pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.' });
     } else {
       // Antes acá se recortaba a 4-10 lugares "por iniciativa propia"
@@ -298,9 +391,26 @@
       if (filtroRubroActivo) {
         lista = lista.filter(function (l) { return l.grupo === filtroRubroActivo; });
       }
+      lista = ordenarPorCercania(lista);
       pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false });
     }
     actualizarMapaHerramienta(reg.nombre, lista || []);
+  }
+
+  // Completa la funcionalidad de "cerca de mí": ya existían
+  // distanciaMetros/formatoDistancia listos, pero nada los llamaba.
+  // Orden estable (no reordena si no hay ubicación) y sin distorsión:
+  // los lugares sin coordenadas se van al final en vez de romper el
+  // orden o desaparecer.
+  function ordenarPorCercania(lista) {
+    if (!cercaTuyoActivo || !ubicacionUsuario) return lista;
+    return lista.slice().sort(function (a, b) {
+      var da = (typeof a.lat === 'number' && typeof a.lng === 'number')
+        ? distanciaMetros(ubicacionUsuario.lat, ubicacionUsuario.lng, a.lat, a.lng) : Infinity;
+      var db = (typeof b.lat === 'number' && typeof b.lng === 'number')
+        ? distanciaMetros(ubicacionUsuario.lat, ubicacionUsuario.lng, b.lat, b.lng) : Infinity;
+      return da - db;
+    });
   }
 
   function actualizarCabecera(reg) {
@@ -343,15 +453,44 @@
     DOM.listaRubros.innerHTML = claves.map(function (k) {
       var meta = window.URU_RUBROS_META[k];
       var activo = filtroRubroActivo === k;
-      return '<button type="button" class="chip' + (activo ? ' chip--activo' : '') + '" data-rubro="' + k + '" style="--chip-color:' + meta[2] + '">' +
+      // aria-pressed: sin esto, un lector de pantalla no tenía forma
+      // de saber que el chip es un botón de estado (activo/inactivo),
+      // solo que es un botón — perdía la mitad de la información que
+      // el color y la clase "chip--activo" ya comunican visualmente.
+      return '<button type="button" class="chip' + (activo ? ' chip--activo' : '') + '" data-rubro="' + k + '" aria-pressed="' + activo + '" style="--chip-color:' + meta[2] + '">' +
         '<span class="chip__punto" style="background:' + meta[2] + '"></span>' +
         escapeHTML(meta[0]) + '<span class="chip__conteo">' + conteo[k] + '</span>' +
         '</button>';
     }).join('');
   }
 
+  // Región viva para lectores de pantalla: anuncia cuántos resultados
+  // quedaron tras buscar o filtrar, sin que haga falta "mirar" la
+  // grilla de tarjetas para saberlo. Oculta visualmente (clip a 1px)
+  // pero presente para tecnología de asistencia — sin depender de
+  // ninguna clase CSS del proyecto que no podemos verificar desde
+  // este archivo.
+  var liveResultados = null;
+  if (DOM.panelDescubrimiento && DOM.panelDescubrimiento.parentNode) {
+    liveResultados = document.createElement('div');
+    liveResultados.setAttribute('aria-live', 'polite');
+    liveResultados.setAttribute('role', 'status');
+    liveResultados.style.position = 'absolute';
+    liveResultados.style.width = '1px';
+    liveResultados.style.height = '1px';
+    liveResultados.style.overflow = 'hidden';
+    liveResultados.style.clip = 'rect(0,0,0,0)';
+    liveResultados.style.whiteSpace = 'nowrap';
+    DOM.panelDescubrimiento.parentNode.insertBefore(liveResultados, DOM.panelDescubrimiento);
+  }
+
   function pintarTarjetas(lista, favoritos, opts) {
     DOM.panelDescubrimiento.innerHTML = '';
+    if (liveResultados) {
+      liveResultados.textContent = lista.length
+        ? (lista.length + ' resultado' + (lista.length === 1 ? '' : 's') + ' encontrado' + (lista.length === 1 ? '' : 's') + '.')
+        : 'Sin resultados.';
+    }
     if (!lista.length) {
       DOM.panelDescubrimiento.innerHTML = '<p class="vacio">' + (opts.vacioTexto || 'No encontramos nada con esa búsqueda.') + '</p>';
       return;
@@ -359,6 +498,7 @@
     var limite = TARJETAS_POR_PAGINA * paginaTarjetas;
     var visible = lista.slice(0, limite);
     var restantes = lista.length - visible.length;
+    var movimientoReducido = prefiereMovimientoReducido();
 
     var frag = document.createDocumentFragment();
     visible.forEach(function (lugar, i) {
@@ -370,7 +510,10 @@
       if (metaRubro) art.style.setProperty('--chip-color', metaRubro[2]);
       // Stagger acotado a las primeras ~24 tarjetas visibles en pantalla:
       // más allá de eso el delay ya no se percibe y solo demora el resto.
-      art.style.animationDelay = (Math.min(i, 24) * 0.03) + 's';
+      // Se omite por completo si el usuario pidió menos movimiento.
+      if (!movimientoReducido) {
+        art.style.animationDelay = (Math.min(i, 24) * 0.03) + 's';
+      }
       var linkMaps = mapsHref(lugar);
       var linkTel = lugar.telefono ? 'tel:' + lugar.telefono.replace(/[^\d+]/g, '') : null;
       // Mini-línea: descripción real del lugar si la tenemos; si no,
@@ -380,8 +523,11 @@
         (lugar.categoria && rubro !== lugar.categoria ? rubro + ' · ' + lugar.categoria : lugar.categoria || rubro);
       var miniEsGenerica = !lugar.descripcion;
       var slugLugar = slug(lugar);
+      var distanciaTxt = (cercaTuyoActivo && ubicacionUsuario && typeof lugar.lat === 'number' && typeof lugar.lng === 'number')
+        ? formatoDistancia(distanciaMetros(ubicacionUsuario.lat, ubicacionUsuario.lng, lugar.lat, lugar.lng))
+        : null;
       art.innerHTML =
-        '<div class="tarjeta-rubro">' + escapeHTML(rubro) + '</div>' +
+        '<div class="tarjeta-rubro">' + escapeHTML(rubro) + (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') + '</div>' +
         '<h3 class="tarjeta-nombre">' + escapeHTML(lugar.nombre) + '</h3>' +
         (miniTexto
           ? '<div class="tarjeta-mini' + (miniEsGenerica ? ' tarjeta-mini--generica' : '') + '">' + escapeHTML(miniTexto) + '</div>'
@@ -535,6 +681,18 @@
     motorMapa.establecerPuntos(puntos);
     motorMapa.encuadrarTodos(48);
     pintarLeyenda(puntos);
+
+    // Antes: DOM.mapaInfo se mostraba/ocultaba pero nunca tenía texto
+    // — una caja vacía. El mapa-herramienta siempre respeta el mismo
+    // recorte acotado que motor-mapa.js le fija (nunca el padrón
+    // completo); cuando ese recorte deja afuera resultados con
+    // coordenadas reales, vale la pena decirlo para que no parezca
+    // que "falta" algo en el mapa por error.
+    if (DOM.mapaInfo) {
+      DOM.mapaInfo.textContent = recorte.length < conCoordenadas.length
+        ? 'Mostrando ' + recorte.length + ' de ' + conCoordenadas.length + ' lugares con ubicación en el mapa.'
+        : recorte.length + ' lugar' + (recorte.length === 1 ? '' : 'es') + ' en el mapa.';
+    }
   }
 
   function pintarLeyenda(puntos) {
@@ -574,8 +732,13 @@
   /* ── 9. Revelado al hacer scroll (progressive enhancement) ──
      Si el navegador no soporta IntersectionObserver, .u-reveal ya
      queda visible por CSS (ver tokens.css .no-js), así que esto nunca
-     puede dejar contenido oculto. */
-  if ('IntersectionObserver' in window) {
+     puede dejar contenido oculto. Si el usuario pidió menos
+     movimiento, se revela todo de una sin esperar el scroll — el
+     "fade-in" es el tipo de movimiento que prefers-reduced-motion
+     está pensado para evitar. */
+  if (prefiereMovimientoReducido()) {
+    document.querySelectorAll('.u-reveal').forEach(function (el) { el.classList.add('visible'); });
+  } else if ('IntersectionObserver' in window) {
     var observador = new IntersectionObserver(function (entradas) {
       entradas.forEach(function (entrada) {
         if (entrada.isIntersecting) {
@@ -589,13 +752,16 @@
       observador.observe(el);
     });
   }
-  // Sin soporte de IntersectionObserver: .u-reveal queda visible por
-  // defecto (ver tokens.css), no hace falta ninguna acción acá.
+  // Sin soporte de IntersectionObserver y sin pedido de movimiento
+  // reducido: .u-reveal queda visible por defecto (ver tokens.css),
+  // no hace falta ninguna acción acá.
 
   /* ── 10. Ripple sutil en botones (.btn) — puramente decorativo,
      nunca reemplaza el click real, que sigue disparando por el
-     listener normal del elemento. ── */
+     listener normal del elemento. Se omite con movimiento reducido:
+     es decoración pura, cero pérdida funcional al saltarla. ── */
   document.addEventListener('pointerdown', function (e) {
+    if (prefiereMovimientoReducido()) return;
     var btn = e.target.closest('.btn');
     if (!btn) return;
     var rect = btn.getBoundingClientRect();
@@ -608,5 +774,69 @@
     btn.appendChild(span);
     span.addEventListener('animationend', function () { span.remove(); });
   });
+
+  /* ── 11. "Cerca de mí" ──
+     El motor (distanciaMetros/formatoDistancia/ubicacionUsuario/
+     cercaTuyoActivo) ya estaba armado en este archivo pero sin
+     ningún control que lo activara. Se agrega un botón junto al
+     buscador — creado por JS y no en el HTML, ya que esta pasada
+     trabaja únicamente sobre este archivo — con detección de
+     soporte real de geolocalización (no se muestra si el navegador
+     no la ofrece, en vez de mostrar un botón que siempre falla). ── */
+  (function inicializarCercaDeMi() {
+    if (!navigator.geolocation || !DOM.inputBuscar || !DOM.inputBuscar.parentNode) return;
+
+    var TEXTO_DEFECTO = '📍 Cerca de mí';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn--cerca-tuyo';
+    btn.textContent = TEXTO_DEFECTO;
+    btn.setAttribute('aria-pressed', 'false');
+    DOM.inputBuscar.insertAdjacentElement('afterend', btn);
+
+    var aviso = null;
+    function mostrarAviso(texto) {
+      if (aviso) aviso.remove();
+      aviso = document.createElement('span');
+      aviso.className = 'aviso-cerca-tuyo';
+      aviso.setAttribute('role', 'status');
+      aviso.textContent = texto;
+      btn.insertAdjacentElement('afterend', aviso);
+      setTimeout(function () { if (aviso) { aviso.remove(); aviso = null; } }, 4000);
+    }
+
+    function activar() {
+      btn.disabled = true;
+      btn.textContent = 'Ubicándote…';
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        ubicacionUsuario = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        cercaTuyoActivo = true;
+        btn.disabled = false;
+        btn.textContent = TEXTO_DEFECTO + ' ✓';
+        btn.setAttribute('aria-pressed', 'true');
+        btn.classList.add('activo');
+        render();
+      }, function (err) {
+        btn.disabled = false;
+        btn.textContent = TEXTO_DEFECTO;
+        console.warn('No se pudo obtener la ubicación', err);
+        mostrarAviso('No pudimos acceder a tu ubicación. Revisá los permisos del navegador.');
+      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+    }
+
+    function desactivar() {
+      cercaTuyoActivo = false;
+      ubicacionUsuario = null;
+      btn.textContent = TEXTO_DEFECTO;
+      btn.setAttribute('aria-pressed', 'false');
+      btn.classList.remove('activo');
+      render();
+    }
+
+    btn.addEventListener('click', function () {
+      if (cercaTuyoActivo) desactivar();
+      else activar();
+    });
+  })();
 
 })();
