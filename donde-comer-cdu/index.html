@@ -218,11 +218,14 @@
     <p id="subtituloRegion">Cargando…</p>
   </div>
 
-  <!-- El mapa-herramienta arranca oculto: app.js lo revela solo cuando
-       motor-mapa.js determina que corresponde (Acción Directa con
-       resultados georreferenciados). -->
+  <!-- El mapa-herramienta arranca oculto solo hasta el primer render:
+       app.js lo revela en CUALQUIER región (Guía, Exploración, Acción
+       Directa, Curaduría) apenas hay al menos un resultado con
+       coordenadas — ver motor-mapa.js: debeMostrarHerramienta() no
+       distingue por región a propósito. No depende de que el usuario
+       busque algo. -->
   <div class="mapa-info" id="mapaInfo" hidden>
-    Clickeá un lugar en el mapa para ver su ficha completa, o buscá por nombre arriba
+    Clickeá un lugar en el mapa para ver su ficha completa
   </div>
 
   <div id="mapaHerramienta" hidden></div>
