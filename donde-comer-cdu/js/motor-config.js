@@ -131,11 +131,13 @@
       // compiten por atención — solo dan la certeza subconsciente de
       // que esto es un lugar real. No necesita mostrar todo el
       // universo para cumplir esa función.
-      herramientaSoloSiCriterioEspacial: true,
       herramientaRecorte: 10
-      // El mapa-herramienta solo aparece en Acción Directa cuando el
-      // criterio de desempate es distancia, y con el mismo tipo de
-      // recorte acotado que el resto del sistema — nunca 1.468 pines.
+      // El mapa-herramienta aparece en cualquier región (Guía,
+      // Exploración, Acción Directa, Curaduría) apenas el recorte
+      // activo tenga algo georreferenciado — ver motor-mapa.js:
+      // debeMostrarHerramienta(). Nunca depende de que haya búsqueda,
+      // y nunca muestra más pines que el mismo recorte acotado que ya
+      // está en pantalla como tarjetas — nunca 1.468 pines.
     },
 
     /* ── 7. Frontera con la monetización (Blueprint v2, sección 2) ──
