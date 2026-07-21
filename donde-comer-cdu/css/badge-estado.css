@@ -1,0 +1,22 @@
+/* ═══════════════════════════════════════════════════════════════════
+   design-system/componentes/badge-estado.css
+   Hoy este patrón (pill + punto + texto "Abierto ahora"/"Cerrado")
+   estaba copiado a mano dentro del <style> de cada una de las 51
+   fichas de locales, con los mismos valores hex repetidos cada vez.
+   Se generaliza acá para que las fichas (Fase 2) y, más adelante,
+   la tarjeta de descubrimiento (Fase 1.5) usen el mismo componente.
+   Requiere tokens.css cargado antes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.badge-estado{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:6px 14px; border-radius:var(--radio-sm);
+  font-size:11px; font-weight:600; letter-spacing:.15em; text-transform:uppercase;
+}
+.badge-estado__punto{ width:6px; height:6px; border-radius:50%; }
+
+.badge-estado--abierto{ background:var(--color-estado-abierto-fondo); color:var(--color-estado-abierto); }
+.badge-estado--abierto .badge-estado__punto{ background:var(--color-estado-abierto); }
+
+.badge-estado--cerrado{ background:var(--color-estado-cerrado-fondo); color:var(--color-estado-cerrado); }
+.badge-estado--cerrado .badge-estado__punto{ background:var(--color-estado-cerrado); }
