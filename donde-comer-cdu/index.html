@@ -39,7 +39,7 @@
 </head>
 <body>
 
-<header>
+<header id="siteHeader">
   <div class="envoltorio membrete">
     <div class="marca">URU SPOT<span>Concepción del Uruguay</span></div>
     <div class="rol">tu relación con esta ciudad<br><b id="rolActual">—</b></div>
@@ -47,11 +47,17 @@
 </header>
 
 <section class="hero envoltorio">
+  <div class="hero__halo" aria-hidden="true"></div>
   <h1>No te mostramos el padrón entero. Te mostramos lo que corresponde ahora.</h1>
   <p>URU SPOT arranca guiando poco y, a medida que lo usás, suelta el control. Si ya sabés lo que buscás, escribilo y vas directo — sin narrativa, sin vueltas.</p>
   <div class="buscador">
     <input id="inputBuscar" type="text" placeholder="buscá por nombre, rubro o dirección…" autocomplete="off">
-    <button id="btnVerGuardados" type="button">tu lista guardada</button>
+    <button id="btnVerGuardados" type="button" class="btn btn--primario">tu lista guardada</button>
+  </div>
+  <div class="stats-rapidas" id="statsRapidas" aria-live="polite">
+    <div class="stat-item"><strong id="statLugares">—</strong><span>lugares verificados</span></div>
+    <div class="stat-item"><strong id="statRubros">—</strong><span>rubros distintos</span></div>
+    <div class="stat-item"><strong>100%</strong><span>caminados y chequeados en el lugar</span></div>
   </div>
 </section>
 
@@ -81,17 +87,72 @@
   </div>
 </main>
 
-<section class="manifiesto envoltorio" id="manifiesto">
+<section class="manifiesto envoltorio u-reveal" id="manifiesto">
   <h2>Cómo funciona</h2>
-  <p>Cada lugar que ves fue caminado y verificado por alguien del equipo, en fuentes oficiales, Google Places o en el lugar mismo — nunca se completa a ojo.</p>
-  <p>El orden no es un ranking pago: nadie compra su posición. El dinero puede financiar una mejor ficha (fotos, verificación más profunda) — nunca puede comprar aparecer antes que otro lugar.</p>
-  <p>Si rechazás algo puntual, esa señal pesa poco y se va apagando sola con el tiempo. Solo un patrón que se repite cambia lo que te mostramos.</p>
-  <p>¿Encontraste un error o un lugar que falta? Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a>.</p>
+  <div class="manifiesto-grid">
+    <div class="manifiesto-card">
+      <span class="manifiesto-card__icono" aria-hidden="true">✓</span>
+      <p>Cada lugar que ves fue caminado y verificado por alguien del equipo, en fuentes oficiales, Google Places o en el lugar mismo — nunca se completa a ojo.</p>
+    </div>
+    <div class="manifiesto-card">
+      <span class="manifiesto-card__icono" aria-hidden="true">⚖</span>
+      <p>El orden no es un ranking pago: nadie compra su posición. El dinero puede financiar una mejor ficha (fotos, verificación más profunda) — nunca puede comprar aparecer antes que otro lugar.</p>
+    </div>
+    <div class="manifiesto-card">
+      <span class="manifiesto-card__icono" aria-hidden="true">◐</span>
+      <p>Si rechazás algo puntual, esa señal pesa poco y se va apagando sola con el tiempo. Solo un patrón que se repite cambia lo que te mostramos.</p>
+    </div>
+    <div class="manifiesto-card">
+      <span class="manifiesto-card__icono" aria-hidden="true">✉</span>
+      <p>¿Encontraste un error o un lugar que falta? Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a>.</p>
+    </div>
+  </div>
 </section>
 
-<section class="indice envoltorio" id="rubros">
+<section class="indice envoltorio u-reveal" id="rubros">
   <h2>Por rubro</h2>
   <div id="listaRubros"></div>
+</section>
+
+<section class="accesos envoltorio u-reveal" id="accesos">
+  <h2>Guías por categoría</h2>
+  <p class="accesos-intro">Si ya sabés qué tipo de lugar buscás, estas guías van directo a lo tuyo.</p>
+  <div class="accesos-grid">
+    <a class="acceso-card" href="../los-mejores-restaurantes-cdu/"><span class="acceso-card__icono">🍽️</span>Restaurantes</a>
+    <a class="acceso-card" href="../las-mejores-cafeterias-cdu/"><span class="acceso-card__icono">☕</span>Cafeterías</a>
+    <a class="acceso-card" href="../las-mejores-heladerias-cdu/"><span class="acceso-card__icono">🍦</span>Heladerías</a>
+    <a class="acceso-card" href="../las-mejores-panaderias-cdu/"><span class="acceso-card__icono">🥖</span>Panaderías</a>
+    <a class="acceso-card" href="../los-mejores-bares-cdu/"><span class="acceso-card__icono">🍷</span>Bares</a>
+    <a class="acceso-card" href="../las-mejores-hosterias-cdu/"><span class="acceso-card__icono">🛏️</span>Hosterías</a>
+    <a class="acceso-card" href="../los-mejores-gimnasios-cdu/"><span class="acceso-card__icono">🏋️</span>Gimnasios</a>
+    <a class="acceso-card" href="../mejores-veterinarias-cdu/"><span class="acceso-card__icono">🐾</span>Veterinarias</a>
+  </div>
+</section>
+
+<section class="faq envoltorio u-reveal" id="faq">
+  <h2>Preguntas frecuentes</h2>
+  <div class="faq-lista" id="faqLista">
+    <div class="faq-item">
+      <button type="button" class="faq-pregunta" aria-expanded="false">¿Por qué a veces veo pocos lugares?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button>
+      <div class="faq-respuesta"><p>URU SPOT arranca guiando de a poco para no saturarte. A medida que interactuás — buscás, guardás, descartás — el sistema entiende mejor qué mostrarte y suelta más control.</p></div>
+    </div>
+    <div class="faq-item">
+      <button type="button" class="faq-pregunta" aria-expanded="false">¿Cómo verifican cada lugar?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button>
+      <div class="faq-respuesta"><p>Alguien del equipo lo camina o lo confirma en fuentes oficiales y Google Places. Nada se completa a ojo ni se scrapea sin revisar.</p></div>
+    </div>
+    <div class="faq-item">
+      <button type="button" class="faq-pregunta" aria-expanded="false">¿El orden se puede comprar?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button>
+      <div class="faq-respuesta"><p>No. Un local puede pagar por una mejor ficha (fotos, verificación más profunda), pero nunca por aparecer antes que otro lugar en los resultados.</p></div>
+    </div>
+    <div class="faq-item">
+      <button type="button" class="faq-pregunta" aria-expanded="false">¿Cómo uso el mapa?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button>
+      <div class="faq-respuesta"><p>Aparece automáticamente apenas hay resultados con ubicación. Podés arrastrar, hacer zoom con la rueda o los botones +/−, y tocar un pin para ver la ficha resumida del lugar.</p></div>
+    </div>
+    <div class="faq-item">
+      <button type="button" class="faq-pregunta" aria-expanded="false">Encontré un error o falta un lugar, ¿qué hago?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button>
+      <div class="faq-respuesta"><p>Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a> con el nombre del lugar y el detalle — lo revisamos y lo corregimos.</p></div>
+    </div>
+  </div>
 </section>
 
 <footer class="envoltorio">
