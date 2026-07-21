@@ -196,7 +196,7 @@
         if (c.tipo === 'cluster') { dibujarCluster(c); return; }
         var esResaltado = c.punto.id === idResaltado;
         var esAbierto = c.punto.id === idAbierto;
-        dibujarMarcador(c.x, c.y, c.punto.color || '#C97A83', esResaltado || esAbierto);
+        dibujarMarcador(c.x, c.y, c.punto, esResaltado || esAbierto);
       });
     }
 
@@ -204,8 +204,12 @@
     // no una bolita genérica. El color codifica el rubro (ver
     // rubros-meta.js) para que de un vistazo se distinga qué es qué,
     // igual que la franja de color de la etiqueta de rubro en las
-    // tarjetas.
-    function dibujarMarcador(x, y, color, activo) {
+    // tarjetas. Además de color, la ventana central lleva la inicial
+    // del rubro: el color solo no alcanza (dos rubros pueden quedar
+    // parecidos en un mapa oscuro, y no es accesible para daltonismo),
+    // la letra es un segundo canal de distinción que no depende del color.
+    function dibujarMarcador(x, y, punto, activo) {
+      var color = (punto && punto.color) || '#C97A83';
       var r = activo ? RADIO_MARCADOR + 2.5 : RADIO_MARCADOR;
       ctx.save();
       if (activo) {
@@ -238,6 +242,16 @@
       ctx.arc(0, -r * 0.35, r * 0.36, 0, Math.PI * 2);
       ctx.fillStyle = '#0A0D13';
       ctx.fill();
+      // Inicial del rubro dentro de la ventana — segundo canal de
+      // distinción además del color (ver comentario arriba).
+      if (punto && punto.rubroNombre) {
+        var inicial = String(punto.rubroNombre).trim().charAt(0).toUpperCase();
+        ctx.fillStyle = color;
+        ctx.font = '700 ' + Math.round(r * 0.5) + 'px "IBM Plex Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(inicial, 0, -r * 0.35 + 0.5);
+      }
       ctx.restore();
     }
 
@@ -251,17 +265,37 @@
       return 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
     }
 
+    // Antes: todo cluster era el mismo círculo bordó, sin importar qué
+    // rubros agrupaba — indistinguible de otro cluster, y del resto de
+    // los pines. Ahora el cluster hereda el color de los rubros que
+    // agrupa: si todos sus miembros son del mismo rubro, se rellena con
+    // ese color (mismo código que un pin individual); si mezcla rubros,
+    // se deja neutro pero con el borde en el color dominante, para que
+    // "mixto" también se lea de un vistazo en vez de camuflarse.
     function dibujarCluster(c) {
-      var r = 15;
+      var conteo = Object.create(null);
+      c.miembros.forEach(function (m) {
+        var col = (m && m.color) || '#C97A83';
+        conteo[col] = (conteo[col] || 0) + 1;
+      });
+      var colores = Object.keys(conteo).sort(function (a, b) { return conteo[b] - conteo[a]; });
+      var colorDominante = colores[0];
+      var esUnRubro = colores.length === 1;
+
+      var r = 16;
       ctx.beginPath();
       ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(16,20,28,.92)';
+      ctx.fillStyle = esUnRubro ? colorDominante : 'rgba(16,20,28,.92)';
+      ctx.shadowColor = 'rgba(0,0,0,.4)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 1;
       ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#C97A83';
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = esUnRubro ? '#ECEDEF' : colorDominante;
       ctx.stroke();
-      ctx.fillStyle = '#ECEDEF';
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
+      ctx.fillStyle = esUnRubro ? '#0A0D13' : '#ECEDEF';
+      ctx.font = '700 12px "IBM Plex Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(String(c.miembros.length), c.x, c.y + 1);
