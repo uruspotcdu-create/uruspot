@@ -26,25 +26,54 @@ button.chip{
   border:1px solid var(--glass-borde); border-radius:var(--radio-full);
   padding:7px var(--esp-3); color:var(--color-tinta-60); font:var(--tipo-dato);
   backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
-  transition:border-color var(--dur-rapido) var(--easing-estandar), color var(--dur-rapido),
-             background var(--dur-rapido), transform var(--dur-rapido) var(--easing-estandar);
+  transition:border-color var(--dur-rapido) var(--easing-estandar),
+             color var(--dur-rapido), background var(--dur-rapido),
+             transform var(--dur-rapido) var(--easing-estandar),
+             box-shadow var(--dur-media);
 }
-button.chip:hover{ color:var(--color-tinta); border-color:var(--chip-color,var(--color-granate-clara)); transform:translateY(-1px); }
-button.chip:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:1px; }
+button.chip:hover{
+  color:var(--color-tinta); border-color:var(--chip-color, var(--color-granate-clara));
+  transform:translateY(-1px);
+}
+button.chip:active{
+  transform:translateY(1px) scale(.98);
+}
+button.chip:focus-visible{
+  outline:2px solid var(--color-granate-clara); outline-offset:2px;
+  border-radius:var(--radio-sm);
+}
+button.chip:disabled{
+  opacity:0.5; cursor:not-allowed; color:var(--color-tinta-30);
+  background:var(--glass-bg); border-color:var(--glass-borde);
+}
 button.chip.chip--activo{
   color:var(--color-fondo);
-  background:linear-gradient(135deg, var(--chip-color,var(--color-granate-clara)), var(--color-granate));
+  background:linear-gradient(135deg, var(--chip-color, var(--color-granate-clara)), var(--color-granate));
   border-color:transparent;
-  box-shadow:0 4px 16px -4px var(--chip-color,var(--color-granate-clara));
+  box-shadow:0 4px 16px -4px var(--chip-color, var(--color-granate-clara));
 }
-.chip__conteo{ color:var(--color-tinta-30); font-variant-numeric:tabular-nums; }
-button.chip.chip--activo .chip__conteo{ color:rgba(10,13,19,.65); }
+button.chip.chip--activo:focus-visible{
+  outline-color:var(--color-tinta);
+}
+.chip__conteo{
+  color:var(--color-tinta-30); font-variant-numeric:tabular-nums;
+}
+button.chip.chip--activo .chip__conteo{
+  color:rgba(10,13,19,.65);
+}
 
 .mapa-leyenda{ display:flex; flex-wrap:wrap; gap:var(--esp-2) 14px; margin:14px 0 var(--esp-8); }
 .mapa-leyenda[hidden]{ display:none; }
 
-/* app.js (pintarLeyenda) emite estas dos clases literalmente — mismo
-   componente que .chip/.chip__punto de arriba, declarado con su
-   nombre real para no depender de que el markup cambie. */
-.mapa-leyenda-chip{ display:flex; align-items:center; gap:6px; font:var(--tipo-dato); font-size:11.5px; color:var(--color-tinta-60); }
-.mapa-leyenda-punto{ width:9px; height:9px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); flex:none; }
+/* Aliases para leyenda de mapa.
+   app.js (pintarLeyenda) emite .mapa-leyenda-chip/.mapa-leyenda-punto.
+   Son EXACTAMENTE lo mismo que .chip/.chip__punto, solo nombres distintos.
+   Se declaran como aliases para mantener compatibilidad con app.js. */
+.mapa-leyenda-chip{
+  display:flex; align-items:center; gap:var(--esp-2);
+  font:var(--tipo-dato-sm); color:var(--color-tinta-60);
+}
+.mapa-leyenda-punto{
+  width:9px; height:9px; border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg); flex:none;
+}
