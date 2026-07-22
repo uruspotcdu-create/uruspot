@@ -75,6 +75,17 @@
   color:var(--color-tinta-30); text-transform:none; letter-spacing:normal;
   font-family:var(--f-dato); display:inline-flex; align-items:center;
 }
+/* BUG REAL (auditoría Fase 3): lugar.estado ('verificado'/'pendiente')
+   se calculaba desde lugares-estado.json hace tiempo pero ninguna
+   tarjeta lo mostraba nunca — se descartaba después de computarlo.
+   Solo aparece para la minoría 'pendiente': transparencia puntual sin
+   diluir la promesa de "100% verificado" para la mayoría. Reusa el
+   token de alerta (Fase 2) en vez de un color nuevo. */
+.tarjeta-pendiente{
+  color:var(--color-alerta); text-transform:none; letter-spacing:normal;
+  font-family:var(--f-ui); font-weight:500;
+}
+.tarjeta-pendiente::before{ content:"◐ "; }
 .tarjeta-nombre{
   font:var(--tipo-display-sm); margin-top:var(--esp-1);
 }
@@ -152,9 +163,26 @@
   opacity:0.5; cursor:not-allowed; color:var(--color-tinta-30);
   background:rgba(10,13,19,.2); border-color:var(--glass-borde);
 }
+/* Acción primaria real de la tarjeta (calculada en app.js: ficha si
+   existe; si no, cómo-llegar, que siempre existe). Mismo acento que
+   .btn--primario en boton.css — un solo lenguaje de "esta es la
+   acción con más peso", no dos sistemas de énfasis distintos. */
+.tarjeta-btn--primaria{
+  background:var(--gradiente-marca); border-color:transparent; color:#FBF4F1;
+  font-weight:600;
+}
+.tarjeta-btn--primaria:hover{
+  filter:brightness(1.08); color:#FBF4F1; border-color:transparent;
+}
 .tarjeta-btn--fav.activo{
   color:var(--color-granate-clara); border-color:var(--color-granate-clara);
   background:rgba(201,122,131,.14);
+  /* Antes, "guardar" disparaba un render() completo del panel: el
+     reflow entero de la grilla YA era el feedback. Fase 3 quita ese
+     render innecesario (ver app.js) por costo de performance/motion,
+     así que el botón necesita su propia confirmación breve — un pop
+     acotado, no un salto. */
+  animation:uru-scale-in var(--dur-media) var(--easing-rebote);
 }
 
 .vacio{
