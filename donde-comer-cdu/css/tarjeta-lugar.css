@@ -63,6 +63,17 @@
 .tarjeta-rubro{
   font:var(--tipo-dato-xs); letter-spacing:var(--ls-extra); text-transform:uppercase;
   color:var(--chip-color, var(--color-granate-clara));
+  display:flex; align-items:center; gap:var(--esp-2); flex-wrap:wrap;
+}
+/* BUG REAL: app.js emite este span solo cuando "cerca de mí" está
+   activo y el lugar tiene coordenadas, pero ninguna hoja de estilo
+   lo cubría — heredaba el color/mayúscula del rubro y se leía como
+   parte del nombre del rubro en vez de un dato aparte. Se le da su
+   propio color neutro (no compite con --chip-color) y normal-case,
+   porque "180 m" en mayúsculas con tracking amplio es ilegible. */
+.tarjeta-distancia{
+  color:var(--color-tinta-30); text-transform:none; letter-spacing:normal;
+  font-family:var(--f-dato); display:inline-flex; align-items:center;
 }
 .tarjeta-nombre{
   font:var(--tipo-display-sm); margin-top:var(--esp-1);
@@ -95,6 +106,29 @@
 .tarjeta-btn--maps:hover{ color:#7fb8e0; border-color:#7fb8e0; background:rgba(127,184,224,.12); }
 .tarjeta-btn--tel:hover{ color:#8fd0a0; border-color:#8fd0a0; background:rgba(143,208,160,.12); }
 .tarjeta-btn--compartir{ padding-left:10px; padding-right:10px; }
+/* Jerarquía deliberada: "no me interesa" es la única acción negativa
+   entre cinco posibles, y antes tenía el mismo peso visual que
+   "guardar" o "ver ficha" — la interfaz le pedía al ojo la misma
+   atención para rechazar que para avanzar. Se le baja la opacidad en
+   reposo (nunca en focus/hover, así sigue siendo 100% operable con
+   teclado y lector de pantalla) para que las acciones positivas
+   ganen la primera pasada visual. */
+.tarjeta-btn--descartar{ opacity:.55; border-style:dashed; }
+.tarjeta-btn--descartar:hover,
+.tarjeta-btn--descartar:focus-visible{ opacity:1; }
+
+/* ── Paginación ("cargar más") ──
+   BUG REAL: pintarTarjetas() en app.js arma este bloque hace tiempo,
+   pero ninguna hoja de estilo lo cubre — el botón cae al estilo
+   nativo del navegador (mayúsculas de sistema, sin relación visual
+   con el resto de la grilla) y queda pegado al borde izquierdo. */
+.paginacion{
+  grid-column:1/-1; display:flex; flex-direction:column; align-items:center;
+  gap:var(--esp-2); padding:var(--esp-6) 0 var(--esp-2);
+}
+.paginacion-conteo{
+  font:var(--tipo-dato-xs); color:var(--color-tinta-30); font-variant-numeric:tabular-nums;
+}
 
 /* app.js emite class="tarjeta-btn" directamente (no "btn") — mismo
    componente visual que boton.css, pero declarado acá explícitamente
@@ -130,6 +164,22 @@
   text-align:center;
 }
 .vacio p{ margin:0; }
+/* BUG REAL corregido: `.vacio.error` (el timeout de 12s en index.html
+   y, tras el ajuste de una línea en app.js, también la falla de
+   fetch inicial) no tenía NINGUNA regla propia en ningún archivo —
+   se veía exactamente igual que "no encontramos lugares con esos
+   criterios", sin ninguna señal de que algo salió mal de verdad. Se
+   usa --color-alerta (Fase 2, tokens.css) — nunca el rojo semántico
+   de "cerrado", que está reservado para ese único uso. */
+.vacio.error{
+  background:var(--color-alerta-fondo); border:1px solid var(--color-alerta-borde);
+  border-radius:var(--radio-lg); color:var(--color-tinta);
+}
+.vacio.error::before{ content:"⚠"; font-size:22px; color:var(--color-alerta); }
+.vacio.error small{ color:var(--color-tinta-30); font:var(--tipo-dato-xs); }
+.vacio.error .btn, .vacio.error .btn-link{
+  color:var(--color-alerta); border-color:var(--color-alerta-borde);
+}
 /* Salida contextual del estado vacío: solo aparece cuando hay algo
    real para deshacer (búsqueda y/o filtro de rubro activos) — nunca
    un botón huérfano cuando el vacío es, por ejemplo, "todavía no
