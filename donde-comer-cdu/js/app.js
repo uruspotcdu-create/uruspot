@@ -509,24 +509,43 @@
     return consultaActual.trim().length > 0 || !!filtroRubroActivo;
   }
 
+  // Fuente única de verdad de "qué rama visual corresponde mostrar".
+  // Antes esta decisión estaba escrita dos veces —una en render(), otra
+  // como `esRecorteReal` dentro de actualizarCabecera()— con el riesgo
+  // real de que una cambiara sin la otra y la cabecera dijera una cosa
+  // mientras el panel mostraba otra. También es la pieza que faltaba
+  // para que tickPermanencia() sepa si de verdad hace falta re-
+  // renderizar: antes comparaba solo PLANO.region(estado).nombre, que
+  // puede cambiar (guia→exploracion) sin que la rama visible cambie
+  // (p. ej. con un filtro de rubro activo, que ya fuerza "buscador" en
+  // los dos casos) — disparaba un render completo (DOM + mapa) sin que
+  // hubiera nada distinto que mostrar. Verificado con evidencia
+  // ejecutable antes de este cambio.
+  function ramaActual(reg) {
+    if (reg.nombre === 'curaduria') return 'curaduria';
+    if (reg.nombre === 'accionDirecta' || hayBusquedaOFiltro() || verCatalogoCompleto) return 'buscador';
+    return 'recorte:' + reg.nombre; // 'recorte:guia' vs 'recorte:exploracion' — tamaños distintos, hay que distinguirlos
+  }
+
   function render() {
     if (!REGISTRO.length || !DOM.panelDescubrimiento) return;
 
     var favoritos = leerFavoritos();
     var reg = PLANO.region(estado);
-    ultimaRegionRenderizada = reg.nombre;
+    var rama = ramaActual(reg);
+    ultimaRamaRenderizada = rama;
 
-    actualizarCabecera(reg);
+    actualizarCabecera(reg, rama);
     actualizarMapaTextura();
     actualizarBannerCuraduriaSugerida(reg);
 
     var lista, opts;
-    if (reg.nombre === 'curaduria') {
+    if (rama === 'curaduria') {
       var idsGuardados = Object.keys(favoritos).filter(function (id) { return favoritos[id]; });
       lista = EXPO.coleccionCurada(REGISTRO, idsGuardados);
       lista = ordenarPorCercania(lista);
       opts = { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.' };
-    } else if (reg.nombre === 'accionDirecta' || hayBusquedaOFiltro() || verCatalogoCompleto) {
+    } else if (rama === 'buscador') {
       // BUSCADOR: quien nombró lo que quiere (o filtró/buscó, aunque
       // el plano todavía no cruzó el umbral) o pidió "ver catálogo
       // completo" nunca se topa con un recorte — prioridad máxima de
