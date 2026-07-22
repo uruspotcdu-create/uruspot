@@ -677,25 +677,55 @@
     // sigue siendo lo más útil (son casos de área real con mucha oferta).
     //
     // BUG REAL corregido: el corte de "hasta 8 lugares" solo cubría
-    // clusters chicos. Un cluster de 9+ lugares apilados en la misma
-    // coordenada (o cerca del zoom máximo, donde ya no queda margen
-    // para acercar más) seguía cayendo en la rama de zoom — y ese zoom
-    // no separaba nada, porque no había nada más que acercar. Resultado
-    // reportado: "pines con un número que no se abren, no se expanden"
-    // al hacer mucho zoom. Ahora, sea cual sea el tamaño del cluster, se
-    // calcula primero si acercar realmente va a mover la vista de forma
-    // significativa (`zoomAyudaria`); si no, se muestra la lista en vez
-    // de intentar un zoom que no tiene a dónde ir.
+    // clusters chicos por conteo, pero el problema real no es el
+    // conteo — es si los miembros pueden llegar a separarse en pantalla
+    // en ALGÚN zoom alcanzable. Un cluster de 9+ lugares casi
+    // superpuestos (o cualquier cluster ya cerca de ZOOM_MAX, sin
+    // margen real para acercar más) seguía cayendo en la rama de zoom,
+    // que no separaba nada. Resultado reportado: "pines con un número
+    // que no se abren, no se expanden" al hacer mucho zoom.
+    //
+    // `dispersionMaxima(miembros, ZOOM_MAX)` calcula, en pixeles de
+    // pantalla, cuánto se separarían esos mismos miembros si lleváramos
+    // el mapa al zoom más alto posible — el mejor caso posible de
+    // separación. Si incluso ahí siguen dentro de RADIO_CLUSTER_PX (el
+    // mismo radio que agruparEnClusters usa para decidir que son "el
+    // mismo punto" en pantalla), matemáticamente NINGÚN zoom los va a
+    // separar: no tiene sentido animar hacia allá. Esto reemplaza la
+    // heurística anterior (comparar el zoom destino contra el zoom
+    // actual) por una verificación directa de la causa raíz que el
+    // comentario de arriba ya describía en prosa pero nunca comprobaba
+    // en código.
+    function dispersionMaxima(miembros, zoom) {
+      var xs = new Array(miembros.length), ys = new Array(miembros.length);
+      for (var i = 0; i < miembros.length; i++) {
+        var p = PROY.proyectar(miembros[i].lat, miembros[i].lng, zoom);
+        xs[i] = p.x; ys[i] = p.y;
+      }
+      var anchoDisp = Math.max.apply(null, xs) - Math.min.apply(null, xs);
+      var altoDisp = Math.max.apply(null, ys) - Math.min.apply(null, ys);
+      return Math.max(anchoDisp, altoDisp);
+    }
+
     function manejarClick(c) {
       if (c.tipo === 'cluster') {
         dispararOnda(c.x, c.y, c.miembros[0] && c.miembros[0].color);
+
+        // Caso rápido, decisión de producto (no de bug): con pocos
+        // lugares, mostrar la lista es más directo que animar un zoom,
+        // aunque el zoom técnicamente pudiera separarlos.
+        if (c.miembros.length <= 8) { abrirPopupCluster(c); return; }
+
+        // Caso general: ¿de verdad hay a dónde acercar? Si en el mejor
+        // zoom posible los miembros van a seguir dentro del radio de
+        // fusión de clusters, ningún acercamiento los va a separar —
+        // mostrar la lista en vez de animar hacia un destino que no
+        // cambia nada.
+        var nuncaSeSepara = dispersionMaxima(c.miembros, ZOOM_MAX) < RADIO_CLUSTER_PX;
+        if (nuncaSeSepara) { abrirPopupCluster(c); return; }
+
         var enc = PROY.encuadrar(c.miembros, viewport.ancho, viewport.alto, 50, ZOOM_MAX);
         var zoomDestino = PROY.clamp(Math.max(viewport.zoom + 1.2, Math.min(viewport.zoom + 2.4, enc.zoom)), ZOOM_MIN, ZOOM_MAX);
-        var zoomAyudaria = zoomDestino > viewport.zoom + 0.05;
-        if (c.miembros.length <= 8 || !zoomAyudaria) {
-          abrirPopupCluster(c);
-          return;
-        }
         animarA(enc.lat, enc.lng, zoomDestino);
         return;
       }
@@ -846,8 +876,20 @@
     function posicionarPopupEn(x, y) {
       var anchoPopup = popup.offsetWidth || 220;
       var altoPopup = popup.offsetHeight || 90;
-      var px = PROY.clamp(x, anchoPopup / 2 + 8, Math.max(anchoPopup / 2 + 8, viewport.ancho - anchoPopup / 2 - 8));
-      var py = PROY.clamp(y, altoPopup + 16, Math.max(altoPopup + 16, viewport.alto - 8));
+      // Los márgenes se acotan al propio tamaño del viewport antes de
+      // usarlos como límites del clamp. Sin esto, un popup más ancho
+      // que el contenedor (pantallas muy angostas, nombre de lugar muy
+      // largo) producía min > max en PROY.clamp; como esa función hace
+      // Math.max(min, Math.min(max, v)), un min>max no lanza, pero
+      // "gana" siempre el mínimo — el popup quedaba fijo pegado a un
+      // borde sin que valiera la pena depurar por qué. Acotando el
+      // margen a la mitad del viewport se garantiza min <= max siempre,
+      // así el popup se achica contra el borde en vez de comportarse
+      // de forma no determinística en el caso límite.
+      var margenX = Math.min(anchoPopup / 2 + 8, viewport.ancho / 2);
+      var margenYMin = Math.min(altoPopup + 16, viewport.alto);
+      var px = PROY.clamp(x, margenX, Math.max(margenX, viewport.ancho - margenX));
+      var py = PROY.clamp(y, margenYMin, Math.max(margenYMin, viewport.alto - 8));
       popup.style.left = px + 'px';
       popup.style.top = py + 'px';
     }
@@ -909,12 +951,29 @@
       var lista = popup.querySelector('.uru-mapa-popup-cluster-lista');
       c.miembros.forEach(function (m) {
         var li = document.createElement('li');
-        var a = document.createElement('a');
-        a.className = 'uru-mapa-popup-cluster-item';
-        a.textContent = m.nombre;
-        if (m.href) a.href = m.href;
-        else { a.href = '#'; a.setAttribute('aria-disabled', 'true'); }
-        li.appendChild(a);
+        if (m.href) {
+          // Miembro con ficha propia: sí es interactivo.
+          var a = document.createElement('a');
+          a.className = 'uru-mapa-popup-cluster-item';
+          a.textContent = m.nombre;
+          a.href = m.href;
+          li.appendChild(a);
+        } else {
+          // BUG REAL corregido: antes esto era un <a href="#"
+          // aria-disabled="true">. `aria-disabled` es solo una
+          // señal semántica para lectores de pantalla — NO evita el
+          // click real ni el foco por teclado. Un usuario de mouse
+          // podía clickearlo igual (navegando a "#", es decir,
+          // saltando al tope de la página sin aviso) y un usuario de
+          // teclado lo encontraba tabulando como si fuera un link
+          // funcional. Un <span> sin href ni tabindex es simplemente
+          // texto: no navega, no se enfoca, y el lector de pantalla
+          // lo anuncia como lo que es.
+          var span = document.createElement('span');
+          span.className = 'uru-mapa-popup-cluster-item uru-mapa-popup-cluster-item--sin-link';
+          span.textContent = m.nombre;
+          li.appendChild(span);
+        }
         lista.appendChild(li);
       });
 
