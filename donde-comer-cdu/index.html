@@ -668,7 +668,10 @@
 <header id="siteHeader" role="banner">
   <div class="envoltorio membrete">
     <div class="marca">
-      URU SPOT<span class="marca__subtitle">Concepción del Uruguay</span>
+      <span class="marca__glifo" aria-hidden="true"></span>
+      <span>
+        <span class="marca__texto">URU SPOT</span><span class="marca__subtitle">Concepción del Uruguay</span>
+      </span>
     </div>
     <!-- id="rolActual": ver Bug B / tabla de contrato §3. Sin este
          id, app.js/actualizarCabecera() nunca puede escribir acá y
@@ -687,7 +690,7 @@
   <!-- HERO: llamada a la acción principal -->
   <section class="hero envoltorio" aria-labelledby="hero-title">
     <div class="hero__halo" aria-hidden="true"></div>
-    <h1 id="hero-title">No te mostramos el padrón entero. Te mostramos lo que corresponde ahora.</h1>
+    <h1 id="hero-title">No te mostramos el padrón entero. <span class="hero__enfasis">Te mostramos lo que corresponde ahora.</span></h1>
     <p class="hero__subtitle">URU SPOT arranca guiando poco y, a medida que lo usás, suelta el control. Si ya sabés lo que buscás, escribilo y vas directo.</p>
 
     <!-- BÚSQUEDA -->
@@ -732,6 +735,11 @@
         <span>caminados y chequeados en el lugar</span>
       </div>
     </div>
+
+    <a href="#region-descubrimiento" class="hero__scroll-cue">
+      <span class="hero__scroll-cue__icono" aria-hidden="true">↓</span>
+      Ver lugares para vos
+    </a>
   </section>
 
   <!-- DESCUBRIMIENTO: región dinámica. Todo lo que hay adentro de
@@ -739,6 +747,7 @@
        §1 para qué módulo decide qué. -->
   <section class="envoltorio descubrimiento-area" id="region-descubrimiento" aria-label="Descubridor de lugares">
     <div id="mapaTextura" aria-hidden="true"></div>
+    <p class="mapa-textura__leyenda">Cada punto de color es un lugar caminado y verificado — el mapa interactivo aparece más abajo apenas haya resultados con ubicación.</p>
 
     <!-- id="tituloRegion" / id="subtituloRegion": ver Bug B / §3.
          Sin estos ids el subtítulo queda pegado en "Cargando…" para
