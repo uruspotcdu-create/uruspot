@@ -75,6 +75,10 @@
   var paginaTarjetas = 1; // cuántas páginas de TARJETAS_POR_PAGINA hay reveladas
   var ubicacionUsuario = null; // {lat,lng} — solo si el usuario lo pide y el navegador lo concede
   var cercaTuyoActivo = false;
+  // Guía/Exploración recortan por defecto (ver render()); este flag es
+  // el escape hatch manual pedido explícitamente: "ver catálogo
+  // completo" siempre visible, nunca escondido detrás del recorte.
+  var verCatalogoCompleto = false;
   var permanenciaTimer = null;
   var ultimaRegionRenderizada = '';
   var debounceBuscarId = null;
@@ -396,6 +400,55 @@
     });
   }
 
+  // Banner discreto para "guardaste 2+ lugares": reemplaza el redirect
+  // duro que existía antes (guardar 2x te sacaba de golpe a "Tu
+  // lista" sin avisar). Ahora solo un click explícito (acá o en
+  // btnVerGuardados) activa curaduriaActiva de verdad — ver
+  // motor-plano.js: Acciones.guardar ya no toca curaduriaActiva,
+  // solo curaduriaSugerida.
+  var bannerCuraduria = null;
+  function asegurarBannerCuraduria() {
+    if (bannerCuraduria || !DOM.panelDescubrimiento || !DOM.panelDescubrimiento.parentNode) return;
+    bannerCuraduria = document.createElement('div');
+    bannerCuraduria.className = 'mapa-info'; // reutiliza el componente de aviso ya existente (mapa.css)
+    bannerCuraduria.setAttribute('role', 'status');
+    bannerCuraduria.hidden = true;
+    var texto = document.createElement('span');
+    texto.textContent = 'Armaste el comienzo de una lista. ';
+    var btnIr = document.createElement('button');
+    btnIr.type = 'button';
+    btnIr.className = 'btn btn--activo';
+    btnIr.textContent = 'Ver tus guardados';
+    btnIr.addEventListener('click', function () {
+      estado.sesion.curaduriaActiva = true;
+      estado.sesion.curaduriaSugerida = false;
+      PLANO.guardarEstado(estado);
+      paginaTarjetas = 1;
+      render();
+    });
+    var btnCerrar = document.createElement('button');
+    btnCerrar.type = 'button';
+    btnCerrar.className = 'btn btn--icono';
+    btnCerrar.setAttribute('aria-label', 'Descartar aviso');
+    btnCerrar.textContent = '✕';
+    btnCerrar.addEventListener('click', function () {
+      estado.sesion.curaduriaSugerida = false;
+      PLANO.guardarEstado(estado);
+      bannerCuraduria.hidden = true;
+    });
+    bannerCuraduria.appendChild(texto);
+    bannerCuraduria.appendChild(btnIr);
+    bannerCuraduria.appendChild(btnCerrar);
+    DOM.panelDescubrimiento.parentNode.insertBefore(bannerCuraduria, DOM.panelDescubrimiento);
+  }
+
+  function actualizarBannerCuraduriaSugerida(reg) {
+    var debeMostrar = reg.nombre !== 'curaduria' && !!estado.sesion.curaduriaSugerida;
+    if (!debeMostrar) { if (bannerCuraduria) bannerCuraduria.hidden = true; return; }
+    asegurarBannerCuraduria();
+    if (bannerCuraduria) bannerCuraduria.hidden = false;
+  }
+
   function tickPermanencia() {
     if (document.hidden) return;
     estado = PLANO.aplicarAccion(estado, 'permanecer', { segundos: 5 });
@@ -440,6 +493,22 @@
      Una sola lista por región alimenta tarjetas y mapa: así se
      garantiza que nunca puedan mostrar conjuntos distintos.        */
 
+  // Devuelve el catálogo acotado únicamente por lo que el usuario pide
+  // de forma explícita: búsqueda y/o rubro elegido en "Por rubro".
+  // Esta es la rama BUSCADOR — nunca recorta, la búsqueda explícita
+  // tiene prioridad máxima sobre cualquier heurística del plano.
+  function listaPorAccionExplicita() {
+    var lista = EXPO.resultadosPorAccionExplicita(REGISTRO, consultaActual);
+    if (filtroRubroActivo) {
+      lista = lista.filter(function (l) { return l.grupo === filtroRubroActivo; });
+    }
+    return lista;
+  }
+
+  function hayBusquedaOFiltro() {
+    return consultaActual.trim().length > 0 || !!filtroRubroActivo;
+  }
+
   function render() {
     if (!REGISTRO.length || !DOM.panelDescubrimiento) return;
 
@@ -449,31 +518,33 @@
 
     actualizarCabecera(reg);
     actualizarMapaTextura();
+    actualizarBannerCuraduriaSugerida(reg);
 
-    var lista;
+    var lista, opts;
     if (reg.nombre === 'curaduria') {
       var idsGuardados = Object.keys(favoritos).filter(function (id) { return favoritos[id]; });
       lista = EXPO.coleccionCurada(REGISTRO, idsGuardados);
       lista = ordenarPorCercania(lista);
-      pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.' });
-    } else {
-      // Antes acá se recortaba a 4-10 lugares "por iniciativa propia"
-      // (motor-exposicion.js: recortePorIniciativaPropia). Se retiró
-      // a pedido: el catálogo completo (+1400 lugares) tiene que verse
-      // siempre, no solo cuando alguien escribe una búsqueda. Ahora
-      // se muestra siempre el padrón entero, acotado únicamente por lo
-      // que el usuario pide de forma explícita: texto de búsqueda y/o
-      // rubro elegido en "Por rubro". recortePorIniciativaPropia() y
-      // el presupuesto de exposición (motor-config.js) quedan sin usar
-      // acá — no se borraron por si en el futuro se quiere retomar
-      // una vista "sugerido" separada de esta.
-      lista = EXPO.resultadosPorAccionExplicita(REGISTRO, consultaActual);
-      if (filtroRubroActivo) {
-        lista = lista.filter(function (l) { return l.grupo === filtroRubroActivo; });
-      }
+      opts = { origen: 'accion_explicita', narrativa: false, vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.' };
+    } else if (reg.nombre === 'accionDirecta' || hayBusquedaOFiltro() || verCatalogoCompleto) {
+      // BUSCADOR: quien nombró lo que quiere (o filtró/buscó, aunque
+      // el plano todavía no cruzó el umbral) o pidió "ver catálogo
+      // completo" nunca se topa con un recorte — prioridad máxima de
+      // lo explícito sobre lo inferido.
+      lista = listaPorAccionExplicita();
       lista = ordenarPorCercania(lista);
-      pintarTarjetas(lista, favoritos, { origen: 'accion_explicita', narrativa: false });
+      opts = { origen: 'accion_explicita', narrativa: false };
+    } else {
+      // GUÍA / EXPLORACIÓN reales: recorte por presupuesto de
+      // exposición (motor-config.js), evitando rubros con patrón
+      // estable de rechazo y rotando 72h los ya aceptados por
+      // iniciativa propia. El catálogo completo sigue a un click de
+      // distancia — ver botón "ver catálogo completo" en actualizarCabecera().
+      lista = EXPO.recortePorIniciativaPropia(REGISTRO, estado, reg.nombre);
+      lista = ordenarPorCercania(lista);
+      opts = { origen: 'iniciativa_propia', narrativa: false };
     }
+    pintarTarjetas(lista, favoritos, opts);
     actualizarMapaHerramienta(reg.nombre, lista || []);
   }
 
@@ -493,6 +564,25 @@
     });
   }
 
+  // Botón "ver catálogo completo": creado por JS (mismo criterio que
+  // "cerca de mí" — progressive enhancement, no toca el HTML), visible
+  // únicamente cuando hay un recorte real activo (Guía/Exploración sin
+  // búsqueda/filtro). Escape hatch pedido explícitamente: el recorte
+  // nunca puede ser la única forma de llegar al padrón completo.
+  var btnVerCatalogoCompleto = null;
+  function asegurarBotonVerCatalogoCompleto() {
+    if (btnVerCatalogoCompleto || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
+    btnVerCatalogoCompleto = document.createElement('button');
+    btnVerCatalogoCompleto.type = 'button';
+    btnVerCatalogoCompleto.className = 'btn btn--link-volver';
+    btnVerCatalogoCompleto.addEventListener('click', function () {
+      verCatalogoCompleto = !verCatalogoCompleto;
+      paginaTarjetas = 1;
+      render();
+    });
+    DOM.subtituloRegion.insertAdjacentElement('afterend', btnVerCatalogoCompleto);
+  }
+
   function actualizarCabecera(reg) {
     if (DOM.rolActual) {
       var rol = PLANO.rolPorAperturas(estado.aperturas);
@@ -500,6 +590,8 @@
       DOM.rolActual.textContent = NOMBRES[rol];
     }
     if (!DOM.tituloRegion || !DOM.subtituloRegion) return;
+
+    if (btnVerCatalogoCompleto) btnVerCatalogoCompleto.hidden = true;
 
     if (reg.nombre === 'curaduria') {
       DOM.tituloRegion.textContent = 'Tu lista';
@@ -510,17 +602,50 @@
     if (DOM.btnVolverATodos) DOM.btnVolverATodos.hidden = true;
 
     var rubroMeta = filtroRubroActivo && window.URU_RUBROS_META ? window.URU_RUBROS_META[filtroRubroActivo] : null;
-    if (consultaActual.trim()) {
-      DOM.tituloRegion.textContent = 'Resultados';
-      DOM.subtituloRegion.textContent = rubroMeta
-        ? 'Coincidencias con "' + consultaActual.trim() + '" en ' + rubroMeta[0] + '.'
-        : 'Esto es lo que coincide con lo que escribiste.';
-    } else if (rubroMeta) {
-      DOM.tituloRegion.textContent = rubroMeta[0];
-      DOM.subtituloRegion.textContent = 'Todos los lugares verificados de este rubro.';
+
+    var esRecorteReal = (reg.nombre === 'guia' || reg.nombre === 'exploracion') && !hayBusquedaOFiltro() && !verCatalogoCompleto;
+
+    // BUSCADOR: hay búsqueda, filtro, o el usuario ya pidió ver todo.
+    if (!esRecorteReal) {
+      if (consultaActual.trim()) {
+        DOM.tituloRegion.textContent = 'Resultados';
+        DOM.subtituloRegion.textContent = rubroMeta
+          ? 'Coincidencias con "' + consultaActual.trim() + '" en ' + rubroMeta[0] + '.'
+          : 'Esto es lo que coincide con lo que escribiste.';
+      } else if (rubroMeta) {
+        DOM.tituloRegion.textContent = rubroMeta[0];
+        DOM.subtituloRegion.textContent = 'Todos los lugares verificados de este rubro.';
+      } else {
+        DOM.tituloRegion.textContent = 'Todos los lugares';
+        DOM.subtituloRegion.textContent = 'El padrón completo (' + REGISTRO.length + ' lugares).';
+      }
+      // "Volver a lo sugerido" solo tiene sentido si estamos viendo
+      // todo por el override manual (no porque haya una búsqueda o
+      // filtro real de por medio — ahí no hay "sugerido" al que volver).
+      if (verCatalogoCompleto && !hayBusquedaOFiltro() && reg.nombre !== 'accionDirecta') {
+        asegurarBotonVerCatalogoCompleto();
+        if (btnVerCatalogoCompleto) {
+          btnVerCatalogoCompleto.textContent = '← Volver a lo sugerido';
+          btnVerCatalogoCompleto.hidden = false;
+        }
+      }
+      return;
+    }
+
+    // GUÍA / EXPLORACIÓN reales: copy distinta porque el contenido
+    // ahora sí es distinto (recorte de 4 u 8 lugares, no el padrón
+    // entero) — antes estas dos ramas eran cosméticamente idénticas.
+    asegurarBotonVerCatalogoCompleto();
+    if (btnVerCatalogoCompleto) {
+      btnVerCatalogoCompleto.textContent = 'Ver catálogo completo →';
+      btnVerCatalogoCompleto.hidden = false;
+    }
+    if (reg.nombre === 'guia') {
+      DOM.tituloRegion.textContent = 'Para arrancar';
+      DOM.subtituloRegion.textContent = 'Una selección chica para no abrumar. Guardá o descartá para afinarla.';
     } else {
-      DOM.tituloRegion.textContent = 'Todos los lugares';
-      DOM.subtituloRegion.textContent = 'El padrón completo, siempre visible. Buscá o filtrá por rubro para acotar.';
+      DOM.tituloRegion.textContent = 'Para explorar';
+      DOM.subtituloRegion.textContent = 'Más variedad para curiosear. Buscá si ya sabés qué querés.';
     }
   }
 
