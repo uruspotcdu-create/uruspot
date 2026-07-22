@@ -276,7 +276,24 @@
       var btnGuardar = e.target.closest('[data-accion="guardar"]');
       var btnCompartir = e.target.closest('[data-accion="compartir"]');
       var btnCargarMas = e.target.closest('[data-accion="cargar-mas"]');
+      var btnLimpiarBusqueda = e.target.closest('[data-accion="limpiar-busqueda"]');
+      var btnLimpiarFiltroRubro = e.target.closest('[data-accion="limpiar-filtro-rubro"]');
       var carta0 = e.target.closest('[data-lugar-id]');
+
+      if (btnLimpiarBusqueda) {
+        consultaActual = '';
+        if (DOM.inputBuscar) DOM.inputBuscar.value = '';
+        estado.sesion.accionDirectaForzada = null;
+        PLANO.guardarEstado(estado);
+        render();
+        return;
+      }
+      if (btnLimpiarFiltroRubro) {
+        filtroRubroActivo = null;
+        pintarRubros(); // los chips deben reflejar que ya ninguno quedó activo
+        render();
+        return;
+      }
 
       if (btnCompartir) {
         var cartaC = btnCompartir.closest('[data-lugar-id]');
@@ -719,7 +736,22 @@
         : 'Sin resultados.';
     }
     if (!lista.length) {
-      DOM.panelDescubrimiento.innerHTML = '<p class="vacio">' + (opts.vacioTexto || 'No encontramos nada con esa búsqueda.') + '</p>';
+      var tieneBusqueda = consultaActual.trim().length > 0;
+      var tieneFiltroRubro = !!filtroRubroActivo;
+      var acciones = '';
+      if (tieneBusqueda) {
+        acciones += '<button type="button" class="btn" data-accion="limpiar-busqueda">Limpiar búsqueda</button>';
+      }
+      if (tieneFiltroRubro) {
+        var metaFiltro = window.URU_RUBROS_META && window.URU_RUBROS_META[filtroRubroActivo];
+        acciones += '<button type="button" class="btn" data-accion="limpiar-filtro-rubro">' +
+          (metaFiltro ? 'Salir de "' + escapeHTML(metaFiltro[0]) + '"' : 'Ver todos los rubros') + '</button>';
+      }
+      DOM.panelDescubrimiento.innerHTML =
+        '<div class="vacio">' +
+          '<p>' + (opts.vacioTexto || 'No encontramos lugares con esos criterios.') + '</p>' +
+          (acciones ? '<div class="vacio-acciones">' + acciones + '</div>' : '') +
+        '</div>';
       return;
     }
     var limite = TARJETAS_POR_PAGINA * paginaTarjetas;
