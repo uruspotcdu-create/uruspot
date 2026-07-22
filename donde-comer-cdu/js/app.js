@@ -81,7 +81,7 @@
 
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
-   'mapaTextura', 'mapaContainer', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados',
+   'mapaTextura', 'mapaContainer', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados', 'btnVolverATodos',
    'listaRubros', 'statLugares', 'statRubros', 'faqLista']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
@@ -242,6 +242,28 @@
     });
   }
 
+  // Helper compartido: una tarjeta que va a desaparecer de la grilla
+  // (rechazada, o des-guardada mientras se está viendo "tus
+  // guardados") primero recibe su transición de salida real
+  // (opacity/transform, CSS) y recién cuando esa transición termina
+  // se dispara el render() que reconstruye todo el panel. Evita que
+  // el propio render() destruya el elemento en el mismo tick en que
+  // se le pidió que se animara — el bug que hacía que "no me
+  // interesa" (y, con el fix de abajo, "quitar de guardados") se
+  // sintieran como un salto brusco en vez de un gesto con feedback.
+  function programarRenderTrasSalida(carta) {
+    if (prefiereMovimientoReducido()) { render(); return; }
+    carta.classList.add('descartada');
+    var yaRenderizo = false;
+    var terminar = function () {
+      if (yaRenderizo) return;
+      yaRenderizo = true;
+      render();
+    };
+    carta.addEventListener('transitionend', terminar, { once: true });
+    setTimeout(terminar, 260); // red de seguridad si transitionend no dispara
+  }
+
   if (DOM.panelDescubrimiento) {
     DOM.panelDescubrimiento.addEventListener('click', function (e) {
       var btnAceptar = e.target.closest('[data-accion="aceptar"]');
@@ -285,8 +307,16 @@
         var grupo = porId[id2] ? porId[id2].grupo : 'sin_rubro';
         estado = PLANO.aplicarAccion(estado, 'rechazar', { grupo: grupo });
         PLANO.guardarEstado(estado);
-        carta.classList.add('descartada');
-        render();
+        // BUG REAL corregido: `render()` se llamaba en el mismo tick
+        // en el que se agregaba la clase 'descartada', destruyendo la
+        // tarjeta (pintarTarjetas hace innerHTML='') antes de que el
+        // navegador llegara a pintar un solo frame con la transición
+        // opacity/transform en curso (definida en tarjeta-lugar.css).
+        // El click "no me interesa" saltaba directo al resultado
+        // final sin ningún feedback visual — se sentía brusco/roto,
+        // como si el click no hubiera hecho nada hasta que de golpe
+        // la tarjeta ya no estaba.
+        programarRenderTrasSalida(carta);
         return;
       }
       if (btnGuardar) {
@@ -295,9 +325,15 @@
         var favoritos = leerFavoritos();
         favoritos[id3] = !favoritos[id3];
         guardarFavoritos(favoritos);
-        estado = PLANO.aplicarAccion(estado, 'guardar', { lugarId: id3 });
+        // BUG REAL corregido: antes se llamaba a la acción 'guardar'
+        // sin importar si este click acababa de GUARDAR o de QUITAR
+        // el favorito — ver motor-plano.js. Ahora se informa el
+        // sentido real (`guardado: true/false`), así "quitar" nunca
+        // cuenta para el disparador que activa la vista de guardados.
+        estado = PLANO.aplicarAccion(estado, 'guardar', { lugarId: id3, guardado: !!favoritos[id3] });
         PLANO.guardarEstado(estado);
         btnGuardar.classList.toggle('activo', !!favoritos[id3]);
+        btnGuardar.setAttribute('aria-pressed', String(!!favoritos[id3]));
         actualizarContadorGuardados();
         render();
         return;
@@ -343,6 +379,20 @@
       PLANO.guardarEstado(estado);
       paginaTarjetas = 1;
       render();
+      // Foco al título de la nueva vista: quien navega con lector de
+      // pantalla o teclado necesita una señal explícita de que el
+      // contenido cambió por completo, no solo el texto silencioso.
+      if (DOM.tituloRegion) { DOM.tituloRegion.setAttribute('tabindex', '-1'); DOM.tituloRegion.focus({ preventScroll: false }); }
+    });
+  }
+
+  if (DOM.btnVolverATodos) {
+    DOM.btnVolverATodos.addEventListener('click', function () {
+      estado.sesion.curaduriaActiva = false;
+      PLANO.guardarEstado(estado);
+      paginaTarjetas = 1;
+      render();
+      if (DOM.tituloRegion) { DOM.tituloRegion.setAttribute('tabindex', '-1'); DOM.tituloRegion.focus({ preventScroll: false }); }
     });
   }
 
@@ -454,8 +504,10 @@
     if (reg.nombre === 'curaduria') {
       DOM.tituloRegion.textContent = 'Tu lista';
       DOM.subtituloRegion.textContent = 'Lo que guardaste, sin recorte ni rotación.';
+      if (DOM.btnVolverATodos) DOM.btnVolverATodos.hidden = false;
       return;
     }
+    if (DOM.btnVolverATodos) DOM.btnVolverATodos.hidden = true;
 
     var rubroMeta = filtroRubroActivo && window.URU_RUBROS_META ? window.URU_RUBROS_META[filtroRubroActivo] : null;
     if (consultaActual.trim()) {
@@ -566,7 +618,14 @@
           (slugLugar ? '<a class="tarjeta-btn" data-accion="aceptar" data-origen="' + opts.origen + '" href="locales/' + slugLugar + '/">ver ficha</a>' : '') +
           (linkMaps ? '<a class="tarjeta-btn tarjeta-btn--maps" data-accion="maps" href="' + linkMaps + '" target="_blank" rel="noopener" aria-label="Abrir en Google Maps">📍 mapa</a>' : '') +
           (linkTel ? '<a class="tarjeta-btn tarjeta-btn--tel" data-accion="llamar" href="' + linkTel + '" aria-label="Llamar">📞 llamar</a>' : '') +
-          '<button class="tarjeta-btn tarjeta-btn--fav' + (favoritos[lugar.id] ? ' activo' : '') + '" type="button" data-accion="guardar" aria-label="Guardar">' + (favoritos[lugar.id] ? '★ guardado' : '☆ guardar') + '</button>' +
+          // BUG REAL corregido: a diferencia de los chips de rubro
+          // (que sí llevan aria-pressed, ver pintarRubros), este botón
+          // de favorito no comunicaba su estado a un lector de
+          // pantalla — solo cambiaba de clase/ícono, visual puro. Se
+          // agrega aria-pressed (se actualiza también al toggle, ver
+          // el listener de click) y un aria-label que refleja la
+          // acción real disponible en cada estado.
+          '<button class="tarjeta-btn tarjeta-btn--fav' + (favoritos[lugar.id] ? ' activo' : '') + '" type="button" data-accion="guardar" aria-pressed="' + (favoritos[lugar.id] ? 'true' : 'false') + '" aria-label="' + (favoritos[lugar.id] ? 'Quitar de guardados' : 'Guardar') + '">' + (favoritos[lugar.id] ? '★ guardado' : '☆ guardar') + '</button>' +
           (slugLugar ? '<button class="tarjeta-btn tarjeta-btn--compartir" type="button" data-accion="compartir" aria-label="Compartir">🔗</button>' : '') +
           '<button class="tarjeta-btn tarjeta-btn--descartar" type="button" data-accion="rechazar">no me interesa</button>' +
         '</div>';
