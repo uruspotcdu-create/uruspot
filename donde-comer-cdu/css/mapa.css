@@ -81,8 +81,13 @@
 .uru-mapa-popup-cerrar:hover{ color:var(--color-tinta); }
 .uru-mapa-popup-nombre{ display:block; font:var(--tipo-display-sm); font-size:15px; color:var(--color-tinta); padding-right:16px; }
 .uru-mapa-popup-direccion{ color:var(--color-tinta-60); margin-top:4px; font-size:12.5px; }
-.uru-mapa-popup-link{ display:inline-block; margin-top:10px; color:var(--color-granate-clara); text-decoration:none; font-weight:500; font-size:12.5px; }
+/* Acciones del popup individual: "Cómo llegar" (siempre presente,
+   garantizado por lat/lng) + "Ver ficha completa" (solo si hay
+   ficha). En fila para que ambas quepan sin agrandar el popup. */
+.uru-mapa-popup-acciones{ display:flex; align-items:center; gap:14px; margin-top:10px; flex-wrap:wrap; }
+.uru-mapa-popup-link{ display:inline-block; color:var(--color-granate-clara); text-decoration:none; font-weight:500; font-size:12.5px; }
 .uru-mapa-popup-link:hover{ text-decoration:underline; }
+.uru-mapa-popup-link--maps{ font-weight:600; }
 
 /* Lista de lugares dentro del popup de un cluster. Antes no existía
    ningún estilo para esto: con clusters chicos (hasta 8 lugares) el
@@ -99,9 +104,17 @@
   scrollbar-width:thin; scrollbar-color:var(--glass-borde-hover) transparent;
 }
 .uru-mapa-popup-cluster-lista li + li{ margin-top:2px; }
+/* Cada fila del cluster: nombre (ficha o texto informativo) + acción
+   de mapa, que SIEMPRE existe — ver comentario en motor-render.js.
+   Ningún miembro de un cluster puede quedar sin forma de llegar a su
+   ubicación específica. */
+.uru-mapa-popup-cluster-fila{
+  display:flex; align-items:center; justify-content:space-between; gap:6px;
+}
 .uru-mapa-popup-cluster-item{
-  display:block; padding:6px 4px; border-radius:var(--radio-sm);
+  display:block; flex:1 1 auto; min-width:0; padding:6px 4px; border-radius:var(--radio-sm);
   color:var(--color-tinta); text-decoration:none; font-size:12.5px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   transition:background var(--dur-rapido);
 }
 a.uru-mapa-popup-cluster-item:hover{ background:rgba(201,122,131,.18); text-decoration:underline; }
@@ -109,10 +122,24 @@ a.uru-mapa-popup-cluster-item:focus-visible{
   outline:2px solid var(--color-granate-clara); outline-offset:-2px;
   background:rgba(201,122,131,.18);
 }
-/* Miembro de un cluster sin ficha propia: texto informativo, no un
-   link roto. No lleva :hover ni :focus-visible a propósito — no es
-   interactivo, y darle esos estados sugeriría lo contrario. */
-.uru-mapa-popup-cluster-item--sin-link{ color:var(--color-tinta-60); cursor:default; }
+/* Miembro de un cluster sin ficha propia: el nombre es texto
+   informativo (no hay página de detalle a la que ir), pero el ítem
+   sigue teniendo su acción de mapa al lado — nunca queda sin forma
+   de llegar a la ubicación real. */
+.uru-mapa-popup-cluster-item--sin-ficha{ color:var(--color-tinta-60); cursor:default; }
+/* Acción de mapa por miembro: ícono chico, siempre presente,
+   siempre un <a> real (nunca depende de si hay ficha o no). */
+.uru-mapa-popup-cluster-mapa{
+  flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  width:26px; height:26px; border-radius:var(--radio-sm);
+  text-decoration:none; font-size:13px; line-height:1;
+  transition:background var(--dur-rapido);
+}
+.uru-mapa-popup-cluster-mapa:hover{ background:rgba(201,122,131,.18); }
+.uru-mapa-popup-cluster-mapa:focus-visible{
+  outline:2px solid var(--color-granate-clara); outline-offset:-2px;
+  background:rgba(201,122,131,.18);
+}
 
 .uru-mapa-etiqueta{
   position:absolute; transform:translate(-50%,calc(-100% - 16px)); pointer-events:none;
