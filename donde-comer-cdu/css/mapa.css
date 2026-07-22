@@ -96,6 +96,7 @@
 .uru-mapa-popup-cluster-lista{
   list-style:none; margin:8px 0 0; padding:0;
   max-height:180px; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:var(--glass-borde-hover) transparent;
 }
 .uru-mapa-popup-cluster-lista li + li{ margin-top:2px; }
 .uru-mapa-popup-cluster-item{
@@ -103,10 +104,15 @@
   color:var(--color-tinta); text-decoration:none; font-size:12.5px;
   transition:background var(--dur-rapido);
 }
-.uru-mapa-popup-cluster-item:hover{ background:rgba(201,122,131,.18); text-decoration:underline; }
-.uru-mapa-popup-cluster-item[aria-disabled="true"]{
-  color:var(--color-tinta-60); cursor:default; pointer-events:none;
+a.uru-mapa-popup-cluster-item:hover{ background:rgba(201,122,131,.18); text-decoration:underline; }
+a.uru-mapa-popup-cluster-item:focus-visible{
+  outline:2px solid var(--color-granate-clara); outline-offset:-2px;
+  background:rgba(201,122,131,.18);
 }
+/* Miembro de un cluster sin ficha propia: texto informativo, no un
+   link roto. No lleva :hover ni :focus-visible a propósito — no es
+   interactivo, y darle esos estados sugeriría lo contrario. */
+.uru-mapa-popup-cluster-item--sin-link{ color:var(--color-tinta-60); cursor:default; }
 
 .uru-mapa-etiqueta{
   position:absolute; transform:translate(-50%,calc(-100% - 16px)); pointer-events:none;
