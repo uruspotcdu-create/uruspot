@@ -84,6 +84,30 @@
 .uru-mapa-popup-link{ display:inline-block; margin-top:10px; color:var(--color-granate-clara); text-decoration:none; font-weight:500; font-size:12.5px; }
 .uru-mapa-popup-link:hover{ text-decoration:underline; }
 
+/* Lista de lugares dentro del popup de un cluster. Antes no existía
+   ningún estilo para esto: con clusters chicos (hasta 8 lugares) el
+   contenido entraba igual y el problema no se notaba, pero al dejar
+   de limitar la lista por cantidad de miembros (ver motor-render.js:
+   un cluster con 9+ lugares apilados en la misma coordenada ahora
+   también puede caer en esta rama) una lista larga sin scroll se
+   desbordaba del popup — y como el mapa recorta con overflow:hidden,
+   se veía cortada de forma fea. max-height + overflow-y la contiene
+   dentro del propio popup. */
+.uru-mapa-popup-cluster-lista{
+  list-style:none; margin:8px 0 0; padding:0;
+  max-height:180px; overflow-y:auto;
+}
+.uru-mapa-popup-cluster-lista li + li{ margin-top:2px; }
+.uru-mapa-popup-cluster-item{
+  display:block; padding:6px 4px; border-radius:var(--radio-sm);
+  color:var(--color-tinta); text-decoration:none; font-size:12.5px;
+  transition:background var(--dur-rapido);
+}
+.uru-mapa-popup-cluster-item:hover{ background:rgba(201,122,131,.18); text-decoration:underline; }
+.uru-mapa-popup-cluster-item[aria-disabled="true"]{
+  color:var(--color-tinta-60); cursor:default; pointer-events:none;
+}
+
 .uru-mapa-etiqueta{
   position:absolute; transform:translate(-50%,calc(-100% - 16px)); pointer-events:none;
   background:rgba(10,13,19,.92); color:var(--color-tinta); font-family:var(--f-ui); font-weight:500;
