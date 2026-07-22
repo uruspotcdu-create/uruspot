@@ -8,21 +8,31 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 #mapaHerramienta{
-  margin:var(--esp-6) 0 var(--esp-8);
-  padding:0;
-  background:var(--color-fondo-2);
-  border:1px solid var(--glass-borde);
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:var(--sombra-vidrio), 0 0 60px -24px rgba(201,122,131,.35);
-  height:420px;
-  position:relative;
+  margin:var(--esp-6) 0 var(--esp-8); padding:0;
+  background:var(--color-fondo-2); border:1px solid var(--glass-borde);
+  border-radius:var(--radio-lg); overflow:hidden;
+  box-shadow:var(--sombra-vidrio), 0 0 60px -24px var(--glow-marca);
+  height:420px; position:relative;
   animation:uru-scale-in var(--dur-lentisima) var(--easing-rebote) backwards;
   transition:box-shadow var(--dur-media);
 }
-#mapaHerramienta:hover{ box-shadow:var(--sombra-vidrio), 0 0 70px -20px rgba(201,122,131,.5); }
-#mapaHerramienta[hidden]{ display:none; }
-@media (max-width:720px){ #mapaHerramienta{ min-height:300px; } }
+#mapaHerramienta:hover{
+  box-shadow:var(--sombra-vidrio), 0 0 70px -20px var(--glow-marca-hover);
+}
+#mapaHerramienta[hidden]{
+  display:none;
+}
+/* Responsive: tablet y mobile */
+@media (max-width:960px){
+  #mapaHerramienta{
+    height:360px;
+  }
+}
+@media (max-width:720px){
+  #mapaHerramienta{
+    height:300px; margin:var(--esp-4) 0;
+  }
+}
 
 /* Viñeta suave en los bordes del canvas: sin esto el basemap claro
    (Voyager) corta seco contra el marco oscuro de la tarjeta y se ve
@@ -47,14 +57,32 @@
   backdrop-filter:blur(var(--glass-blur-fuerte)); -webkit-backdrop-filter:blur(var(--glass-blur-fuerte));
 }
 .uru-mapa-btn{
-  width:32px; height:32px; border:none; background:var(--glass-bg-fuerte); color:var(--color-tinta);
-  font-family:var(--f-ui); font-size:17px; line-height:1; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition:background var(--dur-rapido), transform var(--dur-rapido);
+  width:34px; height:34px; border:1px solid var(--glass-borde); background:var(--glass-bg-fuerte);
+  color:var(--color-tinta); font-family:var(--f-ui); font-size:17px; line-height:1;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background var(--dur-rapido), border-color var(--dur-rapido),
+             transform var(--dur-rapido), box-shadow var(--dur-media);
 }
-.uru-mapa-btn:hover{ background:rgba(201,122,131,.3); }
-.uru-mapa-btn:active{ transform:scale(.92); }
-.uru-mapa-btn:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:-2px; }
+.uru-mapa-btn:hover{
+  background:rgba(201,122,131,.3); border-color:rgba(201,122,131,.5);
+  transform:translateY(-1px);
+}
+.uru-mapa-btn:active{
+  transform:translateY(1px) scale(.96);
+}
+.uru-mapa-btn:focus-visible{
+  outline:2px solid var(--color-granate-clara); outline-offset:2px;
+  border-radius:var(--radio-sm);
+}
+.uru-mapa-btn:disabled{
+  opacity:0.5; cursor:not-allowed; color:var(--color-tinta-30);
+  background:var(--glass-bg); border-color:var(--glass-borde);
+}
+@media (max-width:720px){
+  .uru-mapa-btn{
+    width:44px; height:44px; font-size:20px;
+  }
+}
 
 .uru-mapa-atribucion{
   position:absolute; bottom:6px; right:10px; font:var(--tipo-dato-xs);
@@ -64,24 +92,31 @@
 .uru-mapa-atribucion a{ pointer-events:auto; color:var(--color-tinta-30); }
 
 /* BUG DE PULIDO corregido: `.mapa-container` no tenía NINGUNA regla
-   propia (confirmado — nada en todo el CSS lo mencionaba). Su
-   aparición/desaparición dependía 100% del atributo `hidden` nativo,
-   que alterna `display:none` de golpe: el mapa "aparecía" y
-   "desaparecía" de un frame a otro, sin transición, mientras el
-   resto del sitio (tarjetas, popups, chips) sí tiene entradas
-   animadas. Reutiliza `uru-scale-in`, la misma keyframe que ya usa
-   el resto del sitio — no se inventa un movimiento nuevo — y hereda
-   gratis el reset de `prefers-reduced-motion` global de tokens.css. */
-.mapa-container:not([hidden]){ animation:uru-scale-in var(--dur-lenta) var(--easing-rebote); }
+   propia. Su aparición/desaparición dependía 100% del atributo `hidden`.
+   Reutiliza `uru-scale-in`, la misma keyframe que ya usa el resto del
+   sitio — no se inventa un movimiento nuevo. Protegida con reduced-motion. */
+.mapa-container:not([hidden]){
+  animation:uru-scale-in var(--dur-lenta) var(--easing-rebote);
+}
+@media (prefers-reduced-motion: reduce){
+  .mapa-container:not([hidden]){
+    animation-duration:0.001ms;
+  }
+}
 
 .uru-mapa-popup{
   position:absolute; transform:translate(-50%,calc(-100% - 18px)); min-width:200px; max-width:260px;
-  background:var(--glass-bg-fuerte); border:1px solid var(--glass-borde-hover); border-radius:var(--radio-lg);
-  padding:var(--esp-3) var(--esp-4); box-shadow:var(--sombra-vidrio); font-size:13px;
+  background:var(--glass-bg-fuerte); border:1px solid var(--glass-borde-hover);
+  border-radius:var(--radio-lg); padding:var(--esp-3) var(--esp-4);
+  box-shadow:var(--sombra-vidrio); font:var(--tipo-cuerpo-xs);
   backdrop-filter:blur(var(--glass-blur-fuerte)); -webkit-backdrop-filter:blur(var(--glass-blur-fuerte));
-  animation:uru-popup-in .22s var(--easing-rebote); z-index:5;
+  animation:uru-popup-in 0.22s var(--easing-rebote); z-index:5;
 }
-@keyframes uru-popup-in{ from{ opacity:0; transform:translate(-50%,calc(-100% - 6px)) scale(.92); } to{ opacity:1; transform:translate(-50%,calc(-100% - 18px)) scale(1); } }
+@media (prefers-reduced-motion: reduce){
+  .uru-mapa-popup{
+    animation-duration:0.001ms;
+  }
+}
 .uru-mapa-popup::after{
   content:""; position:absolute; left:50%; bottom:-7px; transform:translateX(-50%);
   width:12px; height:12px; background:var(--glass-bg-fuerte);
@@ -120,36 +155,43 @@
    Ningún miembro de un cluster puede quedar sin forma de llegar a su
    ubicación específica. */
 .uru-mapa-popup-cluster-fila{
-  display:flex; align-items:center; justify-content:space-between; gap:6px;
+  display:flex; align-items:center; justify-content:space-between; gap:var(--esp-2);
 }
 .uru-mapa-popup-cluster-item{
-  display:block; flex:1 1 auto; min-width:0; padding:6px 4px; border-radius:var(--radio-sm);
-  color:var(--color-tinta); text-decoration:none; font-size:12.5px;
+  display:block; flex:1 1 auto; min-width:0; padding:8px 6px; border-radius:var(--radio-sm);
+  color:var(--color-tinta); text-decoration:none; font:var(--tipo-cuerpo-xs);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  transition:background var(--dur-rapido);
+  transition:background var(--dur-rapido), color var(--dur-rapido);
 }
-a.uru-mapa-popup-cluster-item:hover{ background:rgba(201,122,131,.18); text-decoration:underline; }
+a.uru-mapa-popup-cluster-item:hover{
+  background:rgba(201,122,131,.18); text-decoration:underline; color:var(--color-tinta);
+}
 a.uru-mapa-popup-cluster-item:focus-visible{
-  outline:2px solid var(--color-granate-clara); outline-offset:-2px;
-  background:rgba(201,122,131,.18);
+  outline:2px solid var(--color-granate-clara); outline-offset:1px;
+  background:rgba(201,122,131,.18); border-radius:var(--radio-sm);
 }
 /* Miembro de un cluster sin ficha propia: el nombre es texto
-   informativo (no hay página de detalle a la que ir), pero el ítem
-   sigue teniendo su acción de mapa al lado — nunca queda sin forma
-   de llegar a la ubicación real. */
-.uru-mapa-popup-cluster-item--sin-ficha{ color:var(--color-tinta-60); cursor:default; }
-/* Acción de mapa por miembro: ícono chico, siempre presente,
-   siempre un <a> real (nunca depende de si hay ficha o no). */
+   informativo (no hay página de detalle a la que ir). */
+.uru-mapa-popup-cluster-item--sin-ficha{
+  color:var(--color-tinta-60); cursor:default;
+}
+/* Acción de mapa por miembro: ícono, siempre presente.
+   Touch target: 34×34px para WCAG AAA en mobile. */
 .uru-mapa-popup-cluster-mapa{
   flex:0 0 auto; display:flex; align-items:center; justify-content:center;
-  width:26px; height:26px; border-radius:var(--radio-sm);
-  text-decoration:none; font-size:13px; line-height:1;
-  transition:background var(--dur-rapido);
+  width:32px; height:32px; border-radius:var(--radio-sm);
+  text-decoration:none; font:var(--tipo-cuerpo-xs); line-height:1;
+  transition:background var(--dur-rapido), box-shadow var(--dur-media);
 }
-.uru-mapa-popup-cluster-mapa:hover{ background:rgba(201,122,131,.18); }
-.uru-mapa-popup-cluster-mapa:focus-visible{
-  outline:2px solid var(--color-granate-clara); outline-offset:-2px;
+.uru-mapa-popup-cluster-mapa:hover{
   background:rgba(201,122,131,.18);
+}
+.uru-mapa-popup-cluster-mapa:focus-visible{
+  outline:2px solid var(--color-granate-clara); outline-offset:1px;
+  background:rgba(201,122,131,.18); border-radius:var(--radio-sm);
+}
+.uru-mapa-popup-cluster-mapa:active{
+  transform:scale(.94);
 }
 
 .uru-mapa-etiqueta{
@@ -173,9 +215,14 @@ a.uru-mapa-popup-cluster-item:focus-visible{
 .mapa-info{
   display:flex; gap:var(--esp-4); margin:var(--esp-4) 0; padding:14px var(--esp-4);
   background:var(--glass-bg); border:1px solid rgba(201,122,131,.3);
-  border-radius:var(--radio-md); font-size:13px; color:var(--color-tinta-60); align-items:center;
-  backdrop-filter:blur(var(--glass-blur));
+  border-radius:var(--radio-md); font:var(--tipo-cuerpo-xs); color:var(--color-tinta-60);
+  align-items:center; backdrop-filter:blur(var(--glass-blur));
   animation:uru-fade-up var(--dur-lenta) var(--easing-rebote);
+}
+@media (prefers-reduced-motion: reduce){
+  .mapa-info{
+    animation-duration:0.001ms;
+  }
 }
 .mapa-info[hidden]{ display:none; }
 .mapa-info::before{ content:"🗺️"; font-size:18px; }
