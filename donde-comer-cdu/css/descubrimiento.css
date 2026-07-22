@@ -84,6 +84,13 @@ header .membrete{
 
 /* ── Encabezado de región ── */
 .region-encabezado{ padding:var(--esp-6) 0 var(--esp-2); }
+/* #tituloRegion recibe foco por script al cambiar de vista (ver
+   app.js: abrir/cerrar "tus guardados"), para que quien navega con
+   teclado o lector de pantalla note el cambio de contenido en vez de
+   quedar con el foco "flotando" en un botón que ya no está donde
+   estaba. outline coherente con la marca en vez del azul por defecto
+   del navegador. */
+#tituloRegion:focus{ outline:2px solid var(--color-granate-clara); outline-offset:4px; border-radius:var(--radio-sm); }
 #tituloRegion{ font:var(--tipo-display-md); color:var(--color-tinta); transition:opacity var(--dur-media); }
 #subtituloRegion{ font:var(--tipo-cuerpo-sm); color:var(--color-tinta-60); margin-top:var(--esp-1); }
 
