@@ -86,8 +86,8 @@
 
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
-   'mapaTextura', 'mapaContainer', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados', 'btnVolverATodos',
-   'listaRubros', 'statLugares', 'statRubros', 'faqLista', 'estadoResultados']
+   'mapaTextura', 'mapaContainer', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados',
+   'listaRubros', 'statLugares', 'statRubros', 'faqLista', 'estadoResultados', 'destacados', 'listaDestacados']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
   /* ── 1. Arranque de contexto ── */
@@ -135,7 +135,14 @@
         REGISTRO = core.map(function (l) {
           var reg = {
             id: l.id, nombre: l.nombre, categoria: l.categoria, grupo: l.grupo,
-            lat: l.lat, lng: l.lng, direccion: null, telefono: null, descripcion: null, estado: 'verificado'
+            lat: l.lat, lng: l.lng, direccion: null, telefono: null, descripcion: null, estado: 'verificado',
+            // rating/rating_count: auditoría Fase 4. split_dataset.py ya los
+            // incluye en lugares-core.json como CORE_FIELDS_OPTIONAL,
+            // documentados ahí mismo como pensados para un "spotlight mejor
+            // puntuados" — pero ningún punto de este archivo los leía. Ver
+            // pintarDestacados() más abajo, que es ese spotlight.
+            rating: (typeof l.rating === 'number') ? l.rating : null,
+            ratingCount: (typeof l.rating_count === 'number') ? l.rating_count : null
           };
           porId[l.id] = reg;
           return reg;
@@ -143,6 +150,7 @@
         cargarDetallesEnSegundoPlano();
         pintarRubros();
         pintarStatsRapidas();
+        pintarDestacados();
         render();
       })
       .catch(function (err) {
@@ -193,6 +201,100 @@
       REGISTRO.forEach(function (l) { grupos[l.grupo] = true; });
       DOM.statRubros.textContent = Object.keys(grupos).length;
     }
+  }
+
+  // Spotlight "Destacados" — auditoría Fase 4. Independiente de
+  // Guía/Exploración/Curaduría: no consume ni modifica PLANO/EXPO, no
+  // depende de ubicación ni de sesión. Selección:
+  //   1. Candidatos: rating >= UMBRAL_RATING y rating_count >=
+  //      UMBRAL_RESEÑAS (evita que un 5.0 con una sola reseña opaque
+  //      a un 4.8 con cientos — señal real, no ruido).
+  //   2. Score = rating + log10(rating_count)/10: desempata a favor
+  //      de más reseñas sin que el conteo domine sobre la puntuación.
+  //   3. Diversidad: máximo 1 lugar por rubro entre los elegidos —
+  //      sin este límite, gastronomía (el grupo con más candidatos,
+  //      ver auditoría de datos) ocuparía el strip entero.
+  //   4. Rotación diaria determinística (semilla = día del año): el
+  //      spotlight cambia de un día a otro sin ser aleatorio dentro
+  //      del mismo día — mismo lugar si recargás la página, distinto
+  //      mañana. Dentro de "candidatos ya filtrados", no altera CUÁLES
+  //      calificaron, solo el orden de desempate entre los que superan
+  //      el piso de diversidad.
+  var UMBRAL_RATING = 4.6;
+  var UMBRAL_RESEÑAS = 15;
+  var MAX_DESTACADOS = 6;
+  var MIN_PARA_MOSTRAR = 3; // por debajo de esto, la sección queda oculta — no forzamos relleno
+
+  function pintarDestacados() {
+    if (!DOM.destacados || !DOM.listaDestacados) return;
+
+    var candidatos = REGISTRO.filter(function (l) {
+      return typeof l.rating === 'number' && l.rating >= UMBRAL_RATING &&
+             typeof l.ratingCount === 'number' && l.ratingCount >= UMBRAL_RESEÑAS;
+    });
+
+    if (candidatos.length < MIN_PARA_MOSTRAR) {
+      DOM.destacados.hidden = true;
+      return;
+    }
+
+    var diaDelAnio = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    var seed = diaDelAnio;
+    function pseudoRandom(n) {
+      var x = Math.sin(n * 12.9898 + seed * 78.233) * 43758.5453;
+      return x - Math.floor(x);
+    }
+
+    candidatos.forEach(function (l, i) {
+      var score = l.rating + Math.log(l.ratingCount) / Math.LN10 / 10;
+      l._scoreDestacado = score + pseudoRandom(i) * 0.05; // ruido mínimo: desempata sin reordenar el ranking real
+    });
+    candidatos.sort(function (a, b) { return b._scoreDestacado - a._scoreDestacado; });
+
+    var elegidos = [];
+    var rubrosUsados = Object.create(null);
+    candidatos.forEach(function (l) {
+      if (elegidos.length >= MAX_DESTACADOS) return;
+      if (rubrosUsados[l.grupo]) return;
+      rubrosUsados[l.grupo] = true;
+      elegidos.push(l);
+    });
+    // Si la diversidad por rubro dejó el strip corto (poca variedad de
+    // categorías entre los candidatos), se completa con el resto del
+    // ranking real, sin inventar candidatos nuevos.
+    if (elegidos.length < Math.min(MAX_DESTACADOS, candidatos.length)) {
+      candidatos.forEach(function (l) {
+        if (elegidos.length >= MAX_DESTACADOS) return;
+        if (elegidos.indexOf(l) !== -1) return;
+        elegidos.push(l);
+      });
+    }
+
+    var frag = document.createDocumentFragment();
+    elegidos.forEach(function (lugar) {
+      var metaRubro = window.URU_RUBROS_META && window.URU_RUBROS_META[lugar.grupo];
+      var rubro = metaRubro ? metaRubro[0] : lugar.categoria;
+      var slugLugar = slug(lugar);
+      var linkMaps = mapsHref(lugar);
+      var href = slugLugar ? ('locales/' + slugLugar + '/') : linkMaps;
+      var card = document.createElement(href ? 'a' : 'div');
+      card.className = 'destacado-card';
+      card.setAttribute('role', 'listitem');
+      if (href) {
+        card.href = href;
+        if (!slugLugar) { card.target = '_blank'; card.rel = 'noopener'; }
+      }
+      if (metaRubro) card.style.setProperty('--chip-color', metaRubro[2]);
+      card.innerHTML =
+        '<div class="destacado-card__rubro">' + escapeHTML(rubro) + '</div>' +
+        '<div class="destacado-card__nombre">' + escapeHTML(lugar.nombre) + '</div>' +
+        '<div class="destacado-card__rating">★ ' + lugar.rating.toFixed(1).replace('.', ',') +
+          '<span class="destacado-card__conteo">(' + lugar.ratingCount.toLocaleString('es-AR') + ')</span></div>';
+      frag.appendChild(card);
+    });
+    DOM.listaDestacados.innerHTML = '';
+    DOM.listaDestacados.appendChild(frag);
+    DOM.destacados.hidden = false;
   }
 
   function cargarDetallesEnSegundoPlano() {
@@ -428,16 +530,6 @@
     });
   }
 
-  if (DOM.btnVolverATodos) {
-    DOM.btnVolverATodos.addEventListener('click', function () {
-      estado.sesion.curaduriaActiva = false;
-      PLANO.guardarEstado(estado);
-      paginaTarjetas = 1;
-      render();
-      if (DOM.tituloRegion) { DOM.tituloRegion.setAttribute('tabindex', '-1'); DOM.tituloRegion.focus({ preventScroll: false }); }
-    });
-  }
-
   // Banner discreto para "guardaste 2+ lugares": reemplaza el redirect
   // duro que existía antes (guardar 2x te sacaba de golpe a "Tu
   // lista" sin avisar). Ahora solo un click explícito (acá o en
@@ -650,6 +742,35 @@
     DOM.subtituloRegion.insertAdjacentElement('afterend', btnVerCatalogoCompleto);
   }
 
+  // "Volver a todos": escape hatch de la vista "tu lista" (curaduría).
+  // Mismo criterio que btnVerCatalogoCompleto de arriba — creado por JS
+  // en vez de vivir en el HTML, porque solo tiene sentido una vez que
+  // hay JS corriendo y estado de curaduría activo. Bug real encontrado
+  // en auditoría: este botón se esperaba por `id="btnVolverATodos"`
+  // en el HTML (con addEventListener y toggles de .hidden ya escritos
+  // más abajo) pero ese elemento nunca existió en ningún punto del
+  // documento — `DOM.btnVolverATodos` era siempre `null`, así que
+  // entrar a "tu lista" no dejaba ninguna forma de volver a todos los
+  // lugares. Se resuelve con el mismo patrón de creación dinámica que
+  // ya usa el archivo, en vez de volver a tocar el contrato HTML↔JS.
+  var btnVolverATodos = null;
+  function asegurarBotonVolverATodos() {
+    if (btnVolverATodos || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
+    btnVolverATodos = document.createElement('button');
+    btnVolverATodos.type = 'button';
+    btnVolverATodos.className = 'btn btn--link-volver';
+    btnVolverATodos.textContent = '← Ver todos los lugares';
+    btnVolverATodos.hidden = true;
+    btnVolverATodos.addEventListener('click', function () {
+      estado.sesion.curaduriaActiva = false;
+      PLANO.guardarEstado(estado);
+      paginaTarjetas = 1;
+      render();
+      if (DOM.tituloRegion) { DOM.tituloRegion.setAttribute('tabindex', '-1'); DOM.tituloRegion.focus({ preventScroll: false }); }
+    });
+    DOM.subtituloRegion.insertAdjacentElement('afterend', btnVolverATodos);
+  }
+
   function actualizarCabecera(reg) {
     if (DOM.rolActual) {
       var rol = PLANO.rolPorAperturas(estado.aperturas);
@@ -659,14 +780,15 @@
     if (!DOM.tituloRegion || !DOM.subtituloRegion) return;
 
     if (btnVerCatalogoCompleto) btnVerCatalogoCompleto.hidden = true;
+    asegurarBotonVolverATodos();
 
     if (reg.nombre === 'curaduria') {
       DOM.tituloRegion.textContent = 'Tu lista';
       DOM.subtituloRegion.textContent = 'Lo que guardaste, sin recorte ni rotación.' + sufijoCercania();
-      if (DOM.btnVolverATodos) DOM.btnVolverATodos.hidden = false;
+      if (btnVolverATodos) btnVolverATodos.hidden = false;
       return;
     }
-    if (DOM.btnVolverATodos) DOM.btnVolverATodos.hidden = true;
+    if (btnVolverATodos) btnVolverATodos.hidden = true;
 
     var rubroMeta = filtroRubroActivo && window.URU_RUBROS_META ? window.URU_RUBROS_META[filtroRubroActivo] : null;
 
