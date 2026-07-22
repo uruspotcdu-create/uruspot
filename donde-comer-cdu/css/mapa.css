@@ -63,6 +63,17 @@
 }
 .uru-mapa-atribucion a{ pointer-events:auto; color:var(--color-tinta-30); }
 
+/* BUG DE PULIDO corregido: `.mapa-container` no tenía NINGUNA regla
+   propia (confirmado — nada en todo el CSS lo mencionaba). Su
+   aparición/desaparición dependía 100% del atributo `hidden` nativo,
+   que alterna `display:none` de golpe: el mapa "aparecía" y
+   "desaparecía" de un frame a otro, sin transición, mientras el
+   resto del sitio (tarjetas, popups, chips) sí tiene entradas
+   animadas. Reutiliza `uru-scale-in`, la misma keyframe que ya usa
+   el resto del sitio — no se inventa un movimiento nuevo — y hereda
+   gratis el reset de `prefers-reduced-motion` global de tokens.css. */
+.mapa-container:not([hidden]){ animation:uru-scale-in var(--dur-lenta) var(--easing-rebote); }
+
 .uru-mapa-popup{
   position:absolute; transform:translate(-50%,calc(-100% - 18px)); min-width:200px; max-width:260px;
   background:var(--glass-bg-fuerte); border:1px solid var(--glass-borde-hover); border-radius:var(--radio-lg);
