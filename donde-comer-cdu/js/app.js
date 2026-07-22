@@ -81,7 +81,7 @@
 
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
-   'mapaTextura', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados',
+   'mapaTextura', 'mapaContainer', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados',
    'listaRubros', 'statLugares', 'statRubros', 'faqLista']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
@@ -684,13 +684,26 @@
     if (!DOM.mapaHerramienta) return;
     var debeMostrar = MAPA.debeMostrarHerramienta(nombreRegion, lista);
 
+    // #mapaContainer es el <div class="mapa-container"> que envuelve
+    // el mapa, su cartel informativo y su leyenda; nace con `hidden`
+    // en el HTML a propósito (no debe existir visualmente hasta que
+    // haya algo georreferenciado para mostrar). `[hidden]` en un
+    // contenedor padre oculta a TODOS sus hijos sin importar el
+    // estado individual de cada uno — por eso este alternado tiene
+    // que pasar acá, junto con el de mapaHerramienta, y no alcanza
+    // con tocar solo el hijo. Antes de este parche, DOM.mapaContainer
+    // ni siquiera estaba en la lista de elementos vigilados, así que
+    // el mapa quedaba oculto para siempre sin importar qué pasara acá
+    // abajo.
     if (!debeMostrar) {
       DOM.mapaHerramienta.hidden = true;
       if (DOM.mapaInfo) DOM.mapaInfo.hidden = true;
       if (DOM.mapaLeyenda) DOM.mapaLeyenda.hidden = true;
+      if (DOM.mapaContainer) DOM.mapaContainer.hidden = true;
       return;
     }
 
+    if (DOM.mapaContainer) DOM.mapaContainer.hidden = false;
     DOM.mapaHerramienta.hidden = false;
     if (DOM.mapaInfo) DOM.mapaInfo.hidden = false;
     inicializarMotorMapa();
