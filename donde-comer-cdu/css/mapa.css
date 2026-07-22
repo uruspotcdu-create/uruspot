@@ -227,14 +227,25 @@ a.uru-mapa-popup-cluster-item:focus-visible{
 .mapa-info[hidden]{ display:none; }
 .mapa-info::before{ content:"🗺️"; font-size:18px; }
 
-/* Textura ambiental de fondo (no interactiva, ver motor-mapa.js) */
+/* Textura ambiental de fondo (no interactiva, ver motor-mapa.js).
+   Función real, no solo decorativa: es la primera vista previa de
+   que el mapa de abajo tiene datos reales — por eso ahora cada punto
+   toma el color de su rubro (misma paleta que .chip/.mapa-leyenda,
+   ver actualizarMapaTextura() en app.js), en vez de un gris uniforme
+   que no comunicaba nada. */
 #mapaTextura{
-  position:relative; height:110px; margin:var(--esp-6) 0; border-radius:var(--radio-lg); overflow:hidden;
+  position:relative; height:130px; margin:var(--esp-6) 0 var(--esp-2); border-radius:var(--radio-lg); overflow:hidden;
   background:var(--gradiente-halo), linear-gradient(180deg,var(--color-fondo-2),var(--color-fondo));
   border:1px solid var(--glass-borde); pointer-events:none;
 }
 .punto-textura{
-  position:absolute; width:3px; height:3px; border-radius:50%; background:var(--color-tinta-30);
+  position:absolute; width:5px; height:5px; border-radius:50%;
+  background:var(--dot-color, var(--color-tinta-30));
+  box-shadow:0 0 6px var(--dot-color, transparent);
+  opacity:.85;
   animation:uru-flotar 6s ease-in-out infinite;
   animation-delay:calc(var(--i, 0) * -0.4s);
+}
+@media (prefers-reduced-motion: reduce){
+  .punto-textura{ animation:none; }
 }
