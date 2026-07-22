@@ -170,6 +170,29 @@
   --dur-instantaneo: .1s; /* micro-feedback: press states, toggles — más rápido que --dur-rapido */
   --easing-rebote: cubic-bezier(.22,1,.36,1);
 
+  /* ── Fase 2 (esta revisión): alerta y textura cartográfica ──
+     --color-alerta: los estados de error (falla de red, timeout de
+     carga) necesitaban un color semántico propio. No se reutiliza
+     --color-estado-cerrado a propósito: ese token está documentado
+     arriba como "el único uso legítimo de verde/rojo puro... reservado
+     para esto" (abierto/cerrado) — mezclarlo con "error de red" le
+     haría perder ese significado unívoco. --color-alerta reusa el
+     acento de marca (granate claro) en vez de introducir un rojo
+     nuevo al sistema. */
+  --color-alerta:        var(--color-granate-clara);
+  --color-alerta-fondo:  rgba(201,122,131,.12);
+  --color-alerta-borde:  rgba(201,122,131,.4);
+
+  /* --gradiente-grid-mapa: patrón de grilla de coordenadas, muy sutil
+     (5% de opacidad), para que #mapaTextura deje de leerse como "un
+     gradiente con puntos" y empiece a leerse como un fragmento de
+     mapa/plano real — mismo recurso que usan las cartas náuticas y
+     los mapas técnicos. Puramente decorativo, no interactivo, no
+     compite con los puntos de color (que siguen siendo el dato real). */
+  --gradiente-grid-mapa:
+    repeating-linear-gradient(90deg, rgba(236,237,239,.05) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(0deg,  rgba(236,237,239,.05) 0 1px, transparent 1px 34px);
+
   /* Anillo de foco: boton.css, chip.css, mapa.css y descubrimiento.css
      declaran "outline:2px solid var(--color-granate-clara)" a mano,
      cada uno con su propio outline-offset (1px, 2px, -2px, 4px) sin
