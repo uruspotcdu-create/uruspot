@@ -50,9 +50,25 @@ header .membrete{
   background:var(--gradiente-halo); filter:blur(6px); pointer-events:none;
   animation:uru-flotar 10s ease-in-out infinite;
 }
+/* Eyebrow: declara QUÉ es esto antes de que la persona lea el resto
+   del titular. Sin esto, alguien que entra por primera vez llega
+   directo a una frase que contrasta URU SPOT con "el padrón entero"
+   — un contraste que solo tiene sentido si ya sabés que existe un
+   padrón. El eyebrow resuelve el "¿qué es esto?" en menos de un
+   segundo, antes de pedirle a nadie que lea una oración completa. */
+.hero__eyebrow{
+  font:var(--tipo-dato-xs); color:var(--color-granate-clara);
+  text-transform:uppercase; letter-spacing:var(--ls-extra);
+  margin-bottom:var(--esp-3); display:flex; align-items:center; gap:var(--esp-2);
+  animation:uru-fade-up var(--dur-lentisima) var(--easing-rebote) backwards;
+}
+.hero__eyebrow::before{
+  content:""; width:6px; height:6px; border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg); background:var(--gradiente-marca); flex:none;
+}
 .hero h1{
   font:var(--tipo-display-lg); color:var(--color-tinta); max-width:640px;
-  animation:uru-fade-up var(--dur-lentisima) var(--easing-rebote) backwards;
+  animation:uru-fade-up var(--dur-lentisima) var(--easing-rebote) .04s backwards;
 }
 .hero p{
   font:var(--tipo-cuerpo); color:var(--color-tinta-60); max-width:560px; margin-top:var(--esp-3);
@@ -95,13 +111,40 @@ header .membrete{
 .buscador input{
   flex:1 1 260px; min-width:0; background:var(--glass-bg);
   border:1px solid var(--glass-borde); border-radius:var(--radio-md);
-  padding:var(--esp-3); color:var(--color-tinta); font:var(--tipo-cuerpo);
+  padding:var(--esp-3) var(--esp-3) var(--esp-3) 40px; color:var(--color-tinta); font:var(--tipo-cuerpo);
   backdrop-filter:blur(var(--glass-blur));
+  /* Lupa como background-image (SVG inline, sin request extra ni
+     <img> nuevo) — antes el buscador, la acción de mayor intención
+     de toda la página, no tenía ninguna afordancia visual de "esto
+     busca"; dependía 100% del placeholder de texto. */
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(236,237,239,0.35)' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:14px center; background-size:16px;
   transition:border-color var(--dur-media), box-shadow var(--dur-media);
 }
 .buscador input::placeholder{ color:var(--color-tinta-30); }
 .buscador input:focus-visible{ outline:none; border-color:var(--color-granate-clara); box-shadow:var(--sombra-foco); }
 .buscador button{ font:var(--tipo-cuerpo-sm); }
+
+/* ── "Cerca de mí" (app.js: inicializarCercaDeMi) ──
+   BUG REAL encontrado: este botón y su aviso se crean por JS desde
+   hace tiempo pero ninguna hoja de estilo los cubre — hoy renderizan
+   como texto de botón nativo del navegador, sin relación visual con
+   el resto de la barra de búsqueda. Se resuelve acá porque es
+   contenido específico de esta página (el buscador), no un
+   componente genérico de boton.css. */
+.btn--cerca-tuyo{ font:var(--tipo-cuerpo-sm); }
+.btn--cerca-tuyo.activo{
+  color:var(--color-granate-clara); border-color:var(--color-granate-clara);
+  background:rgba(201,122,131,.12);
+}
+.aviso-cerca-tuyo{
+  display:inline-flex; align-items:center; flex-basis:100%;
+  margin-top:var(--esp-1); padding:var(--esp-2) var(--esp-3);
+  background:var(--color-alerta-fondo); border:1px solid var(--color-alerta-borde);
+  border-radius:var(--radio-md); color:var(--color-tinta-60); font:var(--tipo-cuerpo-xs);
+  animation:uru-fade-up var(--dur-media) var(--easing-rebote);
+}
+@media (prefers-reduced-motion: reduce){ .aviso-cerca-tuyo{ animation-duration:.001ms; } }
 
 /* ── Estadísticas rápidas ── */
 .stats-rapidas{
@@ -111,7 +154,9 @@ header .membrete{
 }
 .stat-item{
   display:flex; flex-direction:column; gap:var(--esp-1);
+  transition:transform var(--dur-media) var(--easing-estandar);
 }
+.stat-item:hover{ transform:translateY(-2px); }
 .stat-item strong{
   font:var(--tipo-display-md); background:var(--gradiente-marca);
   -webkit-background-clip:text; background-clip:text; color:transparent;
@@ -179,6 +224,31 @@ header .membrete{
 .indice h2{ font:var(--tipo-display-md); color:var(--color-tinta); padding-top:var(--esp-8); margin-bottom:var(--esp-4); }
 #listaRubros{ display:flex; flex-wrap:wrap; gap:var(--esp-2); }
 
+/* Mobile: flex-wrap convierte 14 chips en una pared de 4-5 filas que
+   empuja todo lo demás hacia abajo antes de que la persona llegue a
+   ver ninguno. Se convierte en un carril horizontal — mismo patrón
+   que "categorías" en cualquier app de descubrimiento — con scroll-
+   snap para que quede prolijo al soltar el dedo, y un fundido en los
+   bordes que insinúa "hay más" sin necesitar una flecha explícita. */
+@media (max-width:720px){
+  .indice{ position:relative; }
+  #listaRubros{
+    flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity;
+    padding-bottom:var(--esp-2); margin:0 calc(var(--esp-4) * -1); padding-left:var(--esp-4); padding-right:var(--esp-4);
+    -ms-overflow-style:none; scrollbar-width:none;
+  }
+  #listaRubros::-webkit-scrollbar{ display:none; }
+  #listaRubros button.chip{ flex:none; scroll-snap-align:start; }
+  /* Fundidos laterales: mismo envoltorio, por eso se posicionan
+     relativos a .indice y no a #listaRubros (que tiene overflow
+     propio y recortaría un pseudo-elemento posicionado en sus bordes). */
+  .indice::before, .indice::after{
+    content:""; position:absolute; top:calc(var(--esp-8) + 40px); bottom:var(--esp-2); width:24px; z-index:1; pointer-events:none;
+  }
+  .indice::before{ left:0; background:linear-gradient(90deg, var(--color-fondo), transparent); }
+  .indice::after{ right:0; background:linear-gradient(270deg, var(--color-fondo), transparent); }
+}
+
 /* ── Guías por categoría (accesos rápidos a landings existentes) ── */
 .accesos{ padding:var(--esp-16) 0; border-top:1px solid var(--glass-borde); }
 .accesos h2{ font:var(--tipo-display-md); color:var(--color-tinta); margin-bottom:var(--esp-2); }
@@ -238,6 +308,7 @@ footer{
 /* ── Protección de reduced-motion ── */
 @media (prefers-reduced-motion: reduce){
   .hero__halo,
+  .hero__eyebrow,
   .hero h1,
   .hero p,
   .buscador,
