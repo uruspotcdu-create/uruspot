@@ -87,7 +87,7 @@
   var DOM = {};
   ['rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion',
    'mapaTextura', 'mapaContainer', 'mapaHerramienta', 'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados', 'btnVolverATodos',
-   'listaRubros', 'statLugares', 'statRubros', 'faqLista']
+   'listaRubros', 'statLugares', 'statRubros', 'faqLista', 'estadoResultados']
     .forEach(function (id) { DOM[id] = document.getElementById(id); });
 
   /* ── 1. Arranque de contexto ── */
@@ -352,12 +352,32 @@
         // el favorito — ver motor-plano.js. Ahora se informa el
         // sentido real (`guardado: true/false`), así "quitar" nunca
         // cuenta para el disparador que activa la vista de guardados.
-        estado = PLANO.aplicarAccion(estado, 'guardar', { lugarId: id3, guardado: !!favoritos[id3] });
+        var quedoGuardado = !!favoritos[id3];
+        estado = PLANO.aplicarAccion(estado, 'guardar', { lugarId: id3, guardado: quedoGuardado });
         PLANO.guardarEstado(estado);
-        btnGuardar.classList.toggle('activo', !!favoritos[id3]);
-        btnGuardar.setAttribute('aria-pressed', String(!!favoritos[id3]));
+        btnGuardar.classList.toggle('activo', quedoGuardado);
+        btnGuardar.setAttribute('aria-pressed', String(quedoGuardado));
+        btnGuardar.setAttribute('aria-label', quedoGuardado ? 'Quitar de guardados' : 'Guardar');
+        btnGuardar.textContent = quedoGuardado ? '★ guardado' : '☆ guardar';
         actualizarContadorGuardados();
-        render();
+        // BUG REAL corregido (auditoría Fase 3): esto llamaba render()
+        // completo en TODO caso, incluso fuera de "Tus guardados" —
+        // donde guardar/quitar un favorito no cambia qué tarjetas
+        // corresponde mostrar, solo el ícono de esta tarjeta puntual.
+        // Reconstruir la grilla entera (innerHTML='' + recrear cada
+        // nodo + reiniciar el stagger de TODAS las tarjetas visibles)
+        // por un toggle de ícono era trabajo de layout innecesario en
+        // la acción más frecuente y de menor riesgo de toda la
+        // interfaz, y además rompía el principio de motion "esto pasó
+        // → esto es la consecuencia": el usuario tocaba una estrella y
+        // la pantalla entera se reconstruía. Solo hace falta
+        // reconstruir cuando la tarjeta debe DESAPARECER de la lista
+        // actual — es decir, al quitar un guardado mientras se está
+        // viendo "Tus guardados" — reusando el mismo patrón de salida
+        // con transición que ya usa "no me interesa".
+        if (estado.sesion.curaduriaActiva && !quedoGuardado) {
+          programarRenderTrasSalida(carta2);
+        }
         return;
       }
       // Click en la tarjeta (no en un botón): si el lugar está en el
@@ -590,6 +610,16 @@
   // Orden estable (no reordena si no hay ubicación) y sin distorsión:
   // los lugares sin coordenadas se van al final en vez de romper el
   // orden o desaparecer.
+  // BUG DE CLARIDAD corregido (auditoría Fase 3): activar "cerca de
+  // mí" reordena las tarjetas y ya muestra la distancia en cada una
+  // (Fase 2), pero ningún texto de cabecera confirmaba que el orden
+  // había cambiado — alguien que no mira con atención cada tarjeta
+  // podía no notar el reordenamiento, y para un lector de pantalla
+  // (que no "ve" el nuevo orden) era información invisible.
+  function sufijoCercania() {
+    return (cercaTuyoActivo && ubicacionUsuario) ? ' Ordenado por cercanía.' : '';
+  }
+
   function ordenarPorCercania(lista) {
     if (!cercaTuyoActivo || !ubicacionUsuario) return lista;
     return lista.slice().sort(function (a, b) {
@@ -632,7 +662,7 @@
 
     if (reg.nombre === 'curaduria') {
       DOM.tituloRegion.textContent = 'Tu lista';
-      DOM.subtituloRegion.textContent = 'Lo que guardaste, sin recorte ni rotación.';
+      DOM.subtituloRegion.textContent = 'Lo que guardaste, sin recorte ni rotación.' + sufijoCercania();
       if (DOM.btnVolverATodos) DOM.btnVolverATodos.hidden = false;
       return;
     }
@@ -646,15 +676,15 @@
     if (!esRecorteReal) {
       if (consultaActual.trim()) {
         DOM.tituloRegion.textContent = 'Resultados';
-        DOM.subtituloRegion.textContent = rubroMeta
+        DOM.subtituloRegion.textContent = (rubroMeta
           ? 'Coincidencias con "' + consultaActual.trim() + '" en ' + rubroMeta[0] + '.'
-          : 'Esto es lo que coincide con lo que escribiste.';
+          : 'Esto es lo que coincide con lo que escribiste.') + sufijoCercania();
       } else if (rubroMeta) {
         DOM.tituloRegion.textContent = rubroMeta[0];
-        DOM.subtituloRegion.textContent = 'Todos los lugares verificados de este rubro.';
+        DOM.subtituloRegion.textContent = 'Todos los lugares verificados de este rubro.' + sufijoCercania();
       } else {
         DOM.tituloRegion.textContent = 'Todos los lugares';
-        DOM.subtituloRegion.textContent = 'El padrón completo (' + REGISTRO.length + ' lugares).';
+        DOM.subtituloRegion.textContent = 'El padrón completo (' + REGISTRO.length + ' lugares).' + sufijoCercania();
       }
       // "Volver a lo sugerido" solo tiene sentido si estamos viendo
       // todo por el override manual (no porque haya una búsqueda o
@@ -679,10 +709,10 @@
     }
     if (reg.nombre === 'guia') {
       DOM.tituloRegion.textContent = 'Para arrancar';
-      DOM.subtituloRegion.textContent = 'Una selección chica para no abrumar. Guardá o descartá para afinarla.';
+      DOM.subtituloRegion.textContent = 'Una selección chica para no abrumar. Guardá o descartá para afinarla.' + sufijoCercania();
     } else {
       DOM.tituloRegion.textContent = 'Para explorar';
-      DOM.subtituloRegion.textContent = 'Más variedad para curiosear. Buscá si ya sabés qué querés.';
+      DOM.subtituloRegion.textContent = 'Más variedad para curiosear. Buscá si ya sabés qué querés.' + sufijoCercania();
     }
   }
 
@@ -714,24 +744,19 @@
   // pero presente para tecnología de asistencia — sin depender de
   // ninguna clase CSS del proyecto que no podemos verificar desde
   // este archivo.
-  var liveResultados = null;
-  if (DOM.panelDescubrimiento && DOM.panelDescubrimiento.parentNode) {
-    liveResultados = document.createElement('div');
-    liveResultados.setAttribute('aria-live', 'polite');
-    liveResultados.setAttribute('role', 'status');
-    liveResultados.style.position = 'absolute';
-    liveResultados.style.width = '1px';
-    liveResultados.style.height = '1px';
-    liveResultados.style.overflow = 'hidden';
-    liveResultados.style.clip = 'rect(0,0,0,0)';
-    liveResultados.style.whiteSpace = 'nowrap';
-    DOM.panelDescubrimiento.parentNode.insertBefore(liveResultados, DOM.panelDescubrimiento);
-  }
+  // BUG REAL corregido (auditoría Fase 3): esta función creaba su
+  // PROPIA región aria-live con estilos inline, duplicando exactamente
+  // lo que #estadoResultados ya hace en index.html (mismo role="status"
+  // aria-live="polite", misma técnica de ocultamiento que .u-sr-only
+  // ya resuelve en CSS) — pero #estadoResultados nunca estaba en la
+  // lista DOM de arriba, así que quedaba huérfano en el HTML mientras
+  // este archivo creaba un nodo nuevo en cada carga. Se usa el hook
+  // real; cero nodos nuevos, cero estilos inline.
 
   function pintarTarjetas(lista, favoritos, opts) {
     DOM.panelDescubrimiento.innerHTML = '';
-    if (liveResultados) {
-      liveResultados.textContent = lista.length
+    if (DOM.estadoResultados) {
+      DOM.estadoResultados.textContent = lista.length
         ? (lista.length + ' resultado' + (lista.length === 1 ? '' : 's') + ' encontrado' + (lista.length === 1 ? '' : 's') + '.')
         : 'Sin resultados.';
     }
@@ -775,26 +800,44 @@
       }
       var linkMaps = mapsHref(lugar);
       var linkTel = lugar.telefono ? 'tel:' + lugar.telefono.replace(/[^\d+]/g, '') : null;
+      var slugLugar = slug(lugar);
+      // Jerarquía real de acciones (auditoría Fase 3): con ficha propia
+      // en menos del 4% del padrón (ver locales-slug.js), "ver ficha"
+      // no puede ser LA acción primaria de la tarjeta en general — para
+      // la enorme mayoría sin ficha, la acción con más valor real es
+      // "cómo llegar" (garantizada: todo registro trae lat/lng desde
+      // lugares-core.json). Se calcula una sola vez qué botón es
+      // primario en ESTA tarjeta puntual, en vez de que las 5-6
+      // acciones compitan visualmente por la misma atención.
+      var primaria = slugLugar ? 'ficha' : (linkMaps ? 'maps' : (linkTel ? 'tel' : null));
       // Mini-línea: descripción real del lugar si la tenemos; si no,
       // un genérico "grupo · categoría" (nunca una frase inventada
       // sobre el negocio en sí, como "no acepta turnos" o similar).
       var miniTexto = lugar.descripcion ||
         (lugar.categoria && rubro !== lugar.categoria ? rubro + ' · ' + lugar.categoria : lugar.categoria || rubro);
       var miniEsGenerica = !lugar.descripcion;
-      var slugLugar = slug(lugar);
       var distanciaTxt = (cercaTuyoActivo && ubicacionUsuario && typeof lugar.lat === 'number' && typeof lugar.lng === 'number')
         ? formatoDistancia(distanciaMetros(ubicacionUsuario.lat, ubicacionUsuario.lng, lugar.lat, lugar.lng))
         : null;
+      // BUG REAL (auditoría Fase 3): cargarDetallesEnSegundoPlano() ya
+      // calcula lugar.estado ('verificado'/'pendiente') desde
+      // lugares-estado.json hace tiempo, pero ningún punto del archivo
+      // lo leía — se computaba y se descartaba. Es exactamente el tipo
+      // de dato real que refuerza la promesa central del producto
+      // ("caminado y verificado") en el punto de decisión, no solo en
+      // el stat del hero. Se muestra únicamente para la minoría
+      // 'pendiente' (transparencia sin diluir la mayoría ya verificada).
+      var pendienteTxt = lugar.estado === 'pendiente' ? '<span class="tarjeta-pendiente">en revisión</span>' : '';
       art.innerHTML =
-        '<div class="tarjeta-rubro">' + escapeHTML(rubro) + (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') + '</div>' +
+        '<div class="tarjeta-rubro">' + escapeHTML(rubro) + pendienteTxt + (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') + '</div>' +
         '<h3 class="tarjeta-nombre">' + escapeHTML(lugar.nombre) + '</h3>' +
         (miniTexto
           ? '<div class="tarjeta-mini' + (miniEsGenerica ? ' tarjeta-mini--generica' : '') + '">' + escapeHTML(miniTexto) + '</div>'
           : '<div class="tarjeta-direccion">' + (lugar.direccion ? escapeHTML(lugar.direccion) : 'cargando dirección…') + '</div>') +
         '<div class="tarjeta-acciones">' +
-          (slugLugar ? '<a class="tarjeta-btn" data-accion="aceptar" data-origen="' + opts.origen + '" href="locales/' + slugLugar + '/">ver ficha</a>' : '') +
-          (linkMaps ? '<a class="tarjeta-btn tarjeta-btn--maps" data-accion="maps" href="' + linkMaps + '" target="_blank" rel="noopener" aria-label="Abrir en Google Maps">📍 mapa</a>' : '') +
-          (linkTel ? '<a class="tarjeta-btn tarjeta-btn--tel" data-accion="llamar" href="' + linkTel + '" aria-label="Llamar">📞 llamar</a>' : '') +
+          (slugLugar ? '<a class="tarjeta-btn' + (primaria === 'ficha' ? ' tarjeta-btn--primaria' : '') + '" data-accion="aceptar" data-origen="' + opts.origen + '" href="locales/' + slugLugar + '/">ver ficha</a>' : '') +
+          (linkMaps ? '<a class="tarjeta-btn tarjeta-btn--maps' + (primaria === 'maps' ? ' tarjeta-btn--primaria' : '') + '" data-accion="maps" href="' + linkMaps + '" target="_blank" rel="noopener" aria-label="Abrir en Google Maps">' + (primaria === 'maps' ? '📍 cómo llegar' : '📍 mapa') + '</a>' : '') +
+          (linkTel ? '<a class="tarjeta-btn tarjeta-btn--tel' + (primaria === 'tel' ? ' tarjeta-btn--primaria' : '') + '" data-accion="llamar" href="' + linkTel + '" aria-label="Llamar">📞 llamar</a>' : '') +
           // BUG REAL corregido: a diferencia de los chips de rubro
           // (que sí llevan aria-pressed, ver pintarRubros), este botón
           // de favorito no comunicaba su estado a un lector de
