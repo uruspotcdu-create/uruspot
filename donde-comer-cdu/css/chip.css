@@ -13,10 +13,25 @@
 
 /* El punto de color: misma silueta de "gota" que usa el pin del mapa
    (motor-render.js) para que leyenda y mapa hablen el mismo idioma
-   visual, no dos convenciones de color distintas. */
+   visual, no dos convenciones de color distintas. Sigue existiendo
+   como fallback para cualquier rubro que todavía no tenga pictograma
+   cargado en rubros-meta.js (ver .rubro-icono debajo). */
 .chip__punto{
   width:9px; height:9px; border-radius:50% 50% 50% 0;
   transform:rotate(-45deg); flex:none;
+}
+
+/* Pictograma de rubro — mismo componente visual en chips ("Por
+   rubro"), leyenda del mapa (mapa-leyenda-chip) y, a futuro,
+   cualquier otra superficie que consuma URU_RUBROS_ICONO_SVG()
+   (rubros-meta.js). `color:currentColor` es lo que permite que el
+   mismo <svg> (mismo string, sin regenerar markup) cambie de color
+   solo con CSS en :hover, :focus-visible y .chip--activo — ver reglas
+   de esos estados más abajo. */
+.rubro-icono{
+  display:inline-flex; flex:none;
+  color:var(--chip-color, var(--color-granate-clara));
+  transition:color var(--dur-rapido) var(--easing-estandar);
 }
 
 /* Variante clicable: índice "Por rubro" (#listaRubros, ver app.js:
@@ -51,6 +66,13 @@ button.chip.chip--activo{
   background:linear-gradient(135deg, var(--chip-color, var(--color-granate-clara)), var(--color-granate));
   border-color:transparent;
   box-shadow:0 4px 16px -4px var(--chip-color, var(--color-granate-clara));
+}
+/* El fondo del chip activo ya usa --chip-color: si el ícono siguiera
+   heredando ese mismo color, se volvería invisible sobre su propio
+   fondo. Pasa a usar el mismo tono oscuro que el texto del chip
+   activo, igual que --color-fondo ya hace arriba. */
+button.chip.chip--activo .rubro-icono{
+  color:var(--color-fondo);
 }
 button.chip.chip--activo:focus-visible{
   outline-color:var(--color-tinta);
