@@ -181,6 +181,10 @@
        statLugares             │ pintarStatsRapidas()     │ contador "lugares verificados"
        statRubros              │ pintarStatsRapidas()     │ contador "rubros distintos"
        faqLista                │ (reservado, ver §9)      │ contenedor de FAQ dinámicas
+       destacados              │ pintarDestacados()       │ visibilidad de TODO el spotlight
+                                │                          │ de mejor puntuados (agregado en
+                                │                          │ auditoría Fase 4 — ver más abajo)
+       listaDestacados         │ pintarDestacados()       │ strip de tarjetas destacadas
 
      Elementos que NO están en esta tabla (mapa-container, sección
      manifiesto, accesos por categoría, footer) son intencionalmente
@@ -534,6 +538,11 @@
 <link rel="stylesheet" href="css/tarjeta-lugar.css">
 <link rel="stylesheet" href="css/chip.css">
 <link rel="stylesheet" href="css/badge-estado.css">
+<!-- destacados.css: nueva (auditoría Fase 4) — spotlight de mejor
+     puntuados. Depende de tokens.css y boton.css (reutiliza .btn),
+     independiente de tarjeta-lugar.css: es un componente propio, no
+     una variante de la tarjeta de descubrimiento. -->
+<link rel="stylesheet" href="css/destacados.css">
 <link rel="stylesheet" href="css/mapa.css">
 <link rel="stylesheet" href="css/descubrimiento.css">
 
@@ -741,6 +750,26 @@
       <span class="hero__scroll-cue__icono" aria-hidden="true">↓</span>
       Ver lugares para vos
     </a>
+  </section>
+
+  <!-- DESTACADOS (auditoría Fase 4, nueva): spotlight de lugares con
+       mejor puntuación real. `rating`/`rating_count` ya viajaban en
+       lugares-core.json desde split_dataset.py — el propio script
+       los documenta como "opcionales... para spotlight 'mejor
+       puntuados'" pero ningún punto de app.js los leía todavía. Esta
+       sección es ese spotlight, finalmente conectado al dato que ya
+       existía.
+       Nace `hidden`: mismo patrón que #mapaContainer (invariante I2)
+       — no debe existir visualmente hasta que pintarDestacados() en
+       app.js confirme que hay suficientes lugares que califican (≥3
+       con rating≥4.6 y rating_count por encima de un piso mínimo,
+       para no destacar un 5.0 con una sola reseña). No es un recorte
+       de Guía/Exploración ni compite con "cerca tuyo": es
+       independiente, no depende de sesión ni de ubicación. -->
+  <section class="destacados envoltorio u-reveal" id="destacados" aria-labelledby="destacados-titulo" hidden>
+    <h2 id="destacados-titulo">Destacados</h2>
+    <p class="destacados-subtitulo">Los mejor puntuados, con reseñas reales — no un ranking pago.</p>
+    <div id="listaDestacados" class="destacados-strip" role="list" aria-label="Lugares destacados por puntuación"></div>
   </section>
 
   <!-- DESCUBRIMIENTO: región dinámica. Todo lo que hay adentro de
