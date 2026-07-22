@@ -105,7 +105,13 @@
 }
 
 .uru-mapa-popup{
-  position:absolute; transform:translate(-50%,calc(-100% - 18px)); min-width:200px; max-width:260px;
+  /* -22px (antes -18px): motor-render.js agrandó el pin (RADIO_MARCADOR
+     10→12) para darle espacio al pictograma de rubro. Un pin abierto
+     siempre dibuja su estado "activo" (r=14.5), cuya cabeza llega a
+     -14.5*1.35 ≈ -19.6px sobre el punto de anclaje — con el offset
+     viejo de -18px el popup quedaba pisando la cabeza del pin. Se
+     sube a -22px para mantener el mismo aire de siempre. */
+  position:absolute; transform:translate(-50%,calc(-100% - 22px)); min-width:200px; max-width:260px;
   background:var(--glass-bg-fuerte); border:1px solid var(--glass-borde-hover);
   border-radius:var(--radio-lg); padding:var(--esp-3) var(--esp-4);
   box-shadow:var(--sombra-vidrio); font:var(--tipo-cuerpo-xs);
@@ -195,7 +201,10 @@ a.uru-mapa-popup-cluster-item:focus-visible{
 }
 
 .uru-mapa-etiqueta{
-  position:absolute; transform:translate(-50%,calc(-100% - 16px)); pointer-events:none;
+  /* -21px (antes -16px): misma razón que .uru-mapa-popup arriba — la
+     etiqueta aparece con el punto resaltado (hover), que también
+     dibuja el pin en estado "activo" agrandado. */
+  position:absolute; transform:translate(-50%,calc(-100% - 21px)); pointer-events:none;
   background:rgba(10,13,19,.92); color:var(--color-tinta); font-family:var(--f-ui); font-weight:500;
   font-size:12px; padding:5px 10px; border-radius:var(--radio-sm); white-space:nowrap;
   border:1px solid var(--color-linea-fuerte); z-index:4;
