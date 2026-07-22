@@ -16,6 +16,11 @@
   --color-fondo:        #0A0D13;
   --color-fondo-2:      #10141C;
   --color-tinta:        #ECEDEF;
+  /* --color-tinta-80: ya esperado por tarjeta-lugar.css como fallback
+     (var(--color-tinta-80, var(--color-tinta-60))) pero nunca estaba
+     declarado acá — caía siempre al fallback en silencio. Se agrega
+     el escalón real de la escala. */
+  --color-tinta-80:     rgba(236,237,239,.82);
   --color-tinta-60:     rgba(236,237,239,.62);
   --color-tinta-30:     rgba(236,237,239,.26);
   --color-linea:        rgba(148,155,171,.16);
@@ -61,6 +66,19 @@
   --tipo-dato:        400 12px/1.4 var(--f-dato);
   --tipo-dato-xs:     400 10.5px/1.3 var(--f-dato);
 
+  /* Peso y tracking como token: hoy boton.css, chip.css, badge-estado.css
+     y descubrimiento.css repiten font-weight:500/600 y letter-spacing
+     sueltos cada uno por su cuenta. Se documentan acá como vocabulario
+     compartido — aplicarlos en esos archivos queda para cuando se
+     toque cada uno puntualmente, no se fuerza ahora. */
+  --peso-regular:  400;
+  --peso-medio:    500;
+  --peso-semibold: 600;
+  --tracking-ajustado: -.01em;
+  --tracking-normal:   0;
+  --tracking-amplio:   .08em;
+  --tracking-mayuscula: .15em; /* el patrón que ya usa badge-estado.css */
+
   /* ── Espaciado: escala 4/8/12/16/24/32/48/64 — nada fuera de esta escala ── */
   --esp-1: 4px;
   --esp-2: 8px;
@@ -80,7 +98,18 @@
   /* ── Sombra ── */
   --sombra-baja:  0 4px 14px rgba(0,0,0,.4);
   --sombra-media: 0 8px 20px rgba(0,0,0,.35);
+  /* Faltaba un escalón entre --sombra-media y --sombra-vidrio/--sombra-glow
+     (definidas más abajo, en la capa Fase 1): sin él, cualquier
+     componente nuevo que necesite "más elevado que una card en reposo
+     pero sin el glow de marca" no tenía a dónde ir y terminaba
+     inventando una sombra inline. */
+  --sombra-alta:  0 14px 32px -8px rgba(0,0,0,.5);
   --sombra-foco:  0 0 0 1px var(--color-granate-clara), 0 8px 20px rgba(156,58,70,.18);
+
+  /* Estado disabled: existe en la intención de varios componentes
+     (botones, inputs de búsqueda) pero no como token — cada uno
+     tendría que inventar su propia opacidad. */
+  --opacidad-disabled: .45;
 
   /* ── Movimiento ── */
   --dur-rapido: .15s;
@@ -117,7 +146,18 @@
   --sombra-glow:    0 0 0 1px var(--color-granate-clara), 0 0 24px rgba(201,122,131,.35);
 
   --dur-lentisima: .6s;
+  --dur-instantaneo: .1s; /* micro-feedback: press states, toggles — más rápido que --dur-rapido */
   --easing-rebote: cubic-bezier(.22,1,.36,1);
+
+  /* Anillo de foco: boton.css, chip.css, mapa.css y descubrimiento.css
+     declaran "outline:2px solid var(--color-granate-clara)" a mano,
+     cada uno con su propio outline-offset (1px, 2px, -2px, 4px) sin
+     una razón sistemática entre ellos. Se documenta acá el color y
+     grosor como fuente única; el offset queda por componente porque
+     depende de la forma del elemento (chip circular vs botón
+     rectangular vs canvas). No se reemplaza en los otros archivos
+     todavía — es fase 2, cambia CSS fuera de tokens.css. */
+  --anillo-foco: 2px solid var(--color-granate-clara);
 }
 
 /* ── Reset mínimo compartido ── */
@@ -140,6 +180,61 @@ a{ color:inherit; }
     animation-iteration-count:1 !important;
     transition-duration:.001ms !important;
     scroll-behavior:auto !important;
+  }
+}
+
+/* ── Respeto por reduced-transparency ──
+   El glassmorphism (--glass-blur/--glass-blur-fuerte) es identidad
+   visual del sitio, pero para quien lo desactiva a nivel sistema
+   operativo (低视力/rendimiento) o en hardware sin GPU dedicada, un
+   blur pesado sobre 51 fichas cuesta repaints reales y puede reducir
+   legibilidad del texto que va encima. Se baja la intensidad en vez
+   de eliminarla — el vidrio sigue existiendo, pero más templado, y
+   el fondo gana opacidad para compensar el contraste que el blur
+   dejaba de aportar. */
+@media (prefers-reduced-transparency: reduce){
+  :root{
+    --glass-blur:        4px;
+    --glass-blur-fuerte:  6px;
+    --glass-bg:          rgba(16,20,28,.92);
+    --glass-bg-fuerte:   rgba(16,20,28,.97);
+  }
+}
+
+/* ── Respeto por prefers-contrast ──
+   Sube el contraste de líneas y bordes sutiles (--color-linea,
+   --glass-borde) que hoy son casi invisibles a propósito (10-16% de
+   opacidad) — correcto para el look premium en condiciones normales,
+   insuficiente para quien necesita más contraste para distinguir
+   dónde termina una tarjeta y empieza el fondo. */
+@media (prefers-contrast: more){
+  :root{
+    --color-linea:        rgba(148,155,171,.45);
+    --color-linea-fuerte: rgba(148,155,171,.65);
+    --glass-borde:        rgba(236,237,239,.35);
+    --glass-borde-hover:  rgba(201,122,131,.75);
+    --color-tinta-60:     rgba(236,237,239,.85);
+    --color-tinta-30:     rgba(236,237,239,.55);
+  }
+}
+
+/* ── Windows High Contrast / forced-colors ──
+   Sin esto, el navegador fuerza sus propios colores del sistema pero
+   mantiene box-shadow y backdrop-filter, que en modo forced-colors
+   suelen quedar como manchas sin sentido (no son "color" para el
+   motor de forced-colors, pero tampoco se anulan solos de forma
+   prolija). Se apagan explícitamente sombras y blur y se deja que el
+   borde real (que forced-colors sí respeta) haga el trabajo de
+   separar superficies. */
+@media (forced-colors: active){
+  *{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .btn, .chip, button.chip, .tarjeta, .badge-estado,
+  #mapaHerramienta, .uru-mapa-popup, .faq-item, .acceso-card, .manifiesto-card{
+    box-shadow:none !important;
+    border:1px solid CanvasText;
   }
 }
 
@@ -173,6 +268,18 @@ a{ color:inherit; }
 .u-reveal.u-reveal--armado{ opacity:0; transform:translateY(18px); }
 .u-reveal.u-reveal--armado.visible{ opacity:1; transform:translateY(0); }
 @media (prefers-reduced-motion: reduce){ .u-reveal.u-reveal--armado{ opacity:1; transform:none; } }
+
+/* Estado disabled reutilizable: aplicar a cualquier control
+   interactivo (botón, chip, input) en vez de que cada componente
+   invente su propia opacidad o, peor, no defina disabled en
+   absoluto. pointer-events:none evita que quede clickeable/focusable
+   mientras se ve inactivo; usar además el atributo disabled/aria-disabled
+   real en el HTML — esto es solo la piel visual. */
+.u-disabled{
+  opacity:var(--opacidad-disabled);
+  pointer-events:none;
+  filter:saturate(.7);
+}
 
 /* Skeleton loading: placeholder de carga reutilizable */
 .u-skeleton{
