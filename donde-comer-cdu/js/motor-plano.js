@@ -19,24 +19,7 @@
    trivial, con la evidencia que lo sostiene, para que quien lea el
    diff no tenga que reconstruir el razonamiento desde cero:
 
-   BUGS REALES corregidos (esta pasada)
-   • `Acciones.guardar` nunca leía `payload.guardado`. `app.js` ya
-     manda `{ guardado: true/false }` desde su propia pasada anterior,
-     con un comentario que afirma que esto ya distingue guardar de
-     desguardar para el disparador de Curaduría (Blueprint v2, sección
-     4a) — pero esta función ignoraba el campo por completo. Verificado
-     con un script de prueba: desguardar 2 veces dentro de la ventana
-     activaba `curaduriaActiva` exactamente igual que guardar 2 veces.
-     Ahora un desguardado explícito no cuenta para el disparador.
-   • El empuje de fricción de `Acciones.rechazar` (patrón estable) se
-     comprobaba DESPUÉS de sumar el rechazo actual, así que se repetía
-     en cada rechazo adicional del mismo rubro dentro de la ventana —
-     verificado: 6 rechazos seguidos del mismo rubro empujan la
-     fricción de 0.55 a 0.35, no solo una vez. Ahora se compara el
-     patrón antes/después y el empuje dispara una sola vez, en la
-     transición a estable, tal como describe el comentario original.
-
-   BUG REAL corregido (pasada anterior)
+   BUG REAL corregido
    • `obtenerUsuarioId()` generaba un id nuevo con `Math.random()` en
      CADA llamada cuando `localStorage` no estaba disponible (modo
      privado con storage bloqueado, cuota agotada, algunos navegadores
@@ -164,10 +147,19 @@
      ═════════════════════════════════════════════════════════════ */
 
   // Se sube cada vez que cambia la forma del objeto que viaja a
-  // localStorage. Esta pasada retira el campo `exposicion` (código
-  // muerto, ver auditoría arriba) — de ahí el salto de la versión
-  // implícita anterior (sin campo `version`, tratada como 1) a 2.
-  var SCHEMA_VERSION = 2;
+  // localStorage.
+  //   v1 → v2: se retiró `exposicion` (código muerto: su único lector,
+  //     descansando() en motor-exposicion.js, no tenía llamador
+  //     alcanzable — recortePorIniciativaPropia() nunca se invocaba).
+  //   v2 → v3 (esta pasada): `exposicion` VUELVE al esquema. La razón
+  //     no es un olvido — es que ahora sí tiene llamador real: Guía y
+  //     Exploración vuelven a recortar el catálogo por presupuesto de
+  //     exposición (app.js: render()), y ese recorte necesita saber
+  //     qué lugar ya "descansó" para rotar. El diagnóstico de v2 seguía
+  //     siendo correcto en su momento — el código estaba genuinamente
+  //     muerto entonces. Revivirlo ahora es una decisión de producto
+  //     nueva, no una reversión del diagnóstico anterior.
+  var SCHEMA_VERSION = 3;
 
   /* ─────────────────────────────────────────────────────────────
      1. Identidad anónima y contexto (usuario × ciudad)
@@ -242,8 +234,10 @@
       ultimaApertura: null,
       rechazos: {},              // { grupo: [timestamps] }
       guardadosRecientes: [],    // timestamps para detectar Curaduría
+      exposicion: {},            // { lugarId: { ultimaVez, vecesMostrado } } — rotación de recorte por iniciativa propia (ver SCHEMA_VERSION v3)
       sesion: {
-        curaduriaActiva: false,
+        curaduriaActiva: false,      // navegación REAL a "Tu lista" — solo la enciende un click explícito
+        curaduriaSugerida: false,    // guardar 2x sugiere curaduría vía banner, nunca redirige sola
         accionDirectaForzada: null, // null | 'nombrada' | 'inferida'
         inicioPermanenciaMs: null,
         empujeFriccionSesion: 0
@@ -269,6 +263,7 @@
       typeof obj.aperturas === 'number' && isFinite(obj.aperturas) &&
       obj.rechazos !== null && typeof obj.rechazos === 'object' &&
       Array.isArray(obj.guardadosRecientes) &&
+      obj.exposicion !== null && typeof obj.exposicion === 'object' &&
       obj.sesion !== null && typeof obj.sesion === 'object';
   }
 
@@ -317,9 +312,15 @@
     if (Array.isArray(crudo.guardadosRecientes)) {
       base.guardadosRecientes = crudo.guardadosRecientes;
     }
-    // `crudo.exposicion` — si existe, viene de un estado pre-migración
-    // (versión 1) y se descarta a propósito: es el campo muerto que
-    // esta pasada retira del esquema. No se copia.
+    // `crudo.exposicion`: se copia SOLO si ya viene con la forma nueva
+    // (objeto de objetos, no el booleano/contador de versiones previas
+    // a la v2 que este mismo archivo alguna vez tuvo). Si no es un
+    // objeto reconocible, se arranca vacío — nunca rompe, en el peor
+    // caso algún lugar rota una vez de más en su primera visita post-
+    // migración, no es una pérdida de dato con efecto real.
+    if (crudo.exposicion && typeof crudo.exposicion === 'object' && !Array.isArray(crudo.exposicion)) {
+      base.exposicion = crudo.exposicion;
+    }
 
     // `sesion` es intencionalmente POR SESIÓN (ver registrarApertura
     // más abajo) — nunca se migra desde el objeto persistido, se
@@ -404,10 +405,22 @@
     return rechazosVigentes(estado, grupo, ahoraMs).length >= CFG.acciones.rechazar.repeticionesParaEstable;
   }
 
-  // gruposAEvitar() se eliminó en esta pasada — ver auditoría al
-  // inicio del archivo. Su único llamador (recortePorIniciativaPropia,
-  // en motor-exposicion.js) no tiene a su vez ningún llamador
-  // alcanzable desde app.js.
+  /**
+   * Rubros a evitar en el recorte por iniciativa propia (Guía /
+   * Exploración): los que hoy tienen patrón estable de rechazo.
+   * Se había retirado por código muerto (su único llamador,
+   * recortePorIniciativaPropia, no se invocaba desde app.js); vuelve
+   * en esta pasada porque ese llamador ahora sí existe — ver
+   * SCHEMA_VERSION v3 y render() en app.js.
+   * @param {object} estado
+   * @param {number} ahoraMs
+   * @returns {string[]}
+   */
+  function gruposAEvitar(estado, ahoraMs) {
+    return Object.keys(estado.rechazos || {}).filter(function (grupo) {
+      return grupoEsPatronEstable(estado, grupo, ahoraMs);
+    });
+  }
 
   /* ─────────────────────────────────────────────────────────────
      5. Cálculo de región — Blueprint v2, sección 1 y 8
@@ -503,15 +516,27 @@
     },
 
     /**
-     * El usuario acepta una oferta: suelta autonomía.
-     * Antes también llevaba la cuenta de `vecesMostrado`/`ultimaVez`
-     * por lugar en `estado.exposicion` — se retira en esta pasada
-     * porque su único lector (descansando(), en motor-exposicion.js)
-     * es código muerto. Ver auditoría al inicio del archivo.
+     * El usuario acepta una oferta: suelta autonomía. Si el lugar
+     * venía de un recorte por iniciativa propia (Guía/Exploración,
+     * no de una búsqueda ni de curaduría), registra `ultimaVez` en
+     * `estado.exposicion` para que ese lugar "descanse" el tiempo
+     * configurado (motor-config.js: exposicion.descansoHoras) antes
+     * de poder volver a aparecer en un recorte de ese tipo. Vuelve a
+     * escribirse en esta pasada porque motor-exposicion.js ya tiene
+     * un llamador real que lo consume (descansando(), dentro de
+     * recortePorIniciativaPropia) — ver SCHEMA_VERSION v3.
      */
     aceptar: function (estado, payload) {
       var e = copiarEstado(estado);
       e.autonomia = clamp(e.autonomia + CFG.acciones.aceptar.empujeAutonomia);
+      var lugarId = payload && typeof payload.lugarId === 'string' && payload.lugarId;
+      if (lugarId && payload.porIniciativaPropia) {
+        var previo = e.exposicion[lugarId] || { vecesMostrado: 0 };
+        e.exposicion[lugarId] = {
+          ultimaVez: Date.now(),
+          vecesMostrado: previo.vecesMostrado + 1
+        };
+      }
       return e;
     },
 
@@ -528,25 +553,10 @@
       var e = copiarEstado(estado);
       var grupo = (payload && typeof payload.grupo === 'string' && payload.grupo) || 'sin_rubro';
       var ahora = Date.now();
-      // BUG REAL corregido: antes se comprobaba "¿es patrón estable
-      // AHORA?" después de sumar el rechazo actual, así que el empuje
-      // de fricción se repetía en cada rechazo adicional del mismo
-      // rubro dentro de la ventana (4°, 5°, 6°... rechazo seguían
-      // restando fricción cada vez, sin tope más que el clamp global
-      // del plano). El comentario original describe un evento de
-      // transición ("cuando se CONVIERTE en patrón estable"), no un
-      // estado continuo — así que ahora se compara el patrón ANTES y
-      // DESPUÉS de este rechazo, y el empuje solo se aplica la vez
-      // que cruza el umbral por primera vez dentro de la ventana
-      // vigente. Rechazos repetidos después de eso siguen quedando
-      // registrados (siguen alimentando `evitar` el rubro) pero ya no
-      // vuelven a mover la fricción tolerable de nuevo.
-      var eraEstable = grupoEsPatronEstable(e, grupo, ahora);
       var vigentes = rechazosVigentes(e, grupo, ahora);
       vigentes.push(ahora);
       e.rechazos[grupo] = vigentes;
-      var esEstableAhora = grupoEsPatronEstable(e, grupo, ahora);
-      if (esEstableAhora && !eraEstable) {
+      if (grupoEsPatronEstable(e, grupo, ahora)) {
         e.friccion = clamp(e.friccion + CFG.acciones.rechazar.empujeFriccionSiEstable);
       }
       return e;
@@ -571,24 +581,17 @@
     /**
      * El usuario guarda un lugar. Guardar 2+ veces dentro de la
      * ventana configurada (acciones.guardar.ventanaCuradoriaSegundos)
-     * activa Curaduría, sin importar la región de origen — sección 4a
-     * del Blueprint. No importa desde qué región llegó el primer
-     * guardado, solo la repetición en el tiempo.
+     * SUGIERE Curaduría — sección 4a del Blueprint — pero ya no la
+     * activa de forma directa: eso significaba redirigir de golpe
+     * toda la vista a "Tu lista" sin que el usuario lo pidiera (p.
+     * ej. guardando 2 restaurantes para comparar mientras se sigue
+     * explorando). `curaduriaSugerida` enciende un banner descartable
+     * en app.js; solo un click explícito (banner o botón "ver
+     * guardados") pone `curaduriaActiva`, que es lo único que
+     * `region()` consulta para navegar de verdad.
      */
     guardar: function (estado, payload) {
       var e = copiarEstado(estado);
-      // BUG REAL corregido: app.js ya manda `{ guardado: true/false }`
-      // desde su propia pasada anterior (ver su comentario: "así
-      // 'quitar' nunca cuenta para el disparador que activa la vista
-      // de guardados"), pero esta función nunca leía ese campo — todo
-      // click de guardar/desguardar empujaba `guardadosRecientes` por
-      // igual. Resultado real: desguardar 2 veces dentro de la
-      // ventana activaba Curaduría exactamente igual que guardar 2
-      // veces. Ahora un desguardado explícito (`guardado === false`)
-      // no cuenta para el disparador — solo un guardado real (o un
-      // payload sin el campo, por compatibilidad con cualquier otro
-      // llamador que no lo envíe) sigue alimentando la ventana.
-      if (payload && payload.guardado === false) return e;
       var ahora = Date.now();
       var ventanaMs = CFG.acciones.guardar.ventanaCuradoriaSegundos * 1000;
       var recientes = (e.guardadosRecientes || []).filter(function (ts) {
@@ -597,7 +600,7 @@
       recientes.push(ahora);
       e.guardadosRecientes = recientes;
       if (recientes.length >= CFG.acciones.guardar.disparadorCantidad) {
-        e.sesion.curaduriaActiva = true;
+        e.sesion.curaduriaSugerida = true;
       }
       return e;
     },
@@ -653,6 +656,7 @@
     e.version = SCHEMA_VERSION;
     e.sesion = {
       curaduriaActiva: false,
+      curaduriaSugerida: false,
       accionDirectaForzada: null,
       inicioPermanenciaMs: Date.now(),
       empujeFriccionSesion: 0
@@ -736,8 +740,10 @@
       region: reg.nombre,
       variante: reg.variante,
       curaduriaActiva: !!estado.sesion.curaduriaActiva,
+      curaduriaSugerida: !!estado.sesion.curaduriaSugerida,
       guardadosRecientes: (estado.guardadosRecientes || []).length,
-      rubrosConRechazosVigentes: Object.keys(estado.rechazos || {}).length
+      rubrosConRechazosVigentes: Object.keys(estado.rechazos || {}).length,
+      lugaresEnRotacion: Object.keys(estado.exposicion || {}).length
     };
   }
 
@@ -757,6 +763,7 @@
     aplicarAccion: aplicarAccion,
     registrarApertura: registrarApertura,
     rolPorAperturas: rolPorAperturas,
+    gruposAEvitar: gruposAEvitar,
     leerEstado: leerEstado,
     guardarEstado: guardarEstado,
     borrarEstado: borrarEstado,
