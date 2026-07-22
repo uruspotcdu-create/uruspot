@@ -281,6 +281,45 @@ a{ color:inherit; }
   filter:saturate(.7);
 }
 
+/* Visualmente oculto pero accesible a lectores de pantalla — técnica
+   estándar de "clip" en vez de display:none (que lo saca del árbol
+   de accesibilidad) o de simplemente achicar la fuente. */
+.u-sr-only{
+  position:absolute;
+  width:1px; height:1px;
+  padding:0; margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+/* Skip-link: "Ir al contenido principal". Estaba usada en el markup
+   (.skip-link.u-sr-only) pero sin ninguna regla propia, así que
+   .u-sr-only tampoco existía y el link quedaba como texto plano
+   siempre visible arriba a la izquierda. Ahora se oculta con la
+   técnica de arriba y, al recibir foco de teclado, se revela como
+   un botón flotante bien visible sobre el resto del contenido. */
+.skip-link:focus{
+  position:fixed;
+  top:var(--espacio-3, 12px);
+  left:var(--espacio-3, 12px);
+  width:auto; height:auto;
+  clip:auto;
+  overflow:visible;
+  white-space:normal;
+  z-index:1000;
+  padding:.6em 1.1em;
+  background:var(--color-granate);
+  color:#fff;
+  font-family:var(--f-ui);
+  font-weight:600;
+  font-size:.95rem;
+  border-radius:var(--radio-md);
+  box-shadow:var(--sombra-alta);
+  text-decoration:none;
+}
+
 /* Skeleton loading: placeholder de carga reutilizable */
 .u-skeleton{
   background:linear-gradient(90deg, var(--color-fondo-2) 25%, rgba(236,237,239,.08) 50%, var(--color-fondo-2) 75%);
