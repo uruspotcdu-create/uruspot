@@ -95,9 +95,37 @@
   pintarEsqueleto();
   cargarCatalogo();
 
+  // fetch con: (a) bypass de caché HTTP (evita quedarse pegado a una
+  // respuesta 404 vieja que el navegador guardó justo después de un
+  // deploy, mientras el CDN de GitHub Pages todavía propagaba el
+  // archivo nuevo), y (b) validación explícita de status — antes,
+  // un 404 devuelto por el CDN se intentaba leer igual como JSON,
+  // tiraba un SyntaxError de parseo genérico y no quedaba rastro claro
+  // de que en realidad era un 404 de red.
+  function fetchJSON(url, intentosRestantes) {
+    if (intentosRestantes === undefined) intentosRestantes = 2;
+    return fetch(url, { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) {
+          var err = new Error('HTTP ' + r.status + ' al pedir ' + url);
+          err.status = r.status;
+          throw err;
+        }
+        return r.json();
+      })
+      .catch(function (err) {
+        if (intentosRestantes > 0) {
+          // Reintento corto: cubre el caso típico de CDN que todavía
+          // no terminó de propagar el archivo tras un deploy reciente.
+          return new Promise(function (resolve) { setTimeout(resolve, 800); })
+            .then(function () { return fetchJSON(url, intentosRestantes - 1); });
+        }
+        throw err;
+      });
+  }
+
   function cargarCatalogo() {
-    fetch('lugares-core.json')
-      .then(function (r) { return r.json(); })
+    fetchJSON('lugares-core.json')
       .then(function (core) {
         REGISTRO = core.map(function (l) {
           var reg = {
@@ -115,9 +143,11 @@
       .catch(function (err) {
         console.error('No se pudo cargar lugares-core.json', err);
         if (DOM.panelDescubrimiento) {
+          var detalle = err && err.message ? err.message : 'error desconocido';
           DOM.panelDescubrimiento.innerHTML =
             '<p class="error">No se pudo cargar la información. ' +
-            '<button type="button" class="btn" data-accion="reintentar-carga">Reintentar</button></p>';
+            '<button type="button" class="btn" data-accion="reintentar-carga">Reintentar</button>' +
+            '<br><small style="opacity:.5">' + detalle.replace(/[<>]/g, '') + '</small></p>';
           var btnReintentar = DOM.panelDescubrimiento.querySelector('[data-accion="reintentar-carga"]');
           if (btnReintentar) {
             btnReintentar.addEventListener('click', function () {
@@ -162,7 +192,7 @@
 
   function cargarDetallesEnSegundoPlano() {
     var lanzar = function () {
-      fetch('lugares-detalles.json').then(function (r) { return r.json(); }).then(function (det) {
+      fetchJSON('lugares-detalles.json').then(function (det) {
         det.forEach(function (d) {
           var reg = porId[d.id];
           if (reg) { reg.direccion = d.direccion || null; reg.telefono = d.telefono || null; reg.descripcion = d.descripcion || null; }
@@ -170,7 +200,7 @@
         render();
       }).catch(function (e) { console.warn('lugares-detalles.json no disponible', e); });
 
-      fetch('lugares-estado.json').then(function (r) { return r.json(); }).then(function (mapa) {
+      fetchJSON('lugares-estado.json').then(function (mapa) {
         var PENDIENTE = ['pendiente', 'no encontrado', 'requiere confirmacion', 'requiere_confirmacion'];
         mapa.forEach(function (m) {
           var reg = porId[m.id];
