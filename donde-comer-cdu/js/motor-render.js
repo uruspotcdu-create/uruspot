@@ -154,6 +154,18 @@
     return (typeof c === 'string' && RE_HEX.test(c)) ? c : COLOR_DEFECTO;
   }
 
+  // GARANTÍA ESTRUCTURAL: todo punto que llega hasta acá ya pasó por el
+  // filtro de `establecerPuntos` (lat/lng numéricos y finitos — ver más
+  // abajo), así que esta función SIEMPRE devuelve un link válido a la
+  // ubicación real en Google Maps. A diferencia de `punto.href` (que
+  // depende de que exista una ficha/slug, y puede ser null), este link
+  // no depende de ningún dato opcional: es la representación directa de
+  // la coordenada del pin. Por eso es la acción primaria de cada popup,
+  // individual o dentro de un cluster — nunca puede faltar.
+  function hrefMapsDe(p) {
+    return 'https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lng;
+  }
+
   /* ── Caché de tiles con desalojo simple (FIFO) y reintento ante error ── */
   var cacheTiles = Object.create(null);
   var ordenTiles = [];
@@ -896,14 +908,26 @@
     function abrirPopup(punto, xy) {
       idAbierto = punto.id;
       elementoFocoPrevio = document.activeElement;
+      // BUG REAL corregido: antes el único link del popup era "Ver
+      // ficha completa", condicionado a `punto.href` (depende de que
+      // el lugar tenga slug/ficha propia). Si no la tenía, el popup se
+      // abría sin ningún link — un pin que representa un lugar real
+      // pero no llevaba a ningún lado. Ahora "Cómo llegar" (hrefMapsDe)
+      // es incondicional: usa lat/lng del punto, que `establecerPuntos`
+      // ya garantiza válidos para todo punto dibujado. "Ver ficha
+      // completa" sigue como link aparte, solo cuando hay ficha.
       popup.innerHTML =
         '<button type="button" class="uru-mapa-popup-cerrar" aria-label="Cerrar">×</button>' +
         '<strong class="uru-mapa-popup-nombre"></strong>' +
         '<div class="uru-mapa-popup-direccion"></div>' +
-        (punto.href ? '<a class="uru-mapa-popup-link">Ver ficha completa →</a>' : '');
+        '<div class="uru-mapa-popup-acciones">' +
+          '<a class="uru-mapa-popup-link uru-mapa-popup-link--maps" target="_blank" rel="noopener">📍 Cómo llegar →</a>' +
+          (punto.href ? '<a class="uru-mapa-popup-link">Ver ficha completa →</a>' : '') +
+        '</div>';
       popup.querySelector('.uru-mapa-popup-nombre').textContent = punto.nombre;
       popup.querySelector('.uru-mapa-popup-direccion').textContent = punto.direccion || '';
-      var link = popup.querySelector('.uru-mapa-popup-link');
+      popup.querySelector('.uru-mapa-popup-link--maps').href = hrefMapsDe(punto);
+      var link = popup.querySelector('.uru-mapa-popup-link:not(.uru-mapa-popup-link--maps)');
       if (link) link.href = punto.href;
       popup.setAttribute('role', 'group');
       popup.setAttribute('aria-label', punto.nombre || 'Detalle del lugar');
@@ -949,31 +973,40 @@
         c.miembros.length + ' lugares acá';
 
       var lista = popup.querySelector('.uru-mapa-popup-cluster-lista');
+      // BUG REAL corregido (raíz del reporte): un miembro sin ficha
+      // propia (`m.href` null) se renderizaba como <span> — ni link,
+      // ni foco, ni acción. El pin representaba un lugar real pero no
+      // llevaba a ningún lado. La ficha (`m.href`) es un dato OPCIONAL
+      // del negocio; la ubicación (`m.lat`/`m.lng`) es un dato
+      // GARANTIZADO por `establecerPuntos` para todo miembro que llegó
+      // a agruparse en este cluster. Por eso cada fila ahora tiene
+      // siempre, como mínimo, un <a> real a "Cómo llegar" — y además
+      // el link a la ficha cuando existe. Ningún miembro de ningún
+      // cluster, chico o grande, con coordenadas repetidas o no, queda
+      // sin una acción real que lo lleve a SU ubicación específica.
       c.miembros.forEach(function (m) {
         var li = document.createElement('li');
+        li.className = 'uru-mapa-popup-cluster-fila';
         if (m.href) {
-          // Miembro con ficha propia: sí es interactivo.
-          var a = document.createElement('a');
-          a.className = 'uru-mapa-popup-cluster-item';
-          a.textContent = m.nombre;
-          a.href = m.href;
-          li.appendChild(a);
+          var aFicha = document.createElement('a');
+          aFicha.className = 'uru-mapa-popup-cluster-item';
+          aFicha.textContent = m.nombre;
+          aFicha.href = m.href;
+          li.appendChild(aFicha);
         } else {
-          // BUG REAL corregido: antes esto era un <a href="#"
-          // aria-disabled="true">. `aria-disabled` es solo una
-          // señal semántica para lectores de pantalla — NO evita el
-          // click real ni el foco por teclado. Un usuario de mouse
-          // podía clickearlo igual (navegando a "#", es decir,
-          // saltando al tope de la página sin aviso) y un usuario de
-          // teclado lo encontraba tabulando como si fuera un link
-          // funcional. Un <span> sin href ni tabindex es simplemente
-          // texto: no navega, no se enfoca, y el lector de pantalla
-          // lo anuncia como lo que es.
           var span = document.createElement('span');
-          span.className = 'uru-mapa-popup-cluster-item uru-mapa-popup-cluster-item--sin-link';
+          span.className = 'uru-mapa-popup-cluster-item uru-mapa-popup-cluster-item--sin-ficha';
           span.textContent = m.nombre;
           li.appendChild(span);
         }
+        var aMapa = document.createElement('a');
+        aMapa.className = 'uru-mapa-popup-cluster-mapa';
+        aMapa.href = hrefMapsDe(m);
+        aMapa.target = '_blank';
+        aMapa.rel = 'noopener';
+        aMapa.setAttribute('aria-label', 'Cómo llegar a ' + m.nombre);
+        aMapa.textContent = '📍';
+        li.appendChild(aMapa);
         lista.appendChild(li);
       });
 
