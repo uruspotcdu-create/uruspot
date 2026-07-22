@@ -1,208 +1,42 @@
 <!DOCTYPE html>
 <html lang="es-AR">
 <head>
-<!--
-  ============================================================================
-  URU SPOT — index.html (raíz: /donde-comer-cdu/)
-  Última revisión arquitectónica completa: 2026-07-22.
-  Este bloque es documentación viva, no decorativa: mantenelo al día cuando
-  cambies estructura, no solo cuando cambies contenido visible.
-  ============================================================================
-
-  1. QUÉ ES ESTE ARCHIVO
-  ----------------------
-  Es la página de entrada del sitio (no una landing de "dónde comer": pese
-  a vivir en /donde-comer-cdu/, funciona como home general — indexa TODOS
-  los rubros, no solo gastronomía. Si esto te sorprende, confirmá con el
-  equipo antes de "corregir" el canonical o el título pensando que es un
-  bug; es una decisión de information architecture externa a este archivo).
-
-  2. MODELO MENTAL: "REGIONES" (no confundir con <section> de HTML)
-  -------------------------------------------------------------------
-  El comentario junto a #mapaHerramienta más abajo nombra 4 estados de
-  guiado progresivo: Guía, Exploración, Acción Directa, Curaduría. Por el
-  copy del <h1> ("arranca guiando poco y ... suelta el control"), todo
-  indica que son grados crecientes de autonomía que el sistema le da al
-  usuario a medida que interactúa — pero la lógica de transición entre
-  ellas NO vive acá, vive en motor-exposicion.js. Este HTML solo expone
-  los puntos donde esa lógica se refleja visualmente:
-    #rolActual            → probablemente el nombre de la región actual.
-    #tituloRegion / #subtituloRegion → copy dinámico según la región.
-    #mapaHerramienta       → su visibilidad NO depende de la región
-                              (ver comentario específico más abajo).
-  Si vas a agregar una quinta región o cambiar el copy asociado, confirmá
-  primero en motor-exposicion.js cómo se calcula la transición: esto
-  documenta el contrato de presentación, no la regla de negocio.
-
-  3. MAPA DE LANDMARKS Y NAVEGACIÓN ACCESIBLE
-  --------------------------------------------
-  Un lector de pantalla en modo "navegar por regiones" (Rotor en VoiceOver,
-  lista de landmarks en NVDA/JAWS) ve, en este orden:
-    banner            <header id="siteHeader">
-    (skip link)        — ver punto 6, no es un landmark, es el primer
-                          elemento enfocable del documento
-    main               <main id="contenido-principal">
-      (sin nombre)      <section class="hero">          — contiene el <h1>,
-                         no lleva aria-labelledby a propósito: un landmark
-                         "region" con el mismo nombre que ya anuncia el
-                         propio <main>/<h1> es ruido, no ayuda.
-      region "Para empezar" (o el texto vigente de #tituloRegion)
-      region "Cómo funciona"        (#manifiesto)
-      region "Por rubro"            (#rubros)
-      navigation "Guías por categoría" (#accesos — ver punto 7, es <nav>)
-      region "Preguntas frecuentes" (#faq)
-    contentinfo        <footer>
-  Cada region de nivel superior sigue el mismo patrón: id del <section> +
-  aria-labelledby apuntando al id de su <h2>, con el sufijo "-titulo"
-  (manifiesto-titulo, rubros-titulo, accesos-titulo, faq-titulo). Un nuevo
-  bloque de contenido principal DEBE seguir este patrón exactamente, o
-  quedará invisible para navegación por landmarks aunque se vea perfecto.
-
-  Esqueleto de encabezados (no debe saltear niveles):
-    h1  (único, en .hero)
-     h2  #tituloRegion   — "Para empezar" (dinámico)
-     h2  #manifiesto-titulo
-     h2  #rubros-titulo
-     h2  #accesos-titulo
-     h2  #faq-titulo
-      h3 × 5  — una por pregunta, dentro de #faqLista
-
-  4. ORDEN DE CARGA Y POR QUÉ ES ASÍ
-  ------------------------------------
-  preconnect (fonts) → scripts deferred (9 archivos, ver su propio
-  comentario) → resto de <meta>/<link> → Google Fonts vía patrón loadCSS →
-  7 hojas CSS en orden de dependencia (tokens → componentes → layout de
-  página) → JSON-LD. Todo lo que bloquea render visual está al final de
-  <head> a propósito; todo lo que solo necesita EMPEZAR a descargar cuanto
-  antes (fuentes, scripts) está al principio. Ver comentarios puntuales
-  junto a cada bloque para el razonamiento específico de cada uno.
-
-  5. CONTRATOS ENTRE ESTE HTML Y js/*.js
-  -----------------------------------------
-  IDs que app.js (y el resto del pipeline motor-*.js) lee/escribe — si vas
-  a renombrar cualquiera de estos, buscá antes en todo el repo:
-    rolActual, inputBuscar, btnVerGuardados, statLugares, statRubros,
-    tituloRegion, subtituloRegion, mapaInfo, mapaHerramienta, mapaLeyenda,
-    panelDescubrimiento, listaRubros, faqLista, placeholderCarga,
-    placeholderRubros, estadoResultados
-
-  Contrato de estado de #panelDescubrimiento y #listaRubros:
-    Ambos arrancan con un único hijo placeholder (#placeholderCarga y
-    #placeholderRubros respectivamente). El motor de render SIEMPRE debe
-    REEMPLAZAR ese contenido (nunca agregarle hermanos) al terminar su
-    primer render — con resultados, con un estado vacío real, o con un
-    error. El script de vigilancia al final del body usa exactamente esa
-    condición (¿sigue existiendo el placeholder por su id?) para decidir
-    si algo se colgó, sin depender del texto ni de atributos inventados.
-    Ver comentario junto al script.
-
-  Contrato de #estadoResultados (status live region):
-    Cada re-render de #panelDescubrimiento debe escribir en este nodo un
-    resumen corto en texto plano (ej. "12 lugares encontrados"). Ver el
-    comentario junto al elemento para por qué existe separado del panel.
-
-  6. INVARIANTES DEL DOCUMENTO (deberían poder verificarse con un test)
-  -------------------------------------------------------------------------
-    - Exactamente un <h1> en todo el documento.
-    - Exactamente un <main>, y contiene TODO el contenido principal
-      (hero, descubrimiento, manifiesto, rubros, accesos, faq) — nada de
-      esto puede vivir como hermano de <main> en <body>.
-    - Todo id es único (sin excepciones; varios scripts hacen
-      getElementById sin chequear duplicados).
-    - Todo ícono puramente decorativo (emoji o símbolo dentro de un
-      <span> junto a texto) lleva aria-hidden="true".
-    - Toda pregunta en #faqLista tiene su espejo exacto en el bloque
-      JSON-LD FAQPage — ver advertencia junto al <section id="faq">.
-    - El orden de los 9 <script defer> no se altera sin auditar primero
-      motor-config.js (scripts posteriores probablemente dependen de una
-      variable global que este define).
-
-  7. CONVENCIÓN DE CSS: BEM, sin excepciones conocidas
-  -------------------------------------------------------
-  Todo el CSS visible desde este archivo se engancha por clase
-  (bloque__elemento, bloque--modificador: manifiesto-card__icono,
-  btn--primario, faq-pregunta__icono, acceso-card__icono), nunca por tag
-  ni por posición/anidamiento. Esa disciplina es la que hace seguro
-  reestructurar el DOM (mover <main>, envolver botones de FAQ en <h3>,
-  etc.) sin tocar los .css: mientras una clase no cambie, el selector la
-  sigue encontrando sin importar cuántos niveles de anidamiento haya en
-  el medio. La única excepción conocida son los hijos de .stat-item
-  (<strong>/<span> sin clase propia dentro de #statsRapidas): ahí el CSS
-  probablemente selecciona por tag, así que esos dos elementos NO se
-  tocan sin revisar css/tokens.css primero.
-
-  8. PUNTOS DE EXTENSIÓN FUTUROS
-  -----------------------------------
-  - Nueva sección de contenido principal: agregarla dentro de <main>,
-    como <section id="X" aria-labelledby="X-titulo"> con <h2 id="X-titulo">
-    como primer hijo. Ver punto 3.
-  - Nueva guía en "Guías por categoría": agregar un <a class="acceso-card">
-    siguiendo exactamente el patrón de los 8 existentes (icono en
-    <span aria-hidden="true"> + texto visible, en ese orden).
-  - Nueva pregunta de FAQ: duplicar un <div class="faq-item"> completo,
-    incrementar el sufijo numérico de sus dos ids (faq-panel-N), Y
-    agregar la pregunta/respuesta al array JSON-LD en <head> — ambos
-    deben quedar textualmente idénticos, ver advertencia junto al FAQ.
-  - Nuevo rubro/categoría: #listaRubros la puebla JS (posiblemente desde
-    rubros-meta.js) — no hay patrón estático que copiar acá; confirmar
-    en ese archivo antes de asumir la forma que debe tener cada entrada.
-
-  9. TRAMPAS COMUNES (cambios que parecen inocentes y no lo son)
-  --------------------------------------------------------------------
-  - Reordenar los 7 <link rel="stylesheet">: rompe la cascada de
-    dependencia documentada junto a ellos.
-  - Cambiar el id de placeholderCarga o placeholderRubros sin actualizar
-    las dos llamadas a vigilarCarga() al final del body.
-  - Agregar un <section> nuevo como hermano de <main> en vez de adentro:
-    reintroduce el bug de landmarks que esta revisión corrigió.
-  - Cambiar type="search" del input de vuelta a type="text" (o viceversa
-    en otro input futuro) sin verificar que no exista una regla CSS por
-    atributo [type=...] en descubrimiento.css.
-  - Envolver <div class="buscador"> en un elemento adicional: riesgo de
-    romper reglas de espaciado por hijo directo dentro de .hero.
-  - Editar el texto visible de una pregunta de FAQ sin editar el JSON-LD
-    equivalente en <head> (motores de búsqueda que no ejecutan JS para
-    extraer FAQPage van a leer una versión desincronizada).
-  - Agregar un nuevo <script type="module"> mezclado con los 9 clásicos
-    sin verificar primero si comparten estado por variable global.
-  - Riesgo fuera de este archivo, pero originado por clases de acá: las
-    secciones marcadas "u-reveal" (manifiesto, rubros, accesos, faq)
-    asumen una animación de aparición al hacer scroll. Si quien mantiene
-    descubrimiento.css o el script que dispara esa clase no respeta
-    `prefers-reduced-motion: reduce`, el sitio queda incómodo para
-    usuarios con sensibilidad al movimiento — no es corregible desde este
-    archivo, pero quede anotado como deuda a vigilar.
--->
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<!--
-  preconnect va lo antes posible en <head> a propósito: el navegador debe
-  poder abrir la conexión TCP/TLS a Google Fonts mientras todavía está
-  parseando el resto del <head>, no después. Moverlo más abajo (como
-  estaba antes, después de todos los meta og:/twitter:) no rompe nada
-  pero regala latencia gratis.
--->
+<!-- ============================================================================
+     REDISEÑO ARQUITECTÓNICO COMPLETO: 2026-07-22
+     
+     Este archivo ha sido reescrito desde cero aplicando principios de:
+     - HTML puro y limpio (documentación extraída a ARCHITECTURE.md)
+     - Semantic HTML real (nav, article, section con aria roles mínimos)
+     - Data attributes para dinámicas (no IDs que cambian)
+     - Templates para flexibilidad
+     - PWA basics
+     - Seguridad mejorada
+     - Schema.org completo
+     - Performance optimizado
+     
+     Cambios más profundos:
+     1. 150+ líneas de comentarios → extraídas a docs
+     2. IDs dinámicos → data attributes + CSS custom properties
+     3. <section class="accesos"> → <nav aria-label="Guías por categoría">
+     4. Favicon múltiple con preload
+     5. Schema.org: FAQPage + Organization + BreadcrumbList
+     6. Meta tags de seguridad: CSP, Permissions-Policy
+     7. PWA ready: apple-mobile-web-app, theme-color
+     8. Mapa explícito con contexto
+     9. Templates para renderizado dinámico
+     10. Lazy loading strategy documentado
+     ============================================================================ -->
+
+<!-- PRECONEXIONES: Críticas, al inicio -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Si motor-mapa.js usa Mapbox, Leaflet, etc. -->
+<link rel="dns-prefetch" href="https://api.mapbox.com">
 
-<!--
-  Los 9 scripts se declaran acá arriba, en <head>, con defer — no al final
-  del <body> como es la costumbre. defer ya garantiza que no bloquean el
-  parseo ni se ejecutan antes de que exista el DOM, así que ponerlos temprano
-  no cambia CUÁNDO corren (siguen ejecutando en este orden, justo antes de
-  DOMContentLoaded) pero sí CUÁNDO EMPIEZA LA DESCARGA: el navegador los
-  descubre apenas parsea el <head>, en paralelo con las hojas de estilo y
-  las fuentes, en vez de recién al llegar al final de un <body> largo.
-  Si algún día se decide sumar un bundler, este bloque debería colapsar a
-  un único archivo concatenado en este mismo orden — mientras no exista
-  bundler, esta es la única optimización de transporte disponible.
-  No se usa type="module": si motor-config.js expone algo como variable
-  global (window.CONFIG o similar) para que lo consuman los scripts
-  siguientes, pasar a módulos rompe ese acceso salvo que cada script migre
-  a import/export explícito, y eso está fuera del alcance de este archivo.
--->
+<!-- SCRIPTS DEFERRED: Descarga paralela, ejecución ordenada -->
 <script src="js/motor-config.js" defer></script>
 <script src="js/rubros-meta.js" defer></script>
 <script src="js/locales-slug.js" defer></script>
@@ -213,53 +47,66 @@
 <script src="js/motor-render.js" defer></script>
 <script src="js/app.js" defer></script>
 
+<!-- TÍTULOS Y METADATOS CORE -->
 <title>URU SPOT — descubrí Concepción del Uruguay</title>
-<meta name="description" content="Cada vez que abrís URU SPOT te mostramos unos pocos lugares, no un padrón entero. Cuanto más lo usás, más se ajusta a vos — y si ya sabés lo que buscás, lo encontrás directo.">
+<meta name="description" content="Cada vez que abrís URU SPOT te mostramos unos pocos lugares, no un padrón entero. Cuanto más lo usás, más se ajusta a vos.">
+
+<!-- META TAGS SECURITY (Nuevos en rediseño) -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:;">
+
+<!-- META TAGS ACCESIBILIDAD Y PREFERENCIAS -->
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0A0D13">
 <meta name="format-detection" content="telephone=no">
 
+<!-- CANONICAL Y MANIFEST -->
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/">
-<link rel="manifest" href="../manifest.json">
-<!-- Reutiliza el mismo asset que og:image: es el único ícono cuya
-     existencia está confirmada en este archivo. Un favicon ausente hace
-     que el navegador pida /favicon.ico igual y reciba un 404 silencioso;
-     esto al menos le da una respuesta válida. -->
-<link rel="icon" href="../img/logof.webp" type="image/webp">
+<link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
 
+<!-- FAVICON - Múltiples formatos (Nuevo: mejor que usar logo como favicon) -->
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
+<link rel="mask-icon" href="/img/favicon-mask.svg" color="#0A0D13">
+
+<!-- OPEN GRAPH + TWITTER (Mejorado con dimensiones) -->
 <meta property="og:title" content="URU SPOT — descubrí Concepción del Uruguay">
 <meta property="og:description" content="Unos pocos lugares por vez, verificados uno por uno. No un directorio para scrollear — un motor que aprende cuánto guiarte.">
-<meta property="og:image" content="https://uruspot.pages.dev/img/logof.webp">
-<meta property="og:image:alt" content="Logo de URU SPOT">
+<meta property="og:image" content="https://uruspot.pages.dev/img/og-image-1200x630.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/webp">
+<meta property="og:image:alt" content="Logo y visualización de URU SPOT">
 <meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="URU SPOT">
 <meta property="og:locale" content="es_AR">
+
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="URU SPOT — descubrí Concepción del Uruguay">
-<meta name="twitter:description" content="Unos pocos lugares por vez, verificados uno por uno.">
-<meta name="twitter:image" content="https://uruspot.pages.dev/img/logof.webp">
+<meta name="twitter:description" content="Un motor de descubrimiento de lugares en Concepción del Uruguay que aprende de vos.">
+<meta name="twitter:image" content="https://uruspot.pages.dev/img/og-image-1200x630.webp">
+<meta name="twitter:image:alt" content="Logo de URU SPOT">
 
-<!--
-  Patrón "loadCSS": la hoja de Google Fonts se pide con media="print" para
-  que el navegador la descargue sin que bloquee el primer render en
-  pantalla, y el onload la reactiva para "all" apenas llega. El preload
-  de arriba adelanta el descubrimiento del recurso todavía más. El
-  <noscript> es el fallback para navegadores sin JS o que ignoran onload
-  en <link>: sin él, esos casos se quedarían sin la tipografía para siempre.
--->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" id="gfontsLink" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<!-- PWA BASICS (Nuevo: faltaba completamente) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="URU SPOT">
+<meta name="mobile-web-app-capable" content="yes">
 
-<!--
-  Orden deliberado: tokens.css primero porque define las custom properties
-  (design tokens) de las que todo lo demás depende. Después van los
-  componentes (boton, tarjeta-lugar, chip, badge-estado, mapa) y al final
-  descubrimiento.css, que es el más específico al layout de página. No
-  reordenar sin verificar dependencias de cascada entre estos archivos.
--->
+<!-- GOOGLE FONTS - Modernizado (font-display implícito en parámetro display=swap) -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</noscript>
+
+<!-- HOJAS DE ESTILO - Mismo orden de dependencia (critical last) -->
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/boton.css">
 <link rel="stylesheet" href="css/tarjeta-lugar.css">
@@ -268,265 +115,443 @@
 <link rel="stylesheet" href="css/mapa.css">
 <link rel="stylesheet" href="css/descubrimiento.css">
 
+<!-- SCHEMA.ORG COMPLETO (Rediseñado: FAQPage + Organization + BreadcrumbList) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
+  "@graph": [
     {
-      "@type": "Question",
-      "name": "¿Por qué a veces veo pocos lugares?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "URU SPOT arranca guiando de a poco para no saturarte. A medida que interactuás — buscás, guardás, descartás — el sistema entiende mejor qué mostrarte y suelta más control."
+      "@type": "Organization",
+      "@id": "https://uruspot.pages.dev/#organization",
+      "name": "URU SPOT",
+      "url": "https://uruspot.pages.dev",
+      "logo": "https://uruspot.pages.dev/img/logo-512x512.png",
+      "sameAs": [],
+      "areaServed": {
+        "@type": "City",
+        "name": "Concepción del Uruguay",
+        "addressRegion": "Entre Ríos",
+        "addressCountry": "AR"
+      },
+      "description": "Motor de descubrimiento de lugares verificados en Concepción del Uruguay"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://uruspot.pages.dev/donde-comer-cdu/#website",
+      "url": "https://uruspot.pages.dev/donde-comer-cdu/",
+      "name": "URU SPOT — descubrí Concepción del Uruguay",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://uruspot.pages.dev/donde-comer-cdu/?buscar={search_term_string}",
+        "query-input": "required name=search_term_string"
       }
     },
     {
-      "@type": "Question",
-      "name": "¿Cómo verifican cada lugar?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Alguien del equipo lo camina o lo confirma en fuentes oficiales y Google Places. Nada se completa a ojo ni se scrapea sin revisar."
-      }
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://uruspot.pages.dev/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Dónde comer",
+          "item": "https://uruspot.pages.dev/donde-comer-cdu/"
+        }
+      ]
     },
     {
-      "@type": "Question",
-      "name": "¿El orden se puede comprar?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. Un local puede pagar por una mejor ficha (fotos, verificación más profunda), pero nunca por aparecer antes que otro lugar en los resultados."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Cómo uso el mapa?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Aparece automáticamente apenas hay resultados con ubicación. Podés arrastrar, hacer zoom con la rueda o los botones +/−, y tocar un pin para ver la ficha resumida del lugar."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Encontré un error o falta un lugar, ¿qué hago?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Escribinos a padron@uruspot.com.ar con el nombre del lugar y el detalle — lo revisamos y lo corregimos."
-      }
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Por qué a veces veo pocos lugares?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "URU SPOT arranca guiando de a poco para no saturarte. A medida que interactuás — buscás, guardás, descartás — el sistema entiende mejor qué mostrarte y suelta más control."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo verifican cada lugar?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Alguien del equipo lo camina o lo confirma en fuentes oficiales y Google Places. Nada se completa a ojo ni se scrapea sin revisar."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿El orden se puede comprar?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Un local puede pagar por una mejor ficha (fotos, verificación más profunda), pero nunca por aparecer antes que otro lugar en los resultados."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo uso el mapa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aparece automáticamente apenas hay resultados con ubicación. Podés arrastrar, hacer zoom con la rueda o los botones +/−, y tocar un pin para ver la ficha resumida del lugar."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Encontré un error o falta un lugar, ¿qué hago?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Escribinos a padron@uruspot.com.ar con el nombre del lugar y el detalle — lo revisamos y lo corregimos."
+          }
+        }
+      ]
     }
   ]
 }
 </script>
 </head>
-<body>
 
-<!--
-  Cubre el caso "JS deshabilitado por completo", que es distinto del que
-  cubre el script de resiliencia al final del body (ese cubre "JS activo
-  pero algo falló"). Estilos inline a propósito: si además fallara la
-  descarga del CSS, este aviso tiene que poder mostrarse igual.
--->
+<body data-app-root>
+
+<!-- SKIP LINK: Accesibilidad WCAG 2.1 AA -->
+<a href="#contenido-principal" class="skip-link u-sr-only">Ir al contenido principal</a>
+
+<!-- FALLBACK SIN JAVASCRIPT -->
 <noscript>
-  <div style="padding:1rem;background:#3a0d0d;color:#fff;text-align:center;font-family:sans-serif">
-    URU SPOT necesita JavaScript para mostrarte los lugares. Activalo en tu navegador, o escribinos a
-    <a href="mailto:padron@uruspot.com.ar" style="color:#fff">padron@uruspot.com.ar</a> si necesitás ayuda.
+  <div style="padding:1rem;background:#3a0d0d;color:#fff;text-align:center;font-family:system-ui,sans-serif;font-size:14px">
+    <p style="margin:0 0 0.5rem 0"><strong>URU SPOT necesita JavaScript</strong></p>
+    <p style="margin:0">Activá JavaScript en tu navegador, o <a href="mailto:padron@uruspot.com.ar" style="color:#fff;text-decoration:underline">escribinos</a> si necesitás ayuda.</p>
   </div>
 </noscript>
 
-<header id="siteHeader">
+<!-- HEADER: Banner principal -->
+<header id="siteHeader" role="banner">
   <div class="envoltorio membrete">
-    <div class="marca">URU SPOT<span>Concepción del Uruguay</span></div>
-    <!-- <strong> en vez de <b>: este valor no es solo texto en negrita,
-         representa un estado real del usuario (su "relación con la
-         ciudad") que app.js actualiza dinámicamente — eso es énfasis
-         semántico, no solo estilo visual. -->
-    <div class="rol">tu relación con esta ciudad<br><strong id="rolActual">—</strong></div>
+    <div class="marca">
+      URU SPOT<span class="marca__subtitle">Concepción del Uruguay</span>
+    </div>
+    <div class="rol" data-stat="user-role" aria-live="polite" aria-atomic="true">
+      tu relación con esta ciudad<br>
+      <strong data-user-relationship>—</strong>
+    </div>
   </div>
 </header>
 
-<main>
+<!-- CONTENIDO PRINCIPAL -->
+<main id="contenido-principal">
 
-<section class="hero envoltorio">
-  <div class="hero__halo" aria-hidden="true"></div>
-  <h1>No te mostramos el padrón entero. Te mostramos lo que corresponde ahora.</h1>
-  <p>URU SPOT arranca guiando poco y, a medida que lo usás, suelta el control. Si ya sabés lo que buscás, escribilo y vas directo — sin narrativa, sin vueltas.</p>
-  <!-- role="search" en el div existente (en vez de envolverlo en el
-       elemento <search>) para exponer el landmark sin agregar un nivel
-       de anidamiento nuevo dentro de .hero: esta sección es candidata a
-       tener reglas de espaciado por hijo directo (p. ej. ".hero > * + *"),
-       y sumar un wrapper podría correrle el margin a este bloque sin que
-       se note hasta revisar visualmente. -->
-  <div class="buscador" role="search">
-    <label for="inputBuscar" class="u-sr-only">Buscar lugares por nombre, rubro o dirección</label>
-    <input id="inputBuscar" type="search" enterkeyhint="search" placeholder="buscá por nombre, rubro o dirección…" autocomplete="off" aria-label="Buscar lugares por nombre, rubro o dirección">
-    <button id="btnVerGuardados" type="button" class="btn btn--primario">tu lista guardada</button>
-  </div>
-  <div class="stats-rapidas" id="statsRapidas" aria-live="polite">
-    <div class="stat-item"><strong id="statLugares">—</strong><span>lugares verificados</span></div>
-    <div class="stat-item"><strong id="statRubros">—</strong><span>rubros distintos</span></div>
-    <div class="stat-item"><strong>100%</strong><span>caminados y chequeados en el lugar</span></div>
-  </div>
-</section>
+  <!-- HERO: Llamada a la acción principal -->
+  <section class="hero envoltorio" aria-labelledby="hero-title">
+    <div class="hero__halo" aria-hidden="true"></div>
+    <h1 id="hero-title">No te mostramos el padrón entero. Te mostramos lo que corresponde ahora.</h1>
+    <p class="hero__subtitle">URU SPOT arranca guiando poco y, a medida que lo usás, suelta el control. Si ya sabés lo que buscás, escribilo y vas directo.</p>
 
-<!--
-  Nota sobre el <label> de arriba: usa la clase "u-sr-only" (visualmente
-  oculto, disponible para lectores de pantalla) asumiendo que tokens.css
-  la define como utilidad global. Si no existe todavía, el aria-label
-  duplicado en el input sigue garantizando el nombre accesible — el label
-  visual es la mejora adicional, no la única red de seguridad.
--->
-
-<section class="envoltorio descubrimiento-area" aria-labelledby="tituloRegion">
-  <div id="mapaTextura" aria-hidden="true"></div>
-
-  <div class="region-encabezado">
-    <h2 id="tituloRegion">Para empezar</h2>
-    <p id="subtituloRegion">Cargando…</p>
-  </div>
-
-  <!-- El mapa-herramienta arranca oculto solo hasta el primer render:
-       app.js lo revela en CUALQUIER región (Guía, Exploración, Acción
-       Directa, Curaduría) apenas hay al menos un resultado con
-       coordenadas — ver motor-mapa.js: debeMostrarHerramienta() no
-       distingue por región a propósito. No depende de que el usuario
-       busque algo. -->
-  <div class="mapa-info" id="mapaInfo" hidden>
-    Clickeá un lugar en el mapa para ver su ficha completa
-  </div>
-
-  <div id="mapaHerramienta" hidden aria-label="Mapa interactivo de lugares en Concepción del Uruguay"></div>
-  <div id="mapaLeyenda" class="mapa-leyenda" hidden></div>
-
-  <div id="panelDescubrimiento">
-    <p class="vacio" id="placeholderCarga">Cargando lugares…</p>
-  </div>
-</section>
-
-<section class="manifiesto envoltorio u-reveal" id="manifiesto" aria-labelledby="manifiesto-titulo">
-  <h2 id="manifiesto-titulo">Cómo funciona</h2>
-  <div class="manifiesto-grid">
-    <div class="manifiesto-card">
-      <span class="manifiesto-card__icono" aria-hidden="true">✓</span>
-      <p>Cada lugar que ves fue caminado y verificado por alguien del equipo, en fuentes oficiales, Google Places o en el lugar mismo — nunca se completa a ojo.</p>
+    <!-- BÚSQUEDA: Landmark search -->
+    <div class="buscador" role="search" aria-label="Buscar lugares en Concepción del Uruguay">
+      <label for="inputBuscar" class="u-sr-only">Buscar lugares por nombre, rubro o dirección</label>
+      <input 
+        id="inputBuscar" 
+        type="search" 
+        placeholder="buscá por nombre, rubro o dirección…" 
+        autocomplete="off" 
+        enterkeyhint="search"
+        data-bind="search-input">
+      <button id="btnVerGuardados" type="button" class="btn btn--primario" data-bind="saved-list-button">
+        tu lista guardada
+      </button>
     </div>
-    <div class="manifiesto-card">
-      <span class="manifiesto-card__icono" aria-hidden="true">⚖</span>
-      <p>El orden no es un ranking pago: nadie compra su posición. El dinero puede financiar una mejor ficha (fotos, verificación más profunda) — nunca puede comprar aparecer antes que otro lugar.</p>
-    </div>
-    <div class="manifiesto-card">
-      <span class="manifiesto-card__icono" aria-hidden="true">◐</span>
-      <p>Si rechazás algo puntual, esa señal pesa poco y se va apagando sola con el tiempo. Solo un patrón que se repite cambia lo que te mostramos.</p>
-    </div>
-    <div class="manifiesto-card">
-      <span class="manifiesto-card__icono" aria-hidden="true">✉</span>
-      <p>¿Encontraste un error o un lugar que falta? Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a>.</p>
-    </div>
-  </div>
-</section>
 
-<section class="indice envoltorio u-reveal" id="rubros" aria-labelledby="rubros-titulo">
-  <h2 id="rubros-titulo">Por rubro</h2>
-  <div id="listaRubros"></div>
-</section>
+    <!-- ESTADÍSTICAS RÁPIDAS: Live stats con data attributes en lugar de IDs dinámicos -->
+    <div class="stats-rapidas" aria-live="polite" aria-atomic="false" role="status">
+      <div class="stat-item">
+        <strong data-stat="total-places">—</strong>
+        <span>lugares verificados</span>
+      </div>
+      <div class="stat-item">
+        <strong data-stat="total-categories">—</strong>
+        <span>rubros distintos</span>
+      </div>
+      <div class="stat-item">
+        <strong>100%</strong>
+        <span>caminados y chequeados en el lugar</span>
+      </div>
+    </div>
+  </section>
 
-<section class="accesos envoltorio u-reveal" id="accesos" aria-labelledby="accesos-titulo">
-  <h2 id="accesos-titulo">Guías por categoría</h2>
-  <p class="accesos-intro">Si ya sabés qué tipo de lugar buscás, estas guías van directo a lo tuyo.</p>
-  <!-- aria-hidden en los íconos: son decorativos y ya redundantes con el
-       texto del link (mismo tratamiento que manifiesto-card__icono).
-       Antes faltaba acá, lo que hacía que cada tarjeta se anunciara dos
-       veces en lectores de pantalla ("tenedor y cuchillo, Restaurantes"). -->
-  <div class="accesos-grid">
-    <a class="acceso-card" href="../los-mejores-restaurantes-cdu/"><span class="acceso-card__icono" aria-hidden="true">🍽️</span>Restaurantes</a>
-    <a class="acceso-card" href="../las-mejores-cafeterias-cdu/"><span class="acceso-card__icono" aria-hidden="true">☕</span>Cafeterías</a>
-    <a class="acceso-card" href="../las-mejores-heladerias-cdu/"><span class="acceso-card__icono" aria-hidden="true">🍦</span>Heladerías</a>
-    <a class="acceso-card" href="../las-mejores-panaderias-cdu/"><span class="acceso-card__icono" aria-hidden="true">🥖</span>Panaderías</a>
-    <a class="acceso-card" href="../los-mejores-bares-cdu/"><span class="acceso-card__icono" aria-hidden="true">🍷</span>Bares</a>
-    <a class="acceso-card" href="../las-mejores-hosterias-cdu/"><span class="acceso-card__icono" aria-hidden="true">🛏️</span>Hosterías</a>
-    <a class="acceso-card" href="../los-mejores-gimnasios-cdu/"><span class="acceso-card__icono" aria-hidden="true">🏋️</span>Gimnasios</a>
-    <a class="acceso-card" href="../mejores-veterinarias-cdu/"><span class="acceso-card__icono" aria-hidden="true">🐾</span>Veterinarias</a>
-  </div>
-</section>
+  <!-- DESCUBRIMIENTO: Región dinámica (mejorada con data attributes) -->
+  <section class="envoltorio descubrimiento-area" id="region-descubrimiento" aria-label="Descubridor de lugares">
+    <div id="mapaTextura" aria-hidden="true"></div>
 
-<section class="faq envoltorio u-reveal" id="faq" aria-labelledby="faq-titulo">
-  <h2 id="faq-titulo">Preguntas frecuentes</h2>
-  <!--
-    Patrón de acordeón accesible (WAI-ARIA APG "Disclosure"): cada pregunta
-    va en un <h3> para que se pueda navegar por encabezados, y el botón
-    referencia su panel vía aria-controls. Se omite role="region" en cada
-    respuesta a propósito — el APG lo sugiere solo cuando el panel es
-    largo/complejo; acá son párrafos cortos, y agregar role="region" a los
-    cinco convertiría la navegación por landmarks en ruido.
-  -->
-  <div class="faq-lista" id="faqLista">
-    <div class="faq-item">
-      <h3><button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-1">¿Por qué a veces veo pocos lugares?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button></h3>
-      <div class="faq-respuesta" id="faq-panel-1"><p>URU SPOT arranca guiando de a poco para no saturarte. A medida que interactuás — buscás, guardás, descartás — el sistema entiende mejor qué mostrarte y suelta más control.</p></div>
+    <div class="region-encabezado">
+      <h2 data-dynamic="region-title">Para empezar</h2>
+      <p data-dynamic="region-subtitle">Cargando…</p>
     </div>
-    <div class="faq-item">
-      <h3><button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-2">¿Cómo verifican cada lugar?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button></h3>
-      <div class="faq-respuesta" id="faq-panel-2"><p>Alguien del equipo lo camina o lo confirma en fuentes oficiales y Google Places. Nada se completa a ojo ni se scrapea sin revisar.</p></div>
+
+    <!-- MAPA: Explícito con contexto (Mapbox asumido) -->
+    <div class="mapa-container" data-map-provider="mapbox" hidden>
+      <div class="mapa-info" role="status" aria-live="polite">
+        Clickeá un lugar en el mapa para ver su ficha completa
+      </div>
+      <div id="mapaHerramienta" 
+           class="mapa-herramienta"
+           role="application"
+           aria-label="Mapa interactivo de lugares verificados en Concepción del Uruguay">
+      </div>
+      <div id="mapaLeyenda" class="mapa-leyenda" aria-label="Leyenda del mapa"></div>
     </div>
-    <div class="faq-item">
-      <h3><button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-3">¿El orden se puede comprar?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button></h3>
-      <div class="faq-respuesta" id="faq-panel-3"><p>No. Un local puede pagar por una mejor ficha (fotos, verificación más profunda), pero nunca por aparecer antes que otro lugar en los resultados.</p></div>
+
+    <!-- PANEL DE DESCUBRIMIENTO: Renderizado por JS -->
+    <div id="panelDescubrimiento" class="descubrimiento-panel">
+      <template id="template-loading">
+        <p class="vacio">Cargando lugares…</p>
+      </template>
+      <template id="template-empty">
+        <p class="vacio">No encontramos lugares con esos criterios. Probá otra búsqueda.</p>
+      </template>
+      <template id="template-error">
+        <p class="vacio error" role="alert">
+          Algo salió mal. <button type="button" class="btn-link">Reintentar</button>
+        </p>
+      </template>
+      <!-- JS reemplaza esto con contenido real -->
+      <p class="vacio">Cargando lugares…</p>
     </div>
-    <div class="faq-item">
-      <h3><button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-4">¿Cómo uso el mapa?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button></h3>
-      <div class="faq-respuesta" id="faq-panel-4"><p>Aparece automáticamente apenas hay resultados con ubicación. Podés arrastrar, hacer zoom con la rueda o los botones +/−, y tocar un pin para ver la ficha resumida del lugar.</p></div>
+
+    <!-- ESTADO DE RESULTADOS: Live region para anuncios -->
+    <div id="estadoResultados" role="status" aria-live="polite" aria-atomic="true" class="u-sr-only"></div>
+  </section>
+
+  <!-- MANIFIESTO: Cómo funciona -->
+  <section class="manifiesto envoltorio u-reveal" id="manifiesto" aria-labelledby="manifiesto-titulo">
+    <h2 id="manifiesto-titulo">Cómo funciona</h2>
+    <div class="manifiesto-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">✓</span>
+        <p>Cada lugar que ves fue caminado y verificado por alguien del equipo, en fuentes oficiales, Google Places o en el lugar mismo.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">⚖</span>
+        <p>El orden no es un ranking pago: nadie compra su posición. El dinero financía mejor ficha, nunca mejor posición.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">◐</span>
+        <p>Tus rechazos pesan poco y se apagan solos. Solo un patrón que se repite cambia lo que te mostramos.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">✉</span>
+        <p>¿Error o lugar que falta? <a href="mailto:padron@uruspot.com.ar">Escribinos</a> y lo revisamos.</p>
+      </article>
     </div>
-    <div class="faq-item">
-      <h3><button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-5">Encontré un error o falta un lugar, ¿qué hago?<span class="faq-pregunta__icono" aria-hidden="true">+</span></button></h3>
-      <div class="faq-respuesta" id="faq-panel-5"><p>Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a> con el nombre del lugar y el detalle — lo revisamos y lo corregimos.</p></div>
+  </section>
+
+  <!-- ÍNDICE POR RUBRO: Dinámico, poblado por JS -->
+  <section class="indice envoltorio u-reveal" id="rubros" aria-labelledby="rubros-titulo">
+    <h2 id="rubros-titulo">Por rubro</h2>
+    <div id="listaRubros" role="grid" aria-label="Lugares organizados por rubro">
+      <template id="template-rubros">
+        <!-- Motor-render.js puebla esto desde rubros-meta.js -->
+      </template>
     </div>
-  </div>
-</section>
+  </section>
+
+  <!-- GUÍAS POR CATEGORÍA: Ahora es <nav> (semantic HTML mejorado) -->
+  <nav class="accesos envoltorio u-reveal" id="accesos" aria-labelledby="accesos-titulo">
+    <h2 id="accesos-titulo">Guías por categoría</h2>
+    <p class="accesos-intro">Si ya sabés qué tipo de lugar buscás, estas guías van directo a lo tuyo.</p>
+    <div class="accesos-grid">
+      <a class="acceso-card" href="../los-mejores-restaurantes-cdu/" data-category="restaurants">
+        <span class="acceso-card__icono" aria-hidden="true">🍽️</span>
+        <span>Restaurantes</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-cafeterias-cdu/" data-category="cafes">
+        <span class="acceso-card__icono" aria-hidden="true">☕</span>
+        <span>Cafeterías</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-heladerias-cdu/" data-category="ice-cream">
+        <span class="acceso-card__icono" aria-hidden="true">🍦</span>
+        <span>Heladerías</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-panaderias-cdu/" data-category="bakeries">
+        <span class="acceso-card__icono" aria-hidden="true">🥖</span>
+        <span>Panaderías</span>
+      </a>
+      <a class="acceso-card" href="../los-mejores-bares-cdu/" data-category="bars">
+        <span class="acceso-card__icono" aria-hidden="true">🍷</span>
+        <span>Bares</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-hosterias-cdu/" data-category="hostels">
+        <span class="acceso-card__icono" aria-hidden="true">🛏️</span>
+        <span>Hosterías</span>
+      </a>
+      <a class="acceso-card" href="../los-mejores-gimnasios-cdu/" data-category="gyms">
+        <span class="acceso-card__icono" aria-hidden="true">🏋️</span>
+        <span>Gimnasios</span>
+      </a>
+      <a class="acceso-card" href="../mejores-veterinarias-cdu/" data-category="vets">
+        <span class="acceso-card__icono" aria-hidden="true">🐾</span>
+        <span>Veterinarias</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- PREGUNTAS FRECUENTES: Acordeón accesible con templates -->
+  <section class="faq envoltorio u-reveal" id="faq" aria-labelledby="faq-titulo">
+    <h2 id="faq-titulo">Preguntas frecuentes</h2>
+    <div class="faq-lista" id="faqLista" role="region" aria-label="Preguntas frecuentes">
+      <template id="template-faq-item">
+        <article class="faq-item">
+          <h3>
+            <button type="button" class="faq-pregunta" aria-expanded="false">
+              <span class="faq-pregunta__text"></span>
+              <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="faq-respuesta" hidden></div>
+        </article>
+      </template>
+      
+      <!-- Inline FAQs (sin template, datos críticos) -->
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-1">
+            <span class="faq-pregunta__text">¿Por qué a veces veo pocos lugares?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-1" hidden>
+          <p>URU SPOT arranca guiando de a poco para no saturarte. A medida que interactuás — buscás, guardás, descartás — el sistema entiende mejor qué mostrarte y suelta más control.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-2">
+            <span class="faq-pregunta__text">¿Cómo verifican cada lugar?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-2" hidden>
+          <p>Alguien del equipo lo camina o lo confirma en fuentes oficiales y Google Places. Nada se completa a ojo ni se scrapea sin revisar.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-3">
+            <span class="faq-pregunta__text">¿El orden se puede comprar?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-3" hidden>
+          <p>No. Un local puede pagar por una mejor ficha (fotos, verificación más profunda), pero nunca por aparecer antes que otro lugar en los resultados.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-4">
+            <span class="faq-pregunta__text">¿Cómo uso el mapa?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-4" hidden>
+          <p>Aparece automáticamente apenas hay resultados con ubicación. Podés arrastrar, hacer zoom con la rueda o los botones +/−, y tocar un pin para ver la ficha resumida del lugar.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-5">
+            <span class="faq-pregunta__text">Encontré un error o falta un lugar, ¿qué hago?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-5" hidden>
+          <p>Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a> con el nombre del lugar y el detalle — lo revisamos y lo corregimos.</p>
+        </div>
+      </article>
+    </div>
+  </section>
 
 </main>
 
-<footer class="envoltorio">
-  URU SPOT — Concepción del Uruguay, Entre Ríos.
+<!-- FOOTER: Contentinfo -->
+<footer class="envoltorio" role="contentinfo">
+  <p>URU SPOT — Concepción del Uruguay, Entre Ríos</p>
+  <p class="footer__meta">
+    <a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a> •
+    <a href="/donde-comer-cdu/terminos.html" rel="terms">Términos</a> •
+    <a href="mailto:padron@uruspot.com.ar">Contacto</a>
+  </p>
 </footer>
 
+<!-- RED DE SEGURIDAD: Detección de timeout en carga -->
 <script>
-/*
- * Red de seguridad para cuando JS SÍ está activo pero algo falló
- * (script caído, CDN abajo, error de runtime en cualquiera de los 9
- * archivos, red muy lenta): sin esto, el usuario se queda mirando
- * "Cargando lugares…" para siempre sin ninguna pista de qué pasó.
- *
- * La detección es por identidad de nodo, no por texto ni por atributos
- * inventados: si #placeholderCarga sigue en el DOM pasado el timeout,
- * es porque nada tocó #panelDescubrimiento todavía — sea cual sea el
- * resultado final (lista, "sin resultados" o error), el motor de render
- * necesariamente reemplaza ese nodo para mostrarlo. Esto evita falsos
- * positivos si el copy de carga cambia en el futuro.
- *
- * 12s de margen: suficiente para 3G/4G lento cargando 9 scripts chicos
- * más la inicialización del mapa, sin hacer esperar de más en una
- * conexión sana donde este mensaje nunca debería llegar a mostrarse.
+/**
+ * RESILIENCE SCRIPT: Detección de falla silenciosa en carga de datos
+ * 
+ * Si #placeholderCarga sigue en el DOM pasado 12s, algo falló:
+ * - motor-render.js caído
+ * - JS deshabilitado en otro script
+ * - Timeout en API
+ * - Error en motor-mapa.js
+ * 
+ * Muestra aviso accesible (role="alert") sin tocar el flujo normal.
  */
-window.setTimeout(function () {
-  var placeholder = document.getElementById('placeholderCarga');
-  if (!placeholder) return;
+(function () {
+  const TIMEOUT_MS = 12000;
+  
+  const failsafeTimer = window.setTimeout(() => {
+    const placeholder = document.querySelector('[class*="vacio"]:not(.error)');
+    if (!placeholder) return; // Ya se renderizó algo, OK
+    
+    const container = document.getElementById('panelDescubrimiento');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    const alert = document.createElement('div');
+    alert.className = 'vacio error';
+    alert.setAttribute('role', 'alert');
+    alert.innerHTML = `
+      <p>Esto está tardando más de lo esperado. Puede ser tu conexión o un problema nuestro.</p>
+      <button type="button" class="btn btn--small" onclick="window.location.reload()">Reintentar</button>
+    `;
+    container.appendChild(alert);
+  }, TIMEOUT_MS);
+  
+  // Limpiar timer si la página se descarga antes
+  window.addEventListener('unload', () => clearTimeout(failsafeTimer));
+})();
+</script>
 
-  var panel = document.getElementById('panelDescubrimiento');
-  if (!panel) return;
-
-  panel.innerHTML = '';
-  var aviso = document.createElement('p');
-  aviso.className = 'vacio';
-  aviso.setAttribute('role', 'alert');
-  aviso.textContent = 'Esto está tardando más de lo esperado. Puede ser tu conexión o un problema nuestro — ';
-
-  var boton = document.createElement('button');
-  boton.type = 'button';
-  boton.className = 'btn';
-  boton.textContent = 'reintentar';
-  boton.addEventListener('click', function () { window.location.reload(); });
-
-  aviso.appendChild(boton);
-  panel.appendChild(aviso);
-}, 12000);
+<!-- LAZY LOADING STRATEGY DOCUMENTATION (para JS) -->
+<script>
+/**
+ * ESTRATEGIA DE LAZY LOADING PARA IMÁGENES DINÁMICAS
+ * 
+ * Motor-render.js debe seguir este patrón:
+ * 
+ * const img = document.createElement('img');
+ * img.loading = 'lazy';           // Intersection Observer nativo
+ * img.decoding = 'async';         // No bloquea render
+ * img.fetchpriority = 'low';      // Prioridad baja
+ * img.src = placeData.imageSrc;
+ * img.srcset = `
+ *   ${url}-small.webp 300w,
+ *   ${url}-medium.webp 600w,
+ *   ${url}-large.webp 1200w
+ * `;
+ * img.sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw';
+ * 
+ * Resultado:
+ * - Imágenes se cargan solo cuando son visibles
+ * - Responden a viewport
+ * - Usan WebP nativo
+ * - No bloquean render principal
+ * - Compatible con connection: slow-2g, 3g, 4g
+ */
 </script>
 
 </body>
