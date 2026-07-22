@@ -675,20 +675,32 @@
     // ficha, así siempre hay una forma de llegar a cada lugar sin
     // depender de que el zoom los separe. Para clusters grandes, el zoom
     // sigue siendo lo más útil (son casos de área real con mucha oferta).
+    //
+    // BUG REAL corregido: el corte de "hasta 8 lugares" solo cubría
+    // clusters chicos. Un cluster de 9+ lugares apilados en la misma
+    // coordenada (o cerca del zoom máximo, donde ya no queda margen
+    // para acercar más) seguía cayendo en la rama de zoom — y ese zoom
+    // no separaba nada, porque no había nada más que acercar. Resultado
+    // reportado: "pines con un número que no se abren, no se expanden"
+    // al hacer mucho zoom. Ahora, sea cual sea el tamaño del cluster, se
+    // calcula primero si acercar realmente va a mover la vista de forma
+    // significativa (`zoomAyudaria`); si no, se muestra la lista en vez
+    // de intentar un zoom que no tiene a dónde ir.
     function manejarClick(c) {
       if (c.tipo === 'cluster') {
         dispararOnda(c.x, c.y, c.miembros[0] && c.miembros[0].color);
-        if (c.miembros.length <= 8) {
+        var enc = PROY.encuadrar(c.miembros, viewport.ancho, viewport.alto, 50, ZOOM_MAX);
+        var zoomDestino = PROY.clamp(Math.max(viewport.zoom + 1.2, Math.min(viewport.zoom + 2.4, enc.zoom)), ZOOM_MIN, ZOOM_MAX);
+        var zoomAyudaria = zoomDestino > viewport.zoom + 0.05;
+        if (c.miembros.length <= 8 || !zoomAyudaria) {
           abrirPopupCluster(c);
           return;
         }
-        var enc = PROY.encuadrar(c.miembros, viewport.ancho, viewport.alto, 50, ZOOM_MAX);
-        var zoomDestino = Math.max(viewport.zoom + 1.2, Math.min(viewport.zoom + 2.4, enc.zoom));
-        animarA(enc.lat, enc.lng, PROY.clamp(zoomDestino, ZOOM_MIN, ZOOM_MAX));
+        animarA(enc.lat, enc.lng, zoomDestino);
         return;
       }
       dispararOnda(c.x, c.y, c.punto && c.punto.color);
-      abrirPopup(c.punto);
+      abrirPopup(c.punto, { x: c.x, y: c.y });
       emisor.emitir('click', c.punto);
     }
 
@@ -811,8 +823,35 @@
       animacionZoom = requestAnimationFrame(paso);
     }
 
-    /* ── Popup ── */
-    function abrirPopup(punto) {
+    /* ── Popup ──
+       BUG REAL corregido: `abrirPopup`/`abrirPopupCluster` sacaban el
+       popup de `hidden` de forma SÍNCRONA, pero su posición (left/top)
+       recién se calculaba en `posicionarPopupAbierto`, que solo corre
+       dentro de `dibujar()` — y `dibujar()` se dispara vía
+       `redibujar()`, que a su vez lo difiere a un `requestAnimationFrame`.
+       Como el popup es un único <div> reutilizado (nunca se recrea),
+       arrastraba el `left`/`top` de la vez anterior (o ningún valor,
+       la primera vez). Resultado: durante un frame — visible a simple
+       vista, sobre todo en dispositivos más lentos — el popup aparecía
+       en la posición vieja (o en la esquina, sin posición), y recién
+       después "saltaba" al lugar correcto. Eso es exactamente lo que
+       se ve en el reporte: el mapa "se ve mal directamente" al
+       clickear un lugar. Ahora se posiciona de forma síncrona, en el
+       mismo tick que se hace visible, usando las coordenadas de
+       pantalla que el propio click ya calculó (o, si no las hay —
+       apertura por teclado/lista accesible—, proyectando el punto con
+       el viewport actual). `redibujar()` se sigue llamando después
+       para que el popup siga acompañando al punto si el mapa está en
+       medio de una animación de vuelo (ver `enfocar`). */
+    function posicionarPopupEn(x, y) {
+      var anchoPopup = popup.offsetWidth || 220;
+      var altoPopup = popup.offsetHeight || 90;
+      var px = PROY.clamp(x, anchoPopup / 2 + 8, Math.max(anchoPopup / 2 + 8, viewport.ancho - anchoPopup / 2 - 8));
+      var py = PROY.clamp(y, altoPopup + 16, Math.max(altoPopup + 16, viewport.alto - 8));
+      popup.style.left = px + 'px';
+      popup.style.top = py + 'px';
+    }
+    function abrirPopup(punto, xy) {
       idAbierto = punto.id;
       elementoFocoPrevio = document.activeElement;
       popup.innerHTML =
@@ -831,6 +870,12 @@
       popup.style.borderLeft = '3px solid ' + colorBorde;
       var btnCerrar = popup.querySelector('.uru-mapa-popup-cerrar');
       btnCerrar.addEventListener('click', function () { cerrarPopup(true); });
+      // Posición síncrona (ver nota arriba): si el click ya nos dio
+      // las coordenadas de pantalla, se usan directo; si no (apertura
+      // por teclado/lista accesible), se proyectan lat/lng con el
+      // viewport actual.
+      var punteroXY = xy || PROY.puntoAPantalla(punto.lat, punto.lng, viewport);
+      posicionarPopupEn(punteroXY.x, punteroXY.y);
       // <button> real: Enter/Espacio ya funcionan sin código adicional.
       if (typeof btnCerrar.focus === 'function') btnCerrar.focus({ preventScroll: true });
       redibujar();
@@ -879,6 +924,9 @@
       popup.style.borderLeft = '3px solid var(--granate-clara)';
       var btnCerrar = popup.querySelector('.uru-mapa-popup-cerrar');
       btnCerrar.addEventListener('click', function () { cerrarPopup(true); });
+      // Posición síncrona (ver nota en abrirPopup): c.x/c.y son las
+      // coordenadas de pantalla que el propio click ya calculó.
+      posicionarPopupEn(c.x, c.y);
       if (typeof btnCerrar.focus === 'function') btnCerrar.focus({ preventScroll: true });
       redibujar();
     }
@@ -888,12 +936,7 @@
       if (!p) { cerrarPopup(); return; }
       // Clamp para que el popup nunca quede parcialmente fuera del
       // contenedor cuando el marcador está cerca de un borde.
-      var anchoPopup = popup.offsetWidth || 220;
-      var altoPopup = popup.offsetHeight || 90;
-      var x = PROY.clamp(p.x, anchoPopup / 2 + 8, Math.max(anchoPopup / 2 + 8, viewport.ancho - anchoPopup / 2 - 8));
-      var y = PROY.clamp(p.y, altoPopup + 16, Math.max(altoPopup + 16, viewport.alto - 8));
-      popup.style.left = x + 'px';
-      popup.style.top = y + 'px';
+      posicionarPopupEn(p.x, p.y);
     }
 
     function posicionarEtiqueta(proyectados) {
