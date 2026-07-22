@@ -19,7 +19,24 @@
    trivial, con la evidencia que lo sostiene, para que quien lea el
    diff no tenga que reconstruir el razonamiento desde cero:
 
-   BUG REAL corregido
+   BUGS REALES corregidos (esta pasada)
+   • `Acciones.guardar` nunca leía `payload.guardado`. `app.js` ya
+     manda `{ guardado: true/false }` desde su propia pasada anterior,
+     con un comentario que afirma que esto ya distingue guardar de
+     desguardar para el disparador de Curaduría (Blueprint v2, sección
+     4a) — pero esta función ignoraba el campo por completo. Verificado
+     con un script de prueba: desguardar 2 veces dentro de la ventana
+     activaba `curaduriaActiva` exactamente igual que guardar 2 veces.
+     Ahora un desguardado explícito no cuenta para el disparador.
+   • El empuje de fricción de `Acciones.rechazar` (patrón estable) se
+     comprobaba DESPUÉS de sumar el rechazo actual, así que se repetía
+     en cada rechazo adicional del mismo rubro dentro de la ventana —
+     verificado: 6 rechazos seguidos del mismo rubro empujan la
+     fricción de 0.55 a 0.35, no solo una vez. Ahora se compara el
+     patrón antes/después y el empuje dispara una sola vez, en la
+     transición a estable, tal como describe el comentario original.
+
+   BUG REAL corregido (pasada anterior)
    • `obtenerUsuarioId()` generaba un id nuevo con `Math.random()` en
      CADA llamada cuando `localStorage` no estaba disponible (modo
      privado con storage bloqueado, cuota agotada, algunos navegadores
@@ -511,10 +528,25 @@
       var e = copiarEstado(estado);
       var grupo = (payload && typeof payload.grupo === 'string' && payload.grupo) || 'sin_rubro';
       var ahora = Date.now();
+      // BUG REAL corregido: antes se comprobaba "¿es patrón estable
+      // AHORA?" después de sumar el rechazo actual, así que el empuje
+      // de fricción se repetía en cada rechazo adicional del mismo
+      // rubro dentro de la ventana (4°, 5°, 6°... rechazo seguían
+      // restando fricción cada vez, sin tope más que el clamp global
+      // del plano). El comentario original describe un evento de
+      // transición ("cuando se CONVIERTE en patrón estable"), no un
+      // estado continuo — así que ahora se compara el patrón ANTES y
+      // DESPUÉS de este rechazo, y el empuje solo se aplica la vez
+      // que cruza el umbral por primera vez dentro de la ventana
+      // vigente. Rechazos repetidos después de eso siguen quedando
+      // registrados (siguen alimentando `evitar` el rubro) pero ya no
+      // vuelven a mover la fricción tolerable de nuevo.
+      var eraEstable = grupoEsPatronEstable(e, grupo, ahora);
       var vigentes = rechazosVigentes(e, grupo, ahora);
       vigentes.push(ahora);
       e.rechazos[grupo] = vigentes;
-      if (grupoEsPatronEstable(e, grupo, ahora)) {
+      var esEstableAhora = grupoEsPatronEstable(e, grupo, ahora);
+      if (esEstableAhora && !eraEstable) {
         e.friccion = clamp(e.friccion + CFG.acciones.rechazar.empujeFriccionSiEstable);
       }
       return e;
@@ -545,6 +577,18 @@
      */
     guardar: function (estado, payload) {
       var e = copiarEstado(estado);
+      // BUG REAL corregido: app.js ya manda `{ guardado: true/false }`
+      // desde su propia pasada anterior (ver su comentario: "así
+      // 'quitar' nunca cuenta para el disparador que activa la vista
+      // de guardados"), pero esta función nunca leía ese campo — todo
+      // click de guardar/desguardar empujaba `guardadosRecientes` por
+      // igual. Resultado real: desguardar 2 veces dentro de la
+      // ventana activaba Curaduría exactamente igual que guardar 2
+      // veces. Ahora un desguardado explícito (`guardado === false`)
+      // no cuenta para el disparador — solo un guardado real (o un
+      // payload sin el campo, por compatibilidad con cualquier otro
+      // llamador que no lo envíe) sigue alimentando la ventana.
+      if (payload && payload.guardado === false) return e;
       var ahora = Date.now();
       var ventanaMs = CFG.acciones.guardar.ventanaCuradoriaSegundos * 1000;
       var recientes = (e.guardadosRecientes || []).filter(function (ts) {
