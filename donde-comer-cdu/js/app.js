@@ -79,6 +79,7 @@
   // el escape hatch manual pedido explícitamente: "ver catálogo
   // completo" siempre visible, nunca escondido detrás del recorte.
   var verCatalogoCompleto = false;
+  var ultimaRamaRenderizada = null; // última rama visual mostrada ('curaduria' | 'buscador' | 'recorte:*'), usada por tickPermanencia() para evitar re-renders innecesarios
   var permanenciaTimer = null;
   var ultimaRegionRenderizada = '';
   var debounceBuscarId = null;
