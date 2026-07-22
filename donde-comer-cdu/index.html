@@ -2,26 +2,178 @@
 <html lang="es-AR">
 <head>
 <!--
-  Contratos que este archivo expone y que js/*.js y css/*.css asumen como
-  estables. Si vas a renombrar algo de esta lista, buscá antes en todo el
-  repo — romperlo rompe el sitio en runtime sin ningún error de build:
+  ============================================================================
+  URU SPOT — index.html (raíz: /donde-comer-cdu/)
+  Última revisión arquitectónica completa: 2026-07-22.
+  Este bloque es documentación viva, no decorativa: mantenelo al día cuando
+  cambies estructura, no solo cuando cambies contenido visible.
+  ============================================================================
 
-    IDs que app.js lee/escribe:
-      rolActual, inputBuscar, btnVerGuardados, statLugares, statRubros,
-      tituloRegion, subtituloRegion, mapaInfo, mapaHerramienta, mapaLeyenda,
-      panelDescubrimiento, listaRubros, faqLista, placeholderCarga
+  1. QUÉ ES ESTE ARCHIVO
+  ----------------------
+  Es la página de entrada del sitio (no una landing de "dónde comer": pese
+  a vivir en /donde-comer-cdu/, funciona como home general — indexa TODOS
+  los rubros, no solo gastronomía. Si esto te sorprende, confirmá con el
+  equipo antes de "corregir" el canonical o el título pensando que es un
+  bug; es una decisión de information architecture externa a este archivo).
 
-    Contrato de estado de #panelDescubrimiento:
-      Al cargar, su único hijo es #placeholderCarga (el <p class="vacio">
-      "Cargando lugares…"</p>). El motor de render SIEMPRE debe reemplazar
-      ese contenido (nunca limitarse a agregarle hermanos) al terminar el
-      primer render, sea con resultados, con un estado vacío real o con un
-      error — el script de resiliencia al final de este archivo usa
-      exactamente esa condición (¿existe #placeholderCarga todavía?) para
-      decidir si algo se colgó. Ver comentario junto al script.
+  2. MODELO MENTAL: "REGIONES" (no confundir con <section> de HTML)
+  -------------------------------------------------------------------
+  El comentario junto a #mapaHerramienta más abajo nombra 4 estados de
+  guiado progresivo: Guía, Exploración, Acción Directa, Curaduría. Por el
+  copy del <h1> ("arranca guiando poco y ... suelta el control"), todo
+  indica que son grados crecientes de autonomía que el sistema le da al
+  usuario a medida que interactúa — pero la lógica de transición entre
+  ellas NO vive acá, vive en motor-exposicion.js. Este HTML solo expone
+  los puntos donde esa lógica se refleja visualmente:
+    #rolActual            → probablemente el nombre de la región actual.
+    #tituloRegion / #subtituloRegion → copy dinámico según la región.
+    #mapaHerramienta       → su visibilidad NO depende de la región
+                              (ver comentario específico más abajo).
+  Si vas a agregar una quinta región o cambiar el copy asociado, confirmá
+  primero en motor-exposicion.js cómo se calcula la transición: esto
+  documenta el contrato de presentación, no la regla de negocio.
 
-  Este bloque es documentación, no código: no lo borres al editar el resto.
+  3. MAPA DE LANDMARKS Y NAVEGACIÓN ACCESIBLE
+  --------------------------------------------
+  Un lector de pantalla en modo "navegar por regiones" (Rotor en VoiceOver,
+  lista de landmarks en NVDA/JAWS) ve, en este orden:
+    banner            <header id="siteHeader">
+    (skip link)        — ver punto 6, no es un landmark, es el primer
+                          elemento enfocable del documento
+    main               <main id="contenido-principal">
+      (sin nombre)      <section class="hero">          — contiene el <h1>,
+                         no lleva aria-labelledby a propósito: un landmark
+                         "region" con el mismo nombre que ya anuncia el
+                         propio <main>/<h1> es ruido, no ayuda.
+      region "Para empezar" (o el texto vigente de #tituloRegion)
+      region "Cómo funciona"        (#manifiesto)
+      region "Por rubro"            (#rubros)
+      navigation "Guías por categoría" (#accesos — ver punto 7, es <nav>)
+      region "Preguntas frecuentes" (#faq)
+    contentinfo        <footer>
+  Cada region de nivel superior sigue el mismo patrón: id del <section> +
+  aria-labelledby apuntando al id de su <h2>, con el sufijo "-titulo"
+  (manifiesto-titulo, rubros-titulo, accesos-titulo, faq-titulo). Un nuevo
+  bloque de contenido principal DEBE seguir este patrón exactamente, o
+  quedará invisible para navegación por landmarks aunque se vea perfecto.
+
+  Esqueleto de encabezados (no debe saltear niveles):
+    h1  (único, en .hero)
+     h2  #tituloRegion   — "Para empezar" (dinámico)
+     h2  #manifiesto-titulo
+     h2  #rubros-titulo
+     h2  #accesos-titulo
+     h2  #faq-titulo
+      h3 × 5  — una por pregunta, dentro de #faqLista
+
+  4. ORDEN DE CARGA Y POR QUÉ ES ASÍ
+  ------------------------------------
+  preconnect (fonts) → scripts deferred (9 archivos, ver su propio
+  comentario) → resto de <meta>/<link> → Google Fonts vía patrón loadCSS →
+  7 hojas CSS en orden de dependencia (tokens → componentes → layout de
+  página) → JSON-LD. Todo lo que bloquea render visual está al final de
+  <head> a propósito; todo lo que solo necesita EMPEZAR a descargar cuanto
+  antes (fuentes, scripts) está al principio. Ver comentarios puntuales
+  junto a cada bloque para el razonamiento específico de cada uno.
+
+  5. CONTRATOS ENTRE ESTE HTML Y js/*.js
+  -----------------------------------------
+  IDs que app.js (y el resto del pipeline motor-*.js) lee/escribe — si vas
+  a renombrar cualquiera de estos, buscá antes en todo el repo:
+    rolActual, inputBuscar, btnVerGuardados, statLugares, statRubros,
+    tituloRegion, subtituloRegion, mapaInfo, mapaHerramienta, mapaLeyenda,
+    panelDescubrimiento, listaRubros, faqLista, placeholderCarga,
+    placeholderRubros, estadoResultados
+
+  Contrato de estado de #panelDescubrimiento y #listaRubros:
+    Ambos arrancan con un único hijo placeholder (#placeholderCarga y
+    #placeholderRubros respectivamente). El motor de render SIEMPRE debe
+    REEMPLAZAR ese contenido (nunca agregarle hermanos) al terminar su
+    primer render — con resultados, con un estado vacío real, o con un
+    error. El script de vigilancia al final del body usa exactamente esa
+    condición (¿sigue existiendo el placeholder por su id?) para decidir
+    si algo se colgó, sin depender del texto ni de atributos inventados.
+    Ver comentario junto al script.
+
+  Contrato de #estadoResultados (status live region):
+    Cada re-render de #panelDescubrimiento debe escribir en este nodo un
+    resumen corto en texto plano (ej. "12 lugares encontrados"). Ver el
+    comentario junto al elemento para por qué existe separado del panel.
+
+  6. INVARIANTES DEL DOCUMENTO (deberían poder verificarse con un test)
+  -------------------------------------------------------------------------
+    - Exactamente un <h1> en todo el documento.
+    - Exactamente un <main>, y contiene TODO el contenido principal
+      (hero, descubrimiento, manifiesto, rubros, accesos, faq) — nada de
+      esto puede vivir como hermano de <main> en <body>.
+    - Todo id es único (sin excepciones; varios scripts hacen
+      getElementById sin chequear duplicados).
+    - Todo ícono puramente decorativo (emoji o símbolo dentro de un
+      <span> junto a texto) lleva aria-hidden="true".
+    - Toda pregunta en #faqLista tiene su espejo exacto en el bloque
+      JSON-LD FAQPage — ver advertencia junto al <section id="faq">.
+    - El orden de los 9 <script defer> no se altera sin auditar primero
+      motor-config.js (scripts posteriores probablemente dependen de una
+      variable global que este define).
+
+  7. CONVENCIÓN DE CSS: BEM, sin excepciones conocidas
+  -------------------------------------------------------
+  Todo el CSS visible desde este archivo se engancha por clase
+  (bloque__elemento, bloque--modificador: manifiesto-card__icono,
+  btn--primario, faq-pregunta__icono, acceso-card__icono), nunca por tag
+  ni por posición/anidamiento. Esa disciplina es la que hace seguro
+  reestructurar el DOM (mover <main>, envolver botones de FAQ en <h3>,
+  etc.) sin tocar los .css: mientras una clase no cambie, el selector la
+  sigue encontrando sin importar cuántos niveles de anidamiento haya en
+  el medio. La única excepción conocida son los hijos de .stat-item
+  (<strong>/<span> sin clase propia dentro de #statsRapidas): ahí el CSS
+  probablemente selecciona por tag, así que esos dos elementos NO se
+  tocan sin revisar css/tokens.css primero.
+
+  8. PUNTOS DE EXTENSIÓN FUTUROS
+  -----------------------------------
+  - Nueva sección de contenido principal: agregarla dentro de <main>,
+    como <section id="X" aria-labelledby="X-titulo"> con <h2 id="X-titulo">
+    como primer hijo. Ver punto 3.
+  - Nueva guía en "Guías por categoría": agregar un <a class="acceso-card">
+    siguiendo exactamente el patrón de los 8 existentes (icono en
+    <span aria-hidden="true"> + texto visible, en ese orden).
+  - Nueva pregunta de FAQ: duplicar un <div class="faq-item"> completo,
+    incrementar el sufijo numérico de sus dos ids (faq-panel-N), Y
+    agregar la pregunta/respuesta al array JSON-LD en <head> — ambos
+    deben quedar textualmente idénticos, ver advertencia junto al FAQ.
+  - Nuevo rubro/categoría: #listaRubros la puebla JS (posiblemente desde
+    rubros-meta.js) — no hay patrón estático que copiar acá; confirmar
+    en ese archivo antes de asumir la forma que debe tener cada entrada.
+
+  9. TRAMPAS COMUNES (cambios que parecen inocentes y no lo son)
+  --------------------------------------------------------------------
+  - Reordenar los 7 <link rel="stylesheet">: rompe la cascada de
+    dependencia documentada junto a ellos.
+  - Cambiar el id de placeholderCarga o placeholderRubros sin actualizar
+    las dos llamadas a vigilarCarga() al final del body.
+  - Agregar un <section> nuevo como hermano de <main> en vez de adentro:
+    reintroduce el bug de landmarks que esta revisión corrigió.
+  - Cambiar type="search" del input de vuelta a type="text" (o viceversa
+    en otro input futuro) sin verificar que no exista una regla CSS por
+    atributo [type=...] en descubrimiento.css.
+  - Envolver <div class="buscador"> en un elemento adicional: riesgo de
+    romper reglas de espaciado por hijo directo dentro de .hero.
+  - Editar el texto visible de una pregunta de FAQ sin editar el JSON-LD
+    equivalente en <head> (motores de búsqueda que no ejecutan JS para
+    extraer FAQPage van a leer una versión desincronizada).
+  - Agregar un nuevo <script type="module"> mezclado con los 9 clásicos
+    sin verificar primero si comparten estado por variable global.
+  - Riesgo fuera de este archivo, pero originado por clases de acá: las
+    secciones marcadas "u-reveal" (manifiesto, rubros, accesos, faq)
+    asumen una animación de aparición al hacer scroll. Si quien mantiene
+    descubrimiento.css o el script que dispara esa clase no respeta
+    `prefers-reduced-motion: reduce`, el sitio queda incómodo para
+    usuarios con sensibilidad al movimiento — no es corregible desde este
+    archivo, pero quede anotado como deuda a vigilar.
 -->
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
