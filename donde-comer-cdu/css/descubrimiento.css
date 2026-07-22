@@ -24,10 +24,22 @@ header .membrete{
   gap:var(--esp-4); padding:var(--esp-3) 0; flex-wrap:wrap;
 }
 .marca{
+  display:inline-flex; align-items:center; gap:var(--esp-2);
   font:var(--tipo-display-sm);
+}
+.marca__texto{
   background:var(--gradiente-marca); -webkit-background-clip:text; background-clip:text; color:transparent;
 }
-.marca span{ display:block; font:var(--tipo-dato-xs); color:var(--color-tinta-60); font-weight:400; letter-spacing:.04em; -webkit-text-fill-color:var(--color-tinta-60); }
+/* Glifo de marca: una gota/pin geométrica simple (misma silueta que
+   .chip__punto y los pines del mapa) para que el logotipo deje de
+   ser texto plano y empiece a leerse como producto. Puramente
+   decorativo — el nombre "URU SPOT" ya está en texto al lado. */
+.marca__glifo{
+  flex:none; width:22px; height:22px; border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg); background:var(--gradiente-marca);
+  box-shadow:var(--sombra-baja);
+}
+.marca__subtitle{ display:block; font:var(--tipo-dato-xs); color:var(--color-tinta-60); font-weight:400; letter-spacing:.04em; -webkit-text-fill-color:var(--color-tinta-60); }
 .rol{ font:var(--tipo-dato-xs); color:var(--color-tinta-60); text-align:right; }
 .rol b{ font:var(--tipo-dato); color:var(--color-tinta); }
 
@@ -45,6 +57,36 @@ header .membrete{
 .hero p{
   font:var(--tipo-cuerpo); color:var(--color-tinta-60); max-width:560px; margin-top:var(--esp-3);
   animation:uru-fade-up var(--dur-lentisima) var(--easing-rebote) .08s backwards;
+}
+/* Énfasis dentro del titular: antes las 15 palabras del h1 competían
+   todas por la misma atención — nada le decía al ojo por dónde
+   empezar a leer. Este span destaca la frase que diferencia a URU
+   SPOT de un directorio común (ver hero-title en index.html),
+   reusando el mismo gradiente de marca en vez de introducir un color
+   nuevo al sistema. */
+.hero__enfasis{
+  background:var(--gradiente-marca); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+/* Scroll-cue: invita a seguir bajando hacia el descubridor real en
+   vez de dejar que el hero se sienta como un final de página. Enlaza
+   a #region-descubrimiento (ya existe, sin nuevo id). Es un link de
+   verdad —no decorativo—, por eso lleva texto accesible propio en
+   vez de aria-hidden. */
+.hero__scroll-cue{
+  display:inline-flex; align-items:center; gap:var(--esp-2);
+  margin-top:var(--esp-8); color:var(--color-tinta-30); font:var(--tipo-dato-xs);
+  text-decoration:none; letter-spacing:.04em;
+  animation:uru-fade-up var(--dur-lentisima) var(--easing-rebote) .32s backwards;
+  transition:color var(--dur-media) var(--easing-estandar);
+}
+.hero__scroll-cue:hover,
+.hero__scroll-cue:focus-visible{ color:var(--color-tinta-60); }
+.hero__scroll-cue:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:4px; border-radius:var(--radio-sm); }
+.hero__scroll-cue__icono{
+  display:inline-block; animation:uru-flotar 2.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce){
+  .hero__scroll-cue__icono{ animation:none; }
 }
 .buscador{
   display:flex; gap:var(--esp-2); margin-top:var(--esp-6); flex-wrap:wrap;
@@ -80,11 +122,15 @@ header .membrete{
   letter-spacing:var(--ls-amplio);
 }
 
-/* ── Mapa-textura (capa ambiental de baja densidad) ── */
-#mapaTextura{
-  position:relative; height:120px; margin:var(--esp-6) 0;
-  overflow:hidden; border-radius:var(--radio-lg);
-  background:var(--color-fondo-2);
+/* ── Mapa-textura (capa ambiental de baja densidad) ──
+   Estilos consolidados en mapa.css (única fuente de verdad — antes
+   este archivo redeclaraba el mismo selector con menos propiedades,
+   lo que pisaba el gradiente/borde de mapa.css sin que se notara a
+   simple vista porque CSS no avisa de "propiedad huérfana"). */
+.mapa-textura__leyenda{
+  font:var(--tipo-dato-xs); color:var(--color-tinta-30);
+  margin:calc(var(--esp-6) * -1 + 6px) 0 var(--esp-6);
+  text-align:center; letter-spacing:.02em;
 }
 
 /* ── Encabezado de región ── */
@@ -195,7 +241,8 @@ footer{
   .hero h1,
   .hero p,
   .buscador,
-  .stats-rapidas {
+  .stats-rapidas,
+  .hero__scroll-cue {
     animation-duration: 0.001ms !important;
   }
 }
