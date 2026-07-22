@@ -274,6 +274,7 @@
     var idResaltado = null;
     var puntoResaltado = null;
     var idAbierto = null;
+    var clusterAbierto = null; // { miembros: [...] } — lista de un cluster chico que no separa al hacer zoom
     var elementoFocoPrevio = null; // para devolver el foco al cerrar el popup
     var clusterResaltadoKey = null;
     var focoVisible = false;
@@ -664,9 +665,23 @@
       return mejor;
     }
 
+    // Antes: un cluster SIEMPRE hacía zoom al clickearlo, asumiendo que
+    // acercar la vista termina separando los pines. Eso rompe en seco
+    // cuando 2+ lugares comparten exactamente la misma coordenada (pasa
+    // seguido: geocodificación aproximada, mismo edificio/galería) — por
+    // más zoom que se haga, nunca se separan y el cluster queda
+    // "muerto": el click no visiblemente hace nada. Para clusters chicos
+    // (hasta 8 lugares) mostramos directamente la lista con links a cada
+    // ficha, así siempre hay una forma de llegar a cada lugar sin
+    // depender de que el zoom los separe. Para clusters grandes, el zoom
+    // sigue siendo lo más útil (son casos de área real con mucha oferta).
     function manejarClick(c) {
       if (c.tipo === 'cluster') {
         dispararOnda(c.x, c.y, c.miembros[0] && c.miembros[0].color);
+        if (c.miembros.length <= 8) {
+          abrirPopupCluster(c);
+          return;
+        }
         var enc = PROY.encuadrar(c.miembros, viewport.ancho, viewport.alto, 50, ZOOM_MAX);
         var zoomDestino = Math.max(viewport.zoom + 1.2, Math.min(viewport.zoom + 2.4, enc.zoom));
         animarA(enc.lat, enc.lng, PROY.clamp(zoomDestino, ZOOM_MIN, ZOOM_MAX));
@@ -822,11 +837,50 @@
     }
     function cerrarPopup(devolverFoco) {
       idAbierto = null;
+      clusterAbierto = null;
       popup.hidden = true;
       if (devolverFoco && elementoFocoPrevio && typeof elementoFocoPrevio.focus === 'function') {
         elementoFocoPrevio.focus({ preventScroll: true });
       }
       elementoFocoPrevio = null;
+    }
+
+    // Lista de lugares de un cluster chico — mismo popup visual que el
+    // de un lugar individual, pero con un <a> por miembro en vez de un
+    // solo nombre/dirección. Usa textContent (nunca innerHTML con datos
+    // del negocio) para no depender de escapar nada a mano.
+    function abrirPopupCluster(c) {
+      idAbierto = null;
+      clusterAbierto = c;
+      elementoFocoPrevio = document.activeElement;
+
+      popup.innerHTML =
+        '<button type="button" class="uru-mapa-popup-cerrar" aria-label="Cerrar">×</button>' +
+        '<strong class="uru-mapa-popup-nombre"></strong>' +
+        '<ul class="uru-mapa-popup-cluster-lista"></ul>';
+      popup.querySelector('.uru-mapa-popup-nombre').textContent =
+        c.miembros.length + ' lugares acá';
+
+      var lista = popup.querySelector('.uru-mapa-popup-cluster-lista');
+      c.miembros.forEach(function (m) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.className = 'uru-mapa-popup-cluster-item';
+        a.textContent = m.nombre;
+        if (m.href) a.href = m.href;
+        else { a.href = '#'; a.setAttribute('aria-disabled', 'true'); }
+        li.appendChild(a);
+        lista.appendChild(li);
+      });
+
+      popup.setAttribute('role', 'group');
+      popup.setAttribute('aria-label', c.miembros.length + ' lugares en este punto del mapa');
+      popup.hidden = false;
+      popup.style.borderLeft = '3px solid var(--granate-clara)';
+      var btnCerrar = popup.querySelector('.uru-mapa-popup-cerrar');
+      btnCerrar.addEventListener('click', function () { cerrarPopup(true); });
+      if (typeof btnCerrar.focus === 'function') btnCerrar.focus({ preventScroll: true });
+      redibujar();
     }
     function posicionarPopupAbierto(proyectados) {
       if (popup.hidden || idAbierto === null) return;
