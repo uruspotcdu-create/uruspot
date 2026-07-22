@@ -27,6 +27,11 @@
   transition:opacity var(--dur-media), transform var(--dur-media) var(--easing-estandar),
              border-color var(--dur-media), box-shadow var(--dur-media) var(--easing-estandar);
 }
+@media (prefers-reduced-motion: reduce){
+  .tarjeta{
+    animation-duration:0.001ms;
+  }
+}
 /* Franja superior con el color del rubro (app.js fija --chip-color
    inline por tarjeta) — mismo idioma visual que el pin del mapa y el
    chip de la leyenda. */
@@ -43,15 +48,7 @@
   transform:translateY(-4px); border-color:var(--glass-borde-hover);
   box-shadow:var(--sombra-vidrio), 0 0 28px -10px var(--chip-color, rgba(201,122,131,.5));
 }
-.tarjeta--narrativa{
-  grid-column:span 2;
-  /* Es contenido editorial de mayor jerarquía (Guía/Curaduría, ver
-     header del archivo) y ya ocupa el doble de ancho en el grid,
-     pero en reposo pesaba exactamente igual que una tarjeta común —
-     recién se distinguía al pasar el mouse. Una elevación base más
-     alta comunica su jerarquía sin esperar interacción. */
-  box-shadow:0 1px 1px rgba(255,255,255,.05) inset, var(--sombra-alta);
-}
+.tarjeta--narrativa{ grid-column:span 2; }
 @media (max-width:720px){ .tarjeta--narrativa{ grid-column:span 1; } }
 .tarjeta.descartada{ opacity:0; transform:scale(.92); pointer-events:none; }
 
@@ -64,11 +61,15 @@
 }
 
 .tarjeta-rubro{
-  font:var(--tipo-dato-xs); letter-spacing:var(--tracking-amplio); text-transform:uppercase;
+  font:var(--tipo-dato-xs); letter-spacing:var(--ls-extra); text-transform:uppercase;
   color:var(--chip-color, var(--color-granate-clara));
 }
-.tarjeta-nombre{ font:var(--tipo-display-sm); margin-top:var(--esp-1); }
-.tarjeta-direccion{ color:var(--color-tinta-60); font-size:13.5px; margin-top:var(--esp-1); }
+.tarjeta-nombre{
+  font:var(--tipo-display-sm); margin-top:var(--esp-1);
+}
+.tarjeta-direccion{
+  color:var(--color-tinta-60); font:var(--tipo-cuerpo-sm); margin-top:var(--esp-1);
+}
 
 /* Mini-descripción específica del lugar (lugares-detalles.json →
    descripcion). Reemplaza la dirección en la tarjeta cuando existe:
@@ -76,7 +77,7 @@
    la calle y el número. Si no hay descripción propia todavía, la
    tarjeta sigue mostrando la dirección — nunca un texto inventado. */
 .tarjeta-mini{
-  color:var(--color-tinta-80); font-size:13.5px;
+  color:var(--color-tinta-80, var(--color-tinta-60)); font-size:13.5px;
   margin-top:var(--esp-1); font-style:italic;
 }
 /* Genérica (grupo · categoría, sin descripción propia todavía):
@@ -99,33 +100,38 @@
    componente visual que boton.css, pero declarado acá explícitamente
    para no depender de que el markup lleve dos clases. */
 .tarjeta-btn{
-  font-family:var(--f-ui); font-size:12.5px; border:1px solid var(--glass-borde);
+  font-family:var(--f-ui); font-size:var(--tipo-cuerpo-xs); border:1px solid var(--glass-borde);
   background:rgba(10,13,19,.35); color:var(--color-tinta-60); padding:7px var(--esp-3);
   border-radius:var(--radio-full); cursor:pointer; text-decoration:none;
-  transition:color var(--dur-media), border-color var(--dur-media), transform var(--dur-rapido), background var(--dur-media);
+  transition:color var(--dur-media), border-color var(--dur-media), transform var(--dur-rapido),
+             background var(--dur-media), box-shadow var(--dur-media);
 }
-.tarjeta-btn:hover{ color:var(--color-tinta); border-color:var(--color-granate-clara); transform:translateY(-1px); background:rgba(201,122,131,.12); }
-/* Sin esto, tabular por teclado entre "Cómo llegar" / "Llamar" /
-   "Compartir" no mostraba ningún foco visible — boton.css sí lo
-   tiene, .tarjeta-btn (componente hermano, mismo rol) no. */
-.tarjeta-btn:focus-visible{ outline:var(--anillo-foco); outline-offset:2px; }
-/* Feedback táctil de press: sin esto, tocar el botón en mobile no
-   daba ninguna señal de que el toque registró antes de que ocurra
-   la acción (llamar, abrir maps). --dur-instantaneo es más corto que
-   --dur-rapido a propósito: el press debe sentirse inmediato. */
-.tarjeta-btn:active{ transform:translateY(1px) scale(.97); transition-duration:var(--dur-instantaneo); }
-.tarjeta-btn--fav.activo{ color:var(--color-granate-clara); border-color:var(--color-granate-clara); background:rgba(201,122,131,.14); }
-
-/* Target táctil: en desktop 7px de padding vertical es correcto —
-   densidad visual apropiada para mouse. En mobile, esa misma altura
-   (~29-30px) queda por debajo del mínimo de 44px recomendado para
-   dedo, y las 3-4 acciones de la tarjeta van en fila apretada. Se
-   sube el padding solo ahí, sin tocar la versión desktop. */
-@media (max-width:720px){
-  .tarjeta-btn{ padding:11px var(--esp-3); }
+.tarjeta-btn:hover{
+  color:var(--color-tinta); border-color:var(--color-granate-clara);
+  transform:translateY(-1px); background:rgba(201,122,131,.12);
+}
+.tarjeta-btn:focus-visible{
+  outline:2px solid var(--color-granate-clara); outline-offset:1px;
+  border-radius:var(--radio-sm);
+}
+.tarjeta-btn:disabled{
+  opacity:0.5; cursor:not-allowed; color:var(--color-tinta-30);
+  background:rgba(10,13,19,.2); border-color:var(--glass-borde);
+}
+.tarjeta-btn--fav.activo{
+  color:var(--color-granate-clara); border-color:var(--color-granate-clara);
+  background:rgba(201,122,131,.14);
 }
 
-.vacio{ color:var(--color-tinta-60); padding:var(--esp-6) 0; grid-column:1/-1; animation:uru-fade-up var(--dur-lenta) var(--easing-rebote); }
+.vacio{
+  color:var(--color-tinta-60); padding:var(--esp-6) 0; grid-column:1/-1;
+  animation:uru-fade-up var(--dur-lenta) var(--easing-rebote);
+  min-height:120px; display:flex; align-items:center; justify-content:center;
+  text-align:center;
+}
+@media (prefers-reduced-motion: reduce){
+  .vacio{ animation-duration:0.001ms; }
+}
 
 /* Estado de carga: tarjetas fantasma mientras llega lugares-core.json
    (ver app.js: pintarEsqueleto). Mismo grid, sin layout shift al
