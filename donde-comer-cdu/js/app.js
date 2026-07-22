@@ -835,13 +835,19 @@
     if (!window.URU_CONFIG.mapa.texturaSiempreVisible) return;
     if (DOM.mapaTextura.dataset.pintado === '1') return;
     var puntos = MAPA.puntosTextura(REGISTRO);
+    var meta = window.URU_RUBROS_META || {};
     var frag = document.createDocumentFragment();
+    var i = 0;
     puntos.forEach(function (l) {
       if (typeof l.lat !== 'number' || typeof l.lng !== 'number') return;
       var p = document.createElement('div');
       p.className = 'punto-textura';
       p.style.left = (Math.random() * 100) + '%';
       p.style.top = (Math.random() * 100) + '%';
+      p.style.setProperty('--i', i);
+      var colorRubro = meta[l.grupo] && meta[l.grupo][2];
+      if (colorRubro) p.style.setProperty('--dot-color', colorRubro);
+      i++;
       frag.appendChild(p);
     });
     DOM.mapaTextura.appendChild(frag);
