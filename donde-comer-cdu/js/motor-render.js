@@ -125,10 +125,36 @@
   var TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
   var SUBDOMINIOS = ['a', 'b', 'c', 'd'];
   var TAM_TILE = PROY.TAM_TILE;
-  var RADIO_MARCADOR = 10;
+  // Antes 10: la ventana central alcanzaba ~3.6px de radio, suficiente
+  // para una inicial de letra pero no para un pictograma legible. Se
+  // sube a 12 (pin ~20% más grande) y se agranda la proporción de la
+  // ventana (RATIO_VENTANA) para darle al ícono el espacio que
+  // necesita — ver dibujarPictogramaRubro() más abajo. La forma y el
+  // resto de la identidad del pin (gota, halo, gradiente, estados) no
+  // cambian, solo la escala.
+  var RADIO_MARCADOR = 12;
   var RADIO_CLUSTER = 16;
   var RADIO_CLUSTER_PX = 36;
   var ZOOM_MIN = 4, ZOOM_MAX = 18;
+
+  // ── Sistema de pictogramas por rubro (ver rubros-meta.js) ──
+  // RATIO_VENTANA: qué fracción del radio del pin ocupa la ventana
+  // central oscura (antes 0.36, fija inline; ahora agrandada y
+  // nombrada porque el pictograma necesita más aire que una letra).
+  var RATIO_VENTANA = 0.62;
+  // Margen interno del ícono dentro de la ventana (0-1): 0.88 dibuja
+  // el pictograma casi al borde de la ventana sin tocarlo.
+  var ICONO_MARGEN = 0.88;
+  var ICONO_VIEWBOX = (global.URU_RUBROS_ICONO_VIEWBOX || 24);
+  var ICONO_GROSOR = (global.URU_RUBROS_ICONO_GROSOR || 1.75);
+  // Cache de Path2D por string `d`: los mismos 14 paths de
+  // rubros-meta.js se reutilizan en cada marcador y en cada frame —
+  // no tiene sentido reconstruir el Path2D por punto ni por redibujo.
+  var CACHE_PATH2D = Object.create(null);
+  function obtenerPath2D(d) {
+    if (!CACHE_PATH2D[d]) CACHE_PATH2D[d] = new Path2D(d);
+    return CACHE_PATH2D[d];
+  }
 
   // Constantes de calibración visual/temporal, agrupadas para que
   // ajustar un número no obligue a bucear en la lógica — mismo
@@ -484,10 +510,12 @@
     // no una bolita genérica. El color codifica el rubro (ver
     // rubros-meta.js) para que de un vistazo se distinga qué es qué,
     // igual que la franja de color de la etiqueta de rubro en las
-    // tarjetas. Además de color, la ventana central lleva la inicial
-    // del rubro: el color solo no alcanza (dos rubros pueden quedar
-    // parecidos en un mapa oscuro, y no es accesible para daltonismo),
-    // la letra es un segundo canal de distinción que no depende del color.
+    // tarjetas. Además de color, la ventana central lleva el
+    // pictograma del rubro (antes una inicial de letra): el color
+    // solo no alcanza (dos rubros pueden quedar parecidos en un mapa
+    // oscuro, y no es accesible para daltonismo) — el ícono es un
+    // segundo canal de distinción que no depende del color, y además
+    // se reconoce más rápido que una letra sola.
     function dibujarMarcador(x, y, punto, activo) {
       var color = colorSeguro(punto && punto.color);
       var r = activo ? RADIO_MARCADOR + 2.5 : RADIO_MARCADOR;
@@ -518,21 +546,51 @@
       ctx.stroke();
       // Centro claro: hace de "ventana" del pin, referencia visual de
       // mapas profesionales (Google/Apple Maps usan el mismo recurso)
+      var rVentana = r * RATIO_VENTANA;
       ctx.beginPath();
-      ctx.arc(0, -r * 0.35, r * 0.36, 0, Math.PI * 2);
+      ctx.arc(0, -r * 0.35, rVentana, 0, Math.PI * 2);
       ctx.fillStyle = '#0A0D13';
       ctx.fill();
-      // Inicial del rubro dentro de la ventana — segundo canal de
-      // distinción además del color (ver comentario arriba).
+      // Pictograma del rubro dentro de la ventana — segundo canal de
+      // distinción además del color (ver comentario arriba: dos
+      // rubros pueden quedar parecidos en un mapa oscuro, y el color
+      // solo no es accesible para daltonismo).
+      dibujarPictogramaRubro(punto, r, rVentana, color);
+      ctx.restore();
+    }
+
+    // Dibuja el pictograma vectorial de rubros-meta.js dentro de la
+    // ventana del pin. Un solo `d` (mismo string que consume el <svg>
+    // del lado DOM vía URU_RUBROS_ICONO_SVG) se reutiliza acá tal
+    // cual con Path2D — sin duplicar la geometría del ícono en dos
+    // formatos ni depender de una librería de íconos.
+    // Si el punto no trae `rubroIcono` (rubro nuevo que todavía no
+    // tiene pictograma cargado en rubros-meta.js), se cae de nuevo a
+    // la inicial de letra: el pin nunca queda con la ventana vacía.
+    function dibujarPictogramaRubro(punto, r, rVentana, color) {
+      var pathD = punto && punto.rubroIcono;
+      if (pathD) {
+        var escala = (rVentana * 2 * ICONO_MARGEN) / ICONO_VIEWBOX;
+        ctx.save();
+        ctx.translate(0, -r * 0.35);
+        ctx.scale(escala, escala);
+        ctx.translate(-ICONO_VIEWBOX / 2, -ICONO_VIEWBOX / 2);
+        ctx.lineWidth = ICONO_GROSOR;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = color;
+        ctx.stroke(obtenerPath2D(pathD));
+        ctx.restore();
+        return;
+      }
       if (punto && punto.rubroNombre) {
         var inicial = String(punto.rubroNombre).trim().charAt(0).toUpperCase();
         ctx.fillStyle = color;
-        ctx.font = '700 ' + Math.round(r * 0.5) + 'px "IBM Plex Sans", sans-serif';
+        ctx.font = '700 ' + Math.round(rVentana * 1.05) + 'px "IBM Plex Sans", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(inicial, 0, -r * 0.35 + 0.5);
       }
-      ctx.restore();
     }
 
     function hexARgba(hex, alpha) {
