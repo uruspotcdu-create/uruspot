@@ -57,3 +57,18 @@
   display:flex; flex-direction:column; gap:1px; border-radius:var(--radio-md);
   overflow:hidden; box-shadow:var(--sombra-vidrio);
 }
+
+/* Variante "volver" — acción de escape de una vista filtrada (ej.
+   salir de "tus guardados"). Jerarquía visual deliberadamente baja
+   (no compite con el título que tiene al lado) pero con affordance
+   de link claro: sin fondo/borde en reposo, se resuelve solo con
+   color + flecha, y gana un subrayado sutil al pasar el mouse o
+   enfocar con teclado. */
+.btn--link-volver{
+  background:transparent; border:none; backdrop-filter:none; -webkit-backdrop-filter:none;
+  padding:4px 2px; margin-top:6px; color:var(--color-granate-clara);
+  font-size:12.5px; font-weight:600;
+}
+.btn--link-volver:hover{ text-decoration:underline; transform:none; box-shadow:none; color:var(--color-granate-clara); border-color:transparent; }
+.btn--link-volver:active{ transform:none; }
+.btn--link-volver:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:2px; border-radius:var(--radio-sm); }
