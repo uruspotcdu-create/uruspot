@@ -235,8 +235,21 @@ a.uru-mapa-popup-cluster-item:focus-visible{
    que no comunicaba nada. */
 #mapaTextura{
   position:relative; height:130px; margin:var(--esp-6) 0 var(--esp-2); border-radius:var(--radio-lg); overflow:hidden;
-  background:var(--gradiente-halo), linear-gradient(180deg,var(--color-fondo-2),var(--color-fondo));
+  background:var(--gradiente-halo), var(--gradiente-grid-mapa), linear-gradient(180deg,var(--color-fondo-2),var(--color-fondo));
   border:1px solid var(--glass-borde); pointer-events:none;
+}
+/* Marco cartográfico: dos esquinas tipo "coordenada" (mismo lenguaje
+   visual que un plano técnico o una carta náutica) para reforzar que
+   esto es un fragmento de mapa real, no un patrón decorativo
+   genérico. Puramente ornamental — z-index bajo, nunca compite con
+   los puntos de color que sí son el dato real. */
+#mapaTextura::before, #mapaTextura::after{
+  content:""; position:absolute; width:14px; height:14px; opacity:.5; z-index:0;
+}
+#mapaTextura::before{ top:8px; left:8px; border-top:1px solid var(--color-tinta-30); border-left:1px solid var(--color-tinta-30); }
+#mapaTextura::after{ bottom:8px; right:8px; border-bottom:1px solid var(--color-tinta-30); border-right:1px solid var(--color-tinta-30); }
+@media (max-width:720px){
+  #mapaTextura{ height:110px; }
 }
 .punto-textura{
   position:absolute; width:5px; height:5px; border-radius:50%;
