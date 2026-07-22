@@ -150,9 +150,9 @@
         if (DOM.panelDescubrimiento) {
           var detalle = err && err.message ? err.message : 'error desconocido';
           DOM.panelDescubrimiento.innerHTML =
-            '<p class="error">No se pudo cargar la información. ' +
+            '<p class="vacio error" role="alert">No se pudo cargar la información. ' +
             '<button type="button" class="btn" data-accion="reintentar-carga">Reintentar</button>' +
-            '<br><small style="opacity:.5">' + detalle.replace(/[<>]/g, '') + '</small></p>';
+            '<br><small>' + detalle.replace(/[<>]/g, '') + '</small></p>';
           var btnReintentar = DOM.panelDescubrimiento.querySelector('[data-accion="reintentar-carga"]');
           if (btnReintentar) {
             btnReintentar.addEventListener('click', function () {
