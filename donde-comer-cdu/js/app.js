@@ -731,8 +731,15 @@
       // de saber que el chip es un botón de estado (activo/inactivo),
       // solo que es un botón — perdía la mitad de la información que
       // el color y la clase "chip--activo" ya comunican visualmente.
+      // El ícono es puramente decorativo acá (aria-hidden, dentro del
+      // helper): el nombre del rubro sigue siendo texto real en el
+      // botón, así que un lector de pantalla no pierde nada si el
+      // ícono faltara. El color se lo da la CSS var --chip-color que
+      // el botón ya declara, no un atributo fijo — así el ícono
+      // hereda el mismo cambio de color que el estado :hover/activo.
+      var icono = window.URU_RUBROS_ICONO_SVG ? window.URU_RUBROS_ICONO_SVG(k, { tam: 15 }) : '';
       return '<button type="button" class="chip' + (activo ? ' chip--activo' : '') + '" data-rubro="' + k + '" aria-pressed="' + activo + '" style="--chip-color:' + meta[2] + '">' +
-        '<span class="chip__punto" style="background:' + meta[2] + '"></span>' +
+        icono +
         escapeHTML(meta[0]) + '<span class="chip__conteo">' + conteo[k] + '</span>' +
         '</button>';
     }).join('');
@@ -1003,7 +1010,15 @@
         id: l.id, lat: l.lat, lng: l.lng, nombre: l.nombre, direccion: l.direccion,
         href: slugL ? 'locales/' + slugL + '/' : null,
         color: meta ? meta[2] : '#C97A83',
-        rubroNombre: meta ? meta[0] : l.categoria
+        rubroNombre: meta ? meta[0] : l.categoria,
+        // rubroKey: para que pintarLeyenda() pueda pedirle el ícono a
+        // URU_RUBROS_ICONO_SVG (mismo helper que usan los chips) en
+        // vez de rearmar el <svg> a mano por su cuenta.
+        rubroKey: l.grupo,
+        // Pictograma del rubro (ver rubros-meta.js) — si el rubro
+        // todavía no tiene ícono cargado, queda undefined y
+        // motor-render.js (canvas) cae solo a la inicial de letra.
+        rubroIcono: meta ? meta[3] : null
       };
     });
     motorMapa.establecerPuntos(puntos);
@@ -1034,7 +1049,15 @@
     });
     if (unicos.length < 2) { DOM.mapaLeyenda.hidden = true; return; } // con un solo rubro, el color no aporta nada
     DOM.mapaLeyenda.innerHTML = unicos.map(function (p) {
-      return '<span class="mapa-leyenda-chip"><span class="mapa-leyenda-punto" style="background:' + p.color + '"></span>' + escapeHTML(p.rubroNombre) + '</span>';
+      // Mismo helper y misma CSS var --chip-color que usa
+      // pintarRubros(): la leyenda del mapa, los chips "Por rubro" y
+      // los pines hablan ahora el mismo lenguaje (color + pictograma),
+      // no tres convenciones visuales distintas para el mismo dato.
+      // Si el rubro todavía no tiene ícono cargado, se cae al punto
+      // de color de siempre — nunca queda un hueco vacío.
+      var icono = (p.rubroKey && window.URU_RUBROS_ICONO_SVG) ? window.URU_RUBROS_ICONO_SVG(p.rubroKey, { tam: 13 }) : '';
+      var marca = icono || '<span class="mapa-leyenda-punto" style="background:' + p.color + '"></span>';
+      return '<span class="mapa-leyenda-chip" style="--chip-color:' + p.color + '">' + marca + escapeHTML(p.rubroNombre) + '</span>';
     }).join('');
     DOM.mapaLeyenda.hidden = false;
   }
