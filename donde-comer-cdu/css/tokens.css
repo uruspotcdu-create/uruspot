@@ -63,8 +63,29 @@
   --tipo-display-sm: 500 19px/1.3 var(--f-display);
   --tipo-cuerpo:      400 15px/1.6 var(--f-ui);
   --tipo-cuerpo-sm:   400 13.5px/1.5 var(--f-ui);
+  /* --tipo-cuerpo-xs: usada por botones (.btn, .tarjeta-btn) y el
+     texto de mapa-info — faltaba por completo. Sin ella, cada botón
+     del sitio caía al font UA del navegador en vez de IBM Plex Sans,
+     perdiendo tamaño, line-height y (en Chrome/Safari) hasta la
+     familia tipográfica, porque <button> tiene su propio font UA por
+     defecto que solo se pisa si el shorthand `font` es válido. */
+  --tipo-cuerpo-xs:   500 12.5px/1.4 var(--f-ui);
   --tipo-dato:        400 12px/1.4 var(--f-dato);
   --tipo-dato-xs:     400 10.5px/1.3 var(--f-dato);
+  /* --tipo-dato-sm: usada por chip.css (leyenda del mapa) y
+     badge-estado.css — mismo problema que --tipo-cuerpo-xs de arriba. */
+  --tipo-dato-sm:     400 11px/1.3 var(--f-dato);
+
+  /* --ls-*: letter-spacing con nombre semántico, usadas en badges,
+     stats y la etiqueta de rubro de cada tarjeta — ninguna de las
+     tres existía, así que ese tracking simplemente no se aplicaba
+     (la propiedad completa se descarta cuando el valor no es válido,
+     no hay "fallback silencioso" a 0 vía CSS estándar). Escala
+     coherente con los valores .02–.04em ya usados manualmente en
+     otras reglas del sitio. */
+  --ls-datos:  .03em;
+  --ls-amplio: .06em;
+  --ls-extra:  .09em;
 
   /* Peso y tracking como token: hoy boton.css, chip.css, badge-estado.css
      y descubrimiento.css repiten font-weight:500/600 y letter-spacing
