@@ -9,7 +9,7 @@
 .btn{
   position:relative; overflow:hidden;
   display:inline-flex; align-items:center; justify-content:center; gap:var(--esp-2);
-  font-family:var(--f-ui); font-size:12.5px; font-weight:500;
+  font-family:var(--f-ui); font-size:var(--tipo-cuerpo-xs); font-weight:500;
   padding:8px var(--esp-4); border-radius:var(--radio-full);
   border:1px solid var(--glass-borde); background:var(--glass-bg); color:var(--color-tinta-60);
   backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
@@ -18,19 +18,37 @@
              border-color var(--dur-media) var(--easing-estandar),
              background var(--dur-media) var(--easing-estandar),
              box-shadow var(--dur-media) var(--easing-estandar),
-             transform var(--dur-rapido) var(--easing-estandar);
+             transform var(--dur-rapido) var(--easing-estandar),
+             opacity var(--dur-media) var(--easing-estandar);
 }
-.btn:hover{ color:var(--color-tinta); border-color:var(--color-granate-clara); transform:translateY(-1px); box-shadow:var(--sombra-baja); }
-.btn:active{ transform:translateY(1px) scale(.98); }
-.btn:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:1px; }
+.btn:hover{
+  color:var(--color-tinta); border-color:var(--color-granate-clara);
+  transform:translateY(-1px); box-shadow:var(--sombra-baja);
+}
+.btn:active{
+  transform:translateY(1px) scale(.98);
+}
+.btn:focus-visible{
+  outline:2px solid var(--color-granate-clara); outline-offset:2px;
+  border-radius:var(--radio-sm);
+}
+.btn:disabled{
+  opacity:0.5; cursor:not-allowed;
+  background:var(--glass-bg); color:var(--color-tinta-30);
+  border-color:var(--glass-borde);
+}
+.btn:disabled:hover{
+  transform:none; box-shadow:none; border-color:var(--glass-borde);
+}
 
 /* Ripple: un <span class="btn__ripple"> opcional que app.js posiciona
-   en el punto de click; si no está presente, el botón funciona igual. */
+   en el punto de click; si no está presente, el botón funciona igual.
+   PROTEGIDO: Respeta prefers-reduced-motion */
 .btn__ripple{
   position:absolute; border-radius:50%; background:rgba(236,237,239,.35);
-  transform:scale(0); animation:uru-ripple .5s var(--easing-estandar) forwards; pointer-events:none;
+  transform:scale(0); animation:uru-ripple 0.5s var(--easing-estandar) forwards;
+  pointer-events:none;
 }
-@keyframes uru-ripple{ to{ transform:scale(2.6); opacity:0; } }
 
 /* Variante principal: acción de mayor jerarquía en la pantalla
    (ej. "tu lista guardada", "cómo llegar") */
@@ -38,19 +56,42 @@
   background:var(--gradiente-marca); border-color:transparent; color:#FBF4F1;
   box-shadow:var(--sombra-baja);
 }
-.btn--primario:hover{ box-shadow:var(--sombra-glow); transform:translateY(-2px); filter:brightness(1.06); }
+.btn--primario:hover{
+  box-shadow:var(--sombra-glow); transform:translateY(-2px);
+  filter:brightness(1.06);
+}
+.btn--primario:focus-visible{
+  outline:2px solid var(--color-tinta); outline-offset:2px;
+}
+.btn--primario:disabled{
+  opacity:0.5; background:var(--gradiente-marca); color:#FBF4F1;
+  filter:grayscale(1) brightness(0.8);
+}
 
 /* Variante activa/marcada (ej. favorito guardado) */
 .btn--activo{ color:var(--color-granate-clara); border-color:var(--color-granate-clara); background:rgba(201,122,131,.12); }
 
-/* Variante ícono cuadrado (ej. controles de zoom del mapa) */
+/* Variante ícono cuadrado (ej. controles de zoom del mapa)
+   Tamaño: 34×34 desktop, 44×44 mobile (WCAG AAA) */
 .btn--icono{
   width:34px; height:34px; padding:0; border-radius:var(--radio-md);
   background:var(--glass-bg-fuerte); color:var(--color-tinta); border:1px solid var(--glass-borde);
   font-size:16px; line-height:1; backdrop-filter:blur(var(--glass-blur));
 }
-.btn--icono:hover{ background:rgba(201,122,131,.22); transform:translateY(-1px); }
-.btn--icono:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:-2px; }
+.btn--icono:hover{
+  background:rgba(201,122,131,.22); transform:translateY(-1px);
+}
+.btn--icono:focus-visible{
+  outline:2px solid var(--color-granate-clara); outline-offset:1px;
+  border-radius:var(--radio-md);
+}
+.btn--icono:disabled{
+  opacity:0.5; cursor:not-allowed; background:var(--glass-bg-fuerte);
+  color:var(--color-tinta-30); border-color:var(--glass-borde);
+}
+@media (max-width:720px){
+  .btn--icono{ width:44px; height:44px; }
+}
 
 /* Grupo de íconos pegados (ej. +/- del mapa) */
 .btn-grupo--icono{
