@@ -422,6 +422,36 @@
       </button>
     </div>
 
+    <!-- SUGERENCIAS RÁPIDAS Y FILTROS ACTIVOS (AUDITORÍA 4ª PASADA —
+         corrección de bug real, no contenido nuevo).
+
+         Diagnóstico: js/app.js define dos funciones completas y ya
+         cableadas al resto del flujo — pintarSugerenciasRapidas() y
+         pintarFiltrosActivos() — que dependen de
+         DOM.sugerenciasRapidas y DOM.filtrosActivos
+         (ver OPTIONAL_DOM_IDS, línea ~176 de app.js). Ninguno de los
+         dos `id` existía en este documento. Al ser IDs "opcionales"
+         el código no tira ningún error — cada función simplemente
+         hace `if (!DOM.x) return;` y no hace nada, en silencio, en
+         cada render(). Resultado real: el atajo de un toque a los 4
+         rubros con más lugares ("Empezá por acá" + "cerca tuyo") y el
+         resumen de filtros activos con su × para quitar cada uno por
+         separado nunca se pintaron ni una sola vez, pese a tener toda
+         su lógica ya escrita y probada en el JS.
+
+         Se agregan acá, en el único lugar del documento donde tienen
+         sentido semántico: dentro de la búsqueda, antes de que el
+         panel de resultados empiece a decidir qué mostrar. Ambos
+         arrancan sin contenido — app.js los puebla por completo vía
+         innerHTML, mismo patrón que #listaRubros y #listaDestacados.
+         Ver css/chip.css ("SUGERENCIAS RÁPIDAS Y FILTROS ACTIVOS
+         (AUDITORÍA 4ª PASADA)") para el estilo, antes también
+         ausente por la misma razón: una clase que nunca se pintó no
+         tenía urgencia de estilo hasta que el bug de arriba se
+         corrigiera. -->
+    <div id="sugerenciasRapidas" class="sugerencias-rapidas" aria-label="Sugerencias para empezar"></div>
+    <div id="filtrosActivos" class="filtros-activos" role="status" aria-live="polite" hidden></div>
+
     <!-- ESTADÍSTICAS RÁPIDAS.
          id="statLugares" / id="statRubros": ver Bug B / tabla §3.
          Sin estos ids, pintarStatsRapidas() en app.js encuentra
@@ -1800,6 +1830,15 @@
                                 │                          │ de mejor puntuados (agregado en
                                 │                          │ auditoría Fase 4 — ver más abajo)
        listaDestacados         │ pintarDestacados()       │ strip de tarjetas destacadas
+       sugerenciasRapidas      │ pintarSugerenciasRapidas(│ atajos "empezá por acá" +
+                                │ ) / actualizarVisibil.() │ cerca tuyo (agregado en
+                                │                          │ auditoría 4ª pasada — ver §14;
+                                │                          │ el `id` ya estaba en
+                                │                          │ OPTIONAL_DOM_IDS de app.js
+                                │                          │ desde antes, sin elemento)
+       filtrosActivos          │ pintarFiltrosActivos()   │ píldoras de filtro activo con
+                                │                          │ su × (mismo origen que la fila
+                                │                          │ de arriba — ver §14)
 
      Elementos que NO están en esta tabla (mapa-container, sección
      manifiesto, accesos por categoría, footer) son intencionalmente
@@ -2215,21 +2254,50 @@
 
      Cambios de esta pasada, en orden de impacto:
 
-     · `css/destacados.css` (NUEVO) — estilo completo de `#destacados`
-       y de `.destacado-card` (la tarjeta real que arma
-       `app.js`/`pintarDestacados()`, línea ~1186): tira horizontal
-       con scroll-snap, filete de color por rubro vía `--rubro-color`
-       inline, mismo vocabulario `--glass-*`/`--sombra-*` que el resto
-       del sitio. Ver el encabezado de ese archivo para el diagnóstico
-       completo.
-     · `css/contenido-editorial.css` (NUEVO) — estilo de las ocho
-       secciones editoriales listadas arriba, más las tres secciones
-       nuevas de esta misma pasada (Testimonios, Para dueños de
-       locales, Privacidad y tus datos). Reutiliza `.manifiesto-card`
-       tal como ya documentaba este archivo — no la redefine, solo
-       agrega las grillas que la envuelven y los componentes
-       genuinamente nuevos (ficha de rubro, fila de radiografía, item
-       de glosario, badge de estado de ruta, lista de accesibilidad).
+     · **Bug real, no cosmético**: `js/app.js` tiene dos funciones
+       completas y ya cableadas al resto del flujo —
+       `pintarSugerenciasRapidas()` (atajos de un toque a los 4
+       rubros con más lugares + "cerca tuyo") y
+       `pintarFiltrosActivos()` (píldoras de qué filtro está aplicado
+       ahora, cada una con su × para sacarse esa faceta puntual) —
+       que dependen de `DOM.sugerenciasRapidas` y `DOM.filtrosActivos`
+       (ver `OPTIONAL_DOM_IDS`, línea ~176 de `js/app.js`). NINGUNO
+       de los dos `id` existía en este documento. Al estar en la
+       lista de IDs "opcionales", cada función hace
+       `if (!DOM.x) return;` y no falla — simplemente no hace nada,
+       en cada `render()`, desde que se escribió ese código. Se
+       agregan ambos contenedores dentro de `.buscador` (el único
+       lugar con sentido semántico: sugerencias y filtros son parte
+       del flujo de búsqueda) y su CSS completo en `css/chip.css`
+       (antes ausente por la misma razón — una clase que nunca se
+       pinta no genera urgencia de estilo hasta que el bug que la
+       bloquea se corrige). Este es, de las dos rondas de auditoría
+       que agregaron contenido a este archivo, el primer hallazgo que
+       reactiva una FUNCIONALIDAD real en vez de agregar solo texto o
+       estilo — ver la tabla de la sección 3 para el detalle exacto
+       de qué controla cada `id`.
+     · Dos hojas de estilo enteras que `index.html` ya referenciaba
+       nunca existieron en el repositorio: `css/destacados.css`
+       (`<link>` desde la auditoría "Fase 4") y
+       `css/contenido-editorial.css` (precargada e inyectada por el
+       `<script>` inline, documentada como la hoja que "gobierna
+       'Sobre la ciudad' en adelante"). No es un matiz de estilo: son
+       ocho secciones completas del documento — Destacados, Sobre la
+       ciudad, Cómo funciona, Cómo pensamos el orden, Guía de rubros,
+       Radiografía del padrón, Guía práctica, Glosario, Hoja de ruta
+       y Accesibilidad — que se venían sirviendo con el estilo por
+       defecto del navegador (letra corrida, sin grilla, sin tarjeta,
+       sin barra de progreso, sin color de rubro) desde que se agregó
+       ese contenido en la 2ª/3ª pasada. Cualquier revisión visual
+       previa que haya evaluado "cómo se ve la página" evaluó, sin
+       saberlo, una versión con dos hojas de estilo faltantes. Se
+       agregan `css/destacados.css` (estilo completo de `#destacados`
+       y `.destacado-card`: tira horizontal con scroll-snap, filete de
+       color por rubro vía `--rubro-color` inline) y
+       `css/contenido-editorial.css` (estilo de las ocho secciones de
+       arriba, más las tres secciones nuevas de esta misma pasada —
+       reutiliza `.manifiesto-card` tal como ya documentaba este
+       archivo, no la redefine).
      · `css/impresion.css` (NUEVO) — el documento no tenía ninguna
        hoja `media="print"`; con contenido de referencia real (Sobre
        la ciudad, Guía práctica, Glosario) tiene sentido que alguien
