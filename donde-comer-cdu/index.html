@@ -29,6 +29,8 @@
        9. Puntos de extensión pensados para quien agregue features
       10. Deuda técnica conocida, fuera del alcance de este archivo
       11. Checklist para quien vaya a modificar este archivo
+      12. Expansión de contenido editorial (esta revisión) — qué se
+          agregó, por qué, y qué NO cambia de la arquitectura
 
      ───────────────────────────────────────────────────────────────
      1. QUÉ ES ESTE ARCHIVO Y QUÉ NO ES
@@ -440,6 +442,68 @@
      [ ] ¿El cambio afecta contenido visible? → revisá que el
          `<noscript>` y el JSON-LD (FAQPage, Organization) sigan
          siendo coherentes con lo que un usuario ve.
+
+     ───────────────────────────────────────────────────────────────
+     12. EXPANSIÓN DE CONTENIDO EDITORIAL (esta revisión)
+     ───────────────────────────────────────────────────────────────
+     Contexto: una auditoría previa (documentada en las secciones 1-11
+     de este mismo archivo) corrigió contratos rotos (bugs A-E) y
+     dejó la arquitectura sólida. Esta revisión NO toca esa
+     arquitectura ni el motor — agrega contenido editorial 100%
+     estático, sin nuevos hooks que `js/app.js` necesite leer, para
+     que el `index` deje de sentirse como una landing corta y pase a
+     ser una guía completa de la ciudad y del producto.
+
+     Secciones nuevas, en orden de aparición en el documento:
+       · `#sobre-la-ciudad`  — contexto histórico/geográfico real de
+         Concepción del Uruguay (fundación 1783, Urquiza, Ramírez,
+         río, termas, patrimonio). Hechos verificados contra fuentes
+         públicas; se evitaron a propósito cifras con fuentes
+         contradictorias entre sí (p. ej. distancias exactas a sitios
+         cercanos).
+       · `#metodologia`      — profundiza "el orden no se compra" con
+         el CÓMO real (Guía → Exploración → Acción Directa), en
+         lenguaje llano, sin exponer nombres de variables internas.
+       · `#rubros-guia`      — contenido de lectura por rubro,
+         complementario (no sustituto) de la sección dinámica
+         `#rubros` que puebla `pintarIndiceRubros()`.
+       · `#guia-practica`    — información orientativa para visitantes,
+         deliberadamente sin cifras que se desactualizan solas
+         (horarios exactos, precios, tarifas).
+       · `#glosario`         — vocabulario propio del producto (Guía,
+         Exploración, Acción Directa, Curaduría, Destacados,
+         Verificado, Rubro), alineado 1:1 con los nombres que ya usa
+         el código.
+       · FAQ ampliado de 5 a 10 preguntas (`faq-panel-6` a
+         `faq-panel-10`), con el JSON-LD `FAQPage` actualizado en el
+         mismo commit — mismo patrón exacto que los 5 originales.
+       · `#hoja-de-ruta`     — transparencia sobre qué existe hoy y
+         qué no todavía (fotos propias, horarios en tiempo real, test
+         e2e del contrato §3), sin comprometer fechas.
+       · `#accesibilidad`    — hace visible en la página lo que antes
+         solo vivía en comentarios de código; cada ítem listado
+         corresponde a un mecanismo real ya implementado (no es
+         aspiracional).
+       · `.indice-pagina`    — nav de anclas después del hero: con 12
+         secciones en vez de 6, sin un mapa de contenido explícito el
+         glosario y la hoja de ruta quedarían invisibles a varios
+         scrolls de profundidad.
+
+     Invariante que esta revisión agrega (I7): ninguna sección nueva
+     de las listadas arriba tiene ni necesita un `id` en la tabla de
+     contrato de la sección 3 — son estáticas por diseño. Si en el
+     futuro alguna de ellas necesita volverse dinámica (por ejemplo,
+     "Hoja de ruta" alimentada desde un JSON real), agregar su `id` a
+     esa tabla en el mismo commit que la conecte, igual que exige el
+     resto del documento.
+
+     CSS: todo el contenido nuevo se apoya en componentes que ya
+     existían (`.manifiesto-card` de `descubrimiento.css`) en vez de
+     clonarlos — la única hoja nueva, `css/contenido-editorial.css`,
+     define exclusivamente lo que no tenía equivalente (índice de
+     anclas, ficha de rubro, lista de glosario, estado de hoja de
+     ruta, checklist de accesibilidad). Ver el encabezado de ese
+     archivo para el detalle.
      ═══════════════════════════════════════════════════════════════════════ -->
 
 <!-- PRECONEXIONES — orígenes externos reales que este documento usa.
@@ -545,6 +609,13 @@
 <link rel="stylesheet" href="css/destacados.css">
 <link rel="stylesheet" href="css/mapa.css">
 <link rel="stylesheet" href="css/descubrimiento.css">
+<!-- contenido-editorial.css: nueva (expansión de contenido). Estilos
+     de las secciones editoriales estáticas agregadas más abajo
+     (índice de página, Sobre la ciudad, Cómo pensamos el orden, guía
+     de rubros, guía práctica, glosario, hoja de ruta, accesibilidad).
+     Depende de descubrimiento.css porque reutiliza .manifiesto-card
+     en vez de duplicarla — debe cargarse después. -->
+<link rel="stylesheet" href="css/contenido-editorial.css">
 
 <!-- PARCHE DE ESTILO MÍNIMO — ver §10 (deuda técnica conocida).
      Solo el badge de "lugares guardados" (#contadorCuraduria), que
@@ -610,6 +681,17 @@
       ]
     },
     {
+      "@type": "City",
+      "@id": "https://uruspot.pages.dev/#concepcion-del-uruguay",
+      "name": "Concepción del Uruguay",
+      "description": "Ciudad de la provincia de Entre Ríos, Argentina, fundada el 25 de junio de 1783 sobre la margen del río Uruguay. Fue capital provincial hasta 1883 y está históricamente vinculada a Justo José de Urquiza y Francisco Ramírez.",
+      "containedInPlace": {
+        "@type": "AdministrativeArea",
+        "name": "Entre Ríos, Argentina"
+      },
+      "foundingDate": "1783-06-25"
+    },
+    {
       "@type": "FAQPage",
       "mainEntity": [
         {
@@ -650,6 +732,46 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Escribinos a padron@uruspot.com.ar con el nombre del lugar y el detalle — lo revisamos y lo corregimos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué diferencia hay entre Guía, Exploración y Acción Directa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Son los tres momentos de tu sesión. Arrancás en Guía, con poco para no saturarte. A medida que buscás, guardás o descartás lugares, el sistema entiende que sabés más de lo que buscás y pasa a Exploración y después a Acción Directa, mostrando más catálogo real y menos curaduría de nuestra parte."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿URU SPOT guarda mis datos personales?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Lo que guardás vive en el almacenamiento local de tu propio navegador, no en un servidor con tu nombre o tu identidad. No vendemos ni compartimos esa información con terceros."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo sugiero que agreguen un lugar nuevo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Escribinos a padron@uruspot.com.ar con el nombre y, si podés, la dirección o un link de Google Maps. Antes de publicarlo alguien del equipo lo verifica, así que puede tardar unos días en aparecer."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué pasa si un lugar cierra o cambia de horario?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Si detectamos o nos avisan que un lugar cerró o cambió, lo actualizamos o lo retiramos. Si llegás a uno que ya no existe, avisanos — es la forma más rápida de corregirlo para el resto."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Funciona con lectores de pantalla y navegación por teclado?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí — todo el sitio se puede recorrer con teclado con foco visible, el buscador y el mapa tienen roles y estados anunciados por lectores de pantalla, y se respetan las preferencias de movimiento reducido, contraste alto y transparencia reducida del sistema operativo."
           }
         }
       ]
@@ -752,6 +874,30 @@
     </a>
   </section>
 
+  <!-- ÍNDICE DE PÁGINA: 100% estático, sin dependencia de JS ni de
+       datos — son anclas (#id) a secciones que ya existen en este
+       mismo documento. Se agrega acá porque la expansión de
+       contenido de esta revisión lleva la página de 6 a 12
+       secciones; sin un mapa de contenido, "Cómo funciona" o
+       "Glosario" quedarían enterrados a varios scrolls de distancia
+       sin que nadie supiera que existen. -->
+  <nav class="indice-pagina envoltorio" aria-label="Ir a una sección de esta página">
+    <ul class="indice-pagina__lista">
+      <li><a class="indice-pagina__link" href="#destacados">Destacados</a></li>
+      <li><a class="indice-pagina__link" href="#region-descubrimiento">Buscar y explorar</a></li>
+      <li><a class="indice-pagina__link" href="#sobre-la-ciudad">Sobre la ciudad</a></li>
+      <li><a class="indice-pagina__link" href="#manifiesto">Cómo funciona</a></li>
+      <li><a class="indice-pagina__link" href="#metodologia">Cómo pensamos el orden</a></li>
+      <li><a class="indice-pagina__link" href="#rubros">Por rubro</a></li>
+      <li><a class="indice-pagina__link" href="#accesos">Guías por categoría</a></li>
+      <li><a class="indice-pagina__link" href="#guia-practica">Guía práctica</a></li>
+      <li><a class="indice-pagina__link" href="#glosario">Glosario</a></li>
+      <li><a class="indice-pagina__link" href="#faq">Preguntas frecuentes</a></li>
+      <li><a class="indice-pagina__link" href="#hoja-de-ruta">Hoja de ruta</a></li>
+      <li><a class="indice-pagina__link" href="#accesibilidad">Accesibilidad</a></li>
+    </ul>
+  </nav>
+
   <!-- DESTACADOS (auditoría Fase 4, nueva): spotlight de lugares con
        mejor puntuación real. `rating`/`rating_count` ya viajaban en
        lugares-core.json desde split_dataset.py — el propio script
@@ -841,6 +987,84 @@
     <div id="estadoResultados" role="status" aria-live="polite" aria-atomic="true" class="u-sr-only"></div>
   </section>
 
+  <!-- SOBRE LA CIUDAD (expansión de contenido, nueva): contexto real
+       de Concepción del Uruguay para quien no la conoce todavía —
+       turista que llega por primera vez, o local que nunca leyó esta
+       historia en detalle. 100% estático, contenido editorial propio
+       de URU SPOT (no depende de lugares-core.json ni de ningún
+       motor). Los datos históricos y geográficos citados acá son
+       verificables públicamente (fundación, población aproximada,
+       hechos vinculados a Urquiza y Ramírez, accesos y atractivos
+       naturales) — se evitó a propósito cualquier cifra sobre la que
+       hay fuentes contradictorias (por ejemplo, distancias exactas a
+       sitios cercanos), prefiriendo una descripción cualitativa antes
+       que un dato falso con apariencia de precisión. -->
+  <section class="ciudad envoltorio u-reveal" id="sobre-la-ciudad" aria-labelledby="ciudad-titulo">
+    <h2 id="ciudad-titulo">Sobre Concepción del Uruguay</h2>
+    <p class="ciudad__intro">
+      Antes de ser una lista de lugares para elegir, Concepción del Uruguay es una ciudad con casi
+      dos siglos y medio de historia, asomada al río que le da nombre. Esto es lo básico para
+      ubicarte, tanto si venís de visita como si naciste acá y nunca lo leíste ordenado.
+    </p>
+    <div class="ciudad-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🏛️</span>
+        <p>
+          <strong>Una ciudad fundacional.</strong> Se fundó el 25 de junio de 1783, cuando el
+          comandante Tomás de Rocamora trazó su primer plano urbano por encargo del virrey Juan
+          José de Vértiz y Salcedo. Antes de esa fundación oficial ya existía población asentada en
+          la zona desde principios del siglo XVII. Fue capital de la provincia de Entre Ríos hasta
+          1883, cuando ese título pasó a Paraná.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">⚜️</span>
+        <p>
+          <strong>Cuna de figuras del federalismo.</strong> Acá nació Francisco Ramírez y acá
+          construyó buena parte de su vida pública Justo José de Urquiza, que fundó el histórico
+          Colegio del Uruguay. En la Plaza San Martín — conocida también como Plaza Ramírez, el
+          centro simbólico de la ciudad — ocurrió el 1º de mayo de 1851 el Pronunciamiento de
+          Urquiza contra Rosas, un antecedente directo de la Constitución de 1853.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🌊</span>
+        <p>
+          <strong>A la orilla del río Uruguay.</strong> La ciudad se asienta sobre la margen del río
+          Uruguay, con playas de arena, islas y arroyos a poca distancia del centro — Banco Pelay,
+          la Isla Cambacuá y el Balneario Municipal sobre el Riacho Itapé son los puntos de baño más
+          conocidos, sobre todo en temporada de verano.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">♨️</span>
+        <p>
+          <strong>Aguas termales todo el año.</strong> Sobre la Ruta Nacional 14, a las afueras del
+          centro urbano, funciona un complejo termal con varias piscinas de agua mineralizada —
+          algunas cálidas todo el año, otras frías en verano — pensado tanto para el turismo como
+          para el uso de quienes viven en la ciudad.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🏰</span>
+        <p>
+          <strong>Patrimonio a mano.</strong> El casco histórico conserva el Colegio Justo J.
+          Urquiza, la Basílica de la Inmaculada Concepción (con el mausoleo del general Urquiza) y
+          la antigua Capitanía de Puerto. A poca distancia en auto se puede visitar el Palacio San
+          José, la residencia de Urquiza convertida hoy en museo nacional.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🚌</span>
+        <p>
+          <strong>Bien conectada.</strong> Está sobre la Ruta Nacional 14, uno de los corredores más
+          transitados del litoral, con servicios regulares de larga distancia hacia Buenos Aires,
+          Rosario, Paraná y otras ciudades de Entre Ríos y del Mercosur.
+        </p>
+      </article>
+    </div>
+  </section>
+
   <!-- MANIFIESTO: contenido 100% estático, no depende de datos ni de
        JS — visible incluso con <noscript> activo. -->
   <section class="manifiesto envoltorio u-reveal" id="manifiesto" aria-labelledby="manifiesto-titulo">
@@ -863,6 +1087,242 @@
         <p>¿Error o lugar que falta? <a href="mailto:padron@uruspot.com.ar">Escribinos</a> y lo revisamos.</p>
       </article>
     </div>
+  </section>
+
+  <!-- CÓMO PENSAMOS EL ORDEN (expansión de contenido, nueva):
+       profundiza el manifiesto de arriba con el detalle que "no
+       compramos posición" deja sin explicar — CÓMO decide el sistema
+       qué mostrar primero. 100% estático: describe en lenguaje llano
+       el comportamiento real de motor-plano.js/motor-exposicion.js
+       (Guía → Exploración → Acción Directa según cuánto interactuás),
+       sin exponer nombres de variables ni implementación interna. -->
+  <section class="metodologia envoltorio u-reveal" id="metodologia" aria-labelledby="metodologia-titulo">
+    <h2 id="metodologia-titulo">Cómo pensamos el orden</h2>
+    <p class="metodologia__intro">
+      "El orden no se compra" explica qué NO hacemos. Esto explica qué SÍ hacemos con lo poco que
+      sabemos de vos en cada visita.
+    </p>
+    <div class="metodologia-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">①</span>
+        <p>
+          <strong>Arrancás en Guía.</strong> La primera vez que abrís URU SPOT no sabemos nada de
+          vos, así que te mostramos poco: un recorte acotado, pensado para no abrumarte con 1.400+
+          lugares de una sola vez. Es una decisión de diseño, no una limitación técnica.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">②</span>
+        <p>
+          <strong>Cada interacción suma evidencia.</strong> Buscar algo puntual, guardar un lugar o
+          descartar otro son señales. Ninguna acción aislada cambia demasiado — el sistema
+          reacciona a patrones que se repiten, no a un solo clic.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">③</span>
+        <p>
+          <strong>El control se suelta de a poco.</strong> A medida que interactuás, pasás de Guía a
+          Exploración y eventualmente a Acción Directa: menos curaduría de nuestra parte, más
+          catálogo real a tu disposición, porque ya demostraste que sabés qué buscás.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">④</span>
+        <p>
+          <strong>Buscar explícitamente salta el proceso.</strong> Si escribís un nombre, un rubro o
+          una dirección en el buscador, te mostramos TODOS los que matchean, sin recorte artificial
+          — el acompañamiento gradual es para cuando no sabés qué buscar, nunca un obstáculo cuando
+          sí lo sabés.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">⑤</span>
+        <p>
+          <strong>Nada de esto se comparte ni se vende.</strong> Lo que guardamos vive en tu
+          navegador (almacenamiento local), no en un servidor con tu identidad. Si borrás los datos
+          del sitio o cambiás de dispositivo, URU SPOT vuelve a arrancar en Guía con vos.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">⑥</span>
+        <p>
+          <strong>Los rechazos pesan poco y se apagan solos.</strong> Descartar un lugar no lo borra
+          para siempre ni lo penaliza para otros usuarios — es una señal tuya, temporal, que se
+          diluye con el tiempo si no se repite.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- GUÍA EDITORIAL DE RUBROS (expansión de contenido, nueva):
+       contenido descriptivo por categoría, separado a propósito de
+       la sección dinámica #rubros de más abajo (que puebla
+       app.js/pintarIndiceRubros() a partir de rubros-meta.js). Esta
+       es contenido humano, de lectura, pensado para quien todavía no
+       sabe qué rubros existen en la plataforma; la sección dinámica
+       de abajo es la herramienta de filtrado en sí. Los 14 rubros y
+       sus colores (var(--color-rubro-*)) son los mismos que ya
+       definen tokens.css y rubros-meta.js — ninguna paleta nueva. -->
+  <section class="rubros-guia envoltorio u-reveal" id="rubros-guia" aria-labelledby="rubros-guia-titulo">
+    <h2 id="rubros-guia-titulo">Qué vas a encontrar en cada rubro</h2>
+    <p class="rubros-guia__intro">
+      URU SPOT organiza todo lo verificado en 14 rubros. Esto es lo que cubre cada uno antes de que
+      elijas uno en el filtro de más abajo.
+    </p>
+    <div class="rubros-guia__grid">
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-gastronomia)">
+        <span class="rubro-ficha__nombre">Gastronomía</span>
+        <p class="rubro-ficha__texto">Restaurantes, bares, rotiserías y todo lo que se come o se toma afuera de casa — el rubro con más lugares verificados hasta hoy.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-alojamiento)">
+        <span class="rubro-ficha__nombre">Alojamiento</span>
+        <p class="rubro-ficha__texto">Hoteles, hosterías, cabañas y bungalows caminados y verificados puerta a puerta, no solo listados desde una foto de internet.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-deporte)">
+        <span class="rubro-ficha__nombre">Deporte</span>
+        <p class="rubro-ficha__texto">Gimnasios, clubes y espacios para entrenar o moverte, dentro y fuera de un techo.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-salud)">
+        <span class="rubro-ficha__nombre">Salud</span>
+        <p class="rubro-ficha__texto">Consultorios, farmacias y centros médicos — el tipo de dato donde "verificado" importa más que en cualquier otro rubro.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-belleza)">
+        <span class="rubro-ficha__nombre">Belleza</span>
+        <p class="rubro-ficha__texto">Peluquerías, barberías y centros de estética de la ciudad.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-compras)">
+        <span class="rubro-ficha__nombre">Compras</span>
+        <p class="rubro-ficha__texto">Desde kioscos de barrio hasta comercios más grandes — lo que resuelve una compra puntual.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-educacion)">
+        <span class="rubro-ficha__nombre">Educación</span>
+        <p class="rubro-ficha__texto">Escuelas, institutos y academias, incluyendo el histórico Colegio del Uruguay.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-finanzas)">
+        <span class="rubro-ficha__nombre">Finanzas</span>
+        <p class="rubro-ficha__texto">Bancos, financieras y casas de cambio para resolver un trámite sin perder el día.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-mascotas)">
+        <span class="rubro-ficha__nombre">Mascotas</span>
+        <p class="rubro-ficha__texto">Veterinarias y pet shops verificados, para cuando quien viaja o vive acá no viaja solo.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-naturaleza)">
+        <span class="rubro-ficha__nombre">Naturaleza</span>
+        <p class="rubro-ficha__texto">Plazas, costaneras y espacios verdes, incluyendo el acceso a las playas del río Uruguay.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-oficios-tecnicos)">
+        <span class="rubro-ficha__nombre">Oficios técnicos</span>
+        <p class="rubro-ficha__texto">Electricistas, plomeros, gasistas y afines — el tipo de contacto que se necesita con poco margen de espera.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-patrimonio)">
+        <span class="rubro-ficha__nombre">Patrimonio</span>
+        <p class="rubro-ficha__texto">Sitios históricos y culturales de una ciudad que fue capital provincial y cuna del federalismo entrerriano.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-servicios-publicos)">
+        <span class="rubro-ficha__nombre">Servicios públicos</span>
+        <p class="rubro-ficha__texto">Trámites, correo y organismos oficiales.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-transporte)">
+        <span class="rubro-ficha__nombre">Transporte</span>
+        <p class="rubro-ficha__texto">Remises, terminales y estaciones para moverte dentro de la ciudad o salir de ella.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- RADIOGRAFÍA DEL PADRÓN (expansión de contenido, nueva): datos
+       REALES, no inventados — calculados directamente contando
+       `grupo` en lugares-core.json (1.468 registros) al momento de
+       escribir esta revisión. Es una fotografía, no un endpoint: se
+       marca explícitamente como "al momento de esta actualización"
+       para no prometer que se recalcula sola. Si en algún momento se
+       quiere que sea dinámico, agregar un `id` acá y una función en
+       app.js que lo recalcule desde REGISTRO — hoy no existe esa
+       función, así que es intencionalmente estático. -->
+  <section class="radiografia envoltorio u-reveal" id="radiografia" aria-labelledby="radiografia-titulo">
+    <h2 id="radiografia-titulo">Radiografía del padrón</h2>
+    <p class="radiografia__intro">
+      Composición real del padrón al momento de esta actualización — 1.468 lugares en total,
+      distribuidos así entre los 14 rubros.
+    </p>
+    <div class="radiografia-lista" role="list" aria-label="Cantidad de lugares por rubro">
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-gastronomia)">
+        <span class="radiografia-fila__nombre">Gastronomía</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:100%"></span></span>
+        <span class="radiografia-fila__num">274</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-compras)">
+        <span class="radiografia-fila__nombre">Compras</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:91%"></span></span>
+        <span class="radiografia-fila__num">249</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-transporte)">
+        <span class="radiografia-fila__nombre">Transporte</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:68%"></span></span>
+        <span class="radiografia-fila__num">186</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-salud)">
+        <span class="radiografia-fila__nombre">Salud</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:64%"></span></span>
+        <span class="radiografia-fila__num">176</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-finanzas)">
+        <span class="radiografia-fila__nombre">Finanzas</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:46%"></span></span>
+        <span class="radiografia-fila__num">127</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-deporte)">
+        <span class="radiografia-fila__nombre">Deporte</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:41%"></span></span>
+        <span class="radiografia-fila__num">111</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-belleza)">
+        <span class="radiografia-fila__nombre">Belleza</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:34%"></span></span>
+        <span class="radiografia-fila__num">94</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-oficios-tecnicos)">
+        <span class="radiografia-fila__nombre">Oficios técnicos</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:31%"></span></span>
+        <span class="radiografia-fila__num">84</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-patrimonio)">
+        <span class="radiografia-fila__nombre">Patrimonio</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:14%"></span></span>
+        <span class="radiografia-fila__num">37</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-educacion)">
+        <span class="radiografia-fila__nombre">Educación</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:12%"></span></span>
+        <span class="radiografia-fila__num">34</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-alojamiento)">
+        <span class="radiografia-fila__nombre">Alojamiento</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:11%"></span></span>
+        <span class="radiografia-fila__num">31</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-naturaleza)">
+        <span class="radiografia-fila__nombre">Naturaleza</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:9%"></span></span>
+        <span class="radiografia-fila__num">26</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-servicios-publicos)">
+        <span class="radiografia-fila__nombre">Servicios públicos</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:8%"></span></span>
+        <span class="radiografia-fila__num">22</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-mascotas)">
+        <span class="radiografia-fila__nombre">Mascotas</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:6%"></span></span>
+        <span class="radiografia-fila__num">17</span>
+      </div>
+    </div>
+    <p class="radiografia__nota">
+      100% de los 1.468 lugares tiene coordenadas cargadas, así que cualquiera de ellos puede
+      aparecer en el mapa interactivo cuando corresponda. La profundidad de verificación varía por
+      lugar (visita presencial, fuentes oficiales o Google Places, según el caso) — ver "Cómo
+      verifican cada lugar" en las preguntas frecuentes.
+    </p>
   </section>
 
   <!-- ÍNDICE POR RUBRO: dinámico, poblado por
@@ -919,6 +1379,122 @@
       </a>
     </div>
   </nav>
+
+  <!-- GUÍA PRÁCTICA PARA TU VISITA (expansión de contenido, nueva):
+       información orientativa para quien llega de afuera. Evita a
+       propósito cifras que cambian seguido (horarios exactos,
+       precios de entrada, tarifas de colectivo): esas se desactualizan
+       solas y generan más desconfianza que ayuda si quedan
+       congeladas en un HTML estático. Se prioriza lo que SÍ es
+       estable: cómo es el clima en términos generales, qué llevar,
+       cómo moverse. -->
+  <section class="guia-practica envoltorio u-reveal" id="guia-practica" aria-labelledby="guia-practica-titulo">
+    <h2 id="guia-practica-titulo">Guía práctica para tu visita</h2>
+    <p class="guia-practica__intro">
+      Algunas cosas útiles de saber si venís de afuera — nada que cambie de un mes a otro, para que
+      esta sección siga siendo cierta dentro de un año.
+    </p>
+    <div class="guia-practica-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">☀️</span>
+        <p>
+          <strong>Clima templado-húmedo.</strong> Veranos calurosos (diciembre a marzo, ideales para
+          playa y termas) e inviernos templados sin heladas extremas. Primavera y otoño son, para
+          la mayoría, la mejor época para caminar la ciudad sin el calor pleno del verano.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🚶</span>
+        <p>
+          <strong>Se recorre bien a pie.</strong> El casco histórico y la zona céntrica son
+          caminables sin apuro; para llegar a las playas o al complejo termal, sobre la Ruta 14,
+          conviene un vehículo, remise o combi turística.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🎒</span>
+        <p>
+          <strong>Qué llevar según la estación.</strong> Protector solar y calzado cómodo casi todo
+          el año; algo de abrigo liviano en invierno. Si vas a la playa o a las termas, traje de
+          baño y toalla — algunos balnearios y el complejo termal alquilan lo que falte.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">💳</span>
+        <p>
+          <strong>Efectivo y tarjeta conviven.</strong> Los comercios más grandes y las cadenas
+          aceptan tarjeta sin problema; en kioscos, ferias y algunos locales más chicos el efectivo
+          sigue siendo más ágil. Nunca está de más llevar algo de los dos.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🕑</span>
+        <p>
+          <strong>El mediodía baja el ritmo.</strong> Como en buena parte del interior argentino,
+          muchos comercios (no todos) hacen un corte al mediodía y retoman por la tarde. Si tenés un
+          trámite puntual, conviene resolverlo por la mañana.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🆘</span>
+        <p>
+          <strong>Emergencias.</strong> El número de emergencias en toda la Argentina es el
+          <strong>911</strong>. Para lo que no es una emergencia — un lugar que parece cerrado, un
+          dato que no coincide — usá el contacto del final de esta página.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- GLOSARIO (expansión de contenido, nueva): URU SPOT usa
+       vocabulario propio (Guía, Exploración, Acción Directa, Plano,
+       Curaduría, Destacados, Verificado, Rubro) en distintos puntos
+       de la interfaz sin explicarlo cada vez — acá se explica una
+       sola vez, en un lugar fijo, en vez de repetir la definición en
+       cada tooltip. Términos alineados 1:1 con los nombres reales que
+       usa el código (motor-plano.js, motor-exposicion.js, app.js),
+       sin inventar sinónimos que después no coincidan con lo que se
+       ve en pantalla. -->
+  <section class="glosario envoltorio u-reveal" id="glosario" aria-labelledby="glosario-titulo">
+    <h2 id="glosario-titulo">Glosario</h2>
+    <p class="glosario__intro">
+      Términos que vas a ver en distintos puntos de URU SPOT, explicados una sola vez.
+    </p>
+    <div class="glosario-lista">
+      <div class="glosario-item">
+        <strong class="glosario-termino">Guía</strong>
+        <p class="glosario-definicion">El punto de partida de cualquier sesión nueva: te mostramos poco, elegido con cuidado, para no saturarte con el catálogo completo.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Exploración</strong>
+        <p class="glosario-definicion">El paso intermedio: ya interactuaste lo suficiente como para que el sistema suelte más variedad y menos curaduría.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Acción Directa</strong>
+        <p class="glosario-definicion">El estado de mayor autonomía: acceso directo al catálogo real, con el mapa como herramienta principal en vez del recorte guiado.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Curaduría</strong>
+        <p class="glosario-definicion">Tu lista personal de lugares guardados — la sección a la que te lleva el botón "tu lista guardada" del buscador.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Destacados</strong>
+        <p class="glosario-definicion">El spotlight de lugares con mejor puntuación real y suficientes reseñas — no depende de tu sesión ni de tu ubicación, es el mismo para todos.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Verificado</strong>
+        <p class="glosario-definicion">Alguien del equipo caminó el lugar o lo confirmó en fuentes oficiales y Google Places — no es un dato completado a ojo ni scrapeado sin revisar.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Rubro</strong>
+        <p class="glosario-definicion">La categoría de un lugar (Gastronomía, Alojamiento, Salud, etc.) — hoy son 14, cada una con su propio color de identificación en el mapa y las tarjetas.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">"Cerca de mí"</strong>
+        <p class="glosario-definicion">Modo de búsqueda espacial que ordena los resultados por distancia real a tu ubicación, cuando el lugar tiene coordenadas cargadas.</p>
+      </div>
+    </div>
+  </section>
 
   <!-- PREGUNTAS FRECUENTES: acordeón accesible. El contenido de cada
        respuesta acá DEBE coincidir con el JSON-LD FAQPage del <head>
@@ -1000,7 +1576,134 @@
           <p>Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a> con el nombre del lugar y el detalle — lo revisamos y lo corregimos.</p>
         </div>
       </article>
+
+      <!-- Preguntas 6-10: expansión de contenido, nuevas. Mismo
+           patrón exacto que las 5 originales (contenido crítico
+           inline, sin template) y mismo texto exacto reflejado en el
+           JSON-LD FAQPage del <head> — ver esa sección para la nota
+           de por qué deben coincidir. -->
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-6">
+            <span class="faq-pregunta__text">¿Qué diferencia hay entre Guía, Exploración y Acción Directa?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-6" hidden>
+          <p>Son los tres momentos de tu sesión (ver <a href="#glosario">Glosario</a>). Arrancás en Guía, con poco para no saturarte. A medida que buscás, guardás o descartás lugares, el sistema entiende que sabés más de lo que buscás y pasa a Exploración y después a Acción Directa, mostrando más catálogo real y menos curaduría de nuestra parte.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-7">
+            <span class="faq-pregunta__text">¿URU SPOT guarda mis datos personales?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-7" hidden>
+          <p>Lo que guardás (favoritos, descartes, tu progreso de sesión) vive en el almacenamiento local de tu propio navegador, no en un servidor con tu nombre o tu identidad. No vendemos ni compartimos esa información con terceros. Si borrás los datos del sitio o cambiás de dispositivo, arrancás de nuevo en Guía.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-8">
+            <span class="faq-pregunta__text">¿Cómo sugiero que agreguen un lugar nuevo?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-8" hidden>
+          <p>Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a> con el nombre y, si podés, la dirección o un link de Google Maps. Antes de publicarlo alguien del equipo lo verifica — caminándolo o confirmándolo en fuentes oficiales — así que puede tardar unos días en aparecer.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-9">
+            <span class="faq-pregunta__text">¿Qué pasa si un lugar cierra o cambia de horario?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-9" hidden>
+          <p>Nos pasa, como a cualquier guía que depende de información real: si detectamos o nos avisan que un lugar cerró o cambió, lo actualizamos o lo retiramos. Si llegás a uno que ya no existe, avisanos — es la forma más rápida de corregirlo para el resto.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-10">
+            <span class="faq-pregunta__text">¿Funciona con lectores de pantalla y navegación por teclado?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-10" hidden>
+          <p>Sí — todo el sitio se puede recorrer con teclado (con foco visible en cada control), el buscador y el mapa tienen roles y estados anunciados por lectores de pantalla, y respetamos las preferencias de movimiento reducido, contraste alto y transparencia reducida del sistema operativo. Ver el detalle completo en <a href="#accesibilidad">Accesibilidad</a>.</p>
+        </div>
+      </article>
     </div>
+  </section>
+
+  <!-- HOJA DE RUTA (expansión de contenido, nueva): transparencia
+       sobre qué existe hoy y qué no todavía. Deliberadamente honesta
+       en ambas direcciones — ni promete fechas que no puede cumplir,
+       ni esconde limitaciones reales conocidas (fotos propias,
+       horarios estructurados) que hoy no tiene. -->
+  <section class="hoja-de-ruta envoltorio u-reveal" id="hoja-de-ruta" aria-labelledby="hoja-de-ruta-titulo">
+    <h2 id="hoja-de-ruta-titulo">Hoja de ruta</h2>
+    <p class="hoja-de-ruta__intro">
+      Qué existe hoy y qué está en camino — sin promesas de fecha, con la misma transparencia con
+      la que explicamos el resto de esta página.
+    </p>
+    <div class="hoja-de-ruta-grid">
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--disponible">Disponible</span>
+        <p><strong>Mapa interactivo con distancia real.</strong> "Cerca de mí" ordena resultados por distancia calculada, no por orden alfabético disfrazado de cercanía.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--disponible">Disponible</span>
+        <p><strong>Spotlight de destacados.</strong> Los mejor puntuados con reseñas reales, independiente de tu sesión.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--camino">En camino</span>
+        <p><strong>Fotos propias por lugar.</strong> Hoy la mayoría de las tarjetas no tiene foto propia — el diseño ya está preparado (<code>.tarjeta__imagen</code>) para cuando el dato exista.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--camino">En camino</span>
+        <p><strong>Horarios estructurados en tiempo real.</strong> Hoy el estado abierto/cerrado depende de datos verificados manualmente, no de una fuente que se actualiza sola.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--camino">En camino</span>
+        <p><strong>Más rubros y más localidades.</strong> El motor está pensado para crecer más allá de Concepción del Uruguay sin rehacer la arquitectura — todavía no se activó para otras ciudades.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--camino">En camino</span>
+        <p><strong>Test automatizado del contrato HTML↔JS.</strong> Hoy la coherencia entre los <code>id</code> de este archivo y lo que espera <code>app.js</code> se revisa a mano — un test e2e mínimo es la mejora pendiente de mayor prioridad técnica.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- COMPROMISO DE ACCESIBILIDAD (expansión de contenido, nueva):
+       hace visible en la propia página lo que hoy ya vive disperso
+       en comentarios de código (skip link, reduced-motion,
+       forced-colors, foco visible, etc.) — nada de lo que dice esta
+       lista es aspiracional, cada ítem corresponde a un mecanismo
+       real ya implementado en tokens.css / index.html. -->
+  <section class="compromiso-a11y envoltorio u-reveal" id="accesibilidad" aria-labelledby="accesibilidad-titulo">
+    <h2 id="accesibilidad-titulo">Accesibilidad</h2>
+    <p class="compromiso-a11y__intro">
+      Lo que ya implementamos, en lenguaje simple — sin prometer más de lo que hoy es cierto.
+    </p>
+    <ul class="a11y-lista">
+      <li>Navegación completa por teclado, con un enlace de salto directo al contenido principal.</li>
+      <li>Foco visible y consistente en todos los controles interactivos (botones, chips, tarjetas, enlaces).</li>
+      <li>Roles y regiones anunciadas para lectores de pantalla en el buscador, el mapa y los contadores dinámicos.</li>
+      <li>Respeto por <code>prefers-reduced-motion</code>: todas las animaciones se desactivan si tu sistema lo pide.</li>
+      <li>Respeto por <code>prefers-contrast</code> y por el modo de alto contraste forzado de Windows.</li>
+      <li>Respeto por <code>prefers-reduced-transparency</code>: el efecto de vidrio se atenúa sin perder legibilidad.</li>
+      <li>Contenido crítico (FAQ, manifiesto, accesos) visible incluso con JavaScript desactivado.</li>
+      <li>¿Encontraste una barrera que no cubrimos? <a href="mailto:padron@uruspot.com.ar">Escribinos</a> y la revisamos.</li>
+    </ul>
   </section>
 
 </main>
