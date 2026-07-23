@@ -1,161 +1,351 @@
 /* ═══════════════════════════════════════════════════════════════════
-   css/boton.css
-   Reemplaza: #btnVerGuardados, .tarjeta-btn, .uru-mapa-btn, .btn/.btn-*
-   de las fichas de local — eran cuatro sistemas de botón distintos
-   para la misma idea. Ahora es uno, con variantes.
-   Requiere tokens.css cargado antes.
+   URU SPOT — Componente: Botón (Refactorizado Impeccable)
+   ───────────────────────────────────────────────────────────────────
+   UNIFICADO: Un solo sistema de botón (.btn) con variantes claras.
+   Antes: .btn + .tarjeta-btn + .uru-mapa-btn + .btn--icono
+   Ahora: 1 base, 4 variantes semánticas
+   
+   Principios:
+   • Affordance visual: hover claro, focus ring WCAG AAA
+   • Jerarquía: una acción primaria por vista, resto secundarias
+   • Tiempo: duración + easing desde tokens.css
+   • Accesibilidad: min-height 44px mobile (WCAG AAA)
    ═══════════════════════════════════════════════════════════════════ */
 
-.btn{
-  position:relative; overflow:hidden;
-  display:inline-flex; align-items:center; justify-content:center; gap:var(--esp-2);
-  font:var(--tipo-cuerpo-xs); font-weight:500;
-  padding:8px var(--esp-4); border-radius:var(--radio-full);
-  border:1px solid var(--glass-borde); background:var(--glass-bg); color:var(--color-tinta-60);
-  backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
-  cursor:pointer; text-decoration:none; white-space:nowrap;
-  transition:color var(--dur-media) var(--easing-estandar),
-             border-color var(--dur-media) var(--easing-estandar),
-             background var(--dur-media) var(--easing-estandar),
-             box-shadow var(--dur-media) var(--easing-estandar),
-             transform var(--dur-rapido) var(--easing-estandar),
-             opacity var(--dur-media) var(--easing-estandar);
-}
-.btn:hover{
-  color:var(--color-tinta); border-color:var(--color-granate-clara);
-  transform:translateY(-1px); box-shadow:var(--sombra-baja);
-}
-.btn:active{
-  transform:translateY(1px) scale(.98);
-}
-.btn:focus-visible{
-  outline:2px solid var(--color-granate-clara); outline-offset:2px;
-  border-radius:var(--radio-sm);
-}
-.btn:disabled{
-  opacity:0.5; cursor:not-allowed;
-  background:var(--glass-bg); color:var(--color-tinta-30);
-  border-color:var(--glass-borde);
-}
-.btn:disabled:hover{
-  transform:none; box-shadow:none; border-color:var(--glass-borde);
+/* ── BASE: Todos los botones ────────────────────────────────── */
+.btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+
+  font: var(--tipo-cuerpo-xs);
+  font-weight: 500;
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--radio-full);
+  border: 1px solid var(--glass-borde);
+  background: var(--glass-bg);
+  color: var(--color-tinta-60);
+
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+
+  /* Transiciones */
+  transition:
+    color var(--dur-media) var(--easing-estandar),
+    border-color var(--dur-media) var(--easing-estandar),
+    background var(--dur-media) var(--easing-estandar),
+    box-shadow var(--dur-media) var(--easing-estandar),
+    transform var(--dur-rapido) var(--easing-estandar),
+    opacity var(--dur-media) var(--easing-estandar);
 }
 
-/* Ripple: un <span class="btn__ripple"> opcional que app.js posiciona
-   en el punto de click; si no está presente, el botón funciona igual.
-   PROTEGIDO: Respeta prefers-reduced-motion */
-.btn__ripple{
-  position:absolute; border-radius:50%; background:rgba(236,237,239,.35);
-  transform:scale(0); animation:uru-ripple 0.5s var(--easing-estandar) forwards;
-  pointer-events:none;
+/* Focus visible (accesibilidad) */
+.btn:focus-visible {
+  outline: var(--anillo-foco);
+  outline-offset: var(--anillo-foco-offset);
+  border-radius: var(--radio-sm);
 }
 
-/* Variante principal: acción de mayor jerarquía en la pantalla
-   (ej. "tu lista guardada", "cómo llegar") */
-.btn--primario{
-  background:var(--gradiente-marca); border-color:transparent; color:#FBF4F1;
-  box-shadow:var(--sombra-baja);
-}
-.btn--primario:hover{
-  box-shadow:var(--sombra-glow); transform:translateY(-2px);
-  filter:brightness(1.06);
-}
-.btn--primario:focus-visible{
-  outline:2px solid var(--color-tinta); outline-offset:2px;
-}
-.btn--primario:disabled{
-  opacity:0.5; background:var(--gradiente-marca); color:#FBF4F1;
-  filter:grayscale(1) brightness(0.8);
+/* Hover: affordance clara */
+.btn:hover:not(:disabled) {
+  color: var(--color-tinta);
+  border-color: var(--color-granate-clara);
+  transform: translateY(-1px);
+  box-shadow: var(--sombra-baja);
 }
 
-/* Variante activa/marcada (ej. favorito guardado) */
-.btn--activo{ color:var(--color-granate-clara); border-color:var(--color-granate-clara); background:rgba(201,122,131,.12); }
-
-/* Variante ícono cuadrado (ej. controles de zoom del mapa)
-   Tamaño: 34×34 desktop, 44×44 mobile (WCAG AAA) */
-.btn--icono{
-  width:34px; height:34px; padding:0; border-radius:var(--radio-md);
-  background:var(--glass-bg-fuerte); color:var(--color-tinta); border:1px solid var(--glass-borde);
-  font-size:16px; line-height:1; backdrop-filter:blur(var(--glass-blur));
-}
-.btn--icono:hover{
-  background:rgba(201,122,131,.22); transform:translateY(-1px);
-}
-.btn--icono:focus-visible{
-  outline:2px solid var(--color-granate-clara); outline-offset:1px;
-  border-radius:var(--radio-md);
-}
-.btn--icono:disabled{
-  opacity:0.5; cursor:not-allowed; background:var(--glass-bg-fuerte);
-  color:var(--color-tinta-30); border-color:var(--glass-borde);
-}
-@media (max-width:720px){
-  .btn--icono{ width:44px; height:44px; }
+/* Active: feedback de click */
+.btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
 }
 
-/* Grupo de íconos pegados (ej. +/- del mapa) */
-.btn-grupo--icono{
-  display:flex; flex-direction:column; gap:1px; border-radius:var(--radio-md);
-  overflow:hidden; box-shadow:var(--sombra-vidrio);
+/* Disabled state */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--glass-bg);
+  color: var(--color-tinta-30);
+  border-color: var(--glass-borde);
 }
 
-/* Variante "volver" — acción de escape de una vista filtrada (ej.
-   salir de "tus guardados"). Jerarquía visual deliberadamente baja
-   (no compite con el título que tiene al lado) pero con affordance
-   de link claro: sin fondo/borde en reposo, se resuelve solo con
-   color + flecha, y gana un subrayado sutil al pasar el mouse o
-   enfocar con teclado. */
-.btn--link-volver{
-  background:transparent; border:none; backdrop-filter:none; -webkit-backdrop-filter:none;
-  padding:4px 2px; margin-top:6px; color:var(--color-granate-clara);
-  font-size:12.5px; font-weight:600;
-}
-.btn--link-volver:hover{ text-decoration:underline; transform:none; box-shadow:none; color:var(--color-granate-clara); border-color:transparent; }
-.btn--link-volver:active{ transform:none; }
-.btn--link-volver:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:2px; border-radius:var(--radio-sm); }
-
-/* ═══════════════════════════════════════════════════════════════
-   BADGE Y PATCHES MIGRADOS DESDE index.html (auditoría 2ª pasada)
-   ───────────────────────────────────────────────────────────────
-   Estos tres bloques vivían como <style> embebido en el <head> del
-   index, documentados a propósito como deuda técnica ("migrar a
-   css/boton.css en cuanto se toque esa capa" — ver index.html §10).
-   Esta revisión toca la capa: se migran acá, con los tokens reales
-   del proyecto (--anillo-foco en vez del fallback genérico que tenía
-   el parche original). Sin cambio visual respecto de cómo se veían.
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Badge "N lugares guardados" sobre #btnVerGuardados */
-.contador-guardados{
-  display:inline-flex; align-items:center; justify-content:center;
-  min-width:20px; height:20px; margin-left:8px; padding:0 6px;
-  border-radius:var(--radio-full);
-  background:var(--color-fondo-2);
-  border:1px solid var(--glass-borde);
-  font-size:11px; font-weight:600; line-height:1;
-  color:inherit; vertical-align:middle;
-}
-.contador-guardados[hidden]{ display:none; }
-
-/* Grupos "Explorá" / "Conocé el proyecto" del índice de página */
-.indice-pagina{ display:flex; flex-wrap:wrap; gap:24px 48px; }
-.indice-pagina__grupo-titulo{
-  display:block; margin-bottom:8px;
-  font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--color-tinta-60);
+.btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--glass-borde);
 }
 
-/* <details> "Ver el detalle completo por rubro..." */
-.rubros-detalle{ margin-top:8px; }
-.rubros-detalle__resumen{
-  cursor:pointer; list-style:none; user-select:none;
-  display:inline-flex; align-items:center; gap:8px;
-  padding:10px 16px; border-radius:var(--radio-full);
-  background:var(--color-fondo-2);
-  border:1px solid var(--glass-borde);
-  font-size:14px; font-weight:600; color:inherit;
+/* ── VARIANTE: PRIMARIO (acción de mayor jerarquía) ─────────── */
+.btn--primario {
+  background: var(--gradiente-marca);
+  border-color: transparent;
+  color: #FBF4F1;
+  font-weight: 600;
+  box-shadow: var(--sombra-baja);
 }
-.rubros-detalle__resumen::-webkit-details-marker{ display:none; }
-.rubros-detalle__resumen::before{ content:"+"; font-weight:400; }
-.rubros-detalle[open] .rubros-detalle__resumen::before{ content:"–"; }
-.rubros-detalle__resumen:focus-visible{ outline:var(--anillo-foco); outline-offset:2px; }
+
+.btn--primario:hover:not(:disabled) {
+  box-shadow: var(--sombra-glow);
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  border-color: transparent;
+}
+
+.btn--primario:focus-visible {
+  outline: 2px solid var(--color-tinta);
+  outline-offset: var(--anillo-foco-offset);
+}
+
+.btn--primario:disabled {
+  opacity: 0.5;
+  background: var(--gradiente-marca);
+  color: #FBF4F1;
+  filter: grayscale(1) brightness(0.8);
+}
+
+/* ── VARIANTE: ACTIVO (estado confirmado: favorito, filtro) ──── */
+.btn--activo {
+  color: var(--color-granate-clara);
+  border-color: var(--color-granate-clara);
+  background: rgba(201, 122, 131, 0.12);
+}
+
+.btn--activo:hover:not(:disabled) {
+  background: rgba(201, 122, 131, 0.18);
+}
+
+/* ── VARIANTE: ICONO (cuadrado pequeño) ──────────────────────── */
+.btn--icono {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: var(--radio-md);
+  background: var(--glass-bg-fuerte);
+  border: 1px solid var(--glass-borde);
+  color: var(--color-tinta);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.btn--icono:hover:not(:disabled) {
+  background: rgba(201, 122, 131, 0.22);
+  border-color: rgba(201, 122, 131, 0.5);
+}
+
+.btn--icono:focus-visible {
+  outline: var(--anillo-foco);
+  outline-offset: 1px;
+  border-radius: var(--radio-sm);
+}
+
+.btn--icono:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--glass-bg-fuerte);
+  color: var(--color-tinta-30);
+  border-color: var(--glass-borde);
+}
+
+/* Mobile: WCAG AAA (min 44px touch target) */
+@media (max-width: 720px) {
+  .btn--icono {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+}
+
+/* ── VARIANTE: LINK-VOLVER (escape, baja jerarquía) ──────────── */
+.btn--link-volver {
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+
+  padding: var(--esp-1) 2px;
+  margin-top: var(--esp-1);
+  color: var(--color-granate-clara);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn--link-volver:hover:not(:disabled) {
+  text-decoration: underline;
+  transform: none;
+  box-shadow: none;
+  color: var(--color-granate-clara);
+  border-color: transparent;
+}
+
+.btn--link-volver:active:not(:disabled) {
+  transform: none;
+}
+
+.btn--link-volver:focus-visible {
+  outline: var(--anillo-foco);
+  outline-offset: var(--anillo-foco-offset);
+  border-radius: var(--radio-sm);
+}
+
+/* ── GRUPO DE ICONOS PEGADOS (ej. zoom +/-) ────────────────── */
+.btn-grupo--icono {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--radio-md);
+  overflow: hidden;
+  box-shadow: var(--sombra-vidrio);
+}
+
+.btn-grupo--icono .btn--icono {
+  border-radius: 0;
+  margin: 0;
+}
+
+.btn-grupo--icono .btn--icono:first-child {
+  border-radius: var(--radio-md) var(--radio-md) 0 0;
+}
+
+.btn-grupo--icono .btn--icono:last-child {
+  border-radius: 0 0 var(--radio-md) var(--radio-md);
+}
+
+.btn-grupo--icono .btn--icono + .btn--icono {
+  border-top: none;
+}
+
+/* ── RIPPLE EFFECT (visual sugar, respeta reduced-motion) ────── */
+.btn__ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(236, 237, 239, 0.35);
+  transform: scale(0);
+  animation: uru-ripple 0.5s var(--easing-estandar) forwards;
+  pointer-events: none;
+}
+
+/* ── CONTADOR (badges sobre botones, ej. "5 guardados") ──────── */
+.contador-guardados {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: var(--esp-2);
+  padding: 0 var(--esp-1);
+  border-radius: var(--radio-full);
+
+  background: var(--color-fondo-2);
+  border: 1px solid var(--glass-borde);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: inherit;
+  vertical-align: middle;
+}
+
+.contador-guardados[hidden] {
+  display: none;
+}
+
+/* ── ÍNDICE DE PÁGINA (ej. "Explorá" / "Conocé el proyecto") ── */
+.indice-pagina {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 48px;
+}
+
+.indice-pagina__grupo-titulo {
+  display: block;
+  margin-bottom: var(--esp-1);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-tinta-60);
+}
+
+/* ── DETAILS: "Ver el detalle completo por rubro..." ──────────── */
+.rubros-detalle {
+  margin-top: var(--esp-2);
+}
+
+.rubros-detalle__resumen {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: 10px 16px;
+  border-radius: var(--radio-full);
+
+  background: var(--color-fondo-2);
+  border: 1px solid var(--glass-borde);
+  font-size: 14px;
+  font-weight: 600;
+  color: inherit;
+
+  transition:
+    background var(--dur-media) var(--easing-estandar),
+    border-color var(--dur-media) var(--easing-estandar),
+    color var(--dur-media) var(--easing-estandar);
+}
+
+.rubros-detalle__resumen::-webkit-details-marker {
+  display: none;
+}
+
+.rubros-detalle__resumen::before {
+  content: "+";
+  font-weight: 400;
+  transition: transform var(--dur-rapido) var(--easing-estandar);
+}
+
+.rubros-detalle[open] .rubros-detalle__resumen::before {
+  content: "–";
+}
+
+.rubros-detalle__resumen:hover {
+  background: var(--color-fondo);
+  border-color: var(--color-granate-clara);
+  color: var(--color-tinta);
+}
+
+.rubros-detalle__resumen:focus-visible {
+  outline: var(--anillo-foco);
+  outline-offset: var(--anillo-foco-offset);
+}
+
+/* ── ANIMACIÓN: ENTRADA SIN RIPPLE ──────────────────────────── */
+.btn:not(:disabled) {
+  animation: uru-fade-up var(--dur-media) var(--easing-estandar) both;
+}
+
+/* ── RESPONSIVE: Ajustes para mobile ────────────────────────── */
+@media (max-width: 720px) {
+  .btn {
+    min-height: 44px;  /* WCAG AAA */
+    padding: var(--esp-3) var(--esp-4);
+  }
+
+  .btn--primario {
+    padding: var(--esp-3) var(--esp-4);
+  }
+}
+
+/* ── PRINT: Ocultar botones en impresión ────────────────────── */
+@media print {
+  .btn, .btn-grupo--icono {
+    display: none;
+  }
+}
