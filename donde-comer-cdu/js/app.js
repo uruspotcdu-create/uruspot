@@ -421,7 +421,8 @@
       if (btnAceptar) {
         var id1 = btnAceptar.closest('[data-lugar-id]').dataset.lugarId;
         var porIniciativa = btnAceptar.dataset.origen === 'iniciativa_propia';
-        estado = PLANO.aplicarAccion(estado, 'aceptar', { lugarId: id1, porIniciativaPropia: porIniciativa });
+        var grupo1 = porId[id1] ? porId[id1].grupo : undefined;
+        estado = PLANO.aplicarAccion(estado, 'aceptar', { lugarId: id1, porIniciativaPropia: porIniciativa, grupo: grupo1 });
         PLANO.guardarEstado(estado);
         return;
       }
