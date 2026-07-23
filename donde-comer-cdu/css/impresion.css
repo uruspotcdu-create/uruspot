@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — css/impresion.css
+   AUDITORÍA 4ª PASADA — archivo NUEVO.
+
+   Diagnóstico: el documento no tenía ninguna hoja con media="print".
+   Con "Sobre la ciudad", "Guía práctica para tu visita" y "Glosario"
+   convertidos en contenido de referencia real (útil para alguien que
+   está planeando una visita y quiere llevarlo impreso o guardarlo
+   como PDF desde el navegador), imprimir la página tal cual hoy
+   produce: fondo casi negro desperdiciando tinta, mapa en canvas
+   vacío ocupando una página entera, botones y chips interactivos sin
+   sentido en papel, y el acordeón de FAQ con las respuestas ocultas
+   (`hidden`) porque esa visibilidad depende de JS y de un :hover/click
+   que no existen al imprimir.
+
+   Esta hoja NO redefine componentes (eso ya lo hacen tokens.css,
+   contenido-editorial.css y destacados.css en su propio bloque
+   `@media print`, ver el final de cada uno) — se ocupa exclusivamente
+   de qué SECCIONES completas tienen sentido en una hoja de papel y
+   cuáles se ocultan, y de la paleta base para impresión (fondo
+   blanco, texto negro, sin vidrio ni blur).
+   Cárgese al final, con media="print" en el <link>, para que nunca
+   compita con el CSS de pantalla. ═══════════════════════════════════════════════════════════════════ */
+
+@media print{
+
+  /* ── Reset de superficie para papel ──
+     El resto del sitio asume fondo oscuro; impreso, un fondo oscuro
+     de página completa consume la tinta de todo el cartucho por una
+     sola hoja de texto. Se fuerza blanco/negro con !important porque
+     el objetivo es específicamente pisar los tokens de tema oscuro,
+     no crear una variante de tema nueva para pantalla. */
+  html, body{
+    background:#fff !important;
+    color:#111 !important;
+  }
+
+  a{ color:#111; text-decoration:underline; }
+  a[href^="http"]::after,
+  a[href^="mailto"]::after{
+    content:' (' attr(href) ')';
+    font-size:.85em;
+    color:#555;
+  }
+  /* Excepción: los anclas internas (#seccion) no aportan nada útil
+     como URL completa en una hoja impresa — mostrarían el mismo
+     dominio repetido decenas de veces sin ninguna información nueva. */
+  a[href^="#"]::after{ content:''; }
+
+  /* ── Qué NO tiene sentido en papel ──
+     Todo lo que depende de interacción en tiempo real (buscador,
+     mapa, botones de guardar/descartar, chips de filtro, stats que
+     dependen de JS) o que es puramente decorativo en pantalla
+     (textura de mapa de fondo, cue de scroll, índice de anclas que
+     no lleva a ningún lado en una hoja física). */
+  .indice-pagina,
+  .hero__scroll-cue,
+  #mapaTextura,
+  .mapa-container,
+  .destacados,
+  #region-descubrimiento .region-encabezado + .mapa-container,
+  .chip, .chips-fila,
+  .btn:not(.btn--imprimible),
+  .skip-link,
+  .rubros-detalle__resumen,
+  footer .footer__meta a[href="#siteHeader"]{
+    display:none !important;
+  }
+
+  /* ── FAQ: todas las respuestas visibles ──
+     `hidden` en `.faq-respuesta` depende de que JS lo togglee al
+     click — en impresión no hay click posible, así que sin esta
+     regla el usuario imprimiría solo las preguntas, sin ninguna
+     respuesta, de una sección pensada precisamente para resolver
+     dudas por escrito. */
+  .faq-respuesta[hidden]{
+    display:block !important;
+  }
+  .faq-pregunta__icono{ display:none; }
+
+  /* ── Detalle de rubros: siempre expandido ──
+     Mismo problema que el FAQ: `<details>` sin `open` no imprime su
+     contenido interno en la mayoría de los navegadores. */
+  .rubros-detalle{
+    display:block;
+  }
+
+  /* ── Tipografía y layout para lectura en papel ── */
+  .envoltorio{
+    max-width:100%;
+    padding:0;
+  }
+
+  h1, h2, h3{
+    color:#000 !important;
+    break-after:avoid;
+  }
+
+  .manifiesto-card,
+  .rubro-ficha,
+  .testimonio-card,
+  .glosario-item{
+    break-inside:avoid;
+  }
+
+  /* Evita que un <section> completo quede cortado a la mitad entre
+     dos hojas cuando el contenido es corto — no aplica a las
+     secciones largas (radiografía, glosario) porque ahí es preferible
+     un corte natural a una página casi vacía forzada. */
+  .manifiesto, .metodologia, .guia-practica, .testimonios,
+  .privacidad-datos, .para-locales{
+    break-inside:avoid-page;
+  }
+
+  /* ── Pie de página impreso ──
+     El footer real (con links de contacto) sigue siendo útil en
+     papel — a diferencia del resto de los elementos interactivos, se
+     mantiene visible pero se simplifica. */
+  footer{
+    border-top:1px solid #999;
+    margin-top:2em;
+    padding-top:1em;
+    font-size:.85em;
+  }
+
+  /* URL de origen al pie, para quien imprime sin saber de dónde salió
+     la hoja — patrón estándar de impresión de páginas web. */
+  main::after{
+    content:'Impreso desde uruspot.pages.dev/donde-comer-cdu/';
+    display:block;
+    margin-top:2em;
+    font-size:.75em;
+    color:#777;
+  }
+}
