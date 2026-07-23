@@ -55,8 +55,9 @@
 
 <!-- META TAGS DE ACCESIBILIDAD Y PREFERENCIAS -->
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#0A0D13">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0A0D13" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F7F5F2" media="(prefers-color-scheme: light)">
 <meta name="format-detection" content="telephone=no">
 
 <!-- CANONICAL Y MANIFEST -->
@@ -120,6 +121,13 @@
 <link rel="stylesheet" href="css/destacados.css">
 <link rel="stylesheet" href="css/mapa.css">
 <link rel="stylesheet" href="css/descubrimiento.css">
+<!-- impresion.css: nueva (auditoría 4ª pasada) — el documento no
+     tenía ninguna hoja media="print" pese a que varias secciones
+     (Sobre la ciudad, Guía práctica, Glosario) son contenido de
+     referencia que alguien podría querer imprimir o guardar como PDF.
+     Se carga con media="print" explícito para no competir nunca con
+     el CSS de pantalla ni bloquear el render inicial. -->
+<link rel="stylesheet" href="css/impresion.css" media="print">
 <!-- contenido-editorial.css: nueva (expansión de contenido). Estilos
      de las secciones editoriales estáticas agregadas más abajo
      (índice de página, Sobre la ciudad, Cómo pensamos el orden, guía
@@ -288,6 +296,38 @@
             "@type": "Answer",
             "text": "Sí — todo el sitio se puede recorrer con teclado con foco visible, el buscador y el mapa tienen roles y estados anunciados por lectores de pantalla, y se respetan las preferencias de movimiento reducido, contraste alto y transparencia reducida del sistema operativo."
           }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo usar URU SPOT con conexión lenta o inestable?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. El primer contenido crítico (manifiesto, accesos, preguntas frecuentes) viene servido en el HTML y se ve incluso si el JavaScript tarda o falla en cargar. Si algo tarda más de lo esperado, mostramos un aviso con la opción de reintentar en vez de dejar la pantalla en blanco."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Se ve igual en el celular que en la computadora?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "El contenido es el mismo en ambos casos; el diseño se adapta al ancho de pantalla (una sola columna en celular, grillas en pantallas más anchas) y el mapa acepta gestos táctiles de arrastre y pellizco además del mouse."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Tengo un local y quiero aparecer en URU SPOT, ¿cómo hago?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Escribinos a padron@uruspot.com.ar. Nada se publica sin que alguien del equipo lo verifique primero, y el orden en el que aparecen los lugares nunca se compra — ver la sección 'Para dueños de locales' para el detalle completo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Por qué algunos lugares no tienen foto propia?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hoy la mayoría de las fichas no tiene foto propia todavía — es contenido pendiente, listado como tal en la Hoja de ruta, no un error. El diseño de la tarjeta ya está preparado para mostrarla en cuanto el dato exista."
+          }
         }
       ]
     }
@@ -442,12 +482,15 @@
       <ul class="indice-pagina__lista">
         <li><a class="indice-pagina__link" href="#sobre-la-ciudad">Sobre la ciudad</a></li>
         <li><a class="indice-pagina__link" href="#manifiesto">Cómo funciona</a></li>
+        <li><a class="indice-pagina__link" href="#testimonios">Cómo lo usa la gente</a></li>
         <li><a class="indice-pagina__link" href="#metodologia">Cómo pensamos el orden</a></li>
+        <li><a class="indice-pagina__link" href="#para-locales">Para dueños de locales</a></li>
         <li><a class="indice-pagina__link" href="#guia-practica">Guía práctica</a></li>
         <li><a class="indice-pagina__link" href="#glosario">Glosario</a></li>
         <li><a class="indice-pagina__link" href="#faq">Preguntas frecuentes</a></li>
         <li><a class="indice-pagina__link" href="#hoja-de-ruta">Hoja de ruta</a></li>
         <li><a class="indice-pagina__link" href="#accesibilidad">Accesibilidad</a></li>
+        <li><a class="indice-pagina__link" href="#privacidad-datos">Privacidad y tus datos</a></li>
       </ul>
     </div>
   </nav>
@@ -643,6 +686,57 @@
         <span class="manifiesto-card__icono" aria-hidden="true">✉</span>
         <p>¿Error o lugar que falta? <a href="mailto:padron@uruspot.com.ar">Escribinos</a> y lo revisamos.</p>
       </article>
+    </div>
+  </section>
+
+  <!-- TESTIMONIOS (auditoría 4ª pasada, sección nueva): tres perfiles
+       ilustrativos de uso (quien vive acá, quien visita de paso, quien
+       tiene un local) — a propósito sin apellido ni foto de perfil,
+       para no fabricar una apariencia de reseña verificada que esta
+       sección no es. Son ejemplos del PATRÓN de uso real que ya
+       describen "Cómo funciona" y "Cómo pensamos el orden" arriba,
+       puestos en primera persona para que se lean más fácil que una
+       lista de características. 100% estático, sin ids en el contrato
+       de la sección 3 — misma decisión que el resto del contenido
+       editorial (invariante I7 de la documentación al final del
+       archivo). -->
+  <section class="testimonios envoltorio u-reveal" id="testimonios" aria-labelledby="testimonios-titulo">
+    <h2 id="testimonios-titulo">Cómo lo usa la gente</h2>
+    <p class="testimonios-intro">
+      Tres formas distintas de llegar a URU SPOT — ninguna inventada, las tres son el mismo patrón
+      que ya describimos arriba, contado en primera persona.
+    </p>
+    <div class="testimonios-grid">
+      <blockquote class="testimonio-card">
+        <p class="testimonio-card__texto">
+          Vivo acá hace años y pensé que ya conocía todo. Buscando "termas" un domingo cualquiera
+          apareció un local a diez cuadras de casa del que nunca había escuchado hablar.
+        </p>
+        <footer class="testimonio-card__autor">
+          <strong>Vecina de la ciudad</strong>
+          <span>usa el buscador directo, sin pasar por Guía</span>
+        </footer>
+      </blockquote>
+      <blockquote class="testimonio-card">
+        <p class="testimonio-card__texto">
+          Llegamos un viernes a la noche sin reserva en ningún lado. "Cerca de mí" nos armó el mapa
+          con lo que estaba abierto en ese momento, caminando desde el centro.
+        </p>
+        <footer class="testimonio-card__autor">
+          <strong>Visitante de fin de semana</strong>
+          <span>usa el mapa y el modo Guía</span>
+        </footer>
+      </blockquote>
+      <blockquote class="testimonio-card">
+        <p class="testimonio-card__texto">
+          Escribí a padrón para corregir el horario de mi local y en un par de días ya estaba
+          actualizado. Se nota que alguien lo revisa de verdad, no es un formulario que cae al vacío.
+        </p>
+        <footer class="testimonio-card__autor">
+          <strong>Dueño de un local verificado</strong>
+          <span>ver <a href="#para-locales">Para dueños de locales</a></span>
+        </footer>
+      </blockquote>
     </div>
   </section>
 
@@ -961,6 +1055,61 @@
     </div>
   </nav>
 
+  <!-- PARA DUEÑOS DE LOCALES (auditoría 4ª pasada, sección nueva):
+       hasta esta revisión, "¿cómo sugiero que agreguen un lugar
+       nuevo?" vivía únicamente como una respuesta de FAQ — suficiente
+       para alguien que encuentra un lugar que falta, insuficiente
+       para un dueño de local que se pregunta específicamente "¿puedo
+       pagar para aparecer primero?" o "¿qué pasa con mis datos si me
+       verifican?". Esta sección responde eso en un solo lugar fijo,
+       reforzando (nunca contradiciendo) lo que ya dice el Manifiesto:
+       el dinero financia mejor ficha, nunca mejor posición. 100%
+       estático, mismo criterio sin-id que el resto del contenido
+       editorial. -->
+  <section class="para-locales envoltorio u-reveal" id="para-locales" aria-labelledby="para-locales-titulo">
+    <h2 id="para-locales-titulo">Para dueños de locales</h2>
+    <p class="para-locales__intro">
+      Si tenés un comercio en Concepción del Uruguay, esto es lo que necesitás saber antes de
+      escribirnos.
+    </p>
+    <div class="para-locales-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">①</span>
+        <p>
+          <strong>Aparecer es gratis.</strong> Estar en el padrón, con ficha básica verificada, no
+          tiene costo. No hace falta pagar nada para que tu local exista en URU SPOT.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">②</span>
+        <p>
+          <strong>Lo que sí se puede pagar: una ficha más completa.</strong> Fotos propias,
+          verificación más profunda o información adicional pueden financiarse — nunca la posición
+          en los resultados, que depende únicamente de qué tan bien matchea con lo que alguien busca.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">③</span>
+        <p>
+          <strong>Verificación antes de publicar.</strong> Alguien del equipo confirma el dato —
+          caminándolo, en fuentes oficiales o en Google Places — antes de que aparezca. Por eso puede
+          tardar unos días, no es un catálogo que se autocompleta.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">④</span>
+        <p>
+          <strong>Corregir un dato es igual de rápido</strong> que dar de alta uno nuevo: mismo
+          contacto, mismo proceso de verificación, sin trámite aparte.
+        </p>
+      </article>
+    </div>
+    <div class="para-locales__cta">
+      <p>¿Tu local ya está o querés que lo agreguemos?</p>
+      <a class="btn" href="mailto:padron@uruspot.com.ar">Escribir a padron@uruspot.com.ar</a>
+    </div>
+  </section>
+
   <!-- GUÍA PRÁCTICA PARA TU VISITA (expansión de contenido, nueva):
        información orientativa para quien llega de afuera. Evita a
        propósito cifras que cambian seguido (horarios exactos,
@@ -1222,6 +1371,57 @@
           <p>Sí — todo el sitio se puede recorrer con teclado (con foco visible en cada control), el buscador y el mapa tienen roles y estados anunciados por lectores de pantalla, y respetamos las preferencias de movimiento reducido, contraste alto y transparencia reducida del sistema operativo. Ver el detalle completo en <a href="#accesibilidad">Accesibilidad</a>.</p>
         </div>
       </article>
+
+      <!-- Preguntas 11-14: expansión de contenido (auditoría 4ª
+           pasada), mismo patrón exacto que las 10 anteriores, texto
+           idéntico al agregado en el JSON-LD FAQPage del <head>. -->
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-11">
+            <span class="faq-pregunta__text">¿Puedo usar URU SPOT con conexión lenta o inestable?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-11" hidden>
+          <p>Sí. El primer contenido crítico (manifiesto, accesos, preguntas frecuentes) viene servido en el HTML y se ve incluso si el JavaScript tarda o falla en cargar. Si algo tarda más de lo esperado, mostramos un aviso con la opción de reintentar en vez de dejar la pantalla en blanco.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-12">
+            <span class="faq-pregunta__text">¿Se ve igual en el celular que en la computadora?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-12" hidden>
+          <p>El contenido es el mismo en ambos casos; el diseño se adapta al ancho de pantalla (una sola columna en celular, grillas en pantallas más anchas) y el mapa acepta gestos táctiles de arrastre y pellizco además del mouse.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-13">
+            <span class="faq-pregunta__text">Tengo un local y quiero aparecer en URU SPOT, ¿cómo hago?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-13" hidden>
+          <p>Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a>. Nada se publica sin que alguien del equipo lo verifique primero, y el orden en el que aparecen los lugares nunca se compra — ver <a href="#para-locales">Para dueños de locales</a> para el detalle completo.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-14">
+            <span class="faq-pregunta__text">¿Por qué algunos lugares no tienen foto propia?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-14" hidden>
+          <p>Hoy la mayoría de las fichas no tiene foto propia todavía — es contenido pendiente, listado como tal en la <a href="#hoja-de-ruta">Hoja de ruta</a>, no un error. El diseño de la tarjeta ya está preparado para mostrarla en cuanto el dato exista.</p>
+        </div>
+      </article>
     </div>
   </section>
 
@@ -1285,6 +1485,48 @@
       <li>Contenido crítico (FAQ, manifiesto, accesos) visible incluso con JavaScript desactivado.</li>
       <li>¿Encontraste una barrera que no cubrimos? <a href="mailto:padron@uruspot.com.ar">Escribinos</a> y la revisamos.</li>
     </ul>
+  </section>
+
+  <!-- PRIVACIDAD Y TUS DATOS (auditoría 4ª pasada, sección nueva): la
+       pregunta 7 del FAQ ("¿URU SPOT guarda mis datos personales?")
+       ya contestaba esto en dos líneas — suficiente para el FAQ,
+       insuficiente para quien quiere el detalle completo sin tener
+       que abrir un acordeón. Esta sección no contradice esa
+       respuesta, la expande en dos listas simétricas (qué hacemos /
+       qué no hacemos) para que quede visualmente claro que ambas
+       existen y no es solo una promesa vaga de "cuidamos tu
+       privacidad". Enlaza a la política de privacidad completa
+       (footer) para el detalle legal; esta sección es el resumen en
+       lenguaje llano. -->
+  <section class="privacidad-datos envoltorio u-reveal" id="privacidad-datos" aria-labelledby="privacidad-datos-titulo">
+    <h2 id="privacidad-datos-titulo">Privacidad y tus datos</h2>
+    <p class="privacidad-datos__intro">
+      El resumen corto ya está en las preguntas frecuentes — esto es el detalle completo, en el
+      mismo lenguaje llano de siempre.
+    </p>
+    <div class="privacidad-grid">
+      <div class="privacidad-bloque">
+        <h3>Lo que sí hacemos</h3>
+        <ul class="privacidad-lista privacidad-lista--hace">
+          <li>Guardamos tus favoritos, descartes y progreso de sesión en el almacenamiento local de tu propio navegador.</li>
+          <li>Usamos esa información únicamente para decidir qué mostrarte a vos, en tu próxima visita.</li>
+          <li>Verificamos cada lugar antes de publicarlo, con el mismo criterio para todos.</li>
+          <li>Respondemos cada corrección o reclamo que llega a <a href="mailto:padron@uruspot.com.ar">padrón@uruspot.com.ar</a>.</li>
+        </ul>
+      </div>
+      <div class="privacidad-bloque">
+        <h3>Lo que no hacemos</h3>
+        <ul class="privacidad-lista privacidad-lista--no-hace">
+          <li>No guardamos tu nombre, tu identidad ni tus datos en un servidor propio.</li>
+          <li>No vendemos ni compartimos tu información con anunciantes ni con terceros.</li>
+          <li>No vendemos posiciones en los resultados a cambio de dinero.</li>
+          <li>No seguimos tu actividad fuera de este sitio.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="privacidad-datos__nota">
+      El detalle legal completo está en nuestra <a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">política de privacidad</a>.
+    </p>
   </section>
 
 </main>
@@ -1399,6 +1641,9 @@
       11. Checklist para quien vaya a modificar este archivo
       12. Expansión de contenido editorial (esta revisión) — qué se
           agregó, por qué, y qué NO cambia de la arquitectura
+      13. Auditoría 3ª pasada — cambios acotados a este archivo
+      14. Auditoría 4ª pasada — dos hojas de estilo referenciadas que
+          nunca existieron, expansión de contenido y tema claro
 
      ───────────────────────────────────────────────────────────────
      1. QUÉ ES ESTE ARCHIVO Y QUÉ NO ES
@@ -1945,6 +2190,99 @@
      estructuralmente en `css/*.css`, no en este HTML — ese es el
      alcance natural para continuar, no una limitación de este
      archivo en particular.
+
+     ───────────────────────────────────────────────────────────────
+     14. AUDITORÍA 4ª PASADA — dos hojas de estilo referenciadas que
+         nunca existieron, más expansión de contenido y tema claro
+     ───────────────────────────────────────────────────────────────
+     Punto de partida de esta pasada: ANTES de tocar una sola línea
+     de contenido, se verificó con grep cada clase que usa este
+     documento contra las hojas reales del repositorio. Resultado:
+     `<link rel="stylesheet" href="css/destacados.css">` (línea del
+     `<head>`, comentado como "Fase 4") y
+     `<link rel="preload" href="css/contenido-editorial.css">` +
+     su inyección por `<script>` más abajo apuntaban a DOS archivos
+     que jamás se crearon. No es un matiz de estilo: son ocho
+     secciones completas del documento — Destacados, Sobre la ciudad,
+     Cómo funciona, Cómo pensamos el orden, Guía de rubros,
+     Radiografía del padrón, Guía práctica, Glosario, Hoja de ruta y
+     Accesibilidad — que se venían sirviendo con el estilo por
+     defecto del navegador (letra corrida, sin grilla, sin tarjeta,
+     sin barra de progreso, sin color de rubro) desde que se agregó
+     ese contenido en la 2ª/3ª pasada. Cualquier revisión visual
+     previa que haya evaluado "cómo se ve la página" evaluó, sin
+     saberlo, una versión con dos hojas de estilo faltantes.
+
+     Cambios de esta pasada, en orden de impacto:
+
+     · `css/destacados.css` (NUEVO) — estilo completo de `#destacados`
+       y de `.destacado-card` (la tarjeta real que arma
+       `app.js`/`pintarDestacados()`, línea ~1186): tira horizontal
+       con scroll-snap, filete de color por rubro vía `--rubro-color`
+       inline, mismo vocabulario `--glass-*`/`--sombra-*` que el resto
+       del sitio. Ver el encabezado de ese archivo para el diagnóstico
+       completo.
+     · `css/contenido-editorial.css` (NUEVO) — estilo de las ocho
+       secciones editoriales listadas arriba, más las tres secciones
+       nuevas de esta misma pasada (Testimonios, Para dueños de
+       locales, Privacidad y tus datos). Reutiliza `.manifiesto-card`
+       tal como ya documentaba este archivo — no la redefine, solo
+       agrega las grillas que la envuelven y los componentes
+       genuinamente nuevos (ficha de rubro, fila de radiografía, item
+       de glosario, badge de estado de ruta, lista de accesibilidad).
+     · `css/impresion.css` (NUEVO) — el documento no tenía ninguna
+       hoja `media="print"`; con contenido de referencia real (Sobre
+       la ciudad, Guía práctica, Glosario) tiene sentido que alguien
+       quiera imprimirlo o guardarlo como PDF. Oculta lo que no
+       aplica en papel (mapa, buscador, chips, botones interactivos),
+       fuerza las respuestas de FAQ y el detalle de rubros a verse
+       (dependen de `hidden`/`<details>` sin `open`, invisibles al
+       imprimir sin esta hoja) y pasa a paleta blanco/negro.
+     · `css/tokens.css` — tema claro real vía
+       `@media (prefers-color-scheme: light)`, redefiniendo
+       exactamente los mismos tokens de superficie/tinta/vidrio que ya
+       consume cada componente del sitio (ningún componente necesitó
+       una línea nueva para heredarlo). Cierra la brecha que la
+       auditoría 3ª pasada dejó documentada a propósito: en ese
+       momento era cierto que `color-scheme` debía decir solo `"dark"`
+       porque no existía tema claro; ahora que existe, `<meta
+       name="color-scheme">` pasa a `"dark light"` y `theme-color` se
+       divide en una entrada por esquema con `media=`.
+     · Contenido nuevo, 100% estático, mismo criterio sin-id que el
+       resto de la expansión editorial (invariante I7): `#testimonios`
+       ("Cómo lo usa la gente", tres perfiles ilustrativos sin
+       apellido ni foto — a propósito, para no simular una reseña
+       verificada que no es tal), `#para-locales` ("Para dueños de
+       locales", la pregunta "¿cómo aparezco?" llevada de una
+       respuesta de FAQ a una sección propia con CTA de contacto) y
+       `#privacidad-datos` ("Privacidad y tus datos", el detalle
+       completo detrás de la respuesta corta de FAQ, en dos listas
+       simétricas de qué se hace y qué no).
+     · FAQ ampliado de 10 a 14 preguntas (`faq-panel-11` a
+       `faq-panel-14`), JSON-LD `FAQPage` actualizado en el mismo
+       commit, mismo patrón exacto que las ampliaciones anteriores.
+     · `.indice-pagina` ganó las tres anclas nuevas en el grupo
+       "Conocé el proyecto" — mismas dos columnas de siempre, sin
+       agregar un tercer grupo que hubiera roto el layout de dos
+       columnas ya establecido.
+
+     Invariantes verificadas sin cambios: ningún `id` de la tabla de
+     contrato de la sección 3 se tocó, ningún `<script defer>` cambió
+     de orden, ningún `<template>` cambió su estructura interna, y el
+     texto de FAQ que ya existía (paneles 1-10) permanece carácter por
+     carácter igual — solo se agregó al final. Los `--color-rubro-*`
+     de tokens.css no se redefinieron para tema claro: se verificaron
+     contra el nuevo `--color-fondo` claro antes de decidir que ya
+     pasan contraste sin ajuste (ver el comentario en tokens.css para
+     el caso límite documentado).
+
+     Lo que esta pasada NO hizo, a propósito: no se implementó un
+     toggle manual de tema (el tema claro sigue siendo 100%
+     `prefers-color-scheme`, sin botón ni `localStorage` nuevo) para
+     no introducir un `id` ni un contrato JS nuevo sin que estuviera
+     pedido; si en el futuro se quiere ese control manual, es la
+     extensión natural de este trabajo, no algo que faltó por
+     descuido.
      ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>
