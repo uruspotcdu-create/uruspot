@@ -343,13 +343,34 @@
     <!-- BÚSQUEDA -->
     <div class="buscador" role="search" aria-label="Buscar lugares en Concepción del Uruguay">
       <label for="inputBuscar" class="u-sr-only">Buscar lugares por nombre, rubro o dirección</label>
-      <input
-        id="inputBuscar"
-        type="search"
-        placeholder="buscá por nombre, rubro o dirección…"
-        autocomplete="off"
-        enterkeyhint="search"
-        data-bind="search-input">
+      <div class="buscador__campo">
+        <input
+          id="inputBuscar"
+          type="search"
+          placeholder="buscá por nombre, rubro o dirección…"
+          autocomplete="off"
+          enterkeyhint="search"
+          aria-controls="panelDescubrimiento"
+          aria-expanded="false"
+          aria-describedby="buscadorAyuda"
+          data-bind="search-input">
+        <!-- Botón de limpiar propio: el ícono nativo de type="search" no
+             existe en Firefox y no es estilable ni tiene aria-label real
+             en ningún navegador. Este botón se comporta igual en todos
+             lados y app.js lo muestra/oculta según haya texto o no. -->
+        <button
+          id="btnLimpiarBusqueda"
+          type="button"
+          class="buscador__clear"
+          hidden
+          aria-label="Limpiar búsqueda"
+          data-bind="clear-search-button">×</button>
+      </div>
+      <span id="buscadorAyuda" class="u-sr-only">
+        Escribí al menos dos letras para buscar por nombre, rubro o dirección.
+        Con resultados visibles, flecha abajo mueve el foco al primer lugar;
+        entre lugares, flecha arriba y abajo recorren la lista y Escape vuelve acá.
+      </span>
       <button id="btnVerGuardados" type="button" class="btn btn--primario" data-bind="saved-list-button">
         tu lista guardada
         <!-- Bug D (§2): este elemento no existía en ningún punto del
