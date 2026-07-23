@@ -55,7 +55,7 @@
 
 <!-- META TAGS DE ACCESIBILIDAD Y PREFERENCIAS -->
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="color-scheme" content="dark light">
+<meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0A0D13">
 <meta name="format-detection" content="telephone=no">
 
@@ -427,7 +427,7 @@
        les da jerarquía, así el nav deja de sentirse como un mapa del
        sitio y vuelve a sentirse como una guía de uso. Sin cambios de
        JS ni de contrato: son las mismas 12 anclas de siempre. -->
-  <nav class="indice-pagina envoltorio" aria-label="Ir a una sección de esta página">
+  <nav class="indice-pagina envoltorio u-reveal" aria-label="Ir a una sección de esta página">
     <div class="indice-pagina__grupo">
       <span class="indice-pagina__grupo-titulo">Explorá</span>
       <ul class="indice-pagina__lista">
@@ -475,7 +475,7 @@
   <!-- DESCUBRIMIENTO: región dinámica. Todo lo que hay adentro de
        esta <section> se recalcula en cada render() de app.js — ver
        §1 para qué módulo decide qué. -->
-  <section class="envoltorio descubrimiento-area" id="region-descubrimiento" aria-label="Descubridor de lugares">
+  <section class="envoltorio descubrimiento-area u-reveal" id="region-descubrimiento" aria-label="Descubridor de lugares">
     <div id="mapaTextura" aria-hidden="true"></div>
     <p class="mapa-textura__leyenda">Cada punto de color es un lugar caminado y verificado — el mapa interactivo aparece más abajo apenas haya resultados con ubicación.</p>
 
@@ -1295,7 +1295,8 @@
   <p class="footer__meta">
     <a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a> •
     <a href="/donde-comer-cdu/terminos.html" rel="terms">Términos</a> •
-    <a href="mailto:padron@uruspot.com.ar">Contacto</a>
+    <a href="mailto:padron@uruspot.com.ar">Contacto</a> •
+    <a href="#siteHeader" aria-label="Volver al inicio de la página">Volver arriba ↑</a>
   </p>
 </footer>
 
@@ -1889,6 +1890,61 @@
      anclas, ficha de rubro, lista de glosario, estado de hoja de
      ruta, checklist de accesibilidad). Ver el encabezado de ese
      archivo para el detalle.
+
+     ───────────────────────────────────────────────────────────────
+     13. AUDITORÍA 3ª PASADA — alcance deliberadamente acotado a
+         index.html, sin tocar css/ ni js/
+     ───────────────────────────────────────────────────────────────
+     Esta pasada revisó arquitectura, flujo de datos, dependencias,
+     CSS, JS y el contrato de la sección 3 completo antes de tocar
+     una sola línea. Con el alcance limitado a este archivo (por
+     pedido explícito), los cambios reales y seguros que quedaban
+     disponibles sin CSS nuevo fueron estos cuatro, cada uno con
+     causa verificada, no cosmética:
+
+     · `<meta name="color-scheme">` pasó de `"dark light"` a `"dark"`.
+       Verificado por grep: ningún archivo de `css/` define un tema
+       claro real (no existe un solo `@media (prefers-color-scheme:
+       light)` en el proyecto). Declarar soporte de tema claro que no
+       existe hace que un navegador en modo claro pinte sus controles
+       nativos (inputs, selects, scrollbar) en claro sobre un fondo
+       de página que sigue siendo `--color-fondo` oscuro — un defecto
+       visual real, no hipotético. Cambio de una palabra, cero riesgo.
+     · `.indice-pagina` y `#region-descubrimiento` ganaron la clase
+       `u-reveal`, la misma que ya usan el resto de las secciones del
+       documento (`destacados`, `sobre-la-ciudad`, `manifiesto`,
+       `metodologia`, `rubros`, `rubros-guia`, `radiografia`,
+       `accesos`, `guia-practica`, `glosario`, `faq`, `hoja-de-ruta`,
+       `accesibilidad`). Eran las únicas dos secciones del `<main>`
+       sin el tratamiento de entrada que ya tiene todo lo demás — una
+       inconsistencia real de tratamiento visual, corregida con una
+       clase que ya existe en `tokens.css` (I5 no se toca: sigue sin
+       haber `<style>` embebido nuevo).
+     · El footer sumó un cuarto link, "Volver arriba ↑", con el mismo
+       patrón `.footer__meta` de separador " • " que ya usan los tres
+       links existentes. Con 12 secciones editoriales el documento es
+       un scroll largo; no había forma de volver al inicio sin usar
+       el scroll nativo del navegador. Apunta a `#siteHeader`, un id
+       que ya existe en este mismo documento — no se agregó ningún id
+       nuevo.
+
+     Lo que esta pasada NO hizo, a propósito: no se tocó ningún `id`
+     de la tabla de la sección 3, ningún `<script defer>`, ningún
+     `<template>`, ningún texto de FAQ/JSON-LD, ninguna clase que
+     dependiera de una regla CSS inexistente, y no se introdujeron
+     encabezados (`<h3>`, etc.) nuevos dentro de `.manifiesto-card`:
+     se verificó que esa clase solo define tipografía para `<p>` y
+     `<a>` en `descubrimiento.css`, así que un `<h3>` ahí adentro
+     habría heredado el tamaño y peso por defecto del user-agent en
+     vez de un estilo propio — una regresión visual silenciosa
+     exactamente del tipo que este archivo pide evitar.
+
+     Si se quiere la reingeniería visual más profunda que se pidió
+     originalmente (mejor composición, microdetalles, transiciones e
+     identidad visual nuevas), la mayoría de ese trabajo vive
+     estructuralmente en `css/*.css`, no en este HTML — ese es el
+     alcance natural para continuar, no una limitación de este
+     archivo en particular.
      ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>
