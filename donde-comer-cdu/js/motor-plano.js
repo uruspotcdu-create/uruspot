@@ -95,25 +95,18 @@
      espejo exacto de `gruposAEvitar()` con el mismo mecanismo de
      decaimiento ya validado en producción — no es un mecanismo nuevo
      sin probar, es el mismo patrón aplicado al otro signo.
-   • `Acciones.aceptar` acepta ahora un `payload.grupo` OPCIONAL. Hoy
-     `app.js:424` no lo manda, así que el comportamiento observable
-     no cambia ni un bit para nadie hasta que algún día `app.js`
-     decida mandarlo — este archivo queda listo para recibir esa
-     señal sin que haga falta otro cambio de esquema cuando llegue.
-     No se toca `app.js` en esta pasada (ver nota de alcance al final
-     de este bloque).
-   • Constantes de calibración (`AFINIDAD.ventanaDecaimientoDias`,
-     `AFINIDAD.repeticionesParaEstable`) viven, por ahora, como
-     constantes de módulo acá mismo — NO en motor-config.js, aunque
-     la convención documentada en motor-config.js pide exactamente
-     eso ("cambiar un número acá nunca debería requerir tocar
-     motor-plano.js"). Es una desviación deliberada y temporal: mover
-     estos dos números a motor-config.js es un cambio aditivo de
-     riesgo casi nulo, pero es OTRO archivo, y la instrucción de
-     alcance para esta pasada es no tocar ningún archivo fuera de
-     motor-plano.js y su test sin confirmación explícita. Quedan
-     marcadas ⚠ MIGRAR_A_CONFIG en su propia definición para que sean
-     fáciles de encontrar el día que se autorice ese commit.
+   • `Acciones.aceptar` acepta un `payload.grupo` OPCIONAL. Autorizado
+     explícitamente: `app.js:424` ahora sí lo manda (mismo patrón que
+     ya usaba `Acciones.rechazar` para resolver el rubro desde
+     `porId[id]`), así que la afinidad positiva queda activa en
+     producción desde esta pasada. El campo se sigue tratando como
+     opcional en `motor-plano.js` — si algún día faltara o llegara
+     `undefined`, el comportamiento degrada al de antes sin lanzar.
+   • Constantes de calibración (ventana de decaimiento, umbral de
+     patrón estable) migradas a `motor-config.js: acciones.aceptar`,
+     junto a sus equivalentes de `acciones.rechazar` — autorizado
+     explícitamente y aplicado en esta pasada. Ya no son constantes
+     de módulo locales.
 
    NUEVO — nivelConfianza(estado)
    • Métrica derivada, pura, de cuánta evidencia real sostiene la
@@ -156,12 +149,13 @@
    • `Acciones.permanecer` / `Acciones.rechazar` / el cálculo de
      `friccion` no cambian: siguen siendo consumidos por `region()`
      tal cual estaban.
-   • `app.js`, `motor-exposicion.js`, `motor-render.js`,
-     `motor-config.js`: fuera de alcance de esta pasada por
-     instrucción explícita. Donde una mejora completa hubiera
-     requerido tocarlos, se dejó la interfaz lista (payload opcional,
-     funciones nuevas expuestas) mejor que forzar el cambio sin
-     autorización. Ver nota de "migrar a config" arriba.
+   • `motor-exposicion.js`, `motor-render.js`: siguen fuera de
+     alcance — es donde vivirá la decisión de producto de priorizar
+     por afinidad, no de esta pasada. `app.js` y `motor-config.js` SÍ
+     se tocaron en esta pasada (autorización explícita): un cambio de
+     una línea en `app.js:424` (mandar `grupo`, igual que ya hacía
+     `Acciones.rechazar`) y la migración de las 2 constantes de
+     calibración de afinidad a `motor-config.js: acciones.aceptar`.
    ═══════════════════════════════════════════════════════════════════ */
 
 (function (global) {
@@ -492,25 +486,14 @@
      aceptaba — solo de cuáles se evitaban. Ver sección 2 del
      encabezado del archivo para la justificación completa.
 
-     MIGRAR_A_CONFIG: estos dos números deberían vivir en
-     motor-config.js junto a `acciones.rechazar` (misma naturaleza:
-     un umbral de calibración de producto), siguiendo la convención
-     que el propio motor-config.js declara. Quedan acá como
-     constantes de módulo porque esta pasada no tiene autorización
-     para tocar otro archivo — ver nota de alcance en el encabezado.
+     Las constantes de calibración (ventana de decaimiento, umbral de
+     patrón estable) viven en motor-config.js: acciones.aceptar, junto
+     a sus equivalentes de acciones.rechazar — misma convención que el
+     propio motor-config.js declara ("cambiar un número acá nunca
+     debería requerir tocar motor-plano.js"). Ya no son constantes de
+     módulo locales (lo eran en la pasada anterior, marcadas
+     MIGRAR_A_CONFIG; esta pasada hace esa migración, autorizada).
      ───────────────────────────────────────────────────────────── */
-  var AFINIDAD = {
-    ventanaDecaimientoDias: 21,
-    // Un poco más larga que la de rechazos (14 días): una preferencia
-    // positiva sostenida es información más barata de confirmar que
-    // un rechazo (aceptar es una acción de un click; rechazar suele
-    // implicar más fricción real) y vale la pena conservarla más
-    // tiempo antes de pedir nueva evidencia.
-    repeticionesParaEstable: 3
-    // Mismo umbral que rechazar.repeticionesParaEstable, por
-    // simetría y porque no hay evidencia de uso real todavía que
-    // sugiera un número distinto — recalibrar cuando la haya.
-  };
 
   /**
    * Timestamps de aceptación de un rubro que siguen dentro de la
@@ -522,7 +505,7 @@
    * @returns {number[]}
    */
   function aceptacionesVigentes(estado, grupo, ahoraMs) {
-    var ventanaMs = AFINIDAD.ventanaDecaimientoDias * 24 * 3600 * 1000;
+    var ventanaMs = CFG.acciones.aceptar.ventanaDecaimientoDias * 24 * 3600 * 1000;
     var lista = (estado.aceptados && estado.aceptados[grupo]) || [];
     return lista.filter(function (ts) { return (ahoraMs - ts) <= ventanaMs; });
   }
@@ -537,7 +520,7 @@
    * @returns {boolean}
    */
   function grupoEsAfinidadEstable(estado, grupo, ahoraMs) {
-    return aceptacionesVigentes(estado, grupo, ahoraMs).length >= AFINIDAD.repeticionesParaEstable;
+    return aceptacionesVigentes(estado, grupo, ahoraMs).length >= CFG.acciones.aceptar.repeticionesParaEstable;
   }
 
   /**
