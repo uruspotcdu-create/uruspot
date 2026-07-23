@@ -44,9 +44,11 @@
   content:""; position:absolute; inset:0; pointer-events:none; z-index:-1;
   background:var(--gradiente-superficie);
 }
+@media (hover:hover) and (pointer:fine){
 .tarjeta:hover{
   transform:translateY(-4px); border-color:var(--glass-borde-hover);
   box-shadow:var(--sombra-vidrio), 0 0 28px -10px var(--chip-color, rgba(201,122,131,.5));
+}
 }
 .tarjeta--narrativa{ grid-column:span 2; }
 @media (max-width:720px){ .tarjeta--narrativa{ grid-column:span 1; } }
@@ -114,8 +116,10 @@
    coordenada, teléfono real, compartir el link de ficha). Mismo
    componente .tarjeta-btn, con un acento de color sutil por tipo de
    acción para que se distingan de un vistazo sin gritar. */
+@media (hover:hover) and (pointer:fine){
 .tarjeta-btn--maps:hover{ color:#7fb8e0; border-color:#7fb8e0; background:rgba(127,184,224,.12); }
 .tarjeta-btn--tel:hover{ color:#8fd0a0; border-color:#8fd0a0; background:rgba(143,208,160,.12); }
+}
 .tarjeta-btn--compartir{ padding-left:10px; padding-right:10px; }
 /* Jerarquía deliberada: "no me interesa" es la única acción negativa
    entre cinco posibles, y antes tenía el mismo peso visual que
@@ -125,7 +129,9 @@
    teclado y lector de pantalla) para que las acciones positivas
    ganen la primera pasada visual. */
 .tarjeta-btn--descartar{ opacity:.55; border-style:dashed; }
-.tarjeta-btn--descartar:hover,
+@media (hover:hover) and (pointer:fine){
+.tarjeta-btn--descartar:hover{ opacity:1; }
+}
 .tarjeta-btn--descartar:focus-visible{ opacity:1; }
 
 /* ── Paginación ("cargar más") ──
@@ -151,9 +157,11 @@
   transition:color var(--dur-media), border-color var(--dur-media), transform var(--dur-rapido),
              background var(--dur-media), box-shadow var(--dur-media);
 }
+@media (hover:hover) and (pointer:fine){
 .tarjeta-btn:hover{
   color:var(--color-tinta); border-color:var(--color-granate-clara);
   transform:translateY(-1px); background:rgba(201,122,131,.12);
+}
 }
 .tarjeta-btn:focus-visible{
   outline:2px solid var(--color-granate-clara); outline-offset:1px;
@@ -171,8 +179,10 @@
   background:var(--gradiente-marca); border-color:transparent; color:#FBF4F1;
   font-weight:600;
 }
+@media (hover:hover) and (pointer:fine){
 .tarjeta-btn--primaria:hover{
   filter:brightness(1.08); color:#FBF4F1; border-color:transparent;
+}
 }
 .tarjeta-btn--fav.activo{
   color:var(--color-granate-clara); border-color:var(--color-granate-clara);
@@ -181,8 +191,18 @@
      reflow entero de la grilla YA era el feedback. Fase 3 quita ese
      render innecesario (ver app.js) por costo de performance/motion,
      así que el botón necesita su propia confirmación breve — un pop
-     acotado, no un salto. */
-  animation:uru-scale-in var(--dur-media) var(--easing-rebote);
+     acotado, no un salto.
+     CORREGIDO: usaba uru-scale-in (keyframe de ENTRADA, parte de
+     opacity:0) sobre un botón que ya está visible — hacía parpadear
+     el botón a invisible en vez de confirmar. uru-pop-confirmar es
+     solo transform, nunca opacity: no hay parpadeo ni layout shift,
+     y si el usuario des-guarda a mitad de camino, se cancela solo
+     (la transition de transform que ya tiene .tarjeta-btn de base
+     absorbe el regreso, sin salto). */
+  animation:uru-pop-confirmar var(--dur-rapido) var(--easing-rebote);
+}
+@media (prefers-reduced-motion: reduce){
+  .tarjeta-btn--fav.activo{ animation:none; }
 }
 
 .vacio{
