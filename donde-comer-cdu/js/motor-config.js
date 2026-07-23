@@ -113,11 +113,90 @@
       // Un lugar ya mostrado por iniciativa propia "descansa" 72h
       // antes de poder volver a aparecer en Guía/Exploración para
       // ese mismo contexto (usuario × ciudad).
-      aplicaSoloEnRegiones: ['guia', 'exploracion']
+      aplicaSoloEnRegiones: ['guia', 'exploracion'],
       // Recalibrar con datos de: ¿la gente se queja de ver lo mismo
       // (bajar descansoHoras) o de nunca ver lo mismo dos veces
       // aunque lo busque (revisar que no se esté aplicando fuera de
       // estas dos regiones por error)?
+
+      /* ── 4b. Motor de scoring del recorte por iniciativa propia ──
+       Solo aplica dentro de recortePorIniciativaPropia() — nunca a
+       búsqueda explícita ni a Curaduría (motor-exposicion.js impone
+       ese límite, esto solo calibra números). Cada señal es opcional
+       en tiempo de ejecución: si el dato de entrada no está
+       disponible para un lugar o para la sesión, esa señal
+       simplemente no participa (se renormalizan los pesos restantes,
+       ver motor-exposicion.js: calcularScore) — nunca se penaliza a
+       un lugar por falta de dato. */
+      scoring: {
+        pesos: {
+          afinidad: 0.35,
+          // Rubros con patrón de aceptación estable (gruposAfines).
+          // El más alto de los cuatro a propósito: es la señal con más
+          // evidencia detrás (3+ aceptaciones reales, no una corazonada).
+          proximidad: 0.25,
+          // Distancia al usuario, cuando hay ubicación. Nunca decide
+          // sola: ver diversidad/exploración más abajo para por qué no
+          // termina en "todo lo más cercano".
+          frescura: 0.15,
+          // Preferencia leve por lugares nunca antes aceptados desde un
+          // recorte. Complementa (no reemplaza) la exclusión dura por
+          // descanso (exposicion.descansoHoras) que ya filtra candidatos
+          // antes de llegar al scoring.
+          contexto: 0.10
+          // Clima/hora. Peso bajo a propósito: hoy `afinidadClimaPorGrupo`
+          // está vacío (ver más abajo), así que en la práctica esta señal
+          // no influye en nada todavía — el peso queda documentado y
+          // listo para cuando el producto decida activarla con datos
+          // reales, no con una suposición de este archivo.
+        },
+        proximidad: {
+          distanciaReferenciaMetros: 3000
+          // A esta distancia el aporte de proximidad decae a ~0; a 0
+          // metros, aporte máximo. 3km cubre cómodamente el radio
+          // urbano de Concepción del Uruguay sin volverse una señal de
+          // todo-o-nada. Recalibrar si "cerca tuyo" en app.js muestra
+          // que la gente usa el filtro con radios muy distintos.
+        },
+        frescura: {
+          decaimientoPorVez: 0.5
+          // score = 1 / (1 + vecesMostrado * este_valor). Nunca llega a
+          // 0 (un lugar muy repetido sigue pudiendo aparecer, solo pesa
+          // menos) — la exclusión dura ya la resuelve el descanso.
+        },
+        diversidad: {
+          maxPorGrupoRatio: 0.5
+          // Ningún rubro puede ocupar más de la mitad del cupo del
+          // recorte, salvo que no haya suficientes rubros distintos
+          // entre los candidatos disponibles (ahí se relaja, mismo
+          // criterio de "nunca cae por debajo del cupo" que ya usa el
+          // filtro de rubros evitados). Evita que la afinidad, llevada
+          // al extremo, se convierta en una burbuja de un solo rubro.
+        },
+        exploracion: {
+          ratio: 0.2,
+          // Fracción del cupo reservada para candidatos fuera del
+          // top-score, elegidos con el mismo mecanismo determinístico
+          // por semilla que ya usaba el shuffle viejo — no es
+          // aleatoriedad real, es "distinto pero reproducible dentro de
+          // la sesión". Ver motor-exposicion.js: seleccionar().
+          minCandidatosParaActivarse: 3
+          // Con muy pocos candidatos no tiene sentido reservar cupo de
+          // exploración — se prioriza mostrar lo que hay.
+        },
+        afinidadClimaPorGrupo: {}
+        // Vacío A PROPÓSITO. Mapear qué rubro conviene más con qué
+        // condición climática ("lluvia" favorece gastronomía con techo,
+        // por ejemplo) es una decisión de producto que necesita datos
+        // reales o al menos una revisión editorial — no algo que este
+        // archivo deba inventar. Con la tabla vacía, la señal de clima
+        // se calcula (para explicabilidad/tests) pero nunca cambia el
+        // orden de nada: es matemáticamente neutra. Forma esperada si
+        // se llena en el futuro:
+        //   { heladerias: { calor: 0.4, frio: -0.3, lluvia: -0.2 },
+        //     cafeterias: { lluvia: 0.3, frio: 0.2 } }
+        // valores como deltas en [-0.5, 0.5] alrededor de un neutro 0.5.
+      }
     },
 
     /* ── 5. Madurez por contexto (Blueprint v2, sección 3) ──
