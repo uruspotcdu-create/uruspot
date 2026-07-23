@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="theme-color" content="#060605" />
+<meta name="theme-color" content="#050403" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
 <!-- DNS prefetch -->
@@ -76,21 +76,22 @@
    TOKENS & RESET
    ============================================================ */
 :root {
-  --void:        #060605;
-  --void2:       #0d0d0b;
-  --parchment:   #f2ede3;
-  --parchment2:  #e8e2d5;
-  --parchment3:  #faf8f3;
-  --ink:         #1a1916;
+  --void:        #050403;
+  --void2:       #0a0908;
+  --parchment:   #f5efe0;
+  --parchment2:  #e9e0cd;
+  --parchment3:  #fbf8f1;
+  --ink:         #14120e;
 
-  /* Gym accent — verde oscuro + dorado URU SPOT */
-  --gym:         #1d5c40;
-  --gym2:        #267a55;
-  --gym3:        #36a870;
-  --gym4:        #64d29b;
-  --oro:         #c4872a;
-  --oro2:        #dfa040;
-  --oro3:        #f2c060;
+  /* Gym accent — verde profundo + oro fundido URU SPOT premium */
+  --gym:         #17493a;
+  --gym2:        #1f7a56;
+  --gym3:        #4fd699;
+  --gym4:        #8bf3c4;
+  --oro:         #a9762a;
+  --oro2:        #e3ab45;
+  --oro3:        #ffd876;
+  --ember:       #ff8a3d;
 
   --f-display:   'DM Serif Display', serif;
   --f-ui:        'Syne', sans-serif;
@@ -218,11 +219,11 @@ img { display: block; max-width: 100%; }
 .hero-mesh {
   position: absolute; inset: 0; z-index: 0;
   background:
-    radial-gradient(ellipse 68% 65% at 80% 10%,  rgba(29,92,64,.42)  0%, transparent 58%),
-    radial-gradient(ellipse 50% 60% at 10% 85%,  rgba(196,135,42,.14) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 50% at 50% 48%,  rgba(29,92,64,.07)  0%, transparent 65%),
-    radial-gradient(ellipse 22% 28% at 22% 22%,  rgba(100,210,155,.05) 0%, transparent 55%),
-    linear-gradient(168deg, #030a06 0%, #060605 50%, #060805 100%);
+    radial-gradient(ellipse 70% 68% at 84% 6%,   rgba(23,73,58,.55)  0%, transparent 58%),
+    radial-gradient(ellipse 46% 54% at 6% 92%,   rgba(227,171,69,.20) 0%, transparent 62%),
+    radial-gradient(ellipse 34% 42% at 55% 40%,  rgba(31,122,86,.10)  0%, transparent 65%),
+    radial-gradient(ellipse 20% 26% at 20% 18%,  rgba(139,243,196,.06) 0%, transparent 55%),
+    linear-gradient(168deg, #020705 0%, #050403 50%, #060503 100%);
 }
 @media (min-width: 769px) {
   .hero-mesh { animation: meshPulse 22s ease-in-out infinite alternate; }
@@ -278,6 +279,30 @@ img { display: block; max-width: 100%; }
   position: relative; z-index: 4;
   padding: 0 var(--gutter) 80px;
   flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+}
+
+/* ── SIGNATURE: numeral colosal en filigrana, el "trofeo tipográfico" ── */
+.hero-watermark {
+  position: absolute; z-index: 0; top: 50%; right: clamp(-40px, 2vw, 40px);
+  transform: translateY(-52%);
+  font-family: var(--f-display); font-style: italic;
+  font-size: clamp(280px, 34vw, 620px); line-height: 1;
+  font-weight: 400; letter-spacing: -.04em;
+  color: transparent;
+  -webkit-text-stroke: 1.4px rgba(227,171,69,.16);
+  background: linear-gradient(160deg, rgba(227,171,69,.14) 0%, rgba(79,214,153,.07) 60%, transparent 100%);
+  -webkit-background-clip: text; background-clip: text;
+  pointer-events: none; user-select: none; white-space: nowrap;
+}
+@media (min-width: 769px) {
+  .hero-watermark { animation: watermarkDrift 26s ease-in-out infinite alternate; }
+  @keyframes watermarkDrift {
+    from { transform: translateY(-52%) translateX(0) rotate(0deg); }
+    to   { transform: translateY(-49%) translateX(-14px) rotate(-1.1deg); }
+  }
+}
+@media (max-width: 900px) {
+  .hero-watermark { font-size: clamp(180px, 55vw, 340px); opacity: .7; }
 }
 
 .breadcrumb {
@@ -392,8 +417,9 @@ img { display: block; max-width: 100%; }
   font-family: var(--f-ui); font-size: 11px; font-weight: 800;
   letter-spacing: 2.5px; text-transform: uppercase;
   padding: 17px 38px; border-radius: 2px;
-  transition: background .4s var(--ease), transform .4s var(--ease), box-shadow .4s ease;
-  box-shadow: 0 8px 40px rgba(29,92,64,.50);
+  border: 1px solid rgba(227,171,69,.35);
+  transition: background .4s var(--ease), transform .4s var(--ease), box-shadow .4s ease, border-color .4s ease;
+  box-shadow: 0 8px 40px rgba(23,73,58,.50);
   position: relative; overflow: hidden;
 }
 .btn-primary::after {
@@ -524,28 +550,29 @@ img { display: block; max-width: 100%; }
    ============================================================ */
 .feat-card {
   position: relative; background: var(--ink);
-  border-left: 5px solid var(--gym);
+  border: 1px solid rgba(227,171,69,.22); border-left: 5px solid var(--oro2);
   padding: 52px 52px 44px; margin-bottom: 2px;
   overflow: hidden; text-decoration: none;
   display: flex; flex-direction: column; gap: 22px;
-  transition: background .4s ease, transform .4s var(--ease), box-shadow .4s ease;
-  box-shadow: 0 4px 40px rgba(0,0,0,.14); contain: layout style;
+  transition: background .4s ease, transform .4s var(--ease), box-shadow .4s ease, border-color .4s ease;
+  box-shadow: 0 4px 40px rgba(0,0,0,.18), inset 0 1px 0 rgba(227,171,69,.08); contain: layout style;
 }
 .feat-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--gym4), var(--gym2), var(--gym));
-  background-size: 200% 100%; animation: shimmerBar 4s linear infinite;
+  background: linear-gradient(90deg, var(--oro3), var(--gym4), var(--oro2), var(--gym));
+  background-size: 250% 100%; animation: shimmerBar 4s linear infinite;
 }
 .feat-card::after {
   content: ''; position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 65% 72% at 96% 12%, rgba(29,92,64,.28) 0%, transparent 55%),
-    radial-gradient(ellipse 42% 52% at 4%  88%, rgba(196,135,42,.10) 0%, transparent 55%);
+    radial-gradient(ellipse 65% 72% at 96% 12%, rgba(227,171,69,.16) 0%, transparent 55%),
+    radial-gradient(ellipse 42% 52% at 4%  88%, rgba(31,122,86,.20) 0%, transparent 55%);
   pointer-events: none; z-index: 0;
 }
 .feat-card:hover {
   background: #1a1f1c; transform: translateY(-4px);
-  box-shadow: 0 28px 72px -10px rgba(0,0,0,.45);
+  box-shadow: 0 28px 80px -10px rgba(0,0,0,.5), 0 0 0 1px rgba(227,171,69,.3);
+  border-color: rgba(227,171,69,.45);
 }
 .feat-shine {
   position: absolute; inset: 0;
@@ -623,7 +650,8 @@ img { display: block; max-width: 100%; }
 }
 .score-bar-fill {
   height: 100%; border-radius: 3px;
-  background: linear-gradient(90deg, var(--gym), var(--gym3));
+  background: linear-gradient(90deg, var(--gym), var(--gym3) 62%, var(--oro3));
+  box-shadow: 0 0 14px rgba(79,214,153,.45);
   transform-origin: left;
   animation: fillBar .8s var(--ease) both;
 }
@@ -649,10 +677,10 @@ img { display: block; max-width: 100%; }
 }
 .gitem::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-  background: var(--gym); transform: scaleY(0);
+  background: linear-gradient(180deg, var(--oro2), var(--gym)); transform: scaleY(0);
   transition: transform .35s var(--ease); transform-origin: bottom;
 }
-.gitem:hover { background: var(--parchment); transform: translateX(5px); box-shadow: -5px 0 28px -4px rgba(29,92,64,.24); }
+.gitem:hover { background: var(--parchment); transform: translateX(5px); box-shadow: -5px 0 32px -4px rgba(227,171,69,.28); }
 .gitem:hover::before { transform: scaleY(1); }
 
 .gitem-rank {
@@ -661,12 +689,12 @@ img { display: block; max-width: 100%; }
   background: rgba(26,25,22,.04); border-right: 1px solid rgba(26,25,22,.07);
 }
 .gitem-rank-num {
-  font-family: var(--f-display); font-size: 20px;
+  font-family: var(--f-display); font-size: 22px;
   color: rgba(26,25,22,.18); line-height: 1; letter-spacing: -1px;
   transition: color .35s ease;
 }
-.gitem:hover .gitem-rank-num { color: var(--gym); }
-.gitem.is-top .gitem-rank-num { color: var(--gym); }
+.gitem:hover .gitem-rank-num { color: var(--oro); }
+.gitem.is-top .gitem-rank-num { color: var(--gym); text-shadow: 0 0 18px rgba(227,171,69,.18); }
 
 .gitem-icon {
   font-size: 26px; flex-shrink: 0; padding: 0 20px;
@@ -696,7 +724,7 @@ img { display: block; max-width: 100%; }
 }
 .gitem-score-fill {
   height: 100%; border-radius: 2px;
-  background: linear-gradient(90deg, var(--gym), var(--gym3));
+  background: linear-gradient(90deg, var(--gym), var(--gym3) 65%, var(--oro3));
 }
 .gitem-score-val {
   font-family: var(--f-ui); font-size: 10px; font-weight: 700;
@@ -783,9 +811,10 @@ img { display: block; max-width: 100%; }
 .score-row-bar {
   height: 5px; border-radius: 2px; flex: 1;
   background: linear-gradient(90deg, var(--gym), var(--gym3));
-  transition: opacity .3s ease;
+  transition: opacity .3s ease, box-shadow .3s ease;
 }
 .score-row:hover .score-row-bar { opacity: .85; }
+.score-row.top-1 .score-row-bar { background: linear-gradient(90deg, var(--gym), var(--gym3) 55%, var(--oro3)); box-shadow: 0 0 12px rgba(227,171,69,.4); }
 
 /* ============================================================
    AD BANNER
@@ -1101,6 +1130,7 @@ a:focus-visible { outline: 2px solid rgba(29,92,64,.75); outline-offset: 3px; bo
   <div class="hero-pattern" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
   <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+  <div class="hero-watermark" aria-hidden="true">N°1</div>
 
   <div class="hero-inner">
     <!-- breadcrumb -->
