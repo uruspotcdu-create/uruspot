@@ -1,0 +1,192 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — css/destacados.css
+   AUDITORÍA 4ª PASADA — archivo NUEVO, corrige un enlace roto real.
+
+   Diagnóstico: index.html carga <link rel="stylesheet"
+   href="css/destacados.css"> desde la auditoría "Fase 4" (ver el
+   comentario sobre la sección #destacados en ese archivo), pero el
+   archivo nunca se creó. El navegador pedía este recurso y recibía un
+   404 silencioso — ni un error visible en pantalla, porque perder una
+   hoja de estilos no rompe HTML ni JS, solo deja al elemento sin
+   ninguna regla propia. Efecto real y comprobable: la sección
+   "Destacados" y cada `.destacado-card` que arma
+   app.js/pintarDestacados() (ver js/app.js, línea ~1186,
+   `card.className = 'destacado-card'`) se pintaban con el estilo por
+   defecto del navegador — texto plano, sin tarjeta, sin grilla, sin
+   color de rubro — en la sección pensada como spotlight principal del
+   catálogo mejor puntuado.
+
+   Este archivo define exclusivamente lo que le falta a esa sección y
+   a las tarjetas que arma `pintarDestacados()`. Reutiliza vocabulario
+   ya existente (--glass-*, --sombra-*, --color-rubro-*, --tipo-*) de
+   tokens.css en vez de inventar valores nuevos — ninguna paleta ni
+   escala propia. Depende de tokens.css (variables) y de boton.css
+   (.btn, si en el futuro se agrega un CTA dentro de la tarjeta); no
+   depende de tarjeta-lugar.css ni lo reemplaza: `.destacado-card` es
+   un componente propio, más compacto, pensado para una tira
+   horizontal de scroll, no para la grilla principal de resultados.
+
+   Contrato con JS (no tocar sin revisar js/app.js primero):
+     #listaDestacados         → contenedor, recibe .destacados-strip
+     .destacado-card          → una tarjeta (arma innerHTML completo)
+     .destacado-card__rubro   → línea superior, texto del rubro
+     .destacado-card__nombre  → nombre del lugar
+     .destacado-card__rating  → línea "★ 4,8"
+     .destacado-card__conteo  → "(123)" dentro de __rating
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Sección contenedora ──
+   Nace `hidden` en el HTML (invariante I2, ver index.html §3) hasta
+   que pintarDestacados() confirme que hay ≥3 lugares que califican.
+   Cuando se revela, hereda `u-reveal` como el resto del documento. */
+.destacados{
+  position:relative;
+}
+
+.destacados h2{
+  font:var(--tipo-display-md);
+  color:var(--color-tinta);
+  margin-bottom:var(--esp-2);
+}
+
+.destacados-subtitulo{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-60);
+  margin-bottom:var(--esp-6);
+  max-width:52ch;
+}
+
+/* ── Tira de tarjetas ──
+   Scroll horizontal con snap: en mobile no hay espacio para una
+   grilla de 3-4 columnas sin que cada tarjeta quede angosta al punto
+   de no leerse; el patrón de "carrusel simple" (overflow-x + snap,
+   sin JS de por medio) es el mismo criterio que usa el resto del
+   sitio para contenido que no necesita reflow — scroll nativo,
+   accesible con teclado (flechas del sistema) y sin dependencias. */
+.destacados-strip{
+  display:flex;
+  gap:var(--esp-4);
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding-block:var(--esp-2);
+  padding-inline:var(--esp-1);
+  margin-inline:calc(var(--esp-1) * -1);
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;
+  scrollbar-color:var(--glass-borde-hover) transparent;
+  -webkit-overflow-scrolling:touch;
+}
+.destacados-strip::-webkit-scrollbar{ height:6px; }
+.destacados-strip::-webkit-scrollbar-thumb{
+  background:var(--glass-borde-hover);
+  border-radius:var(--radio-full);
+}
+.destacados-strip::-webkit-scrollbar-track{ background:transparent; }
+
+/* Estado de carga: mismo vocabulario .u-skeleton que ya define
+   tokens.css, tres placeholders con el tamaño real de una tarjeta
+   para que el layout no salte cuando llegan los datos. */
+.destacados-strip:empty::before{
+  content:'';
+  display:block;
+  width:100%;
+  height:1px;
+}
+
+/* ── Tarjeta individual ──
+   Vidrio consistente con el resto del sitio (misma familia visual que
+   .manifiesto-card y .tarjeta), pero con ancho fijo pensado para la
+   tira horizontal en vez de estirarse a una grilla. */
+.destacado-card{
+  flex:0 0 auto;
+  scroll-snap-align:start;
+  width:220px;
+  padding:var(--esp-4);
+  border-radius:var(--radio-lg);
+  background:var(--glass-bg);
+  border:1px solid var(--glass-borde);
+  backdrop-filter:blur(var(--glass-blur));
+  -webkit-backdrop-filter:blur(var(--glass-blur));
+  box-shadow:var(--sombra-vidrio);
+  position:relative;
+  overflow:hidden;
+  transition:
+    transform var(--dur-media) var(--easing-estandar),
+    border-color var(--dur-media) var(--easing-estandar),
+    box-shadow var(--dur-media) var(--easing-estandar);
+}
+
+/* Filete superior con el color de rubro cuando app.js lo trae como
+   --rubro-color inline (mismo patrón que .radiografia-fila y
+   .rubro-ficha de contenido-editorial.css) — si no llega la variable,
+   cae al degradé de marca en vez de a un borde transparente roto. */
+.destacado-card::before{
+  content:'';
+  position:absolute;
+  inset:0 0 auto 0;
+  height:3px;
+  background:var(--rubro-color, var(--gradiente-marca));
+}
+
+.destacado-card:hover,
+.destacado-card:focus-within{
+  transform:translateY(-4px);
+  border-color:var(--glass-borde-hover);
+  box-shadow:var(--sombra-vidrio), var(--sombra-glow);
+}
+
+.destacado-card__rubro{
+  font:var(--tipo-dato-xs);
+  letter-spacing:var(--ls-amplio);
+  text-transform:uppercase;
+  color:var(--rubro-color, var(--color-tinta-60));
+  margin-bottom:var(--esp-2);
+}
+
+.destacado-card__nombre{
+  font:var(--tipo-display-sm);
+  color:var(--color-tinta);
+  margin-bottom:var(--esp-2);
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  min-height:calc(1.3em * 2);
+}
+
+.destacado-card__rating{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-rubro-alojamiento);
+  font-weight:var(--peso-semibold);
+  display:flex;
+  align-items:baseline;
+  gap:var(--esp-1);
+}
+
+.destacado-card__conteo{
+  font:var(--tipo-dato-xs);
+  color:var(--color-tinta-60);
+  font-weight:var(--peso-regular);
+}
+
+/* ── Responsive ──
+   Bajo 720px las tarjetas se angostan un poco para que se alcance a
+   sugerir la siguiente (affordance de "hay más scrolleando"), sin
+   llegar a un ancho donde el nombre del lugar quede ilegible. */
+@media (max-width:720px){
+  .destacado-card{ width:180px; }
+}
+
+/* ── Reduced motion / transparencia / alto contraste ──
+   Mismo criterio que el resto del sitio (ver tokens.css): no se
+   inventa una excepción nueva, se hereda el comportamiento global y
+   solo se ajusta lo que es específico de este componente. */
+@media (prefers-reduced-motion:reduce){
+  .destacado-card{ transition:none; }
+  .destacado-card:hover,
+  .destacado-card:focus-within{ transform:none; }
+}
+@media (forced-colors:active){
+  .destacado-card{ border:1px solid CanvasText; box-shadow:none; }
+  .destacado-card::before{ background:CanvasText; }
+}
