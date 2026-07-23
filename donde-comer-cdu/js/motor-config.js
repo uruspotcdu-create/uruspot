@@ -55,7 +55,19 @@
         empujeFriccionMax: 0.30     // tope acumulado por sesión
       },
       aceptar: {
-        empujeAutonomia: 0.06       // "esta oferta funcionó, soltá un poco más"
+        empujeAutonomia: 0.06,      // "esta oferta funcionó, soltá un poco más"
+        ventanaDecaimientoDias: 21,
+        // Afinidad positiva por rubro (espejo de rechazar, señal
+        // contraria). Un poco más larga que la de rechazar (14 días):
+        // una preferencia positiva sostenida es información más
+        // barata de confirmar que un rechazo (aceptar es una acción
+        // de un click; rechazar suele implicar más fricción real) y
+        // vale la pena conservarla más tiempo antes de pedir nueva
+        // evidencia.
+        repeticionesParaEstable: 3
+        // Mismo umbral que rechazar.repeticionesParaEstable, por
+        // simetría y porque no hay evidencia de uso real todavía que
+        // sugiera un número distinto — recalibrar cuando la haya.
       },
       rechazar: {
         ventanaDecaimientoDias: 14,
