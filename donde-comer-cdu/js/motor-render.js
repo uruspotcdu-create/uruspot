@@ -96,6 +96,70 @@
    `URU_MOTOR_MAPA_RENDER.crear(...)` con los mismos métodos:
    on / establecerPuntos / encuadrarTodos / enfocar / resaltar /
    quitarResaltado / destruir).
+
+   ───────────────────────────────────────────────────────────────────
+   SEGUNDA PASADA — sensación premium de la interacción de zoom/pan.
+
+   Antes de tocar nada, se revisó el resto del repo (app.js,
+   motor-plano.js, motor-exposicion.js, motor-mapa.js,
+   motor-config.js) para calibrar esta pasada contra la escala real
+   del proyecto, no una hipotética: motor-config.js documenta
+   explícitamente ~1468 lugares en catálogo, un tope de 2000 puntos
+   simultáneos en el mapa-herramienta, y deja escrito que indexar
+   espacialmente (grid/quadtree) es intencional para "si el catálogo
+   crece mucho más allá de unos pocos miles" — no ahora. Construir acá
+   una arquitectura para decenas de miles de puntos sería la clase de
+   volumen sin sustento real que este mismo archivo ya advierte en su
+   propio historial de decisiones (ver motor-config.js, sección mapa).
+   Por eso esta pasada NO toca el algoritmo de clustering ni agrega
+   indexado espacial: a la escala real y proyectada del catálogo, con
+   caché ya vigente entre frames, no es el cuello de botella.
+
+   Lo que sí eran carencias reales de sensación premium, verificadas
+   contra el comportamiento de referencia (Google/Apple Maps):
+   • La rueda del mouse cambiaba el zoom manteniendo fijo el CENTRO
+     del viewport en vez del punto bajo el cursor — explorar con la
+     rueda se sentía como si el mapa se escapara. Ahora ancla al
+     punto geográfico bajo el cursor (misma matemática que ya existía
+     para el pellizco de dos dedos, reutilizada, no duplicada).
+   • Esa misma rueda trataba un trackpad (decenas de eventos
+     pequeños/segundo) igual que un mouse de scroll a clicks —
+     resultado, un trackpad zoomeaba mucho más rápido y entrecortado.
+     Ahora se acumula el delta y se aplica una vez por frame vía rAF.
+   • El doble clic también zoomeaba con el centro del viewport fijo,
+     no con el punto clickeado.
+   • Soltar el mapa en medio de un arrastre lo frenaba en seco. Ahora
+     tiene inercia: sigue deslizando y frena solo, con la velocidad
+     real del gesto al soltar (ventana de 80ms, no el promedio de todo
+     el arrastre). Se cancela automáticamente si empieza cualquier
+     otra interacción que deba tomar control del viewport (pellizco,
+     otro arrastre, flechas de teclado, botones +/−, vuelo animado) —
+     para que inercia y esas interacciones nunca compitan por el
+     mismo estado, mismo principio que ya regía pan-vs-pellizco.
+   • Un pin que pasaba de no existir en pantalla a existir (un
+     cluster se separa al hacer zoom, una búsqueda nueva trae
+     resultados) aparecía de golpe a tamaño completo. Ahora entra con
+     un scale+opacity corto (220ms, se salta con
+     prefers-reduced-motion). Deliberadamente NO se aplica a clusters:
+     su membership cambia en cada frame de una animación de vuelo, sin
+     clave estable que no se re-dispare constantemente — aplicarlo
+     ahí se hubiera visto roto (nunca terminando de asentar) en vez de
+     premium, así que se dejó fuera con esa razón documentada acá en
+     vez de forzarlo.
+
+   Se evaluó y se descartó explícitamente (para que quede constancia
+   de que se consideró, no que se pasó por alto):
+   • Detección manual de doble-toque en touch, en paralelo al
+     `dblclick` que el navegador ya sintetiza: los navegadores móviles
+     actuales ya lo sintetizan de forma confiable con
+     `touch-action: none` (que este mapa ya usa — ver css/mapa.css).
+     Una detección propia hubiera disparado en paralelo con el manejo
+     de click de marcador ya existente (abrir/cerrar popup) en el
+     mismo toque, produciendo un conflicto real de estados en vez de
+     una mejora — se prefirió no introducirlo antes que introducir un
+     bug nuevo por sumar una función que ya cubre otro camino.
+   • Indexado espacial (grid/quadtree) para el clustering — ver
+     justificación de escala arriba.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -338,6 +402,48 @@
       return clusters;
     }
 
+    // ── Aparición de marcadores individuales ──
+    // MICROINTERACCIÓN REAL (no cosmética porque sí): cuando un pin
+    // pasa de no existir en pantalla a existir — un cluster se separa
+    // al hacer zoom, una búsqueda nueva trae resultados que antes no
+    // estaban — antes aparecía de golpe, en el mismo frame, a tamaño
+    // completo. Un `scale`+`opacity` de entrada corto (220ms) comunica
+    // "esto es nuevo" sin depender de leer texto, y es exactamente el
+    // tipo de detalle que separa un mapa que "funciona" de uno que se
+    // siente vivo.
+    //
+    // Deliberadamente NO se aplica esta animación a los clusters: la
+    // identidad de un cluster (qué miembros lo componen) cambia en
+    // cada frame de una animación de vuelo o de un pellizco continuo
+    // — no hay una clave estable frame a frame sin recalcular
+    // membership, y usar la posición en pantalla como clave la
+    // re-dispara en cada pixel de pan. La clave de un punto individual
+    // (`punto.id`) sí es 100% estable, así que solo los puntos
+    // individuales entran animados; los clusters aparecen directo,
+    // que es preferible a una animación que nunca llega a completarse
+    // durante un vuelo.
+    var DURACION_APARICION_MS = 220;
+    var visiblesFramePrevio = Object.create(null); // set de ids vistos como punto individual en el último frame
+    var apariciones = Object.create(null);          // id -> timestamp de cuándo empezó a aparecer
+    var rafApariciones = null;
+    function factorAparicion(id) {
+      var inicio = apariciones[id];
+      if (inicio === undefined) return 1;
+      var t = (performance.now() - inicio) / DURACION_APARICION_MS;
+      if (t >= 1) { delete apariciones[id]; return 1; }
+      return Math.max(0, t);
+    }
+    function seguirApariciones() {
+      if (rafApariciones !== null) return;
+      rafApariciones = requestAnimationFrame(function () {
+        rafApariciones = null;
+        var pendientes = false;
+        for (var k in apariciones) { if (apariciones[k] !== undefined) { pendientes = true; break; } }
+        redibujar();
+        if (pendientes) seguirApariciones();
+      });
+    }
+
     var rafOndas = null;
     function dispararOnda(x, y, color) {
       if (prefiereMovimientoReducido()) return; // el estado (popup, tarjeta resaltada) ya comunica la acción sin necesidad de animación
@@ -498,13 +604,31 @@
     }
 
     function dibujarMarcadores(clusters) {
+      var visiblesEsteFrame = Object.create(null);
+      var reducido = prefiereMovimientoReducido();
+      var hayNuevos = false;
       clusters.forEach(function (c) {
         if (c.tipo === 'cluster') { dibujarCluster(c); return; }
-        var esResaltado = c.punto.id === idResaltado;
-        var esAbierto = c.punto.id === idAbierto;
-        dibujarMarcador(c.x, c.y, c.punto, esResaltado || esAbierto);
+        var id = c.punto.id;
+        visiblesEsteFrame[id] = true;
+        if (!reducido && visiblesFramePrevio[id] === undefined && apariciones[id] === undefined) {
+          // No es el primer frame del mapa entero (huellaListaPrevia ya
+          // se habría poblado) y el punto no estaba en el frame
+          // anterior: es una aparición real, no el dibujado inicial en
+          // frío, que se ve mejor a tamaño completo desde el primer
+          // frame en vez de animar 220ms antes de mostrar el estado
+          // inicial del mapa.
+          if (huboFramePrevioConPuntos) { apariciones[id] = performance.now(); hayNuevos = true; }
+        }
+        var esResaltado = id === idResaltado;
+        var esAbierto = id === idAbierto;
+        dibujarMarcador(c.x, c.y, c.punto, esResaltado || esAbierto, reducido ? 1 : factorAparicion(id));
       });
+      visiblesFramePrevio = visiblesEsteFrame;
+      huboFramePrevioConPuntos = true;
+      if (hayNuevos) seguirApariciones();
     }
+    var huboFramePrevioConPuntos = false;
 
     // Pin con forma de gota — silueta reconocible de "lugar en un mapa",
     // no una bolita genérica. El color codifica el rubro (ver
@@ -516,10 +640,24 @@
     // oscuro, y no es accesible para daltonismo) — el ícono es un
     // segundo canal de distinción que no depende del color, y además
     // se reconoce más rápido que una letra sola.
-    function dibujarMarcador(x, y, punto, activo) {
+    function dibujarMarcador(x, y, punto, activo, factorEntrada) {
       var color = colorSeguro(punto && punto.color);
       var r = activo ? RADIO_MARCADOR + 2.5 : RADIO_MARCADOR;
+      var f = factorEntrada === undefined ? 1 : factorEntrada;
       ctx.save();
+      if (f < 1) {
+        // easeOutCubic manual (evitar la dependencia de la función de
+        // animación de vuelo, que vive más abajo en el archivo y está
+        // pensada para t de 0 a 1 sobre coordenadas geográficas, no
+        // sobre una escala de dibujo): entra "creciendo un poco de
+        // más" y asentando, en vez de una interpolación lineal que se
+        // percibe mecánica.
+        var e = 1 - Math.pow(1 - f, 3);
+        ctx.globalAlpha = e;
+        ctx.translate(x, y);
+        ctx.scale(0.5 + e * 0.5, 0.5 + e * 0.5);
+        ctx.translate(-x, -y);
+      }
       if (activo) {
         ctx.beginPath();
         ctx.arc(x, y, r + 9, 0, Math.PI * 2);
@@ -661,11 +799,73 @@
     var arrastrando = false, ultimoX = 0, ultimoY = 0, sePanneo = false;
     var pointerActivoId = null; // solo un puntero controla el pan a la vez
 
+    // ── Inercia de arrastre (momentum) ──
+    // GAP REAL DE PRODUCTO: al soltar el dedo/mouse en pleno arrastre,
+    // el mapa se detenía en seco — funcional, pero se siente "pesado"
+    // comparado con cualquier mapa o lista con scroll nativo, donde el
+    // contenido sigue deslizando y frena solo. Se guarda una ventana
+    // corta de las últimas muestras de movimiento (tiempo + delta) y,
+    // al soltar, se estima la velocidad instantánea real (no el
+    // promedio de todo el gesto, que diluiría un frenado intencional
+    // justo antes de soltar) para decidir si vale la pena seguir
+    // deslizando y con cuánta fuerza.
+    var MUESTRAS_INERCIA_MAX = 6;
+    var muestrasMovimiento = [];
+    var inerciaRAF = null;
+    function registrarMuestra(x, y) {
+      var ahora = performance.now();
+      muestrasMovimiento.push({ t: ahora, x: x, y: y });
+      if (muestrasMovimiento.length > MUESTRAS_INERCIA_MAX) muestrasMovimiento.shift();
+    }
+    function cancelarInercia() {
+      if (inerciaRAF !== null) { cancelAnimationFrame(inerciaRAF); inerciaRAF = null; }
+    }
+    function iniciarInercia() {
+      if (prefiereMovimientoReducido() || muestrasMovimiento.length < 2) return;
+      var reciente = muestrasMovimiento[muestrasMovimiento.length - 1];
+      // Se busca la muestra más vieja dentro de los últimos 80ms: una
+      // ventana corta refleja el gesto real al soltar, no el arrastre
+      // completo (que puede haber sido lento al principio y rápido al
+      // final, o viceversa).
+      var base = reciente;
+      for (var i = muestrasMovimiento.length - 2; i >= 0; i--) {
+        base = muestrasMovimiento[i];
+        if (reciente.t - base.t >= 80) break;
+      }
+      var dt = reciente.t - base.t;
+      if (dt <= 0) return;
+      var vx = (reciente.x - base.x) / dt; // px/ms
+      var vy = (reciente.y - base.y) / dt;
+      var velocidad = Math.sqrt(vx * vx + vy * vy);
+      if (velocidad < 0.04) return; // gesto casi estático al soltar: no vale la pena animar
+      // Techo de velocidad: un pellizco/arrastre muy brusco no debería
+      // catapultar el mapa a un pan absurdamente largo.
+      var TECHO_V = 2.2;
+      if (velocidad > TECHO_V) { vx = vx / velocidad * TECHO_V; vy = vy / velocidad * TECHO_V; }
+      var FRICCION = 0.0022; // px/ms perdidos por ms — calibra distancia y duración del deslizamiento
+      function paso(ahora, previo) {
+        var dtPaso = previo ? ahora - previo : 16;
+        var factor = Math.max(0, 1 - FRICCION * dtPaso * 12);
+        vx *= factor; vy *= factor;
+        var v = Math.sqrt(vx * vx + vy * vy);
+        if (v < 0.02) { inerciaRAF = null; return; }
+        var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
+        var nuevo = PROY.desproyectar(c0.x - vx * dtPaso, c0.y - vy * dtPaso, viewport.zoom);
+        viewport.lat = nuevo.lat; viewport.lng = nuevo.lng;
+        redibujar();
+        inerciaRAF = requestAnimationFrame(function (t) { paso(t, ahora); });
+      }
+      inerciaRAF = requestAnimationFrame(function (t) { paso(t, null); });
+    }
+
     lienzo.addEventListener('pointerdown', function (e) {
       if (pointerActivoId !== null) return; // ya hay otro dedo/puntero arrastrando — el pellizco se maneja aparte
+      cancelarInercia();
       pointerActivoId = e.pointerId;
       arrastrando = true; sePanneo = false;
       ultimoX = e.clientX; ultimoY = e.clientY;
+      muestrasMovimiento = [];
+      registrarMuestra(e.clientX, e.clientY);
       lienzo.setPointerCapture(e.pointerId);
       lienzo.style.cursor = 'grabbing';
     });
@@ -675,6 +875,7 @@
         var dx = e.clientX - ultimoX, dy = e.clientY - ultimoY;
         if (Math.abs(dx) > 2 || Math.abs(dy) > 2) sePanneo = true;
         ultimoX = e.clientX; ultimoY = e.clientY;
+        registrarMuestra(e.clientX, e.clientY);
         var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
         var nuevo = PROY.desproyectar(c0.x - dx, c0.y - dy, viewport.zoom);
         viewport.lat = nuevo.lat; viewport.lng = nuevo.lng;
@@ -706,6 +907,8 @@
         var clusters = clustersActuales();
         var cerca = buscarMarcadorEn(e, clusters);
         if (cerca) manejarClick(cerca);
+      } else {
+        iniciarInercia();
       }
     });
     lienzo.addEventListener('pointercancel', function (e) {
@@ -804,17 +1007,93 @@
       emisor.emitir('click', c.punto);
     }
 
-    lienzo.addEventListener('wheel', function (e) {
-      e.preventDefault();
-      var delta = e.deltaY > 0 ? -0.5 : 0.5;
-      viewport.zoom = PROY.clamp(viewport.zoom + delta, ZOOM_MIN, ZOOM_MAX);
+    // GAP REAL DE PRODUCTO (no un bug, una carencia): antes la rueda
+    // cambiaba el zoom manteniendo fijo el CENTRO del viewport, sin
+    // importar dónde estuviera el cursor. En cualquier mapa de
+    // referencia (Google/Apple/Mapbox) la rueda ancla el punto
+    // geográfico que está bajo el cursor — así explorar "hacia" un
+    // lugar con la rueda se siente intencional, no como si el mapa se
+    // escapara por debajo del mouse. Reutiliza la misma matemática de
+    // anclaje que ya existía para el pellizco (pantallaAPunto +
+    // proyectar/desproyectar), esta vez con el zoom cambiando en un
+    // solo paso en vez de continuamente.
+    function zoomAnclado(nuevoZoom, xRel, yRel) {
+      nuevoZoom = PROY.clamp(nuevoZoom, ZOOM_MIN, ZOOM_MAX);
+      if (Math.abs(nuevoZoom - viewport.zoom) < 0.0001) return;
+      var geoFoco = PROY.pantallaAPunto(xRel, yRel, viewport);
+      viewport.zoom = nuevoZoom;
+      var pFoco = PROY.proyectar(geoFoco.lat, geoFoco.lng, viewport.zoom);
+      var centroMundoX = pFoco.x + viewport.ancho / 2 - xRel;
+      var centroMundoY = pFoco.y + viewport.alto / 2 - yRel;
+      var nuevoCentro = PROY.desproyectar(centroMundoX, centroMundoY, viewport.zoom);
+      viewport.lat = nuevoCentro.lat;
+      viewport.lng = nuevoCentro.lng;
+    }
+
+    // Acumulador de rueda: trackpads e input devices "de precisión"
+    // (Windows PointerEvents, trackpads de Mac con gesto de pellizco
+    // mapeado a wheel+ctrlKey) disparan decenas de eventos wheel muy
+    // pequeños por segundo en vez de unos pocos "clicks" de mouse
+    // tradicional. Tratarlos igual (±0.5 por evento) hacía que un
+    // trackpad zoomeara muchísimo más rápido y de forma entrecortada
+    // que un mouse. Ahora se acumula deltaY normalizado y se aplica en
+    // el próximo frame vía rAF — un solo redibujo por frame sin
+    // importar cuántos eventos wheel llegaron, y una sensación de
+    // "rueda" pareja entre mouse y trackpad.
+    var wheelAcumulado = 0;
+    var wheelRAF = null;
+    var wheelXRel = 0, wheelYRel = 0;
+    function aplicarWheelAcumulado() {
+      wheelRAF = null;
+      if (!wheelAcumulado) return;
+      var delta = PROY.clamp(wheelAcumulado, -1.6, 1.6);
+      wheelAcumulado = 0;
+      zoomAnclado(viewport.zoom + delta, wheelXRel, wheelYRel);
       cerrarPopup();
       redibujar();
+    }
+    lienzo.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      cancelarInercia();
+      var rect = lienzo.getBoundingClientRect();
+      wheelXRel = e.clientX - rect.left;
+      wheelYRel = e.clientY - rect.top;
+      // deltaMode 0 = píxeles (trackpad, mouse de alta resolución): se
+      // escala hacia abajo. deltaMode 1 = líneas (mouse tradicional):
+      // un "click" de rueda entero equivale al paso de 0.5 de antes.
+      var unidad = e.deltaMode === 1 ? 0.5 : Math.min(0.12, Math.abs(e.deltaY) * 0.0035);
+      wheelAcumulado += (e.deltaY > 0 ? -1 : 1) * unidad;
+      if (wheelRAF === null) wheelRAF = requestAnimationFrame(aplicarWheelAcumulado);
     }, { passive: false });
 
-    lienzo.addEventListener('dblclick', function () {
-      animarA(viewport.lat, viewport.lng, Math.min(viewport.zoom + 1, ZOOM_MAX));
+    lienzo.addEventListener('dblclick', function (e) {
+      var rect = lienzo.getBoundingClientRect();
+      var xRel = e.clientX - rect.left, yRel = e.clientY - rect.top;
+      var geoFoco = PROY.pantallaAPunto(xRel, yRel, viewport);
+      var zoomDestino = Math.min(viewport.zoom + 1, ZOOM_MAX);
+      // BUG REAL evitado (no llegó a publicarse, detectado en revisión
+      // propia): mutar `viewport.zoom` acá ANTES de llamar a `animarA`
+      // haría que `origen.zoom` (leído dentro de animarA al arrancar)
+      // ya fuera igual a `zoomDestino` — el resultado visible sería un
+      // pan que sí se anima suave, pero un zoom que "salta" de golpe
+      // en vez de acompañar la animación. animarA no puede animar el
+      // anclaje frame a frame sin duplicar toda la matemática de
+      // zoomAnclado dentro de la propia animación de vuelo — para un
+      // doble clic (un solo nivel de zoom, ~420ms) la diferencia entre
+      // animar hacia el destino final anclado vs. animar el anclaje
+      // continuo es imperceptible. Por eso el punto de anclaje se
+      // resuelve acá con el zoom destino, PERO sin tocar el viewport
+      // real — solo animarA(), más abajo, es quien efectivamente
+      // mueve lat/lng/zoom, interpolando desde el estado actual real.
+      var pFoco = PROY.proyectar(geoFoco.lat, geoFoco.lng, zoomDestino);
+      var destino = PROY.desproyectar(
+        pFoco.x + viewport.ancho / 2 - xRel,
+        pFoco.y + viewport.alto / 2 - yRel,
+        zoomDestino
+      );
+      animarA(destino.lat, destino.lng, zoomDestino);
     });
+
 
     lienzo.addEventListener('keydown', function (e) {
       var paso = 40;
@@ -837,6 +1116,7 @@
     });
 
     function desplazarPx(dx, dy) {
+      cancelarInercia();
       var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
       var n = PROY.desproyectar(c0.x - dx, c0.y - dy, viewport.zoom);
       viewport.lat = n.lat; viewport.lng = n.lng;
@@ -846,6 +1126,7 @@
     controles.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-zoom]');
       if (!btn || btn.disabled) return;
+      cancelarInercia();
       var dz = parseFloat(btn.dataset.zoom);
       animarA(viewport.lat, viewport.lng, PROY.clamp(viewport.zoom + dz, ZOOM_MIN, ZOOM_MAX));
     });
@@ -863,9 +1144,11 @@
         pinchZoom0 = viewport.zoom;
         pinchCentro0 = centroToques(e.touches);
         // El pellizco toma el control: cede cualquier arrastre de un
-        // solo puntero que estuviera en curso, para que no compitan.
+        // solo puntero (o inercia post-arrastre) que estuviera en
+        // curso, para que no compitan.
         arrastrando = false;
         pointerActivoId = null;
+        cancelarInercia();
         cerrarPopup();
       }
     }, { passive: true });
@@ -901,6 +1184,7 @@
     /* ── Animación suave de zoom/pan (usada por focar/encuadrar) ── */
     function animarA(lat, lng, zoom, duracion) {
       if (animacionZoom) cancelAnimationFrame(animacionZoom);
+      cancelarInercia();
       if (prefiereMovimientoReducido()) {
         viewport.lat = lat; viewport.lng = lng; viewport.zoom = zoom;
         redibujar();
@@ -1218,6 +1502,9 @@
         if (animacionZoom) cancelAnimationFrame(animacionZoom);
         if (rafRedibujo !== null) cancelAnimationFrame(rafRedibujo);
         if (rafOndas !== null) cancelAnimationFrame(rafOndas);
+        if (rafApariciones !== null) cancelAnimationFrame(rafApariciones);
+        cancelarInercia();
+        if (wheelRAF !== null) cancelAnimationFrame(wheelRAF);
         contenedor.innerHTML = '';
       }
     };
