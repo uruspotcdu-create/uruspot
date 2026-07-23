@@ -97,7 +97,11 @@
     EMPTY: 'empty',
     ERROR: 'error',
     SUCCESS: 'success',
-    TRANSITION: 'transition'
+    TRANSITION: 'transition',
+    // Nuevo: 1 carácter en el buscador, por debajo del umbral de
+    // búsqueda explícita (2). Ni "cargando" ni "sin resultados" —
+    // un estado propio para no mentir sobre cuál de los dos es.
+    TYPING: 'typing'
   };
 
   // ───────────────────────────────────────────────────────────────────
@@ -162,7 +166,14 @@
     'listaRubros', 'statLugares', 'statRubros', 'faqLista',
     'estadoResultados', 'destacados', 'listaDestacados'
   ];
-  var OPTIONAL_DOM_IDS = [];
+  // OPTIONAL_DOM_IDS existía declarado pero sin ningún lector real en
+  // validarDOM() — un punto de extensión listo pero desconectado,
+  // igual que el resto de los casos "infraestructura sin consumidor"
+  // documentados en motor-exposicion.js. btnLimpiarBusqueda es su
+  // primer uso real: si por lo que sea no está en el HTML, el resto
+  // del sitio sigue funcionando (a diferencia de los REQUIRED_DOM_IDS,
+  // cuya ausencia frena el arranque).
+  var OPTIONAL_DOM_IDS = ['btnLimpiarBusqueda'];
 
   var dynamicElements = {
     btnCercaDeMi: null,
@@ -649,6 +660,13 @@
       throw new Error('Elementos DOM faltantes: ' + faltantes.join(', '));
     }
 
+    // Opcionales: se resuelven si existen, pero su ausencia nunca
+    // frena el arranque (por eso no entran en `faltantes`).
+    OPTIONAL_DOM_IDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) DOM[id] = el;
+    });
+
     return true;
   }
 
@@ -986,6 +1004,17 @@
     if (!REGISTRO.length || !DOM.panelDescubrimiento) return;
 
     try {
+      actualizarBotonLimpiar();
+
+      // 1 carácter, sin filtro de rubro: ni "cargando" ni "resultados",
+      // un estado propio (ver pintarEstadoEscribiendo). Con 0, 2+
+      // caracteres o un rubro activo, el pipeline sigue igual que
+      // siempre más abajo.
+      if (uiState.consultaActual.trim().length === 1 && !uiState.filtroRubroActivo) {
+        pintarEstadoEscribiendo();
+        return;
+      }
+
       var favoritos = leerFavoritos();
       var reg = PLANO.region(estado);
       var rama = ramaActual(reg);
@@ -1783,6 +1812,12 @@
     // Input de búsqueda
     if (DOM.inputBuscar) {
       DOM.inputBuscar.addEventListener('input', manejarInputBusqueda);
+      DOM.inputBuscar.addEventListener('keydown', manejarKeydownBuscar);
+    }
+
+    // Botón de limpiar interno del campo
+    if (DOM.btnLimpiarBusqueda) {
+      DOM.btnLimpiarBusqueda.addEventListener('click', limpiarBusqueda);
     }
 
     // Acciones en panel de descubrimiento
@@ -1790,6 +1825,7 @@
       DOM.panelDescubrimiento.addEventListener('click', manejarClickPanel);
       DOM.panelDescubrimiento.addEventListener('mouseover', manejarHoverPanel);
       DOM.panelDescubrimiento.addEventListener('mouseout', manejarHoverOutPanel);
+      DOM.panelDescubrimiento.addEventListener('keydown', manejarKeydownPanel);
     }
 
     // Chips de rubro
@@ -1832,6 +1868,7 @@
   function manejarInputBusqueda(e) {
     uiState.consultaActual = e.target.value;
     uiState.paginaTarjetas = 1;
+    actualizarBotonLimpiar();
 
     if (uiState.consultaActual.trim().length >= 2) {
       estado = PLANO.aplicarAccion(estado, 'nombrar', { consulta: uiState.consultaActual });
@@ -1840,9 +1877,138 @@
     }
     PLANO.guardarEstado(estado);
 
-    // Debounce del render
     clearTimeout(activeOperations.debounceBuscarId);
-    activeOperations.debounceBuscarId = setTimeout(render, DEBOUNCE_BUSQUEDA_MS);
+    if (!uiState.consultaActual) {
+      // Vaciar el campo es, en la cabeza de quien lo hace, un "deshacer":
+      // debe sentirse instantáneo. El debounce existe para no recalcular
+      // en cada tecla mientras se escribe, no para demorar el momento en
+      // que alguien decide arrancar de nuevo.
+      render();
+    } else {
+      activeOperations.debounceBuscarId = setTimeout(render, DEBOUNCE_BUSQUEDA_MS);
+    }
+  }
+
+  /**
+   * Muestra/oculta el botón de limpiar y mantiene aria-expanded del
+   * input sincronizado con si hay una búsqueda/filtro gobernando el
+   * panel de resultados ahora mismo.
+   */
+  function actualizarBotonLimpiar() {
+    if (DOM.btnLimpiarBusqueda) {
+      DOM.btnLimpiarBusqueda.hidden = !uiState.consultaActual;
+    }
+    if (DOM.inputBuscar) {
+      DOM.inputBuscar.setAttribute('aria-expanded', hayBusquedaOFiltro() ? 'true' : 'false');
+    }
+  }
+
+  /**
+   * Limpia la búsqueda actual. Única función para las tres formas de
+   * disparar la misma acción (botón interno del campo, acción del
+   * estado vacío, y en el futuro cualquier otra): antes cada una
+   * repetía su propia versión de estas cinco líneas por separado.
+   */
+  function limpiarBusqueda() {
+    uiState.consultaActual = '';
+    uiState.paginaTarjetas = 1;
+    if (DOM.inputBuscar) {
+      DOM.inputBuscar.value = '';
+      DOM.inputBuscar.focus();
+    }
+    actualizarBotonLimpiar();
+    estado.sesion.accionDirectaForzada = null;
+    PLANO.guardarEstado(estado);
+    clearTimeout(activeOperations.debounceBuscarId);
+    render();
+  }
+
+  /**
+   * Todos los controles focuseables "principales" de las tarjetas
+   * visibles, en orden de aparición — para la navegación por teclado
+   * entre resultados (flechas arriba/abajo desde el buscador o entre
+   * tarjetas). Toma el primer link/botón de cada tarjeta en vez de
+   * todos los suyos: moverse "a la tarjeta siguiente" con una sola
+   * tecla, no a su quinto botón interno.
+   */
+  function elementosNavegablesDelPanel() {
+    if (!DOM.panelDescubrimiento) return [];
+    var tarjetas = Array.prototype.slice.call(DOM.panelDescubrimiento.querySelectorAll('.tarjeta'));
+    var focos = [];
+    tarjetas.forEach(function (t) {
+      var primero = t.querySelector('a.tarjeta-btn, button.tarjeta-btn, a, button');
+      if (primero) focos.push(primero);
+    });
+    return focos;
+  }
+
+  /**
+   * Teclado desde el input: flecha abajo salta al primer resultado
+   * (evita tener que Tabular uno por uno para llegar), Escape limpia
+   * si hay texto. El resto (Enter, Tab) queda con su comportamiento
+   * nativo — no hay nada que interceptar ahí.
+   */
+  function manejarKeydownBuscar(e) {
+    if (e.key === 'ArrowDown') {
+      var focos = elementosNavegablesDelPanel();
+      if (focos.length) {
+        e.preventDefault();
+        focos[0].focus();
+      }
+    } else if (e.key === 'Escape' && uiState.consultaActual) {
+      e.preventDefault();
+      limpiarBusqueda();
+    }
+  }
+
+  /**
+   * Teclado dentro del panel de resultados: flechas arriba/abajo
+   * recorren tarjetas (sin tener que Tabular por cada botón interno de
+   * cada una), Escape vuelve al buscador. Delegado en el panel para
+   * no atar un listener por tarjeta — el panel se repinta seguido.
+   */
+  function manejarKeydownPanel(e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Escape') return;
+    if (!e.target.closest('.tarjeta')) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (DOM.inputBuscar) DOM.inputBuscar.focus();
+      return;
+    }
+
+    var focos = elementosNavegablesDelPanel();
+    var idx = focos.indexOf(e.target);
+    if (idx === -1) return;
+    e.preventDefault();
+
+    if (e.key === 'ArrowDown' && focos[idx + 1]) {
+      focos[idx + 1].focus();
+    } else if (e.key === 'ArrowUp') {
+      if (focos[idx - 1]) {
+        focos[idx - 1].focus();
+      } else if (DOM.inputBuscar) {
+        DOM.inputBuscar.focus();
+      }
+    }
+  }
+
+  /**
+   * Estado "seguí escribiendo": 1 carácter, por debajo del umbral de
+   * búsqueda explícita (2). Antes ese carácter ya disparaba un filtro
+   * real —contra casi todo el catálogo, ruido puro— sin avisar que
+   * faltaba una letra más. Ahora hay una respuesta inmediata y honesta
+   * en vez de silencio o resultados que no dicen nada.
+   */
+  function pintarEstadoEscribiendo() {
+    if (!DOM.panelDescubrimiento) return;
+    DOM.panelDescubrimiento.innerHTML =
+      '<p class="escribiendo"><span class="escribiendo__punto" aria-hidden="true"></span>' +
+      'Seguí escribiendo — buscamos a partir de 2 letras.</p>';
+    if (DOM.estadoResultados) {
+      DOM.estadoResultados.textContent = 'Escribiendo. Hacen falta al menos 2 letras para buscar.';
+    }
+    uiState.visualState = VISUAL_STATE.TYPING;
   }
 
   function manejarClickPanel(e) {
@@ -1856,11 +2022,7 @@
     var carta = e.target.closest('[data-lugar-id]');
 
     if (btnLimpiarBusqueda) {
-      uiState.consultaActual = '';
-      if (DOM.inputBuscar) DOM.inputBuscar.value = '';
-      estado.sesion.accionDirectaForzada = null;
-      PLANO.guardarEstado(estado);
-      render();
+      limpiarBusqueda();
       return;
     }
 
