@@ -173,7 +173,7 @@
   // primer uso real: si por lo que sea no está en el HTML, el resto
   // del sitio sigue funcionando (a diferencia de los REQUIRED_DOM_IDS,
   // cuya ausencia frena el arranque).
-  var OPTIONAL_DOM_IDS = ['btnLimpiarBusqueda'];
+  var OPTIONAL_DOM_IDS = ['btnLimpiarBusqueda', 'sugerenciasRapidas', 'filtrosActivos'];
 
   var dynamicElements = {
     btnCercaDeMi: null,
@@ -844,6 +844,7 @@
         pintarRubros();
         pintarStatsRapidas();
         pintarDestacados();
+        pintarSugerenciasRapidas();
         render();
 
       })
@@ -1235,6 +1236,153 @@
         escapeHTML(meta[0]) + '<span class="chip__conteo">' + conteo[k] + '</span>' +
         '</button>';
     }).join('');
+  }
+
+  /**
+   * Sugerencias rápidas: atajos de un toque a los 4 rubros con más
+   * lugares, más "cerca tuyo" si el navegador soporta geolocalización.
+   * Se pinta UNA sola vez al cargar el catálogo (el conteo por rubro
+   * no cambia durante la sesión) — actualizarVisibilidadSugerencias()
+   * es quien decide, en cada render(), si corresponde mostrarlas o
+   * no. Reutiliza exactamente los mismos íconos de rubros-meta.js que
+   * ya usa pintarRubros(), para que un mismo rubro se vea igual acá y
+   * en el índice de abajo.
+   */
+  function pintarSugerenciasRapidas() {
+    if (!DOM.sugerenciasRapidas || !REGISTRO.length || !window.URU_RUBROS_META) return;
+
+    var conteo = Object.create(null);
+    REGISTRO.forEach(function (l) {
+      conteo[l.grupo] = (conteo[l.grupo] || 0) + 1;
+    });
+
+    var topRubros = Object.keys(window.URU_RUBROS_META)
+      .filter(function (k) { return conteo[k]; })
+      .sort(function (a, b) { return conteo[b] - conteo[a]; })
+      .slice(0, 4);
+
+    if (!topRubros.length) return;
+
+    var html = '<span class="sugerencias-rapidas__etiqueta">Empezá por acá</span>' +
+      topRubros.map(function (k) {
+        var meta = window.URU_RUBROS_META[k];
+        var icono = window.URU_RUBROS_ICONO_SVG ? window.URU_RUBROS_ICONO_SVG(k, { tam: 15 }) : '';
+        return '<button type="button" class="sugerencia-chip" data-rubro="' + k +
+          '" style="--chip-color:' + meta[2] + '">' + icono + escapeHTML(meta[0]) + '</button>';
+      }).join('');
+
+    if (navigator.geolocation) {
+      html += '<button type="button" class="sugerencia-chip sugerencia-chip--cerca" data-accion="sugerencia-cerca-tuyo">' +
+        '📍 cerca tuyo</button>';
+    }
+
+    DOM.sugerenciasRapidas.innerHTML = html;
+    actualizarVisibilidadSugerencias();
+  }
+
+  /**
+   * Alterna la visibilidad de las sugerencias rápidas sin reconstruir
+   * su contenido: en cuanto hay búsqueda, filtro de rubro o "cerca
+   * tuyo" activo, el atajo de arranque ya cumplió su función.
+   */
+  function actualizarVisibilidadSugerencias() {
+    if (!DOM.sugerenciasRapidas) return;
+    DOM.sugerenciasRapidas.hidden = hayBusquedaOFiltro() || uiState.cercaTuyoActivo;
+  }
+
+  /**
+   * Resumen de filtros activos: una píldora por faceta (búsqueda,
+   * rubro, cerca-tuyo), cada una con su propia × para sacarse esa
+   * faceta de encima sin tocar las otras. Antes la única forma de
+   * quitar UN filtro puntual era vaciar el campo a mano o reabrir el
+   * índice de rubros — acá queda a la vista, en el mismo lugar donde
+   * se está mirando el resultado que esos filtros produjeron.
+   */
+  function pintarFiltrosActivos() {
+    if (!DOM.filtrosActivos) return;
+
+    var pills = [];
+    var consulta = uiState.consultaActual.trim();
+
+    if (consulta) {
+      pills.push(
+        '<span class="filtro-pill" data-filtro="busqueda">' +
+        '<span class="filtro-pill__texto">“' + escapeHTML(consulta) + '”</span>' +
+        '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="busqueda" ' +
+        'aria-label="Quitar búsqueda de ' + escapeHTML(consulta) + '">×</button>' +
+        '</span>'
+      );
+    }
+
+    if (uiState.filtroRubroActivo) {
+      var meta = window.URU_RUBROS_META && window.URU_RUBROS_META[uiState.filtroRubroActivo];
+      var nombreRubro = meta ? meta[0] : uiState.filtroRubroActivo;
+      pills.push(
+        '<span class="filtro-pill" data-filtro="rubro" style="--chip-color:' +
+        (meta ? meta[2] : 'var(--color-granate-clara)') + '">' +
+        '<span class="filtro-pill__texto">' + escapeHTML(nombreRubro) + '</span>' +
+        '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="rubro" ' +
+        'aria-label="Quitar filtro de rubro ' + escapeHTML(nombreRubro) + '">×</button>' +
+        '</span>'
+      );
+    }
+
+    if (uiState.cercaTuyoActivo) {
+      pills.push(
+        '<span class="filtro-pill filtro-pill--cerca" data-filtro="cerca">' +
+        '<span class="filtro-pill__texto">📍 cerca tuyo</span>' +
+        '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="cerca" ' +
+        'aria-label="Dejar de ordenar por cercanía">×</button>' +
+        '</span>'
+      );
+    }
+
+    if (!pills.length) {
+      DOM.filtrosActivos.hidden = true;
+      DOM.filtrosActivos.innerHTML = '';
+      return;
+    }
+
+    DOM.filtrosActivos.hidden = false;
+    DOM.filtrosActivos.innerHTML = pills.join('');
+  }
+
+  /**
+   * Click delegado en las sugerencias rápidas: un rubro reusa
+   * exactamente `seleccionarRubro()` (mismo camino que el índice de
+   * rubros de más abajo); "cerca tuyo" reusa `activarCercaDeMi()`
+   * sobre el botón real ya creado por inicializarGeolocation() —
+   * ninguna de las dos rutas duplica lógica de selección.
+   */
+  function manejarClickSugerencias(e) {
+    var chipRubro = e.target.closest('[data-rubro]');
+    if (chipRubro) {
+      seleccionarRubro(chipRubro.dataset.rubro);
+      return;
+    }
+    var chipCerca = e.target.closest('[data-accion="sugerencia-cerca-tuyo"]');
+    if (chipCerca && dynamicElements.btnCercaDeMi && !uiState.cercaTuyoActivo) {
+      activarCercaDeMi(dynamicElements.btnCercaDeMi);
+    }
+  }
+
+  /**
+   * Click delegado en el resumen de filtros activos: cada × quita
+   * únicamente su propia faceta.
+   */
+  function manejarClickFiltrosActivos(e) {
+    var btn = e.target.closest('[data-filtro-quitar]');
+    if (!btn) return;
+    var cual = btn.dataset.filtroQuitar;
+    if (cual === 'busqueda') {
+      limpiarBusqueda();
+    } else if (cual === 'rubro') {
+      uiState.filtroRubroActivo = null;
+      pintarRubros();
+      render();
+    } else if (cual === 'cerca') {
+      desactivarCercaDeMi();
+    }
   }
 
   /**
