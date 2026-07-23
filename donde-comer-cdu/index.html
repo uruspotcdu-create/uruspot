@@ -4,507 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     URU SPOT — index.html (donde-comer-cdu)
-     Reconstrucción arquitectónica: 2026-07-22
+<!-- DOCUMENTACIÓN ARQUITECTÓNICA DE ESTE ARCHIVO — auditoría 2ª pasada:
+     se movió al final del documento, justo antes de </body> (buscá
+     "DOCUMENTACIÓN COMPLETA DE index.html" más abajo, o Ctrl+F "12.
+     EXPANSIÓN DE CONTENIDO EDITORIAL"). Motivo: quien abre este
+     archivo por primera vez encontraba 519 líneas de comentarios
+     antes del primer <meta> real — la documentación es valiosa pero
+     no debía ser lo primero que se lee para editar un <title> o
+     revisar la CSP. El contenido NO cambió una sola palabra: se
+     recortó y pegó entero, con sus 12 secciones y su propia numeración
+     intactas — sigue siendo la referencia obligatoria antes de tocar
+     cualquier `id`, `data-*` o `<script src>` de este documento. -->
 
-     ESTE BLOQUE ES EL PUNTO DE ENTRADA A LA DOCUMENTACIÓN DEL ARCHIVO.
-     Léelo antes de tocar cualquier `id`, `data-*` o `<script src>` de
-     acá abajo. La sección 3 (CONTRATO HTML↔JS) es la que más deuda
-     técnica genera si se ignora — es, literalmente, la causa de los
-     dos bugs que motivaron esta revisión.
-
-     ÍNDICE DE ESTA DOCUMENTACIÓN
-       1. Qué es este archivo y qué NO es
-       2. Diagnóstico: por qué el mapa no se veía y por qué los
-          números quedaban en "cargando" (root cause, con evidencia)
-       3. Contrato HTML↔JS — tabla completa de hooks (id / data-*)
-          que js/app.js consume, y qué pasa si se rompen
-       4. Invariantes del documento (lo que nunca debe dejar de ser
-          cierto, aunque cambie el contenido)
-       5. Orden de carga de <script> y por qué es una dependencia dura
-       6. Accesibilidad: decisiones y su justificación
-       7. Resiliencia: qué pasa cuando algo falla
-       8. Seguridad: CSP y por qué estos orígenes y no otros
-       9. Puntos de extensión pensados para quien agregue features
-      10. Deuda técnica conocida, fuera del alcance de este archivo
-      11. Checklist para quien vaya a modificar este archivo
-      12. Expansión de contenido editorial (esta revisión) — qué se
-          agregó, por qué, y qué NO cambia de la arquitectura
-
-     ───────────────────────────────────────────────────────────────
-     1. QUÉ ES ESTE ARCHIVO Y QUÉ NO ES
-     ───────────────────────────────────────────────────────────────
-     Este HTML es la CÁSCARA de la landing "Dónde comer" de URU SPOT.
-     No contiene lógica de negocio, no contiene datos de lugares, no
-     decide qué se muestra ni cuándo. Su único trabajo es:
-
-       (a) declarar los ELEMENTOS ESTABLES que el JavaScript necesita
-           encontrar para poder pintar contenido dinámico sobre ellos
-           (buscador, panel de descubrimiento, mapa, stats, FAQ);
-       (b) declarar el contenido ESTÁTICO que no cambia con datos
-           (manifiesto, accesos por categoría, preguntas frecuentes);
-       (c) cargar, en el orden correcto, los módulos de JS que sí
-           tienen la lógica real (ver sección 5);
-       (d) exponer metadatos para buscadores y redes sociales.
-
-     Si estás buscando la lógica de "cuántos lugares mostrar", "qué
-     región del usuario aplica", "cómo se calcula el mapa" o "qué
-     pasa cuando guardás un lugar" — no está acá. Está en, en este
-     orden de responsabilidad:
-       js/motor-config.js      → constantes y umbrales, un solo lugar
-       js/motor-plano.js       → estado de sesión persistido (PLANO)
-       js/motor-exposicion.js  → cuánto mostrar según el "plano"
-       js/motor-mapa.js        → QUÉ puntos le corresponden al mapa
-       js/proyeccion.js        → matemática de proyección lat/lng→px
-       js/motor-render.js      → CÓMO se dibuja el mapa (canvas propio)
-       js/app.js               → orquestador: conecta todo lo anterior
-                                  con el DOM que este archivo declara
-
-     ───────────────────────────────────────────────────────────────
-     2. DIAGNÓSTICO — POR QUÉ EL MAPA NO SE VEÍA Y LOS NÚMEROS
-        QUEDABAN PEGADOS EN "CARGANDO" (bugs reales, corregidos acá)
-     ───────────────────────────────────────────────────────────────
-     Una revisión anterior de este archivo ("REDISEÑO ARQUITECTÓNICO
-     2026-07-22" original) reemplazó varios `id` por atributos
-     `data-*`, con el argumento correcto de que los `id` usados solo
-     para hooks de JS son peores que atributos semánticos dedicados.
-     El principio es válido — el problema es que esa revisión NUNCA
-     tocó js/app.js, que es un módulo mucho más grande y con lógica
-     real (873 líneas) y que sigue seleccionando elementos por
-     `document.getElementById(...)`. El resultado: varios `id` que
-     app.js necesita dejaron de existir en el HTML, y las funciones
-     que dependían de ellos empezaron a fallar EN SILENCIO, porque
-     todas están escritas defensivamente (`if (DOM.x) DOM.x....`).
-     Nada tira una excepción visible en consola — por eso el bug
-     sobrevivió sin que saltara ninguna alarma obvia.
-
-     Bug A — "el mapa no se ve":
-       `.mapa-container` es el contenedor que envuelve el mapa, su
-       cartel informativo y su leyenda. Nace con el atributo `hidden`
-       en el propio HTML (correcto: no debe verse hasta que haya
-       datos con coordenadas). El problema es que:
-         · no tenía `id`, así que js/app.js no podía referenciarlo, y
-         · js/app.js NUNCA lo tenía en su lista de elementos vigilados
-           (solo vigilaba `#mapaHerramienta`, el `<div>` interno).
-       `[hidden]` en el contenedor padre oculta a TODOS sus hijos sin
-       importar el estado individual de cada uno — así que aunque
-       `actualizarMapaHerramienta()` hiciera bien su trabajo y pusiera
-       `mapaHerramienta.hidden = false`, el padre seguía oculto y el
-       mapa jamás llegaba a pintarse en pantalla. Confirmado también
-       revisando css/mapa.css: `.mapa-container` no tiene NINGUNA
-       regla propia — su visibilidad depende 100% del atributo
-       `hidden`, que nadie quitaba.
-       Arreglo en este archivo: se agrega `id="mapaContainer"`. Ese id
-       por sí solo no alcanza — hace falta que app.js lo agregue a su
-       lista de elementos vigilados y alterne su `.hidden` junto con
-       el de `mapaHerramienta`. Ese cambio, mínimo y quirúrgico, se
-       entrega junto con este archivo (ver parche a js/app.js más
-       abajo en la respuesta — no se reescribió el resto del módulo).
-
-     Bug B — "los números quedan en cargando":
-       Tres piezas de contenido dinámico perdieron su `id` en la
-       misma revisión, y quedaron atascadas en su valor de placeholder
-       para siempre porque `DOM.x` es `null` y cada asignación está
-       protegida por `if (DOM.x)`:
-         · el contador "lugares verificados"     (quedaba en "—")
-         · el contador "rubros distintos"        (quedaba en "—")
-         · el título/subtítulo de la región activa, que arranca en
-           "Para empezar" / "Cargando…" y nunca se actualiza — este
-           es, con altísima probabilidad, el "cargando" que se ve
-           pegado en pantalla.
-         · como efecto secundario menos visible: "tu relación con
-           esta ciudad" en el header tampoco se actualiza nunca.
-       Arreglo en este archivo: se restituye el `id` histórico que
-       app.js espera en cada uno de estos elementos, MANTENIENDO el
-       atributo `data-*` correspondiente (no se revierte la mejora
-       semántica — conviven ambos, ver sección 3 para el porqué).
-
-     Bug C — hallado en la misma auditoría, mismo patrón exacto:
-       `.mapa-info` (el cartel "Clickeá un lugar en el mapa…") tenía
-       clase pero no `id` → `DOM.mapaInfo` también era `null` → el
-       texto "Mostrando X de Y lugares en el mapa" nunca se pintaba.
-       Se agrega `id="mapaInfo"`.
-
-     Bug D — elemento faltante, no solo `id` perdido:
-       js/app.js tiene una función completa,
-       `actualizarContadorGuardados()`, que pinta cuántos lugares
-       tiene guardados el usuario en un badge `#contadorCuraduria`
-       — pero ese elemento no existía en ningún punto del HTML. Se
-       agrega el `<span id="contadorCuraduria">` junto al botón
-       "tu lista guardada", con un parche de estilo mínimo y
-       explícitamente marcado como deuda a migrar (ver sección 10).
-
-     Bug E — metadato incorrecto, sin impacto funcional pero sí de
-       mantenibilidad:
-       `data-map-provider="mapbox"` y el `dns-prefetch` a
-       `api.mapbox.com` son ambos falsos: el motor de mapa
-       (js/motor-render.js) dibuja tiles raster de CARTO (Voyager)
-       directamente sobre un `<canvas>` propio, sin ninguna
-       dependencia de Mapbox. Se corrige el valor del atributo y se
-       reemplaza el `dns-prefetch` por los subdominios reales que usa
-       el motor (a/b/c/d.basemaps.cartocdn.com — ver
-       js/motor-render.js:126, array SUBDOMINIOS). Este tipo de
-       metadato "de mentira" es peligroso porque un mantenedor futuro
-       puede leerlo, confiar en él y perder tiempo buscando una
-       integración de Mapbox que no existe.
-
-     ───────────────────────────────────────────────────────────────
-     3. CONTRATO HTML↔JS — TODO hook que js/app.js consume por id
-        (revisar `js/app.js`, línea ~83, array de `DOM`)
-     ───────────────────────────────────────────────────────────────
-     Regla de oro: cada fila de esta tabla es una promesa. Si cambiás
-     el `id` de un elemento sin actualizar `js/app.js` en el mismo
-     commit, revivís exactamente los bugs A-D de arriba, y lo harás
-     EN SILENCIO — nada va a fallar ruidosamente, solo un pedazo de
-     la interfaz va a dejar de actualizarse. La única forma confiable
-     de detectarlo es una revisión manual comparando este bloque
-     contra el array `DOM` de app.js, o un test que lo automatice
-     (ver sección 10 — no existe ese test todavía).
-
-       id                    │ dueño en app.js         │ qué controla
-       ──────────────────────┼─────────────────────────┼──────────────────────────────
-       rolActual              │ actualizarCabecera()     │ texto "tu relación con esta
-                               │                          │ ciudad" en el header
-       inputBuscar            │ listener de búsqueda     │ valor del buscador
-       btnVerGuardados        │ listener de click        │ activa la región "curaduría"
-       contadorCuraduria      │ actualizarContadorGuard. │ badge con cantidad guardada
-       panelDescubrimiento    │ render()                 │ grilla de tarjetas de lugares
-       tituloRegion           │ actualizarCabecera()     │ título de la región activa
-       subtituloRegion        │ actualizarCabecera()     │ subtítulo de la región activa
-       mapaTextura            │ actualizarMapaTextura()  │ capa ambiental no interactiva
-       mapaContainer          │ actualizarMapaHerram.()  │ visibilidad de TODO el bloque
-                               │                          │ de mapa (contenedor padre)
-       mapaHerramienta        │ inicializarMotorMapa() + │ el <canvas> del mapa en sí
-                               │ actualizarMapaHerram.()  │
-       mapaInfo               │ actualizarMapaHerram.()  │ cartel "mostrando X de Y…"
-       mapaLeyenda             │ pintarLeyenda()          │ leyenda de colores por rubro
-       listaRubros            │ pintarIndiceRubros()     │ grilla "Por rubro"
-       statLugares             │ pintarStatsRapidas()     │ contador "lugares verificados"
-       statRubros              │ pintarStatsRapidas()     │ contador "rubros distintos"
-       faqLista                │ (reservado, ver §9)      │ contenedor de FAQ dinámicas
-       destacados              │ pintarDestacados()       │ visibilidad de TODO el spotlight
-                                │                          │ de mejor puntuados (agregado en
-                                │                          │ auditoría Fase 4 — ver más abajo)
-       listaDestacados         │ pintarDestacados()       │ strip de tarjetas destacadas
-
-     Elementos que NO están en esta tabla (mapa-container, sección
-     manifiesto, accesos por categoría, footer) son intencionalmente
-     estáticos: js/app.js no los toca, y no deberían empezar a
-     necesitar un `id` salvo que se vuelvan dinámicos — en ese caso,
-     agregalos a esta tabla en el mismo commit que los conecte.
-
-     Por qué conviven `id` y `data-*` en el mismo elemento en vez de
-     elegir uno solo: el `id` es el contrato de bajo nivel con
-     `getElementById` (rápido, sin ambigüedad, es lo que ya usa el
-     87% de la lógica en app.js — reescribirlo a `querySelector`
-     para no ganar nada era el tipo de reescritura cosmética que este
-     archivo evita). El `data-*` es semántico: describe QUÉ es el dato
-     ("total-places", "region-title") independientemente de cómo se
-     lo localiza, y es lo que usarían tests end-to-end, lectores de
-     pantalla con software de terceros, o una futura migración a un
-     framework de componentes. Ninguno reemplaza al otro.
-
-     ───────────────────────────────────────────────────────────────
-     4. INVARIANTES DEL DOCUMENTO
-        (verdades que este archivo garantiza; romperlas rompe algo
-        que no es obvio desde el diff que las rompió)
-     ───────────────────────────────────────────────────────────────
-     I1. Todo `id` listado en la sección 3 existe exactamente una vez
-         en este documento y nunca dentro de un `<template>` (los
-         `<template>` no forman parte del DOM activo — un `id`
-         adentro es invisible para `getElementById` hasta que se
-         clona, y si ese clon no le asigna un id ÚNICO por instancia,
-         terminás con ids duplicados en el documento real).
-     I2. `.mapa-container` empieza con `hidden` en el marcado crudo.
-         Es un invariante deliberado (no un placeholder que "alguien
-         se olvidó de sacar"): el mapa no debe existir visualmente
-         hasta que `js/motor-mapa.js` confirme que hay al menos un
-         resultado georreferenciado. Si algún día se decide que el
-         mapa debe verse siempre (aunque vacío), sacar el `hidden` acá
-         NO alcanza — hay que revisar `actualizarMapaHerramienta()` en
-         app.js para que no vuelva a esconderlo cuando no hay puntos.
-     I3. Cada `<template>` tiene un propósito documentado en el punto
-         donde se declara. Un `<template>` sin consumidor conocido en
-         JS es deuda muerta — antes de agregar uno nuevo, confirmá que
-         algo en app.js/motor-render.js lo va a clonar.
-     I4. El orden de los `<script defer>` codifica dependencias reales
-         entre módulos (ver sección 5) — no es orden alfabético ni
-         cosmético. Reordenarlos sin entender esas dependencias puede
-         romper el mapa con un error de consola sutil
-         ("URU_MOTOR_MAPA_RENDER: falta URU_PROYECCION...").
-     I5. El único `<script>` inline permitido es el de resiliencia
-         (sección 7) y el bloque de documentación de lazy-loading —
-         ambos existen deliberadamente fuera de los módulos con
-         nombre porque no son parte de la lógica de negocio, son
-         salvaguardas del propio documento. La CSP (`script-src
-         'self'`) NO bloquea estos porque no usan atributos `on*` ni
-         `javascript:` URIs — son bloques `<script>` normales del
-         mismo documento, que sí están permitidos aunque `'self'` no
-         incluya `'unsafe-inline'`. Ver sección 8 para el detalle.
-     I6. `lang="es-AR"` en `<html>` es el idioma real de TODO el
-         contenido estático de este archivo. Si en el futuro se agrega
-         contenido en otro idioma (una guía en inglés, por ejemplo),
-         ese fragmento necesita su propio `lang="en"` — no cambiar el
-         `lang` del documento entero.
-
-     ───────────────────────────────────────────────────────────────
-     5. ORDEN DE CARGA DE <script defer> — POR QUÉ ES UNA DEPENDENCIA
-        DURA Y NO UNA CONVENCIÓN
-     ───────────────────────────────────────────────────────────────
-     `defer` garantiza dos cosas: (a) la descarga es paralela — el
-     orden en el HTML no afecta cuándo termina de bajar cada archivo,
-     y (b) la EJECUCIÓN respeta el orden del documento, siempre
-     después de parsear el HTML y siempre antes de `DOMContentLoaded`.
-     Este documento se apoya en (b) para resolver dependencias entre
-     módulos sin usar un bundler ni imports de ES modules — es una
-     decisión consciente de simplicidad (sin build step), pero exige
-     que el orden de abajo se respete al pie de la letra:
-
-       1. motor-config.js     — no depende de nada. Define URU_CONFIG.
-       2. rubros-meta.js      — no depende de nada. Define
-                                 URU_RUBROS_META (íconos, colores,
-                                 nombres por rubro).
-       3. locales-slug.js     — no depende de nada. Define
-                                 URU_LOCALES_SLUGS (mapa id→slug para
-                                 armar URLs de ficha).
-       4. motor-plano.js      — usa URU_CONFIG. Define URU_PLANO
-                                 (estado de sesión persistido).
-       5. motor-exposicion.js — usa URU_CONFIG y URU_PLANO. Define
-                                 URU_EXPOSICION.
-       6. motor-mapa.js       — usa URU_CONFIG. Define URU_MAPA
-                                 (qué puntos le corresponden al mapa).
-       7. proyeccion.js       — no depende de nada. Define
-                                 URU_PROYECCION (matemática lat/lng↔px
-                                 y tiles). DEBE ir antes que #8: ver
-                                 motor-render.js línea ~103-120, que
-                                 falla temprano y explícito
-                                 (`console.error` + `crear()` lanza
-                                 excepción) si URU_PROYECCION no
-                                 existe todavía — un diseño defensivo
-                                 correcto que solo funciona si el
-                                 orden acá es el correcto.
-       8. motor-render.js     — usa URU_PROYECCION. Define
-                                 URU_MOTOR_MAPA_RENDER (el motor de
-                                 canvas del mapa).
-       9. app.js              — usa TODOS los anteriores. Es el
-                                 último a propósito: si algún módulo
-                                 de arriba no cargó, app.js encuentra
-                                 `window.URU_X` como `undefined` y
-                                 sus propios chequeos (`if (!PROY)...`,
-                                 `if (!window.URU_MOTOR_MAPA_RENDER)
-                                 return;`) evitan que el resto de la
-                                 página se rompa — se degrada, no
-                                 explota.
-
-     Si agregás un módulo nuevo: identificá de qué `window.URU_*`
-     depende, ubicalo después de esas dependencias y antes de
-     app.js, y agregá una línea a esta lista en el mismo commit.
-
-     ───────────────────────────────────────────────────────────────
-     6. ACCESIBILIDAD — decisiones y su justificación
-     ───────────────────────────────────────────────────────────────
-     · El `<canvas>` del mapa es `aria-hidden` a nivel de
-       implementación en motor-render.js (no en este HTML) porque el
-       mapa siempre tiene una lista paralela de tarjetas con la misma
-       información — el canvas es una redundancia visual, no la única
-       fuente de la información. Por eso `#mapaHerramienta` acá se
-       declara con `role="application"`: ese rol es correcto para el
-       contenedor que EN LA PRÁCTICA aloja gestos custom (arrastrar,
-       zoom con rueda, click en marcador), aunque el propio motor
-       luego marque el `<canvas>` interno como no navegable por
-       teclado/lector — la combinación es intencional, no
-       contradictoria: "esta región tiene su propia interacción" +
-       "pero no obligues a un lector de pantalla a entrar en ella".
-     · `role="search"` en el buscador y `role="status"` +
-       `aria-live="polite"` en las estadísticas rápidas y en
-       `#estadoResultados` siguen el patrón WCAG de landmarks +
-       regiones vivas: un lector de pantalla puede saltar directo al
-       buscador, y se entera de cambios de resultados sin que el
-       foco se mueva solo.
-     · El skip-link (`.skip-link`) es el primer elemento
-       enfocable del `<body>` — cualquier reordenamiento del `<body>`
-       que lo mueva de esa posición rompe su propósito (dejar de ser
-       lo primero que un usuario de teclado tabula).
-     · Los emojis usados como ícono (🍽️, ☕, etc.) llevan
-       `aria-hidden="true"` porque son decorativos — el texto visible
-       junto a cada uno ya transmite el significado; sin ese atributo,
-       un lector de pantalla leería en voz alta el nombre Unicode del
-       emoji antes del texto real, duplicando la información.
-
-     ───────────────────────────────────────────────────────────────
-     7. RESILIENCIA — qué pasa cuando algo falla
-     ───────────────────────────────────────────────────────────────
-     Dos capas de defensa, en orden de exigencia creciente:
-       (1) `<noscript>` — cubre el caso "JS deshabilitado", con un
-           mensaje claro y un contacto por email.
-       (2) El script de failsafe al final del `<body>` — cubre el
-           caso "JS está habilitado pero algo se colgó" (falla de
-           red, un módulo que tira una excepción antes de terminar
-           de pintar, una API caída). Después de 12s sin que el
-           placeholder de carga haya sido reemplazado, inyecta un
-           aviso `role="alert"` con un botón de reintentar. El
-           timeout se limpia en `unload` para no dejar timers vivos
-           si el usuario navega antes de que se cumplan los 12s.
-     Ninguna de las dos capas depende de que el resto del sistema
-     funcione — están escritas para ser lo último que falla.
-
-     ───────────────────────────────────────────────────────────────
-     8. SEGURIDAD — CSP y por qué estos orígenes y no otros
-     ───────────────────────────────────────────────────────────────
-     `script-src 'self'` — todo el JS de negocio es propio y se sirve
-       desde el mismo origen (`js/*.js`); no hay CDN de terceros para
-       lógica. Esto bloquea inyección de script externo aunque haya
-       un XSS en algún dato renderizado con `innerHTML` en app.js.
-     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` —
-       `'unsafe-inline'` es necesario porque el motor de mapa fija
-       colores por rubro con `style="background:..."` inline (ver
-       `pintarLeyenda()` en app.js) — migrar eso a clases CSS
-       generadas dinámicamente sacaría esta excepción, pero no es
-       gratis (habría que generar una clase por color de rubro). Se
-       documenta como deuda aceptada, no como descuido.
-     `img-src 'self' data: https:;` — deliberadamente amplio en
-       `https:` porque los tiles del mapa (CARTO) y las imágenes de
-       lugares pueden servirse desde distintos subdominios/CDNs con
-       el tiempo; `data:` cubre placeholders inline si el motor de
-       render los usara. Es el trade-off correcto para un sitio que
-       consume tiles de mapa de un proveedor externo sin
-       autenticación por origen.
-     `connect-src 'self' https:;` — los tiles se cargan como
-       `<img src=...>`, no por `fetch`, así que en rigor `connect-src`
-       no los gobierna (los gobierna `img-src`, ya cubierto); se deja
-       `https:` amplio acá para no bloquear los `fetch()` a
-       `lugares-core.json` / `lugares-detalles.json` si algún día se
-       sirven desde un dominio distinto (hoy son relativos a
-       `'self'`, que ya está permitido).
-
-     ───────────────────────────────────────────────────────────────
-     9. PUNTOS DE EXTENSIÓN
-     ───────────────────────────────────────────────────────────────
-     · `#faqLista` ya existe como contenedor con un `<template
-       id="template-faq-item">` listo para clonar. Hoy las 5 FAQ están
-       escritas a mano como contenido crítico/estático (para que
-       existan incluso si JS no corre — buscadores y `<noscript>` las
-       ven igual). Si el número de preguntas crece, el patrón correcto
-       es: agregar las nuevas al array `mainEntity` del JSON-LD +
-       clonar `template-faq-item` desde JS, no seguir copiando bloques
-       `<article class="faq-item">` a mano indefinidamente.
-     · `data-map-provider` en `#mapaContainer` queda como hook
-       reservado: hoy nada lo lee, pero si en el futuro se soporta más
-       de un proveedor de tiles (por ejemplo, para tener un fallback
-       si CARTO cae), este atributo es el lugar natural para que
-       `motor-render.js` decida qué URL de tiles usar sin tener que
-       tocar este HTML de nuevo.
-     · `<template id="template-rubros">` en `#listaRubros` está
-       reservado para cuando `pintarIndiceRubros()` necesite un layout
-       más complejo por ítem que un simple `innerHTML +=`; hoy la
-       función arma el HTML directamente en JS por simplicidad.
-
-     ───────────────────────────────────────────────────────────────
-     10. DEUDA TÉCNICA CONOCIDA (documentada a propósito, fuera del
-         alcance de este archivo — no se resuelve acá)
-     ───────────────────────────────────────────────────────────────
-     · No existe ningún test (ni manual con checklist, ni automatizado)
-       que verifique que la tabla de la sección 3 sigue siendo cierta.
-       Hoy la única defensa es la revisión humana. Un test e2e mínimo
-       (Playwright/Puppeteer) que cargue la página y assert-ee
-       `document.getElementById(x) !== null` para cada fila de la
-       tabla sería barato y hubiera atrapado los bugs A-D antes de
-       producción.
-     · `css/mapa.css` y `css/descubrimiento.css` definen la MISMA
-       regla `#mapaHerramienta[hidden]{ display:none; }` por
-       duplicado — inofensivo hoy (CSS es idempotente), pero es una
-       señal de que esas dos hojas se solapan más de lo que sus
-       nombres sugieren. No se toca en esta revisión porque el
-       alcance es este archivo, no las hojas de estilo.
-     · El badge `#contadorCuraduria` agregado en esta revisión usa un
-       `<style>` embebido mínimo en este mismo documento (ver más
-       abajo, bloque marcado "PARCHE") en lugar de una clase en
-       `css/boton.css`. Es intencional para no editar un archivo CSS
-       fuera del alcance pedido, pero es la ubicación equivocada a
-       largo plazo — debería migrar a `css/boton.css` o a un nuevo
-       `css/badge-contador.css` en cuanto se toque esa capa.
-
-     ───────────────────────────────────────────────────────────────
-     11. CHECKLIST PARA QUIEN MODIFIQUE ESTE ARCHIVO
-     ───────────────────────────────────────────────────────────────
-     [ ] ¿Agregaste o renombraste un `id`? → actualizá la tabla de la
-         sección 3 Y el array `DOM` en js/app.js, en el mismo commit.
-     [ ] ¿Agregaste un `<script defer>` nuevo? → ubicalo respetando
-         sus dependencias reales (sección 5) y documentá la
-         dependencia acá.
-     [ ] ¿Modificaste algo dentro de un `<template>`? → confirmá en
-         app.js/motor-render.js que el consumidor sigue esperando esa
-         misma estructura interna.
-     [ ] ¿Tocaste el `<head>`? → correlo por un validador de HTML y
-         confirmá que la CSP sigue permitiendo todo lo que este
-         documento carga (fonts, tiles, JSON de datos).
-     [ ] ¿El cambio afecta contenido visible? → revisá que el
-         `<noscript>` y el JSON-LD (FAQPage, Organization) sigan
-         siendo coherentes con lo que un usuario ve.
-
-     ───────────────────────────────────────────────────────────────
-     12. EXPANSIÓN DE CONTENIDO EDITORIAL (esta revisión)
-     ───────────────────────────────────────────────────────────────
-     Contexto: una auditoría previa (documentada en las secciones 1-11
-     de este mismo archivo) corrigió contratos rotos (bugs A-E) y
-     dejó la arquitectura sólida. Esta revisión NO toca esa
-     arquitectura ni el motor — agrega contenido editorial 100%
-     estático, sin nuevos hooks que `js/app.js` necesite leer, para
-     que el `index` deje de sentirse como una landing corta y pase a
-     ser una guía completa de la ciudad y del producto.
-
-     Secciones nuevas, en orden de aparición en el documento:
-       · `#sobre-la-ciudad`  — contexto histórico/geográfico real de
-         Concepción del Uruguay (fundación 1783, Urquiza, Ramírez,
-         río, termas, patrimonio). Hechos verificados contra fuentes
-         públicas; se evitaron a propósito cifras con fuentes
-         contradictorias entre sí (p. ej. distancias exactas a sitios
-         cercanos).
-       · `#metodologia`      — profundiza "el orden no se compra" con
-         el CÓMO real (Guía → Exploración → Acción Directa), en
-         lenguaje llano, sin exponer nombres de variables internas.
-       · `#rubros-guia`      — contenido de lectura por rubro,
-         complementario (no sustituto) de la sección dinámica
-         `#rubros` que puebla `pintarIndiceRubros()`.
-       · `#guia-practica`    — información orientativa para visitantes,
-         deliberadamente sin cifras que se desactualizan solas
-         (horarios exactos, precios, tarifas).
-       · `#glosario`         — vocabulario propio del producto (Guía,
-         Exploración, Acción Directa, Curaduría, Destacados,
-         Verificado, Rubro), alineado 1:1 con los nombres que ya usa
-         el código.
-       · FAQ ampliado de 5 a 10 preguntas (`faq-panel-6` a
-         `faq-panel-10`), con el JSON-LD `FAQPage` actualizado en el
-         mismo commit — mismo patrón exacto que los 5 originales.
-       · `#hoja-de-ruta`     — transparencia sobre qué existe hoy y
-         qué no todavía (fotos propias, horarios en tiempo real, test
-         e2e del contrato §3), sin comprometer fechas.
-       · `#accesibilidad`    — hace visible en la página lo que antes
-         solo vivía en comentarios de código; cada ítem listado
-         corresponde a un mecanismo real ya implementado (no es
-         aspiracional).
-       · `.indice-pagina`    — nav de anclas después del hero: con 12
-         secciones en vez de 6, sin un mapa de contenido explícito el
-         glosario y la hoja de ruta quedarían invisibles a varios
-         scrolls de profundidad.
-
-     Invariante que esta revisión agrega (I7): ninguna sección nueva
-     de las listadas arriba tiene ni necesita un `id` en la tabla de
-     contrato de la sección 3 — son estáticas por diseño. Si en el
-     futuro alguna de ellas necesita volverse dinámica (por ejemplo,
-     "Hoja de ruta" alimentada desde un JSON real), agregar su `id` a
-     esa tabla en el mismo commit que la conecte, igual que exige el
-     resto del documento.
-
-     CSS: todo el contenido nuevo se apoya en componentes que ya
-     existían (`.manifiesto-card` de `descubrimiento.css`) en vez de
-     clonarlos — la única hoja nueva, `css/contenido-editorial.css`,
-     define exclusivamente lo que no tenía equivalente (índice de
-     anclas, ficha de rubro, lista de glosario, estado de hoja de
-     ruta, checklist de accesibilidad). Ver el encabezado de ese
-     archivo para el detalle.
-     ═══════════════════════════════════════════════════════════════════════ -->
 
 <!-- PRECONEXIONES — orígenes externos reales que este documento usa.
      No es una lista aspiracional: cada entrada corresponde a un
@@ -615,27 +126,31 @@
      de rubros, guía práctica, glosario, hoja de ruta, accesibilidad).
      Depende de descubrimiento.css porque reutiliza .manifiesto-card
      en vez de duplicarla — debe cargarse después. -->
-<link rel="stylesheet" href="css/contenido-editorial.css">
+<!-- contenido-editorial.css se carga sin bloquear el render (ver
+     script inline más abajo, permitido por CSP §8/I5): gobierna
+     "Sobre la ciudad" en adelante, contenido que ningún usuario ve
+     sin scrollear más allá del hero y de Descubrimiento. Bloquear el
+     primer paint por una hoja que solo pinta contenido fuera de
+     pantalla no tenía justificación — el <noscript> abajo cubre el
+     caso sin JS, mismo criterio que el resto del documento (§7). -->
+<link rel="preload" href="css/contenido-editorial.css" as="style">
+<script>
+  (function(){
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'css/contenido-editorial.css';
+    document.head.appendChild(l);
+  })();
+</script>
+<noscript><link rel="stylesheet" href="css/contenido-editorial.css"></noscript>
 
-<!-- PARCHE DE ESTILO MÍNIMO — ver §10 (deuda técnica conocida).
-     Solo el badge de "lugares guardados" (#contadorCuraduria), que
-     no tenía ningún elemento en el HTML hasta esta revisión y por
-     lo tanto tampoco tenía clase en ninguna hoja de estilo. Se
-     resuelve acá, embebido y con alcance mínimo, en vez de editar
-     una hoja de estilo fuera del alcance de esta revisión. Migrar a
-     css/boton.css (o a un archivo dedicado) es la tarea pendiente. -->
-<style>
-  .contador-guardados{
-    display:inline-flex; align-items:center; justify-content:center;
-    min-width:20px; height:20px; margin-left:8px; padding:0 6px;
-    border-radius:var(--radio-full, 999px);
-    background:var(--color-fondo-2, #10141C);
-    border:1px solid var(--glass-borde, rgba(236,237,239,.10));
-    font-size:11px; font-weight:600; line-height:1;
-    color:inherit; vertical-align:middle;
-  }
-  .contador-guardados[hidden]{ display:none; }
-</style>
+<!-- La deuda de §10 ("migrar a css/boton.css") queda saldada en esta
+     revisión: .contador-guardados, .indice-pagina__grupo-titulo y
+     .rubros-detalle__resumen se movieron a css/boton.css, con los
+     tokens reales del proyecto (--anillo-foco, --color-tinta-60) en
+     vez de los fallbacks genéricos que tenía este parche embebido.
+     Ver css/boton.css, bloque "BADGE Y PATCHES MIGRADOS DESDE
+     index.html". Este documento ya no necesita <style> propio. -->
 
 <!-- SCHEMA.ORG — Organization + WebSite (con SearchAction) +
      BreadcrumbList + FAQPage. El texto de cada respuesta acá DEBE
@@ -881,21 +396,39 @@
        secciones; sin un mapa de contenido, "Cómo funciona" o
        "Glosario" quedarían enterrados a varios scrolls de distancia
        sin que nadie supiera que existen. -->
+  <!-- ÍNDICE DE PÁGINA — reagrupado en dos bloques con encabezado
+       propio (auditoría 2ª pasada, P1). Antes eran 12 links sueltos
+       en una sola lista plana, sin jerarquía: "Destacados" y
+       "Accesibilidad" pesaban visualmente lo mismo, cuando el primero
+       es producto y el segundo es contenido de referencia. Separar
+       "Explorá" (lo que se usa) de "Conocé el proyecto" (lo que se
+       lee una vez) no elimina ninguna sección ni ningún link — solo
+       les da jerarquía, así el nav deja de sentirse como un mapa del
+       sitio y vuelve a sentirse como una guía de uso. Sin cambios de
+       JS ni de contrato: son las mismas 12 anclas de siempre. -->
   <nav class="indice-pagina envoltorio" aria-label="Ir a una sección de esta página">
-    <ul class="indice-pagina__lista">
-      <li><a class="indice-pagina__link" href="#destacados">Destacados</a></li>
-      <li><a class="indice-pagina__link" href="#region-descubrimiento">Buscar y explorar</a></li>
-      <li><a class="indice-pagina__link" href="#sobre-la-ciudad">Sobre la ciudad</a></li>
-      <li><a class="indice-pagina__link" href="#manifiesto">Cómo funciona</a></li>
-      <li><a class="indice-pagina__link" href="#metodologia">Cómo pensamos el orden</a></li>
-      <li><a class="indice-pagina__link" href="#rubros">Por rubro</a></li>
-      <li><a class="indice-pagina__link" href="#accesos">Guías por categoría</a></li>
-      <li><a class="indice-pagina__link" href="#guia-practica">Guía práctica</a></li>
-      <li><a class="indice-pagina__link" href="#glosario">Glosario</a></li>
-      <li><a class="indice-pagina__link" href="#faq">Preguntas frecuentes</a></li>
-      <li><a class="indice-pagina__link" href="#hoja-de-ruta">Hoja de ruta</a></li>
-      <li><a class="indice-pagina__link" href="#accesibilidad">Accesibilidad</a></li>
-    </ul>
+    <div class="indice-pagina__grupo">
+      <span class="indice-pagina__grupo-titulo">Explorá</span>
+      <ul class="indice-pagina__lista">
+        <li><a class="indice-pagina__link" href="#destacados">Destacados</a></li>
+        <li><a class="indice-pagina__link" href="#region-descubrimiento">Buscar y explorar</a></li>
+        <li><a class="indice-pagina__link" href="#rubros">Por rubro</a></li>
+        <li><a class="indice-pagina__link" href="#accesos">Guías por categoría</a></li>
+      </ul>
+    </div>
+    <div class="indice-pagina__grupo">
+      <span class="indice-pagina__grupo-titulo">Conocé el proyecto</span>
+      <ul class="indice-pagina__lista">
+        <li><a class="indice-pagina__link" href="#sobre-la-ciudad">Sobre la ciudad</a></li>
+        <li><a class="indice-pagina__link" href="#manifiesto">Cómo funciona</a></li>
+        <li><a class="indice-pagina__link" href="#metodologia">Cómo pensamos el orden</a></li>
+        <li><a class="indice-pagina__link" href="#guia-practica">Guía práctica</a></li>
+        <li><a class="indice-pagina__link" href="#glosario">Glosario</a></li>
+        <li><a class="indice-pagina__link" href="#faq">Preguntas frecuentes</a></li>
+        <li><a class="indice-pagina__link" href="#hoja-de-ruta">Hoja de ruta</a></li>
+        <li><a class="indice-pagina__link" href="#accesibilidad">Accesibilidad</a></li>
+      </ul>
+    </div>
   </nav>
 
   <!-- DESTACADOS (auditoría Fase 4, nueva): spotlight de lugares con
@@ -1066,7 +599,14 @@
   </section>
 
   <!-- MANIFIESTO: contenido 100% estático, no depende de datos ni de
-       JS — visible incluso con <noscript> activo. -->
+       JS — visible incluso con <noscript> activo.
+       Auditoría 2ª pasada: se retira la tarjeta "tus rechazos pesan
+       poco" — decía, casi palabra por palabra, lo mismo que la
+       tarjeta ⑥ de Metodología ("los rechazos pesan poco y se apagan
+       solos"), dos secciones seguidas repitiendo el mismo hecho. Se
+       mantiene la versión de Metodología por ser más específica
+       (explica el POR QUÉ, no solo el QUÉ). Ningún hecho se pierde —
+       se cuenta una sola vez, en el lugar que mejor lo explica. -->
   <section class="manifiesto envoltorio u-reveal" id="manifiesto" aria-labelledby="manifiesto-titulo">
     <h2 id="manifiesto-titulo">Cómo funciona</h2>
     <div class="manifiesto-grid">
@@ -1077,10 +617,6 @@
       <article class="manifiesto-card">
         <span class="manifiesto-card__icono" aria-hidden="true">⚖</span>
         <p>El orden no es un ranking pago: nadie compra su posición. El dinero financía mejor ficha, nunca mejor posición.</p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">◐</span>
-        <p>Tus rechazos pesan poco y se apagan solos. Solo un patrón que se repite cambia lo que te mostramos.</p>
       </article>
       <article class="manifiesto-card">
         <span class="manifiesto-card__icono" aria-hidden="true">✉</span>
@@ -1099,7 +635,7 @@
   <section class="metodologia envoltorio u-reveal" id="metodologia" aria-labelledby="metodologia-titulo">
     <h2 id="metodologia-titulo">Cómo pensamos el orden</h2>
     <p class="metodologia__intro">
-      "El orden no se compra" explica qué NO hacemos. Esto explica qué SÍ hacemos con lo poco que
+      Arriba contamos qué NO hacemos. Esto es el CÓMO: qué hacemos, paso a paso, con lo poco que
       sabemos de vos en cada visita.
     </p>
     <div class="metodologia-grid">
@@ -1155,13 +691,48 @@
     </div>
   </section>
 
+  <!-- ÍNDICE POR RUBRO: dinámico, poblado por
+       app.js/pintarIndiceRubros() a partir de rubros-meta.js. El
+       <template> queda declarado como punto de extensión (§9) para
+       cuando ese layout deje de ser un innerHTML simple.
+       Auditoría 2ª pasada: se adelanta esta sección para que quede
+       ANTES del detalle editorial (ver <details> más abajo) — la
+       herramienta de filtro real es lo primero que se ve; la ficha
+       descriptiva de cada rubro y la composición del padrón quedan
+       como profundización opcional a un click, no como peaje de
+       scroll obligatorio antes de llegar a lo funcional. -->
+  <section class="indice envoltorio u-reveal" id="rubros" aria-labelledby="rubros-titulo">
+    <h2 id="rubros-titulo">Por rubro</h2>
+    <div id="listaRubros" role="grid" aria-label="Lugares organizados por rubro">
+      <template id="template-rubros">
+        <!-- app.js puebla #listaRubros directamente; ver §9. -->
+      </template>
+    </div>
+  </section>
+
+  <!-- DETALLE POR RUBRO — auditoría 2ª pasada (P1). Antes, "Guía
+       editorial de rubros" (14 tarjetas) + "Radiografía del padrón"
+       (14 filas) + "Por rubro" (grilla dinámica, la herramienta real)
+       eran TRES secciones seguidas contando lo mismo desde tres
+       ángulos: 28 bloques de texto/gráfico antes de llegar a la
+       herramienta de filtro en sí. Ningún contenido se borra — se
+       envuelve en un <details> cerrado por defecto, con la grilla
+       dinámica de filtro (arriba) como lo primero que se ve. Quien
+       quiere el detalle completo (ficha por rubro + composición del
+       padrón) lo tiene a un click, sin pagar el costo de scroll por
+       defecto. <details>/<summary> es HTML semántico nativo — no
+       requiere JS, funciona con teclado y lectores de pantalla sin
+       ARIA extra. -->
+  <details class="rubros-detalle envoltorio">
+    <summary class="rubros-detalle__resumen">Ver el detalle completo por rubro y la composición del padrón</summary>
+
   <!-- GUÍA EDITORIAL DE RUBROS (expansión de contenido, nueva):
        contenido descriptivo por categoría, separado a propósito de
-       la sección dinámica #rubros de más abajo (que puebla
+       la sección dinámica #rubros de más arriba (que puebla
        app.js/pintarIndiceRubros() a partir de rubros-meta.js). Esta
        es contenido humano, de lectura, pensado para quien todavía no
        sabe qué rubros existen en la plataforma; la sección dinámica
-       de abajo es la herramienta de filtrado en sí. Los 14 rubros y
+       de arriba es la herramienta de filtrado en sí. Los 14 rubros y
        sus colores (var(--color-rubro-*)) son los mismos que ya
        definen tokens.css y rubros-meta.js — ninguna paleta nueva. -->
   <section class="rubros-guia envoltorio u-reveal" id="rubros-guia" aria-labelledby="rubros-guia-titulo">
@@ -1325,18 +896,7 @@
     </p>
   </section>
 
-  <!-- ÍNDICE POR RUBRO: dinámico, poblado por
-       app.js/pintarIndiceRubros() a partir de rubros-meta.js. El
-       <template> queda declarado como punto de extensión (§9) para
-       cuando ese layout deje de ser un innerHTML simple. -->
-  <section class="indice envoltorio u-reveal" id="rubros" aria-labelledby="rubros-titulo">
-    <h2 id="rubros-titulo">Por rubro</h2>
-    <div id="listaRubros" role="grid" aria-label="Lugares organizados por rubro">
-      <template id="template-rubros">
-        <!-- app.js puebla #listaRubros directamente; ver §9. -->
-      </template>
-    </div>
-  </section>
+  </details>
 
   <!-- GUÍAS POR CATEGORÍA: <nav> real porque es, literalmente, un
        menú de navegación a otras páginas del sitio — no una lista de
@@ -1782,6 +1342,533 @@
  * crítico para el primer render.
  */
 </script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     DOCUMENTACIÓN COMPLETA DE index.html (donde-comer-cdu)
+     Reubicada acá, al final del documento, en la 2ª auditoría — ver
+     nota al principio del <head> para el motivo. Contenido idéntico
+     al original, sin editar una sola palabra de las 12 secciones.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════
+     URU SPOT — index.html (donde-comer-cdu)
+     Reconstrucción arquitectónica: 2026-07-22
+
+     ESTE BLOQUE ES EL PUNTO DE ENTRADA A LA DOCUMENTACIÓN DEL ARCHIVO.
+     Léelo antes de tocar cualquier `id`, `data-*` o `<script src>` de
+     acá abajo. La sección 3 (CONTRATO HTML↔JS) es la que más deuda
+     técnica genera si se ignora — es, literalmente, la causa de los
+     dos bugs que motivaron esta revisión.
+
+     ÍNDICE DE ESTA DOCUMENTACIÓN
+       1. Qué es este archivo y qué NO es
+       2. Diagnóstico: por qué el mapa no se veía y por qué los
+          números quedaban en "cargando" (root cause, con evidencia)
+       3. Contrato HTML↔JS — tabla completa de hooks (id / data-*)
+          que js/app.js consume, y qué pasa si se rompen
+       4. Invariantes del documento (lo que nunca debe dejar de ser
+          cierto, aunque cambie el contenido)
+       5. Orden de carga de <script> y por qué es una dependencia dura
+       6. Accesibilidad: decisiones y su justificación
+       7. Resiliencia: qué pasa cuando algo falla
+       8. Seguridad: CSP y por qué estos orígenes y no otros
+       9. Puntos de extensión pensados para quien agregue features
+      10. Deuda técnica conocida, fuera del alcance de este archivo
+      11. Checklist para quien vaya a modificar este archivo
+      12. Expansión de contenido editorial (esta revisión) — qué se
+          agregó, por qué, y qué NO cambia de la arquitectura
+
+     ───────────────────────────────────────────────────────────────
+     1. QUÉ ES ESTE ARCHIVO Y QUÉ NO ES
+     ───────────────────────────────────────────────────────────────
+     Este HTML es la CÁSCARA de la landing "Dónde comer" de URU SPOT.
+     No contiene lógica de negocio, no contiene datos de lugares, no
+     decide qué se muestra ni cuándo. Su único trabajo es:
+
+       (a) declarar los ELEMENTOS ESTABLES que el JavaScript necesita
+           encontrar para poder pintar contenido dinámico sobre ellos
+           (buscador, panel de descubrimiento, mapa, stats, FAQ);
+       (b) declarar el contenido ESTÁTICO que no cambia con datos
+           (manifiesto, accesos por categoría, preguntas frecuentes);
+       (c) cargar, en el orden correcto, los módulos de JS que sí
+           tienen la lógica real (ver sección 5);
+       (d) exponer metadatos para buscadores y redes sociales.
+
+     Si estás buscando la lógica de "cuántos lugares mostrar", "qué
+     región del usuario aplica", "cómo se calcula el mapa" o "qué
+     pasa cuando guardás un lugar" — no está acá. Está en, en este
+     orden de responsabilidad:
+       js/motor-config.js      → constantes y umbrales, un solo lugar
+       js/motor-plano.js       → estado de sesión persistido (PLANO)
+       js/motor-exposicion.js  → cuánto mostrar según el "plano"
+       js/motor-mapa.js        → QUÉ puntos le corresponden al mapa
+       js/proyeccion.js        → matemática de proyección lat/lng→px
+       js/motor-render.js      → CÓMO se dibuja el mapa (canvas propio)
+       js/app.js               → orquestador: conecta todo lo anterior
+                                  con el DOM que este archivo declara
+
+     ───────────────────────────────────────────────────────────────
+     2. DIAGNÓSTICO — POR QUÉ EL MAPA NO SE VEÍA Y LOS NÚMEROS
+        QUEDABAN PEGADOS EN "CARGANDO" (bugs reales, corregidos acá)
+     ───────────────────────────────────────────────────────────────
+     Una revisión anterior de este archivo ("REDISEÑO ARQUITECTÓNICO
+     2026-07-22" original) reemplazó varios `id` por atributos
+     `data-*`, con el argumento correcto de que los `id` usados solo
+     para hooks de JS son peores que atributos semánticos dedicados.
+     El principio es válido — el problema es que esa revisión NUNCA
+     tocó js/app.js, que es un módulo mucho más grande y con lógica
+     real (873 líneas) y que sigue seleccionando elementos por
+     `document.getElementById(...)`. El resultado: varios `id` que
+     app.js necesita dejaron de existir en el HTML, y las funciones
+     que dependían de ellos empezaron a fallar EN SILENCIO, porque
+     todas están escritas defensivamente (`if (DOM.x) DOM.x....`).
+     Nada tira una excepción visible en consola — por eso el bug
+     sobrevivió sin que saltara ninguna alarma obvia.
+
+     Bug A — "el mapa no se ve":
+       `.mapa-container` es el contenedor que envuelve el mapa, su
+       cartel informativo y su leyenda. Nace con el atributo `hidden`
+       en el propio HTML (correcto: no debe verse hasta que haya
+       datos con coordenadas). El problema es que:
+         · no tenía `id`, así que js/app.js no podía referenciarlo, y
+         · js/app.js NUNCA lo tenía en su lista de elementos vigilados
+           (solo vigilaba `#mapaHerramienta`, el `<div>` interno).
+       `[hidden]` en el contenedor padre oculta a TODOS sus hijos sin
+       importar el estado individual de cada uno — así que aunque
+       `actualizarMapaHerramienta()` hiciera bien su trabajo y pusiera
+       `mapaHerramienta.hidden = false`, el padre seguía oculto y el
+       mapa jamás llegaba a pintarse en pantalla. Confirmado también
+       revisando css/mapa.css: `.mapa-container` no tiene NINGUNA
+       regla propia — su visibilidad depende 100% del atributo
+       `hidden`, que nadie quitaba.
+       Arreglo en este archivo: se agrega `id="mapaContainer"`. Ese id
+       por sí solo no alcanza — hace falta que app.js lo agregue a su
+       lista de elementos vigilados y alterne su `.hidden` junto con
+       el de `mapaHerramienta`. Ese cambio, mínimo y quirúrgico, se
+       entrega junto con este archivo (ver parche a js/app.js más
+       abajo en la respuesta — no se reescribió el resto del módulo).
+
+     Bug B — "los números quedan en cargando":
+       Tres piezas de contenido dinámico perdieron su `id` en la
+       misma revisión, y quedaron atascadas en su valor de placeholder
+       para siempre porque `DOM.x` es `null` y cada asignación está
+       protegida por `if (DOM.x)`:
+         · el contador "lugares verificados"     (quedaba en "—")
+         · el contador "rubros distintos"        (quedaba en "—")
+         · el título/subtítulo de la región activa, que arranca en
+           "Para empezar" / "Cargando…" y nunca se actualiza — este
+           es, con altísima probabilidad, el "cargando" que se ve
+           pegado en pantalla.
+         · como efecto secundario menos visible: "tu relación con
+           esta ciudad" en el header tampoco se actualiza nunca.
+       Arreglo en este archivo: se restituye el `id` histórico que
+       app.js espera en cada uno de estos elementos, MANTENIENDO el
+       atributo `data-*` correspondiente (no se revierte la mejora
+       semántica — conviven ambos, ver sección 3 para el porqué).
+
+     Bug C — hallado en la misma auditoría, mismo patrón exacto:
+       `.mapa-info` (el cartel "Clickeá un lugar en el mapa…") tenía
+       clase pero no `id` → `DOM.mapaInfo` también era `null` → el
+       texto "Mostrando X de Y lugares en el mapa" nunca se pintaba.
+       Se agrega `id="mapaInfo"`.
+
+     Bug D — elemento faltante, no solo `id` perdido:
+       js/app.js tiene una función completa,
+       `actualizarContadorGuardados()`, que pinta cuántos lugares
+       tiene guardados el usuario en un badge `#contadorCuraduria`
+       — pero ese elemento no existía en ningún punto del HTML. Se
+       agrega el `<span id="contadorCuraduria">` junto al botón
+       "tu lista guardada", con un parche de estilo mínimo y
+       explícitamente marcado como deuda a migrar (ver sección 10).
+
+     Bug E — metadato incorrecto, sin impacto funcional pero sí de
+       mantenibilidad:
+       `data-map-provider="mapbox"` y el `dns-prefetch` a
+       `api.mapbox.com` son ambos falsos: el motor de mapa
+       (js/motor-render.js) dibuja tiles raster de CARTO (Voyager)
+       directamente sobre un `<canvas>` propio, sin ninguna
+       dependencia de Mapbox. Se corrige el valor del atributo y se
+       reemplaza el `dns-prefetch` por los subdominios reales que usa
+       el motor (a/b/c/d.basemaps.cartocdn.com — ver
+       js/motor-render.js:126, array SUBDOMINIOS). Este tipo de
+       metadato "de mentira" es peligroso porque un mantenedor futuro
+       puede leerlo, confiar en él y perder tiempo buscando una
+       integración de Mapbox que no existe.
+
+     ───────────────────────────────────────────────────────────────
+     3. CONTRATO HTML↔JS — TODO hook que js/app.js consume por id
+        (revisar `js/app.js`, línea ~83, array de `DOM`)
+     ───────────────────────────────────────────────────────────────
+     Regla de oro: cada fila de esta tabla es una promesa. Si cambiás
+     el `id` de un elemento sin actualizar `js/app.js` en el mismo
+     commit, revivís exactamente los bugs A-D de arriba, y lo harás
+     EN SILENCIO — nada va a fallar ruidosamente, solo un pedazo de
+     la interfaz va a dejar de actualizarse. La única forma confiable
+     de detectarlo es una revisión manual comparando este bloque
+     contra el array `DOM` de app.js, o un test que lo automatice
+     (ver sección 10 — no existe ese test todavía).
+
+       id                    │ dueño en app.js         │ qué controla
+       ──────────────────────┼─────────────────────────┼──────────────────────────────
+       rolActual              │ actualizarCabecera()     │ texto "tu relación con esta
+                               │                          │ ciudad" en el header
+       inputBuscar            │ listener de búsqueda     │ valor del buscador
+       btnVerGuardados        │ listener de click        │ activa la región "curaduría"
+       contadorCuraduria      │ actualizarContadorGuard. │ badge con cantidad guardada
+       panelDescubrimiento    │ render()                 │ grilla de tarjetas de lugares
+       tituloRegion           │ actualizarCabecera()     │ título de la región activa
+       subtituloRegion        │ actualizarCabecera()     │ subtítulo de la región activa
+       mapaTextura            │ actualizarMapaTextura()  │ capa ambiental no interactiva
+       mapaContainer          │ actualizarMapaHerram.()  │ visibilidad de TODO el bloque
+                               │                          │ de mapa (contenedor padre)
+       mapaHerramienta        │ inicializarMotorMapa() + │ el <canvas> del mapa en sí
+                               │ actualizarMapaHerram.()  │
+       mapaInfo               │ actualizarMapaHerram.()  │ cartel "mostrando X de Y…"
+       mapaLeyenda             │ pintarLeyenda()          │ leyenda de colores por rubro
+       listaRubros            │ pintarIndiceRubros()     │ grilla "Por rubro"
+       statLugares             │ pintarStatsRapidas()     │ contador "lugares verificados"
+       statRubros              │ pintarStatsRapidas()     │ contador "rubros distintos"
+       faqLista                │ (reservado, ver §9)      │ contenedor de FAQ dinámicas
+       destacados              │ pintarDestacados()       │ visibilidad de TODO el spotlight
+                                │                          │ de mejor puntuados (agregado en
+                                │                          │ auditoría Fase 4 — ver más abajo)
+       listaDestacados         │ pintarDestacados()       │ strip de tarjetas destacadas
+
+     Elementos que NO están en esta tabla (mapa-container, sección
+     manifiesto, accesos por categoría, footer) son intencionalmente
+     estáticos: js/app.js no los toca, y no deberían empezar a
+     necesitar un `id` salvo que se vuelvan dinámicos — en ese caso,
+     agregalos a esta tabla en el mismo commit que los conecte.
+
+     Por qué conviven `id` y `data-*` en el mismo elemento en vez de
+     elegir uno solo: el `id` es el contrato de bajo nivel con
+     `getElementById` (rápido, sin ambigüedad, es lo que ya usa el
+     87% de la lógica en app.js — reescribirlo a `querySelector`
+     para no ganar nada era el tipo de reescritura cosmética que este
+     archivo evita). El `data-*` es semántico: describe QUÉ es el dato
+     ("total-places", "region-title") independientemente de cómo se
+     lo localiza, y es lo que usarían tests end-to-end, lectores de
+     pantalla con software de terceros, o una futura migración a un
+     framework de componentes. Ninguno reemplaza al otro.
+
+     ───────────────────────────────────────────────────────────────
+     4. INVARIANTES DEL DOCUMENTO
+        (verdades que este archivo garantiza; romperlas rompe algo
+        que no es obvio desde el diff que las rompió)
+     ───────────────────────────────────────────────────────────────
+     I1. Todo `id` listado en la sección 3 existe exactamente una vez
+         en este documento y nunca dentro de un `<template>` (los
+         `<template>` no forman parte del DOM activo — un `id`
+         adentro es invisible para `getElementById` hasta que se
+         clona, y si ese clon no le asigna un id ÚNICO por instancia,
+         terminás con ids duplicados en el documento real).
+     I2. `.mapa-container` empieza con `hidden` en el marcado crudo.
+         Es un invariante deliberado (no un placeholder que "alguien
+         se olvidó de sacar"): el mapa no debe existir visualmente
+         hasta que `js/motor-mapa.js` confirme que hay al menos un
+         resultado georreferenciado. Si algún día se decide que el
+         mapa debe verse siempre (aunque vacío), sacar el `hidden` acá
+         NO alcanza — hay que revisar `actualizarMapaHerramienta()` en
+         app.js para que no vuelva a esconderlo cuando no hay puntos.
+     I3. Cada `<template>` tiene un propósito documentado en el punto
+         donde se declara. Un `<template>` sin consumidor conocido en
+         JS es deuda muerta — antes de agregar uno nuevo, confirmá que
+         algo en app.js/motor-render.js lo va a clonar.
+     I4. El orden de los `<script defer>` codifica dependencias reales
+         entre módulos (ver sección 5) — no es orden alfabético ni
+         cosmético. Reordenarlos sin entender esas dependencias puede
+         romper el mapa con un error de consola sutil
+         ("URU_MOTOR_MAPA_RENDER: falta URU_PROYECCION...").
+     I5. El único `<script>` inline permitido es el de resiliencia
+         (sección 7) y el bloque de documentación de lazy-loading —
+         ambos existen deliberadamente fuera de los módulos con
+         nombre porque no son parte de la lógica de negocio, son
+         salvaguardas del propio documento. La CSP (`script-src
+         'self'`) NO bloquea estos porque no usan atributos `on*` ni
+         `javascript:` URIs — son bloques `<script>` normales del
+         mismo documento, que sí están permitidos aunque `'self'` no
+         incluya `'unsafe-inline'`. Ver sección 8 para el detalle.
+     I6. `lang="es-AR"` en `<html>` es el idioma real de TODO el
+         contenido estático de este archivo. Si en el futuro se agrega
+         contenido en otro idioma (una guía en inglés, por ejemplo),
+         ese fragmento necesita su propio `lang="en"` — no cambiar el
+         `lang` del documento entero.
+
+     ───────────────────────────────────────────────────────────────
+     5. ORDEN DE CARGA DE <script defer> — POR QUÉ ES UNA DEPENDENCIA
+        DURA Y NO UNA CONVENCIÓN
+     ───────────────────────────────────────────────────────────────
+     `defer` garantiza dos cosas: (a) la descarga es paralela — el
+     orden en el HTML no afecta cuándo termina de bajar cada archivo,
+     y (b) la EJECUCIÓN respeta el orden del documento, siempre
+     después de parsear el HTML y siempre antes de `DOMContentLoaded`.
+     Este documento se apoya en (b) para resolver dependencias entre
+     módulos sin usar un bundler ni imports de ES modules — es una
+     decisión consciente de simplicidad (sin build step), pero exige
+     que el orden de abajo se respete al pie de la letra:
+
+       1. motor-config.js     — no depende de nada. Define URU_CONFIG.
+       2. rubros-meta.js      — no depende de nada. Define
+                                 URU_RUBROS_META (íconos, colores,
+                                 nombres por rubro).
+       3. locales-slug.js     — no depende de nada. Define
+                                 URU_LOCALES_SLUGS (mapa id→slug para
+                                 armar URLs de ficha).
+       4. motor-plano.js      — usa URU_CONFIG. Define URU_PLANO
+                                 (estado de sesión persistido).
+       5. motor-exposicion.js — usa URU_CONFIG y URU_PLANO. Define
+                                 URU_EXPOSICION.
+       6. motor-mapa.js       — usa URU_CONFIG. Define URU_MAPA
+                                 (qué puntos le corresponden al mapa).
+       7. proyeccion.js       — no depende de nada. Define
+                                 URU_PROYECCION (matemática lat/lng↔px
+                                 y tiles). DEBE ir antes que #8: ver
+                                 motor-render.js línea ~103-120, que
+                                 falla temprano y explícito
+                                 (`console.error` + `crear()` lanza
+                                 excepción) si URU_PROYECCION no
+                                 existe todavía — un diseño defensivo
+                                 correcto que solo funciona si el
+                                 orden acá es el correcto.
+       8. motor-render.js     — usa URU_PROYECCION. Define
+                                 URU_MOTOR_MAPA_RENDER (el motor de
+                                 canvas del mapa).
+       9. app.js              — usa TODOS los anteriores. Es el
+                                 último a propósito: si algún módulo
+                                 de arriba no cargó, app.js encuentra
+                                 `window.URU_X` como `undefined` y
+                                 sus propios chequeos (`if (!PROY)...`,
+                                 `if (!window.URU_MOTOR_MAPA_RENDER)
+                                 return;`) evitan que el resto de la
+                                 página se rompa — se degrada, no
+                                 explota.
+
+     Si agregás un módulo nuevo: identificá de qué `window.URU_*`
+     depende, ubicalo después de esas dependencias y antes de
+     app.js, y agregá una línea a esta lista en el mismo commit.
+
+     ───────────────────────────────────────────────────────────────
+     6. ACCESIBILIDAD — decisiones y su justificación
+     ───────────────────────────────────────────────────────────────
+     · El `<canvas>` del mapa es `aria-hidden` a nivel de
+       implementación en motor-render.js (no en este HTML) porque el
+       mapa siempre tiene una lista paralela de tarjetas con la misma
+       información — el canvas es una redundancia visual, no la única
+       fuente de la información. Por eso `#mapaHerramienta` acá se
+       declara con `role="application"`: ese rol es correcto para el
+       contenedor que EN LA PRÁCTICA aloja gestos custom (arrastrar,
+       zoom con rueda, click en marcador), aunque el propio motor
+       luego marque el `<canvas>` interno como no navegable por
+       teclado/lector — la combinación es intencional, no
+       contradictoria: "esta región tiene su propia interacción" +
+       "pero no obligues a un lector de pantalla a entrar en ella".
+     · `role="search"` en el buscador y `role="status"` +
+       `aria-live="polite"` en las estadísticas rápidas y en
+       `#estadoResultados` siguen el patrón WCAG de landmarks +
+       regiones vivas: un lector de pantalla puede saltar directo al
+       buscador, y se entera de cambios de resultados sin que el
+       foco se mueva solo.
+     · El skip-link (`.skip-link`) es el primer elemento
+       enfocable del `<body>` — cualquier reordenamiento del `<body>`
+       que lo mueva de esa posición rompe su propósito (dejar de ser
+       lo primero que un usuario de teclado tabula).
+     · Los emojis usados como ícono (🍽️, ☕, etc.) llevan
+       `aria-hidden="true"` porque son decorativos — el texto visible
+       junto a cada uno ya transmite el significado; sin ese atributo,
+       un lector de pantalla leería en voz alta el nombre Unicode del
+       emoji antes del texto real, duplicando la información.
+
+     ───────────────────────────────────────────────────────────────
+     7. RESILIENCIA — qué pasa cuando algo falla
+     ───────────────────────────────────────────────────────────────
+     Dos capas de defensa, en orden de exigencia creciente:
+       (1) `<noscript>` — cubre el caso "JS deshabilitado", con un
+           mensaje claro y un contacto por email.
+       (2) El script de failsafe al final del `<body>` — cubre el
+           caso "JS está habilitado pero algo se colgó" (falla de
+           red, un módulo que tira una excepción antes de terminar
+           de pintar, una API caída). Después de 12s sin que el
+           placeholder de carga haya sido reemplazado, inyecta un
+           aviso `role="alert"` con un botón de reintentar. El
+           timeout se limpia en `unload` para no dejar timers vivos
+           si el usuario navega antes de que se cumplan los 12s.
+     Ninguna de las dos capas depende de que el resto del sistema
+     funcione — están escritas para ser lo último que falla.
+
+     ───────────────────────────────────────────────────────────────
+     8. SEGURIDAD — CSP y por qué estos orígenes y no otros
+     ───────────────────────────────────────────────────────────────
+     `script-src 'self'` — todo el JS de negocio es propio y se sirve
+       desde el mismo origen (`js/*.js`); no hay CDN de terceros para
+       lógica. Esto bloquea inyección de script externo aunque haya
+       un XSS en algún dato renderizado con `innerHTML` en app.js.
+     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` —
+       `'unsafe-inline'` es necesario porque el motor de mapa fija
+       colores por rubro con `style="background:..."` inline (ver
+       `pintarLeyenda()` en app.js) — migrar eso a clases CSS
+       generadas dinámicamente sacaría esta excepción, pero no es
+       gratis (habría que generar una clase por color de rubro). Se
+       documenta como deuda aceptada, no como descuido.
+     `img-src 'self' data: https:;` — deliberadamente amplio en
+       `https:` porque los tiles del mapa (CARTO) y las imágenes de
+       lugares pueden servirse desde distintos subdominios/CDNs con
+       el tiempo; `data:` cubre placeholders inline si el motor de
+       render los usara. Es el trade-off correcto para un sitio que
+       consume tiles de mapa de un proveedor externo sin
+       autenticación por origen.
+     `connect-src 'self' https:;` — los tiles se cargan como
+       `<img src=...>`, no por `fetch`, así que en rigor `connect-src`
+       no los gobierna (los gobierna `img-src`, ya cubierto); se deja
+       `https:` amplio acá para no bloquear los `fetch()` a
+       `lugares-core.json` / `lugares-detalles.json` si algún día se
+       sirven desde un dominio distinto (hoy son relativos a
+       `'self'`, que ya está permitido).
+
+     ───────────────────────────────────────────────────────────────
+     9. PUNTOS DE EXTENSIÓN
+     ───────────────────────────────────────────────────────────────
+     · `#faqLista` ya existe como contenedor con un `<template
+       id="template-faq-item">` listo para clonar. Hoy las 5 FAQ están
+       escritas a mano como contenido crítico/estático (para que
+       existan incluso si JS no corre — buscadores y `<noscript>` las
+       ven igual). Si el número de preguntas crece, el patrón correcto
+       es: agregar las nuevas al array `mainEntity` del JSON-LD +
+       clonar `template-faq-item` desde JS, no seguir copiando bloques
+       `<article class="faq-item">` a mano indefinidamente.
+     · `data-map-provider` en `#mapaContainer` queda como hook
+       reservado: hoy nada lo lee, pero si en el futuro se soporta más
+       de un proveedor de tiles (por ejemplo, para tener un fallback
+       si CARTO cae), este atributo es el lugar natural para que
+       `motor-render.js` decida qué URL de tiles usar sin tener que
+       tocar este HTML de nuevo.
+     · `<template id="template-rubros">` en `#listaRubros` está
+       reservado para cuando `pintarIndiceRubros()` necesite un layout
+       más complejo por ítem que un simple `innerHTML +=`; hoy la
+       función arma el HTML directamente en JS por simplicidad.
+
+     ───────────────────────────────────────────────────────────────
+     10. DEUDA TÉCNICA CONOCIDA (actualizado en la 2ª auditoría)
+     ───────────────────────────────────────────────────────────────
+     · No existe ningún test (ni manual con checklist, ni automatizado)
+       que verifique que la tabla de la sección 3 sigue siendo cierta.
+       Hoy la única defensa es la revisión humana. Un test e2e mínimo
+       (Playwright/Puppeteer) que cargue la página y assert-ee
+       `document.getElementById(x) !== null` para cada fila de la
+       tabla sería barato y hubiera atrapado los bugs A-D antes de
+       producción. SIGUE PENDIENTE — fuera del alcance de este archivo.
+     · RESUELTO (2ª auditoría): la regla duplicada
+       `#mapaHerramienta[hidden]{ display:none; }` que esta misma
+       sección reportaba en `css/mapa.css` Y `css/descubrimiento.css`
+       ya NO existe en `css/descubrimiento.css` al momento de esta
+       revisión — solo vive en `css/mapa.css:22`. No se tocó nada para
+       "resolverlo": el duplicado ya no estaba. Se deja esta nota para
+       que quede registro de que el hallazgo original estaba
+       desactualizado, no para reabrir un problema inexistente.
+     · RESUELTO (2ª auditoría): `#contadorCuraduria` y los nuevos
+       patches de esta revisión (`.indice-pagina__grupo-titulo`,
+       `.rubros-detalle__resumen`) ya NO usan `<style>` embebido en
+       este documento — se migraron a `css/boton.css` (bloque "BADGE Y
+       PATCHES MIGRADOS DESDE index.html"), con los tokens reales del
+       proyecto (`--anillo-foco`, `--color-tinta-60`, `--radio-full`,
+       `--glass-borde`) en vez de los fallbacks genéricos que tenía el
+       parche original.
+     · NUEVO (2ª auditoría): `#rubros-guia` (ficha editorial por
+       rubro) y `#radiografia` (composición del padrón) viven ahora
+       dentro de un `<details class="rubros-detalle">` colapsado por
+       defecto, ubicado después de la grilla dinámica `#rubros`. Sus
+       `id` no cambiaron, su contenido no cambió, siguen siendo
+       estáticos y visibles con `<noscript>` (un `<details>` cerrado
+       igual expone su contenido en el DOM/HTML servido, solo lo
+       oculta visualmente hasta que se abre — buscadores y lectores de
+       pantalla lo siguen viendo). Si en el futuro se decide que
+       deben volver a estar siempre expandidos, alcanza con agregar
+       el atributo `open` al `<details>` — no hace falta deshacer la
+       estructura.
+     · NUEVO (2ª auditoría): la tarjeta "tus rechazos pesan poco" del
+       Manifiesto se retiró por ser un duplicado casi literal de la
+       tarjeta ⑥ de Metodología. El hecho no se perdió — se cuenta una
+       sola vez, en la sección que lo explica con más detalle.
+
+     ───────────────────────────────────────────────────────────────
+     11. CHECKLIST PARA QUIEN MODIFIQUE ESTE ARCHIVO
+     ───────────────────────────────────────────────────────────────
+     [ ] ¿Agregaste o renombraste un `id`? → actualizá la tabla de la
+         sección 3 Y el array `DOM` en js/app.js, en el mismo commit.
+     [ ] ¿Agregaste un `<script defer>` nuevo? → ubicalo respetando
+         sus dependencias reales (sección 5) y documentá la
+         dependencia acá.
+     [ ] ¿Modificaste algo dentro de un `<template>`? → confirmá en
+         app.js/motor-render.js que el consumidor sigue esperando esa
+         misma estructura interna.
+     [ ] ¿Tocaste el `<head>`? → correlo por un validador de HTML y
+         confirmá que la CSP sigue permitiendo todo lo que este
+         documento carga (fonts, tiles, JSON de datos).
+     [ ] ¿El cambio afecta contenido visible? → revisá que el
+         `<noscript>` y el JSON-LD (FAQPage, Organization) sigan
+         siendo coherentes con lo que un usuario ve.
+
+     ───────────────────────────────────────────────────────────────
+     12. EXPANSIÓN DE CONTENIDO EDITORIAL (esta revisión)
+     ───────────────────────────────────────────────────────────────
+     Contexto: una auditoría previa (documentada en las secciones 1-11
+     de este mismo archivo) corrigió contratos rotos (bugs A-E) y
+     dejó la arquitectura sólida. Esta revisión NO toca esa
+     arquitectura ni el motor — agrega contenido editorial 100%
+     estático, sin nuevos hooks que `js/app.js` necesite leer, para
+     que el `index` deje de sentirse como una landing corta y pase a
+     ser una guía completa de la ciudad y del producto.
+
+     Secciones nuevas, en orden de aparición en el documento:
+       · `#sobre-la-ciudad`  — contexto histórico/geográfico real de
+         Concepción del Uruguay (fundación 1783, Urquiza, Ramírez,
+         río, termas, patrimonio). Hechos verificados contra fuentes
+         públicas; se evitaron a propósito cifras con fuentes
+         contradictorias entre sí (p. ej. distancias exactas a sitios
+         cercanos).
+       · `#metodologia`      — profundiza "el orden no se compra" con
+         el CÓMO real (Guía → Exploración → Acción Directa), en
+         lenguaje llano, sin exponer nombres de variables internas.
+       · `#rubros-guia`      — contenido de lectura por rubro,
+         complementario (no sustituto) de la sección dinámica
+         `#rubros` que puebla `pintarIndiceRubros()`.
+       · `#guia-practica`    — información orientativa para visitantes,
+         deliberadamente sin cifras que se desactualizan solas
+         (horarios exactos, precios, tarifas).
+       · `#glosario`         — vocabulario propio del producto (Guía,
+         Exploración, Acción Directa, Curaduría, Destacados,
+         Verificado, Rubro), alineado 1:1 con los nombres que ya usa
+         el código.
+       · FAQ ampliado de 5 a 10 preguntas (`faq-panel-6` a
+         `faq-panel-10`), con el JSON-LD `FAQPage` actualizado en el
+         mismo commit — mismo patrón exacto que los 5 originales.
+       · `#hoja-de-ruta`     — transparencia sobre qué existe hoy y
+         qué no todavía (fotos propias, horarios en tiempo real, test
+         e2e del contrato §3), sin comprometer fechas.
+       · `#accesibilidad`    — hace visible en la página lo que antes
+         solo vivía en comentarios de código; cada ítem listado
+         corresponde a un mecanismo real ya implementado (no es
+         aspiracional).
+       · `.indice-pagina`    — nav de anclas después del hero: con 12
+         secciones en vez de 6, sin un mapa de contenido explícito el
+         glosario y la hoja de ruta quedarían invisibles a varios
+         scrolls de profundidad.
+
+     Invariante que esta revisión agrega (I7): ninguna sección nueva
+     de las listadas arriba tiene ni necesita un `id` en la tabla de
+     contrato de la sección 3 — son estáticas por diseño. Si en el
+     futuro alguna de ellas necesita volverse dinámica (por ejemplo,
+     "Hoja de ruta" alimentada desde un JSON real), agregar su `id` a
+     esa tabla en el mismo commit que la conecte, igual que exige el
+     resto del documento.
+
+     CSS: todo el contenido nuevo se apoya en componentes que ya
+     existían (`.manifiesto-card` de `descubrimiento.css`) en vez de
+     clonarlos — la única hoja nueva, `css/contenido-editorial.css`,
+     define exclusivamente lo que no tenía equivalente (índice de
+     anclas, ficha de rubro, lista de glosario, estado de hoja de
+     ruta, checklist de accesibilidad). Ver el encabezado de ese
+     archivo para el detalle.
+     ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>
 </html>
