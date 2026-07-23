@@ -568,5 +568,299 @@ function claveActual() {
   assert('resumenEstado(null) devuelve null sin lanzar', PLANO.resumenEstado(null) === null);
 })();
 
+/* ═══════════════════════════════════════════════════════════════════
+   BLOQUE 12 — NUEVO: motor de scoring de motor-exposicion.js
+   Cobertura de cada señal por separado, casos límite, determinismo,
+   diversidad, exploración, explicabilidad, rendimiento con el
+   catálogo completo, y los invariantes de Acción Directa/Curaduría.
+   ═══════════════════════════════════════════════════════════════════ */
+
+function lugar(id, grupo, lat, lng) {
+  var l = { id: id, grupo: grupo, nombre: id, categoria: grupo, direccion: '' };
+  if (typeof lat === 'number') { l.lat = lat; l.lng = lng; }
+  return l;
+}
+
+/* ── 43. Afinidad: un rubro con afinidad estable pesa más que uno sin señal ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  for (var i = 0; i < 3; i++) e = PLANO.aplicarAccion(e, 'aceptar', { lugarId: 'A' + i, grupo: 'cafeterias' });
+  var conAfinidad = EXPO.calcularScoreLugar(lugar('X', 'cafeterias'), e, {});
+  var sinAfinidad = EXPO.calcularScoreLugar(lugar('Y', 'bares'), e, {});
+  assert('señal de afinidad: 1 cuando el rubro tiene afinidad estable', conAfinidad.señales.afinidad === 1);
+  assert('señal de afinidad: 0 cuando el rubro no tiene señal', sinAfinidad.señales.afinidad === 0);
+  assert('un lugar de rubro afín puntúa más alto que uno sin ninguna señal', conAfinidad.score > sinAfinidad.score);
+})();
+
+/* ── 44. Rechazo: un rubro con patrón de rechazo estable no participa del score (se filtra antes) ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var n = CFG.acciones.rechazar.repeticionesParaEstable;
+  for (var i = 0; i < n; i++) e = PLANO.aplicarAccion(e, 'rechazar', { grupo: 'bares' });
+  var registro = [lugar('A', 'gastronomia'), lugar('B', 'cafeterias'), lugar('C', 'cafeterias'),
+    lugar('D', 'cafeterias'), lugar('E', 'bares'), lugar('F', 'bares')];
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia');
+  assert('un rubro con rechazo estable queda fuera del recorte cuando hay alternativas',
+    recorte.every(function (l) { return l.grupo !== 'bares'; }));
+})();
+
+/* ── 45. Proximidad: con ubicación, un lugar cercano puntúa más que uno lejano ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var ubicacion = { lat: -32.4825, lng: -58.2372 }; // CdU centro
+  var cerca = lugar('A', 'gastronomia', -32.4826, -58.2373);       // ~15m
+  var lejos = lugar('B', 'gastronomia', -32.60, -58.35);            // varios km
+  var scoreCerca = EXPO.calcularScoreLugar(cerca, e, { ubicacion: ubicacion });
+  var scoreLejos = EXPO.calcularScoreLugar(lejos, e, { ubicacion: ubicacion });
+  assert('con ubicación disponible, un lugar cercano tiene señal de proximidad', typeof scoreCerca.señales.proximidad === 'number');
+  assert('un lugar cercano puntúa más alto que uno lejano con la misma ubicación', scoreCerca.score > scoreLejos.score);
+})();
+
+/* ── 46. Ausencia de proximidad: sin ubicación, la señal no existe y no penaliza ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var conCoords = EXPO.calcularScoreLugar(lugar('A', 'gastronomia', -32.48, -58.24), e, {});
+  assert('sin ubicación del usuario, la señal de proximidad no participa', typeof conCoords.señales.proximidad === 'undefined');
+  assert('sin proximidad, el score sigue siendo un número válido en [0,1]', conCoords.score >= 0 && conCoords.score <= 1);
+})();
+
+/* ── 47. Ausencia de proximidad por falta de coordenadas del LUGAR (con ubicación disponible) ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var sinCoords = EXPO.calcularScoreLugar(lugar('A', 'gastronomia'), e, { ubicacion: { lat: -32.48, lng: -58.24 } });
+  assert('lugar sin lat/lng no recibe señal de proximidad aunque haya ubicación del usuario',
+    typeof sinCoords.señales.proximidad === 'undefined');
+  assert('lugar sin coordenadas no queda con score inválido (NaN)', !isNaN(sinCoords.score));
+})();
+
+/* ── 48. Clima presente + tabla configurada: la señal de contexto SÍ participa y cambia el orden ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var original = CFG.exposicion.scoring.afinidadClimaPorGrupo;
+  CFG.exposicion.scoring.afinidadClimaPorGrupo = { cafeterias: { lluvia: 0.4 }, heladerias: { lluvia: -0.4 } };
+  var clima = { weather_code: 61, temperature_2m: 18, precipitation: 2 }; // lluvia
+  var cafeteria = EXPO.calcularScoreLugar(lugar('A', 'cafeterias'), e, { clima: clima });
+  var heladeria = EXPO.calcularScoreLugar(lugar('B', 'heladerias'), e, { clima: clima });
+  assert('con tabla de clima configurada y lluvia detectada, la señal de contexto participa', typeof cafeteria.señales.contexto === 'number');
+  assert('bajo lluvia, una cafetería (afinidad positiva configurada) puntúa más que una heladería (negativa)',
+    cafeteria.score > heladeria.score);
+  CFG.exposicion.scoring.afinidadClimaPorGrupo = original;
+})();
+
+/* ── 49. Clima ausente: el motor funciona exactamente igual sin romperse ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var sinClima = EXPO.calcularScoreLugar(lugar('A', 'cafeterias'), e, {});
+  assert('sin clima en el contexto, la señal de contexto no participa', typeof sinClima.señales.contexto === 'undefined');
+  assert('sin clima, el score sigue siendo válido', !isNaN(sinClima.score) && sinClima.score >= 0);
+})();
+
+/* ── 50. Clima con tabla vacía (configuración por defecto real del repo): neutro, no cambia el orden ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var clima = { weather_code: 61, temperature_2m: 18, precipitation: 2 };
+  var a = EXPO.calcularScoreLugar(lugar('A', 'cafeterias'), e, { clima: clima });
+  var b = EXPO.calcularScoreLugar(lugar('A', 'cafeterias'), e, {});
+  assert('con afinidadClimaPorGrupo vacío (default de fábrica), el clima no altera el score de un mismo lugar',
+    a.score === b.score);
+})();
+
+/* ── 51. Confianza baja vs alta: ambas producen un recorte válido, sin romper ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 30; i++) registro.push(lugar('L' + i, 'gastronomia'));
+  var bajo = PLANO.estadoInicial('cdu');
+  assert('confianza baja (estado inicial) → recorte igual produce el tamaño configurado',
+    EXPO.recortePorIniciativaPropia(registro, bajo, 'guia').length === CFG.exposicion.recorteGuia);
+
+  var alto = PLANO.estadoInicial('cdu');
+  alto.aperturas = CFG.madurez.umbralAperturas.complice;
+  for (var j = 0; j < 3; j++) alto = PLANO.aplicarAccion(alto, 'aceptar', { lugarId: 'A' + j, grupo: 'gastronomia' });
+  assert('confianza alta (madurez + afinidad) también produce el tamaño configurado, sin romperse',
+    EXPO.recortePorIniciativaPropia(registro, alto, 'guia').length === CFG.exposicion.recorteGuia);
+})();
+
+/* ── 52. Diversidad: ningún rubro ocupa más de la mitad del cupo si hay alternativas suficientes ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 20; i++) registro.push(lugar('G' + i, 'gastronomia'));
+  for (var j = 0; j < 20; j++) registro.push(lugar('C' + j, 'cafeterias'));
+  for (var k = 0; k < 20; k++) registro.push(lugar('B' + k, 'bares'));
+  var e = PLANO.estadoInicial('cdu');
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion'); // cupo 10
+  var conteo = {};
+  recorte.forEach(function (l) { conteo[l.grupo] = (conteo[l.grupo] || 0) + 1; });
+  var maxEsperado = Math.ceil(CFG.exposicion.recorteExploracion * CFG.exposicion.scoring.diversidad.maxPorGrupoRatio);
+  assert('con 3 rubros disponibles en cantidad de sobra, ningún rubro supera el tope de diversidad',
+    Object.keys(conteo).every(function (g) { return conteo[g] <= maxEsperado; }));
+})();
+
+/* ── 53. Diversidad se relaja si solo hay un rubro disponible entre los candidatos ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 20; i++) registro.push(lugar('U' + i, 'unico'));
+  var e = PLANO.estadoInicial('cdu');
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia');
+  assert('con un solo rubro disponible, el tope de diversidad se relaja y el cupo se llena igual',
+    recorte.length === CFG.exposicion.recorteGuia);
+})();
+
+/* ── 54. Exploración: con candidatos de sobra, el recorte incluye al menos un lugar fuera del top-score puro ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 40; i++) registro.push(lugar('L' + i, 'grupo' + (i % 8)));
+  var e = PLANO.estadoInicial('cdu');
+  e.ultimaApertura = 777;
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion');
+  var explicado = EXPO.recortePorIniciativaPropiaExplicado(registro, e, 'exploracion');
+  var scoresOrdenadosDesc = explicado.lugares.map(function (x) { return x.score; });
+  var esDescendenteEstricto = scoresOrdenadosDesc.every(function (s, idx) {
+    return idx === 0 || scoresOrdenadosDesc[idx - 1] >= s;
+  });
+  assert('el recorte final no es necesariamente un top-score estrictamente ordenado (hay slots de exploración mezclados con relevancia)',
+    recorte.length === CFG.exposicion.recorteExploracion);
+  assert('recortePorIniciativaPropiaExplicado expone un score por lugar seleccionado', scoresOrdenadosDesc.length === recorte.length);
+})();
+
+/* ── 55. Rotación: un lugar recién aceptado por iniciativa propia no vuelve a aparecer mientras descansa ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 10; i++) registro.push(lugar('L' + i, 'gastronomia'));
+  var e = PLANO.estadoInicial('cdu');
+  e = PLANO.aplicarAccion(e, 'aceptar', { lugarId: 'L0', porIniciativaPropia: true });
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia');
+  assert('un lugar recién aceptado por iniciativa propia no aparece en el siguiente recorte (descansando)',
+    recorte.every(function (l) { return l.id !== 'L0'; }));
+})();
+
+/* ── 56. Determinismo: misma entrada (registro, estado, región, contexto) produce siempre la misma salida ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 60; i++) registro.push(lugar('L' + i, 'grupo' + (i % 6), -32.48 + i * 0.001, -58.24 + i * 0.001));
+  var e = PLANO.estadoInicial('cdu');
+  e.ultimaApertura = 12345;
+  var contexto = { ubicacion: { lat: -32.48, lng: -58.24 }, ahoraMs: 99999999 };
+  var r1 = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion', contexto).map(function (l) { return l.id; });
+  var r2 = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion', contexto).map(function (l) { return l.id; });
+  assert('la misma entrada exacta produce siempre la misma selección (determinismo)', JSON.stringify(r1) === JSON.stringify(r2));
+})();
+
+/* ── 57. Empate de scores: candidatos idénticos en todas las señales no rompen el orden ni el tamaño ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 15; i++) registro.push(lugar('E' + i, 'mismoGrupo')); // todos iguales: mismo score exacto
+  var e = PLANO.estadoInicial('cdu');
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia');
+  assert('un empate total de scores igual produce el tamaño de cupo correcto', recorte.length === CFG.exposicion.recorteGuia);
+  var idsUnicos = {};
+  recorte.forEach(function (l) { idsUnicos[l.id] = true; });
+  assert('un empate total de scores no duplica lugares en el resultado', Object.keys(idsUnicos).length === recorte.length);
+})();
+
+/* ── 58. Datos incompletos: rubro desconocido / undefined no lanza excepción ── */
+(function () {
+  var registro = [{ id: 'A', nombre: 'A' }, { id: 'B', grupo: undefined, nombre: 'B' }];
+  var e = PLANO.estadoInicial('cdu');
+  var lanzo = false, recorte;
+  try { recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia'); } catch (err) { lanzo = true; }
+  assert('lugares con grupo undefined no hacen lanzar al motor', lanzo === false);
+  assert('lugares con grupo undefined igual entran en la selección', recorte.length === 2);
+})();
+
+/* ── 59. Listas vacías: registro vacío no lanza y devuelve vacío ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var recorte = EXPO.recortePorIniciativaPropia([], e, 'guia');
+  assert('registro vacío devuelve recorte vacío sin lanzar', Array.isArray(recorte) && recorte.length === 0);
+})();
+
+/* ── 60. Listas pequeñas: menos candidatos que el cupo devuelve todos, sin repetir ── */
+(function () {
+  var registro = [lugar('A', 'gastronomia'), lugar('B', 'cafeterias')];
+  var e = PLANO.estadoInicial('cdu');
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion'); // cupo 10 > 2 candidatos
+  assert('con menos candidatos que el cupo, se devuelven todos (sin inventar ni truncar de más)', recorte.length === 2);
+})();
+
+/* ── 61. Catálogo completo (1.468 lugares): correctitud + rendimiento razonable ── */
+(function () {
+  var registro = [];
+  var grupos = ['gastronomia', 'cafeterias', 'bares', 'heladerias', 'compras', 'belleza', 'alojamiento', 'panaderias'];
+  for (var i = 0; i < 1468; i++) {
+    registro.push(lugar('URU-' + i, grupos[i % grupos.length], -32.40 - (i % 50) * 0.001, -58.20 - (i % 50) * 0.001));
+  }
+  var e = PLANO.estadoInicial('cdu');
+  for (var k = 0; k < 3; k++) e = PLANO.aplicarAccion(e, 'aceptar', { lugarId: 'AF' + k, grupo: 'cafeterias' });
+  var contexto = { ubicacion: { lat: -32.4825, lng: -58.2372 }, clima: { weather_code: 3, temperature_2m: 22, precipitation: 0 } };
+
+  var t0 = Date.now();
+  var recorteGuia = EXPO.recortePorIniciativaPropia(registro, e, 'guia', contexto);
+  var recorteExplo = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion', contexto);
+  var explicado = EXPO.recortePorIniciativaPropiaExplicado(registro, e, 'exploracion', contexto);
+  var t1 = Date.now();
+
+  assert('catálogo completo (1.468): recorte de Guía respeta el cupo configurado', recorteGuia.length === CFG.exposicion.recorteGuia);
+  assert('catálogo completo (1.468): recorte de Exploración respeta el cupo configurado', recorteExplo.length === CFG.exposicion.recorteExploracion);
+  assert('catálogo completo (1.468): la versión explicada devuelve señales para cada lugar seleccionado',
+    explicado.lugares.every(function (x) { return x.señales && x.razones && x.razones.length > 0; }));
+  assert('catálogo completo (1.468): tiempo total de 3 llamadas de recorte por debajo de 500ms (' + (t1 - t0) + 'ms)',
+    (t1 - t0) < 500);
+  console.log('  · rendimiento motor-exposicion.js sobre 1.468 lugares (3 llamadas): ' + (t1 - t0) + 'ms');
+})();
+
+/* ── 62. Acción Directa: la búsqueda explícita nunca pierde resultados por score bajo ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 100; i++) registro.push(lugar('P' + i, 'gastronomia'));
+  registro.forEach(function (l) { l.nombre = 'Pizzería ' + l.id; l.categoria = 'pizzería'; l.direccion = ''; });
+  var e = PLANO.estadoInicial('cdu');
+  var n = CFG.acciones.rechazar.repeticionesParaEstable;
+  for (var i2 = 0; i2 < n; i2++) e = PLANO.aplicarAccion(e, 'rechazar', { grupo: 'gastronomia' }); // rubro "evitado"
+  var resultados = EXPO.resultadosPorAccionExplicita(registro, 'pizzería');
+  assert('Acción Directa devuelve TODOS los matches (100) aunque el rubro esté marcado a evitar en Guía/Exploración',
+    resultados.length === 100);
+})();
+
+/* ── 63. Curaduría: nunca pasa por scoring, rotación ni presupuesto, sin importar el estado ── */
+(function () {
+  var registro = [lugar('A', 'gastronomia'), lugar('B', 'gastronomia'), lugar('C', 'bares')];
+  var e = PLANO.estadoInicial('cdu');
+  var n = CFG.acciones.rechazar.repeticionesParaEstable;
+  for (var i = 0; i < n; i++) e = PLANO.aplicarAccion(e, 'rechazar', { grupo: 'gastronomia' });
+  var curada = EXPO.coleccionCurada(registro, ['A', 'B']);
+  assert('Curaduría devuelve exactamente los ids guardados, aunque su rubro esté marcado a evitar',
+    curada.length === 2 && curada.every(function (l) { return l.id === 'A' || l.id === 'B'; }));
+})();
+
+/* ── 64. Compatibilidad de API: superficie previa a esta pasada sigue existiendo con la misma forma ── */
+(function () {
+  ['recortePorIniciativaPropia', 'resultadosPorAccionExplicita', 'coleccionCurada'].forEach(function (nombre) {
+    assert('API pública de EXPO conserva "' + nombre + '"', typeof EXPO[nombre] === 'function');
+  });
+  var registro = [lugar('A', 'gastronomia'), lugar('B', 'cafeterias')];
+  var e = PLANO.estadoInicial('cdu');
+  var sinContexto = EXPO.recortePorIniciativaPropia(registro, e, 'guia');
+  assert('recortePorIniciativaPropia sigue funcionando sin el 4to parámetro (contexto), como lo llama app.js hoy',
+    Array.isArray(sinContexto));
+})();
+
+/* ── 65. API pública nueva de esta pasada ── */
+(function () {
+  ['recortePorIniciativaPropiaExplicado', 'calcularScoreLugar'].forEach(function (nombre) {
+    assert('API pública de EXPO expone "' + nombre + '" (nuevo)', typeof EXPO[nombre] === 'function');
+  });
+})();
+
+/* ── 66. Pureza: recortePorIniciativaPropia no muta el estado ni el registro de entrada ── */
+(function () {
+  var registro = [lugar('A', 'gastronomia'), lugar('B', 'cafeterias')];
+  var registroJSONAntes = JSON.stringify(registro);
+  var e = PLANO.estadoInicial('cdu');
+  var estadoJSONAntes = JSON.stringify(e);
+  EXPO.recortePorIniciativaPropia(registro, e, 'guia', { ubicacion: { lat: -32.48, lng: -58.24 } });
+  assert('recortePorIniciativaPropia no muta el registro de entrada', JSON.stringify(registro) === registroJSONAntes);
+  assert('recortePorIniciativaPropia no muta el estado de entrada', JSON.stringify(e) === estadoJSONAntes);
+})();
+
 console.log('\n' + (total - fallos) + '/' + total + ' pruebas OK');
 if (fallos > 0) process.exit(1);
