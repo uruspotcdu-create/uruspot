@@ -113,3 +113,49 @@
 .btn--link-volver:hover{ text-decoration:underline; transform:none; box-shadow:none; color:var(--color-granate-clara); border-color:transparent; }
 .btn--link-volver:active{ transform:none; }
 .btn--link-volver:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:2px; border-radius:var(--radio-sm); }
+
+/* ═══════════════════════════════════════════════════════════════
+   BADGE Y PATCHES MIGRADOS DESDE index.html (auditoría 2ª pasada)
+   ───────────────────────────────────────────────────────────────
+   Estos tres bloques vivían como <style> embebido en el <head> del
+   index, documentados a propósito como deuda técnica ("migrar a
+   css/boton.css en cuanto se toque esa capa" — ver index.html §10).
+   Esta revisión toca la capa: se migran acá, con los tokens reales
+   del proyecto (--anillo-foco en vez del fallback genérico que tenía
+   el parche original). Sin cambio visual respecto de cómo se veían.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Badge "N lugares guardados" sobre #btnVerGuardados */
+.contador-guardados{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:20px; height:20px; margin-left:8px; padding:0 6px;
+  border-radius:var(--radio-full);
+  background:var(--color-fondo-2);
+  border:1px solid var(--glass-borde);
+  font-size:11px; font-weight:600; line-height:1;
+  color:inherit; vertical-align:middle;
+}
+.contador-guardados[hidden]{ display:none; }
+
+/* Grupos "Explorá" / "Conocé el proyecto" del índice de página */
+.indice-pagina{ display:flex; flex-wrap:wrap; gap:24px 48px; }
+.indice-pagina__grupo-titulo{
+  display:block; margin-bottom:8px;
+  font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--color-tinta-60);
+}
+
+/* <details> "Ver el detalle completo por rubro..." */
+.rubros-detalle{ margin-top:8px; }
+.rubros-detalle__resumen{
+  cursor:pointer; list-style:none; user-select:none;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 16px; border-radius:var(--radio-full);
+  background:var(--color-fondo-2);
+  border:1px solid var(--glass-borde);
+  font-size:14px; font-weight:600; color:inherit;
+}
+.rubros-detalle__resumen::-webkit-details-marker{ display:none; }
+.rubros-detalle__resumen::before{ content:"+"; font-weight:400; }
+.rubros-detalle[open] .rubros-detalle__resumen::before{ content:"–"; }
+.rubros-detalle__resumen:focus-visible{ outline:var(--anillo-foco); outline-offset:2px; }
