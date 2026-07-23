@@ -106,13 +106,17 @@ header .membrete{
   .hero__scroll-cue__icono{ animation:none; }
 }
 .buscador{
-  display:flex; gap:var(--esp-2); margin-top:var(--esp-6); flex-wrap:wrap;
+  display:flex; gap:var(--esp-2); margin-top:var(--esp-6); flex-wrap:wrap; align-items:flex-start;
   animation:uru-fade-up var(--dur-lentisima) var(--easing-rebote) .16s backwards;
 }
-.buscador input{
-  flex:1 1 260px; min-width:0; background:var(--glass-bg);
+/* Wrapper del campo: aloja el input y el botón de limpiar interno sin
+   que ninguno de los dos tenga que saber del otro por fuera del flujo
+   normal de documento (position:relative acá, no en el input). */
+.buscador__campo{ position:relative; flex:1 1 260px; min-width:0; }
+.buscador__campo input{
+  width:100%; background:var(--glass-bg);
   border:1px solid var(--glass-borde); border-radius:var(--radio-md);
-  padding:var(--esp-3) var(--esp-3) var(--esp-3) 40px; color:var(--color-tinta); font:var(--tipo-cuerpo);
+  padding:var(--esp-3) 40px var(--esp-3) 40px; color:var(--color-tinta); font:var(--tipo-cuerpo);
   backdrop-filter:blur(var(--glass-blur));
   /* Lupa como background-image (SVG inline, sin request extra ni
      <img> nuevo) — antes el buscador, la acción de mayor intención
@@ -120,11 +124,49 @@ header .membrete{
      busca"; dependía 100% del placeholder de texto. */
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(236,237,239,0.35)' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:14px center; background-size:16px;
-  transition:border-color var(--dur-media), box-shadow var(--dur-media);
+  transition:border-color var(--dur-media) var(--easing-estandar), box-shadow var(--dur-media) var(--easing-estandar), background-color var(--dur-rapido);
 }
-.buscador input::placeholder{ color:var(--color-tinta-30); }
-.buscador input:focus-visible{ outline:none; border-color:var(--color-granate-clara); box-shadow:var(--sombra-foco); }
-.buscador button{ font:var(--tipo-cuerpo-sm); }
+/* Oculta el ícono "x" nativo de type=search en Chrome/Edge — Firefox
+   directamente nunca lo tuvo, así que dejarlo era una afordancia que
+   dependía de qué navegador abrieras. .buscador__clear lo reemplaza
+   con un control real, con aria-label e igual en todos lados. */
+.buscador__campo input::-webkit-search-cancel-button{ -webkit-appearance:none; appearance:none; }
+.buscador__campo input::placeholder{ color:var(--color-tinta-30); }
+.buscador__campo input:focus-visible{ outline:none; border-color:var(--color-granate-clara); box-shadow:var(--sombra-foco); }
+/* Con texto adentro el fondo se acentúa levemente: refuerza que el
+   sistema ya está reaccionando a lo escrito, sin esperar el resultado
+   final — la única señal que había antes era el conteo, varios cm más
+   abajo, fuera del campo visual inmediato de quien está tipeando. */
+.buscador__campo input:not(:placeholder-shown){ background-color:var(--glass-bg-fuerte); }
+
+.buscador__clear{
+  position:absolute; top:50%; right:6px; transform:translateY(-50%);
+  width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+  border:none; border-radius:50%; background:transparent; color:var(--color-tinta-60);
+  font:400 20px/1 var(--f-ui); line-height:1; padding:0; cursor:pointer;
+  transition:background-color var(--dur-rapido) var(--easing-estandar), color var(--dur-rapido) var(--easing-estandar);
+}
+@media (hover:hover) and (pointer:fine){
+.buscador__clear:hover{ background:var(--glass-borde); color:var(--color-tinta); }
+}
+.buscador__clear:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:2px; }
+.buscador__clear[hidden]{ display:none; }
+
+.buscador .btn{ font:var(--tipo-cuerpo-sm); }
+
+/* Estado "seguí escribiendo" (1 letra, todavía no alcanza el umbral de
+   búsqueda): un solo punto respirando, con el mismo keyframe
+   `uru-pulso-suave` que ya usa el resto del sitio — cero @keyframes
+   nuevos, cero vocabulario de movimiento propio para esta página. */
+#panelDescubrimiento .escribiendo{
+  grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:var(--esp-2);
+  color:var(--color-tinta-60); font:var(--tipo-cuerpo-sm); padding:var(--esp-8) 0;
+}
+.escribiendo__punto{
+  width:8px; height:8px; border-radius:50%; background:var(--color-granate-clara); flex:none;
+  animation:uru-pulso-suave 1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion:reduce){ .escribiendo__punto{ animation:none; } }
 
 /* ── "Cerca de mí" (app.js: inicializarCercaDeMi) ──
    BUG REAL encontrado: este botón y su aviso se crean por JS desde
