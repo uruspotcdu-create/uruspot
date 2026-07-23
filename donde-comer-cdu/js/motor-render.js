@@ -160,6 +160,64 @@
      bug nuevo por sumar una función que ya cubre otro camino.
    • Indexado espacial (grid/quadtree) para el clustering — ver
      justificación de escala arriba.
+
+   ───────────────────────────────────────────────────────────────────
+   TERCERA PASADA — se releyó el repo completo (app.js, motor-mapa.js,
+   proyeccion.js, motor-config.js, motor-exposicion.js, motor-plano.js,
+   tests/motor-test.js) antes de tocar nada. Confirmado: motorMapa es
+   un singleton lazy-inicializado una sola vez por sesión de app.js
+   (nunca se destruye/recrea en producción), así que el trabajo de
+   ciclo de vida de esta pasada es robustez real por si algún consumo
+   futuro sí destruye/reinicializa, no una corrección de un bug ya
+   observado en producción.
+
+   GAPS REALES encontrados y resueltos:
+   • Coordenadas coincidentes/casi coincidentes en un cluster: existía
+     una salida funcional (lista de texto), pero sin forma espacial de
+     distinguir "estos lugares están literalmente acá". Se agrega
+     spiderfy — abanico de pines individuales alrededor del cluster,
+     cada uno clickeable — para clusters de hasta SPIDER_MAX_MIEMBROS.
+     Por encima de ese umbral, la lista sigue siendo el mejor recurso
+     (un abanico de más piernas deja de ser legible).
+   • Soltar un dedo de un pellizco de dos dedos dejaba el mapa quieto
+     hasta que el usuario levantara el dedo restante y lo volviera a
+     apoyar — el pan de un solo dedo no se reactivaba solo, a
+     diferencia de Google/Apple Maps.
+   • Pestaña en background: nada frenaba explícitamente las animaciones
+     por tiempo (inercia, ondas, apariciones, vuelo); un rAF pausado o
+     acelerado de forma impredecible por el navegador podía dejar un
+     `dt` gigante en el primer frame al volver a foreground. Ahora se
+     cancela todo al ocultarse y se resincroniza (o se completa
+     directo al destino) al volver.
+   • `entrada.onReady` (caché de tiles, a nivel de módulo) se pisaba
+     solo si estaba vacío — una instancia destruida y recreada que
+     pedía un tile ya en vuelo nunca se enteraba de que terminó de
+     cargar. Ahora se reasigna siempre al callback más reciente.
+   • Hit-testing de hover corría completo en cada `pointermove`, sin
+     coalescer — con mouses/trackpads de alta frecuencia (100-1000Hz)
+     eso es mucho trabajo descartado entre frame y frame. Se coalesce
+     a una vez por frame vía rAF.
+   • Sin indicio visual de "no hay resultados" (lista vacía) ni de
+     "tiles fallando de forma sostenida" (red degradada/offline) — dos
+     estados reales que antes se veían igual que un mapa cargando
+     normal.
+
+   EVALUADO Y DESCARTADO explícitamente en esta pasada:
+   • Rotación del pellizco (dos dedos girando) — ningún elemento del
+     mapa (pines, tiles) tiene orientación propia; rotar el mapa entero
+     es una decisión de producto mayor (reescribir toda la matemática
+     de proyección/dibujado para un norte no fijo) sin pedido ni
+     necesidad real detrás, no una mejora incremental de este archivo.
+   • Momentum configurable por el consumidor (parámetro de fricción
+     expuesto en `crear(opciones)`): ningún consumidor real
+     (`app.js`) necesita distinto momentum en distintos contextos —
+     agregar una API que nadie va a llamar es exactamente el tipo de
+     superficie sin sustento que esta pasada busca evitar.
+   • Foco secuencial de marcadores dentro del propio `<canvas>` con
+     flechas (independiente de la lista accesible ya existente):
+     redundante con la lista accesible en paralelo, que ya expone cada
+     punto sin depender del estado de clustering — agregarlo hubiera
+     sido dos caminos de teclado para llegar a lo mismo.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -405,6 +463,50 @@
     var focoVisible = false;
     var ondas = []; // feedback de toque: cada clic dispara un anillo que se expande y se apaga
 
+    // PREVENCIÓN DE MEMORY LEAKS EN REINICIALIZACIÓN REPETIDA: guard
+    // central de ciclo de vida. Antes, destruir() cancelaba los
+    // `requestAnimationFrame` en vuelo pero no impedía que un callback
+    // asíncrono ya en camino (imagen de tile que termina de cargar
+    // después de destruir, `document.fonts.ready` resuelto tarde,
+    // `ResizeObserver` disparando durante el mismo tick del `disconnect`)
+    // volviera a programar trabajo nuevo sobre una instancia ya muerta.
+    // Cada punto de entrada asíncrono (no cada línea del archivo)
+    // consulta `vivo` antes de actuar — un solo booleano en vez de
+    // repetir `if (contenedorDestruido) return` disperso y fácil de
+    // olvidar en el próximo callback que se agregue.
+    var vivo = true;
+
+    var establecioAlgunaVez = false; // primera vez que el consumidor llamó establecerPuntos(): distingue "todavía no se buscó nada" de "se buscó y no hay resultados"
+
+    // ── Spiderfy: alternativa visual a la lista para clusters chicos ──
+    // GAP REAL: dos o más lugares pueden compartir coordenadas exactas
+    // o casi exactas (mismo edificio, galería, shopping — geocodificación
+    // aproximada). Ya existía una salida funcional para ese caso
+    // (abrirPopupCluster: lista con un link "Cómo llegar" por miembro),
+    // pero es una lista de texto — no comunica "estos lugares están
+    // literalmente acá" de forma espacial. Spiderfy expande el cluster
+    // en un abanico de pines individuales alrededor de su centro, cada
+    // uno clickeable como un marcador normal. No reemplaza la lista
+    // (que sigue siendo el mejor recurso para clusters grandes que
+    // nunca se separan, ver SPIDER_MAX_MIEMBROS más abajo) ni la lista
+    // accesible en paralelo (que ya expone cada punto individual sin
+    // depender del estado de clustering en absoluto).
+    var spiderActivo = null; // { key, cx, cy, posiciones:[{punto,x,y,_xActual,_yActual}], inicio }
+    var rafSpider = null;
+
+    // ── Continuidad de pan al soltar un dedo de un pellizco ──
+    // Ver justificación completa junto al listener de touchstart/
+    // touchmove/touchend más abajo.
+    var enPellizco = false;
+    var pellizcoTerminoEn = 0;
+    var panTactilUnico = null; // { id, x, y }
+
+    // Seguido por animarA(): permite completar un vuelo instantáneamente
+    // si la pestaña vuelve de segundo plano a mitad de la animación (ver
+    // alCambiarVisibilidad más abajo) en vez de retomar una interpolación
+    // cuyo origen temporal ya no significa nada.
+    var vueloDestino = null;
+
     // Caché del último clustering calculado, para no repetir el
     // trabajo O(n²) de agrupar en cada movimiento de mouse — solo se
     // recalcula si el viewport (o el conjunto de puntos) cambió
@@ -460,6 +562,7 @@
       if (rafApariciones !== null) return;
       rafApariciones = requestAnimationFrame(function () {
         rafApariciones = null;
+        if (!vivo) return;
         var pendientes = false;
         for (var k in apariciones) { if (apariciones[k] !== undefined) { pendientes = true; break; } }
         redibujar();
@@ -474,7 +577,7 @@
       animarOndas();
     }
     function animarOndas() {
-      if (!ondas.length) { rafOndas = null; return; }
+      if (!vivo || !ondas.length) { rafOndas = null; return; }
       var ahora = performance.now();
       ondas = ondas.filter(function (o) { return ahora - o.inicio < DURACION_ONDA_MS; });
       dibujar();
@@ -508,24 +611,30 @@
 
     var rafRedibujo = null;
     function redibujar() {
-      if (rafRedibujo !== null) return;
-      rafRedibujo = requestAnimationFrame(function () { rafRedibujo = null; dibujar(); });
+      if (!vivo || rafRedibujo !== null) return;
+      rafRedibujo = requestAnimationFrame(function () { rafRedibujo = null; if (vivo) dibujar(); });
     }
 
     function dibujar() {
-      if (!viewport.ancho || !viewport.alto) return;
+      if (!vivo || !viewport.ancho || !viewport.alto) return;
       try {
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, viewport.ancho, viewport.alto);
         dibujarTiles();
-        var proyectados = proyectarPuntos();
-        var clusters = agruparEnClusters(proyectados);
-        ultimosClusters = clusters;
-        claveClusters = clusteringVigente();
-        dibujarMarcadores(clusters);
+        if (puntos.length === 0) {
+          dibujarEstadoVacio();
+        } else {
+          var proyectados = proyectarPuntos();
+          var clusters = agruparEnClusters(proyectados);
+          ultimosClusters = clusters;
+          claveClusters = clusteringVigente();
+          dibujarMarcadores(clusters);
+          dibujarSpider();
+          posicionarPopupAbierto(proyectados);
+          posicionarEtiqueta(proyectados);
+        }
         dibujarOndas();
-        posicionarPopupAbierto(proyectados);
-        posicionarEtiqueta(proyectados);
+        dibujarBadgeDegradado();
         if (focoVisible) dibujarAnilloFoco();
         actualizarEstadoControles();
       } catch (err) {
@@ -557,6 +666,20 @@
       }
     }
 
+    // BUG REAL corregido (reinicialización repetida): `cacheTiles` es un
+    // caché a nivel de MÓDULO, compartido entre cualquier instancia que
+    // haya pedido ese tile — no se limpia al destruir una instancia,
+    // deliberadamente (otra instancia futura reutiliza tiles ya
+    // descargados). Pero `entrada.onReady` guardaba el callback de
+    // redibujo de la PRIMERA instancia que lo pidió, y `if (!entrada.
+    // onReady)` nunca lo actualizaba después: si esa instancia se
+    // destruía y una instancia nueva pedía el mismo tile todavía en
+    // vuelo, la nueva instancia nunca se enteraba de que terminó de
+    // cargar (quedaba con el hueco de fondo hasta el próximo redibujo
+    // por otro motivo). Ahora se pisa siempre con el callback más
+    // reciente — el único que puede importarle a alguien vivo.
+    var degradacionTiles = false;
+    var degradacionTilesPrevia = false;
     function dibujarTiles() {
       // Relleno base primero: así un tile que todavía no cargó, o que
       // falló definitivamente, nunca deja un hueco crudo — se ve el
@@ -575,20 +698,59 @@
       var tileX1 = Math.ceil((origenX + viewport.ancho / escalaExtra) / TAM_TILE) + 1;
       var tileY1 = Math.ceil((origenY + viewport.alto / escalaExtra) / TAM_TILE) + 1;
 
+      var totalTiles = 0, tilesFallidos = 0;
       for (var tx = tileX0; tx <= tileX1; tx++) {
         for (var ty = tileY0; ty <= tileY1; ty++) {
           var entrada = cargarTile(zTiles, tx, ty);
           if (!entrada) continue;
+          totalTiles++;
           var sx = (tx * TAM_TILE - origenX) * escalaExtra;
           var sy = (ty * TAM_TILE - origenY) * escalaExtra;
           var s = TAM_TILE * escalaExtra;
           if (entrada.cargado) {
             ctx.drawImage(entrada.img, sx, sy, s, s);
-          } else if (!entrada.onReady) {
+          } else {
             entrada.onReady = redibujar;
+            if (entrada.error && entrada.intentos >= REINTENTOS_TILE) tilesFallidos++;
           }
         }
       }
+      // ESTADO DEGRADADO REAL: no un solo tile suelto (una request
+      // puede fallar por ruido de red sin que signifique nada), sino
+      // una fracción sostenida del viewport visible sin poder cargar
+      // tras agotar reintentos. El umbral de 4 tiles totales evita
+      // falsos positivos con muy poca superficie de mapa en pantalla
+      // (por ejemplo, un contenedor chico en un zoom alto).
+      degradacionTiles = totalTiles >= 4 && (tilesFallidos / totalTiles) > 0.6;
+      if (degradacionTiles !== degradacionTilesPrevia) {
+        degradacionTilesPrevia = degradacionTiles;
+        emisor.emitir(degradacionTiles ? 'tilesDegradados' : 'tilesRecuperados');
+      }
+    }
+
+    // Insignia discreta, no bloqueante: comunica degradación sin
+    // interrumpir pan/zoom/click, que siguen funcionando sobre el
+    // relleno base. Se recalcula cada frame contra `degradacionTiles`,
+    // así que desaparece sola en cuanto la red se recupera — sin
+    // ningún estado que haya que "limpiar" a mano.
+    function dibujarBadgeDegradado() {
+      if (!degradacionTiles || viewport.ancho < 140) return;
+      var texto = 'Conexión limitada al mapa';
+      ctx.save();
+      ctx.font = '600 11px "IBM Plex Sans", sans-serif';
+      var anchoTexto = ctx.measureText(texto).width;
+      var w = Math.min(viewport.ancho - 16, anchoTexto + 24);
+      var h = 24;
+      var x = 8, y = viewport.alto - h - 8;
+      ctx.fillStyle = 'rgba(10,13,19,.78)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, y, w, h, 6); else ctx.rect(x, y, w, h);
+      ctx.fill();
+      ctx.fillStyle = '#ECEDEF';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(texto, x + 10, y + h / 2 + 1, w - 16);
+      ctx.restore();
     }
 
     // RENDIMIENTO REAL: `proyectarPuntos()` corre en CADA frame
@@ -609,6 +771,24 @@
     // (se lee y se descarta dentro de `dibujar()`/`clustersActuales()`
     // — nunca se guarda en una variable de instancia ni se pasa a un
     // callback diferido).
+    // ESTADO VACÍO REAL: antes, una lista de resultados vacía dejaba el
+    // mapa mostrando solo tiles y ningún indicio de por qué no hay
+    // pines — indistinguible de "todavía no cargó nada". Se muestra
+    // solo después de que `establecerPuntos` se llamó al menos una vez
+    // (así el primer montado del mapa, antes de la primera búsqueda
+    // real, no parpadea este mensaje).
+    function dibujarEstadoVacio() {
+      if (!establecioAlgunaVez) return;
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = '#ECEDEF';
+      ctx.font = '600 13px "IBM Plex Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Sin lugares para mostrar en esta vista', viewport.ancho / 2, viewport.alto / 2);
+      ctx.restore();
+    }
+
     var bufferProyectados = [];
     function proyectarPuntos() {
       var n = 0;
@@ -844,6 +1024,88 @@
       ctx.fillText(String(c.miembros.length), c.x, c.y + 1);
     }
 
+    // Radio del primer anillo del abanico, separación entre anillos si
+    // hace falta más de uno, y cuántas piernas caben cómodas en un
+    // solo anillo sin que los pines se toquen entre sí (calibrado
+    // contra RADIO_MARCADOR: con 8 piernas en el primer anillo, el
+    // espacio entre pines vecinos es cómodamente mayor a su diámetro).
+    var SPIDER_RADIO_BASE = 34;
+    var SPIDER_RADIO_PASO = 26;
+    var SPIDER_MAX_POR_ANILLO = 8;
+    // Por encima de esta cantidad de miembros, un abanico deja de ser
+    // más legible que la lista de texto (demasiadas piernas cortas y
+    // pines superpuestos) — la lista (abrirPopupCluster) sigue siendo
+    // el mejor recurso para esos casos, igual que antes de esta pasada.
+    var SPIDER_MAX_MIEMBROS = 14;
+    var DURACION_SPIDER_MS = 240;
+
+    function claveCluster(c) { return Math.round(c.x) + ':' + Math.round(c.y); }
+
+    function calcularPosicionesSpider(c) {
+      var n = c.miembros.length;
+      var posiciones = new Array(n);
+      for (var i = 0; i < n; i++) {
+        var anillo = Math.floor(i / SPIDER_MAX_POR_ANILLO);
+        var idxEnAnillo = i % SPIDER_MAX_POR_ANILLO;
+        var totalEnEsteAnillo = Math.min(SPIDER_MAX_POR_ANILLO, n - anillo * SPIDER_MAX_POR_ANILLO);
+        var angulo = (idxEnAnillo / totalEnEsteAnillo) * Math.PI * 2 - Math.PI / 2;
+        var radio = SPIDER_RADIO_BASE + anillo * SPIDER_RADIO_PASO;
+        posiciones[i] = {
+          punto: c.miembros[i],
+          x: c.x + Math.cos(angulo) * radio,
+          y: c.y + Math.sin(angulo) * radio
+        };
+      }
+      return posiciones;
+    }
+
+    function abrirSpider(c) {
+      cerrarPopup();
+      spiderActivo = { key: claveCluster(c), cx: c.x, cy: c.y, posiciones: calcularPosicionesSpider(c), inicio: performance.now() };
+      if (prefiereMovimientoReducido()) redibujar(); else animarSpider();
+    }
+    function cerrarSpider() {
+      if (!spiderActivo) return;
+      spiderActivo = null;
+      redibujar();
+    }
+    function animarSpider() {
+      if (rafSpider !== null) return;
+      rafSpider = requestAnimationFrame(function () {
+        rafSpider = null;
+        if (!vivo || !spiderActivo) return;
+        redibujar();
+        var t = (performance.now() - spiderActivo.inicio) / DURACION_SPIDER_MS;
+        if (t < 1) animarSpider();
+      });
+    }
+    // Piernas del abanico (líneas finas centro→pin) + los pines
+    // individuales, dibujados encima del cluster que sigue actuando de
+    // "eje" visual del abanico — mismo recurso que usan Leaflet/Google
+    // Maps: el cluster no desaparece, se queda como centro de anclaje.
+    function dibujarSpider() {
+      if (!spiderActivo) return;
+      var t = prefiereMovimientoReducido() ? 1 : Math.min(1, (performance.now() - spiderActivo.inicio) / DURACION_SPIDER_MS);
+      var e = easeOutCubic(t);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(236,237,239,.55)';
+      ctx.lineWidth = 1.5;
+      spiderActivo.posiciones.forEach(function (pos) {
+        var px = spiderActivo.cx + (pos.x - spiderActivo.cx) * e;
+        var py = spiderActivo.cy + (pos.y - spiderActivo.cy) * e;
+        pos._xActual = px; pos._yActual = py;
+        ctx.beginPath();
+        ctx.moveTo(spiderActivo.cx, spiderActivo.cy);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+      });
+      ctx.restore();
+      spiderActivo.posiciones.forEach(function (pos) {
+        var esResaltado = pos.punto.id === idResaltado || pos.punto.id === idAbierto;
+        dibujarMarcador(pos._xActual, pos._yActual, pos.punto, esResaltado, e);
+      });
+    }
+
     /* ── Interacción: pan + zoom (mouse, touch, rueda, teclado) ── */
     var arrastrando = false, ultimoX = 0, ultimoY = 0, sePanneo = false;
     var pointerActivoId = null; // solo un puntero controla el pan a la vez
@@ -893,6 +1155,7 @@
       if (velocidad > TECHO_V) { vx = vx / velocidad * TECHO_V; vy = vy / velocidad * TECHO_V; }
       var FRICCION = 0.0022; // px/ms perdidos por ms — calibra distancia y duración del deslizamiento
       function paso(ahora, previo) {
+        if (!vivo) { inerciaRAF = null; return; }
         var dtPaso = previo ? ahora - previo : 16;
         var factor = Math.max(0, 1 - FRICCION * dtPaso * 12);
         vx *= factor; vy *= factor;
@@ -919,10 +1182,16 @@
       lienzo.style.cursor = 'grabbing';
     });
     lienzo.addEventListener('pointermove', function (e) {
+      // Durante la continuación táctil de un pan con un solo dedo tras
+      // soltar uno de los dos de un pellizco (ver touchend más abajo),
+      // el movimiento real ya lo aplica ese código con Touch Events
+      // puros — procesar acá el mismo gesto como "hover" produciría un
+      // resaltado que titila mientras el mapa se mueve por otro lado.
+      if (panTactilUnico) return;
       if (arrastrando) {
         if (e.pointerId !== pointerActivoId) return; // ignorar punteros secundarios mientras se arrastra
         var dx = e.clientX - ultimoX, dy = e.clientY - ultimoY;
-        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) sePanneo = true;
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { sePanneo = true; cerrarSpider(); }
         ultimoX = e.clientX; ultimoY = e.clientY;
         registrarMuestra(e.clientX, e.clientY);
         var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
@@ -932,8 +1201,27 @@
         redibujar();
         return;
       }
+      // RENDIMIENTO REAL (mouse/trackpad de alta frecuencia): un mouse
+      // gaming a 125-1000Hz o un trackpad de precisión pueden disparar
+      // varios cientos de `pointermove` por segundo — muchos más que
+      // los ~60 frames por segundo que de verdad se dibujan. Hacer el
+      // hit-testing completo (recorrer todos los clusters/puntos
+      // visibles) en cada uno de esos eventos es trabajo descartado:
+      // solo el resultado del último evento antes de cada frame
+      // termina importando. Se guarda apenas la posición del puntero
+      // (un objeto liviano, no el Event completo) y se resuelve una
+      // sola vez por frame vía rAF.
+      hoverPendiente = { clientX: e.clientX, clientY: e.clientY };
+      if (hoverRAF === null) hoverRAF = requestAnimationFrame(procesarHoverPendiente);
+    });
+    var hoverPendiente = null;
+    var hoverRAF = null;
+    function procesarHoverPendiente() {
+      hoverRAF = null;
+      if (!vivo || !hoverPendiente || arrastrando || panTactilUnico) { hoverPendiente = null; return; }
+      var evt = hoverPendiente; hoverPendiente = null;
       var clusters = clustersActuales();
-      var cerca = buscarMarcadorEn(e, clusters);
+      var cerca = buscarMarcadorEn(evt, clusters);
       if (cerca && cerca.tipo === 'punto') {
         lienzo.style.cursor = 'pointer';
         if (cerca.punto.id !== idResaltado) { idResaltado = cerca.punto.id; puntoResaltado = cerca.punto; emisor.emitir('hover', cerca.punto); redibujar(); }
@@ -946,7 +1234,7 @@
       } else if (idResaltado !== null || clusterResaltadoKey !== null) {
         idResaltado = null; puntoResaltado = null; clusterResaltadoKey = null; lienzo.style.cursor = 'grab'; emisor.emitir('hoverOut'); redibujar();
       }
-    });
+    }
     lienzo.addEventListener('pointerup', function (e) {
       if (e.pointerId !== pointerActivoId) return;
       pointerActivoId = null;
@@ -955,7 +1243,7 @@
       if (!sePanneo) {
         var clusters = clustersActuales();
         var cerca = buscarMarcadorEn(e, clusters);
-        if (cerca) manejarClick(cerca);
+        if (cerca) manejarClick(cerca); else cerrarSpider();
       } else {
         iniciarInercia();
       }
@@ -979,6 +1267,16 @@
     function buscarMarcadorEn(evtPointer, clusters) {
       var rect = lienzo.getBoundingClientRect();
       var mx = evtPointer.clientX - rect.left, my = evtPointer.clientY - rect.top;
+      if (spiderActivo) {
+        var mejorSpider = null, mejorDistSpider = TOLERANCIA_CLICK_PX;
+        spiderActivo.posiciones.forEach(function (pos) {
+          var px = pos._xActual !== undefined ? pos._xActual : pos.x;
+          var py = pos._yActual !== undefined ? pos._yActual : pos.y;
+          var d = Math.sqrt(Math.pow(px - mx, 2) + Math.pow(py - my, 2));
+          if (d < mejorDistSpider) { mejorDistSpider = d; mejorSpider = { tipo: 'punto', x: px, y: py, punto: pos.punto }; }
+        });
+        if (mejorSpider) return mejorSpider;
+      }
       var mejor = null, mejorDist = TOLERANCIA_CLICK_PX;
       clusters.forEach(function (c) {
         var d = Math.sqrt(Math.pow(c.x - mx, 2) + Math.pow(c.y - my, 2));
@@ -1031,18 +1329,24 @@
 
     function manejarClick(c) {
       if (c.tipo === 'cluster') {
+        var key = claveCluster(c);
+        // Reclickear el mismo cluster que ya está desplegado en abanico
+        // lo cierra — mismo principio de "toggle" que un acordeón, sin
+        // necesitar un botón de cerrar aparte.
+        if (spiderActivo && spiderActivo.key === key) { cerrarSpider(); return; }
+
         dispararOnda(c.x, c.y, c.miembros[0] && c.miembros[0].color);
 
-        // Caso rápido, decisión de producto (no de bug): con pocos
-        // lugares, mostrar la lista es más directo que animar un zoom,
-        // aunque el zoom técnicamente pudiera separarlos.
-        if (c.miembros.length <= 8) { abrirPopupCluster(c); return; }
+        // Spiderfy: para clusters chicos/medianos, expandir en abanico
+        // es más directo y más espacial que una lista de texto — ver
+        // justificación completa junto a la definición de abrirSpider.
+        if (c.miembros.length <= SPIDER_MAX_MIEMBROS) { abrirSpider(c); return; }
 
         // Caso general: ¿de verdad hay a dónde acercar? Si en el mejor
         // zoom posible los miembros van a seguir dentro del radio de
         // fusión de clusters, ningún acercamiento los va a separar —
-        // mostrar la lista en vez de animar hacia un destino que no
-        // cambia nada.
+        // y un abanico de más de SPIDER_MAX_MIEMBROS piernas ya no es
+        // legible, así que acá sí conviene la lista en vez del fan.
         var nuncaSeSepara = dispersionMaxima(c.miembros, ZOOM_MAX) < RADIO_CLUSTER_PX;
         if (nuncaSeSepara) { abrirPopupCluster(c); return; }
 
@@ -1051,6 +1355,7 @@
         animarA(enc.lat, enc.lng, zoomDestino);
         return;
       }
+      cerrarSpider();
       dispararOnda(c.x, c.y, c.punto && c.punto.color);
       abrirPopup(c.punto, { x: c.x, y: c.y });
       emisor.emitir('click', c.punto);
@@ -1104,6 +1409,7 @@
     lienzo.addEventListener('wheel', function (e) {
       e.preventDefault();
       cancelarInercia();
+      cerrarSpider();
       var rect = lienzo.getBoundingClientRect();
       wheelXRel = e.clientX - rect.left;
       wheelYRel = e.clientY - rect.top;
@@ -1158,14 +1464,16 @@
     // antes de abrirla — sin esto, un usuario de teclado que abre un
     // popup y quiere descartarlo no tenía forma de hacerlo sin el mouse.
     contenedor.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !popup.hidden) {
+      if (e.key === 'Escape' && (!popup.hidden || spiderActivo)) {
         e.stopPropagation();
-        cerrarPopup(true);
+        if (!popup.hidden) cerrarPopup(true);
+        cerrarSpider();
       }
     });
 
     function desplazarPx(dx, dy) {
       cancelarInercia();
+      cerrarSpider();
       var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
       var n = PROY.desproyectar(c0.x - dx, c0.y - dy, viewport.zoom);
       viewport.lat = n.lat; viewport.lng = n.lng;
@@ -1189,6 +1497,8 @@
     var pinchDist0 = null, pinchZoom0 = null, pinchCentro0 = null;
     contenedor.addEventListener('touchstart', function (e) {
       if (e.touches.length === 2) {
+        enPellizco = true;
+        panTactilUnico = null;
         pinchDist0 = distanciaToques(e.touches);
         pinchZoom0 = viewport.zoom;
         pinchCentro0 = centroToques(e.touches);
@@ -1199,6 +1509,7 @@
         pointerActivoId = null;
         cancelarInercia();
         cerrarPopup();
+        cerrarSpider();
       }
     }, { passive: true });
     contenedor.addEventListener('touchmove', function (e) {
@@ -1222,10 +1533,49 @@
         viewport.lat = nuevoCentro.lat;
         viewport.lng = nuevoCentro.lng;
         redibujar();
+        return;
+      }
+      // GAP REAL corregido: al soltar uno de los dos dedos de un
+      // pellizco, el dedo que queda abajo no generaba ningún
+      // `pointerdown` nuevo (ya estaba apoyado desde antes), así que
+      // el pan de un solo dedo no se reactivaba solo — el mapa se
+      // quedaba quieto hasta que el usuario levantara ese dedo también
+      // y volviera a apoyarlo. Google/Apple Maps sí continúan el pan
+      // sin cortes. Se seguí acá con Touch Events puros (no con
+      // Pointer Events: ese dedo nunca se activó como puntero de
+      // arrastre, ver touchend) hasta que se suelte del todo.
+      if (e.touches.length === 1 && panTactilUnico) {
+        var t = e.touches[0];
+        var dx = t.clientX - panTactilUnico.x, dy = t.clientY - panTactilUnico.y;
+        panTactilUnico.x = t.clientX; panTactilUnico.y = t.clientY;
+        registrarMuestra(t.clientX, t.clientY);
+        var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
+        var n = PROY.desproyectar(c0.x - dx, c0.y - dy, viewport.zoom);
+        viewport.lat = n.lat; viewport.lng = n.lng;
+        cerrarPopup();
+        redibujar();
       }
     }, { passive: true });
     contenedor.addEventListener('touchend', function (e) {
+      if (e.touches.length === 1 && enPellizco) {
+        var t = e.touches[0];
+        muestrasMovimiento = [];
+        panTactilUnico = { id: t.identifier, x: t.clientX, y: t.clientY };
+        registrarMuestra(t.clientX, t.clientY);
+      }
       if (e.touches.length < 2) { pinchDist0 = null; pinchCentro0 = null; }
+      if (e.touches.length === 0) {
+        if (enPellizco) pellizcoTerminoEn = performance.now();
+        enPellizco = false;
+        if (panTactilUnico) { panTactilUnico = null; iniciarInercia(); }
+      }
+    });
+    contenedor.addEventListener('touchcancel', function () {
+      // El sistema puede interrumpir el gesto (llamada entrante,
+      // gesto de sistema del propio OS) sin `touchend` — sin este
+      // manejo, `panTactilUnico`/`enPellizco` quedaban pegados y el
+      // próximo toque heredaba un estado de pellizco que ya no existe.
+      pinchDist0 = null; pinchCentro0 = null; panTactilUnico = null; enPellizco = false;
     });
     function distanciaToques(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
     function centroToques(t) { return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 }; }
@@ -1234,24 +1584,27 @@
     function animarA(lat, lng, zoom, duracion) {
       if (animacionZoom) cancelAnimationFrame(animacionZoom);
       cancelarInercia();
+      cerrarSpider();
       if (prefiereMovimientoReducido()) {
         viewport.lat = lat; viewport.lng = lng; viewport.zoom = zoom;
+        vueloDestino = null;
         redibujar();
         return;
       }
       var origen = { lat: viewport.lat, lng: viewport.lng, zoom: viewport.zoom };
       var destino = { lat: lat, lng: lng, zoom: zoom };
+      vueloDestino = destino;
       var inicio = performance.now();
       duracion = duracion || DURACION_VUELO_MS;
       function paso(ahora) {
+        if (!vivo) return;
         var t = Math.min(1, (ahora - inicio) / duracion);
         var e = easeOutCubic(t);
         viewport.lat = origen.lat + (destino.lat - origen.lat) * e;
         viewport.lng = origen.lng + (destino.lng - origen.lng) * e;
         viewport.zoom = origen.zoom + (destino.zoom - origen.zoom) * e;
         redibujar();
-        if (t < 1) animacionZoom = requestAnimationFrame(paso);
-        else animacionZoom = null;
+        if (t < 1) { animacionZoom = requestAnimationFrame(paso); } else { animacionZoom = null; vueloDestino = null; }
       }
       animacionZoom = requestAnimationFrame(paso);
     }
@@ -1415,6 +1768,10 @@
     }
     function posicionarPopupAbierto(proyectados) {
       if (popup.hidden || idAbierto === null) return;
+      if (spiderActivo) {
+        var posSpider = spiderActivo.posiciones.filter(function (ps) { return ps.punto.id === idAbierto; })[0];
+        if (posSpider) { posicionarPopupEn(posSpider._xActual || posSpider.x, posSpider._yActual || posSpider.y); return; }
+      }
       var p = proyectados.filter(function (pr) { return pr.punto.id === idAbierto; })[0];
       if (!p) { cerrarPopup(); return; }
       // Clamp para que el popup nunca quede parcialmente fuera del
@@ -1490,6 +1847,13 @@
     }
 
     function establecerPuntos(nuevosPuntos) {
+      establecioAlgunaVez = true;
+      // La identidad de un cluster (`spiderActivo.key`) depende de su
+      // posición en pantalla y de qué miembros agrupa — ambas cosas
+      // pueden cambiar con una lista nueva de resultados. Mantener el
+      // abanico abierto apuntando a datos viejos mostraría piernas
+      // hacia lugares que ya no están en el conjunto actual.
+      cerrarSpider();
       var entrada = nuevosPuntos || [];
       var descartados = 0;
       // Un punto sin lat/lng numérico y finito no puede proyectarse —
@@ -1502,6 +1866,26 @@
       });
       if (descartados > 0 && global.console) {
         console.warn('URU_MOTOR_MAPA_RENDER: se descartaron ' + descartados + ' punto(s) sin coordenadas válidas.');
+      }
+      // ROBUSTEZ REAL, no defensiva por las dudas: `enfocar(id)` y
+      // `resaltar(id)` resuelven por `.filter(...)[0]` — con IDs
+      // repetidos (bug de datos aguas arriba, no algo que este archivo
+      // pueda o deba corregir por su cuenta) siempre apuntan al
+      // primero, silenciosamente. No se filtra nada (el resto del
+      // motor sigue funcionando: dos puntos con el mismo ID igual se
+      // dibujan, clusterizan y aparecen en la lista accesible, cada
+      // uno con sus propias coordenadas), pero se avisa una vez por
+      // llamada para que el problema de datos se note en desarrollo en
+      // vez de manifestarse como "el mapa enfoca el lugar equivocado".
+      if (global.console) {
+        var vistos = Object.create(null), repetidos = 0;
+        for (var iDup = 0; iDup < puntos.length; iDup++) {
+          var idDup = puntos[iDup].id;
+          if (vistos[idDup]) repetidos++; else vistos[idDup] = true;
+        }
+        if (repetidos > 0) {
+          console.warn('URU_MOTOR_MAPA_RENDER: ' + repetidos + ' punto(s) con id repetido — enfocar()/resaltar() solo pueden apuntar al primero de cada grupo.');
+        }
       }
       var huella = calcularHuella(puntos);
       if (huella !== huellaListaPrevia) {
@@ -1547,12 +1931,12 @@
     var resizeObs = null;
     var resizeFallback = null;
     if ('ResizeObserver' in global) {
-      resizeObs = new ResizeObserver(function () { medir(); redibujar(); });
+      resizeObs = new ResizeObserver(function () { if (vivo) { medir(); redibujar(); } });
       resizeObs.observe(contenedor);
     } else {
       // Navegador sin ResizeObserver: al menos reaccionar al resize de
       // la ventana, en vez de quedar con un tamaño de canvas obsoleto.
-      resizeFallback = function () { medir(); redibujar(); };
+      resizeFallback = function () { if (vivo) { medir(); redibujar(); } };
       global.addEventListener('resize', resizeFallback);
     }
     medir();
@@ -1563,7 +1947,71 @@
     // fuentes terminan de cargar corrige ese frame inicial sin costo
     // permanente.
     if (global.document && document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(function () { redibujar(); }).catch(function () {});
+      document.fonts.ready.then(function () { if (vivo) redibujar(); }).catch(function () {});
+    }
+
+    // ── Suspensión/reanudación en background (pestaña oculta) ──
+    // GAP REAL: los navegadores throttlean (no garantizan cancelar)
+    // `requestAnimationFrame` en una pestaña en background — una
+    // animación en curso puede seguir "corriendo" a una cadencia
+    // arbitraria e impredecible, o acumular un `dt` gigante en el
+    // primer frame tras volver a foreground si algo asumía ~16ms entre
+    // pasos. En vez de confiar en ese comportamiento no garantizado,
+    // se corta explícitamente todo lo que anima por tiempo al ocultarse
+    // y se resincroniza al volver — degradación elegante en vez de
+    // dejarlo a la suerte del navegador.
+    function alCambiarVisibilidad() {
+      if (!vivo) return;
+      if (document.hidden) {
+        if (animacionZoom) { cancelAnimationFrame(animacionZoom); animacionZoom = null; }
+        cancelarInercia();
+        if (rafOndas !== null) { cancelAnimationFrame(rafOndas); rafOndas = null; }
+        if (rafApariciones !== null) { cancelAnimationFrame(rafApariciones); rafApariciones = null; }
+        if (rafSpider !== null) { cancelAnimationFrame(rafSpider); rafSpider = null; }
+        if (wheelRAF !== null) { cancelAnimationFrame(wheelRAF); wheelRAF = null; wheelAcumulado = 0; }
+        if (hoverRAF !== null) { cancelAnimationFrame(hoverRAF); hoverRAF = null; hoverPendiente = null; }
+      } else {
+        // Un vuelo interrumpido a mitad de camino no tiene un origen
+        // temporal razonable para retomar tras un tiempo indeterminado
+        // en background — se completa directo al destino en vez de que
+        // el usuario vuelva a ver una animación arrancando de la nada.
+        if (vueloDestino) {
+          viewport.lat = vueloDestino.lat; viewport.lng = vueloDestino.lng; viewport.zoom = vueloDestino.zoom;
+          vueloDestino = null;
+        }
+        // Mismo razonamiento para microinteracciones de duración fija
+        // (ondas de clic, apariciones de pines): "completarlas" de
+        // golpe en un lugar que el usuario ya no está mirando se vería
+        // peor que simplemente descartarlas.
+        ondas = [];
+        for (var kApar in apariciones) delete apariciones[kApar];
+        // La pestaña pudo volver en otro monitor (distinto
+        // devicePixelRatio) o con el contenedor en otro tamaño —
+        // remedir agarra ambos casos, no solo el resize.
+        medir();
+        redibujar();
+      }
+    }
+    if (global.document) document.addEventListener('visibilitychange', alCambiarVisibilidad);
+
+    // Red de seguridad para `orientationchange`: ResizeObserver ya
+    // debería reaccionar al nuevo tamaño del contenedor tras rotar,
+    // pero algunas combinaciones de WebView/Safari iOS viejo disparan
+    // el resize real del layout con demora respecto al evento de
+    // orientación. Un remedido extra, un instante después, no cuesta
+    // nada si ya estaba todo actualizado y corrige el caso raro en que
+    // sí hacía falta.
+    var orientationFallback = null;
+    var orientationTimeout = null;
+    if ('onorientationchange' in global) {
+      orientationFallback = function () {
+        if (orientationTimeout !== null) clearTimeout(orientationTimeout);
+        orientationTimeout = setTimeout(function () {
+          orientationTimeout = null;
+          if (vivo) { medir(); redibujar(); }
+        }, 60);
+      };
+      global.addEventListener('orientationchange', orientationFallback);
     }
 
     return {
@@ -1574,12 +2022,22 @@
       resaltar: resaltar,
       quitarResaltado: quitarResaltado,
       destruir: function () {
+        // Primero el guard: cualquier callback asíncrono que llegue
+        // DESPUÉS de esta línea (imagen de tile, promesa de fuentes,
+        // un RAF que ya estaba encolado antes de cancelarlo) se
+        // encuentra `vivo === false` y no reprograma nada nuevo.
+        vivo = false;
         if (resizeObs) resizeObs.disconnect();
         if (resizeFallback) global.removeEventListener('resize', resizeFallback);
+        if (global.document) document.removeEventListener('visibilitychange', alCambiarVisibilidad);
+        if (orientationFallback) global.removeEventListener('orientationchange', orientationFallback);
+        if (orientationTimeout !== null) clearTimeout(orientationTimeout);
         if (animacionZoom) cancelAnimationFrame(animacionZoom);
         if (rafRedibujo !== null) cancelAnimationFrame(rafRedibujo);
         if (rafOndas !== null) cancelAnimationFrame(rafOndas);
         if (rafApariciones !== null) cancelAnimationFrame(rafApariciones);
+        if (rafSpider !== null) cancelAnimationFrame(rafSpider);
+        if (hoverRAF !== null) cancelAnimationFrame(hoverRAF);
         cancelarInercia();
         if (wheelRAF !== null) cancelAnimationFrame(wheelRAF);
         contenedor.innerHTML = '';
