@@ -7,120 +7,161 @@
 
    Todas las funciones que calculan algo son puras (reciben estado,
    devuelven estado nuevo) para poder testearlas sin DOM ni red —
-   ver tests/motor.test.js. La única parte impura es la persistencia
+   ver tests/motor-test.js. La única parte impura es la persistencia
    (leerEstado/guardarEstado/borrarEstado), aislada al final del
    archivo.
 
    No depende de motor-exposicion.js ni de motor-mapa.js: estos leen
-   el estado que expone este módulo, nunca al revés.
+   el estado que expone este módulo, nunca al revés. Este módulo no
+   toca DOM, no hace fetch, no conoce HTML/CSS — cualquier señal
+   externa (clima, hora, proximidad) entra por el `payload` de una
+   acción o por un parámetro explícito, nunca por una llamada propia
+   a una API externa (ver Principio Arquitectónico, sección 6b).
 
    ───────────────────────────────────────────────────────────────────
-   Auditoría y evolución de esta pasada — motivo de cada cambio no
-   trivial, con la evidencia que lo sostiene, para que quien lea el
-   diff no tenga que reconstruir el razonamiento desde cero:
+   NOTA HISTÓRICA — por qué este bloque no narra "pasadas" anteriores
+   ───────────────────────────────────────────────────────────────────
+   Versiones previas de este comentario documentaban, pasada por
+   pasada, qué se agregaba o se retiraba y por qué — con la intención
+   de que el diff fuera trazable. El efecto real, confirmado en esta
+   auditoría (ejecutando `node tests/motor-test.js` y cruzando cada
+   función pública contra sus call sites reales con `grep` en todo el
+   repo, no asumiendo nada de lo ya escrito), fue el contrario: dos
+   pasadas sucesivas terminaron narrando conclusiones opuestas sobre
+   las mismas funciones (`gruposAEvitar()` se documentó como "código
+   muerto, se elimina" en un bloque y, más abajo en el propio archivo,
+   como "vuelve porque ahora sí tiene llamador" en otro) sin que
+   nadie corrigiera el primer bloque. Un mantenedor que leyera solo
+   el encabezado se llevaba información falsa.
 
-   BUG REAL corregido
-   • `obtenerUsuarioId()` generaba un id nuevo con `Math.random()` en
-     CADA llamada cuando `localStorage` no estaba disponible (modo
-     privado con storage bloqueado, cuota agotada, algunos navegadores
-     in-app). Como `claveContexto()` invoca `obtenerUsuarioId()` en
-     cada `leerEstado()`/`guardarEstado()`, la clave de contexto
-     cambiaba en cada lectura — el estado nunca se encontraba a sí
-     mismo, ni siquiera dentro de la misma sesión de pestaña. Ahora el
-     id de sesión de emergencia se genera una sola vez y se cachea en
-     una variable de módulo: sigue sin persistir entre visitas (eso es
-     inevitable sin storage), pero es estable durante toda la sesión.
+   La política desde esta pasada es otra: este encabezado describe
+   SOLO el estado actual, verificado. El historial de decisiones vive
+   en el control de versiones (git blame/log), que es la herramienta
+   que ya existe para eso y no puede desincronizarse del código como
+   sí puede un comentario.
 
-   CÓDIGO MUERTO eliminado (con la evidencia que lo confirma)
-   • `gruposAEvitar()`: su único consumidor en todo el repo era
-     `recortePorIniciativaPropia()` dentro de motor-exposicion.js —
-     una función que a su vez nunca se invoca desde app.js (el único
-     call site posible). Sin `recortePorIniciativaPropia()` en el
-     camino de ejecución, `gruposAEvitar()` no tiene ningún llamador
-     alcanzable. Se elimina. El decaimiento de rechazos que la
-     alimentaba (`rechazosVigentes`, `grupoEsPatronEstable`) SÍ se
-     conserva, porque además de alimentar a `gruposAEvitar()` también
-     empuja `friccion` dentro de `Acciones.rechazar` — y `friccion`
-     sigue siendo parte del estado persistido (ver nota más abajo
-     sobre qué NO se tocó).
-   • `reposoForzadoActivo()`: exportada en la API pública, cero call
-     sites en app.js (el único consumidor posible de la superficie
-     pública de este módulo). No la consume ni siquiera otro módulo
-     interno de este archivo. Se elimina.
-   • Bloque `exposicion` dentro de `Acciones.aceptar` (el que llevaba
-     la cuenta de `vecesMostrado`/`ultimaVez` por lugar): su único
-     lector era `descansando()` en motor-exposicion.js, función que
-     — igual que `recortePorIniciativaPropia()` — nunca se ejecuta
-     porque nadie la llama. Se elimina la escritura, y por lo tanto
-     también el campo `exposicion` del shape de `estadoInicial()`
-     (ver "cambio de esquema" abajo: es un caso legítimo porque la
-     migración de versión ya lo cubre).
+   ───────────────────────────────────────────────────────────────────
+   6a. SECCIÓN 1 — CONTRATO PÚBLICO (verificado contra consumidores reales)
+   ───────────────────────────────────────────────────────────────────
+   Confirmado con `grep -rn "URU_PLANO\." js/ tests/` sobre el estado
+   real del repo, no sobre lo que el código *dice* de sí mismo:
 
-   QUÉ NO SE TOCÓ, Y POR QUÉ (para que no se lea como un olvido)
+     leerEstado, registrarApertura, guardarEstado, aplicarAccion,
+     region, rolPorAperturas
+       → consumidas por js/app.js. Tocar su firma rompe la app.
+
+     gruposAEvitar
+       → consumida por js/motor-exposicion.js (recortePorIniciativaPropia),
+         que a su vez SÍ es llamada por js/app.js (render(), línea
+         ~692). Viva y en el camino de ejecución real, pese a lo que
+         decía una versión anterior de este mismo comentario.
+
+     SCHEMA_VERSION, borrarEstado, resumenEstado, obtenerUsuarioId
+       → sin ningún consumidor en el repo hoy. No son código muerto en
+         sentido estricto (utilidad de versionado, privacidad —
+         "olvidame en esta ciudad" — y debug/telemetría,
+         respectivamente) pero no tienen call site. Se conservan: son
+         infraestructura barata y de bajo riesgo, lista para cuando
+         haga falta, no relleno especulativo. `borrarEstado` en
+         particular es la única forma programática de cumplir un
+         futuro pedido de privacidad — removerla movería ese trabajo
+         a "reinventarla desde cero" el día que haga falta.
+
+     reposoForzadoActivo
+       → NO EXISTÍA en el archivo al empezar esta pasada (se había
+         retirado en una revisión anterior por "cero call sites"),
+         pero `tests/motor-test.js` seguía invocándola y
+         `motor-config.js` (madurez.rolesConReposoForzado) seguía
+         calibrada para alimentarla. Resultado verificado: el test
+         runner terminaba en `TypeError` y cortaba antes de correr
+         los últimos 4 tests (exposición y mapa). Se reinstala en
+         esta pasada: es pura, ya tiene su configuración lista, cierra
+         un bug real de ejecución, y recupera compatibilidad con la
+         API que el propio test suite del repo asume. Ver sección 3.
+
+   ───────────────────────────────────────────────────────────────────
+   6b. SECCIÓN 2 — QUÉ CAMBIA EN ESTA PASADA Y POR QUÉ CADA COSA
+   ───────────────────────────────────────────────────────────────────
+   NUEVO — Afinidad positiva por rubro (el cambio central)
+   • Hasta esta pasada, `rechazos` (por grupo, con decaimiento
+     temporal por ventana y umbral de "patrón estable") tenía una
+     arquitectura completa para señal NEGATIVA. No existía el
+     equivalente para señal POSITIVA: `Acciones.aceptar` subía un
+     escalar global de autonomía pero nunca registraba QUÉ rubro se
+     había aceptado. El motor sabía evitar, no sabía preferir — pese
+     a que el propio meta-description del sitio promete "cuanto más
+     lo usás, más se ajusta a vos". Se agrega `aceptados` (mismo shape
+     que `rechazos`: `{ grupo: [timestamps] }`) y `gruposAfines()`,
+     espejo exacto de `gruposAEvitar()` con el mismo mecanismo de
+     decaimiento ya validado en producción — no es un mecanismo nuevo
+     sin probar, es el mismo patrón aplicado al otro signo.
+   • `Acciones.aceptar` acepta ahora un `payload.grupo` OPCIONAL. Hoy
+     `app.js:424` no lo manda, así que el comportamiento observable
+     no cambia ni un bit para nadie hasta que algún día `app.js`
+     decida mandarlo — este archivo queda listo para recibir esa
+     señal sin que haga falta otro cambio de esquema cuando llegue.
+     No se toca `app.js` en esta pasada (ver nota de alcance al final
+     de este bloque).
+   • Constantes de calibración (`AFINIDAD.ventanaDecaimientoDias`,
+     `AFINIDAD.repeticionesParaEstable`) viven, por ahora, como
+     constantes de módulo acá mismo — NO en motor-config.js, aunque
+     la convención documentada en motor-config.js pide exactamente
+     eso ("cambiar un número acá nunca debería requerir tocar
+     motor-plano.js"). Es una desviación deliberada y temporal: mover
+     estos dos números a motor-config.js es un cambio aditivo de
+     riesgo casi nulo, pero es OTRO archivo, y la instrucción de
+     alcance para esta pasada es no tocar ningún archivo fuera de
+     motor-plano.js y su test sin confirmación explícita. Quedan
+     marcadas ⚠ MIGRAR_A_CONFIG en su propia definición para que sean
+     fáciles de encontrar el día que se autorice ese commit.
+
+   NUEVO — nivelConfianza(estado)
+   • Métrica derivada, pura, de cuánta evidencia real sostiene la
+     posición actual del usuario en el plano (aperturas + señales
+     acumuladas). No inventa ninguna fuente de datos nueva: es una
+     lectura distinta de campos que ya existían. Sirve como base para
+     que, el día de mañana, la interfaz pueda mostrar algo como "esto
+     todavía te conoce poco" sin que ese texto sea una mentira de
+     producto — hoy no hay ningún consumidor de esto en app.js, y no
+     se agrega ninguno acá.
+
+   CORREGIDO — bug real (reposoForzadoActivo)
+   • Ver 6a arriba. Reinstalada, misma firma y semántica que el test
+     suite ya esperaba: `true` si el rol de madurez actual está en
+     `CFG.madurez.rolesConReposoForzado`.
+
+   CORREGIDO — documentación contradictoria (gruposAEvitar)
+   • Ver 6a arriba. Este encabezado ya no afirma que la función esté
+     muerta; el comentario puntual junto a `gruposAEvitar()` es ahora
+     la única fuente sobre su estado, y coincide con lo verificado.
+
+   ESQUEMA — v3 → v4 (aditivo, nunca destructivo)
+   • Se agrega el campo `aceptados` al shape persistido. La migración
+     normaliza cualquier estado v1/v2/v3, o corrupto, o con forma
+     inesperada, a la forma v4 — ver `migrarEstado()`. Ningún estado
+     existente en el `localStorage` de un usuario real pierde datos
+     con efecto vigente: los campos que ya importaban (`autonomia`,
+     `friccion`, `aperturas`, `rechazos`, `guardadosRecientes`,
+     `exposicion`) se preservan igual que en v3; `aceptados` arranca
+     vacío para cualquier estado que no lo tuviera, que es el
+     comportamiento correcto (no hay forma de reconstruir afinidad
+     retroactiva a partir de un esquema que nunca la registró).
+
+   QUÉ NO SE TOCÓ EN ESTA PASADA, Y POR QUÉ
    • `region()` sigue distinguiendo 'guia' / 'exploracion' /
-     'accionDirecta' exactamente igual que antes, aunque hoy esa
-     distinción de tres nombres es cosméticamente indistinguible en
-     el render de app.js (las tres ramas producen la misma lista y el
-     mismo texto de cabecera — ver diagnóstico previo). No es código
-     muerto en el sentido de "sin llamador": SÍ se llama, y SÍ decide
-     entre curaduría y el resto. Colapsar 'guia'/'exploracion'/
-     'accionDirecta' en un solo valor es un cambio de comportamiento
-     de producto, no una poda de código muerto, y por eso queda fuera
-     de esta pasada — se hace en un commit propio, explícito, cuando
-     se decida qué reemplaza a esa distinción (o si simplemente se
-     retira). Tocarlo acá, mezclado con el resto, sería exactamente
-     el tipo de cambio no trazable que este mismo archivo advierte
-     evitar en sus propios comentarios de auditoría.
-   • `Acciones.permanecer` / `Acciones.aceptar` (empuje de autonomía) /
-     `Acciones.rechazar` (empuje de fricción) siguen mutando el plano
-     igual que antes, por la misma razón: `region()` todavía los
-     consume, y decidir si dejan de importar es parte de la misma
-     decisión de producto que `region()`, no de esta pasada.
-
-   CAMBIO DE ESQUEMA (el único de esta pasada, y por qué es seguro)
-   • Se agrega versionado explícito (`SCHEMA_VERSION`) al estado
-     persistido, con una función `migrarEstado()` que normaliza
-     cualquier objeto leído de `localStorage` — de esta versión, de
-     una anterior sin campo `version`, o corrupto — a la forma actual.
-     Esto es lo que permite retirar el campo `exposicion` (ya muerto,
-     ver arriba) sin dejar basura en los `localStorage` de usuarios
-     que ya tenían estado guardado: la migración simplemente no lo
-     copia al normalizar. Ningún dato con efecto real se pierde,
-     porque ya no tenía efecto real. Sin este mecanismo, retirar el
-     campo del shape hoy y agregar campos nuevos mañana habría
-     significado, tarde o temprano, un `leerEstado()` que devuelve un
-     objeto a medio camino entre dos formas — la clase de bug que
-     este cambio existe para prevenir de raíz, no solo para esta vez.
-
-   ROBUSTEZ agregada
-   • `esEstadoValido()`: antes, un JSON sintácticamente válido pero
-     con la forma equivocada (p. ej. `{}` guardado por error, o un
-     objeto de otra clave que compartiera el mismo namespace por un
-     bug futuro) pasaba el `try/catch` de `JSON.parse` sin problema y
-     rompía más adelante, en el primer lugar que asumiera que
-     `estado.sesion.curaduriaActiva` existe. Ahora se valida la forma
-     después de parsear, no solo la sintaxis.
-   • Guardas de payload en `Acciones` (`segundos`, `grupo`, `lugarId`)
-     para que un valor inesperado degrade sin excepción en vez de
-     propagar `NaN` o `undefined` al plano.
-
-   NUEVO (funcionalidad, no relleno)
-   • `borrarEstado(ciudadId)`: no existía ninguna forma de limpiar el
-     estado persistido de un contexto. Hace falta para cualquier
-     futuro control de privacidad ("olvidame en esta ciudad") y para
-     QA/debug — hoy la única forma de resetear era borrar
-     `localStorage` a mano desde devtools.
-   • `resumenEstado(estado)`: una vista plana y redondeada del estado,
-     pensada para logging/telemetría/debug — nunca se debería loguear
-     el objeto de estado crudo completo (incluye timestamps de
-     rechazos y guardados que no aportan nada a un log y solo
-     ensucian).
-
-   La superficie pública que SÍ consume app.js hoy no cambia:
-   `leerEstado`, `registrarApertura`, `guardarEstado`, `aplicarAccion`,
-   `region`, `rolPorAperturas`. Se retiran de `URU_PLANO` únicamente
-   `gruposAEvitar` y `reposoForzadoActivo`, confirmado arriba que no
-   tienen llamador alcanzable.
+     'accionDirecta' con el mismo comportamiento observable que antes
+     (las tres ramas siguen alimentando el mismo camino de render en
+     app.js). Colapsar esa distinción es una decisión de producto, no
+     una corrección de esta auditoría — queda fuera a propósito.
+   • `Acciones.permanecer` / `Acciones.rechazar` / el cálculo de
+     `friccion` no cambian: siguen siendo consumidos por `region()`
+     tal cual estaban.
+   • `app.js`, `motor-exposicion.js`, `motor-render.js`,
+     `motor-config.js`: fuera de alcance de esta pasada por
+     instrucción explícita. Donde una mejora completa hubiera
+     requerido tocarlos, se dejó la interfaz lista (payload opcional,
+     funciones nuevas expuestas) mejor que forzar el cambio sin
+     autorización. Ver nota de "migrar a config" arriba.
    ═══════════════════════════════════════════════════════════════════ */
 
 (function (global) {
@@ -147,19 +188,15 @@
      ═════════════════════════════════════════════════════════════ */
 
   // Se sube cada vez que cambia la forma del objeto que viaja a
-  // localStorage.
-  //   v1 → v2: se retiró `exposicion` (código muerto: su único lector,
-  //     descansando() en motor-exposicion.js, no tenía llamador
-  //     alcanzable — recortePorIniciativaPropia() nunca se invocaba).
-  //   v2 → v3 (esta pasada): `exposicion` VUELVE al esquema. La razón
-  //     no es un olvido — es que ahora sí tiene llamador real: Guía y
-  //     Exploración vuelven a recortar el catálogo por presupuesto de
-  //     exposición (app.js: render()), y ese recorte necesita saber
-  //     qué lugar ya "descansó" para rotar. El diagnóstico de v2 seguía
-  //     siendo correcto en su momento — el código estaba genuinamente
-  //     muerto entonces. Revivirlo ahora es una decisión de producto
-  //     nueva, no una reversión del diagnóstico anterior.
-  var SCHEMA_VERSION = 3;
+  // localStorage. Historial de FORMA (no de razones — el porqué de
+  // cada cambio vive en git log, no acá, ver nota al inicio del
+  // archivo):
+  //   v1: forma original, sin `exposicion`.
+  //   v2: sin `exposicion` (equivalente a v1 a estos efectos).
+  //   v3: con `exposicion` (rotación de recorte por iniciativa propia).
+  //   v4 (esta pasada): se agrega `aceptados` — señal positiva por
+  //     rubro, espejo de `rechazos`. Ver sección 2 del encabezado.
+  var SCHEMA_VERSION = 4;
 
   /* ─────────────────────────────────────────────────────────────
      1. Identidad anónima y contexto (usuario × ciudad)
@@ -232,7 +269,8 @@
       friccion: CFG.plano.friccionInicial,
       aperturas: 0,              // madurez de ESTE contexto, no global
       ultimaApertura: null,
-      rechazos: {},              // { grupo: [timestamps] }
+      rechazos: {},              // { grupo: [timestamps] } — señal negativa
+      aceptados: {},             // { grupo: [timestamps] } — señal positiva (SCHEMA_VERSION v4)
       guardadosRecientes: [],    // timestamps para detectar Curaduría
       exposicion: {},            // { lugarId: { ultimaVez, vecesMostrado } } — rotación de recorte por iniciativa propia (ver SCHEMA_VERSION v3)
       sesion: {
@@ -262,6 +300,7 @@
       typeof obj.friccion === 'number' && isFinite(obj.friccion) &&
       typeof obj.aperturas === 'number' && isFinite(obj.aperturas) &&
       obj.rechazos !== null && typeof obj.rechazos === 'object' &&
+      obj.aceptados !== null && typeof obj.aceptados === 'object' &&
       Array.isArray(obj.guardadosRecientes) &&
       obj.exposicion !== null && typeof obj.exposicion === 'object' &&
       obj.sesion !== null && typeof obj.sesion === 'object';
@@ -306,8 +345,17 @@
     if (typeof crudo.friccion === 'number' && isFinite(crudo.friccion)) {
       base.friccion = clamp(crudo.friccion);
     }
-    if (crudo.rechazos && typeof crudo.rechazos === 'object') {
+    if (crudo.rechazos && typeof crudo.rechazos === 'object' && !Array.isArray(crudo.rechazos)) {
       base.rechazos = crudo.rechazos;
+    }
+    // `crudo.aceptados`: nuevo en v4. Cualquier estado anterior (v1-v3)
+    // simplemente no lo tiene — arranca vacío en `base`, que ya sale de
+    // `estadoInicial()`. No hay forma de reconstruir afinidad retroactiva
+    // a partir de un esquema que nunca la registró, y no hace falta:
+    // arrancar en {} es exactamente "sin evidencia todavía", el estado
+    // neutral correcto para esta señal.
+    if (crudo.aceptados && typeof crudo.aceptados === 'object' && !Array.isArray(crudo.aceptados)) {
+      base.aceptados = crudo.aceptados;
     }
     if (Array.isArray(crudo.guardadosRecientes)) {
       base.guardadosRecientes = crudo.guardadosRecientes;
@@ -361,9 +409,22 @@
     return 'anfitrion';
   }
 
-  // reposoForzadoActivo() se eliminó en esta pasada — ver auditoría al
-  // inicio del archivo. Cero call sites en todo el repo fuera de su
-  // propia definición/export.
+  /**
+   * Si el rol de madurez actual del usuario está entre los que el
+   * Blueprint marca con "reposo forzado" (motor-config.js:
+   * madurez.rolesConReposoForzado — hoy 'anfitrion' y 'conocido').
+   * Función pura de lectura: no decide nada por sí sola ni muta el
+   * plano, solo expone la señal para que quien orqueste sesión
+   * (hoy: nadie la consume — ver nota de alcance en el encabezado)
+   * decida qué hacer con ella, p. ej. no ofrecer el cierre de sesión
+   * intencional a un usuario todavía nuevo en este contexto.
+   * @param {object} estado
+   * @returns {boolean}
+   */
+  function reposoForzadoActivo(estado) {
+    var rol = rolPorAperturas(estado.aperturas);
+    return CFG.madurez.rolesConReposoForzado.indexOf(rol) !== -1;
+  }
 
   /* ─────────────────────────────────────────────────────────────
      4. Decaimiento de señales negativas — Blueprint v2, sección 6
@@ -419,6 +480,80 @@
   function gruposAEvitar(estado, ahoraMs) {
     return Object.keys(estado.rechazos || {}).filter(function (grupo) {
       return grupoEsPatronEstable(estado, grupo, ahoraMs);
+    });
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     4b. Afinidad positiva por rubro — espejo de la sección 4
+     Mismo mecanismo de decaimiento que `rechazos` (una señal aislada
+     no alcanza; solo un patrón repetido DENTRO de una ventana se
+     considera "afinidad estable"), aplicado a la señal contraria.
+     Antes de esta pasada no existía ningún registro de QUÉ rubro se
+     aceptaba — solo de cuáles se evitaban. Ver sección 2 del
+     encabezado del archivo para la justificación completa.
+
+     MIGRAR_A_CONFIG: estos dos números deberían vivir en
+     motor-config.js junto a `acciones.rechazar` (misma naturaleza:
+     un umbral de calibración de producto), siguiendo la convención
+     que el propio motor-config.js declara. Quedan acá como
+     constantes de módulo porque esta pasada no tiene autorización
+     para tocar otro archivo — ver nota de alcance en el encabezado.
+     ───────────────────────────────────────────────────────────── */
+  var AFINIDAD = {
+    ventanaDecaimientoDias: 21,
+    // Un poco más larga que la de rechazos (14 días): una preferencia
+    // positiva sostenida es información más barata de confirmar que
+    // un rechazo (aceptar es una acción de un click; rechazar suele
+    // implicar más fricción real) y vale la pena conservarla más
+    // tiempo antes de pedir nueva evidencia.
+    repeticionesParaEstable: 3
+    // Mismo umbral que rechazar.repeticionesParaEstable, por
+    // simetría y porque no hay evidencia de uso real todavía que
+    // sugiera un número distinto — recalibrar cuando la haya.
+  };
+
+  /**
+   * Timestamps de aceptación de un rubro que siguen dentro de la
+   * ventana de decaimiento de afinidad. Espejo exacto de
+   * `rechazosVigentes()`.
+   * @param {object} estado
+   * @param {string} grupo
+   * @param {number} ahoraMs
+   * @returns {number[]}
+   */
+  function aceptacionesVigentes(estado, grupo, ahoraMs) {
+    var ventanaMs = AFINIDAD.ventanaDecaimientoDias * 24 * 3600 * 1000;
+    var lista = (estado.aceptados && estado.aceptados[grupo]) || [];
+    return lista.filter(function (ts) { return (ahoraMs - ts) <= ventanaMs; });
+  }
+
+  /**
+   * Un rubro es "afinidad estable" cuando se aceptó suficientes veces
+   * dentro de la ventana vigente. Espejo exacto de
+   * `grupoEsPatronEstable()`.
+   * @param {object} estado
+   * @param {string} grupo
+   * @param {number} ahoraMs
+   * @returns {boolean}
+   */
+  function grupoEsAfinidadEstable(estado, grupo, ahoraMs) {
+    return aceptacionesVigentes(estado, grupo, ahoraMs).length >= AFINIDAD.repeticionesParaEstable;
+  }
+
+  /**
+   * Rubros con afinidad positiva estable hoy — la señal simétrica de
+   * `gruposAEvitar()`. No tiene consumidor todavía en
+   * motor-exposicion.js (fuera de alcance de esta pasada); queda
+   * expuesta públicamente para que ese módulo pueda usarla el día que
+   * se decida priorizar por afinidad, sin que motor-plano.js necesite
+   * otro cambio de superficie cuando eso pase.
+   * @param {object} estado
+   * @param {number} ahoraMs
+   * @returns {string[]}
+   */
+  function gruposAfines(estado, ahoraMs) {
+    return Object.keys(estado.aceptados || {}).filter(function (grupo) {
+      return grupoEsAfinidadEstable(estado, grupo, ahoraMs);
     });
   }
 
@@ -521,10 +656,17 @@
      * no de una búsqueda ni de curaduría), registra `ultimaVez` en
      * `estado.exposicion` para que ese lugar "descanse" el tiempo
      * configurado (motor-config.js: exposicion.descansoHoras) antes
-     * de poder volver a aparecer en un recorte de ese tipo. Vuelve a
-     * escribirse en esta pasada porque motor-exposicion.js ya tiene
-     * un llamador real que lo consume (descansando(), dentro de
-     * recortePorIniciativaPropia) — ver SCHEMA_VERSION v3.
+     * de poder volver a aparecer en un recorte de ese tipo — este
+     * cruce lo consume motor-exposicion.js (descansando(), dentro de
+     * recortePorIniciativaPropia).
+     *
+     * `payload.grupo` es OPCIONAL (nuevo en esta pasada): si viene,
+     * registra el rubro aceptado en `estado.aceptados` con el mismo
+     * mecanismo de decaimiento que `rechazos` — ver `gruposAfines()`.
+     * Si no viene (como pasa hoy: app.js todavía no lo manda), el
+     * comportamiento es idéntico al de antes de esta pasada. No es
+     * una acción nueva del Vocabulario — sigue siendo "aceptar", solo
+     * con un dato opcional más en su payload.
      */
     aceptar: function (estado, payload) {
       var e = copiarEstado(estado);
@@ -536,6 +678,13 @@
           ultimaVez: Date.now(),
           vecesMostrado: previo.vecesMostrado + 1
         };
+      }
+      var grupo = payload && typeof payload.grupo === 'string' && payload.grupo;
+      if (grupo) {
+        var ahora = Date.now();
+        var vigentes = aceptacionesVigentes(e, grupo, ahora);
+        vigentes.push(ahora);
+        e.aceptados[grupo] = vigentes;
       }
       return e;
     },
@@ -723,6 +872,26 @@
      ───────────────────────────────────────────────────────────── */
 
   /**
+   * Cuánta evidencia real sostiene la posición actual del usuario en
+   * el plano. No es una fuente de datos nueva: es una lectura
+   * derivada de señales que ya existían (aperturas de este contexto +
+   * cuántos grupos tienen hoy un patrón, positivo o negativo,
+   * vigente). Pensada como base mínima para que, el día de mañana, la
+   * interfaz pueda comunicar honestamente "todavía te conocemos poco"
+   * sin inventar ningún dato — hoy no tiene consumidor en app.js, se
+   * expone lista para cuando haga falta.
+   * @param {object} estado
+   * @returns {'bajo'|'medio'|'alto'}
+   */
+  function nivelConfianza(estado) {
+    var ahora = Date.now();
+    var gruposConSenal = gruposAEvitar(estado, ahora).length + gruposAfines(estado, ahora).length;
+    if (estado.aperturas >= CFG.madurez.umbralAperturas.complice && gruposConSenal >= 2) return 'alto';
+    if (estado.aperturas >= CFG.madurez.umbralAperturas.conocido || gruposConSenal >= 1) return 'medio';
+    return 'bajo';
+  }
+
+  /**
    * Resumen plano y legible del estado, para logging/debug. No es
    * parte del contrato de negocio — es una utilidad de observación.
    * @param {object} estado
@@ -731,18 +900,22 @@
   function resumenEstado(estado) {
     if (!estado) return null;
     var reg = region(estado);
+    var ahora = Date.now();
     return {
       ciudad: estado.ciudad,
       rol: rolPorAperturas(estado.aperturas),
+      reposoForzado: reposoForzadoActivo(estado),
       aperturas: estado.aperturas,
       autonomia: Number(estado.autonomia.toFixed(3)),
       friccion: Number(estado.friccion.toFixed(3)),
+      confianza: nivelConfianza(estado),
       region: reg.nombre,
       variante: reg.variante,
       curaduriaActiva: !!estado.sesion.curaduriaActiva,
       curaduriaSugerida: !!estado.sesion.curaduriaSugerida,
       guardadosRecientes: (estado.guardadosRecientes || []).length,
-      rubrosConRechazosVigentes: Object.keys(estado.rechazos || {}).length,
+      rubrosConRechazosVigentes: gruposAEvitar(estado, ahora).length,
+      rubrosConAfinidadVigente: gruposAfines(estado, ahora).length,
       lugaresEnRotacion: Object.keys(estado.exposicion || {}).length
     };
   }
@@ -750,11 +923,20 @@
   /* ─────────────────────────────────────────────────────────────
      API pública
 
-     Respecto de la versión anterior: se retiran `gruposAEvitar` y
-     `reposoForzadoActivo` (código muerto confirmado, ver auditoría).
-     Se agregan `borrarEstado` y `resumenEstado` (funcionalidad nueva,
-     ver auditoría). El resto de la superficie —la que efectivamente
-     consume app.js hoy— no cambia.
+     Todo lo que ya consumía app.js en producción (leerEstado,
+     registrarApertura, guardarEstado, aplicarAccion, region,
+     rolPorAperturas, gruposAEvitar) sigue exactamente igual — misma
+     firma, mismo comportamiento por defecto. Esta pasada solo AGREGA
+     superficie nueva, nunca retira ni cambia una firma existente:
+
+       gruposAfines         → señal positiva, espejo de gruposAEvitar
+       reposoForzadoActivo  → reinstalada (ver sección 1 del encabezado;
+                               tests/motor-test.js ya la esperaba)
+       nivelConfianza       → nueva, derivada, sin efecto en nada más
+
+     `SCHEMA_VERSION`, `borrarEstado`, `resumenEstado` y
+     `obtenerUsuarioId` se conservan sin consumidor hoy (ver sección 1
+     del encabezado — no son código muerto, son infraestructura lista).
      ───────────────────────────────────────────────────────────── */
   global.URU_PLANO = {
     SCHEMA_VERSION: SCHEMA_VERSION,
@@ -763,7 +945,10 @@
     aplicarAccion: aplicarAccion,
     registrarApertura: registrarApertura,
     rolPorAperturas: rolPorAperturas,
+    reposoForzadoActivo: reposoForzadoActivo,
     gruposAEvitar: gruposAEvitar,
+    gruposAfines: gruposAfines,
+    nivelConfianza: nivelConfianza,
     leerEstado: leerEstado,
     guardarEstado: guardarEstado,
     borrarEstado: borrarEstado,
