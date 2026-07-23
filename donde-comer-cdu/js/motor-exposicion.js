@@ -503,14 +503,62 @@
      sección 4b). Ver invariantes en el encabezado.
      ───────────────────────────────────────────────────────────── */
 
+  // Minúsculas + sin acentos. Antes solo se hacía toLowerCase(): una
+  // tilde de más o de menos en "café"/"cafe" rompía el match en
+  // silencio, justo el tipo de fricción que esta pasada busca sacar.
+  function normalizarTexto(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  // Rango de relevancia, de más a menos específico (0 = mejor). null
+  // = no matchea nada. El orden de los checks —nombre exacto > nombre
+  // empieza con > nombre contiene > categoría > dirección— es el
+  // mismo criterio con el que una persona escanearía los resultados:
+  // lo más parecido a lo que escribiste, primero.
+  function rangoDeCoincidencia(nombre, categoria, direccion, q) {
+    if (nombre === q) return 0;
+    if (nombre.indexOf(q) === 0) return 1;
+    if (nombre.indexOf(q) !== -1) return 2;
+    if (categoria === q) return 3;
+    if (categoria.indexOf(q) !== -1) return 4;
+    if (direccion.indexOf(q) !== -1) return 5;
+    return null;
+  }
+
+  /**
+   * SIGUE SIN RECORTAR NADA (Blueprint v2, sección 4b): esta función
+   * devuelve el 100% de los lugares que matchean, sin presupuesto ni
+   * exposición — eso no cambia. Lo que se agrega en esta pasada es
+   * orden: antes el resultado salía en el orden crudo del registro
+   * (esencialmente arbitrario desde la perspectiva de quien buscó);
+   * ahora sale ordenado por qué tan específico es el match. Ordenar
+   * quién aparece primero no es lo mismo que decidir quién no aparece
+   * — el conteo total nunca cambia (ver tests §19 y §62).
+   */
   function resultadosPorAccionExplicita(registro, consulta) {
     if (!consulta) return registro.slice();
-    var q = consulta.trim().toLowerCase();
+    var q = normalizarTexto(consulta.trim());
     if (!q) return registro.slice();
-    return registro.filter(function (lugar) {
-      var texto = (lugar.nombre + ' ' + (lugar.categoria || '') + ' ' + (lugar.direccion || '')).toLowerCase();
-      return texto.indexOf(q) !== -1;
+
+    var candidatos = [];
+    for (var i = 0; i < registro.length; i++) {
+      var lugar = registro[i];
+      var nombre = normalizarTexto(lugar.nombre);
+      var categoria = normalizarTexto(lugar.categoria);
+      var direccion = normalizarTexto(lugar.direccion);
+      var rango = rangoDeCoincidencia(nombre, categoria, direccion, q);
+      if (rango === null) continue;
+      candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: i });
+    }
+
+    // Desempate explícito por índice original en vez de confiar en que
+    // Array.prototype.sort sea estable: mantiene el orden del catálogo
+    // entre lugares con el mismo nivel de relevancia.
+    candidatos.sort(function (a, b) {
+      return (a.rango - b.rango) || (a.indiceOriginal - b.indiceOriginal);
     });
+
+    return candidatos.map(function (c) { return c.lugar; });
   }
 
   function coleccionCurada(registro, idsGuardados) {
