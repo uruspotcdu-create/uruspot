@@ -49,7 +49,7 @@
   "name": "Los Mejores Restaurantes en Concepción del Uruguay 2026",
   "description": "Ranking de los 20 mejores restaurantes de Concepción del Uruguay, Entre Ríos, Argentina. Actualizado Mayo 2026.",
   "url": "https://uruspotcdu-create.github.io/uruspot/los-mejores-restaurantes-cdu/",
-  "numberOfItems": 20,
+  "numberOfItems": 81,
   "author": {
     "@type": "Organization",
     "name": "URU SPOT",
@@ -1216,6 +1216,60 @@ a:focus-visible {
     padding-bottom: max(56px, calc(56px + env(safe-area-inset-bottom)));
   }
 }
+
+/* ============================================================
+   FILTROS POR CATEGORÍA (nuevo)
+   ============================================================ */
+.filters-bar {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin: -20px 0 40px;
+}
+.filter-chip {
+  font-family: var(--f-ui); font-size: 10px; font-weight: 700;
+  letter-spacing: 1.6px; text-transform: uppercase;
+  color: rgba(26,25,22,.52);
+  background: #fff;
+  border: 1px solid rgba(26,25,22,.14);
+  border-radius: 999px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background .3s ease, color .3s ease, border-color .3s ease, transform .3s var(--ease);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.filter-chip:hover { border-color: rgba(155,47,26,.4); color: var(--rust2); transform: translateY(-2px); }
+.filter-chip.is-active {
+  background: var(--rust2); border-color: var(--rust2); color: #fff;
+  box-shadow: 0 6px 20px rgba(155,47,26,.30);
+}
+.filter-count {
+  font-size: 9px; opacity: .7;
+}
+
+/* ============================================================
+   CARGAR MÁS (nuevo)
+   ============================================================ */
+.litem.is-hidden-extra { display: none; }
+.litem.is-filtered-out { display: none; }
+.load-more-wrap {
+  display: flex; justify-content: center;
+  padding: 44px 0 8px;
+}
+.btn-load-more {
+  font-family: var(--f-ui); font-size: 11px; font-weight: 800;
+  letter-spacing: 2.2px; text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 1.5px solid rgba(26,25,22,.22);
+  border-radius: 2px;
+  padding: 16px 40px;
+  cursor: pointer;
+  transition: background .35s ease, color .35s ease, border-color .35s ease, transform .35s var(--ease);
+}
+.btn-load-more:hover {
+  background: var(--rust2); color: #fff; border-color: var(--rust2);
+  transform: translateY(-3px);
+}
+.btn-load-more.is-hidden { display: none; }
 </style>
 </head>
 <body>
@@ -1294,7 +1348,7 @@ a:focus-visible {
     <!-- stats -->
     <div class="stats-strip" role="list" aria-label="Estadísticas de la guía">
       <div class="stat" role="listitem">
-        <div class="stat-num">20<sup>+</sup></div>
+        <div class="stat-num">81<sup>+</sup></div>
         <div class="stat-label">Restaurantes</div>
       </div>
       <div class="stat" role="listitem">
@@ -1363,12 +1417,24 @@ a:focus-visible {
         <span class="section-eyebrow">Selección URU SPOT</span>
         <h2 class="section-title" id="title-ranking">🍽️ Ranking de restaurantes</h2>
       </div>
-      <span class="section-count">20 restaurantes</span>
+      <span class="section-count" id="section-count">81 restaurantes</span>
       <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
     </div>
 
+    <div class="filters-bar reveal" role="tablist" aria-label="Filtrar por tipo de cocina">
+      <button class="filter-chip is-active" type="button" data-filter="all" role="tab" aria-selected="true">Todos <span class="filter-count">81</span></button>
+      <button class="filter-chip" type="button" data-filter="restaurante" role="tab" aria-selected="false">Restaurantes</button>
+      <button class="filter-chip" type="button" data-filter="parrilla" role="tab" aria-selected="false">Parrillas</button>
+      <button class="filter-chip" type="button" data-filter="pizzeria" role="tab" aria-selected="false">Pizzerías</button>
+      <button class="filter-chip" type="button" data-filter="resto-bar" role="tab" aria-selected="false">Resto Bar</button>
+      <button class="filter-chip" type="button" data-filter="buffet" role="tab" aria-selected="false">Buffets</button>
+      <button class="filter-chip" type="button" data-filter="asiatica" role="tab" aria-selected="false">Asiática</button>
+      <button class="filter-chip" type="button" data-filter="italiana" role="tab" aria-selected="false">Italiana</button>
+      <button class="filter-chip" type="button" data-filter="cafe" role="tab" aria-selected="false">Café Restó</button>
+    </div>
+
     <!-- #1 Featured -->
-    <a class="feat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-arca-resto-bar/" aria-label="El Arca — #1 URU SPOT">
+    <a data-cat="restaurante" class="feat-card reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-arca-resto-bar/" aria-label="El Arca — #1 URU SPOT">
       <div class="feat-shine" aria-hidden="true"></div>
       <div class="feat-inner">
         <div class="feat-left">
@@ -1408,7 +1474,7 @@ a:focus-visible {
     <!-- #2–20 List -->
     <div class="list-items" role="list">
 
-      <a class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" role="listitem" aria-label="Bella Vista — #2">
+      <a data-cat="restaurante" class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bella-vista/" role="listitem" aria-label="Bella Vista — #2">
         <div class="litem-rank"><span class="litem-rank-num">2</span></div>
         <span class="litem-icon" aria-hidden="true">🌅</span>
         <div class="litem-body">
@@ -1423,7 +1489,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-top-badge">Top</span><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" role="listitem" aria-label="Papa Luigi — #3" style="transition-delay:.05s">
+      <a data-cat="italiana" class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/papa-luigi/" role="listitem" aria-label="Papa Luigi — #3" style="transition-delay:.05s">
         <div class="litem-rank"><span class="litem-rank-num">3</span></div>
         <span class="litem-icon" aria-hidden="true">🍕</span>
         <div class="litem-body">
@@ -1438,7 +1504,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-top-badge">Top</span><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-jos%C3%A9/" role="listitem" aria-label="Justo José — #4" style="transition-delay:.08s">
+      <a data-cat="parrilla" class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/justo-jos%C3%A9/" role="listitem" aria-label="Justo José — #4" style="transition-delay:.08s">
         <div class="litem-rank"><span class="litem-rank-num">4</span></div>
         <span class="litem-icon" aria-hidden="true">⚖️</span>
         <div class="litem-body">
@@ -1452,7 +1518,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-top-badge">Top</span><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" role="listitem" aria-label="Bonhomia — #5" style="transition-delay:.11s">
+      <a data-cat="restaurante" class="litem is-top reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bonhomia/" role="listitem" aria-label="Bonhomia — #5" style="transition-delay:.11s">
         <div class="litem-rank"><span class="litem-rank-num">5</span></div>
         <span class="litem-icon" aria-hidden="true">✨</span>
         <div class="litem-body">
@@ -1466,7 +1532,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-top-badge">Top</span><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/faro-3260/" role="listitem" aria-label="Faro 3260 — #6" style="transition-delay:.14s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/faro-3260/" role="listitem" aria-label="Faro 3260 — #6" style="transition-delay:.14s">
         <div class="litem-rank"><span class="litem-rank-num">6</span></div>
         <span class="litem-icon" aria-hidden="true">🌊</span>
         <div class="litem-body">
@@ -1480,7 +1546,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-gruta/" role="listitem" aria-label="La Gruta — #7" style="transition-delay:.17s">
+      <a data-cat="parrilla" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-gruta/" role="listitem" aria-label="La Gruta — #7" style="transition-delay:.17s">
         <div class="litem-rank"><span class="litem-rank-num">7</span></div>
         <span class="litem-icon" aria-hidden="true">🔥</span>
         <div class="litem-body">
@@ -1494,7 +1560,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" role="listitem" aria-label="Panza Verde — #8" style="transition-delay:.20s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/panza-verde/" role="listitem" aria-label="Panza Verde — #8" style="transition-delay:.20s">
         <div class="litem-rank"><span class="litem-rank-num">8</span></div>
         <span class="litem-icon" aria-hidden="true">🌿</span>
         <div class="litem-body">
@@ -1508,7 +1574,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" role="listitem" aria-label="Sanduba — #9" style="transition-delay:.23s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sanduba/" role="listitem" aria-label="Sanduba — #9" style="transition-delay:.23s">
         <div class="litem-rank"><span class="litem-rank-num">9</span></div>
         <span class="litem-icon" aria-hidden="true">🍔</span>
         <div class="litem-body">
@@ -1522,7 +1588,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pimienta-negra/" role="listitem" aria-label="Pimienta Negra — #10" style="transition-delay:.26s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pimienta-negra/" role="listitem" aria-label="Pimienta Negra — #10" style="transition-delay:.26s">
         <div class="litem-rank"><span class="litem-rank-num">10</span></div>
         <span class="litem-icon" aria-hidden="true">🌶️</span>
         <div class="litem-body">
@@ -1536,7 +1602,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" role="listitem" aria-label="Parada 33 — #11" style="transition-delay:.29s">
+      <a data-cat="resto-bar" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parada-33/" role="listitem" aria-label="Parada 33 — #11" style="transition-delay:.29s">
         <div class="litem-rank"><span class="litem-rank-num">11</span></div>
         <span class="litem-icon" aria-hidden="true">🍺</span>
         <div class="litem-body">
@@ -1550,7 +1616,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" role="listitem" aria-label="Mamma Mía — #12" style="transition-delay:.32s">
+      <a data-cat="italiana" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/mamma-mia/" role="listitem" aria-label="Mamma Mía — #12" style="transition-delay:.32s">
         <div class="litem-rank"><span class="litem-rank-num">12</span></div>
         <span class="litem-icon" aria-hidden="true">🍝</span>
         <div class="litem-body">
@@ -1564,7 +1630,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" role="listitem" aria-label="La Ris — #13" style="transition-delay:.35s">
+      <a data-cat="cafe" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-ris/" role="listitem" aria-label="La Ris — #13" style="transition-delay:.35s">
         <div class="litem-rank"><span class="litem-rank-num">13</span></div>
         <span class="litem-icon" aria-hidden="true">🎨</span>
         <div class="litem-body">
@@ -1578,7 +1644,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/garifo/" role="listitem" aria-label="Garifo — #14" style="transition-delay:.38s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/garifo/" role="listitem" aria-label="Garifo — #14" style="transition-delay:.38s">
         <div class="litem-rank"><span class="litem-rank-num">14</span></div>
         <span class="litem-icon" aria-hidden="true">🍷</span>
         <div class="litem-body">
@@ -1592,7 +1658,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/dolores-costa/" role="listitem" aria-label="Dolores Costa — #15" style="transition-delay:.41s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/dolores-costa/" role="listitem" aria-label="Dolores Costa — #15" style="transition-delay:.41s">
         <div class="litem-rank"><span class="litem-rank-num">15</span></div>
         <span class="litem-icon" aria-hidden="true">🌴</span>
         <div class="litem-body">
@@ -1606,7 +1672,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-delfina/" role="listitem" aria-label="La Delfina — #16" style="transition-delay:.44s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-delfina/" role="listitem" aria-label="La Delfina — #16" style="transition-delay:.44s">
         <div class="litem-rank"><span class="litem-rank-num">16</span></div>
         <span class="litem-icon" aria-hidden="true">🐬</span>
         <div class="litem-body">
@@ -1620,7 +1686,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-conventillo-de-baco/" role="listitem" aria-label="Baco — #17" style="transition-delay:.47s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-conventillo-de-baco/" role="listitem" aria-label="Baco — #17" style="transition-delay:.47s">
         <div class="litem-rank"><span class="litem-rank-num">17</span></div>
         <span class="litem-icon" aria-hidden="true">🍇</span>
         <div class="litem-body">
@@ -1634,7 +1700,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" role="listitem" aria-label="El Calderón — #18" style="transition-delay:.50s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-calderon/" role="listitem" aria-label="El Calderón — #18" style="transition-delay:.50s">
         <div class="litem-rank"><span class="litem-rank-num">18</span></div>
         <span class="litem-icon" aria-hidden="true">🍲</span>
         <div class="litem-body">
@@ -1648,7 +1714,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-danubio-azul/" role="listitem" aria-label="Danubio Azul — #19" style="transition-delay:.53s">
+      <a data-cat="restaurante" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-danubio-azul/" role="listitem" aria-label="Danubio Azul — #19" style="transition-delay:.53s">
         <div class="litem-rank"><span class="litem-rank-num">19</span></div>
         <span class="litem-icon" aria-hidden="true">🇩🇪</span>
         <div class="litem-body">
@@ -1662,7 +1728,7 @@ a:focus-visible {
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
       </a>
 
-      <a class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" role="listitem" aria-label="La Segunda — #20" style="transition-delay:.56s">
+      <a data-cat="parrilla" class="litem reveal" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-segunda/" role="listitem" aria-label="La Segunda — #20" style="transition-delay:.56s">
         <div class="litem-rank"><span class="litem-rank-num">20</span></div>
         <span class="litem-icon" aria-hidden="true">🥩</span>
         <div class="litem-body">
@@ -1671,6 +1737,845 @@ a:focus-visible {
           <div class="litem-pills">
             <span class="pill pill-default">Parrilla</span>
             <span class="pill pill-price">$</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="restaurante" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/bajo-llave-929/" role="listitem" aria-label="Bajo Llave 929 — #21">
+        <div class="litem-rank"><span class="litem-rank-num">21</span></div>
+        <span class="litem-icon" aria-hidden="true">🔐</span>
+        <div class="litem-body">
+          <span class="litem-name">Bajo Llave 929</span>
+          <span class="litem-desc">Fine dining discreto, casi secreto. Carta corta, ejecución impecable, sin dar ninguna dirección de más.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Gourmet</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-fogon-de-gabriel/" role="listitem" aria-label="El Fogón de Gabriel — #22">
+        <div class="litem-rank"><span class="litem-rank-num">22</span></div>
+        <span class="litem-icon" aria-hidden="true">🔥</span>
+        <div class="litem-body">
+          <span class="litem-name">El Fogón de Gabriel</span>
+          <span class="litem-desc">Parrilla de barrio con fuego de verdad. Sin cartel llamativo, pero el boca en boca no falla.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Parrilla</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="buffet" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/buffet-sarmiento/" role="listitem" aria-label="Buffet Sarmiento — #23">
+        <div class="litem-rank"><span class="litem-rank-num">23</span></div>
+        <span class="litem-icon" aria-hidden="true">🍛</span>
+        <div class="litem-body">
+          <span class="litem-name">Buffet Sarmiento</span>
+          <span class="litem-desc">Buffet clásico de club social. Comida casera, abundante, al paso, para el que no quiere elegir.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Buffet</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="buffet" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/buffet-de-la-utn/" role="listitem" aria-label="Buffet de la UTN — #24">
+        <div class="litem-rank"><span class="litem-rank-num">24</span></div>
+        <span class="litem-icon" aria-hidden="true">🎓</span>
+        <div class="litem-body">
+          <span class="litem-name">Buffet de la UTN</span>
+          <span class="litem-desc">El buffet de siempre para estudiantes y docentes. Rápido, económico, sin vueltas.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Buffet universitario</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizza-pronto-vip/" role="listitem" aria-label="Pizza Pronto VIP — #25">
+        <div class="litem-rank"><span class="litem-rank-num">25</span></div>
+        <span class="litem-icon" aria-hidden="true">⭐</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizza Pronto VIP</span>
+          <span class="litem-desc">Estilo napolitano cuidado, masa fermentada larga. De las mejores relaciones calidad-espera de la ciudad.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Pizzería italiana</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-de-otro-planeta/" role="listitem" aria-label="Pizzería De Otro Planeta — #26">
+        <div class="litem-rank"><span class="litem-rank-num">26</span></div>
+        <span class="litem-icon" aria-hidden="true">🛸</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzería De Otro Planeta</span>
+          <span class="litem-desc">Nombre raro, pizza seria. Combinaciones que no vas a encontrar en el resto de las cartas.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-moro-pizza/" role="listitem" aria-label="El Moro Pizza — #27">
+        <div class="litem-rank"><span class="litem-rank-num">27</span></div>
+        <span class="litem-icon" aria-hidden="true">🏛️</span>
+        <div class="litem-body">
+          <span class="litem-name">El Moro Pizza</span>
+          <span class="litem-desc">Pizza a la piedra con onda de barrio antiguo. Consistente, sin sorpresas malas.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parra-pizzeria/" role="listitem" aria-label="Parra Pizzeria — #28">
+        <div class="litem-rank"><span class="litem-rank-num">28</span></div>
+        <span class="litem-icon" aria-hidden="true">🍇</span>
+        <div class="litem-body">
+          <span class="litem-name">Parra Pizzeria</span>
+          <span class="litem-desc">Chica, familiar, honesta. La pizza que pedís cuando no querés arriesgar nada.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/victor-s-cocina/" role="listitem" aria-label="Víctor S. Cocina — #29">
+        <div class="litem-rank"><span class="litem-rank-num">29</span></div>
+        <span class="litem-icon" aria-hidden="true">👨‍🍳</span>
+        <div class="litem-body">
+          <span class="litem-name">Víctor S. Cocina</span>
+          <span class="litem-desc">Un cocinero, pocas mesas, mucho oficio. Pizza pensada más como plato que como pizza de apuro.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 5.0</span>
+            <span class="pill pill-default">Pizzería de autor</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="restaurante" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-terraza-de-nuestros-viejos/" role="listitem" aria-label="La Terraza de Nuestros Viejos — #30">
+        <div class="litem-rank"><span class="litem-rank-num">30</span></div>
+        <span class="litem-icon" aria-hidden="true">🌇</span>
+        <div class="litem-body">
+          <span class="litem-name">La Terraza de Nuestros Viejos</span>
+          <span class="litem-desc">Comida de siempre en un patio con historia. El lugar que recomienda la gente grande de la ciudad.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.9</span>
+            <span class="pill pill-default">Restaurante</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/ricura-camp/" role="listitem" aria-label="Ricura Camp — #31">
+        <div class="litem-rank"><span class="litem-rank-num">31</span></div>
+        <span class="litem-icon" aria-hidden="true">🏕️</span>
+        <div class="litem-body">
+          <span class="litem-name">Ricura Camp</span>
+          <span class="litem-desc">Parrilla a cielo abierto para grupos grandes. Ideal para cumpleaños de campo y after de asado.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.9</span>
+            <span class="pill pill-default">Parrilla / Eventos</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/barro/" role="listitem" aria-label="Barro — #32">
+        <div class="litem-rank"><span class="litem-rank-num">32</span></div>
+        <span class="litem-icon" aria-hidden="true">🔥</span>
+        <div class="litem-body">
+          <span class="litem-name">Barro</span>
+          <span class="litem-desc">Horno de barro real, leña de verdad. La corteza es la protagonista, no un detalle más.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.9</span>
+            <span class="pill pill-default">Pizzería a la leña</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/don-pato-parrilla-y-rotiseria/" role="listitem" aria-label="Don Pato Parrilla y Rotisería — #33">
+        <div class="litem-rank"><span class="litem-rank-num">33</span></div>
+        <span class="litem-icon" aria-hidden="true">🦆</span>
+        <div class="litem-body">
+          <span class="litem-name">Don Pato Parrilla y Rotisería</span>
+          <span class="litem-desc">Parrilla con opción take-away. Para el asado sin mantel o para llevarte la cena resuelta.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.7</span>
+            <span class="pill pill-default">Parrilla / Rotisería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-pizzeria-estrada/" role="listitem" aria-label="La pizzería (Estrada) — #34">
+        <div class="litem-rank"><span class="litem-rank-num">34</span></div>
+        <span class="litem-icon" aria-hidden="true">🚉</span>
+        <div class="litem-body">
+          <span class="litem-name">La pizzería (Estrada)</span>
+          <span class="litem-desc">Pizzería de esquina, sin nombre de fantasía, pero con clientela fija hace años.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.7</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="restaurante" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-posta-de-colonia-perfeccion/" role="listitem" aria-label="La Posta de Colonia Perfección — #35">
+        <div class="litem-rank"><span class="litem-rank-num">35</span></div>
+        <span class="litem-icon" aria-hidden="true">🌾</span>
+        <div class="litem-body">
+          <span class="litem-name">La Posta de Colonia Perfección</span>
+          <span class="litem-desc">Cocina de campo a minutos de la ciudad. Ideal para una escapada corta con buena mesa.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.8</span>
+            <span class="pill pill-default">Restaurante rural</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizza-love/" role="listitem" aria-label="Pizza&amp;Love — #36">
+        <div class="litem-rank"><span class="litem-rank-num">36</span></div>
+        <span class="litem-icon" aria-hidden="true">💛</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizza&amp;Love</span>
+          <span class="litem-desc">Pizzería moderna con buena variedad de combinaciones dulces y saladas. Ambiente joven.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.6</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-carmela/" role="listitem" aria-label="La Carmela — #37">
+        <div class="litem-rank"><span class="litem-rank-num">37</span></div>
+        <span class="litem-icon" aria-hidden="true">🌹</span>
+        <div class="litem-body">
+          <span class="litem-name">La Carmela</span>
+          <span class="litem-desc">Parrilla de zona norte con opción de comida para llevar. Porciones generosas.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.6</span>
+            <span class="pill pill-default">Parrilla / Rotisería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-me-gusta-a-la-piedra/" role="listitem" aria-label="Pizzería Me Gusta: a la piedra — #38">
+        <div class="litem-rank"><span class="litem-rank-num">38</span></div>
+        <span class="litem-icon" aria-hidden="true">🪨</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzería Me Gusta: a la piedra</span>
+          <span class="litem-desc">La versión a la piedra de una marca ya instalada en la ciudad. Masa fina y crocante.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.6</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="restaurante" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/club-social/" role="listitem" aria-label="Club Social — #39">
+        <div class="litem-rank"><span class="litem-rank-num">39</span></div>
+        <span class="litem-icon" aria-hidden="true">🎩</span>
+        <div class="litem-body">
+          <span class="litem-name">Club Social</span>
+          <span class="litem-desc">Comedor de club social de toda la vida. Menú tradicional, precios accesibles, historia de barrio.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Restaurante de club</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-don-enrique/" role="listitem" aria-label="Parrilla Don Enrique — #40">
+        <div class="litem-rank"><span class="litem-rank-num">40</span></div>
+        <span class="litem-icon" aria-hidden="true">🔥</span>
+        <div class="litem-body">
+          <span class="litem-name">Parrilla Don Enrique</span>
+          <span class="litem-desc">Parrilla de las de fuego bajo y parrillero de confianza. Un clásico poco ruidoso.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Parrilla</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-el-pequeno-tom/" role="listitem" aria-label="Parrilla El Pequeño Tom — #41">
+        <div class="litem-rank"><span class="litem-rank-num">41</span></div>
+        <span class="litem-icon" aria-hidden="true">🐈</span>
+        <div class="litem-body">
+          <span class="litem-name">Parrilla El Pequeño Tom</span>
+          <span class="litem-desc">Parrilla mediana, atención cercana, buena relación precio-porción.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Parrilla</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-me-gusta/" role="listitem" aria-label="Pizzería Me Gusta — #42">
+        <div class="litem-rank"><span class="litem-rank-num">42</span></div>
+        <span class="litem-icon" aria-hidden="true">🍕</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzería Me Gusta</span>
+          <span class="litem-desc">Sucursal hermana de la de a la piedra, con horno tradicional. Buena opción de delivery.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-catalina/" role="listitem" aria-label="Pizzería Catalina — #43">
+        <div class="litem-rank"><span class="litem-rank-num">43</span></div>
+        <span class="litem-icon" aria-hidden="true">🌺</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzería Catalina</span>
+          <span class="litem-desc">Pizzería chica de barrio, buena muzza clásica, sin pretensiones.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-los-presidentes/" role="listitem" aria-label="Pizzería Los Presidentes — #44">
+        <div class="litem-rank"><span class="litem-rank-num">44</span></div>
+        <span class="litem-icon" aria-hidden="true">🎩</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzería Los Presidentes</span>
+          <span class="litem-desc">Nombre curioso, pizza prolija. Buena opción para pedir a domicilio en zona norte.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/nocaut-9/" role="listitem" aria-label="Nocaut 9 — #45">
+        <div class="litem-rank"><span class="litem-rank-num">45</span></div>
+        <span class="litem-icon" aria-hidden="true">🥊</span>
+        <div class="litem-body">
+          <span class="litem-name">Nocaut 9</span>
+          <span class="litem-desc">Combo de pizzería y fiambrería en un mismo local. Práctico para resolver la cena rápido.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Pizzería / Fiambrería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="buffet" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/al-spiedo/" role="listitem" aria-label="Al Spiedo — #46">
+        <div class="litem-rank"><span class="litem-rank-num">46</span></div>
+        <span class="litem-icon" aria-hidden="true">🍗</span>
+        <div class="litem-body">
+          <span class="litem-name">Al Spiedo</span>
+          <span class="litem-desc">Pollo al spiedo y buffet caliente. Ideal para llevar la comida resuelta a casa.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Buffet / Rotisería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="cafe" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/casa-coco-cafe-resto/" role="listitem" aria-label="Casa Coco café restó — #47">
+        <div class="litem-rank"><span class="litem-rank-num">47</span></div>
+        <span class="litem-icon" aria-hidden="true">🥥</span>
+        <div class="litem-body">
+          <span class="litem-name">Casa Coco café restó</span>
+          <span class="litem-desc">Café de día, restó de noche. Ambiente cálido para almorzar tranquilo o cenar liviano.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.5</span>
+            <span class="pill pill-default">Café restó</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="resto-bar" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/restaurante-birra-postre/" role="listitem" aria-label="Restaurante Birra &amp; Postre — #48">
+        <div class="litem-rank"><span class="litem-rank-num">48</span></div>
+        <span class="litem-icon" aria-hidden="true">🍰</span>
+        <div class="litem-body">
+          <span class="litem-name">Restaurante Birra &amp; Postre</span>
+          <span class="litem-desc">Buena cerveza y buena repostería en la misma carta. Combinación poco común y bien resuelta.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.4</span>
+            <span class="pill pill-default">Restaurante / Bar</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-el-monumento/" role="listitem" aria-label="Parrilla El Monumento — #49">
+        <div class="litem-rank"><span class="litem-rank-num">49</span></div>
+        <span class="litem-icon" aria-hidden="true">🗿</span>
+        <div class="litem-body">
+          <span class="litem-name">Parrilla El Monumento</span>
+          <span class="litem-desc">Una de las parrillas más concurridas de la ciudad. Grande, movida, buen punto de la carne.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.4</span>
+            <span class="pill pill-default">Parrilla</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/itape-pizzeria/" role="listitem" aria-label="Itapé Pizzería — #50">
+        <div class="litem-rank"><span class="litem-rank-num">50</span></div>
+        <span class="litem-icon" aria-hidden="true">🌊</span>
+        <div class="litem-body">
+          <span class="litem-name">Itapé Pizzería</span>
+          <span class="litem-desc">Pizzería de zona costanera. Buena opción después de una caminata por la ribera.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.4</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/tio-muza/" role="listitem" aria-label="Tio Muza — #51">
+        <div class="litem-rank"><span class="litem-rank-num">51</span></div>
+        <span class="litem-icon" aria-hidden="true">🎵</span>
+        <div class="litem-body">
+          <span class="litem-name">Tio Muza</span>
+          <span class="litem-desc">Estilo napolitano con nombre de barrio. Masa alta, buen borde, ambiente relajado.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.4</span>
+            <span class="pill pill-default">Pizzería napolitana</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="restaurante" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-casa-del-chef/" role="listitem" aria-label="La Casa del Chef — #52">
+        <div class="litem-rank"><span class="litem-rank-num">52</span></div>
+        <span class="litem-icon" aria-hidden="true">👨‍🍳</span>
+        <div class="litem-body">
+          <span class="litem-name">La Casa del Chef</span>
+          <span class="litem-desc">Cocina de autor a escala pequeña. El cocinero elige la carta según lo que consigue fresco.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.3</span>
+            <span class="pill pill-default">Restaurante</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="buffet" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parador-bv-balbin/" role="listitem" aria-label="Parador (Bv. Balbín) — #53">
+        <div class="litem-rank"><span class="litem-rank-num">53</span></div>
+        <span class="litem-icon" aria-hidden="true">🛣️</span>
+        <div class="litem-body">
+          <span class="litem-name">Parador (Bv. Balbín)</span>
+          <span class="litem-desc">Parador de ruta con buffet y menú del día. Para el que va de paso y quiere comer bien rápido.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.3</span>
+            <span class="pill pill-default">Buffet / Restaurante</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/locos-de-asar/" role="listitem" aria-label="Locos de asar — #54">
+        <div class="litem-rank"><span class="litem-rank-num">54</span></div>
+        <span class="litem-icon" aria-hidden="true">😜</span>
+        <div class="litem-body">
+          <span class="litem-name">Locos de asar</span>
+          <span class="litem-desc">Parrilla con nombre divertido y buen humor en la atención. Cumple lo que promete.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.3</span>
+            <span class="pill pill-default">Parrilla</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-don-quijote/" role="listitem" aria-label="pizzeria don quijote — #55">
+        <div class="litem-rank"><span class="litem-rank-num">55</span></div>
+        <span class="litem-icon" aria-hidden="true">🗡️</span>
+        <div class="litem-body">
+          <span class="litem-name">pizzeria don quijote</span>
+          <span class="litem-desc">Una de las pizzerías más nombradas de la ciudad. Clásica, con mucha trayectoria.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.3</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-pizza-s/" role="listitem" aria-label="Pizzería Pizza&#x27;s — #56">
+        <div class="litem-rank"><span class="litem-rank-num">56</span></div>
+        <span class="litem-icon" aria-hidden="true">🍕</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzería Pizza&#x27;s</span>
+          <span class="litem-desc">Pizzería tradicional con delivery aceitado. Segura para pedir un viernes cualquiera.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.3</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="resto-bar" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/ferrugem/" role="listitem" aria-label="Ferrugem — #57">
+        <div class="litem-rank"><span class="litem-rank-num">57</span></div>
+        <span class="litem-icon" aria-hidden="true">🎸</span>
+        <div class="litem-body">
+          <span class="litem-name">Ferrugem</span>
+          <span class="litem-desc">Gastropub con bandas en vivo. Comida de bar bien hecha en un ambiente con onda musical.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.3</span>
+            <span class="pill pill-default">Gastropub</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="asiatica" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/agarrame-como-puedas/" role="listitem" aria-label="Agarrame como puedas — #58">
+        <div class="litem-rank"><span class="litem-rank-num">58</span></div>
+        <span class="litem-icon" aria-hidden="true">🎬</span>
+        <div class="litem-body">
+          <span class="litem-name">Agarrame como puedas</span>
+          <span class="litem-desc">Sushi y comida asiática con nombre de comedia. Buena opción para variar del asado.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.3</span>
+            <span class="pill pill-default">Sushi / Asiático</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/san-remo/" role="listitem" aria-label="San Remo — #59">
+        <div class="litem-rank"><span class="litem-rank-num">59</span></div>
+        <span class="litem-icon" aria-hidden="true">🇮🇹</span>
+        <div class="litem-body">
+          <span class="litem-name">San Remo</span>
+          <span class="litem-desc">Restaurante-pizzería de mucha trayectoria en el centro. Carta amplia, para toda la familia.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.2</span>
+            <span class="pill pill-default">Restaurante / Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-don-quiquiche/" role="listitem" aria-label="Parrilla Don Quiquiche — #60">
+        <div class="litem-rank"><span class="litem-rank-num">60</span></div>
+        <span class="litem-icon" aria-hidden="true">🎪</span>
+        <div class="litem-body">
+          <span class="litem-name">Parrilla Don Quiquiche</span>
+          <span class="litem-desc">Parrilla con espacio para peñas y eventos. Comida abundante, ambiente para grupos grandes.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.1</span>
+            <span class="pill pill-default">Parrilla / Peña</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="asiatica" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/wok-resto-bar/" role="listitem" aria-label="Wok Resto - Bar — #61">
+        <div class="litem-rank"><span class="litem-rank-num">61</span></div>
+        <span class="litem-icon" aria-hidden="true">🥢</span>
+        <div class="litem-body">
+          <span class="litem-name">Wok Resto - Bar</span>
+          <span class="litem-desc">Wok y comida china casera, sin grandes vueltas. Opción rápida para un antojo distinto.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 4.0</span>
+            <span class="pill pill-default">Comida China / Wok</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizza-libre-garden/" role="listitem" aria-label="Pizza Libre Garden — #62">
+        <div class="litem-rank"><span class="litem-rank-num">62</span></div>
+        <span class="litem-icon" aria-hidden="true">🌳</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizza Libre Garden</span>
+          <span class="litem-desc">Pizzería con patio al aire libre. Buena opción para ir con chicos o en grupo grande.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 3.9</span>
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="resto-bar" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/huston-gastrobar/" role="listitem" aria-label="Huston Gastrobar — #63">
+        <div class="litem-rank"><span class="litem-rank-num">63</span></div>
+        <span class="litem-icon" aria-hidden="true">🚀</span>
+        <div class="litem-body">
+          <span class="litem-name">Huston Gastrobar</span>
+          <span class="litem-desc">Gastrobar con propuesta de autor accesible. Ambiente moderno, buena carta de tragos.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 3.9</span>
+            <span class="pill pill-default">Gastrobar</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="resto-bar" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/niso-restobar/" role="listitem" aria-label="NISO RESTOBAR — #64">
+        <div class="litem-rank"><span class="litem-rank-num">64</span></div>
+        <span class="litem-icon" aria-hidden="true">🍸</span>
+        <div class="litem-body">
+          <span class="litem-name">NISO RESTOBAR</span>
+          <span class="litem-desc">Resto bar bien ubicado en el centro. Ideal para una picada con amigos.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 3.5</span>
+            <span class="pill pill-default">Resto Bar</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="cafe" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/atelier-london/" role="listitem" aria-label="Atelier London — #65">
+        <div class="litem-rank"><span class="litem-rank-num">65</span></div>
+        <span class="litem-icon" aria-hidden="true">🎨</span>
+        <div class="litem-body">
+          <span class="litem-name">Atelier London</span>
+          <span class="litem-desc">Café-restó con impronta artística. Buena opción para desayunos largos y meriendas.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 3.3</span>
+            <span class="pill pill-default">Café Restó</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/el-rancho-oriental/" role="listitem" aria-label="El rancho oriental — #66">
+        <div class="litem-rank"><span class="litem-rank-num">66</span></div>
+        <span class="litem-icon" aria-hidden="true">🛖</span>
+        <div class="litem-body">
+          <span class="litem-name">El rancho oriental</span>
+          <span class="litem-desc">Propuesta de comida casera y parrilla en formato sencillo, sin lujos.</span>
+          <div class="litem-pills">
+            <span class="pill pill-rating">★ 2.7</span>
+            <span class="pill pill-default">Restaurante / Parrilla</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="restaurante" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/portofino/" role="listitem" aria-label="Portofino — #67">
+        <div class="litem-rank"><span class="litem-rank-num">67</span></div>
+        <span class="litem-icon" aria-hidden="true">⛵</span>
+        <div class="litem-body">
+          <span class="litem-name">Portofino</span>
+          <span class="litem-desc">Nombre con aire costero para un restaurante clásico del centro.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Restaurante</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="restaurante" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/la-rusita/" role="listitem" aria-label="La Rusita — #68">
+        <div class="litem-rank"><span class="litem-rank-num">68</span></div>
+        <span class="litem-icon" aria-hidden="true">🪆</span>
+        <div class="litem-body">
+          <span class="litem-name">La Rusita</span>
+          <span class="litem-desc">Casa de comidas de barrio, con nombre propio y clientela fiel.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Restaurante</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="asiatica" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/casa-nostra/" role="listitem" aria-label="Casa Nostra — #69">
+        <div class="litem-rank"><span class="litem-rank-num">69</span></div>
+        <span class="litem-icon" aria-hidden="true">🍣</span>
+        <div class="litem-body">
+          <span class="litem-name">Casa Nostra</span>
+          <span class="litem-desc">Tres propuestas en un mismo local: sushi, pizza y cocina de restaurante.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Restaurante / Sushi / Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/guay-ari/" role="listitem" aria-label="Guay - Ari — #70">
+        <div class="litem-rank"><span class="litem-rank-num">70</span></div>
+        <span class="litem-icon" aria-hidden="true">🍕</span>
+        <div class="litem-body">
+          <span class="litem-name">Guay - Ari</span>
+          <span class="litem-desc">Pizzería-restaurante de formato mixto, ideal para pedidos grupales.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Pizzería / Restaurante</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-luisito/" role="listitem" aria-label="Parrilla Luisito — #71">
+        <div class="litem-rank"><span class="litem-rank-num">71</span></div>
+        <span class="litem-icon" aria-hidden="true">🥩</span>
+        <div class="litem-body">
+          <span class="litem-name">Parrilla Luisito</span>
+          <span class="litem-desc">Parrilla chica y directa, sin vueltas: carne, brasa y punto.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Parrilla</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="parrilla" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/parrilla-la-master/" role="listitem" aria-label="Parrilla La Master — #72">
+        <div class="litem-rank"><span class="litem-rank-num">72</span></div>
+        <span class="litem-icon" aria-hidden="true">🏆</span>
+        <div class="litem-body">
+          <span class="litem-name">Parrilla La Master</span>
+          <span class="litem-desc">Parrilla con opción de rotisería para llevar. Buena para resolver la cena rápido.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Parrilla / Rotisería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-circus/" role="listitem" aria-label="Pizzeria Circus — #73">
+        <div class="litem-rank"><span class="litem-rank-num">73</span></div>
+        <span class="litem-icon" aria-hidden="true">🎪</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzeria Circus</span>
+          <span class="litem-desc">Pizzería de barrio con nombre llamativo y clientela de siempre.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-punto-pizza/" role="listitem" aria-label="Pizzeria Punto Pizza — #74">
+        <div class="litem-rank"><span class="litem-rank-num">74</span></div>
+        <span class="litem-icon" aria-hidden="true">📍</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzeria Punto Pizza</span>
+          <span class="litem-desc">Local de delivery de pizza en zona norte de la ciudad.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-corococo/" role="listitem" aria-label="Pizzeria Corococo — #75">
+        <div class="litem-rank"><span class="litem-rank-num">75</span></div>
+        <span class="litem-icon" aria-hidden="true">🐔</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzeria Corococo</span>
+          <span class="litem-desc">Pizzería de barrio con nombre curioso y buena muzza casera.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-rotiseria-tia-beba/" role="listitem" aria-label="Pizzeria rotiseria &#x27;Tía Beba&#x27; — #76">
+        <div class="litem-rank"><span class="litem-rank-num">76</span></div>
+        <span class="litem-icon" aria-hidden="true">👵</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzeria rotiseria &#x27;Tía Beba&#x27;</span>
+          <span class="litem-desc">Combo pizza y rotisería con nombre de casa de familia.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Pizzería / Rotisería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-la-nuit/" role="listitem" aria-label="Pizzeria La Nuit — #77">
+        <div class="litem-rank"><span class="litem-rank-num">77</span></div>
+        <span class="litem-icon" aria-hidden="true">🌙</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzeria La Nuit</span>
+          <span class="litem-desc">Pizzería nocturna, abre cuando otras ya cerraron.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-nacho/" role="listitem" aria-label="Pizzeria Nacho — #78">
+        <div class="litem-rank"><span class="litem-rank-num">78</span></div>
+        <span class="litem-icon" aria-hidden="true">🧀</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzeria Nacho</span>
+          <span class="litem-desc">Pizzería de esquina, sin muchas vueltas, buena opción de cercanía.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="pizzeria" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/pizzeria-bru-va/" role="listitem" aria-label="Pizzería Bru-Va — #79">
+        <div class="litem-rank"><span class="litem-rank-num">79</span></div>
+        <span class="litem-icon" aria-hidden="true">🍕</span>
+        <div class="litem-body">
+          <span class="litem-name">Pizzería Bru-Va</span>
+          <span class="litem-desc">Pizzería de barrio con clientela fija y delivery propio.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Pizzería</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="resto-bar" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/byggvir/" role="listitem" aria-label="Byggvir — #80">
+        <div class="litem-rank"><span class="litem-rank-num">80</span></div>
+        <span class="litem-icon" aria-hidden="true">🍺</span>
+        <div class="litem-body">
+          <span class="litem-name">Byggvir</span>
+          <span class="litem-desc">Bar and grill con impronta nórdica en el nombre. Buena carta de cerveza y grill.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Bar and Grill</span>
+          </div>
+        </div>
+        <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
+      </a>
+
+      <a data-cat="asiatica" class="litem reveal extra-item" href="https://uruspotcdu-create.github.io/uruspot/donde-comer-cdu/locales/sumeria-sushi/" role="listitem" aria-label="Sumeria sushi — #81">
+        <div class="litem-rank"><span class="litem-rank-num">81</span></div>
+        <span class="litem-icon" aria-hidden="true">🍣</span>
+        <div class="litem-body">
+          <span class="litem-name">Sumeria sushi</span>
+          <span class="litem-desc">Sushi de barrio, buena opción para pedir a domicilio.</span>
+          <div class="litem-pills">
+            <span class="pill pill-default">Sushi</span>
           </div>
         </div>
         <div class="litem-meta"><span class="litem-arrow" aria-hidden="true">→</span></div>
@@ -1854,6 +2759,66 @@ a:focus-visible {
   }, 800);
 
   /* ── initial calls ── */
+
+  /* ── filtros por categoría + cargar más (nuevo) ── */
+  (function () {
+    var EXTRA_BATCH = 20;
+    var extraItems = Array.prototype.slice.call(document.querySelectorAll('.litem.extra-item'));
+    var loadBtn = document.getElementById('loadMoreBtn');
+    var loadCountEl = document.getElementById('loadMoreCount');
+    var shown = 0;
+
+    extraItems.forEach(function (el) { el.classList.add('is-hidden-extra'); });
+
+    function updateLoadBtn() {
+      var remaining = extraItems.length - shown;
+      if (remaining <= 0) {
+        loadBtn.classList.add('is-hidden');
+      } else if (loadCountEl) {
+        loadCountEl.textContent = Math.min(remaining, EXTRA_BATCH);
+      }
+    }
+
+    if (loadBtn) {
+      updateLoadBtn();
+      loadBtn.addEventListener('click', function () {
+        var next = extraItems.slice(shown, shown + EXTRA_BATCH);
+        next.forEach(function (el) {
+          el.classList.remove('is-hidden-extra');
+          el.classList.add('visible');
+        });
+        shown += next.length;
+        updateLoadBtn();
+      });
+    }
+
+    /* filtros */
+    var chips = Array.prototype.slice.call(document.querySelectorAll('.filter-chip'));
+    var allLitems = Array.prototype.slice.call(document.querySelectorAll('.litem[data-cat], .feat-card[data-cat]'));
+
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        chips.forEach(function (c) { c.classList.remove('is-active'); c.setAttribute('aria-selected', 'false'); });
+        chip.classList.add('is-active');
+        chip.setAttribute('aria-selected', 'true');
+        var filter = chip.getAttribute('data-filter');
+
+        if (filter === 'all') {
+          allLitems.forEach(function (el) { el.classList.remove('is-filtered-out'); });
+          extraItems.forEach(function (el, i) { if (i >= shown) el.classList.add('is-hidden-extra'); });
+          if (loadBtn) loadBtn.classList.toggle('is-hidden', shown >= extraItems.length);
+        } else {
+          allLitems.forEach(function (el) {
+            var match = el.getAttribute('data-cat') === filter;
+            el.classList.toggle('is-filtered-out', !match);
+            if (el.classList.contains('extra-item')) el.classList.remove('is-hidden-extra');
+          });
+          if (loadBtn) loadBtn.classList.add('is-hidden');
+        }
+      });
+    });
+  })();
+
   updateProgress();
   updateTopbar();
 })();
