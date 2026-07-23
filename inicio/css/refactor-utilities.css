@@ -1,0 +1,41 @@
+/*
+  refactor-utilities.css
+  ----------------------
+  Clases nuevas creadas durante la reingeniería de inicio/index.html.
+
+  Por qué existe este archivo en vez de agregar estas reglas directamente
+  a deferred-styles.min.css: ese archivo no forma parte del repositorio
+  auditado (se referencia en index.html pero no existe en el repo), así
+  que no tenemos su contenido y no podemos editarlo seguro sin arriesgar
+  romper reglas existentes. Este archivo es un complemento explícito y
+  aislado; cuando el equipo tenga acceso al stylesheet diferido real, su
+  contenido puede fusionarse ahí sin cambios (son reglas independientes,
+  sin dependencias cruzadas).
+
+  Namespacing: todas las clases usan el prefijo "rf-" (refactor) para
+  garantizar que no choquen con nombres ya existentes en
+  deferred-styles.min.css, que no podemos inspeccionar desde este repo.
+*/
+
+/* Reemplaza el style="" repetido 8 veces en los listados (.litem-name)
+   para la línea de dirección/horario bajo el nombre del lugar. */
+.rf-litem-meta {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--f-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(242, 237, 227, 0.4);
+}
+
+/* Reemplaza el style="" repetido 5 veces en las imágenes de fondo
+   de .ccard-bg (tarjetas de categoría en la sección de Cafés). */
+.rf-ccard-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.65s cubic-bezier(0.23, 1, 0.32, 1);
+}
