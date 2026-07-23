@@ -102,3 +102,146 @@ button.chip.chip--activo .chip__conteo{
   width:9px; height:9px; border-radius:50% 50% 50% 0;
   transform:rotate(-45deg); flex:none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   SUGERENCIAS RÁPIDAS Y FILTROS ACTIVOS (AUDITORÍA 4ª PASADA)
+
+   Corrección de bug, no feature nueva: js/app.js ya tenía
+   pintarSugerenciasRapidas() y pintarFiltrosActivos() completas y
+   cableadas, pero sus contenedores (#sugerenciasRapidas,
+   #filtrosActivos) no existían en index.html — ver el comentario en
+   ese archivo, junto al `<div class="buscador">`, para el diagnóstico
+   completo. Sin contenedor, ninguna de las dos clases de acá abajo se
+   había pintado nunca; se agregan ahora, en el mismo commit que el
+   `id` que las activa.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Sugerencias rápidas ──
+   Atajos de un toque a los rubros con más lugares + "cerca tuyo".
+   Reutiliza `--chip-color` inline igual que `.chip`/`button.chip` de
+   arriba — mismo vocabulario de color por rubro en todo el sitio. */
+.sugerencias-rapidas{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:var(--esp-2);
+  margin-top:var(--esp-4);
+}
+.sugerencias-rapidas[hidden]{ display:none; }
+
+.sugerencias-rapidas__etiqueta{
+  font:var(--tipo-dato-xs);
+  color:var(--color-tinta-30);
+  letter-spacing:var(--ls-datos);
+  margin-right:var(--esp-1);
+}
+
+.sugerencia-chip{
+  appearance:none;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:transparent;
+  border:1px solid var(--color-linea);
+  border-radius:var(--radio-full);
+  padding:5px var(--esp-3);
+  color:var(--color-tinta-60);
+  font:var(--tipo-dato-sm);
+  transition:border-color var(--dur-rapido) var(--easing-estandar),
+             color var(--dur-rapido) var(--easing-estandar),
+             background var(--dur-rapido) var(--easing-estandar);
+}
+.sugerencia-chip:hover{
+  color:var(--color-tinta);
+  border-color:var(--chip-color, var(--color-granate-clara));
+  background:var(--glass-bg);
+}
+.sugerencia-chip:focus-visible{
+  outline:var(--anillo-foco);
+  outline-offset:2px;
+}
+.sugerencia-chip .rubro-icono{ color:var(--chip-color, var(--color-tinta-60)); }
+.sugerencia-chip--cerca{
+  border-style:dashed;
+  color:var(--color-rubro-naturaleza);
+  border-color:var(--color-rubro-naturaleza);
+}
+.sugerencia-chip--cerca:hover{
+  background:rgba(111,191,139,.10);
+  border-style:solid;
+}
+
+/* ── Filtros activos ──
+   Resumen en píldoras de qué filtro está aplicado ahora mismo, cada
+   una con su propia × para quitar SOLO esa faceta (búsqueda, rubro o
+   cerca-tuyo) sin afectar las otras dos. Nace `hidden` porque arranca
+   sin ningún filtro aplicado — mismo criterio I2 que el resto del
+   sitio (nunca visible vacío). */
+.filtros-activos{
+  display:flex;
+  flex-wrap:wrap;
+  gap:var(--esp-2);
+  margin-top:var(--esp-3);
+}
+.filtros-activos[hidden]{ display:none; }
+
+.filtro-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-borde-hover);
+  border-radius:var(--radio-full);
+  padding:4px 6px 4px var(--esp-3);
+  font:var(--tipo-dato-sm);
+  color:var(--color-tinta);
+  animation:uru-scale-in var(--dur-media) var(--easing-estandar);
+}
+
+.filtro-pill__texto{
+  color:var(--chip-color, var(--color-tinta));
+  max-width:26ch;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.filtro-pill__quitar{
+  appearance:none;
+  cursor:pointer;
+  border:none;
+  background:var(--color-fondo-2);
+  color:var(--color-tinta-60);
+  width:20px; height:20px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font:600 13px/1 var(--f-ui);
+  flex:none;
+  transition:background var(--dur-rapido) var(--easing-estandar),
+             color var(--dur-rapido) var(--easing-estandar);
+}
+.filtro-pill__quitar:hover{
+  background:var(--color-granate);
+  color:#fff;
+}
+.filtro-pill__quitar:focus-visible{
+  outline:var(--anillo-foco);
+  outline-offset:2px;
+}
+
+.filtro-pill--cerca{ border-color:var(--color-rubro-naturaleza); }
+.filtro-pill--cerca .filtro-pill__texto{ color:var(--color-rubro-naturaleza); }
+
+@media (max-width:720px){
+  .sugerencia-chip, .filtro-pill{ min-height:36px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .filtro-pill{ animation:none; }
+}
+@media (forced-colors:active){
+  .sugerencia-chip, .filtro-pill{ border:1px solid CanvasText; }
+  .filtro-pill__quitar{ border:1px solid CanvasText; background:Canvas; color:CanvasText; }
+}
