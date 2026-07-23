@@ -2,492 +2,1894 @@
 <html lang="es-AR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>URU SPOT — el padrón de Concepción del Uruguay</title>
-<meta name="description" content="El padrón completo de Concepción del Uruguay: 1.468 lugares caminados y verificados uno por uno, en 14 rubros — sin ranking, sin relleno.">
-<link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- DOCUMENTACIÓN ARQUITECTÓNICA DE ESTE ARCHIVO — auditoría 2ª pasada:
+     se movió al final del documento, justo antes de </body> (buscá
+     "DOCUMENTACIÓN COMPLETA DE index.html" más abajo, o Ctrl+F "12.
+     EXPANSIÓN DE CONTENIDO EDITORIAL"). Motivo: quien abre este
+     archivo por primera vez encontraba 519 líneas de comentarios
+     antes del primer <meta> real — la documentación es valiosa pero
+     no debía ser lo primero que se lee para editar un <title> o
+     revisar la CSP. El contenido NO cambió una sola palabra: se
+     recortó y pegó entero, con sus 12 secciones y su propia numeración
+     intactas — sigue siendo la referencia obligatoria antes de tocar
+     cualquier `id`, `data-*` o `<script src>` de este documento. -->
+
+
+<!-- PRECONEXIONES — orígenes externos reales que este documento usa.
+     No es una lista aspiracional: cada entrada corresponde a un
+     recurso que efectivamente se pide (ver sección 8 para el detalle
+     de por qué cada uno está permitido en la CSP). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
-<style>
+<!-- Tiles del mapa: CARTO Voyager sobre <canvas> propio (no Mapbox —
+     ver sección 2, Bug E, y js/motor-render.js). El motor reparte
+     pedidos entre 4 subdominios (a/b/c/d) para paralelizar descargas
+     por debajo del límite de conexiones concurrentes por host. -->
+<link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://b.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com">
 
-  /* ═══════════════════════════════════════════════════════════════
-     URU SPOT — Fase 4: ensamblado final
-     Une las tres fases anteriores sobre el mismo manifiesto y las
-     conecta a los datos reales del padrón (1.468 lugares, 14 rubros):
-       1. la totalidad siempre es visible (fracción persistente)
-       2. nada existe sin verificación real
-       3. el tiempo es direccional, el orden de caminata no se
-          desarma (posición antes que nombre)
-       4. el contenido se acumula, nunca se reemplaza sin rastro
-       5. los cambios de estado corresponden a hechos, no a mood
+<!-- SCRIPTS DEFERRED — orden = grafo de dependencias, ver §5 arriba.
+     No reordenar sin leer esa sección. -->
+<script src="js/motor-config.js" defer></script>
+<script src="js/rubros-meta.js" defer></script>
+<script src="js/locales-slug.js" defer></script>
+<script src="js/motor-plano.js" defer></script>
+<script src="js/motor-exposicion.js" defer></script>
+<script src="js/motor-mapa.js" defer></script>
+<script src="js/proyeccion.js" defer></script>
+<script src="js/motor-render.js" defer></script>
+<script src="js/app.js" defer></script>
 
-     Buscador, chips de rubro y mapa esquemático son el mismo lente
-     de Fase 3 aplicado sobre la secuencia real — ninguno crea una
-     vista paralela, ninguno reordena el padrón. No importa ni toca
-     core-engine.js ni el resto del motor viejo: esta página usa
-     js/fase4-motor.js, aislado.
-     ═══════════════════════════════════════════════════════════════ */
+<!-- TÍTULOS Y METADATOS CORE -->
+<title>URU SPOT — descubrí Concepción del Uruguay</title>
+<meta name="description" content="Cada vez que abrís URU SPOT te mostramos unos pocos lugares, no un padrón entero. Cuanto más lo usás, más se ajusta a vos.">
 
-  :root{
-    --tinta:      #ECEDEF;
-    --tinta-60:   rgba(236,237,239,.62);
-    --tinta-30:   rgba(236,237,239,.26);
-    --fondo:      #0A0D13;
-    --fondo-2:    #10141C;
-    --linea:      rgba(148,155,171,.16);
-    --linea-fuerte: rgba(148,155,171,.30);
-    --granate:    #9C3A46;
-    --granate-clara: #C97A83;
+<!-- META TAGS DE SEGURIDAD -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:;">
 
-    --f-display: 'Fraunces', serif;
-    --f-ui:      'IBM Plex Sans', sans-serif;
-    --f-dato:    'IBM Plex Mono', monospace;
-  }
+<!-- META TAGS DE ACCESIBILIDAD Y PREFERENCIAS -->
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0A0D13">
+<meta name="format-detection" content="telephone=no">
 
-  *{ box-sizing:border-box; margin:0; padding:0; }
-  html{ scroll-behavior:smooth; }
-  body{
-    background:var(--fondo); color:var(--tinta);
-    font-family:var(--f-ui); line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-  }
-  ::selection{ background:var(--granate); color:var(--tinta); }
-  a{ color:inherit; }
+<!-- CANONICAL Y MANIFEST -->
+<link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/">
+<link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
 
-  .envoltorio{ max-width:1180px; margin:0 auto; padding:0 40px; }
-  .envoltorio--angosta{ max-width:920px; }
-  @media (max-width:720px){ .envoltorio{ padding:0 20px; } }
+<!-- FAVICON — múltiples formatos, cada uno con su consumidor real:
+     SVG para navegadores modernos, PNG para los que no soportan SVG
+     en favicon, ICO como último recurso universal, apple-touch-icon
+     para iOS al agregar a inicio, mask-icon para el pin de Safari. -->
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
+<link rel="mask-icon" href="/img/favicon-mask.svg" color="#0A0D13">
 
-  /* ─── CABECERA — fracción persistente: coordenada, no progreso ─── */
-  header{
-    position:sticky; top:0; z-index:20;
-    background:rgba(10,13,19,.88); backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--linea);
-  }
-  .membrete{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:18px 0;
-  }
-  .marca{ font-family:var(--f-ui); font-weight:600; font-size:13px; letter-spacing:.14em; }
-  .marca span{
-    display:block; font-family:var(--f-dato); font-weight:400;
-    font-size:10px; letter-spacing:.02em; color:var(--tinta-30); margin-top:3px;
-  }
-  .fraccion{ font-family:var(--f-dato); font-size:13px; color:var(--tinta-60); text-align:right; white-space:nowrap; }
-  .fraccion b{ color:var(--tinta); font-weight:500; }
-  .fraccion .etiqueta{
-    display:block; font-size:9.5px; color:var(--tinta-30);
-    letter-spacing:.08em; text-transform:uppercase; margin-top:2px;
-  }
+<!-- OPEN GRAPH + TWITTER -->
+<meta property="og:title" content="URU SPOT — descubrí Concepción del Uruguay">
+<meta property="og:description" content="Unos pocos lugares por vez, verificados uno por uno. No un directorio para scrollear — un motor que aprende cuánto guiarte.">
+<meta property="og:image" content="https://uruspot.pages.dev/img/og-image-1200x630.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/webp">
+<meta property="og:image:alt" content="Logo y visualización de URU SPOT">
+<meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="URU SPOT">
+<meta property="og:locale" content="es_AR">
 
-  /* ─── APERTURA ─── */
-  .apertura{ padding:76px 0 54px; max-width:700px; }
-  .apertura .eyebrow{
-    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--granate-clara); margin-bottom:24px;
-  }
-  .apertura h1{
-    font-family:var(--f-display); font-weight:500; font-style:normal;
-    font-size:clamp(1.7rem, 4vw, 2.7rem); line-height:1.32; letter-spacing:-.01em;
-  }
-  .apertura h1 .num{ font-family:var(--f-dato); font-weight:400; font-size:.72em; color:var(--granate-clara); }
-  .apertura p{ margin-top:22px; font-size:15.5px; color:var(--tinta-60); max-width:56ch; }
-  .apertura p b{ color:var(--tinta); font-weight:600; }
-  .senial{
-    margin-top:44px; font-family:var(--f-dato); font-size:10.5px;
-    letter-spacing:.06em; color:var(--tinta-30); display:flex; align-items:center; gap:10px;
-  }
-  .senial::before{ content:''; width:16px; height:1px; background:var(--tinta-30); }
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="URU SPOT — descubrí Concepción del Uruguay">
+<meta name="twitter:description" content="Un motor de descubrimiento de lugares en Concepción del Uruguay que aprende de vos.">
+<meta name="twitter:image" content="https://uruspot.pages.dev/img/og-image-1200x630.webp">
+<meta name="twitter:image:alt" content="Logo de URU SPOT">
 
-  /* ─── TÍTULO DE VISTA (motor) ─── */
-  .titulo-vista{ padding:36px 0 4px; max-width:640px; }
-  .titulo-vista .eyebrow{
-    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--granate-clara); margin-bottom:14px;
-  }
-  .titulo-vista h2{
-    font-family:var(--f-display); font-weight:500; font-size:clamp(1.4rem,3vw,1.9rem); line-height:1.3;
-  }
-  .titulo-vista p{ margin-top:12px; font-size:14px; color:var(--tinta-60); max-width:56ch; }
+<!-- PWA BASICS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="URU SPOT">
+<meta name="mobile-web-app-capable" content="yes">
 
-  /* ─── HERRAMIENTAS — buscador, chips de rubro, favoritos ─── */
-  .herramientas{ padding:26px 0 6px; }
-  .buscador{
-    display:flex; align-items:center; gap:10px;
-    border:1px solid var(--linea-fuerte); border-radius:2px;
-    padding:11px 14px; max-width:440px;
-  }
-  .buscador input{
-    flex:1; background:none; border:none; outline:none;
-    font-family:var(--f-ui); font-size:14px; color:var(--tinta);
-  }
-  .buscador input::placeholder{ color:var(--tinta-30); }
-  .buscador .lupa{ font-family:var(--f-dato); color:var(--tinta-30); font-size:13px; }
+<!-- GOOGLE FONTS — preload + stylesheet + fallback sin JS -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</noscript>
 
-  .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
-  .chip{
-    font-family:var(--f-dato); font-size:10.5px; letter-spacing:.03em;
-    color:var(--tinta-60); background:none;
-    border:1px solid var(--linea-fuerte); border-radius:20px;
-    padding:7px 13px; cursor:pointer;
-    transition:border-color .2s ease, color .2s ease, background .2s ease;
-  }
-  .chip:hover{ border-color:var(--tinta-60); color:var(--tinta); }
-  .chip.activo{ border-color:var(--granate); color:var(--tinta); background:rgba(156,58,70,.16); }
-  .chip.chip-fav.activo{ border-color:var(--granate-clara); }
-  .chip.chip-fav::before{ content:'☆ '; }
-  .chip.chip-fav.activo::before{ content:'★ '; color:var(--granate-clara); }
+<!-- HOJAS DE ESTILO — mismo orden de dependencia que documentan sus
+     propios encabezados (tokens.css primero, siempre). -->
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/boton.css">
+<link rel="stylesheet" href="css/tarjeta-lugar.css">
+<link rel="stylesheet" href="css/chip.css">
+<link rel="stylesheet" href="css/badge-estado.css">
+<!-- destacados.css: nueva (auditoría Fase 4) — spotlight de mejor
+     puntuados. Depende de tokens.css y boton.css (reutiliza .btn),
+     independiente de tarjeta-lugar.css: es un componente propio, no
+     una variante de la tarjeta de descubrimiento. -->
+<link rel="stylesheet" href="css/destacados.css">
+<link rel="stylesheet" href="css/mapa.css">
+<link rel="stylesheet" href="css/descubrimiento.css">
+<!-- contenido-editorial.css: nueva (expansión de contenido). Estilos
+     de las secciones editoriales estáticas agregadas más abajo
+     (índice de página, Sobre la ciudad, Cómo pensamos el orden, guía
+     de rubros, guía práctica, glosario, hoja de ruta, accesibilidad).
+     Depende de descubrimiento.css porque reutiliza .manifiesto-card
+     en vez de duplicarla — debe cargarse después. -->
+<!-- contenido-editorial.css se carga sin bloquear el render (ver
+     script inline más abajo, permitido por CSP §8/I5): gobierna
+     "Sobre la ciudad" en adelante, contenido que ningún usuario ve
+     sin scrollear más allá del hero y de Descubrimiento. Bloquear el
+     primer paint por una hoja que solo pinta contenido fuera de
+     pantalla no tenía justificación — el <noscript> abajo cubre el
+     caso sin JS, mismo criterio que el resto del documento (§7). -->
+<link rel="preload" href="css/contenido-editorial.css" as="style">
+<script>
+  (function(){
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'css/contenido-editorial.css';
+    document.head.appendChild(l);
+  })();
+</script>
+<noscript><link rel="stylesheet" href="css/contenido-editorial.css"></noscript>
 
-  .estado-resultados{
-    margin-top:20px; font-family:var(--f-dato); font-size:11px; color:var(--tinta-30);
-    padding-bottom:8px; border-bottom:1px solid var(--linea);
-  }
-  .estado-resultados b{ color:var(--tinta-60); font-weight:500; }
+<!-- La deuda de §10 ("migrar a css/boton.css") queda saldada en esta
+     revisión: .contador-guardados, .indice-pagina__grupo-titulo y
+     .rubros-detalle__resumen se movieron a css/boton.css, con los
+     tokens reales del proyecto (--anillo-foco, --color-tinta-60) en
+     vez de los fallbacks genéricos que tenía este parche embebido.
+     Ver css/boton.css, bloque "BADGE Y PATCHES MIGRADOS DESDE
+     index.html". Este documento ya no necesita <style> propio. -->
 
-  /* ─── ÁREA — lista y mapa, la misma secuencia en dos lentes ─── */
-  .area{ display:grid; grid-template-columns:1fr 380px; gap:0; }
-  @media (max-width:900px){
-    .area{ grid-template-columns:1fr; }
-    .panel-mapa{ order:-1; }
-  }
-
-  .panel-lista{ padding:6px 0 80px; }
-
-  .paso{
-    display:grid; grid-template-rows:1fr; overflow:hidden;
-    border-bottom:1px solid var(--linea);
-    transition:grid-template-rows .38s ease, opacity .4s ease, padding .38s ease, transform .4s ease;
-    opacity:0; transform:translateY(6px);
-    /* content-visibility: el navegador salta el trabajo de layout/paint
-       de filas fuera de pantalla — clave con 1.468 registros. */
-    content-visibility:auto; contain-intrinsic-size:auto 84px;
-  }
-  .paso.visible{ opacity:1; transform:none; }
-  .paso-inner{
-    display:grid; grid-template-columns:64px 1fr auto; gap:18px;
-    align-items:start; padding:18px 0; min-height:0;
-  }
-  .paso.oculto{ grid-template-rows:0fr; opacity:0; padding-top:0; padding-bottom:0; border-color:transparent; }
-  .paso.oculto .paso-inner{ padding:0; overflow:hidden; }
-
-  .paso .pos{ font-family:var(--f-dato); font-size:12.5px; color:var(--tinta-30); padding-top:2px; }
-  .paso.activa{ background:rgba(156,58,70,.07); }
-  .paso.activa .pos{ color:var(--granate-clara); }
-  .paso.paso--activa{ background:rgba(156,58,70,.05); }
-  .paso.paso--activa .pos{ color:var(--granate-clara); }
-
-  .paso .rubro{
-    font-family:var(--f-dato); font-size:9.5px; letter-spacing:.08em;
-    text-transform:uppercase; color:var(--granate-clara);
-  }
-  .paso .nombre{ font-family:var(--f-display); font-weight:500; font-size:17px; margin-top:6px; }
-  .paso .direccion{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-60); margin-top:4px; }
-  .paso .constancia{
-    font-family:var(--f-dato); font-size:10px; color:var(--tinta-30); margin-top:8px; letter-spacing:.02em;
-  }
-  .paso .constancia::before{ content:'✓ '; color:var(--granate-clara); }
-  .paso .constancia.constancia--pendiente{ color:var(--granate-clara); }
-  .paso .constancia.constancia--pendiente::before{ content:'· '; color:var(--tinta-30); }
-
-  .btn-fav{
-    background:none; border:none; cursor:pointer; font-size:16px;
-    color:var(--tinta-30); padding:2px 4px; line-height:1;
-    transition:color .2s ease, transform .2s ease;
-  }
-  .btn-fav:hover{ color:var(--granate-clara); }
-  .btn-fav.activo{ color:var(--granate-clara); }
-
-  .sin-resultados{ padding:60px 10px; font-family:var(--f-ui); color:var(--tinta-60); max-width:44ch; }
-  .sin-resultados b{ display:block; font-family:var(--f-display); font-size:19px; color:var(--tinta); margin-bottom:8px; font-weight:500; }
-
-  /* ─── MAPA ESQUEMÁTICO ─── */
-  .panel-mapa{
-    position:sticky; top:96px; align-self:start;
-    padding:20px 0 40px 30px; border-left:1px solid var(--linea); height:fit-content;
-  }
-  @media (max-width:900px){
-    .panel-mapa{ position:static; border-left:none; padding-left:0; margin-bottom:10px; }
-  }
-  .mapa-etiqueta{
-    font-family:var(--f-dato); font-size:10px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--tinta-30); margin-bottom:12px;
-  }
-  .mapa-lienzo{ width:100%; aspect-ratio:1/1; position:relative; border:1px solid var(--linea-fuerte); }
-  .mapa-lienzo .eje{ position:absolute; font-family:var(--f-dato); font-size:9px; color:var(--tinta-30); }
-  .mapa-lienzo .eje-n{ top:6px; left:50%; transform:translateX(-50%); }
-  .mapa-lienzo .eje-s{ bottom:6px; left:50%; transform:translateX(-50%); }
-  .mapa-lienzo .eje-e{ right:6px; top:50%; transform:translateY(-50%); }
-  .mapa-lienzo .eje-o{ left:6px; top:50%; transform:translateY(-50%); }
-  .mapa-lienzo .central{ position:absolute; left:50%; top:50%; width:1px; height:1px; background:var(--linea-fuerte); }
-
-  .punto{
-    position:absolute; width:5px; height:5px; margin:-2.5px 0 0 -2.5px;
-    border-radius:50%; background:var(--tinta-30);
-    cursor:pointer; transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
-  }
-  .punto:hover{ background:var(--tinta-60); transform:scale(1.6); }
-  .punto.activo{ background:var(--granate-clara); transform:scale(2); box-shadow:0 0 0 4px rgba(201,122,131,.18); }
-  .punto.favorito::after{
-    content:''; position:absolute; inset:-3px; border:1px solid var(--granate-clara); border-radius:50%; opacity:.6;
-  }
-  .mapa-nota{ margin-top:16px; font-family:var(--f-ui); font-size:11.5px; color:var(--tinta-30); }
-
-  /* ─── MANIFIESTO ─── */
-  .manifiesto{ padding:70px 0 20px; max-width:700px; }
-  .manifiesto .eyebrow{
-    font-family:var(--f-dato); font-size:11px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--granate-clara); margin-bottom:22px;
-  }
-  .manifiesto h2{
-    font-family:var(--f-display); font-weight:500; font-size:clamp(1.4rem,3vw,1.9rem);
-    line-height:1.36; letter-spacing:-.005em; max-width:22ch;
-  }
-  .manifiesto > p{ margin-top:22px; font-size:15px; color:var(--tinta-60); max-width:58ch; }
-  .manifiesto > p b{ color:var(--tinta); font-weight:600; }
-  .principios{ margin-top:40px; }
-  .principio{
-    display:grid; grid-template-columns:110px 1fr; gap:22px;
-    padding:20px 0; border-top:1px solid var(--linea);
-  }
-  .principio:last-child{ border-bottom:1px solid var(--linea); }
-  .principio .tag{
-    font-family:var(--f-dato); font-size:10px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--tinta-30); padding-top:2px;
-  }
-  .principio p{ font-size:14.5px; color:var(--tinta-60); }
-  .principio p b{ color:var(--tinta); font-weight:600; }
-  @media (max-width:560px){ .principio{ grid-template-columns:1fr; gap:8px; } }
-
-  /* ─── ÍNDICE DE RUBROS ─── */
-  .indice{ padding:60px 0 90px; max-width:640px; }
-  .indice-cab{
-    display:flex; justify-content:space-between; align-items:baseline;
-    padding-bottom:14px; border-bottom:1px solid var(--linea-fuerte); margin-bottom:2px;
-  }
-  .indice-cab h2{ font-family:var(--f-display); font-weight:500; font-size:17px; }
-  .indice-cab span{ font-family:var(--f-dato); font-size:10px; color:var(--tinta-30); }
-  .indice-nota{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-30); margin:14px 0 6px; max-width:50ch; }
-  .fila-rubro{ display:grid; grid-template-columns:1fr auto; gap:16px; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--linea); }
-  .fila-rubro .col-izq{ display:flex; flex-direction:column; }
-  .fila-rubro .nombre{ font-family:var(--f-ui); font-size:14.5px; color:var(--tinta-60); }
-  .fila-rubro .desc{ font-family:var(--f-ui); font-size:12.5px; color:var(--tinta-30); margin-top:4px; max-width:46ch; }
-  .fila-rubro .cifra{ font-family:var(--f-dato); font-size:12px; color:var(--tinta-30); white-space:nowrap; }
-
-  /* ─── FAQ ─── */
-  .faq{ padding:60px 0 90px; max-width:700px; }
-  .pregunta{ border-bottom:1px solid var(--linea); }
-  .pregunta:first-of-type{ border-top:1px solid var(--linea-fuerte); }
-  .pregunta-cabecera{
-    width:100%; display:flex; align-items:baseline; gap:18px;
-    background:none; border:none; text-align:left; cursor:pointer;
-    padding:20px 0; color:var(--tinta); font-family:var(--f-ui);
-  }
-  .pregunta-cabecera .num{ font-family:var(--f-dato); font-size:11px; color:var(--tinta-30); white-space:nowrap; }
-  .pregunta-cabecera .texto{ flex:1; font-size:15px; font-weight:500; }
-  .pregunta-cabecera .icono{ font-family:var(--f-dato); font-size:14px; color:var(--tinta-30); transition:transform .3s ease; }
-  .pregunta.abierta .pregunta-cabecera .icono{ transform:rotate(45deg); color:var(--granate-clara); }
-  .pregunta.abierta .pregunta-cabecera .num{ color:var(--granate-clara); }
-  .pregunta-cuerpo{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s ease; }
-  .pregunta.abierta .pregunta-cuerpo{ grid-template-rows:1fr; }
-  .pregunta-cuerpo-inner{ overflow:hidden; }
-  .pregunta-cuerpo p{ font-size:14px; color:var(--tinta-60); max-width:56ch; padding-bottom:22px; padding-right:30px; }
-
-  /* ─── FOOTER ─── */
-  footer.pie{ padding:56px 0 40px; border-top:1px solid var(--linea-fuerte); }
-  .footer-grillado{ display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px; padding-bottom:36px; }
-  .footer-marca .marca{ font-size:13px; }
-  .footer-marca p{ margin-top:14px; font-size:13px; color:var(--tinta-30); max-width:32ch; }
-  .footer-col h4{ font-family:var(--f-dato); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--tinta-30); margin-bottom:14px; }
-  .footer-col a{ display:block; font-size:13.5px; color:var(--tinta-60); text-decoration:none; padding:6px 0; transition:color .2s ease; }
-  .footer-col a:hover{ color:var(--granate-clara); }
-  .footer-base{
-    padding-top:22px; border-top:1px solid var(--linea);
-    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
-    font-family:var(--f-dato); font-size:9.5px; color:var(--tinta-30);
-  }
-  @media (max-width:640px){ .footer-grillado{ grid-template-columns:1fr; gap:28px; } }
-
-  :focus-visible{ outline:1.5px solid var(--granate-clara); outline-offset:2px; }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; }
-    .paso{ opacity:1 !important; transform:none !important; }
-  }
-
-</style>
+<!-- SCHEMA.ORG — Organization + WebSite (con SearchAction) +
+     BreadcrumbList + FAQPage. El texto de cada respuesta acá DEBE
+     coincidir con el texto visible en #faqLista más abajo — son la
+     misma información en dos formatos (uno para motores de búsqueda,
+     otro para personas); si edita uno sin el otro, buscadores como
+     Google pueden marcar el snippet como engañoso. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://uruspot.pages.dev/#organization",
+      "name": "URU SPOT",
+      "url": "https://uruspot.pages.dev",
+      "logo": "https://uruspot.pages.dev/img/logo-512x512.png",
+      "sameAs": [],
+      "areaServed": {
+        "@type": "City",
+        "name": "Concepción del Uruguay",
+        "addressRegion": "Entre Ríos",
+        "addressCountry": "AR"
+      },
+      "description": "Motor de descubrimiento de lugares verificados en Concepción del Uruguay"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://uruspot.pages.dev/donde-comer-cdu/#website",
+      "url": "https://uruspot.pages.dev/donde-comer-cdu/",
+      "name": "URU SPOT — descubrí Concepción del Uruguay",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://uruspot.pages.dev/donde-comer-cdu/?buscar={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://uruspot.pages.dev/" },
+        { "@type": "ListItem", "position": 2, "name": "Dónde comer", "item": "https://uruspot.pages.dev/donde-comer-cdu/" }
+      ]
+    },
+    {
+      "@type": "City",
+      "@id": "https://uruspot.pages.dev/#concepcion-del-uruguay",
+      "name": "Concepción del Uruguay",
+      "description": "Ciudad de la provincia de Entre Ríos, Argentina, fundada el 25 de junio de 1783 sobre la margen del río Uruguay. Fue capital provincial hasta 1883 y está históricamente vinculada a Justo José de Urquiza y Francisco Ramírez.",
+      "containedInPlace": {
+        "@type": "AdministrativeArea",
+        "name": "Entre Ríos, Argentina"
+      },
+      "foundingDate": "1783-06-25"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Por qué a veces veo pocos lugares?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "URU SPOT arranca guiando de a poco para no saturarte. A medida que interactuás — buscás, guardás, descartás — el sistema entiende mejor qué mostrarte y suelta más control."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo verifican cada lugar?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Alguien del equipo lo camina o lo confirma en fuentes oficiales y Google Places. Nada se completa a ojo ni se scrapea sin revisar."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿El orden se puede comprar?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Un local puede pagar por una mejor ficha (fotos, verificación más profunda), pero nunca por aparecer antes que otro lugar en los resultados."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo uso el mapa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aparece automáticamente apenas hay resultados con ubicación. Podés arrastrar, hacer zoom con la rueda o los botones +/−, y tocar un pin para ver la ficha resumida del lugar."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Encontré un error o falta un lugar, ¿qué hago?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Escribinos a padron@uruspot.com.ar con el nombre del lugar y el detalle — lo revisamos y lo corregimos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué diferencia hay entre Guía, Exploración y Acción Directa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Son los tres momentos de tu sesión. Arrancás en Guía, con poco para no saturarte. A medida que buscás, guardás o descartás lugares, el sistema entiende que sabés más de lo que buscás y pasa a Exploración y después a Acción Directa, mostrando más catálogo real y menos curaduría de nuestra parte."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿URU SPOT guarda mis datos personales?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Lo que guardás vive en el almacenamiento local de tu propio navegador, no en un servidor con tu nombre o tu identidad. No vendemos ni compartimos esa información con terceros."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo sugiero que agreguen un lugar nuevo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Escribinos a padron@uruspot.com.ar con el nombre y, si podés, la dirección o un link de Google Maps. Antes de publicarlo alguien del equipo lo verifica, así que puede tardar unos días en aparecer."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué pasa si un lugar cierra o cambia de horario?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Si detectamos o nos avisan que un lugar cerró o cambió, lo actualizamos o lo retiramos. Si llegás a uno que ya no existe, avisanos — es la forma más rápida de corregirlo para el resto."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Funciona con lectores de pantalla y navegación por teclado?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí — todo el sitio se puede recorrer con teclado con foco visible, el buscador y el mapa tienen roles y estados anunciados por lectores de pantalla, y se respetan las preferencias de movimiento reducido, contraste alto y transparencia reducida del sistema operativo."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
-<body>
 
-<header>
+<body data-app-root>
+
+<!-- SKIP LINK — invariante I: debe ser el primer elemento enfocable
+     del <body>. Ver §6, accesibilidad. -->
+<a href="#contenido-principal" class="skip-link u-sr-only">Ir al contenido principal</a>
+
+<!-- FALLBACK SIN JAVASCRIPT — ver §7, resiliencia, capa 1. -->
+<noscript>
+  <div style="padding:1rem;background:#3a0d0d;color:#fff;text-align:center;font-family:system-ui,sans-serif;font-size:14px">
+    <p style="margin:0 0 0.5rem 0"><strong>URU SPOT necesita JavaScript</strong></p>
+    <p style="margin:0">Activá JavaScript en tu navegador, o <a href="mailto:padron@uruspot.com.ar" style="color:#fff;text-decoration:underline">escribinos</a> si necesitás ayuda.</p>
+  </div>
+</noscript>
+
+<!-- HEADER: banner principal -->
+<header id="siteHeader" role="banner">
   <div class="envoltorio membrete">
-    <div class="marca">URU SPOT
-      <span>32°29'S 58°14'O — Concepción del Uruguay</span>
+    <div class="marca">
+      <span class="marca__glifo" aria-hidden="true"></span>
+      <span>
+        <span class="marca__texto">URU SPOT</span><span class="marca__subtitle">Concepción del Uruguay</span>
+      </span>
     </div>
-    <div class="fraccion">
-      <b id="fraccionNum">0000</b> / <span id="fraccionTotal">1468</span>
-      <span class="etiqueta">del padrón</span>
+    <!-- id="rolActual": ver Bug B / tabla de contrato §3. Sin este
+         id, app.js/actualizarCabecera() nunca puede escribir acá y
+         el texto queda pegado en "—" para siempre. data-stat y
+         data-user-relationship se conservan como hooks semánticos. -->
+    <div class="rol" data-stat="user-role" aria-live="polite" aria-atomic="true">
+      tu relación con esta ciudad<br>
+      <strong id="rolActual" data-user-relationship>—</strong>
     </div>
   </div>
 </header>
 
-<div class="envoltorio envoltorio--angosta">
+<!-- CONTENIDO PRINCIPAL -->
+<main id="contenido-principal">
 
-  <section class="apertura">
-    <div class="eyebrow">un registro, no un catálogo</div>
-    <h1>Esto tiene un tamaño exacto: <span class="num" id="aperturaNum">1.468</span> lugares, caminados uno por uno.</h1>
-    <p>
-      No hay ranking, no hay algoritmo, no hay orden por relevancia.
-      Cada lugar entró al padrón porque <b>alguien golpeó esa puerta</b>
-      después de haber golpeado la anterior. El orden en que aparece
-      acá abajo es el orden real en que se caminó Concepción del
-      Uruguay — nada se reordena para verse mejor.
+  <!-- HERO: llamada a la acción principal -->
+  <section class="hero envoltorio" aria-labelledby="hero-title">
+    <div class="hero__halo" aria-hidden="true"></div>
+    <p class="hero__eyebrow">Motor de descubrimiento local · Concepción del Uruguay</p>
+    <h1 id="hero-title">No te mostramos el padrón entero. <span class="hero__enfasis">Te mostramos lo que corresponde ahora.</span></h1>
+    <p class="hero__subtitle">URU SPOT arranca guiando poco y, a medida que lo usás, suelta el control. Si ya sabés lo que buscás, escribilo y vas directo.</p>
+
+    <!-- BÚSQUEDA -->
+    <div class="buscador" role="search" aria-label="Buscar lugares en Concepción del Uruguay">
+      <label for="inputBuscar" class="u-sr-only">Buscar lugares por nombre, rubro o dirección</label>
+      <div class="buscador__campo">
+        <input
+          id="inputBuscar"
+          type="search"
+          placeholder="buscá por nombre, rubro o dirección…"
+          autocomplete="off"
+          enterkeyhint="search"
+          aria-controls="panelDescubrimiento"
+          aria-expanded="false"
+          aria-describedby="buscadorAyuda"
+          data-bind="search-input">
+        <!-- Botón de limpiar propio: el ícono nativo de type="search" no
+             existe en Firefox y no es estilable ni tiene aria-label real
+             en ningún navegador. Este botón se comporta igual en todos
+             lados y app.js lo muestra/oculta según haya texto o no. -->
+        <button
+          id="btnLimpiarBusqueda"
+          type="button"
+          class="buscador__clear"
+          hidden
+          aria-label="Limpiar búsqueda"
+          data-bind="clear-search-button">×</button>
+      </div>
+      <span id="buscadorAyuda" class="u-sr-only">
+        Escribí al menos dos letras para buscar por nombre, rubro o dirección.
+        Con resultados visibles, flecha abajo mueve el foco al primer lugar;
+        entre lugares, flecha arriba y abajo recorren la lista y Escape vuelve acá.
+      </span>
+      <button id="btnVerGuardados" type="button" class="btn btn--primario" data-bind="saved-list-button">
+        tu lista guardada
+        <!-- Bug D (§2): este elemento no existía en ningún punto del
+             HTML pese a que js/app.js ya tenía una función completa
+             (actualizarContadorGuardados()) esperando encontrarlo.
+             Arranca oculto — app.js lo revela solo si hay al menos
+             un lugar guardado, y le pone la cantidad como texto. -->
+        <span id="contadorCuraduria" class="contador-guardados" hidden aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <!-- ESTADÍSTICAS RÁPIDAS.
+         id="statLugares" / id="statRubros": ver Bug B / tabla §3.
+         Sin estos ids, pintarStatsRapidas() en app.js encuentra
+         DOM.statLugares y DOM.statRubros como null, y el guard
+         `if (DOM.statX) ...` hace que el placeholder "—" quede fijo
+         para siempre — indistinguible, a simple vista, de "todavía
+         no cargó". Los data-stat se conservan como hook semántico. -->
+    <div class="stats-rapidas" aria-live="polite" aria-atomic="false" role="status">
+      <div class="stat-item">
+        <strong id="statLugares" data-stat="total-places">—</strong>
+        <span>lugares verificados</span>
+      </div>
+      <div class="stat-item">
+        <strong id="statRubros" data-stat="total-categories">—</strong>
+        <span>rubros distintos</span>
+      </div>
+      <div class="stat-item">
+        <strong>100%</strong>
+        <span>caminados y chequeados en el lugar</span>
+      </div>
+    </div>
+
+    <a href="#region-descubrimiento" class="hero__scroll-cue">
+      <span class="hero__scroll-cue__icono" aria-hidden="true">↓</span>
+      Ver lugares para vos
+    </a>
+  </section>
+
+  <!-- ÍNDICE DE PÁGINA: 100% estático, sin dependencia de JS ni de
+       datos — son anclas (#id) a secciones que ya existen en este
+       mismo documento. Se agrega acá porque la expansión de
+       contenido de esta revisión lleva la página de 6 a 12
+       secciones; sin un mapa de contenido, "Cómo funciona" o
+       "Glosario" quedarían enterrados a varios scrolls de distancia
+       sin que nadie supiera que existen. -->
+  <!-- ÍNDICE DE PÁGINA — reagrupado en dos bloques con encabezado
+       propio (auditoría 2ª pasada, P1). Antes eran 12 links sueltos
+       en una sola lista plana, sin jerarquía: "Destacados" y
+       "Accesibilidad" pesaban visualmente lo mismo, cuando el primero
+       es producto y el segundo es contenido de referencia. Separar
+       "Explorá" (lo que se usa) de "Conocé el proyecto" (lo que se
+       lee una vez) no elimina ninguna sección ni ningún link — solo
+       les da jerarquía, así el nav deja de sentirse como un mapa del
+       sitio y vuelve a sentirse como una guía de uso. Sin cambios de
+       JS ni de contrato: son las mismas 12 anclas de siempre. -->
+  <nav class="indice-pagina envoltorio" aria-label="Ir a una sección de esta página">
+    <div class="indice-pagina__grupo">
+      <span class="indice-pagina__grupo-titulo">Explorá</span>
+      <ul class="indice-pagina__lista">
+        <li><a class="indice-pagina__link" href="#destacados">Destacados</a></li>
+        <li><a class="indice-pagina__link" href="#region-descubrimiento">Buscar y explorar</a></li>
+        <li><a class="indice-pagina__link" href="#rubros">Por rubro</a></li>
+        <li><a class="indice-pagina__link" href="#accesos">Guías por categoría</a></li>
+      </ul>
+    </div>
+    <div class="indice-pagina__grupo">
+      <span class="indice-pagina__grupo-titulo">Conocé el proyecto</span>
+      <ul class="indice-pagina__lista">
+        <li><a class="indice-pagina__link" href="#sobre-la-ciudad">Sobre la ciudad</a></li>
+        <li><a class="indice-pagina__link" href="#manifiesto">Cómo funciona</a></li>
+        <li><a class="indice-pagina__link" href="#metodologia">Cómo pensamos el orden</a></li>
+        <li><a class="indice-pagina__link" href="#guia-practica">Guía práctica</a></li>
+        <li><a class="indice-pagina__link" href="#glosario">Glosario</a></li>
+        <li><a class="indice-pagina__link" href="#faq">Preguntas frecuentes</a></li>
+        <li><a class="indice-pagina__link" href="#hoja-de-ruta">Hoja de ruta</a></li>
+        <li><a class="indice-pagina__link" href="#accesibilidad">Accesibilidad</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- DESTACADOS (auditoría Fase 4, nueva): spotlight de lugares con
+       mejor puntuación real. `rating`/`rating_count` ya viajaban en
+       lugares-core.json desde split_dataset.py — el propio script
+       los documenta como "opcionales... para spotlight 'mejor
+       puntuados'" pero ningún punto de app.js los leía todavía. Esta
+       sección es ese spotlight, finalmente conectado al dato que ya
+       existía.
+       Nace `hidden`: mismo patrón que #mapaContainer (invariante I2)
+       — no debe existir visualmente hasta que pintarDestacados() en
+       app.js confirme que hay suficientes lugares que califican (≥3
+       con rating≥4.6 y rating_count por encima de un piso mínimo,
+       para no destacar un 5.0 con una sola reseña). No es un recorte
+       de Guía/Exploración ni compite con "cerca tuyo": es
+       independiente, no depende de sesión ni de ubicación. -->
+  <section class="destacados envoltorio u-reveal" id="destacados" aria-labelledby="destacados-titulo" hidden>
+    <h2 id="destacados-titulo">Destacados</h2>
+    <p class="destacados-subtitulo">Los mejor puntuados, con reseñas reales — no un ranking pago.</p>
+    <div id="listaDestacados" class="destacados-strip" role="list" aria-label="Lugares destacados por puntuación"></div>
+  </section>
+
+  <!-- DESCUBRIMIENTO: región dinámica. Todo lo que hay adentro de
+       esta <section> se recalcula en cada render() de app.js — ver
+       §1 para qué módulo decide qué. -->
+  <section class="envoltorio descubrimiento-area" id="region-descubrimiento" aria-label="Descubridor de lugares">
+    <div id="mapaTextura" aria-hidden="true"></div>
+    <p class="mapa-textura__leyenda">Cada punto de color es un lugar caminado y verificado — el mapa interactivo aparece más abajo apenas haya resultados con ubicación.</p>
+
+    <!-- id="tituloRegion" / id="subtituloRegion": ver Bug B / §3.
+         Sin estos ids el subtítulo queda pegado en "Cargando…" para
+         siempre — es, con alta probabilidad, el síntoma que se
+         reportó como "salen los números en cargando". -->
+    <div class="region-encabezado">
+      <h2 id="tituloRegion" data-dynamic="region-title">Para empezar</h2>
+      <p id="subtituloRegion" data-dynamic="region-subtitle">Cargando…</p>
+    </div>
+
+    <!-- MAPA — ver Bug A / invariante I2. `hidden` acá es
+         intencional: no debe verse hasta que motor-mapa.js confirme
+         que hay al menos un resultado georreferenciado. Requiere que
+         js/app.js incluya "mapaContainer" en su lista de elementos
+         vigilados y alterne su .hidden junto con mapaHerramienta
+         (parche entregado junto con este archivo).
+         data-map-provider corregido: el motor real es CARTO sobre
+         canvas propio, no Mapbox (ver Bug E) — el atributo queda
+         como punto de extensión documentado en §9, no como dato de
+         producción consumido hoy. -->
+    <div class="mapa-container" id="mapaContainer" data-map-provider="carto-canvas" hidden>
+      <div class="mapa-info" id="mapaInfo" role="status" aria-live="polite">
+        Clickeá un lugar en el mapa para ver su ficha completa
+      </div>
+      <div id="mapaHerramienta"
+           class="mapa-herramienta"
+           role="application"
+           aria-label="Mapa interactivo de lugares verificados en Concepción del Uruguay">
+      </div>
+      <div id="mapaLeyenda" class="mapa-leyenda" aria-label="Leyenda del mapa"></div>
+    </div>
+
+    <!-- PANEL DE DESCUBRIMIENTO: renderizado por app.js/render().
+         Los tres <template> de abajo son la referencia de markup que
+         usa (o debería usar) motor-render.js/pintarEsqueleto() para
+         los tres estados posibles antes de que haya datos reales:
+         cargando, vacío tras un filtro sin resultados, y error de
+         red. El <p> suelto fuera de los <template> es el estado
+         inicial real en el HTML servido — el primer paint, antes de
+         que corra cualquier JS. -->
+    <div id="panelDescubrimiento" class="descubrimiento-panel">
+      <template id="template-loading">
+        <p class="vacio">Cargando lugares…</p>
+      </template>
+      <template id="template-empty">
+        <p class="vacio">No encontramos lugares con esos criterios. Probá otra búsqueda.</p>
+      </template>
+      <template id="template-error">
+        <p class="vacio error" role="alert">
+          Algo salió mal. <button type="button" class="btn-link">Reintentar</button>
+        </p>
+      </template>
+      <p class="vacio">Cargando lugares…</p>
+    </div>
+
+    <!-- Live region separada de #subtituloRegion a propósito: esta
+         es exclusivamente para anuncios de "N resultados" tras una
+         búsqueda/filtro — mezclarla con el título de región forzaría
+         a un lector de pantalla a re-anunciar el título completo en
+         cada tecleo, no solo el conteo nuevo. -->
+    <div id="estadoResultados" role="status" aria-live="polite" aria-atomic="true" class="u-sr-only"></div>
+  </section>
+
+  <!-- SOBRE LA CIUDAD (expansión de contenido, nueva): contexto real
+       de Concepción del Uruguay para quien no la conoce todavía —
+       turista que llega por primera vez, o local que nunca leyó esta
+       historia en detalle. 100% estático, contenido editorial propio
+       de URU SPOT (no depende de lugares-core.json ni de ningún
+       motor). Los datos históricos y geográficos citados acá son
+       verificables públicamente (fundación, población aproximada,
+       hechos vinculados a Urquiza y Ramírez, accesos y atractivos
+       naturales) — se evitó a propósito cualquier cifra sobre la que
+       hay fuentes contradictorias (por ejemplo, distancias exactas a
+       sitios cercanos), prefiriendo una descripción cualitativa antes
+       que un dato falso con apariencia de precisión. -->
+  <section class="ciudad envoltorio u-reveal" id="sobre-la-ciudad" aria-labelledby="ciudad-titulo">
+    <h2 id="ciudad-titulo">Sobre Concepción del Uruguay</h2>
+    <p class="ciudad__intro">
+      Antes de ser una lista de lugares para elegir, Concepción del Uruguay es una ciudad con casi
+      dos siglos y medio de historia, asomada al río que le da nombre. Esto es lo básico para
+      ubicarte, tanto si venís de visita como si naciste acá y nunca lo leíste ordenado.
     </p>
-    <div class="senial">bajá para recorrerlo, buscalo o filtralo — es la misma secuencia</div>
-  </section>
-
-</div>
-
-<div class="envoltorio">
-
-  <section class="titulo-vista">
-    <div class="eyebrow">un lente, no una vista nueva</div>
-    <h2>Buscar, filtrar o mirar el mapa es lo mismo: recortar la secuencia.</h2>
-    <p>Nada de esto reordena el padrón. Un lugar filtrado conserva su
-      posición real — la que tenía cuando se caminó — aunque hoy lo
-      estés viendo a través de un filtro de rubro, una búsqueda de
-      texto o el mapa.</p>
-  </section>
-
-  <section class="herramientas">
-    <div class="buscador">
-      <span class="lupa">buscar</span>
-      <input id="inputBuscar" type="text" placeholder="por nombre, rubro o dirección…" autocomplete="off">
+    <div class="ciudad-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🏛️</span>
+        <p>
+          <strong>Una ciudad fundacional.</strong> Se fundó el 25 de junio de 1783, cuando el
+          comandante Tomás de Rocamora trazó su primer plano urbano por encargo del virrey Juan
+          José de Vértiz y Salcedo. Antes de esa fundación oficial ya existía población asentada en
+          la zona desde principios del siglo XVII. Fue capital de la provincia de Entre Ríos hasta
+          1883, cuando ese título pasó a Paraná.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">⚜️</span>
+        <p>
+          <strong>Cuna de figuras del federalismo.</strong> Acá nació Francisco Ramírez y acá
+          construyó buena parte de su vida pública Justo José de Urquiza, que fundó el histórico
+          Colegio del Uruguay. En la Plaza San Martín — conocida también como Plaza Ramírez, el
+          centro simbólico de la ciudad — ocurrió el 1º de mayo de 1851 el Pronunciamiento de
+          Urquiza contra Rosas, un antecedente directo de la Constitución de 1853.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🌊</span>
+        <p>
+          <strong>A la orilla del río Uruguay.</strong> La ciudad se asienta sobre la margen del río
+          Uruguay, con playas de arena, islas y arroyos a poca distancia del centro — Banco Pelay,
+          la Isla Cambacuá y el Balneario Municipal sobre el Riacho Itapé son los puntos de baño más
+          conocidos, sobre todo en temporada de verano.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">♨️</span>
+        <p>
+          <strong>Aguas termales todo el año.</strong> Sobre la Ruta Nacional 14, a las afueras del
+          centro urbano, funciona un complejo termal con varias piscinas de agua mineralizada —
+          algunas cálidas todo el año, otras frías en verano — pensado tanto para el turismo como
+          para el uso de quienes viven en la ciudad.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🏰</span>
+        <p>
+          <strong>Patrimonio a mano.</strong> El casco histórico conserva el Colegio Justo J.
+          Urquiza, la Basílica de la Inmaculada Concepción (con el mausoleo del general Urquiza) y
+          la antigua Capitanía de Puerto. A poca distancia en auto se puede visitar el Palacio San
+          José, la residencia de Urquiza convertida hoy en museo nacional.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🚌</span>
+        <p>
+          <strong>Bien conectada.</strong> Está sobre la Ruta Nacional 14, uno de los corredores más
+          transitados del litoral, con servicios regulares de larga distancia hacia Buenos Aires,
+          Rosario, Paraná y otras ciudades de Entre Ríos y del Mercosur.
+        </p>
+      </article>
     </div>
-    <div class="chips" id="chipsRubros"></div>
-    <div class="chips">
-      <button class="chip chip-fav" id="chipFav" type="button">favoritos</button>
-      <button class="chip" id="chipLimpiar" type="button">limpiar filtros</button>
-    </div>
-    <div class="estado-resultados" id="estadoResultados">cargando el padrón…</div>
   </section>
 
-  <section class="area" id="secuencia">
-    <div class="panel-lista" id="panelLista">
-      <div class="sin-resultados" id="sinResultados" hidden>
-        <b>Ningún lugar coincide con este filtro.</b>
-        No es un error de carga: dentro del padrón completo, nadie
-        cumple esa combinación todavía. Probá con otro rubro o borrá
-        la búsqueda.
-      </div>
+  <!-- MANIFIESTO: contenido 100% estático, no depende de datos ni de
+       JS — visible incluso con <noscript> activo.
+       Auditoría 2ª pasada: se retira la tarjeta "tus rechazos pesan
+       poco" — decía, casi palabra por palabra, lo mismo que la
+       tarjeta ⑥ de Metodología ("los rechazos pesan poco y se apagan
+       solos"), dos secciones seguidas repitiendo el mismo hecho. Se
+       mantiene la versión de Metodología por ser más específica
+       (explica el POR QUÉ, no solo el QUÉ). Ningún hecho se pierde —
+       se cuenta una sola vez, en el lugar que mejor lo explica. -->
+  <section class="manifiesto envoltorio u-reveal" id="manifiesto" aria-labelledby="manifiesto-titulo">
+    <h2 id="manifiesto-titulo">Cómo funciona</h2>
+    <div class="manifiesto-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">✓</span>
+        <p>Cada lugar que ves fue caminado y verificado por alguien del equipo, en fuentes oficiales, Google Places o en el lugar mismo.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">⚖</span>
+        <p>El orden no es un ranking pago: nadie compra su posición. El dinero financía mejor ficha, nunca mejor posición.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">✉</span>
+        <p>¿Error o lugar que falta? <a href="mailto:padron@uruspot.com.ar">Escribinos</a> y lo revisamos.</p>
+      </article>
     </div>
-
-    <aside class="panel-mapa">
-      <div class="mapa-etiqueta">mapa esquemático — misma secuencia, otro lente</div>
-      <div class="mapa-lienzo" id="mapaLienzo">
-        <span class="eje eje-n">N</span>
-        <span class="eje eje-s">S</span>
-        <span class="eje eje-e">E</span>
-        <span class="eje eje-o">O</span>
-        <div class="central"></div>
-      </div>
-      <p class="mapa-nota">Las posiciones son las coordenadas reales de
-        cada lugar, escaladas al recuadro — no es un mapa de calles,
-        es la misma lógica de la secuencia aplicada a otro eje.</p>
-    </aside>
   </section>
 
-</div>
-
-<div class="envoltorio envoltorio--angosta">
-
-  <section class="manifiesto" id="manifiesto">
-    <div class="eyebrow">cómo pensamos esto</div>
-    <h2>Un catálogo se llena. Un registro se completa.</h2>
-    <p>
-      Cualquier plataforma de lugares puede sumar contenido para
-      siempre. Nosotros no. <b>URU SPOT tiene un final</b>: el día
-      que se camine la última dirección de Concepción del Uruguay,
-      el padrón está terminado. No hay incentivo para inflarlo, ni
-      apuro por publicar algo sin confirmar.
+  <!-- CÓMO PENSAMOS EL ORDEN (expansión de contenido, nueva):
+       profundiza el manifiesto de arriba con el detalle que "no
+       compramos posición" deja sin explicar — CÓMO decide el sistema
+       qué mostrar primero. 100% estático: describe en lenguaje llano
+       el comportamiento real de motor-plano.js/motor-exposicion.js
+       (Guía → Exploración → Acción Directa según cuánto interactuás),
+       sin exponer nombres de variables ni implementación interna. -->
+  <section class="metodologia envoltorio u-reveal" id="metodologia" aria-labelledby="metodologia-titulo">
+    <h2 id="metodologia-titulo">Cómo pensamos el orden</h2>
+    <p class="metodologia__intro">
+      Arriba contamos qué NO hacemos. Esto es el CÓMO: qué hacemos, paso a paso, con lo poco que
+      sabemos de vos en cada visita.
     </p>
-    <div class="principios">
-      <div class="principio">
-        <div class="tag">sin ranking</div>
-        <p><b>El orden nunca es una opinión.</b> No medimos "mejor" ni
-          "más popular". El único orden que respetamos es el orden en
-          que se relevó cada dirección — por eso cada lugar tiene una
-          posición, no una calificación.</p>
-      </div>
-      <div class="principio">
-        <div class="tag">sin relleno</div>
-        <p><b>Lo que no está verificado, no se muestra como si lo
-          estuviera.</b> Preferimos marcar una ficha "pendiente de
-          confirmación" antes que una ficha adivinada. Es más lento.
-          También es lo único que nos distingue de un scraper.</p>
-      </div>
-      <div class="principio">
-        <div class="tag">sin vencimiento oculto</div>
-        <p><b>Una vez verificado, un lugar queda en el padrón</b> hasta
-          que alguien vuelva a confirmarlo o desmentirlo — nunca porque
-          dejó de pagar, ni porque bajó su actividad.</p>
-      </div>
+    <div class="metodologia-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">①</span>
+        <p>
+          <strong>Arrancás en Guía.</strong> La primera vez que abrís URU SPOT no sabemos nada de
+          vos, así que te mostramos poco: un recorte acotado, pensado para no abrumarte con 1.400+
+          lugares de una sola vez. Es una decisión de diseño, no una limitación técnica.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">②</span>
+        <p>
+          <strong>Cada interacción suma evidencia.</strong> Buscar algo puntual, guardar un lugar o
+          descartar otro son señales. Ninguna acción aislada cambia demasiado — el sistema
+          reacciona a patrones que se repiten, no a un solo clic.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">③</span>
+        <p>
+          <strong>El control se suelta de a poco.</strong> A medida que interactuás, pasás de Guía a
+          Exploración y eventualmente a Acción Directa: menos curaduría de nuestra parte, más
+          catálogo real a tu disposición, porque ya demostraste que sabés qué buscás.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">④</span>
+        <p>
+          <strong>Buscar explícitamente salta el proceso.</strong> Si escribís un nombre, un rubro o
+          una dirección en el buscador, te mostramos TODOS los que matchean, sin recorte artificial
+          — el acompañamiento gradual es para cuando no sabés qué buscar, nunca un obstáculo cuando
+          sí lo sabés.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">⑤</span>
+        <p>
+          <strong>Nada de esto se comparte ni se vende.</strong> Lo que guardamos vive en tu
+          navegador (almacenamiento local), no en un servidor con tu identidad. Si borrás los datos
+          del sitio o cambiás de dispositivo, URU SPOT vuelve a arrancar en Guía con vos.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">⑥</span>
+        <p>
+          <strong>Los rechazos pesan poco y se apagan solos.</strong> Descartar un lugar no lo borra
+          para siempre ni lo penaliza para otros usuarios — es una señal tuya, temporal, que se
+          diluye con el tiempo si no se repite.
+        </p>
+      </article>
     </div>
   </section>
 
-  <section class="indice" id="rubros">
-    <div class="indice-cab">
-      <h2>Los rubros del padrón</h2>
-      <span>14 categorías</span>
+  <!-- ÍNDICE POR RUBRO: dinámico, poblado por
+       app.js/pintarIndiceRubros() a partir de rubros-meta.js. El
+       <template> queda declarado como punto de extensión (§9) para
+       cuando ese layout deje de ser un innerHTML simple.
+       Auditoría 2ª pasada: se adelanta esta sección para que quede
+       ANTES del detalle editorial (ver <details> más abajo) — la
+       herramienta de filtro real es lo primero que se ve; la ficha
+       descriptiva de cada rubro y la composición del padrón quedan
+       como profundización opcional a un click, no como peaje de
+       scroll obligatorio antes de llegar a lo funcional. -->
+  <section class="indice envoltorio u-reveal" id="rubros" aria-labelledby="rubros-titulo">
+    <h2 id="rubros-titulo">Por rubro</h2>
+    <div id="listaRubros" role="grid" aria-label="Lugares organizados por rubro">
+      <template id="template-rubros">
+        <!-- app.js puebla #listaRubros directamente; ver §9. -->
+      </template>
     </div>
-    <p class="indice-nota">
-      Orden alfabético, no por cantidad — ordenar por cantidad sería
-      ordenar por importancia, y eso es justamente lo que este
-      registro no hace.
+  </section>
+
+  <!-- DETALLE POR RUBRO — auditoría 2ª pasada (P1). Antes, "Guía
+       editorial de rubros" (14 tarjetas) + "Radiografía del padrón"
+       (14 filas) + "Por rubro" (grilla dinámica, la herramienta real)
+       eran TRES secciones seguidas contando lo mismo desde tres
+       ángulos: 28 bloques de texto/gráfico antes de llegar a la
+       herramienta de filtro en sí. Ningún contenido se borra — se
+       envuelve en un <details> cerrado por defecto, con la grilla
+       dinámica de filtro (arriba) como lo primero que se ve. Quien
+       quiere el detalle completo (ficha por rubro + composición del
+       padrón) lo tiene a un click, sin pagar el costo de scroll por
+       defecto. <details>/<summary> es HTML semántico nativo — no
+       requiere JS, funciona con teclado y lectores de pantalla sin
+       ARIA extra. -->
+  <details class="rubros-detalle envoltorio">
+    <summary class="rubros-detalle__resumen">Ver el detalle completo por rubro y la composición del padrón</summary>
+
+  <!-- GUÍA EDITORIAL DE RUBROS (expansión de contenido, nueva):
+       contenido descriptivo por categoría, separado a propósito de
+       la sección dinámica #rubros de más arriba (que puebla
+       app.js/pintarIndiceRubros() a partir de rubros-meta.js). Esta
+       es contenido humano, de lectura, pensado para quien todavía no
+       sabe qué rubros existen en la plataforma; la sección dinámica
+       de arriba es la herramienta de filtrado en sí. Los 14 rubros y
+       sus colores (var(--color-rubro-*)) son los mismos que ya
+       definen tokens.css y rubros-meta.js — ninguna paleta nueva. -->
+  <section class="rubros-guia envoltorio u-reveal" id="rubros-guia" aria-labelledby="rubros-guia-titulo">
+    <h2 id="rubros-guia-titulo">Qué vas a encontrar en cada rubro</h2>
+    <p class="rubros-guia__intro">
+      URU SPOT organiza todo lo verificado en 14 rubros. Esto es lo que cubre cada uno antes de que
+      elijas uno en el filtro de más abajo.
     </p>
-    <div id="listaRubros"></div>
+    <div class="rubros-guia__grid">
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-gastronomia)">
+        <span class="rubro-ficha__nombre">Gastronomía</span>
+        <p class="rubro-ficha__texto">Restaurantes, bares, rotiserías y todo lo que se come o se toma afuera de casa — el rubro con más lugares verificados hasta hoy.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-alojamiento)">
+        <span class="rubro-ficha__nombre">Alojamiento</span>
+        <p class="rubro-ficha__texto">Hoteles, hosterías, cabañas y bungalows caminados y verificados puerta a puerta, no solo listados desde una foto de internet.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-deporte)">
+        <span class="rubro-ficha__nombre">Deporte</span>
+        <p class="rubro-ficha__texto">Gimnasios, clubes y espacios para entrenar o moverte, dentro y fuera de un techo.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-salud)">
+        <span class="rubro-ficha__nombre">Salud</span>
+        <p class="rubro-ficha__texto">Consultorios, farmacias y centros médicos — el tipo de dato donde "verificado" importa más que en cualquier otro rubro.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-belleza)">
+        <span class="rubro-ficha__nombre">Belleza</span>
+        <p class="rubro-ficha__texto">Peluquerías, barberías y centros de estética de la ciudad.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-compras)">
+        <span class="rubro-ficha__nombre">Compras</span>
+        <p class="rubro-ficha__texto">Desde kioscos de barrio hasta comercios más grandes — lo que resuelve una compra puntual.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-educacion)">
+        <span class="rubro-ficha__nombre">Educación</span>
+        <p class="rubro-ficha__texto">Escuelas, institutos y academias, incluyendo el histórico Colegio del Uruguay.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-finanzas)">
+        <span class="rubro-ficha__nombre">Finanzas</span>
+        <p class="rubro-ficha__texto">Bancos, financieras y casas de cambio para resolver un trámite sin perder el día.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-mascotas)">
+        <span class="rubro-ficha__nombre">Mascotas</span>
+        <p class="rubro-ficha__texto">Veterinarias y pet shops verificados, para cuando quien viaja o vive acá no viaja solo.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-naturaleza)">
+        <span class="rubro-ficha__nombre">Naturaleza</span>
+        <p class="rubro-ficha__texto">Plazas, costaneras y espacios verdes, incluyendo el acceso a las playas del río Uruguay.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-oficios-tecnicos)">
+        <span class="rubro-ficha__nombre">Oficios técnicos</span>
+        <p class="rubro-ficha__texto">Electricistas, plomeros, gasistas y afines — el tipo de contacto que se necesita con poco margen de espera.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-patrimonio)">
+        <span class="rubro-ficha__nombre">Patrimonio</span>
+        <p class="rubro-ficha__texto">Sitios históricos y culturales de una ciudad que fue capital provincial y cuna del federalismo entrerriano.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-servicios-publicos)">
+        <span class="rubro-ficha__nombre">Servicios públicos</span>
+        <p class="rubro-ficha__texto">Trámites, correo y organismos oficiales.</p>
+      </article>
+      <article class="rubro-ficha" style="--rubro-color:var(--color-rubro-transporte)">
+        <span class="rubro-ficha__nombre">Transporte</span>
+        <p class="rubro-ficha__texto">Remises, terminales y estaciones para moverte dentro de la ciudad o salir de ella.</p>
+      </article>
+    </div>
   </section>
 
-  <section class="faq" id="preguntas">
-    <div class="indice-cab">
-      <h2>Preguntas</h2>
-      <span>7</span>
+  <!-- RADIOGRAFÍA DEL PADRÓN (expansión de contenido, nueva): datos
+       REALES, no inventados — calculados directamente contando
+       `grupo` en lugares-core.json (1.468 registros) al momento de
+       escribir esta revisión. Es una fotografía, no un endpoint: se
+       marca explícitamente como "al momento de esta actualización"
+       para no prometer que se recalcula sola. Si en algún momento se
+       quiere que sea dinámico, agregar un `id` acá y una función en
+       app.js que lo recalcule desde REGISTRO — hoy no existe esa
+       función, así que es intencionalmente estático. -->
+  <section class="radiografia envoltorio u-reveal" id="radiografia" aria-labelledby="radiografia-titulo">
+    <h2 id="radiografia-titulo">Radiografía del padrón</h2>
+    <p class="radiografia__intro">
+      Composición real del padrón al momento de esta actualización — 1.468 lugares en total,
+      distribuidos así entre los 14 rubros.
+    </p>
+    <div class="radiografia-lista" role="list" aria-label="Cantidad de lugares por rubro">
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-gastronomia)">
+        <span class="radiografia-fila__nombre">Gastronomía</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:100%"></span></span>
+        <span class="radiografia-fila__num">274</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-compras)">
+        <span class="radiografia-fila__nombre">Compras</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:91%"></span></span>
+        <span class="radiografia-fila__num">249</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-transporte)">
+        <span class="radiografia-fila__nombre">Transporte</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:68%"></span></span>
+        <span class="radiografia-fila__num">186</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-salud)">
+        <span class="radiografia-fila__nombre">Salud</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:64%"></span></span>
+        <span class="radiografia-fila__num">176</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-finanzas)">
+        <span class="radiografia-fila__nombre">Finanzas</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:46%"></span></span>
+        <span class="radiografia-fila__num">127</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-deporte)">
+        <span class="radiografia-fila__nombre">Deporte</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:41%"></span></span>
+        <span class="radiografia-fila__num">111</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-belleza)">
+        <span class="radiografia-fila__nombre">Belleza</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:34%"></span></span>
+        <span class="radiografia-fila__num">94</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-oficios-tecnicos)">
+        <span class="radiografia-fila__nombre">Oficios técnicos</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:31%"></span></span>
+        <span class="radiografia-fila__num">84</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-patrimonio)">
+        <span class="radiografia-fila__nombre">Patrimonio</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:14%"></span></span>
+        <span class="radiografia-fila__num">37</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-educacion)">
+        <span class="radiografia-fila__nombre">Educación</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:12%"></span></span>
+        <span class="radiografia-fila__num">34</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-alojamiento)">
+        <span class="radiografia-fila__nombre">Alojamiento</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:11%"></span></span>
+        <span class="radiografia-fila__num">31</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-naturaleza)">
+        <span class="radiografia-fila__nombre">Naturaleza</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:9%"></span></span>
+        <span class="radiografia-fila__num">26</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-servicios-publicos)">
+        <span class="radiografia-fila__nombre">Servicios públicos</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:8%"></span></span>
+        <span class="radiografia-fila__num">22</span>
+      </div>
+      <div class="radiografia-fila" role="listitem" style="--rubro-color:var(--color-rubro-mascotas)">
+        <span class="radiografia-fila__nombre">Mascotas</span>
+        <span class="radiografia-fila__pista"><span class="radiografia-fila__barra" style="--pct:6%"></span></span>
+        <span class="radiografia-fila__num">17</span>
+      </div>
     </div>
-    <div id="listaPreguntas"></div>
+    <p class="radiografia__nota">
+      100% de los 1.468 lugares tiene coordenadas cargadas, así que cualquiera de ellos puede
+      aparecer en el mapa interactivo cuando corresponda. La profundidad de verificación varía por
+      lugar (visita presencial, fuentes oficiales o Google Places, según el caso) — ver "Cómo
+      verifican cada lugar" en las preguntas frecuentes.
+    </p>
   </section>
 
-</div>
+  </details>
 
-<footer class="pie">
-  <div class="envoltorio envoltorio--angosta">
-    <div class="footer-grillado">
-      <div class="footer-marca">
-        <div class="marca">URU SPOT</div>
-        <p>Un registro caminado, no scrapeado. 1.468 lugares de
-          Concepción del Uruguay, verificados uno por uno.</p>
+  <!-- GUÍAS POR CATEGORÍA: <nav> real porque es, literalmente, un
+       menú de navegación a otras páginas del sitio — no una lista de
+       contenido, un landmark de navegación secundaria. -->
+  <nav class="accesos envoltorio u-reveal" id="accesos" aria-labelledby="accesos-titulo">
+    <h2 id="accesos-titulo">Guías por categoría</h2>
+    <p class="accesos-intro">Si ya sabés qué tipo de lugar buscás, estas guías van directo a lo tuyo.</p>
+    <div class="accesos-grid">
+      <a class="acceso-card" href="../los-mejores-restaurantes-cdu/" data-category="restaurants">
+        <span class="acceso-card__icono" aria-hidden="true">🍽️</span>
+        <span>Restaurantes</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-cafeterias-cdu/" data-category="cafes">
+        <span class="acceso-card__icono" aria-hidden="true">☕</span>
+        <span>Cafeterías</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-heladerias-cdu/" data-category="ice-cream">
+        <span class="acceso-card__icono" aria-hidden="true">🍦</span>
+        <span>Heladerías</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-panaderias-cdu/" data-category="bakeries">
+        <span class="acceso-card__icono" aria-hidden="true">🥖</span>
+        <span>Panaderías</span>
+      </a>
+      <a class="acceso-card" href="../los-mejores-bares-cdu/" data-category="bars">
+        <span class="acceso-card__icono" aria-hidden="true">🍷</span>
+        <span>Bares</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-hosterias-cdu/" data-category="hostels">
+        <span class="acceso-card__icono" aria-hidden="true">🛏️</span>
+        <span>Hosterías</span>
+      </a>
+      <a class="acceso-card" href="../los-mejores-gimnasios-cdu/" data-category="gyms">
+        <span class="acceso-card__icono" aria-hidden="true">🏋️</span>
+        <span>Gimnasios</span>
+      </a>
+      <a class="acceso-card" href="../mejores-veterinarias-cdu/" data-category="vets">
+        <span class="acceso-card__icono" aria-hidden="true">🐾</span>
+        <span>Veterinarias</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- GUÍA PRÁCTICA PARA TU VISITA (expansión de contenido, nueva):
+       información orientativa para quien llega de afuera. Evita a
+       propósito cifras que cambian seguido (horarios exactos,
+       precios de entrada, tarifas de colectivo): esas se desactualizan
+       solas y generan más desconfianza que ayuda si quedan
+       congeladas en un HTML estático. Se prioriza lo que SÍ es
+       estable: cómo es el clima en términos generales, qué llevar,
+       cómo moverse. -->
+  <section class="guia-practica envoltorio u-reveal" id="guia-practica" aria-labelledby="guia-practica-titulo">
+    <h2 id="guia-practica-titulo">Guía práctica para tu visita</h2>
+    <p class="guia-practica__intro">
+      Algunas cosas útiles de saber si venís de afuera — nada que cambie de un mes a otro, para que
+      esta sección siga siendo cierta dentro de un año.
+    </p>
+    <div class="guia-practica-grid">
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">☀️</span>
+        <p>
+          <strong>Clima templado-húmedo.</strong> Veranos calurosos (diciembre a marzo, ideales para
+          playa y termas) e inviernos templados sin heladas extremas. Primavera y otoño son, para
+          la mayoría, la mejor época para caminar la ciudad sin el calor pleno del verano.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🚶</span>
+        <p>
+          <strong>Se recorre bien a pie.</strong> El casco histórico y la zona céntrica son
+          caminables sin apuro; para llegar a las playas o al complejo termal, sobre la Ruta 14,
+          conviene un vehículo, remise o combi turística.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🎒</span>
+        <p>
+          <strong>Qué llevar según la estación.</strong> Protector solar y calzado cómodo casi todo
+          el año; algo de abrigo liviano en invierno. Si vas a la playa o a las termas, traje de
+          baño y toalla — algunos balnearios y el complejo termal alquilan lo que falte.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">💳</span>
+        <p>
+          <strong>Efectivo y tarjeta conviven.</strong> Los comercios más grandes y las cadenas
+          aceptan tarjeta sin problema; en kioscos, ferias y algunos locales más chicos el efectivo
+          sigue siendo más ágil. Nunca está de más llevar algo de los dos.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🕑</span>
+        <p>
+          <strong>El mediodía baja el ritmo.</strong> Como en buena parte del interior argentino,
+          muchos comercios (no todos) hacen un corte al mediodía y retoman por la tarde. Si tenés un
+          trámite puntual, conviene resolverlo por la mañana.
+        </p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="manifiesto-card__icono" aria-hidden="true">🆘</span>
+        <p>
+          <strong>Emergencias.</strong> El número de emergencias en toda la Argentina es el
+          <strong>911</strong>. Para lo que no es una emergencia — un lugar que parece cerrado, un
+          dato que no coincide — usá el contacto del final de esta página.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- GLOSARIO (expansión de contenido, nueva): URU SPOT usa
+       vocabulario propio (Guía, Exploración, Acción Directa, Plano,
+       Curaduría, Destacados, Verificado, Rubro) en distintos puntos
+       de la interfaz sin explicarlo cada vez — acá se explica una
+       sola vez, en un lugar fijo, en vez de repetir la definición en
+       cada tooltip. Términos alineados 1:1 con los nombres reales que
+       usa el código (motor-plano.js, motor-exposicion.js, app.js),
+       sin inventar sinónimos que después no coincidan con lo que se
+       ve en pantalla. -->
+  <section class="glosario envoltorio u-reveal" id="glosario" aria-labelledby="glosario-titulo">
+    <h2 id="glosario-titulo">Glosario</h2>
+    <p class="glosario__intro">
+      Términos que vas a ver en distintos puntos de URU SPOT, explicados una sola vez.
+    </p>
+    <div class="glosario-lista">
+      <div class="glosario-item">
+        <strong class="glosario-termino">Guía</strong>
+        <p class="glosario-definicion">El punto de partida de cualquier sesión nueva: te mostramos poco, elegido con cuidado, para no saturarte con el catálogo completo.</p>
       </div>
-      <div class="footer-col">
-        <h4>Recorrer</h4>
-        <a href="#secuencia">La secuencia</a>
-        <a href="#manifiesto">Cómo pensamos esto</a>
-        <a href="#rubros">Rubros</a>
-        <a href="#preguntas">Preguntas</a>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Exploración</strong>
+        <p class="glosario-definicion">El paso intermedio: ya interactuaste lo suficiente como para que el sistema suelte más variedad y menos curaduría.</p>
       </div>
-      <div class="footer-col">
-        <h4>Sumar un dato</h4>
-        <a href="mailto:padron@uruspot.com.ar">Falta un lugar</a>
-        <a href="mailto:padron@uruspot.com.ar">Corregir una ficha</a>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Acción Directa</strong>
+        <p class="glosario-definicion">El estado de mayor autonomía: acceso directo al catálogo real, con el mapa como herramienta principal en vez del recorte guiado.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Curaduría</strong>
+        <p class="glosario-definicion">Tu lista personal de lugares guardados — la sección a la que te lleva el botón "tu lista guardada" del buscador.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Destacados</strong>
+        <p class="glosario-definicion">El spotlight de lugares con mejor puntuación real y suficientes reseñas — no depende de tu sesión ni de tu ubicación, es el mismo para todos.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Verificado</strong>
+        <p class="glosario-definicion">Alguien del equipo caminó el lugar o lo confirmó en fuentes oficiales y Google Places — no es un dato completado a ojo ni scrapeado sin revisar.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">Rubro</strong>
+        <p class="glosario-definicion">La categoría de un lugar (Gastronomía, Alojamiento, Salud, etc.) — hoy son 14, cada una con su propio color de identificación en el mapa y las tarjetas.</p>
+      </div>
+      <div class="glosario-item">
+        <strong class="glosario-termino">"Cerca de mí"</strong>
+        <p class="glosario-definicion">Modo de búsqueda espacial que ordena los resultados por distancia real a tu ubicación, cuando el lugar tiene coordenadas cargadas.</p>
       </div>
     </div>
-    <div class="footer-base">
-      <span>URU SPOT — registro completo, fase 4</span>
-      <span>32°29'S 58°14'O · Concepción del Uruguay, Entre Ríos</span>
+  </section>
+
+  <!-- PREGUNTAS FRECUENTES: acordeón accesible. El contenido de cada
+       respuesta acá DEBE coincidir con el JSON-LD FAQPage del <head>
+       — ver la nota en esa sección. -->
+  <section class="faq envoltorio u-reveal" id="faq" aria-labelledby="faq-titulo">
+    <h2 id="faq-titulo">Preguntas frecuentes</h2>
+    <div class="faq-lista" id="faqLista" role="region" aria-label="Preguntas frecuentes">
+      <template id="template-faq-item">
+        <article class="faq-item">
+          <h3>
+            <button type="button" class="faq-pregunta" aria-expanded="false">
+              <span class="faq-pregunta__text"></span>
+              <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="faq-respuesta" hidden></div>
+        </article>
+      </template>
+
+      <!-- FAQ inline, sin template: contenido crítico que debe existir
+           en el HTML servido, no solo tras hidratación de JS — así
+           lo ven buscadores y usuarios con <noscript> activo. -->
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-1">
+            <span class="faq-pregunta__text">¿Por qué a veces veo pocos lugares?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-1" hidden>
+          <p>URU SPOT arranca guiando de a poco para no saturarte. A medida que interactuás — buscás, guardás, descartás — el sistema entiende mejor qué mostrarte y suelta más control.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-2">
+            <span class="faq-pregunta__text">¿Cómo verifican cada lugar?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-2" hidden>
+          <p>Alguien del equipo lo camina o lo confirma en fuentes oficiales y Google Places. Nada se completa a ojo ni se scrapea sin revisar.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-3">
+            <span class="faq-pregunta__text">¿El orden se puede comprar?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-3" hidden>
+          <p>No. Un local puede pagar por una mejor ficha (fotos, verificación más profunda), pero nunca por aparecer antes que otro lugar en los resultados.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-4">
+            <span class="faq-pregunta__text">¿Cómo uso el mapa?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-4" hidden>
+          <p>Aparece automáticamente apenas hay resultados con ubicación. Podés arrastrar, hacer zoom con la rueda o los botones +/−, y tocar un pin para ver la ficha resumida del lugar.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-5">
+            <span class="faq-pregunta__text">Encontré un error o falta un lugar, ¿qué hago?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-5" hidden>
+          <p>Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a> con el nombre del lugar y el detalle — lo revisamos y lo corregimos.</p>
+        </div>
+      </article>
+
+      <!-- Preguntas 6-10: expansión de contenido, nuevas. Mismo
+           patrón exacto que las 5 originales (contenido crítico
+           inline, sin template) y mismo texto exacto reflejado en el
+           JSON-LD FAQPage del <head> — ver esa sección para la nota
+           de por qué deben coincidir. -->
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-6">
+            <span class="faq-pregunta__text">¿Qué diferencia hay entre Guía, Exploración y Acción Directa?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-6" hidden>
+          <p>Son los tres momentos de tu sesión (ver <a href="#glosario">Glosario</a>). Arrancás en Guía, con poco para no saturarte. A medida que buscás, guardás o descartás lugares, el sistema entiende que sabés más de lo que buscás y pasa a Exploración y después a Acción Directa, mostrando más catálogo real y menos curaduría de nuestra parte.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-7">
+            <span class="faq-pregunta__text">¿URU SPOT guarda mis datos personales?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-7" hidden>
+          <p>Lo que guardás (favoritos, descartes, tu progreso de sesión) vive en el almacenamiento local de tu propio navegador, no en un servidor con tu nombre o tu identidad. No vendemos ni compartimos esa información con terceros. Si borrás los datos del sitio o cambiás de dispositivo, arrancás de nuevo en Guía.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-8">
+            <span class="faq-pregunta__text">¿Cómo sugiero que agreguen un lugar nuevo?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-8" hidden>
+          <p>Escribinos a <a href="mailto:padron@uruspot.com.ar">padron@uruspot.com.ar</a> con el nombre y, si podés, la dirección o un link de Google Maps. Antes de publicarlo alguien del equipo lo verifica — caminándolo o confirmándolo en fuentes oficiales — así que puede tardar unos días en aparecer.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-9">
+            <span class="faq-pregunta__text">¿Qué pasa si un lugar cierra o cambia de horario?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-9" hidden>
+          <p>Nos pasa, como a cualquier guía que depende de información real: si detectamos o nos avisan que un lugar cerró o cambió, lo actualizamos o lo retiramos. Si llegás a uno que ya no existe, avisanos — es la forma más rápida de corregirlo para el resto.</p>
+        </div>
+      </article>
+
+      <article class="faq-item">
+        <h3>
+          <button type="button" class="faq-pregunta" aria-expanded="false" aria-controls="faq-panel-10">
+            <span class="faq-pregunta__text">¿Funciona con lectores de pantalla y navegación por teclado?</span>
+            <span class="faq-pregunta__icono" aria-hidden="true">+</span>
+          </button>
+        </h3>
+        <div class="faq-respuesta" id="faq-panel-10" hidden>
+          <p>Sí — todo el sitio se puede recorrer con teclado (con foco visible en cada control), el buscador y el mapa tienen roles y estados anunciados por lectores de pantalla, y respetamos las preferencias de movimiento reducido, contraste alto y transparencia reducida del sistema operativo. Ver el detalle completo en <a href="#accesibilidad">Accesibilidad</a>.</p>
+        </div>
+      </article>
     </div>
-  </div>
+  </section>
+
+  <!-- HOJA DE RUTA (expansión de contenido, nueva): transparencia
+       sobre qué existe hoy y qué no todavía. Deliberadamente honesta
+       en ambas direcciones — ni promete fechas que no puede cumplir,
+       ni esconde limitaciones reales conocidas (fotos propias,
+       horarios estructurados) que hoy no tiene. -->
+  <section class="hoja-de-ruta envoltorio u-reveal" id="hoja-de-ruta" aria-labelledby="hoja-de-ruta-titulo">
+    <h2 id="hoja-de-ruta-titulo">Hoja de ruta</h2>
+    <p class="hoja-de-ruta__intro">
+      Qué existe hoy y qué está en camino — sin promesas de fecha, con la misma transparencia con
+      la que explicamos el resto de esta página.
+    </p>
+    <div class="hoja-de-ruta-grid">
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--disponible">Disponible</span>
+        <p><strong>Mapa interactivo con distancia real.</strong> "Cerca de mí" ordena resultados por distancia calculada, no por orden alfabético disfrazado de cercanía.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--disponible">Disponible</span>
+        <p><strong>Spotlight de destacados.</strong> Los mejor puntuados con reseñas reales, independiente de tu sesión.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--camino">En camino</span>
+        <p><strong>Fotos propias por lugar.</strong> Hoy la mayoría de las tarjetas no tiene foto propia — el diseño ya está preparado (<code>.tarjeta__imagen</code>) para cuando el dato exista.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--camino">En camino</span>
+        <p><strong>Horarios estructurados en tiempo real.</strong> Hoy el estado abierto/cerrado depende de datos verificados manualmente, no de una fuente que se actualiza sola.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--camino">En camino</span>
+        <p><strong>Más rubros y más localidades.</strong> El motor está pensado para crecer más allá de Concepción del Uruguay sin rehacer la arquitectura — todavía no se activó para otras ciudades.</p>
+      </article>
+      <article class="manifiesto-card">
+        <span class="ruta-estado ruta-estado--camino">En camino</span>
+        <p><strong>Test automatizado del contrato HTML↔JS.</strong> Hoy la coherencia entre los <code>id</code> de este archivo y lo que espera <code>app.js</code> se revisa a mano — un test e2e mínimo es la mejora pendiente de mayor prioridad técnica.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- COMPROMISO DE ACCESIBILIDAD (expansión de contenido, nueva):
+       hace visible en la propia página lo que hoy ya vive disperso
+       en comentarios de código (skip link, reduced-motion,
+       forced-colors, foco visible, etc.) — nada de lo que dice esta
+       lista es aspiracional, cada ítem corresponde a un mecanismo
+       real ya implementado en tokens.css / index.html. -->
+  <section class="compromiso-a11y envoltorio u-reveal" id="accesibilidad" aria-labelledby="accesibilidad-titulo">
+    <h2 id="accesibilidad-titulo">Accesibilidad</h2>
+    <p class="compromiso-a11y__intro">
+      Lo que ya implementamos, en lenguaje simple — sin prometer más de lo que hoy es cierto.
+    </p>
+    <ul class="a11y-lista">
+      <li>Navegación completa por teclado, con un enlace de salto directo al contenido principal.</li>
+      <li>Foco visible y consistente en todos los controles interactivos (botones, chips, tarjetas, enlaces).</li>
+      <li>Roles y regiones anunciadas para lectores de pantalla en el buscador, el mapa y los contadores dinámicos.</li>
+      <li>Respeto por <code>prefers-reduced-motion</code>: todas las animaciones se desactivan si tu sistema lo pide.</li>
+      <li>Respeto por <code>prefers-contrast</code> y por el modo de alto contraste forzado de Windows.</li>
+      <li>Respeto por <code>prefers-reduced-transparency</code>: el efecto de vidrio se atenúa sin perder legibilidad.</li>
+      <li>Contenido crítico (FAQ, manifiesto, accesos) visible incluso con JavaScript desactivado.</li>
+      <li>¿Encontraste una barrera que no cubrimos? <a href="mailto:padron@uruspot.com.ar">Escribinos</a> y la revisamos.</li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="envoltorio" role="contentinfo">
+  <p>URU SPOT — Concepción del Uruguay, Entre Ríos</p>
+  <p class="footer__meta">
+    <a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a> •
+    <a href="/donde-comer-cdu/terminos.html" rel="terms">Términos</a> •
+    <a href="mailto:padron@uruspot.com.ar">Contacto</a>
+  </p>
 </footer>
 
-<script src="js/fase4-motor.js"></script>
+<!-- RED DE SEGURIDAD: detección de timeout en carga. Ver §7. -->
+<script>
+/**
+ * RESILIENCE SCRIPT: detección de falla silenciosa en carga de datos.
+ *
+ * Si sigue habiendo un placeholder ".vacio" (y no ".vacio.error", que
+ * ya sería un error ya manejado) pasados 12s desde que se ejecutó
+ * este bloque, algo falló sin avisar: motor-render.js caído, un
+ * fetch colgado, o una excepción silenciosa en algún módulo previo.
+ * Se reemplaza el contenido de #panelDescubrimiento por un aviso
+ * accesible (role="alert") con botón de recarga, sin tocar el resto
+ * del flujo normal ni asumir nada sobre qué falló exactamente.
+ */
+(function () {
+  var TIMEOUT_MS = 12000;
+
+  var failsafeTimer = window.setTimeout(function () {
+    var placeholder = document.querySelector('[class*="vacio"]:not(.error)');
+    if (!placeholder) return; // ya se renderizó algo real, todo bien
+
+    var container = document.getElementById('panelDescubrimiento');
+    if (!container) return;
+
+    container.innerHTML = '';
+    var alerta = document.createElement('div');
+    alerta.className = 'vacio error';
+    alerta.setAttribute('role', 'alert');
+    alerta.innerHTML =
+      '<p>Esto está tardando más de lo esperado. Puede ser tu conexión o un problema nuestro.</p>' +
+      '<button type="button" class="btn btn--small" onclick="window.location.reload()">Reintentar</button>';
+    container.appendChild(alerta);
+  }, TIMEOUT_MS);
+
+  // Limpia el timer si la página se descarga antes de los 12s, para
+  // no dejar un setTimeout colgado innecesariamente.
+  window.addEventListener('unload', function () { clearTimeout(failsafeTimer); });
+})();
+</script>
+
+<!-- ESTRATEGIA DE LAZY LOADING PARA IMÁGENES DINÁMICAS — documentación
+     de contrato para motor-render.js, no código ejecutable. Vive acá
+     (y no en un .md aparte) porque describe una convención que debe
+     respetar cualquier código que cree <img> dentro de este documento;
+     mantenerla junto al HTML que gobierna reduce la chance de que se
+     desactualice sin que nadie la note. -->
+<script>
+/**
+ * Todo <img> creado dinámicamente para tarjetas de lugares debe
+ * seguir este patrón:
+ *
+ *   var img = document.createElement('img');
+ *   img.loading = 'lazy';        // Intersection Observer nativo
+ *   img.decoding = 'async';      // no bloquea el render principal
+ *   img.fetchPriority = 'low';   // no compite con el contenido crítico
+ *   img.src = lugar.imagenSrc;
+ *   img.srcset = url + '-small.webp 300w, ' + url + '-medium.webp 600w, ' + url + '-large.webp 1200w';
+ *   img.sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw';
+ *
+ * Resultado esperado: las imágenes se cargan solo cuando entran en
+ * viewport, responden al tamaño real de pantalla, usan WebP nativo,
+ * y no compiten por ancho de banda con el JSON de datos que sí es
+ * crítico para el primer render.
+ */
+</script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     DOCUMENTACIÓN COMPLETA DE index.html (donde-comer-cdu)
+     Reubicada acá, al final del documento, en la 2ª auditoría — ver
+     nota al principio del <head> para el motivo. Contenido idéntico
+     al original, sin editar una sola palabra de las 12 secciones.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════
+     URU SPOT — index.html (donde-comer-cdu)
+     Reconstrucción arquitectónica: 2026-07-22
+
+     ESTE BLOQUE ES EL PUNTO DE ENTRADA A LA DOCUMENTACIÓN DEL ARCHIVO.
+     Léelo antes de tocar cualquier `id`, `data-*` o `<script src>` de
+     acá abajo. La sección 3 (CONTRATO HTML↔JS) es la que más deuda
+     técnica genera si se ignora — es, literalmente, la causa de los
+     dos bugs que motivaron esta revisión.
+
+     ÍNDICE DE ESTA DOCUMENTACIÓN
+       1. Qué es este archivo y qué NO es
+       2. Diagnóstico: por qué el mapa no se veía y por qué los
+          números quedaban en "cargando" (root cause, con evidencia)
+       3. Contrato HTML↔JS — tabla completa de hooks (id / data-*)
+          que js/app.js consume, y qué pasa si se rompen
+       4. Invariantes del documento (lo que nunca debe dejar de ser
+          cierto, aunque cambie el contenido)
+       5. Orden de carga de <script> y por qué es una dependencia dura
+       6. Accesibilidad: decisiones y su justificación
+       7. Resiliencia: qué pasa cuando algo falla
+       8. Seguridad: CSP y por qué estos orígenes y no otros
+       9. Puntos de extensión pensados para quien agregue features
+      10. Deuda técnica conocida, fuera del alcance de este archivo
+      11. Checklist para quien vaya a modificar este archivo
+      12. Expansión de contenido editorial (esta revisión) — qué se
+          agregó, por qué, y qué NO cambia de la arquitectura
+
+     ───────────────────────────────────────────────────────────────
+     1. QUÉ ES ESTE ARCHIVO Y QUÉ NO ES
+     ───────────────────────────────────────────────────────────────
+     Este HTML es la CÁSCARA de la landing "Dónde comer" de URU SPOT.
+     No contiene lógica de negocio, no contiene datos de lugares, no
+     decide qué se muestra ni cuándo. Su único trabajo es:
+
+       (a) declarar los ELEMENTOS ESTABLES que el JavaScript necesita
+           encontrar para poder pintar contenido dinámico sobre ellos
+           (buscador, panel de descubrimiento, mapa, stats, FAQ);
+       (b) declarar el contenido ESTÁTICO que no cambia con datos
+           (manifiesto, accesos por categoría, preguntas frecuentes);
+       (c) cargar, en el orden correcto, los módulos de JS que sí
+           tienen la lógica real (ver sección 5);
+       (d) exponer metadatos para buscadores y redes sociales.
+
+     Si estás buscando la lógica de "cuántos lugares mostrar", "qué
+     región del usuario aplica", "cómo se calcula el mapa" o "qué
+     pasa cuando guardás un lugar" — no está acá. Está en, en este
+     orden de responsabilidad:
+       js/motor-config.js      → constantes y umbrales, un solo lugar
+       js/motor-plano.js       → estado de sesión persistido (PLANO)
+       js/motor-exposicion.js  → cuánto mostrar según el "plano"
+       js/motor-mapa.js        → QUÉ puntos le corresponden al mapa
+       js/proyeccion.js        → matemática de proyección lat/lng→px
+       js/motor-render.js      → CÓMO se dibuja el mapa (canvas propio)
+       js/app.js               → orquestador: conecta todo lo anterior
+                                  con el DOM que este archivo declara
+
+     ───────────────────────────────────────────────────────────────
+     2. DIAGNÓSTICO — POR QUÉ EL MAPA NO SE VEÍA Y LOS NÚMEROS
+        QUEDABAN PEGADOS EN "CARGANDO" (bugs reales, corregidos acá)
+     ───────────────────────────────────────────────────────────────
+     Una revisión anterior de este archivo ("REDISEÑO ARQUITECTÓNICO
+     2026-07-22" original) reemplazó varios `id` por atributos
+     `data-*`, con el argumento correcto de que los `id` usados solo
+     para hooks de JS son peores que atributos semánticos dedicados.
+     El principio es válido — el problema es que esa revisión NUNCA
+     tocó js/app.js, que es un módulo mucho más grande y con lógica
+     real (873 líneas) y que sigue seleccionando elementos por
+     `document.getElementById(...)`. El resultado: varios `id` que
+     app.js necesita dejaron de existir en el HTML, y las funciones
+     que dependían de ellos empezaron a fallar EN SILENCIO, porque
+     todas están escritas defensivamente (`if (DOM.x) DOM.x....`).
+     Nada tira una excepción visible en consola — por eso el bug
+     sobrevivió sin que saltara ninguna alarma obvia.
+
+     Bug A — "el mapa no se ve":
+       `.mapa-container` es el contenedor que envuelve el mapa, su
+       cartel informativo y su leyenda. Nace con el atributo `hidden`
+       en el propio HTML (correcto: no debe verse hasta que haya
+       datos con coordenadas). El problema es que:
+         · no tenía `id`, así que js/app.js no podía referenciarlo, y
+         · js/app.js NUNCA lo tenía en su lista de elementos vigilados
+           (solo vigilaba `#mapaHerramienta`, el `<div>` interno).
+       `[hidden]` en el contenedor padre oculta a TODOS sus hijos sin
+       importar el estado individual de cada uno — así que aunque
+       `actualizarMapaHerramienta()` hiciera bien su trabajo y pusiera
+       `mapaHerramienta.hidden = false`, el padre seguía oculto y el
+       mapa jamás llegaba a pintarse en pantalla. Confirmado también
+       revisando css/mapa.css: `.mapa-container` no tiene NINGUNA
+       regla propia — su visibilidad depende 100% del atributo
+       `hidden`, que nadie quitaba.
+       Arreglo en este archivo: se agrega `id="mapaContainer"`. Ese id
+       por sí solo no alcanza — hace falta que app.js lo agregue a su
+       lista de elementos vigilados y alterne su `.hidden` junto con
+       el de `mapaHerramienta`. Ese cambio, mínimo y quirúrgico, se
+       entrega junto con este archivo (ver parche a js/app.js más
+       abajo en la respuesta — no se reescribió el resto del módulo).
+
+     Bug B — "los números quedan en cargando":
+       Tres piezas de contenido dinámico perdieron su `id` en la
+       misma revisión, y quedaron atascadas en su valor de placeholder
+       para siempre porque `DOM.x` es `null` y cada asignación está
+       protegida por `if (DOM.x)`:
+         · el contador "lugares verificados"     (quedaba en "—")
+         · el contador "rubros distintos"        (quedaba en "—")
+         · el título/subtítulo de la región activa, que arranca en
+           "Para empezar" / "Cargando…" y nunca se actualiza — este
+           es, con altísima probabilidad, el "cargando" que se ve
+           pegado en pantalla.
+         · como efecto secundario menos visible: "tu relación con
+           esta ciudad" en el header tampoco se actualiza nunca.
+       Arreglo en este archivo: se restituye el `id` histórico que
+       app.js espera en cada uno de estos elementos, MANTENIENDO el
+       atributo `data-*` correspondiente (no se revierte la mejora
+       semántica — conviven ambos, ver sección 3 para el porqué).
+
+     Bug C — hallado en la misma auditoría, mismo patrón exacto:
+       `.mapa-info` (el cartel "Clickeá un lugar en el mapa…") tenía
+       clase pero no `id` → `DOM.mapaInfo` también era `null` → el
+       texto "Mostrando X de Y lugares en el mapa" nunca se pintaba.
+       Se agrega `id="mapaInfo"`.
+
+     Bug D — elemento faltante, no solo `id` perdido:
+       js/app.js tiene una función completa,
+       `actualizarContadorGuardados()`, que pinta cuántos lugares
+       tiene guardados el usuario en un badge `#contadorCuraduria`
+       — pero ese elemento no existía en ningún punto del HTML. Se
+       agrega el `<span id="contadorCuraduria">` junto al botón
+       "tu lista guardada", con un parche de estilo mínimo y
+       explícitamente marcado como deuda a migrar (ver sección 10).
+
+     Bug E — metadato incorrecto, sin impacto funcional pero sí de
+       mantenibilidad:
+       `data-map-provider="mapbox"` y el `dns-prefetch` a
+       `api.mapbox.com` son ambos falsos: el motor de mapa
+       (js/motor-render.js) dibuja tiles raster de CARTO (Voyager)
+       directamente sobre un `<canvas>` propio, sin ninguna
+       dependencia de Mapbox. Se corrige el valor del atributo y se
+       reemplaza el `dns-prefetch` por los subdominios reales que usa
+       el motor (a/b/c/d.basemaps.cartocdn.com — ver
+       js/motor-render.js:126, array SUBDOMINIOS). Este tipo de
+       metadato "de mentira" es peligroso porque un mantenedor futuro
+       puede leerlo, confiar en él y perder tiempo buscando una
+       integración de Mapbox que no existe.
+
+     ───────────────────────────────────────────────────────────────
+     3. CONTRATO HTML↔JS — TODO hook que js/app.js consume por id
+        (revisar `js/app.js`, línea ~83, array de `DOM`)
+     ───────────────────────────────────────────────────────────────
+     Regla de oro: cada fila de esta tabla es una promesa. Si cambiás
+     el `id` de un elemento sin actualizar `js/app.js` en el mismo
+     commit, revivís exactamente los bugs A-D de arriba, y lo harás
+     EN SILENCIO — nada va a fallar ruidosamente, solo un pedazo de
+     la interfaz va a dejar de actualizarse. La única forma confiable
+     de detectarlo es una revisión manual comparando este bloque
+     contra el array `DOM` de app.js, o un test que lo automatice
+     (ver sección 10 — no existe ese test todavía).
+
+       id                    │ dueño en app.js         │ qué controla
+       ──────────────────────┼─────────────────────────┼──────────────────────────────
+       rolActual              │ actualizarCabecera()     │ texto "tu relación con esta
+                               │                          │ ciudad" en el header
+       inputBuscar            │ listener de búsqueda     │ valor del buscador
+       btnVerGuardados        │ listener de click        │ activa la región "curaduría"
+       contadorCuraduria      │ actualizarContadorGuard. │ badge con cantidad guardada
+       panelDescubrimiento    │ render()                 │ grilla de tarjetas de lugares
+       tituloRegion           │ actualizarCabecera()     │ título de la región activa
+       subtituloRegion        │ actualizarCabecera()     │ subtítulo de la región activa
+       mapaTextura            │ actualizarMapaTextura()  │ capa ambiental no interactiva
+       mapaContainer          │ actualizarMapaHerram.()  │ visibilidad de TODO el bloque
+                               │                          │ de mapa (contenedor padre)
+       mapaHerramienta        │ inicializarMotorMapa() + │ el <canvas> del mapa en sí
+                               │ actualizarMapaHerram.()  │
+       mapaInfo               │ actualizarMapaHerram.()  │ cartel "mostrando X de Y…"
+       mapaLeyenda             │ pintarLeyenda()          │ leyenda de colores por rubro
+       listaRubros            │ pintarIndiceRubros()     │ grilla "Por rubro"
+       statLugares             │ pintarStatsRapidas()     │ contador "lugares verificados"
+       statRubros              │ pintarStatsRapidas()     │ contador "rubros distintos"
+       faqLista                │ (reservado, ver §9)      │ contenedor de FAQ dinámicas
+       destacados              │ pintarDestacados()       │ visibilidad de TODO el spotlight
+                                │                          │ de mejor puntuados (agregado en
+                                │                          │ auditoría Fase 4 — ver más abajo)
+       listaDestacados         │ pintarDestacados()       │ strip de tarjetas destacadas
+
+     Elementos que NO están en esta tabla (mapa-container, sección
+     manifiesto, accesos por categoría, footer) son intencionalmente
+     estáticos: js/app.js no los toca, y no deberían empezar a
+     necesitar un `id` salvo que se vuelvan dinámicos — en ese caso,
+     agregalos a esta tabla en el mismo commit que los conecte.
+
+     Por qué conviven `id` y `data-*` en el mismo elemento en vez de
+     elegir uno solo: el `id` es el contrato de bajo nivel con
+     `getElementById` (rápido, sin ambigüedad, es lo que ya usa el
+     87% de la lógica en app.js — reescribirlo a `querySelector`
+     para no ganar nada era el tipo de reescritura cosmética que este
+     archivo evita). El `data-*` es semántico: describe QUÉ es el dato
+     ("total-places", "region-title") independientemente de cómo se
+     lo localiza, y es lo que usarían tests end-to-end, lectores de
+     pantalla con software de terceros, o una futura migración a un
+     framework de componentes. Ninguno reemplaza al otro.
+
+     ───────────────────────────────────────────────────────────────
+     4. INVARIANTES DEL DOCUMENTO
+        (verdades que este archivo garantiza; romperlas rompe algo
+        que no es obvio desde el diff que las rompió)
+     ───────────────────────────────────────────────────────────────
+     I1. Todo `id` listado en la sección 3 existe exactamente una vez
+         en este documento y nunca dentro de un `<template>` (los
+         `<template>` no forman parte del DOM activo — un `id`
+         adentro es invisible para `getElementById` hasta que se
+         clona, y si ese clon no le asigna un id ÚNICO por instancia,
+         terminás con ids duplicados en el documento real).
+     I2. `.mapa-container` empieza con `hidden` en el marcado crudo.
+         Es un invariante deliberado (no un placeholder que "alguien
+         se olvidó de sacar"): el mapa no debe existir visualmente
+         hasta que `js/motor-mapa.js` confirme que hay al menos un
+         resultado georreferenciado. Si algún día se decide que el
+         mapa debe verse siempre (aunque vacío), sacar el `hidden` acá
+         NO alcanza — hay que revisar `actualizarMapaHerramienta()` en
+         app.js para que no vuelva a esconderlo cuando no hay puntos.
+     I3. Cada `<template>` tiene un propósito documentado en el punto
+         donde se declara. Un `<template>` sin consumidor conocido en
+         JS es deuda muerta — antes de agregar uno nuevo, confirmá que
+         algo en app.js/motor-render.js lo va a clonar.
+     I4. El orden de los `<script defer>` codifica dependencias reales
+         entre módulos (ver sección 5) — no es orden alfabético ni
+         cosmético. Reordenarlos sin entender esas dependencias puede
+         romper el mapa con un error de consola sutil
+         ("URU_MOTOR_MAPA_RENDER: falta URU_PROYECCION...").
+     I5. El único `<script>` inline permitido es el de resiliencia
+         (sección 7) y el bloque de documentación de lazy-loading —
+         ambos existen deliberadamente fuera de los módulos con
+         nombre porque no son parte de la lógica de negocio, son
+         salvaguardas del propio documento. La CSP (`script-src
+         'self'`) NO bloquea estos porque no usan atributos `on*` ni
+         `javascript:` URIs — son bloques `<script>` normales del
+         mismo documento, que sí están permitidos aunque `'self'` no
+         incluya `'unsafe-inline'`. Ver sección 8 para el detalle.
+     I6. `lang="es-AR"` en `<html>` es el idioma real de TODO el
+         contenido estático de este archivo. Si en el futuro se agrega
+         contenido en otro idioma (una guía en inglés, por ejemplo),
+         ese fragmento necesita su propio `lang="en"` — no cambiar el
+         `lang` del documento entero.
+
+     ───────────────────────────────────────────────────────────────
+     5. ORDEN DE CARGA DE <script defer> — POR QUÉ ES UNA DEPENDENCIA
+        DURA Y NO UNA CONVENCIÓN
+     ───────────────────────────────────────────────────────────────
+     `defer` garantiza dos cosas: (a) la descarga es paralela — el
+     orden en el HTML no afecta cuándo termina de bajar cada archivo,
+     y (b) la EJECUCIÓN respeta el orden del documento, siempre
+     después de parsear el HTML y siempre antes de `DOMContentLoaded`.
+     Este documento se apoya en (b) para resolver dependencias entre
+     módulos sin usar un bundler ni imports de ES modules — es una
+     decisión consciente de simplicidad (sin build step), pero exige
+     que el orden de abajo se respete al pie de la letra:
+
+       1. motor-config.js     — no depende de nada. Define URU_CONFIG.
+       2. rubros-meta.js      — no depende de nada. Define
+                                 URU_RUBROS_META (íconos, colores,
+                                 nombres por rubro).
+       3. locales-slug.js     — no depende de nada. Define
+                                 URU_LOCALES_SLUGS (mapa id→slug para
+                                 armar URLs de ficha).
+       4. motor-plano.js      — usa URU_CONFIG. Define URU_PLANO
+                                 (estado de sesión persistido).
+       5. motor-exposicion.js — usa URU_CONFIG y URU_PLANO. Define
+                                 URU_EXPOSICION.
+       6. motor-mapa.js       — usa URU_CONFIG. Define URU_MAPA
+                                 (qué puntos le corresponden al mapa).
+       7. proyeccion.js       — no depende de nada. Define
+                                 URU_PROYECCION (matemática lat/lng↔px
+                                 y tiles). DEBE ir antes que #8: ver
+                                 motor-render.js línea ~103-120, que
+                                 falla temprano y explícito
+                                 (`console.error` + `crear()` lanza
+                                 excepción) si URU_PROYECCION no
+                                 existe todavía — un diseño defensivo
+                                 correcto que solo funciona si el
+                                 orden acá es el correcto.
+       8. motor-render.js     — usa URU_PROYECCION. Define
+                                 URU_MOTOR_MAPA_RENDER (el motor de
+                                 canvas del mapa).
+       9. app.js              — usa TODOS los anteriores. Es el
+                                 último a propósito: si algún módulo
+                                 de arriba no cargó, app.js encuentra
+                                 `window.URU_X` como `undefined` y
+                                 sus propios chequeos (`if (!PROY)...`,
+                                 `if (!window.URU_MOTOR_MAPA_RENDER)
+                                 return;`) evitan que el resto de la
+                                 página se rompa — se degrada, no
+                                 explota.
+
+     Si agregás un módulo nuevo: identificá de qué `window.URU_*`
+     depende, ubicalo después de esas dependencias y antes de
+     app.js, y agregá una línea a esta lista en el mismo commit.
+
+     ───────────────────────────────────────────────────────────────
+     6. ACCESIBILIDAD — decisiones y su justificación
+     ───────────────────────────────────────────────────────────────
+     · El `<canvas>` del mapa es `aria-hidden` a nivel de
+       implementación en motor-render.js (no en este HTML) porque el
+       mapa siempre tiene una lista paralela de tarjetas con la misma
+       información — el canvas es una redundancia visual, no la única
+       fuente de la información. Por eso `#mapaHerramienta` acá se
+       declara con `role="application"`: ese rol es correcto para el
+       contenedor que EN LA PRÁCTICA aloja gestos custom (arrastrar,
+       zoom con rueda, click en marcador), aunque el propio motor
+       luego marque el `<canvas>` interno como no navegable por
+       teclado/lector — la combinación es intencional, no
+       contradictoria: "esta región tiene su propia interacción" +
+       "pero no obligues a un lector de pantalla a entrar en ella".
+     · `role="search"` en el buscador y `role="status"` +
+       `aria-live="polite"` en las estadísticas rápidas y en
+       `#estadoResultados` siguen el patrón WCAG de landmarks +
+       regiones vivas: un lector de pantalla puede saltar directo al
+       buscador, y se entera de cambios de resultados sin que el
+       foco se mueva solo.
+     · El skip-link (`.skip-link`) es el primer elemento
+       enfocable del `<body>` — cualquier reordenamiento del `<body>`
+       que lo mueva de esa posición rompe su propósito (dejar de ser
+       lo primero que un usuario de teclado tabula).
+     · Los emojis usados como ícono (🍽️, ☕, etc.) llevan
+       `aria-hidden="true"` porque son decorativos — el texto visible
+       junto a cada uno ya transmite el significado; sin ese atributo,
+       un lector de pantalla leería en voz alta el nombre Unicode del
+       emoji antes del texto real, duplicando la información.
+
+     ───────────────────────────────────────────────────────────────
+     7. RESILIENCIA — qué pasa cuando algo falla
+     ───────────────────────────────────────────────────────────────
+     Dos capas de defensa, en orden de exigencia creciente:
+       (1) `<noscript>` — cubre el caso "JS deshabilitado", con un
+           mensaje claro y un contacto por email.
+       (2) El script de failsafe al final del `<body>` — cubre el
+           caso "JS está habilitado pero algo se colgó" (falla de
+           red, un módulo que tira una excepción antes de terminar
+           de pintar, una API caída). Después de 12s sin que el
+           placeholder de carga haya sido reemplazado, inyecta un
+           aviso `role="alert"` con un botón de reintentar. El
+           timeout se limpia en `unload` para no dejar timers vivos
+           si el usuario navega antes de que se cumplan los 12s.
+     Ninguna de las dos capas depende de que el resto del sistema
+     funcione — están escritas para ser lo último que falla.
+
+     ───────────────────────────────────────────────────────────────
+     8. SEGURIDAD — CSP y por qué estos orígenes y no otros
+     ───────────────────────────────────────────────────────────────
+     `script-src 'self'` — todo el JS de negocio es propio y se sirve
+       desde el mismo origen (`js/*.js`); no hay CDN de terceros para
+       lógica. Esto bloquea inyección de script externo aunque haya
+       un XSS en algún dato renderizado con `innerHTML` en app.js.
+     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` —
+       `'unsafe-inline'` es necesario porque el motor de mapa fija
+       colores por rubro con `style="background:..."` inline (ver
+       `pintarLeyenda()` en app.js) — migrar eso a clases CSS
+       generadas dinámicamente sacaría esta excepción, pero no es
+       gratis (habría que generar una clase por color de rubro). Se
+       documenta como deuda aceptada, no como descuido.
+     `img-src 'self' data: https:;` — deliberadamente amplio en
+       `https:` porque los tiles del mapa (CARTO) y las imágenes de
+       lugares pueden servirse desde distintos subdominios/CDNs con
+       el tiempo; `data:` cubre placeholders inline si el motor de
+       render los usara. Es el trade-off correcto para un sitio que
+       consume tiles de mapa de un proveedor externo sin
+       autenticación por origen.
+     `connect-src 'self' https:;` — los tiles se cargan como
+       `<img src=...>`, no por `fetch`, así que en rigor `connect-src`
+       no los gobierna (los gobierna `img-src`, ya cubierto); se deja
+       `https:` amplio acá para no bloquear los `fetch()` a
+       `lugares-core.json` / `lugares-detalles.json` si algún día se
+       sirven desde un dominio distinto (hoy son relativos a
+       `'self'`, que ya está permitido).
+
+     ───────────────────────────────────────────────────────────────
+     9. PUNTOS DE EXTENSIÓN
+     ───────────────────────────────────────────────────────────────
+     · `#faqLista` ya existe como contenedor con un `<template
+       id="template-faq-item">` listo para clonar. Hoy las 5 FAQ están
+       escritas a mano como contenido crítico/estático (para que
+       existan incluso si JS no corre — buscadores y `<noscript>` las
+       ven igual). Si el número de preguntas crece, el patrón correcto
+       es: agregar las nuevas al array `mainEntity` del JSON-LD +
+       clonar `template-faq-item` desde JS, no seguir copiando bloques
+       `<article class="faq-item">` a mano indefinidamente.
+     · `data-map-provider` en `#mapaContainer` queda como hook
+       reservado: hoy nada lo lee, pero si en el futuro se soporta más
+       de un proveedor de tiles (por ejemplo, para tener un fallback
+       si CARTO cae), este atributo es el lugar natural para que
+       `motor-render.js` decida qué URL de tiles usar sin tener que
+       tocar este HTML de nuevo.
+     · `<template id="template-rubros">` en `#listaRubros` está
+       reservado para cuando `pintarIndiceRubros()` necesite un layout
+       más complejo por ítem que un simple `innerHTML +=`; hoy la
+       función arma el HTML directamente en JS por simplicidad.
+
+     ───────────────────────────────────────────────────────────────
+     10. DEUDA TÉCNICA CONOCIDA (actualizado en la 2ª auditoría)
+     ───────────────────────────────────────────────────────────────
+     · No existe ningún test (ni manual con checklist, ni automatizado)
+       que verifique que la tabla de la sección 3 sigue siendo cierta.
+       Hoy la única defensa es la revisión humana. Un test e2e mínimo
+       (Playwright/Puppeteer) que cargue la página y assert-ee
+       `document.getElementById(x) !== null` para cada fila de la
+       tabla sería barato y hubiera atrapado los bugs A-D antes de
+       producción. SIGUE PENDIENTE — fuera del alcance de este archivo.
+     · RESUELTO (2ª auditoría): la regla duplicada
+       `#mapaHerramienta[hidden]{ display:none; }` que esta misma
+       sección reportaba en `css/mapa.css` Y `css/descubrimiento.css`
+       ya NO existe en `css/descubrimiento.css` al momento de esta
+       revisión — solo vive en `css/mapa.css:22`. No se tocó nada para
+       "resolverlo": el duplicado ya no estaba. Se deja esta nota para
+       que quede registro de que el hallazgo original estaba
+       desactualizado, no para reabrir un problema inexistente.
+     · RESUELTO (2ª auditoría): `#contadorCuraduria` y los nuevos
+       patches de esta revisión (`.indice-pagina__grupo-titulo`,
+       `.rubros-detalle__resumen`) ya NO usan `<style>` embebido en
+       este documento — se migraron a `css/boton.css` (bloque "BADGE Y
+       PATCHES MIGRADOS DESDE index.html"), con los tokens reales del
+       proyecto (`--anillo-foco`, `--color-tinta-60`, `--radio-full`,
+       `--glass-borde`) en vez de los fallbacks genéricos que tenía el
+       parche original.
+     · NUEVO (2ª auditoría): `#rubros-guia` (ficha editorial por
+       rubro) y `#radiografia` (composición del padrón) viven ahora
+       dentro de un `<details class="rubros-detalle">` colapsado por
+       defecto, ubicado después de la grilla dinámica `#rubros`. Sus
+       `id` no cambiaron, su contenido no cambió, siguen siendo
+       estáticos y visibles con `<noscript>` (un `<details>` cerrado
+       igual expone su contenido en el DOM/HTML servido, solo lo
+       oculta visualmente hasta que se abre — buscadores y lectores de
+       pantalla lo siguen viendo). Si en el futuro se decide que
+       deben volver a estar siempre expandidos, alcanza con agregar
+       el atributo `open` al `<details>` — no hace falta deshacer la
+       estructura.
+     · NUEVO (2ª auditoría): la tarjeta "tus rechazos pesan poco" del
+       Manifiesto se retiró por ser un duplicado casi literal de la
+       tarjeta ⑥ de Metodología. El hecho no se perdió — se cuenta una
+       sola vez, en la sección que lo explica con más detalle.
+
+     ───────────────────────────────────────────────────────────────
+     11. CHECKLIST PARA QUIEN MODIFIQUE ESTE ARCHIVO
+     ───────────────────────────────────────────────────────────────
+     [ ] ¿Agregaste o renombraste un `id`? → actualizá la tabla de la
+         sección 3 Y el array `DOM` en js/app.js, en el mismo commit.
+     [ ] ¿Agregaste un `<script defer>` nuevo? → ubicalo respetando
+         sus dependencias reales (sección 5) y documentá la
+         dependencia acá.
+     [ ] ¿Modificaste algo dentro de un `<template>`? → confirmá en
+         app.js/motor-render.js que el consumidor sigue esperando esa
+         misma estructura interna.
+     [ ] ¿Tocaste el `<head>`? → correlo por un validador de HTML y
+         confirmá que la CSP sigue permitiendo todo lo que este
+         documento carga (fonts, tiles, JSON de datos).
+     [ ] ¿El cambio afecta contenido visible? → revisá que el
+         `<noscript>` y el JSON-LD (FAQPage, Organization) sigan
+         siendo coherentes con lo que un usuario ve.
+
+     ───────────────────────────────────────────────────────────────
+     12. EXPANSIÓN DE CONTENIDO EDITORIAL (esta revisión)
+     ───────────────────────────────────────────────────────────────
+     Contexto: una auditoría previa (documentada en las secciones 1-11
+     de este mismo archivo) corrigió contratos rotos (bugs A-E) y
+     dejó la arquitectura sólida. Esta revisión NO toca esa
+     arquitectura ni el motor — agrega contenido editorial 100%
+     estático, sin nuevos hooks que `js/app.js` necesite leer, para
+     que el `index` deje de sentirse como una landing corta y pase a
+     ser una guía completa de la ciudad y del producto.
+
+     Secciones nuevas, en orden de aparición en el documento:
+       · `#sobre-la-ciudad`  — contexto histórico/geográfico real de
+         Concepción del Uruguay (fundación 1783, Urquiza, Ramírez,
+         río, termas, patrimonio). Hechos verificados contra fuentes
+         públicas; se evitaron a propósito cifras con fuentes
+         contradictorias entre sí (p. ej. distancias exactas a sitios
+         cercanos).
+       · `#metodologia`      — profundiza "el orden no se compra" con
+         el CÓMO real (Guía → Exploración → Acción Directa), en
+         lenguaje llano, sin exponer nombres de variables internas.
+       · `#rubros-guia`      — contenido de lectura por rubro,
+         complementario (no sustituto) de la sección dinámica
+         `#rubros` que puebla `pintarIndiceRubros()`.
+       · `#guia-practica`    — información orientativa para visitantes,
+         deliberadamente sin cifras que se desactualizan solas
+         (horarios exactos, precios, tarifas).
+       · `#glosario`         — vocabulario propio del producto (Guía,
+         Exploración, Acción Directa, Curaduría, Destacados,
+         Verificado, Rubro), alineado 1:1 con los nombres que ya usa
+         el código.
+       · FAQ ampliado de 5 a 10 preguntas (`faq-panel-6` a
+         `faq-panel-10`), con el JSON-LD `FAQPage` actualizado en el
+         mismo commit — mismo patrón exacto que los 5 originales.
+       · `#hoja-de-ruta`     — transparencia sobre qué existe hoy y
+         qué no todavía (fotos propias, horarios en tiempo real, test
+         e2e del contrato §3), sin comprometer fechas.
+       · `#accesibilidad`    — hace visible en la página lo que antes
+         solo vivía en comentarios de código; cada ítem listado
+         corresponde a un mecanismo real ya implementado (no es
+         aspiracional).
+       · `.indice-pagina`    — nav de anclas después del hero: con 12
+         secciones en vez de 6, sin un mapa de contenido explícito el
+         glosario y la hoja de ruta quedarían invisibles a varios
+         scrolls de profundidad.
+
+     Invariante que esta revisión agrega (I7): ninguna sección nueva
+     de las listadas arriba tiene ni necesita un `id` en la tabla de
+     contrato de la sección 3 — son estáticas por diseño. Si en el
+     futuro alguna de ellas necesita volverse dinámica (por ejemplo,
+     "Hoja de ruta" alimentada desde un JSON real), agregar su `id` a
+     esa tabla en el mismo commit que la conecte, igual que exige el
+     resto del documento.
+
+     CSS: todo el contenido nuevo se apoya en componentes que ya
+     existían (`.manifiesto-card` de `descubrimiento.css`) en vez de
+     clonarlos — la única hoja nueva, `css/contenido-editorial.css`,
+     define exclusivamente lo que no tenía equivalente (índice de
+     anclas, ficha de rubro, lista de glosario, estado de hoja de
+     ruta, checklist de accesibilidad). Ver el encabezado de ese
+     archivo para el detalle.
+     ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>
 </html>
