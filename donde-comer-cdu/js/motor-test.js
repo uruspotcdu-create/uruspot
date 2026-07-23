@@ -22,9 +22,11 @@ global.localStorage = (function () {
 
 require('../js/motor-config.js');
 require('../js/motor-mapa.js');
+require('../js/proyeccion.js');
 var PLANO = require('../js/motor-plano.js');
 var EXPO = require('../js/motor-exposicion.js');
 var MAPA = global.URU_MAPA;
+var PROY = global.URU_PROYECCION;
 var CFG = global.URU_CONFIG;
 
 var fallos = 0, total = 0;
@@ -860,6 +862,188 @@ function lugar(id, grupo, lat, lng) {
   EXPO.recortePorIniciativaPropia(registro, e, 'guia', { ubicacion: { lat: -32.48, lng: -58.24 } });
   assert('recortePorIniciativaPropia no muta el registro de entrada', JSON.stringify(registro) === registroJSONAntes);
   assert('recortePorIniciativaPropia no muta el estado de entrada', JSON.stringify(e) === estadoJSONAntes);
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   BLOQUE 10 — NUEVO: motor-mapa.js, robustez agregada en esta pasada
+   (validación real de coordenadas, deduplicación por id, entradas
+   no-array, herramienta de diagnóstico).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 67. NaN no es una coordenada válida, aunque typeof NaN === 'number' ── */
+(function () {
+  assert('esCoordenadaValida rechaza NaN en lat', MAPA.esCoordenadaValida(NaN, -58.24) === false);
+  assert('esCoordenadaValida rechaza NaN en lng', MAPA.esCoordenadaValida(-32.48, NaN) === false);
+  assert('esCoordenadaValida rechaza lat fuera de rango', MAPA.esCoordenadaValida(200, -58.24) === false);
+  assert('esCoordenadaValida rechaza lng fuera de rango', MAPA.esCoordenadaValida(-32.48, -500) === false);
+  assert('esCoordenadaValida acepta una coordenada real', MAPA.esCoordenadaValida(-32.48, -58.24) === true);
+})();
+
+/* ── 68. Un lugar con lat=NaN no llega al mapa-herramienta ni cuenta para debeMostrarHerramienta ── */
+(function () {
+  var conNaN = [{ id: 'A', lat: NaN, lng: -58.24 }, { id: 'B', lat: -32.48, lng: -58.24 }];
+  assert('puntosHerramienta descarta el lugar con lat NaN',
+    MAPA.puntosHerramienta(conNaN).length === 1 && MAPA.puntosHerramienta(conNaN)[0].id === 'B');
+  var soloNaN = [{ id: 'A', lat: NaN, lng: -58.24 }];
+  assert('debeMostrarHerramienta es false si el único resultado tiene lat NaN',
+    MAPA.debeMostrarHerramienta('guia', soloNaN) === false);
+})();
+
+/* ── 69. puntosTextura filtra coordenadas inválidas ANTES de muestrear, no después ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 30; i++) registro.push({ id: 'L' + i, lat: NaN, lng: -58.24 });
+  registro.push({ id: 'valido', lat: -32.48, lng: -58.24 });
+  var puntos = MAPA.puntosTextura(registro);
+  assert('puntosTextura nunca incluye un lugar con coordenada inválida',
+    puntos.every(function (p) { return MAPA.esCoordenadaValida(p.lat, p.lng); }));
+})();
+
+/* ── 70. deduplicarPorId preserva orden y primera aparición ── */
+(function () {
+  var lista = [
+    { id: 'A', v: 1 }, { id: 'B', v: 1 }, { id: 'A', v: 2 }, { id: 'C', v: 1 }
+  ];
+  var out = MAPA.deduplicarPorId(lista);
+  assert('deduplicarPorId reduce a 3 elementos (A, B, C)', out.length === 3);
+  assert('deduplicarPorId conserva la PRIMERA aparición de A (v:1, no v:2)',
+    out[0].id === 'A' && out[0].v === 1);
+  assert('deduplicarPorId preserva el orden original de las claves', out[1].id === 'B' && out[2].id === 'C');
+})();
+
+/* ── 71. puntosHerramienta descarta ids duplicados y preserva el orden del resto ── */
+(function () {
+  var lista = [
+    { id: 'A', lat: -32.48, lng: -58.24 },
+    { id: 'B', lat: -32.47, lng: -58.23 },
+    { id: 'A', lat: -32.48, lng: -58.24 }
+  ];
+  var out = MAPA.puntosHerramienta(lista);
+  assert('puntosHerramienta elimina el id "A" repetido', out.length === 2);
+  assert('puntosHerramienta no reordena: "A" sigue antes que "B"', out[0].id === 'A' && out[1].id === 'B');
+})();
+
+/* ── 72. Dos lugares distintos en la MISMA coordenada NO se consideran duplicados ── */
+(function () {
+  var lista = [
+    { id: 'edificio-1a', lat: -32.48, lng: -58.24 },
+    { id: 'edificio-1b', lat: -32.48, lng: -58.24 }
+  ];
+  var out = MAPA.puntosHerramienta(lista);
+  assert('coordenada compartida entre dos ids distintos no se deduplica', out.length === 2);
+})();
+
+/* ── 73. Entradas que no son arrays no rompen ninguna función pública ── */
+(function () {
+  [null, undefined, {}, 'texto', 42].forEach(function (entradaInvalida) {
+    assert('puntosTextura no lanza con entrada no-array (' + String(entradaInvalida) + ')',
+      Array.isArray(MAPA.puntosTextura(entradaInvalida)));
+    assert('puntosHerramienta no lanza con entrada no-array (' + String(entradaInvalida) + ')',
+      Array.isArray(MAPA.puntosHerramienta(entradaInvalida)));
+    assert('debeMostrarHerramienta no lanza con entrada no-array (' + String(entradaInvalida) + ')',
+      MAPA.debeMostrarHerramienta('guia', entradaInvalida) === false);
+  });
+})();
+
+/* ── 74. diagnostico() cuenta válidos, inválidos y duplicados por id ── */
+(function () {
+  var lista = [
+    { id: 'A', lat: -32.48, lng: -58.24 },
+    { id: 'B', lat: NaN, lng: -58.24 },
+    { id: 'A', lat: -32.48, lng: -58.24 },
+    { id: 'C', lat: 200, lng: -58.24 }
+  ];
+  var diag = MAPA.diagnostico(lista);
+  assert('diagnostico.total cuenta todos los elementos', diag.total === 4);
+  assert('diagnostico.validos cuenta solo coordenadas reales', diag.validos === 2);
+  assert('diagnostico.invalidos cuenta NaN y fuera de rango', diag.invalidos === 2);
+  assert('diagnostico.duplicadosPorId detecta el id "A" repetido', diag.duplicadosPorId === 1);
+  assert('diagnostico.muestraInvalidos trae al menos un ejemplo', diag.muestraInvalidos.length >= 1);
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   BLOQUE 11 — NUEVO: proyeccion.js, sin cobertura de tests hasta esta
+   pasada. Matemática pura: round-trip, casos límite de encuadrar(),
+   validación de coordenadas, distanciaMetros.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 75. proyectar → desproyectar es la identidad (dentro de tolerancia de punto flotante) ── */
+(function () {
+  var casos = [
+    { lat: -32.4833, lng: -58.2333, zoom: 15 },
+    { lat: 0, lng: 0, zoom: 10 },
+    { lat: 60, lng: 179.9, zoom: 8 },
+    { lat: -60, lng: -179.9, zoom: 18 }
+  ];
+  casos.forEach(function (c) {
+    var p = PROY.proyectar(c.lat, c.lng, c.zoom);
+    var back = PROY.desproyectar(p.x, p.y, c.zoom);
+    assert('round-trip de lat en (' + c.lat + ',' + c.lng + ') @z' + c.zoom,
+      Math.abs(back.lat - c.lat) < 1e-6);
+    assert('round-trip de lng en (' + c.lat + ',' + c.lng + ') @z' + c.zoom,
+      Math.abs(back.lng - c.lng) < 1e-6);
+  });
+})();
+
+/* ── 76. esCoordenadaValida: misma definición real usada por encuadrar/distanciaMetros ── */
+(function () {
+  assert('PROY.esCoordenadaValida rechaza NaN', PROY.esCoordenadaValida(NaN, 0) === false);
+  assert('PROY.esCoordenadaValida rechaza lat fuera de rango', PROY.esCoordenadaValida(-91, 0) === false);
+  assert('PROY.esCoordenadaValida rechaza lng fuera de rango', PROY.esCoordenadaValida(0, 181) === false);
+  assert('PROY.esCoordenadaValida acepta un punto real', PROY.esCoordenadaValida(-32.48, -58.24) === true);
+})();
+
+/* ── 77. distanciaMetros: valor conocido (1° de latitud ≈ 111.19 km) y contrato con datos inválidos ── */
+(function () {
+  var d = PROY.distanciaMetros(0, 0, 1, 0);
+  assert('1 grado de latitud da ~111.19km (Haversine, no una aproximación burda)',
+    Math.abs(d - 111194.9) < 50);
+  assert('distanciaMetros con el mismo punto da 0', PROY.distanciaMetros(-32.48, -58.24, -32.48, -58.24) === 0);
+  assert('distanciaMetros devuelve null (no NaN, no 0) ante coordenada inválida',
+    PROY.distanciaMetros(NaN, 0, 1, 0) === null);
+})();
+
+/* ── 78. encuadrar: un solo punto válido usa el tope de acercamiento razonable, no zoomMax ── */
+(function () {
+  var enc = PROY.encuadrar([{ lat: -32.48, lng: -58.24 }], 800, 600, 48, 20);
+  assert('un solo punto encuadra al tope de acercamiento razonable (16), no a zoomMax (20)',
+    enc.zoom === 16);
+})();
+
+/* ── 79. encuadrar: puntos duplicados en la misma coordenada exacta no fuerzan zoomMax ── */
+(function () {
+  var enc = PROY.encuadrar(
+    [{ lat: -32.48, lng: -58.24 }, { lat: -32.48, lng: -58.24 }],
+    800, 600, 48, 20
+  );
+  assert('bbox de área cero (2+ lugares en el mismo edificio) no salta a zoomMax',
+    enc.zoom === 16);
+})();
+
+/* ── 80. encuadrar: filtra puntos con coordenadas corruptas y sigue encuadrando el resto ── */
+(function () {
+  var enc = PROY.encuadrar(
+    [{ lat: -32.48, lng: -58.24 }, { lat: NaN, lng: -58.20 }, { lat: -32.46, lng: -58.22 }],
+    800, 600, 48, 20
+  );
+  assert('encuadrar no lanza ni devuelve NaN con un punto corrupto en el lote', enc && isFinite(enc.lat) && isFinite(enc.lng));
+})();
+
+/* ── 81. encuadrar: si TODOS los puntos son inválidos, devuelve null (no NaN,NaN) ── */
+(function () {
+  var enc = PROY.encuadrar([{ lat: NaN, lng: 1 }, { lat: 200, lng: 1 }], 800, 600, 48, 20);
+  assert('encuadrar con todos los puntos inválidos devuelve null', enc === null);
+})();
+
+/* ── 82. encuadrar: contenedor sin medir (0×0) devuelve null en vez de un encuadre inservible ── */
+(function () {
+  var enc = PROY.encuadrar([{ lat: 1, lng: 1 }, { lat: 2, lng: 2 }], 0, 0, 48, 20);
+  assert('encuadrar con contenedor 0x0 devuelve null', enc === null);
+})();
+
+/* ── 83. encuadrar: lista vacía sigue devolviendo null (contrato preexistente, sin regresión) ── */
+(function () {
+  assert('encuadrar([]) sigue devolviendo null', PROY.encuadrar([], 800, 600, 48, 20) === null);
 })();
 
 console.log('\n' + (total - fallos) + '/' + total + ' pruebas OK');
