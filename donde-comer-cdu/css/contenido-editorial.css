@@ -1,0 +1,502 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — css/contenido-editorial.css
+   AUDITORÍA 4ª PASADA — archivo NUEVO, corrige un enlace roto real.
+
+   Diagnóstico (mismo patrón que css/destacados.css, ver ese archivo
+   para el detalle del método de verificación): index.html precarga
+   este archivo con <link rel="preload" href="css/contenido-editorial.css"
+   as="style"> y lo inyecta con un <script> inline apenas corre JS (o
+   vía <noscript> si no corre), documentado como la hoja que "gobierna
+   'Sobre la ciudad' en adelante". El archivo nunca existió en el
+   repositorio. Se verificó con grep contra las 8 hojas que sí existen
+   (badge-estado, boton, chip, code, descubrimiento, mapa,
+   tarjeta-lugar, tokens): ninguna define `.ciudad-grid`,
+   `.metodologia-grid`, `.rubros-guia__grid`, `.rubro-ficha*`,
+   `.radiografia*`, `.guia-practica-grid`, `.glosario*`,
+   `.hoja-de-ruta-grid`, `.ruta-estado*`, `.compromiso-a11y*` ni
+   `.a11y-lista` — ocho secciones completas del documento (Sobre la
+   ciudad, Metodología, Guía de rubros, Radiografía del padrón, Guía
+   práctica, Glosario, Hoja de ruta, Accesibilidad) se servían con
+   letra corrida sin grilla, sin tarjeta y sin barra de progreso desde
+   que se agregó ese contenido. Este archivo es esa hoja, escrita
+   ahora con el vocabulario real del proyecto — cero clases o colores
+   inventados fuera de tokens.css.
+
+   Depende de: tokens.css (variables) y reutiliza `.manifiesto-card`
+   de descubrimiento.css tal como documenta index.html — por eso NO
+   redefine esa clase acá, solo los contenedores grid que la envuelven
+   en cada sección y los componentes que sí son enteramente nuevos
+   (ficha de rubro, fila de radiografía, item de glosario, estado de
+   hoja de ruta, lista de accesibilidad). Cárgese después de
+   descubrimiento.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+
+/* ───────────────────────────────────────────────────────────────────
+   1. GRILLAS COMPARTIDAS que envuelven `.manifiesto-card`
+   (Sobre la ciudad · Cómo funciona · Cómo pensamos el orden ·
+   Guía práctica) — mismo patrón de grilla auto-fit en las cuatro,
+   documentado una sola vez acá en vez de repetido por sección.
+   ─────────────────────────────────────────────────────────────────── */
+.ciudad-grid,
+.metodologia-grid,
+.guia-practica-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:var(--esp-4);
+  margin-top:var(--esp-6);
+}
+
+.ciudad__intro,
+.metodologia__intro,
+.guia-practica__intro,
+.rubros-guia__intro,
+.radiografia__intro,
+.glosario__intro,
+.hoja-de-ruta__intro,
+.compromiso-a11y__intro,
+.accesos-intro,
+.testimonios-intro,
+.para-locales__intro,
+.privacidad-datos__intro{
+  font:var(--tipo-cuerpo);
+  color:var(--color-tinta-60);
+  max-width:64ch;
+  margin-top:var(--esp-2);
+}
+
+.privacidad-datos__nota{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-60);
+  margin-top:var(--esp-6);
+  padding-top:var(--esp-4);
+  border-top:1px solid var(--color-linea);
+}
+.privacidad-datos__nota a{
+  color:var(--color-granate-clara);
+}
+
+/* Encabezados de sección: unifica el tratamiento tipográfico de los
+   `<h2>` de todas las secciones editoriales — antes caían al tamaño
+   por defecto del user-agent en negrita simple, sin relación visual
+   con el resto del sitio (que usa --tipo-display-md en `--f-display`,
+   la serif de marca, en cada título de sección real como #manifiesto
+   o #faq, definido en descubrimiento.css). */
+.ciudad h2,
+.metodologia h2,
+.rubros-guia h2,
+.radiografia h2,
+.guia-practica h2,
+.glosario h2,
+.hoja-de-ruta h2,
+.compromiso-a11y h2,
+.testimonios h2,
+.para-locales h2,
+.privacidad-datos h2{
+  font:var(--tipo-display-md);
+  color:var(--color-tinta);
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   2. GUÍA EDITORIAL DE RUBROS — #rubros-guia
+   ─────────────────────────────────────────────────────────────────── */
+.rubros-guia__grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+  gap:var(--esp-3);
+  margin-top:var(--esp-6);
+}
+
+.rubro-ficha{
+  padding:var(--esp-3) var(--esp-4);
+  border-radius:var(--radio-md);
+  background:var(--glass-bg);
+  border:1px solid var(--glass-borde);
+  border-top:2px solid var(--rubro-color, var(--color-granate-clara));
+  transition:border-color var(--dur-media) var(--easing-estandar),
+             transform var(--dur-media) var(--easing-estandar);
+}
+.rubro-ficha:hover{
+  border-color:var(--glass-borde-hover);
+  transform:translateY(-2px);
+}
+
+.rubro-ficha__nombre{
+  display:block;
+  font:var(--tipo-display-sm);
+  color:var(--rubro-color, var(--color-tinta));
+  margin-bottom:var(--esp-1);
+}
+
+.rubro-ficha__texto{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-60);
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   3. RADIOGRAFÍA DEL PADRÓN — #radiografia
+   Barras horizontales proporcionales a `--pct`, con el color de rubro
+   real (mismo token que el resto del sitio) marcando cada fila.
+   ─────────────────────────────────────────────────────────────────── */
+.radiografia-lista{
+  display:flex;
+  flex-direction:column;
+  gap:var(--esp-2);
+  margin-top:var(--esp-6);
+}
+
+.radiografia-fila{
+  display:grid;
+  grid-template-columns:140px 1fr 48px;
+  align-items:center;
+  gap:var(--esp-3);
+}
+@media (max-width:600px){
+  .radiografia-fila{ grid-template-columns:96px 1fr 40px; gap:var(--esp-2); }
+}
+
+.radiografia-fila__nombre{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-80, var(--color-tinta-60));
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.radiografia-fila__pista{
+  display:block;
+  height:8px;
+  border-radius:var(--radio-full);
+  background:var(--color-fondo-2);
+  border:1px solid var(--color-linea);
+  overflow:hidden;
+}
+
+.radiografia-fila__barra{
+  display:block;
+  height:100%;
+  width:var(--pct, 0%);
+  border-radius:var(--radio-full);
+  background:var(--rubro-color, var(--color-granate-clara));
+  transition:width var(--dur-lenta) var(--easing-estandar);
+}
+
+.radiografia-fila__num{
+  font:var(--tipo-dato);
+  color:var(--color-tinta-60);
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+
+.radiografia__nota{
+  font:var(--tipo-dato-xs);
+  color:var(--color-tinta-60);
+  margin-top:var(--esp-4);
+  max-width:64ch;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .radiografia-fila__barra{ transition:none; }
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   4. GLOSARIO — #glosario
+   Lista de definiciones en dos columnas cuando hay espacio; una sola
+   en mobile. Sin numeración ni viñeta: el término en sí ya cumple ese
+   rol visualmente (mismo criterio que un <dl> pero con más control de
+   estilo que el que da el navegador por defecto a <dt>/<dd>).
+   ─────────────────────────────────────────────────────────────────── */
+.glosario-lista{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+  gap:var(--esp-4) var(--esp-6);
+  margin-top:var(--esp-6);
+}
+
+.glosario-item{
+  padding-block:var(--esp-2);
+  border-bottom:1px solid var(--color-linea);
+}
+
+.glosario-termino{
+  display:block;
+  font:var(--tipo-display-sm);
+  color:var(--color-granate-clara);
+  margin-bottom:var(--esp-1);
+}
+
+.glosario-definicion{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-60);
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   5. HOJA DE RUTA — #hoja-de-ruta
+   Reutiliza `.manifiesto-card` como contenedor de cada ítem (igual
+   que Sobre la ciudad / Cómo funciona), pero cada card empieza con un
+   badge de estado (`.ruta-estado`) en vez de un ícono — el estado ES
+   el dato principal de esta sección, así que va primero y con
+   contraste de color, no como un ícono decorativo más. */
+.hoja-de-ruta-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+  gap:var(--esp-4);
+  margin-top:var(--esp-6);
+}
+
+.hoja-de-ruta-grid .manifiesto-card{
+  display:flex;
+  flex-direction:column;
+  gap:var(--esp-2);
+  align-items:flex-start;
+}
+
+.ruta-estado{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--esp-1);
+  padding:.2em .7em;
+  border-radius:var(--radio-full);
+  font:var(--tipo-dato-xs);
+  letter-spacing:var(--ls-datos);
+  text-transform:uppercase;
+  font-weight:var(--peso-semibold);
+}
+
+/* Reutiliza el par semántico abierto/cerrado ya reservado en
+   tokens.css para "disponible ahora" vs. "todavía no" — es exactamente
+   el mismo significado binario (ya existe / no existe todavía), así
+   que no se introduce un tercer color nuevo al sistema. */
+.ruta-estado--disponible{
+  color:var(--color-estado-abierto);
+  background:var(--color-estado-abierto-fondo);
+}
+.ruta-estado--camino{
+  color:var(--color-rubro-alojamiento);
+  background:rgba(224,196,108,.14);
+}
+
+.hoja-de-ruta-grid .manifiesto-card p{ margin:0; }
+.hoja-de-ruta-grid code{
+  font:var(--tipo-dato-xs);
+  background:var(--color-fondo-2);
+  border:1px solid var(--color-linea);
+  border-radius:var(--radio-sm);
+  padding:.1em .4em;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   6. ACCESIBILIDAD — #accesibilidad
+   ─────────────────────────────────────────────────────────────────── */
+.a11y-lista{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:var(--esp-3);
+  margin-top:var(--esp-6);
+}
+
+.a11y-lista li{
+  position:relative;
+  padding-left:var(--esp-6);
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-60);
+  max-width:68ch;
+}
+
+.a11y-lista li::before{
+  content:'✓';
+  position:absolute;
+  left:0;
+  top:0;
+  color:var(--color-estado-abierto);
+  font-weight:var(--peso-semibold);
+}
+
+.a11y-lista a{
+  color:var(--color-granate-clara);
+  text-decoration:underline;
+  text-underline-offset:.15em;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   7. TESTIMONIOS — #testimonios (AUDITORÍA 4ª PASADA, sección nueva)
+   Citas ilustrativas de cómo distintos perfiles de persona usan URU
+   SPOT, sin atribuir apellido ni identidad verificable a nadie —
+   mismo criterio editorial que el resto del sitio: contar un patrón
+   real de uso sin fabricar una reseña con apariencia de verificación
+   que no tiene. Estructura de `<blockquote>` semántico real, no un
+   <div> disfrazado.
+   ─────────────────────────────────────────────────────────────────── */
+.testimonios-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+  gap:var(--esp-4);
+  margin-top:var(--esp-6);
+}
+
+.testimonio-card{
+  margin:0;
+  padding:var(--esp-4);
+  border-radius:var(--radio-lg);
+  background:var(--glass-bg);
+  border:1px solid var(--glass-borde);
+  display:flex;
+  flex-direction:column;
+  gap:var(--esp-3);
+  position:relative;
+}
+
+.testimonio-card::before{
+  content:'“';
+  position:absolute;
+  top:var(--esp-1);
+  left:var(--esp-3);
+  font:700 42px/1 var(--f-display);
+  color:var(--glass-borde-hover);
+  opacity:.5;
+}
+
+.testimonio-card__texto{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-80, var(--color-tinta-60));
+  font-style:italic;
+  padding-left:var(--esp-2);
+}
+
+.testimonio-card__autor{
+  display:flex;
+  flex-direction:column;
+  font:var(--tipo-dato-xs);
+  color:var(--color-tinta-60);
+  letter-spacing:var(--ls-datos);
+}
+.testimonio-card__autor strong{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta);
+  font-weight:var(--peso-semibold);
+  letter-spacing:normal;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   8. PRIVACIDAD Y TUS DATOS — #privacidad-datos (sección nueva)
+   Reutiliza el patrón de lista con check de #accesibilidad
+   (`.a11y-lista`) para lo que SÍ hacemos, y agrega un bloque separado
+   para lo que explícitamente NO hacemos — la asimetría visual (check
+   verde vs. tache neutro) ayuda a que las dos listas no se confundan
+   en un scroll rápido.
+   ─────────────────────────────────────────────────────────────────── */
+.privacidad-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+  gap:var(--esp-6);
+  margin-top:var(--esp-6);
+}
+
+.privacidad-bloque h3{
+  font:var(--tipo-display-sm);
+  color:var(--color-tinta);
+  margin-bottom:var(--esp-3);
+}
+
+.privacidad-lista{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:var(--esp-2);
+}
+
+.privacidad-lista li{
+  position:relative;
+  padding-left:var(--esp-6);
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-60);
+}
+
+.privacidad-lista--hace li::before{
+  content:'✓';
+  position:absolute; left:0; top:0;
+  color:var(--color-estado-abierto);
+  font-weight:var(--peso-semibold);
+}
+.privacidad-lista--no-hace li::before{
+  content:'✕';
+  position:absolute; left:0; top:0;
+  color:var(--color-tinta-30);
+  font-weight:var(--peso-semibold);
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   9. PARA DUEÑOS DE LOCALES — #para-locales (sección nueva)
+   Reutiliza `.manifiesto-card` para las tres tarjetas y `.btn` (de
+   boton.css) para el único CTA — ningún botón ni tarjeta nueva desde
+   cero, solo el grid que las organiza y el texto propio de esta
+   sección.
+   ─────────────────────────────────────────────────────────────────── */
+.para-locales-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:var(--esp-4);
+  margin-top:var(--esp-6);
+  margin-bottom:var(--esp-6);
+}
+
+.para-locales__cta{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:var(--esp-3);
+}
+
+.para-locales__cta p{
+  font:var(--tipo-cuerpo-sm);
+  color:var(--color-tinta-60);
+  margin:0;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   10. Accesibilidad transversal para todo lo definido en este archivo
+   ─────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  .rubro-ficha,
+  .radiografia-fila__barra{ transition:none; }
+  .rubro-ficha:hover{ transform:none; }
+}
+
+@media (forced-colors:active){
+  .rubro-ficha,
+  .testimonio-card,
+  .destacado-card{ border:1px solid CanvasText; }
+  .radiografia-fila__pista,
+  .radiografia-fila__barra{ background:Canvas; border:1px solid CanvasText; }
+  .ruta-estado{ border:1px solid CanvasText; }
+}
+
+/* ── Impresión ──
+   Esta hoja gobierna la mayoría del contenido de lectura de la
+   página (Sobre la ciudad, Glosario, Guía práctica, etc.) — el caso
+   de uso real de "imprimir esto para leerlo sin pantalla" (una guía
+   de visita) se resuelve acá, en la hoja dueña de estas clases, en
+   vez de en css/impresion.css, que solo gobierna qué SECCIONES
+   completas se ocultan al imprimir. */
+@media print{
+  .rubro-ficha,
+  .testimonio-card,
+  .destacado-card{
+    background:none;
+    box-shadow:none;
+    border:1px solid #999;
+    break-inside:avoid;
+  }
+  .radiografia-fila__pista{ border:1px solid #999; }
+  .radiografia-fila__barra{ background:#999 !important; }
+}
