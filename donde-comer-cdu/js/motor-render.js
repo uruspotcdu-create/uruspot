@@ -244,6 +244,29 @@
     return (typeof c === 'string' && RE_HEX.test(c)) ? c : COLOR_DEFECTO;
   }
 
+  // RENDIMIENTO REAL (no especulativo): el catálogo usa un puñado de
+  // colores por rubro (rubros-meta.js tiene ~14 entradas), pero
+  // `hexARgba`/`aclarar` se llaman una vez POR MARCADOR VISIBLE EN
+  // CADA FRAME — con cientos de pines en pantalla a 60fps durante un
+  // pan o una animación de vuelo, eso es re-parsear el mismo puñado
+  // de strings hex miles de veces por segundo. `parseInt` sobre un
+  // string ya visto no cambia de resultado — es la definición de un
+  // caso para memoizar. La caché es por hex crudo (sin alpha), así
+  // que sirve tanto para `hexARgba` (que solo cambia la alpha, un
+  // string liviano) como para `aclarar` (que si acaso solo compone el
+  // rgb ya cacheado con un porcentaje).
+  var CACHE_RGB = Object.create(null);
+  function rgbDe(hex) {
+    var c = CACHE_RGB[hex];
+    if (c) return c;
+    c = CACHE_RGB[hex] = {
+      r: parseInt(hex.slice(1, 3), 16),
+      g: parseInt(hex.slice(3, 5), 16),
+      b: parseInt(hex.slice(5, 7), 16)
+    };
+    return c;
+  }
+
   // GARANTÍA ESTRUCTURAL: todo punto que llega hasta acá ya pasó por el
   // filtro de `establecerPuntos` (lat/lng numéricos y finitos — ver más
   // abajo), así que esta función SIEMPRE devuelve un link válido a la
@@ -568,13 +591,39 @@
       }
     }
 
+    // RENDIMIENTO REAL: `proyectarPuntos()` corre en CADA frame
+    // dibujado (no solo cuando cambia el clustering — `dibujar()` la
+    // llama directo, y `clustersActuales()` la llama cuando el
+    // clustering está desactualizado). La versión anterior hacía
+    // `.map().filter()`: dos arrays nuevos más un objeto literal por
+    // punto, EN CADA frame, incluyendo un pan simple a 60fps con el
+    // catálogo completo en pantalla. Con miles de redibujados por
+    // sesión eso es presión de GC real, no cosmética — el recolector
+    // de basura pausando el hilo principal es exactamente el tipo de
+    // "stutter" que rompe la sensación de fluidez que esta pasada
+    // busca. Se reemplaza por un buffer reutilizado entre frames: se
+    // sobreescriben los mismos objetos en vez de crear otros nuevos, y
+    // el array se trunca con `.length = n` en vez de descartarse.
+    // Es seguro porque ningún consumidor retiene una referencia al
+    // array o a sus objetos más allá del mismo tick en que se pidió
+    // (se lee y se descarta dentro de `dibujar()`/`clustersActuales()`
+    // — nunca se guarda en una variable de instancia ni se pasa a un
+    // callback diferido).
+    var bufferProyectados = [];
     function proyectarPuntos() {
-      return puntos.map(function (p) {
+      var n = 0;
+      for (var i = 0; i < puntos.length; i++) {
+        var p = puntos[i];
         var xy = PROY.puntoAPantalla(p.lat, p.lng, viewport);
-        return { punto: p, x: xy.x, y: xy.y };
-      }).filter(function (p) {
-        return p.x > -40 && p.x < viewport.ancho + 40 && p.y > -40 && p.y < viewport.alto + 40;
-      });
+        if (xy.x > -40 && xy.x < viewport.ancho + 40 && xy.y > -40 && xy.y < viewport.alto + 40) {
+          var slot = bufferProyectados[n];
+          if (!slot) { slot = bufferProyectados[n] = {}; }
+          slot.punto = p; slot.x = xy.x; slot.y = xy.y;
+          n++;
+        }
+      }
+      bufferProyectados.length = n;
+      return bufferProyectados;
     }
 
     // Clustering por grilla en espacio de pantalla: solo agrupa cuando
@@ -732,12 +781,12 @@
     }
 
     function hexARgba(hex, alpha) {
-      var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-      return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+      var c = rgbDe(hex);
+      return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha + ')';
     }
     function aclarar(hex, pct) {
-      var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-      r = Math.min(255, r + pct * 2.55); g = Math.min(255, g + pct * 2.55); b = Math.min(255, b + pct * 2.55);
+      var c = rgbDe(hex);
+      var r = Math.min(255, c.r + pct * 2.55), g = Math.min(255, c.g + pct * 2.55), b = Math.min(255, c.b + pct * 2.55);
       return 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
     }
 
@@ -1383,6 +1432,34 @@
       etiqueta.style.left = p.x + 'px';
       etiqueta.style.top = p.y + 'px';
       etiqueta.hidden = false;
+    }
+
+    // ── Prioridad visual derivada del orden de exposición ──
+    // INTELIGENCIA VISUAL, no un motor de scoring paralelo: este
+    // archivo NUNCA debe decidir qué lugar es "mejor" — esa decisión
+    // es enteramente de motor-exposicion.js (ver `ordenarPorScore`,
+    // que ya deja los resultados ordenados por score descendente antes
+    // de que lleguen a app.js y de ahí a `establecerPuntos`). Pero ese
+    // orden YA es información real y gratuita: el índice de un punto
+    // dentro del array de entrada es, en los hechos, su rango de
+    // relevancia. Ignorar esa señal y tratar a todos los marcadores
+    // igual visualmente sería desperdiciar algo que el resto del
+    // sistema ya calculó con más contexto del que este renderer tiene
+    // o debería tener. Por eso: los primeros `TOP_PRIORIDAD_VISUAL`
+    // puntos del array (tal cual llegan) se dibujan con una leve
+    // jerarquía — halo sutil + se dibujan al final (encima del resto
+    // cuando hay solapamiento visual) — sin inventar ninguna métrica
+    // propia y sin exponer ninguna API nueva que motor-exposicion.js
+    // tendría que aprender a llenar. Si `establecerPuntos` recibe un
+    // conjunto que no viene ordenado por relevancia (p. ej. otro
+    // consumidor futuro), el peor caso es una jerarquía visual
+    // arbitraria pero inofensiva — nunca un error.
+    var TOP_PRIORIDAD_VISUAL = 3;
+    var rangoPorId = Object.create(null); // id -> índice en el array de entrada (0 = más relevante)
+
+    function esPrioridadVisual(id) {
+      var rango = rangoPorId[id];
+      return rango !== undefined && rango < TOP_PRIORIDAD_VISUAL;
     }
 
     /* ── Lista accesible en paralelo (teclado / lectores de pantalla) ── */
