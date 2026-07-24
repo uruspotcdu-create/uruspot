@@ -1,23 +1,37 @@
 /* ═══════════════════════════════════════════════════════════════════
    URU SPOT — Ambient Engine — js/ambiente-orquestador.js
-   Fase 0: Orquestador central (Documento de diseño, Cap. 11.1 / 11.2)
+   Fase 0/2: Orquestador central — Ambient Engine, raíz orquestadora
+   (Documento de diseño, Cap. 11.1 / 11.2; Arquitectura técnica, Cap. 3.1)
 
    Es la única pieza del sistema que efectivamente conecta señales,
-   estados y capas entre sí (Cap. 11.3). Expone hacia el resto de la
-   aplicación la superficie mínima y estable descrita en el Cap. 11.1:
-   "una forma de indicar la escena activa, una forma de indicar el
-   estado activo, y poco más" — window.AmbientEngine.
+   estados, gobierno y capas entre sí (Cap. 11.3 diseño / Cap. 2.3
+   arquitectura: "el Grupo de Orquestación es el único que puede
+   comunicarse con los tres grupos restantes"). Expone hacia el resto
+   de la aplicación la superficie mínima y estable descrita en el
+   Cap. 11.1: "una forma de indicar la escena activa, una forma de
+   indicar el estado activo, y poco más" — window.AmbientEngine.
 
    Ninguna pantalla funcional de la aplicación debería necesitar
    conocer los detalles internos de una capa (Cap. 11.4). Este
-   archivo es, a propósito, el único lugar donde señales + estados +
-   capas se importan juntos; ambiente-senales.js, ambiente-estados.js
-   y ambiente-capa-fondo.js no se conocen entre sí.
+   archivo es, a propósito, el único lugar donde infraestructura +
+   gobierno + estados + Motion Controller + capas se importan juntos;
+   ningún otro módulo del Ambient Engine conoce a sus pares de otro
+   grupo funcional.
+
+   Fase 2: este archivo ya no lee ambiente-senales.js (retirado — ver
+   nota en ambiente-accesibilidad.js). Las señales que antes venían de
+   ahí ahora se leen de sus fuentes canónicas: AmbienteAccesibilidad
+   (reducirMovimiento) y AmbienteRendimiento (nivel de fidelidad).
+   También precalienta el Asset Registry (Cap. 8.1) e inicia el Motion
+   Controller (Cap. 3.4), que es quien de ahora en más decide qué
+   parámetros de movimiento recibe cada capa — este archivo ya no le
+   pasa señales de gobierno directamente a ninguna capa.
 
    Debe cargarse ÚLTIMO entre los scripts del Ambient Engine: con
    scripts `defer`, el orden de ejecución es el orden del documento,
-   así que para cuando este módulo corre, AmbienteSenales,
-   AmbienteEstados y AmbienteCapaFondo ya existen.
+   así que para cuando este módulo corre, todo el Grupo de
+   Infraestructura, todo el Grupo de Gobierno, AmbienteEstados,
+   AmbienteMovimiento y AmbienteCapaFondo ya existen.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -52,22 +66,48 @@
     document.documentElement.setAttribute('data-ambiente-estado', estado);
   }
 
-  function reflejarSenalesEnDOM() {
-    var s = global.AmbienteSenales;
-    document.documentElement.setAttribute('data-ambiente-reducido', String(s.reducirMovimiento));
-    document.documentElement.setAttribute('data-ambiente-rendimiento', s.rendimiento);
+  // Fase 2: ya no refleja una sola "señal" cruda — refleja el
+  // resultado ya resuelto de Accessibility Manager y Performance
+  // Manager, cada uno desde su propia fuente canónica (Cap. 2.3: el
+  // Grupo de Gobierno puede ser consultado por el Grupo de
+  // Orquestación sin restricción, a diferencia del Grupo de Contenido
+  // Visual).
+  function reflejarGobiernoEnDOM() {
+    var a = global.AmbienteAccesibilidad;
+    var r = global.AmbienteRendimiento;
+    if (a) document.documentElement.setAttribute('data-ambiente-reducido', String(a.reducirMovimiento));
+    if (r) document.documentElement.setAttribute('data-ambiente-rendimiento', r.nivelFidelidad);
   }
 
   function iniciar() {
-    // Fase 0 incompleta sin señales o sin máquina de estados: se
-    // aborta silenciosamente en vez de fallar a medias. Mejor no
-    // tener Ambient Engine que tenerlo roto compitiendo con el
-    // contenido real (Cap. 1.4).
-    if (!global.AmbienteSenales || !global.AmbienteEstados) return;
+    // Fase 0 incompleta sin máquina de estados: se aborta
+    // silenciosamente en vez de fallar a medias. Mejor no tener
+    // Ambient Engine que tenerlo roto compitiendo con el contenido
+    // real (Cap. 1.4).
+    if (!global.AmbienteEstados) return;
 
-    reflejarSenalesEnDOM();
-    global.AmbienteSenales.suscribir(reflejarSenalesEnDOM);
+    // ── Grupo de Infraestructura (Cap. 8.1) ─────────────────────────
+    // Precalienta los assets de carga anticipada de la escena inicial
+    // antes de que cualquier capa los pida — así ninguna capa visual
+    // tiene que preocuparse por si el Asset Registry ya está "tibio".
+    if (global.AmbienteAssets) global.AmbienteAssets.precalentar();
 
+    // ── Grupo de Gobierno (Cap. 3.10 / 3.11) ────────────────────────
+    // Performance Manager ya se autoinicia al cargarse (ver su propio
+    // archivo); Accessibility Manager no requiere inicio explícito.
+    // Este orquestador solo se suscribe a ambos para reflejar su
+    // estado en el DOM, el único contrato hacia el resto de la app.
+    reflejarGobiernoEnDOM();
+    if (global.AmbienteAccesibilidad) global.AmbienteAccesibilidad.suscribir(reflejarGobiernoEnDOM);
+    if (global.AmbienteRendimiento) global.AmbienteRendimiento.suscribir(reflejarGobiernoEnDOM);
+
+    // ── Motion Controller (Cap. 3.4) ────────────────────────────────
+    // Se inicia antes que cualquier capa de Contenido Visual, para
+    // que cuando AmbienteCapaFondo.iniciar() corra ya tenga a quién
+    // suscribirse.
+    if (global.AmbienteMovimiento) global.AmbienteMovimiento.iniciar();
+
+    // ── State Manager (Cap. 6) ───────────────────────────────────────
     global.AmbienteEstados.on('cambio', function (evento) {
       reflejarEstadoEnDOM(evento.actual);
     });
@@ -79,9 +119,10 @@
     reiniciarTemporizadorInactividad();
 
     // Fase 1: única capa visual conectada hasta ahora. Fases futuras
-    // (2 en adelante) agregarán el catálogo de escenas real; hasta
-    // entonces, setEscena() solo dispara la Transición y marca el
-    // atributo, sin reconfigurar ninguna capa todavía.
+    // (T4 en adelante del roadmap técnico) agregarán el catálogo real
+    // de escenas vía Scene Manager; hasta entonces, setEscena() abajo
+    // le informa la escena directamente al Motion Controller (ver nota
+    // de cabecera de ambiente-movimiento.js) y dispara la Transición.
     if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
   }
 
@@ -111,14 +152,18 @@
       if (global.AmbienteEstados) global.AmbienteEstados.reintentar();
     },
 
-    // Declarada desde Fase 0 como parte de la superficie estable
-    // (Cap. 11.1), pero sin catálogo de escenas real todavía (eso es
-    // Fase 2 — Cap. 13). Por ahora dispara el Estado de Transición y
-    // deja constancia de la escena en el DOM; no reconfigura capas.
+    // Fase 2: ahora sí tiene un catálogo real detrás (AmbienteConfig,
+    // vía el Motion Controller) en lugar de solo marcar el DOM. Un
+    // nombre de escena desconocido no rompe nada: AmbienteMovimiento
+    // cae de vuelta a la escena inicial (Cap. 6.2 Arquitectura: "el
+    // Scene Manager es quien decide qué hacer si una resolución
+    // falla" — mientras ese módulo no exista, este es el mismo
+    // criterio aplicado por su sustituto temporal).
     setEscena: function (nombre) {
       if (!global.AmbienteEstados) return;
       global.AmbienteEstados.iniciarTransicion(function () {
         document.documentElement.setAttribute('data-ambiente-escena', nombre);
+        if (global.AmbienteMovimiento) global.AmbienteMovimiento.setEscena(nombre);
       });
     }
   };
