@@ -18,8 +18,13 @@
 
    El Estado de Reducción (accesibilidad) NO participa de este grafo
    (Cap. 6.4): es una restricción global gestionada por
-   ambiente-senales.js y leída por quien la necesite, no un nodo más
-   de esta máquina.
+   ambiente-accesibilidad.js y leída por quien la necesite, no un nodo
+   más de esta máquina.
+
+   Fase 2 (Cap. 3.4 Arquitectura): la duración real de la Transición ya
+   no se calcula acá — es un parámetro de movimiento, y por eso lo
+   resuelve el Motion Controller (ambiente-movimiento.js). Este módulo
+   solo le pregunta cuánto debe durar; nunca decide el número él mismo.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -61,15 +66,18 @@
     emitir(anterior, nuevoEstado);
   }
 
-  // Banda de contexto: 400-900ms (Cap. 3.1). Se acorta en
-  // dispositivos de bajo rendimiento o bajo movimiento reducido, pero
-  // nunca se elimina (Cap. 6.5: "eso rompería el principio de
+  // Banda de contexto: 400-900ms (Cap. 3.1). El cálculo real vive en
+  // el Motion Controller (Cap. 3.4 Arquitectura) porque combina
+  // rendimiento y accesibilidad — dos subsistemas de Gobierno que este
+  // módulo no debería tener que conocer directamente. Si el Motion
+  // Controller todavía no cargó (por ejemplo, en tests que instancian
+  // este archivo solo), se usa el valor medio de la banda como
+  // respaldo, nunca cero (Cap. 6.5: "eso rompería el principio de
   // continuidad").
   function duracionTransicion() {
-    var s = global.AmbienteSenales;
-    if (s && s.reducirMovimiento) return 150; // Cap. 9.5: corta, nunca cero
-    if (s && s.rendimiento === 'bajo') return 400; // extremo inferior de la banda
-    return 600; // valor medio de la banda 400-900ms
+    var m = global.AmbienteMovimiento;
+    if (m && typeof m.duracionTransicion === 'function') return m.duracionTransicion();
+    return 600;
   }
 
   var api = {
