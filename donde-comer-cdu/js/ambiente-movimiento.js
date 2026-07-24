@@ -96,6 +96,27 @@
   // forzar a cero lo que la fidelidad todavía dejaba pasar — nunca al
   // revés, para que una preferencia de accesibilidad jamás pueda ser
   // "recuperada" por un nivel de fidelidad alto.
+  //
+  // Cap. 7.4: Presupuesto de Contraste Compartido. La suma de
+  // intensidad visual entre Partículas + Clima + Navegación (profundidad)
+  // nunca puede superar el presupuesto declarado por la escena. Si el
+  // presupuesto se agota, se reduce proporcional a cada capa.
+  function calcularPresupuestoContraste(presupuesto, densidadParticulas, climaHabilitado, profundidadNavegacion) {
+    // Suma bruta de todas las capas que comparten presupuesto
+    var demandaBruta = densidadParticulas + (climaHabilitado ? 0.5 : 0) + profundidadNavegacion;
+    
+    // Si la suma no supera el presupuesto, no hay restricción
+    if (demandaBruta <= presupuesto) return { particulas: 1, clima: 1, navegacion: 1 };
+    
+    // Si supera, cada capa se reduce proporcionalmente
+    var factorGlobal = presupuesto / demandaBruta;
+    return {
+      particulas: factorGlobal,
+      clima: factorGlobal,
+      navegacion: factorGlobal
+    };
+  }
+
   function calcularParametros() {
     var c = config();
     var r = rendimiento();
@@ -109,6 +130,19 @@
     var nivel = c.obtenerNivelFidelidad(nivelId) || c.obtenerNivelFidelidad(c.NIVEL_FIDELIDAD_INICIAL);
     var reducido = !!(a && a.reducirMovimiento);
 
+    // Calcular valores antes de aplicar presupuesto
+    var densidadParticulas = reducido ? 0 : escena.particulas.densidad * nivel.particulas;
+    var climaHabilitado = reducido ? false : (escena.clima.habilitado && nivel.clima > 0);
+    var profundidadNavegacion = escena.profundidad.navegacion * nivel.navegacion;
+    
+    // Aplicar presupuesto de contraste (Cap. 7.4)
+    var factoresPresupuesto = calcularPresupuestoContraste(
+      escena.presupuestoContraste,
+      densidadParticulas,
+      climaHabilitado,
+      profundidadNavegacion
+    );
+    
     var parametros = {
       escena: escena.nombre,
       // Fondo y Luz nunca se desactivan (Cap. 7.2): sus multiplicadores
@@ -119,22 +153,27 @@
         saturacion: escena.fondo.saturacion
       },
       particulas: {
-        densidad: reducido ? 0 : escena.particulas.densidad * nivel.particulas,
-        libertadRecorrido: escena.particulas.libertadRecorrido
+        densidad: densidadParticulas * factoresPresupuesto.particulas,
+        libertadRecorrido: escena.particulas.libertadRecorrido,
+        factorPresupuesto: factoresPresupuesto.particulas
       },
       clima: {
-        habilitado: reducido ? false : (escena.clima.habilitado && nivel.clima > 0),
-        nieblaSutil: !!escena.clima.nieblaSutil
+        habilitado: climaHabilitado,
+        nieblaSutil: !!escena.clima.nieblaSutil,
+        factorPresupuesto: factoresPresupuesto.clima
       },
       luz: {
         intensidad: escena.luz.intensidad * nivel.luz
       },
-      profundidad: calcularProfundidad(escena.profundidad, nivel),
+      profundidad: Object.assign(calcularProfundidad(escena.profundidad, nivel), {
+        factorPresupuesto: factoresPresupuesto.navegacion
+      }),
       transicion: {
         banda: escena.transicion.banda,
         duracionMs: duracionTransicion()
       },
       presupuestoContraste: escena.presupuestoContraste,
+      factoresPresupuesto: factoresPresupuesto,
       reducido: reducido,
       nivelFidelidad: nivelId
     };
