@@ -42,6 +42,14 @@
 <script src="js/motor-mapa.js" defer></script>
 <script src="js/proyeccion.js" defer></script>
 <script src="js/motor-render.js" defer></script>
+<!-- Ambient Engine — Fase 0 + Fase 1 (ver docs/AMBIENT-ENGINE-FASE0-FASE1.md).
+     Orden fijo: señales → estados → capa-fondo → orquestador (el
+     orquestador va último porque es el único que conoce a los otros
+     tres — con `defer` se ejecutan en orden de documento). -->
+<script src="js/ambiente-senales.js" defer></script>
+<script src="js/ambiente-estados.js" defer></script>
+<script src="js/ambiente-capa-fondo.js" defer></script>
+<script src="js/ambiente-orquestador.js" defer></script>
 <script src="js/app.js" defer></script>
 
 <!-- TÍTULOS Y METADATOS CORE -->
@@ -110,6 +118,8 @@
 <!-- HOJAS DE ESTILO — mismo orden de dependencia que documentan sus
      propios encabezados (tokens.css primero, siempre). -->
 <link rel="stylesheet" href="css/tokens.css">
+<!-- Ambient Engine — Fase 1: Capa de Fondo (ver docs/AMBIENT-ENGINE-FASE0-FASE1.md) -->
+<link rel="stylesheet" href="css/ambiente-capa-fondo.css">
 <link rel="stylesheet" href="css/boton.css">
 <link rel="stylesheet" href="css/tarjeta-lugar.css">
 <link rel="stylesheet" href="css/chip.css">

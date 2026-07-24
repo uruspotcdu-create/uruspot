@@ -1,0 +1,67 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — Ambient Engine — css/ambiente-capa-fondo.css
+   Fase 1: Capa de Fondo (Documento de diseño, Cap. 4.1)
+
+   Se carga DESPUÉS de css/tokens.css (usa su vocabulario de tiempo)
+   y ANTES de los componentes de interfaz — la Capa de Fondo es,
+   literalmente, lo que está más atrás de todo (Cap. 4: "la más
+   lejana de la más cercana"). No define nada que un componente deba
+   sobreescribir; si algún componente necesita verse "por encima" de
+   esto, ya lo está por el flujo normal del documento.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* @property registra --ambiente-color-1/2 como <color>: esto es lo
+   que permite que el navegador anime la transición de color de forma
+   nativa aunque el valor esté dentro de una función linear-gradient()
+   (que de otro modo no interpola color a color de forma confiable
+   entre navegadores). Si el navegador no soporta @property, el
+   degradé simplemente cambia sin transición — degradación aceptable,
+   nunca rompe el layout ni la legibilidad. */
+@property --ambiente-color-1 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0A0D13;
+}
+@property --ambiente-color-2 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #10141C;
+}
+
+#ambiente-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: -1; /* Cap. 4: capa más profunda del sistema */
+  pointer-events: none; /* nunca compite por interacción (Cap. 1.4) */
+
+  background: linear-gradient(180deg, var(--ambiente-color-1) 0%, var(--ambiente-color-2) 100%);
+
+  /* Banda ambiental (Cap. 3.1): la transición dura menos que el
+     período de muestreo del JS (60s) para llegar siempre a completarse
+     antes del siguiente cambio, pero sigue dentro del rango 20-90s
+     que el documento define como "el ojo no debe poder percibir el
+     punto exacto de inicio o fin de estos ciclos". */
+  transition: --ambiente-color-1 58s cubic-bezier(.45, 0, .55, 1),
+              --ambiente-color-2 58s cubic-bezier(.45, 0, .55, 1);
+  will-change: background;
+}
+
+/* Usada por ambiente-capa-fondo.js durante el primer aplicado y al
+   volver del segundo plano (Cap. 3.3: la app debe abrir ya en el
+   punto correcto del ciclo, nunca "saltar" visiblemente hacia él). */
+#ambiente-fondo.ambiente-fondo--sin-transicion {
+  transition: none !important;
+}
+
+/* Cap. 9.5: bajo prefers-reduced-motion los cambios de luz del ciclo
+   horario permanecen (son color, no movimiento) pero se aplican de
+   forma instantánea. css/tokens.css ya fuerza esto de forma global
+   (animation-duration/transition-duration: .001ms !important para
+   *, *::before, *::after), así que esta regla es redundante a
+   propósito: documenta la intención acá mismo, en el único archivo
+   que un futuro editor de la Capa de Fondo probablemente abra. */
+@media (prefers-reduced-motion: reduce) {
+  #ambiente-fondo {
+    transition: none;
+  }
+}
