@@ -34,19 +34,23 @@
    - Cap. 7.2 — Fondo y Luz nunca se desactivan del todo, sin importar
      el nivel de fidelidad activo.
 
-   Nota de transición T3→T4: el Scene Manager (Cap. 3.3) todavía no
-   existe — según el roadmap técnico (Cap. 14) es la Fase T4, posterior
-   a esta. Hasta entonces, el Ambient Engine (raíz orquestadora) le
-   informa la escena activa directamente a través de setEscena(),
-   haciendo temporalmente el rol mínimo de "decir qué escena está
-   activa" que en T4 pasará a resolver el Scene Manager real. El día
-   que ese módulo exista, solo hay que redirigir esa única llamada —
-   ninguna otra parte de este archivo cambia.
+   T4 completo: el Scene Manager (Cap. 3.3, js/ambiente-escenas.js) ya
+   existe. Tal como preveía la nota original de este archivo, la única
+   redirección necesaria fue del lado de quien LLAMA a setEscena(): el
+   orquestador ya no le informa la escena directamente a este módulo,
+   sino que delega en AmbienteEscenas.activar(), que resuelve la
+   escena en dos fases (Cap. 6.2) y recién entonces invoca este mismo
+   setEscena() de siempre. Ninguna otra parte de este archivo cambió —
+   setEscena() sigue siendo, a propósito, un método "tonto" que confía
+   en que quien lo llama ya validó la escena.
 
-   Debe cargarse después de ambiente-estados.js, ambiente-rendimiento.js
-   y ambiente-accesibilidad.js, y antes de ambiente-capa-fondo.js y de
-   ambiente-orquestador.js (que es quien lo inicia y quien le informa
-   la escena activa).
+   Debe cargarse después de ambiente-estados.js, ambiente-rendimiento.js,
+   ambiente-accesibilidad.js y ambiente-profundidad.js (Depth Manager,
+   Cap. 3.9 — un cálculo puro sin dependencias propias, así que puede
+   cargarse en cualquier punto anterior a este archivo), y antes de
+   ambiente-escenas.js (que lo invoca en su fase de activación),
+   ambiente-capa-fondo.js y ambiente-orquestador.js (que es quien lo
+   inicia).
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -54,6 +58,24 @@
   function config() { return global.AmbienteConfig || null; }
   function rendimiento() { return global.AmbienteRendimiento || null; }
   function accesibilidad() { return global.AmbienteAccesibilidad || null; }
+  function profundidad() { return global.AmbienteProfundidad || null; }
+
+  // Cap. 3.9: el Motion Controller es quien llama al Depth Manager —
+  // este último "no renderiza contenido propio", solo calcula. Si el
+  // módulo no está cargado (por ejemplo, en un test aislado de este
+  // archivo), se degrada a la misma multiplicación simple que hacía
+  // este propio Motion Controller antes del T6, nunca a un profundidad
+  // vacío que rompería a los suscriptores.
+  function calcularProfundidad(profundidadEscena, nivel) {
+    var d = profundidad();
+    var multiplicadores = { navegacion: nivel.navegacion, atmosfera: nivel.atmosfera };
+    if (d) return d.calcularFactores(profundidadEscena, multiplicadores);
+    return {
+      velocidadRelativa: profundidadEscena.navegacion * multiplicadores.navegacion * 0.12,
+      desenfoqueMaxPx: Math.round(profundidadEscena.atmosfera * multiplicadores.atmosfera * 6),
+      opacidadAtmosfera: 1 - (profundidadEscena.atmosfera * multiplicadores.atmosfera * 0.3)
+    };
+  }
 
   var listeners = [];
   var escenaActualId = null;
@@ -107,10 +129,7 @@
       luz: {
         intensidad: escena.luz.intensidad * nivel.luz
       },
-      profundidad: {
-        navegacion: escena.profundidad.navegacion * nivel.navegacion,
-        atmosfera: escena.profundidad.atmosfera * nivel.atmosfera
-      },
+      profundidad: calcularProfundidad(escena.profundidad, nivel),
       transicion: {
         banda: escena.transicion.banda,
         duracionMs: duracionTransicion()
