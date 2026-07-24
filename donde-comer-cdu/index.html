@@ -42,12 +42,33 @@
 <script src="js/motor-mapa.js" defer></script>
 <script src="js/proyeccion.js" defer></script>
 <script src="js/motor-render.js" defer></script>
-<!-- Ambient Engine — Fase 0 + Fase 1 (ver docs/AMBIENT-ENGINE-FASE0-FASE1.md).
-     Orden fijo: señales → estados → capa-fondo → orquestador (el
-     orquestador va último porque es el único que conoce a los otros
-     tres — con `defer` se ejecutan en orden de documento). -->
-<script src="js/ambiente-senales.js" defer></script>
+<!-- Ambient Engine — Fase 0 + Fase 1 + Fase 2 T0-T3 (ver docs/AMBIENT-ENGINE-FASE0-FASE1.md
+     y el documento de Arquitectura técnica). Orden fijo = grafo de
+     dependencias real entre grupos funcionales (Cap. 2.1/2.3):
+
+       1) Infraestructura (config → assets → diagnóstico): no dependen
+          de nadie más y todo lo demás puede depender de ellos.
+       2) Gobierno (accesibilidad, rendimiento): dependen solo de
+          Infraestructura.
+       3) State Manager: no depende de ningún otro grupo.
+       4) Motion Controller: el único subsistema de Contenido Visual
+          que puede leer Gobierno y Orquestación directamente — por
+          eso carga recién después de ambos.
+       5) Background Renderer (capa-fondo): Contenido Visual puro,
+          depende únicamente del Motion Controller ya cargado.
+       6) Orquestador: va último porque es el único módulo que conoce
+          a todos los demás (con `defer`, el orden de ejecución es el
+          orden del documento).
+
+     ambiente-senales.js (Fase 0) fue retirado: su rol quedó dividido
+     entre ambiente-accesibilidad.js y ambiente-rendimiento.js. -->
+<script src="js/ambiente-config.js" defer></script>
+<script src="js/ambiente-assets.js" defer></script>
+<script src="js/ambiente-diagnostico.js" defer></script>
+<script src="js/ambiente-accesibilidad.js" defer></script>
+<script src="js/ambiente-rendimiento.js" defer></script>
 <script src="js/ambiente-estados.js" defer></script>
+<script src="js/ambiente-movimiento.js" defer></script>
 <script src="js/ambiente-capa-fondo.js" defer></script>
 <script src="js/ambiente-orquestador.js" defer></script>
 <script src="js/app.js" defer></script>
