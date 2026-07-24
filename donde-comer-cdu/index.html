@@ -577,7 +577,7 @@
       </div>
       <div id="mapaHerramienta"
            class="mapa-herramienta"
-           role="application"
+           role="region"
            aria-label="Mapa interactivo de lugares verificados en Concepción del Uruguay">
       </div>
       <div id="mapaLeyenda" class="mapa-leyenda" aria-label="Leyenda del mapa"></div>
@@ -1674,6 +1674,7 @@
       13. Auditoría 3ª pasada — cambios acotados a este archivo
       14. Auditoría 4ª pasada — dos hojas de estilo referenciadas que
           nunca existieron, expansión de contenido y tema claro
+      15. Auditoría 5ª pasada — WP0, limpieza previa al Ambient Engine
 
      ───────────────────────────────────────────────────────────────
      1. QUÉ ES ESTE ARCHIVO Y QUÉ NO ES
@@ -2351,6 +2352,59 @@
      pedido; si en el futuro se quiere ese control manual, es la
      extensión natural de este trabajo, no algo que faltó por
      descuido.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+     <!-- ═══════════════════════════════════════════════════════════════════════
+     15. AUDITORÍA 5ª PASADA — WP0, limpieza previa al Ambient Engine (24/07/2026)
+     ═══════════════════════════════════════════════════════════════════════
+
+     Contexto: previo a implementar el Ambient Engine (sistema de 7
+     documentos oficiales, Fases 1-7 + Playbook de Ingeniería Fase 6),
+     el propio Playbook exige resolver primero la deuda técnica ya
+     identificada por la Auditoría de Repositorio (Fase 7), como Work
+     Package 0, bloqueante e independiente de cualquier código nuevo.
+     Detalle completo, con verificación línea por línea, en
+     docs/integration-notes.md.
+
+     Cambios en ESTE archivo:
+     · `#mapaHerramienta` — `role="application"` → `role="region"`,
+       alineando el valor estático con el que `motor-render.js` ya
+       fija en tiempo de ejecución (línea 402 de ese archivo). Cierra
+       la discrepancia que la Auditoría §7.3/§8 ya había señalado
+       como de baja prioridad: usuarios sin JavaScript o crawlers de
+       accesibilidad ahora ven el mismo role que ve un usuario con JS.
+
+     Cambios en OTROS archivos (ver docs/integration-notes.md para el
+     detalle y la verificación de cada uno):
+     · `css/code.css` — ELIMINADO (huérfano, cero referencias, dupli-
+       caba `.btn` de `css/boton.css`).
+     · `tests/motor-test.js` — ELIMINADO (suite duplicada del mismo
+       nombre que `js/motor-test.js`, desactualizada contra una API de
+       `motor-mapa.js` ya removida — `js/motor-test.js` siempre fue,
+       y sigue siendo, la única suite real: 199/199).
+     · `js/motor-test.js` — corrección de un comentario obsoleto
+       (ninguna aserción ni lógica de test cambió; se re-verificó
+       199/199 después del cambio).
+     · `tests/contraste-tokens.js` — NUEVO. Auditoría de contraste
+       WCAG 2.1 sin dependencias (no hay build step para traer
+       axe-core/Lighthouse). Encontró que el tema claro que esta
+       misma documentación afirma en la sección 14 de arriba
+       ("`@media (prefers-color-scheme: light)` en tokens.css") NO
+       EXISTE en el archivo real — hallazgo nuevo, no detectado por
+       la Auditoría de Repositorio Fase 7. También encontró que los
+       badges de estado (Abierto: 4.34:1, Cerrado: 2.98:1) no
+       alcanzan el mínimo WCAG AA de 4.5:1 contra su propia píldora
+       real. Ninguno de los dos hallazgos se corrigió en esta pasada
+       — ambos requieren una decisión de diseño de color, no una
+       limpieza de código, y quedan documentados como excepción
+       versionada pendiente en docs/integration-notes.md.
+
+     Invariantes verificadas sin cambios: `node js/motor-test.js`
+     sigue en 199/199, ningún `id` de la tabla de contrato de la
+     sección 3 se tocó, ningún `<script defer>` cambió de orden ni de
+     cantidad (WP0 no agrega ningún módulo nuevo — eso es WP2/F0, el
+     siguiente Work Package, pendiente de la confirmación de alcance
+     de WP1), y el contenido editorial visible no cambió en absoluto.
      ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>
