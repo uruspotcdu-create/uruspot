@@ -22,6 +22,14 @@
    - Cap. 9.5 — bajo prefers-reduced-motion, el cambio de color del
      ciclo horario se mantiene (es color, no movimiento) pero se
      aplica de forma instantánea en lugar de gradual.
+
+   Fase 2 (Cap. 2.3 Arquitectura): "el Grupo de Contenido Visual...
+   nunca [se comunica] lateralmente" con el Grupo de Gobierno — por eso
+   este módulo ya no lee la visibilidad de pestaña de una señal cruda
+   propia ni de un subsistema de Gobierno directamente, sino del Motion
+   Controller (ambiente-movimiento.js), su única dependencia hacia
+   arriba (Cap. 3.5: "Entradas:... provenientes del Motion
+   Controller").
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -117,8 +125,8 @@
   var intervalo = null;
 
   function tick() {
-    var s = global.AmbienteSenales;
-    if (s && !s.pestanaVisible) return; // Cap. 9.2: nada se anima en 2º plano
+    var m = global.AmbienteMovimiento;
+    if (m && !m.pestanaVisible) return; // Cap. 9.2: nada se anima en 2º plano
     aplicar(horaDecimalActual(), false);
   }
 
@@ -133,9 +141,9 @@
 
     intervalo = global.setInterval(tick, PERIODO_MUESTREO_MS);
 
-    if (global.AmbienteSenales) {
-      global.AmbienteSenales.suscribir(function (nombreSenal) {
-        if (nombreSenal === 'pestanaVisible' && global.AmbienteSenales.pestanaVisible) {
+    if (global.AmbienteMovimiento) {
+      global.AmbienteMovimiento.suscribir(function (evento) {
+        if (evento.motivo === 'visibilidad' && global.AmbienteMovimiento.pestanaVisible) {
           // Al volver a primer plano, re-sincronizar sin animar el
           // salto de tiempo transcurrido mientras estuvo oculta
           // (evita una transición larga y visible de "recuperación").
