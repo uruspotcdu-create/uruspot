@@ -28,6 +28,12 @@
    escena directamente al Motion Controller, ni señales de gobierno
    directamente a ninguna capa.
 
+   T5 (Cap. 3.12 Arquitectura): el temporizador de inactividad y el
+   listener de gestos genéricos que antes vivían acá se movieron a
+   ambiente-interaccion.js (Interaction Observer) — este archivo ya
+   no conoce ningún nombre de evento DOM de gesto, solo arranca ese
+   subsistema.
+
    Debe cargarse ÚLTIMO entre los scripts del Ambient Engine: con
    scripts `defer`, el orden de ejecución es el orden del documento,
    así que para cuando este módulo corre, todo el Grupo de
@@ -37,32 +43,9 @@
 (function (global) {
   'use strict';
 
-  // Cap. 6.1: "más de 20-30 segundos sin gesto alguno". Se usa el
-  // punto medio del rango.
-  var UMBRAL_INACTIVIDAD_MS = 25000;
-
-  // Cap. 6.2: "Activo se activa por cualquier gesto de usuario" — se
-  // escucha un vocabulario mínimo y genérico de gesto, no eventos
-  // específicos de ningún componente de la aplicación.
-  var GESTOS = ['pointerdown', 'keydown', 'wheel', 'touchstart'];
-
-  var temporizadorInactividad = null;
-
-  function reiniciarTemporizadorInactividad() {
-    if (temporizadorInactividad) global.clearTimeout(temporizadorInactividad);
-    temporizadorInactividad = global.setTimeout(function () {
-      global.AmbienteEstados.pasarAInactivo();
-    }, UMBRAL_INACTIVIDAD_MS);
-  }
-
-  function onGesto() {
-    global.AmbienteEstados.registrarGesto();
-    reiniciarTemporizadorInactividad();
-  }
-
-  // El único contrato entre el Ambient Engine y el resto de la
-  // aplicación (Cap. 11.1 / 11.4): atributos data-* en <html>, nunca
-  // una API que exponga las capas mismas.
+  // Cap. 3.1: el único contrato entre el Ambient Engine y el resto de
+  // la aplicación (Cap. 11.1 / 11.4): atributos data-* en <html>,
+  // nunca una API que exponga las capas mismas.
   function reflejarEstadoEnDOM(estado) {
     document.documentElement.setAttribute('data-ambiente-estado', estado);
   }
@@ -114,7 +97,16 @@
     // después de esto AmbienteMovimiento.parametros() deja de ser
     // null, así que debe correr antes de iniciar cualquier capa visual.
     if (global.AmbienteEscenas && global.AmbienteConfig) {
-      global.AmbienteEscenas.activar(global.AmbienteConfig.ESCENA_INICIAL);
+      var idInicial = global.AmbienteConfig.ESCENA_INICIAL;
+      if (global.AmbienteEscenas.activar(idInicial)) {
+        // Mismo contrato que setEscena() aplica a cada cambio posterior
+        // (Cap. 11.1: "una forma de indicar la escena activa"). La
+        // escena inicial no pasa por el Estado de Transición (Cap. 6.1
+        // diseño: "abrir la app ya cuenta como el primer momento de
+        // atención"), pero igual debe quedar reflejada en el DOM desde
+        // el primer instante, no recién en el segundo cambio de escena.
+        document.documentElement.setAttribute('data-ambiente-escena', idInicial);
+      }
     }
 
     // ── State Manager (Cap. 6) ───────────────────────────────────────
@@ -123,17 +115,23 @@
     });
     reflejarEstadoEnDOM(global.AmbienteEstados.actual());
 
-    GESTOS.forEach(function (nombre) {
-      document.addEventListener(nombre, onGesto, { passive: true });
-    });
-    reiniciarTemporizadorInactividad();
+    // ── Interaction Observer (Cap. 3.12, T5) ────────────────────────
+    // Gestos genéricos + temporizador de inactividad ya no viven acá
+    // (ver nota de cabecera) — este subsistema le habla directo al
+    // State Manager, sin pasar por el orquestador.
+    if (global.AmbienteInteraccion) global.AmbienteInteraccion.iniciar();
 
-    // Fase 1: única capa visual conectada hasta ahora. Fases futuras
-    // (T4 en adelante del roadmap técnico) agregarán el catálogo real
-    // de escenas vía Scene Manager; hasta entonces, setEscena() abajo
-    // le informa la escena directamente al Motion Controller (ver nota
-    // de cabecera de ambiente-movimiento.js) y dispara la Transición.
+    // ── Grupo de Contenido Visual (Cap. 2.3) ────────────────────────
+    // Cada capa se suscribe por su cuenta al Motion Controller ya
+    // iniciado arriba — el orquestador no les entrega parámetros
+    // directamente (eso violaría el Cap. 3.4: "nunca debe entregar
+    // parámetros... sin haber aplicado primero las restricciones");
+    // solo dispara su iniciar(), como hace desde la Fase 1 con la
+    // Capa de Fondo.
     if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
+    if (global.AmbienteParticulas) global.AmbienteParticulas.iniciar();
+    if (global.AmbienteLuz) global.AmbienteLuz.iniciar();
+    if (global.AmbienteClima) global.AmbienteClima.iniciar();
   }
 
   global.AmbientEngine = {
