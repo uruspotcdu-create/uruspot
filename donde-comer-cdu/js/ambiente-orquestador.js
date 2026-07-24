@@ -22,16 +22,17 @@
    nota en ambiente-accesibilidad.js). Las señales que antes venían de
    ahí ahora se leen de sus fuentes canónicas: AmbienteAccesibilidad
    (reducirMovimiento) y AmbienteRendimiento (nivel de fidelidad).
-   También precalienta el Asset Registry (Cap. 8.1) e inicia el Motion
-   Controller (Cap. 3.4), que es quien de ahora en más decide qué
-   parámetros de movimiento recibe cada capa — este archivo ya no le
-   pasa señales de gobierno directamente a ninguna capa.
+   También precalienta el Asset Registry (Cap. 8.1), inicia el Motion
+   Controller (Cap. 3.4) y activa la escena inicial a través del Scene
+   Manager (Cap. 3.3, T4) — este archivo ya no le pasa nombres de
+   escena directamente al Motion Controller, ni señales de gobierno
+   directamente a ninguna capa.
 
    Debe cargarse ÚLTIMO entre los scripts del Ambient Engine: con
    scripts `defer`, el orden de ejecución es el orden del documento,
    así que para cuando este módulo corre, todo el Grupo de
    Infraestructura, todo el Grupo de Gobierno, AmbienteEstados,
-   AmbienteMovimiento y AmbienteCapaFondo ya existen.
+   AmbienteMovimiento, AmbienteEscenas y AmbienteCapaFondo ya existen.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -107,6 +108,15 @@
     // suscribirse.
     if (global.AmbienteMovimiento) global.AmbienteMovimiento.iniciar();
 
+    // ── Scene Manager (Cap. 3.3, T4) ────────────────────────────────
+    // Activa la escena inicial (Cap. 6.1 diseño: "abrir la app ya
+    // cuenta como el primer momento de atención del usuario"). Recién
+    // después de esto AmbienteMovimiento.parametros() deja de ser
+    // null, así que debe correr antes de iniciar cualquier capa visual.
+    if (global.AmbienteEscenas && global.AmbienteConfig) {
+      global.AmbienteEscenas.activar(global.AmbienteConfig.ESCENA_INICIAL);
+    }
+
     // ── State Manager (Cap. 6) ───────────────────────────────────────
     global.AmbienteEstados.on('cambio', function (evento) {
       reflejarEstadoEnDOM(evento.actual);
@@ -152,18 +162,18 @@
       if (global.AmbienteEstados) global.AmbienteEstados.reintentar();
     },
 
-    // Fase 2: ahora sí tiene un catálogo real detrás (AmbienteConfig,
-    // vía el Motion Controller) en lugar de solo marcar el DOM. Un
-    // nombre de escena desconocido no rompe nada: AmbienteMovimiento
-    // cae de vuelta a la escena inicial (Cap. 6.2 Arquitectura: "el
-    // Scene Manager es quien decide qué hacer si una resolución
-    // falla" — mientras ese módulo no exista, este es el mismo
-    // criterio aplicado por su sustituto temporal).
+    // Fase 2 (T4): ahora delega en el Scene Manager, que resuelve la
+    // escena en dos fases (Cap. 6.2) antes de entregársela al Motion
+    // Controller. Un nombre de escena desconocido o con assets no
+    // disponibles no rompe nada: AmbienteEscenas.activar() devuelve
+    // false y mantiene la escena previamente activa sin tocar el DOM
+    // de escena — la Transición visual tampoco se dispara en ese caso,
+    // porque no tendría destino real al que llegar.
     setEscena: function (nombre) {
       if (!global.AmbienteEstados) return;
       global.AmbienteEstados.iniciarTransicion(function () {
-        document.documentElement.setAttribute('data-ambiente-escena', nombre);
-        if (global.AmbienteMovimiento) global.AmbienteMovimiento.setEscena(nombre);
+        var activada = global.AmbienteEscenas ? global.AmbienteEscenas.activar(nombre) : false;
+        if (activada) document.documentElement.setAttribute('data-ambiente-escena', nombre);
       });
     }
   };
