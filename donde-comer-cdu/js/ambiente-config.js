@@ -370,6 +370,24 @@
       // punto seleccionado (Cap. 6.1) — carga anticipada no aplica.
       archivo: 'assets/ambient/coordenadas/coordenadas--default--hairline.svg'
     },
+    'brujula': {
+      tipo: 'brujula', capa: 'orientacion', carga: 'anticipada',
+      // Fase 3 (Lenguaje de Assets, familia Brújula): asset SVG real,
+      // consumido por js/ambiente-brujula.js vía
+      // AmbienteAssets.obtenerBinario() e insertado en el plano P2
+      // (Cap. 4.1: "Orientación" — brújula + partículas de deriva).
+      // 'carga: anticipada' por el mismo criterio que
+      // 'lineas-cartograficas'/'curvas-topograficas'/'corrientes':
+      // es el "ancla simbólica única del producto" (Cap. 2.1),
+      // presente desde el arranque de cualquier escena, no un asset
+      // atado a una selección que puede no ocurrir nunca (Cap. 8.1)
+      // — a diferencia de 'coordenadas', que sí es condicional.
+      // 'capa: orientacion' es una taxonomía conceptual nueva (no
+      // existía en el catálogo de Fase 1/2, a diferencia de
+      // 'profundidad' que ya reutilizaban Retícula/Corrientes): no
+      // había ningún asset previo de este tipo antes de la Fase 3.
+      archivo: 'assets/ambient/brujula/brujula--default--regular.svg'
+    },
     'clima-lluvia-lineas': {
       tipo: 'elemento-climatico', capa: 'clima', carga: 'diferida'
     },

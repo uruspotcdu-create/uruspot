@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  URU SPOT — Ambient Engine — Familia: Brújula
+  Archivo: brujula, variante default, peso regular.
+
+  Cap. 2.1: "Ancla simbólica única del producto — orientación,
+  encontrar tu lugar." Plano P2 (Orientación, Cap. 4.1). Único peso
+  permitido: regular (Cap. 1.3 — "brújulas, elementos de plano
+  medio" es, textualmente, uno de los tres usos de ese peso).
+  Movimiento heredado: Rotación mínima (aro) + oscilación de aguja
+  (Cap. 5) — dos ejes de movimiento simultáneos, el máximo que
+  permite el capítulo, aplicados afuera de este archivo por
+  ambiente-tokens-movimiento.css. Este SVG nunca anima su propio
+  grosor (Cap. 1.3).
+
+  Estructura en 3 grupos con significado propio (Cap. 3.3: "en una
+  brújula: aro / marcas / aguja... nunca un único path monolítico"):
+  brujula-aro, brujula-marcas, brujula-aguja. Cada grupo es el que
+  luego anima su propio eje de movimiento por separado.
+
+  Construido con 3 de las 5 primitivas compartidas: círculo
+  concéntrico (aro), marca de coordenada (marcas cardinales + punta
+  norte de la aguja) y sinusoide (cuerpo de la aguja) — el propio
+  archivo de primitivas ya documenta esta última asociación
+  ("base geométrica de Corrientes y de la oscilación de aguja de
+  Brújula"). La aguja es, a propósito, una curva suave (sinusoide
+  rotada) y no una línea recta: un trazo puramente recto se leería
+  como marca de retícula, no como instrumento (Cap. 1.2: "geometría
+  construida", no dos familias compitiendo por el mismo vocabulario
+  de formas).
+
+  Color/opacidad: currentColor + la variable de color y de opacidad
+  del plano P2 (ver assets/ambient/_tokens/), nunca fijos (Cap. 3.4,
+  11.2). Grosor: variable de trazo regular (Cap. 1.3).
+
+  Complejidad (Cap. 9.2): 3 grupos (límite 6), 7 nodos <use> (límite
+  80 por asset). Sin filter, sin animación de propiedades de layout
+  (Cap. 9.1) — solo transform vía las clases de cada grupo.
+-->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     class="amb-asset amb-asset--brujula"
+     style="color:var(--amb-p2-color);
+            opacity:var(--amb-p2-opacidad);
+            stroke:currentColor; stroke-width:var(--amb-trazo-regular);
+            fill:none;" aria-hidden="true" focusable="false">
+
+  <!-- Aro — círculo concéntrico sin escalar (radio 30, el mismo que
+       trae la primitiva). Rotación mínima (Cap. 5: "el aro casi no
+       rota"): la clase de movimiento se aplica sobre este grupo. -->
+  <g class="brujula-aro">
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico"/>
+  </g>
+
+  <!-- Marcas cardinales — 4 marcas de coordenada sobre el propio aro
+       (radio 30, mismo radio que el aro para que queden exactamente
+       sobre el trazo, no flotando adentro/afuera). Grupo fijo: nunca
+       rota ni oscila, es la referencia estática contra la que se
+       lee el movimiento del aro y de la aguja. -->
+  <g class="brujula-marcas" fill="currentColor">
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 -30)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(30 0)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 30)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(-30 0)"/>
+  </g>
+
+  <!-- Aguja — sinusoide (Cap. 3.3, ver comentario de cabecera)
+       rotada a vertical y escalada a 0.7 (semi-longitud 28, apenas
+       adentro del radio del aro) + una marca de coordenada en la
+       punta norte, para que se distinga de la punta sur al oscilar.
+       Todo el grupo es lo que anima la oscilación (Cap. 5: "la
+       aguja oscila buscando norte"); en reposo (0°) la punta norte
+       queda alineada con la marca cardinal N de brujula-marcas. -->
+  <g class="brujula-aguja" fill="currentColor">
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" transform="translate(50 50) scale(0.7) translate(-50 -50) rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 -28)"/>
+  </g>
+
+</svg>

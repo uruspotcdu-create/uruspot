@@ -85,6 +85,11 @@
   .amb-asset--coordenadas {
     transition: none !important;
   }
+  .amb-asset--brujula .brujula-aro,
+  .amb-asset--brujula .brujula-aguja {
+    animation: none !important;
+    transform: none !important;
+  }
 }
 
 /* Coordenadas — Aparición/desaparición discreta (Cap. 5: "fade in/out
@@ -122,4 +127,56 @@
 
 .amb-asset--coordenadas.is-visible {
   opacity: var(--amb-p1-opacidad);
+}
+
+/* Brújula (Fase 3, familia Brújula) — Rotación mínima + oscilación de
+   aguja (Cap. 5): "el aro casi no rota; la aguja oscila buscando
+   norte — debe comportarse como un instrumento real, no decorativo."
+   Dos ejes de movimiento simultáneos (el máximo del Cap. 5), cada
+   uno sobre su propio grupo dentro del asset (Cap. 3.3): el aro y la
+   aguja nunca comparten animación ni duración, para que se lean
+   como dos piezas mecánicas independientes, no como un solo bloque
+   girando.
+
+   Ambas animan `transform: rotate()` sobre el propio <g>, nunca una
+   propiedad de layout (Cap. 9.1). transform-box: fill-box +
+   transform-origin: center hacen que la rotación pivote sobre el
+   centro geométrico de cada grupo (el centro óptico del asset,
+   Cap. 3.1), no sobre la esquina superior izquierda del viewBox por
+   defecto — sin esto el aro y la aguja "orbitarían" en vez de girar
+   sobre sí mismos. */
+@keyframes amb-rotacion-minima {
+  0%   { transform: rotate(-3deg); }
+  50%  { transform: rotate(3deg); }
+  100% { transform: rotate(-3deg); }
+}
+
+.amb-asset--brujula .brujula-aro {
+  transform-box: fill-box;
+  transform-origin: center;
+  /* 60s: deliberadamente el ciclo más largo de todo el sistema hasta
+     ahora (más lento que la Respiración de P0, 10-24s) — "el aro
+     casi no rota" es, acá, casi imperceptible salvo mirando con
+     atención, coherente con que P2 se mueve más que P0/P1 pero el
+     aro específicamente es la pieza fija del instrumento. */
+  animation: amb-rotacion-minima 60s ease-in-out infinite;
+}
+
+@keyframes amb-oscilacion-aguja {
+  0%   { transform: rotate(-8deg); }
+  50%  { transform: rotate(8deg); }
+  100% { transform: rotate(-8deg); }
+}
+
+.amb-asset--brujula .brujula-aguja {
+  transform-box: fill-box;
+  transform-origin: center;
+  /* 6s: deliberadamente el ciclo más corto de todo el sistema hasta
+     ahora — es la única pieza con semántica de "buscando" (Cap. 5),
+     un instrumento real oscila rápido comparado con cualquier firma
+     de ambiente de fondo (Respiración 10-24s, Deriva 40s). Cuando el
+     Paso siguiente cablee reactividad real a mapa/ubicación activa
+     (Cap. 6.1), esta oscilación libre es el estado "sin selección";
+     no se toca acá — es alcance explícito de un paso posterior. */
+  animation: amb-oscilacion-aguja 6s ease-in-out infinite;
 }

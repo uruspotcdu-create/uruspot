@@ -167,3 +167,45 @@ recién en el commit `f6adbd8`, no en `d32b241`.
 *(Los assets de las familias restantes — Brújula, Partículas de
 deriva, Halos de posición — se agregan a esta tabla a medida que se
 implementan, uno por paso, siguiendo el Roadmap del Cap. 12.)*
+
+## v1.0 — Brújula (Paso 7, Roadmap Cap. 12 orden 6)
+
+| Nombre de archivo | Familia | Plano | Movimiento heredado | Reactividad | Fecha / versión | Justificación |
+|---|---|---|---|---|---|---|
+| `brujula/brujula--default--regular.svg` | Brújula | P2 | Rotación mínima (aro, 60s) + Oscilación de aguja (6s) | Mapa/ubicación activa — instrumento listo, disparo real pendiente (mismo estado que Coordenadas antes de su cableado) | v1.0 | "Ancla simbólica única del producto — orientación, encontrar tu lugar" (Cap. 2.1). Único asset hasta ahora con 2 ejes de movimiento simultáneos, el máximo del Cap. 5. |
+
+Primer asset construido con 3 primitivas a la vez (círculo
+concéntrico, marca de coordenada, sinusoide) en vez de 1 o 2 como
+las familias anteriores — la propia `_primitivas/primitivas-compartidas.svg`
+ya documentaba de antemano que la sinusoide era la base geométrica
+pensada para la aguja, decisión tomada al construir el set de
+primitivas en el Paso 1, no en este paso.
+
+Estructura en 3 grupos con significado propio (Cap. 3.3): aro (fijo
+en radio, rota mínimamente), marcas cardinales (completamente
+estático, referencia contra la que se lee el resto), aguja (sinusoide
+rotada a vertical + marca de coordenada en la punta norte, para
+distinguir norte de sur al oscilar).
+
+Peso `regular` (1.5px) — primera familia del sistema en usar ese
+peso; las tres anteriores (Retícula, Topográficas, Corrientes) usan
+`hairline` en P0/P1, Coordenadas también `hairline` en P1. Cap. 1.3:
+"brújulas, elementos de plano medio" es uno de los tres usos
+textuales de `regular`.
+
+`carga: 'anticipada'` (a diferencia de Coordenadas): la Brújula es
+sustrato de identidad del producto, presente desde el arranque de
+cualquier escena — no depende de que haya un punto seleccionado.
+
+**Pendiente registrado a propósito (mismo criterio que Coordenadas
+en el Paso 6, no una excepción del Cap. 8.2):** la aguja solo tiene,
+por ahora, su oscilación libre "buscando norte" — no apunta todavía
+hacia ningún spot seleccionado real (Cap. 6.1). Cablear un rumbo
+geográfico real requiere una proyección que hoy no existe en ningún
+subsistema de la app (misma limitación exacta que ya se documentó al
+cablear `mostrarEn()` de Coordenadas a `motorMapa.on('click', ...)`
+en `js/app.js`) — queda para un paso posterior explícito.
+
+*(Los assets de las familias restantes — Partículas de deriva, Halos
+de posición — se agregan a esta tabla a medida que se implementan,
+uno por paso, siguiendo el Roadmap del Cap. 12.)*
