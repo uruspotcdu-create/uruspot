@@ -1,0 +1,11 @@
+// Carga diferida y no bloqueante de contenido-editorial.css.
+// Externalizado desde un <script> inline: la CSP de la página
+// (script-src 'self') no autoriza bloques inline sin 'unsafe-inline',
+// nonce o hash, así que este archivo vive como js/ propio, igual que
+// el resto de los scripts del documento.
+(function () {
+  var l = document.createElement('link');
+  l.rel = 'stylesheet';
+  l.href = 'css/contenido-editorial.css';
+  document.head.appendChild(l);
+})();
