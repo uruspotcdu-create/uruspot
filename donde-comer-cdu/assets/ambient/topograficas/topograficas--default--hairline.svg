@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  URU SPOT — Ambient Engine — Familia: Curvas topográficas
+  Archivo: topograficas, variante default, peso hairline (el nombre
+  real usa doble guion como separador de segmento; no se repite acá
+  literal porque un doble guion es inválido dentro de un comentario XML)
+
+  Cap. 2.1: "Da profundidad sin necesitar sombra ni ilustración."
+  Comunica terreno, capas, relieve de barrios. Plano P0 (Sustrato),
+  el más profundo de los 4 (Cap. 4.1) — por eso es, con la Retícula,
+  la única familia con permiso de usar el peso hairline (Cap. 1.3).
+
+  Construida enteramente con UNA sola primitiva compartida (Cap. 3.3):
+  arco de circunferencia. Nunca círculos cerrados completos — un
+  círculo cerrado pertenece a la primitiva "círculo concéntrico"
+  (reservada para Brújula/Halos, familias de otro plano); acá cada
+  curva de nivel es un arco parcial, lo que evita que este asset se
+  lea como la misma forma que esas otras familias.
+
+  Progresión de escala 80/20 (Cap. 1.4, usando el ejemplo textual del
+  propio capítulo: "pasos de 1.0 / 1.3 / 1.6"): los clusters A y B
+  siguen esa progresión exacta (radio base × 0.5 / × 0.65, proporción
+  1 : 1.3). El cluster C rompe la progresión a propósito — un solo
+  arco suelto, sin pareja, en un ángulo irregular — introduciendo la
+  organicidad que pide el capítulo.
+
+  Movimiento: NINGUNO propio en este archivo. La respiración extrema
+  lenta (>20s, Cap. 5: "casi estático es la decisión correcta") vive
+  en assets/ambient/_tokens/ambiente-tokens-movimiento.css, clase
+  CSS del asset topográficas, ya declarada desde el Paso 2 para que las
+  dos familias que respiran compartan un solo lugar de verdad.
+
+  Silencio (Cap. 1.5): deliberadamente pocos elementos — es el plano
+  más profundo, el que menos debe competir por atención.
+
+  Complejidad (Cap. 9.2): 3 grupos (límite 6), 5 nodos <use> (límite
+  80). Sin filter, sin animación de propiedades de layout (Cap. 9.1).
+-->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     class="amb-asset amb-asset--topograficas"
+     style="color:var(--amb-p0-color);
+            opacity:calc(var(--amb-p0-opacidad) * var(--amb-resp-mult, 1));
+            stroke:currentColor; stroke-width:var(--amb-trazo-hairline);
+            fill:none;" aria-hidden="true" focusable="false">
+
+  <!-- Cluster A — noroeste. Dos arcos anidados, misma orientación,
+       proporción de escala 1 : 1.3 (Cap. 1.4). -->
+  <g class="topograficas-a" opacity="0.5">
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-arco" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-arco" transform="translate(35 40) rotate(20) scale(0.5) translate(-50 -50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-arco" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-arco" transform="translate(35 40) rotate(20) scale(0.65) translate(-50 -50)"/>
+  </g>
+
+  <!-- Cluster B — centro-este. Misma lógica que A, orientación
+       distinta, para que las dos agrupaciones no se lean como una
+       sola forma repetida. -->
+  <g class="topograficas-b" opacity="0.7">
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-arco" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-arco" transform="translate(68 55) rotate(160) scale(0.5) translate(-50 -50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-arco" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-arco" transform="translate(68 55) rotate(160) scale(0.65) translate(-50 -50)"/>
+  </g>
+
+  <!-- Cluster C — sur. Ruptura deliberada del 20% (Cap. 1.4): un solo
+       arco suelto, sin pareja, escala y ángulo fuera de la
+       progresión regular de A/B. -->
+  <g class="topograficas-c" opacity="1">
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-arco" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-arco" transform="translate(48 78) rotate(97) scale(0.8) translate(-50 -50)"/>
+  </g>
+
+</svg>

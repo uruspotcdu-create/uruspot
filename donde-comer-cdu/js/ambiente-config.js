@@ -305,7 +305,10 @@
       tipo: 'paleta', capa: 'fondo', carga: 'anticipada'
     },
     'curvas-topograficas': {
-      tipo: 'textura', capa: 'fondo', carga: 'anticipada'
+      tipo: 'textura', capa: 'fondo', carga: 'anticipada',
+      // Fase 3 (Lenguaje de Assets, Paso 3): asset SVG real. Campo
+      // aditivo puro, ver nota equivalente en 'lineas-cartograficas'.
+      archivo: 'assets/ambient/topograficas/topograficas--default--hairline.svg'
     },
     'patron-carta-marina': {
       tipo: 'patron', capa: 'fondo', carga: 'diferida'

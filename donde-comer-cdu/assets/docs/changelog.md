@@ -30,3 +30,13 @@ visual — queda para que la fase de integración la revise a propósito.
 *(Los assets de las familias restantes se agregan a esta tabla a
 medida que se implementan, uno por paso, siguiendo el roadmap del
 Cap. 12.)*
+
+## v1.0 — Curvas topográficas (Paso 3)
+
+| Nombre de archivo | Familia | Plano | Movimiento heredado | Reactividad | Fecha / versión | Justificación |
+|---|---|---|---|---|---|---|
+| `topograficas/topograficas--default--hairline.svg` | Curvas topográficas | P0 (más profundo) | Respiración extrema lenta (24s) | Ninguna (sustrato, Cap. 4.2) | v1.0 | "Da profundidad sin necesitar sombra ni ilustración" (Cap. 2.1). Construida solo con la primitiva arco; 3 clusters, escala 1 : 1.3 en dos de ellos (Cap. 1.4) y una ruptura deliberada en el tercero. |
+
+Sin discrepancias que anotar en este paso: `curvas-topograficas` ya
+tenía `carga: 'anticipada'` en el catálogo Fase 2, coherente con su
+rol de infraestructura visual base según el documento Fase 3.
