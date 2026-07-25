@@ -181,6 +181,43 @@
   --sombra-vidrio:  0 1px 1px rgba(255,255,255,.05) inset, 0 20px 40px -16px rgba(0,0,0,.55);
   --sombra-glow:    0 0 0 1px var(--color-granate-clara), 0 0 24px rgba(201,122,131,.35);
 
+  /* BUG REAL (auditoría Fase 8): --glow-marca/--glow-marca-hover se
+     usaban en css/mapa.css (#mapaHerramienta y su :hover) desde antes
+     de esta fase, pero nunca estuvieron declarados en ningún archivo
+     del repo. Un var() que no resuelve y no tiene fallback invalida
+     toda la declaración que lo contiene "at computed-value time" —
+     no es que el glow se viera flojo, es que #mapaHerramienta no
+     tenía NINGÚN box-shadow, ni en reposo ni en hover, pese a que el
+     comentario de ese archivo lo daba por hecho. Mismo tono que
+     --sombra-glow (granate claro), pero como color plano en vez de
+     shorthand completo porque mapa.css ya arma su propio spread/blur
+     alrededor de este color. */
+  --glow-marca:        rgba(201,122,131,.40);
+  --glow-marca-hover:  rgba(201,122,131,.60);
+
+  /* BUG REAL (auditoría Fase 8): mismo problema en css/badge-estado.css
+     — .badge-estado--abierto usaba var(--glow-abierto) sin que
+     existiera en ningún lado, así que el badge "Abierto ahora" no
+     tenía el anillo de 1px que sí tiene, simétricamente, el badge
+     "Cerrado" (rgba(193,18,31,.3), calcado del --color-estado-cerrado
+     de más arriba). Se define acá con el mismo criterio: el propio
+     --color-estado-abierto (#40916C → rgb 64,145,108) a la misma
+     opacidad que su contraparte cerrada. */
+  --glow-abierto: rgba(64,145,108,.35);
+
+  /* BUG REAL (auditoría Fase 8): --anillo-foco-offset se usaba cuatro
+     veces en css/boton.css (.btn:focus-visible, las cuatro variantes)
+     sin estar nunca definido. outline-offset no tiene fallback visual
+     "razonable" cuando el var() falla — vuelve a su valor inicial (0),
+     así que el anillo de foco por teclado del sistema de botones
+     (.btn, la base que boton.css llama "focus ring WCAG AAA" en su
+     propio encabezado) quedaba pegado al borde del botón en vez de
+     separado, perdiendo el aire que si tienen .chip/.uru-mapa-btn con
+     sus propios valores manuales (2px). Se fija acá en 2px, mismo
+     valor que esos otros controles de forma de píldora/cuadrada — no
+     el 1px de .tarjeta-btn, que es un botón más chico y compacto. */
+  --anillo-foco-offset: 2px;
+
   --dur-lentisima: .6s;
   --dur-instantaneo: .1s; /* micro-feedback: press states, toggles — más rápido que --dur-rapido */
   /* Deprecado como default (Fase 4, Cap. 14: "Rebotes innecesarios"
