@@ -128,7 +128,12 @@
     lastErrorState: null,
     focusedElement: null,
     scrollPosition: 0,
-    cartasActuales: [] // referencia a tarjetas pintadas para reconciliación
+    cartasActuales: [], // referencia a tarjetas pintadas para reconciliación
+    // Fase 4, Cap. 5 "Cómo evitar la fatiga": "a partir de la segunda
+    // repetición en una misma sesión, la respuesta se simplifica al
+    // registro inmediato" — cuenta clicks de rubro que efectivamente
+    // dispararon la coreografía completa de renderConTransicionDeFiltro().
+    vecesTransicionFiltro: 0
   };
 
   // Timers y operaciones async activas
@@ -2352,7 +2357,16 @@
       ? DOM.panelDescubrimiento.querySelectorAll('.tarjeta')
       : [];
 
-    if (!existentes.length || prefiereMovimientoReducido()) {
+    // Cap. 5 "Cómo evitar la fatiga": la coreografía completa (salida
+    // antes que entrada) solo corre la primera vez en la sesión;
+    // desde la segunda repetición de la misma acción, se simplifica
+    // al registro inmediato — repetir la ceremonia completa cada vez
+    // que alguien prueba varios rubros seguidos es, en la práctica,
+    // la fatiga que ese capítulo pide evitar.
+    uiState.vecesTransicionFiltro++;
+    var simplificar = uiState.vecesTransicionFiltro > 1;
+
+    if (!existentes.length || prefiereMovimientoReducido() || simplificar) {
       render();
       return;
     }
