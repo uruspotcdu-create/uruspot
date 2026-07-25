@@ -83,7 +83,10 @@
       resplandor.style.pointerEvents = 'none';
       resplandor.style.zIndex = '1';
       resplandor.style.mixBlendMode = 'screen';
-      resplandor.style.opacity = '0.5';
+      // Sin opacity inline: css/ambiente-estilos.css la calcula a
+      // partir de --amb-resplandor-base (ver actualizarLuz) sumada a
+      // --amb-respiracion (Fase 4, Cap. 8) — un valor inline acá
+      // ganaría por especificidad y anularía esa suma.
       document.body.appendChild(resplandor);
     }
   }
@@ -112,7 +115,12 @@
     if (resplandor) {
       var colorTemperatura = calcularTemperaturaColor(intensidad);
       resplandor.style.backgroundColor = colorTemperatura;
-      resplandor.style.opacity = (0.3 * intensidad).toString();
+      // Fase 4 (Cap. 8): la opacidad final no se fija acá — se publica
+      // solo la base, y css/ambiente-estilos.css le suma la variación
+      // continua de --amb-respiracion (ambiente-respiracion.js). Este
+      // módulo sigue sin conocer a ese otro módulo (Cap. 2.3): ambos
+      // convergen únicamente en la hoja de estilos.
+      resplandor.style.setProperty('--amb-resplandor-base', (0.3 * intensidad).toString());
     }
   }
 
