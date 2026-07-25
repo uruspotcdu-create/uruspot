@@ -306,8 +306,9 @@
     },
     'curvas-topograficas': {
       tipo: 'textura', capa: 'fondo', carga: 'anticipada',
-      // Fase 3 (Lenguaje de Assets, Paso 3): asset SVG real. Campo
-      // aditivo puro, ver nota equivalente en 'lineas-cartograficas'.
+      // Fase 3 (Lenguaje de Assets, Paso 3): asset SVG real,
+      // consumido por js/ambiente-topografia.js vía
+      // AmbienteAssets.obtenerBinario() e insertado en el plano P0.
       archivo: 'assets/ambient/topograficas/topograficas--default--hairline.svg'
     },
     'patron-carta-marina': {
@@ -324,11 +325,14 @@
     },
     'lineas-cartograficas': {
       tipo: 'linea-cartografica', capa: 'profundidad', carga: 'diferida',
-      // Fase 3 (Lenguaje de Assets, Paso 2): asset SVG real ya
-      // construido. Campo aditivo puro — nada todavía lo lee, así
-      // que no cambia el comportamiento en tiempo de ejecución. Un
-      // futuro Asset Registry que resuelva binarios reales (Cap. 8.1
-      // arquitectura, "fases posteriores") lo consume desde acá.
+      // Fase 3 (Lenguaje de Assets, Paso 2): asset SVG real,
+      // consumido por js/ambiente-reticula.js vía
+      // AmbienteAssets.obtenerBinario() e insertado en el plano P0.
+      // Nota: 'capa: profundidad' es la taxonomía conceptual previa
+      // a la Fase 3 (Cap. 7.10 Fase 1); el plano real que usa este
+      // asset hoy es P0 del Plane Manager (Cap. 4.1) — no se
+      // renombra este campo para no romper otros lectores existentes
+      // del catálogo, pero queda documentado acá la diferencia.
       archivo: 'assets/ambient/reticula/reticula--default--hairline.svg'
     },
     'coordenadas': {

@@ -136,6 +136,8 @@
     // documento — para que AmbientePlanos.contenedor() ya exista
     // cuando la primera familia lo pida.
     if (global.AmbientePlanos) global.AmbientePlanos.iniciar();
+    if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
+    if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
     if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
     if (global.AmbienteParticulas) global.AmbienteParticulas.iniciar();
     if (global.AmbienteLuz) global.AmbienteLuz.iniciar();

@@ -71,13 +71,52 @@
     return global.AmbienteConfig.obtenerAsset(id);
   }
 
+  // ── Caché de binarios (Cap. 8.1, "fases posteriores") ───────────
+  // La caché de arriba guarda metadata conceptual (obtener()); esta
+  // es la caché de segundo nivel para los assets que sí son binarios
+  // reales a descargar por red (SVG). Misma política LRU que la
+  // caché caliente, pero separada: mezclar objetos de metadata con
+  // strings de markup en la misma caché complicaría el cálculo de
+  // "tamaño" sin ganar nada.
+  var TAMANO_CACHE_BINARIOS_POR_DEFECTO = 12;
+  var tamanoMaximoCacheBinarios = TAMANO_CACHE_BINARIOS_POR_DEFECTO;
+  var cacheBinarios = new Map();
+
+  function marcarBinarioUsado(id, valor) {
+    if (cacheBinarios.has(id)) cacheBinarios.delete(id);
+    cacheBinarios.set(id, valor);
+    while (cacheBinarios.size > tamanoMaximoCacheBinarios) {
+      cacheBinarios.delete(cacheBinarios.keys().next().value);
+    }
+  }
+
+  // Los SVG de familia referencian assets/ambient/_primitivas/... con
+  // rutas relativas a su propia carpeta (Cap. 3.3: "ensamblan las
+  // mismas 5 primitivas" vía <use href>). Eso es correcto cuando el
+  // archivo se sirve solo, pero se rompe si el markup se inyecta
+  // inline dentro de index.html (la ruta relativa pasaría a
+  // resolverse contra la URL de la página, no la del SVG de origen).
+  // Se resuelve acá, una sola vez, al cachear — así ninguna familia
+  // tiene que preocuparse por esto al consumir obtenerBinario().
+  function resolverRutasRelativas(markupSvg, urlOrigenSvg) {
+    return markupSvg.replace(/(href)="([^"]+)"/g, function (coincidencia, atributo, valor) {
+      if (valor.charAt(0) === '#') return coincidencia; // referencia interna, no tocar
+      try {
+        return atributo + '="' + new URL(valor, urlOrigenSvg).href + '"';
+      } catch (e) {
+        return coincidencia;
+      }
+    });
+  }
+
+
   var api = {
     // Solicitud de asset por identificador (Cap. 3.13). Sincrónico:
-    // en esta fase los assets son definiciones conceptuales, no
-    // binarios a descargar por red, así que no existe una versión
-    // asincrónica real todavía — la caché sigue siendo el mecanismo
-    // correcto para cuando esos assets pasen a ser recursos gráficos
-    // reales (Cap. 8.1, fases posteriores).
+    // resuelve la definición conceptual del asset (a qué capa
+    // pertenece, si es de carga anticipada, etc.), nunca el binario.
+    // Para el binario real (SVG a insertar en el DOM) ver
+    // obtenerBinario() más abajo — método aparte y asincrónico, para
+    // no romper a nadie que ya dependa de que obtener() sea síncrono.
     obtener: function (id) {
       if (cacheCaliente.has(id)) {
         var enCache = cacheCaliente.get(id);
@@ -98,6 +137,37 @@
       if (!global.AmbienteConfig) return;
       global.AmbienteConfig.listarAssetsAnticipados().forEach(function (id) {
         api.obtener(id);
+      });
+    },
+
+    // Cap. 8.1 "fases posteriores": resuelve el binario real (markup
+    // SVG) de un asset, si su definición en AmbienteConfig declara
+    // 'archivo'. Asincrónico siempre (aunque venga de la caché
+    // caliente de binarios) para que ninguna familia tenga que
+    // manejar dos formas distintas de llamarlo según haya pegado en
+    // caché o no. Un id sin 'archivo' definido, o que falle al
+    // descargarse, resuelve a null — nunca rechaza la promesa: una
+    // familia sin su asset debe poder no dibujarse, nunca romper el
+    // arranque del Ambient Engine (mismo principio de "señal de no
+    // disponibilidad" que ya usa obtener()).
+    obtenerBinario: function (id) {
+      if (cacheBinarios.has(id)) {
+        var enCache = cacheBinarios.get(id);
+        marcarBinarioUsado(id, enCache);
+        return Promise.resolve(enCache);
+      }
+      var meta = resolverDesdeOrigen(id);
+      if (!meta || !meta.archivo) return Promise.resolve(null);
+      var urlOrigen = new URL(meta.archivo, document.baseURI).href;
+      return fetch(meta.archivo).then(function (respuesta) {
+        return respuesta.ok ? respuesta.text() : null;
+      }).then(function (texto) {
+        if (texto == null) return null;
+        var resuelto = resolverRutasRelativas(texto, urlOrigen);
+        marcarBinarioUsado(id, resuelto);
+        return resuelto;
+      }).catch(function () {
+        return null; // Cap. 3.13: falla se resuelve como no disponibilidad, nunca como excepción hacia el llamador
       });
     },
 
