@@ -62,3 +62,42 @@ sueltos y pasaran a verse en pantalla:
 Como sustrato P0, debe estar presente desde el primer instante de
 cualquier escena — "diferida" no aplicaba acá (ver nota de Paso 2
 más arriba).
+
+## v1.0 — Corrientes (Paso 5, Roadmap Cap. 12 orden 4)
+
+| Nombre de archivo | Familia | Plano | Movimiento heredado | Reactividad | Fecha / versión | Justificación |
+|---|---|---|---|---|---|---|
+| `corrientes/corrientes--diagonal-lenta--hairline.svg` | Corrientes | P1 | Deriva direccional continua (40s, loop) | Ninguna implementada en este paso (ver nota abajo) | v1.0 | "Es la única familia que representa el río sin literalidad" (Cap. 2.1). Construida solo con la primitiva sinusoide; 3 franjas, escala 1.0 / 1.3 en progresión (Cap. 1.4) y una tercera fuera de serie a propósito. |
+
+Primer paso del Roadmap (Cap. 12) que sale del plano P0: Corrientes
+vive en P1 ("Corriente", Cap. 4.1), con opacidad y color tomados de
+los tokens `--amb-p1-*` ya definidos desde el Paso 1 pero sin uso
+hasta ahora.
+
+Movimiento nuevo: a diferencia de Respiración (que solo anima una
+variable de opacidad), Deriva anima `transform: translateX()` sobre
+un grupo que contiene el tile original + una copia desplazada un
+ancho de tile completo — técnica de loop sin salto documentada en
+el propio SVG. Se agregó el keyframe `amb-deriva` en
+`ambiente-tokens-movimiento.css`, junto al `amb-respiracion` ya
+existente, respetando `prefers-reduced-motion` con el mismo criterio
+que las dos familias anteriores.
+
+**Pendiente registrado a propósito (no es una excepción del Cap. 8.2,
+es alcance explícito de este paso):** la matriz de reactividad del
+Cap. 6.1 asigna a Corrientes reacción a scroll (parallax de
+velocidad) y a clima (velocidad ↑ con lluvia). Ninguna de las dos se
+implementa acá — este paso solo resuelve la familia y su firma de
+movimiento propia. Queda para el paso de integración de interacción/
+clima, mismo criterio que ya dejó pendientes los shifts de
+clima/horario de `ambiente-tokens-visual.css` en el Paso 1.
+
+Integración: `js/ambiente-corrientes.js` (nuevo, mismo patrón que
+`ambiente-reticula.js`/`ambiente-topografia.js`, mismo `iniciar()`
+llamado desde `ambiente-orquestador.js`), inserta el asset en
+`AmbientePlanos.contenedor('p1')` en vez de `'p0'`.
+
+*(Los assets de las familias restantes — Coordenadas, Brújula,
+Partículas de deriva, Halos de posición — se agregan a esta tabla a
+medida que se implementan, uno por paso, siguiendo el Roadmap del
+Cap. 12.)*
