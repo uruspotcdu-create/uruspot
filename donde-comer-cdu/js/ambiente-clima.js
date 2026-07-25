@@ -21,6 +21,16 @@
      en ser desactivado cuando hay restricciones de recursos).
    - Cap. 9.2 — bajo reducirMovimiento se desactiva por completo.
 
+   Fase 6 (Playbook, WP5) / Fase 7 (Auditoría §9.1): conecta
+   functions/weather.js como primera señal ambiental real. Sigue
+   siendo un ejecutor, no un decisor de negocio: solo traduce
+   temperatura/código WMO/viento ya normalizados por esa función a
+   activar/desactivar los mismos tres efectos que ya existían — nunca
+   agrega un cuarto efecto ni decide fuera de ese vocabulario. Nunca
+   escribe en ninguna fuente de datos existente, solo lee. Una falla
+   de red acá nunca debe notarse: se degrada a exactamente el mismo
+   comportamiento de antes (niebla sutil por escena, nada más).
+
    Debe cargarse después de ambiente-movimiento.js y antes de
    ambiente-orquestador.js.
    ═══════════════════════════════════════════════════════════════════ */
@@ -33,6 +43,24 @@
   var contenedor = null;
   var parametrosActuales = null;
   var desuscribir = null;
+
+  // Fase 6/7: clima real. Endpoint co-alojado (Cloudflare Pages
+  // Function en functions/weather.js) — mismo origen, sin CORS.
+  var URL_CLIMA = '/weather';
+  // Mismo intervalo que el cache-control del propio endpoint (300s):
+  // pedir más seguido no traería datos más frescos (Fase 6 criterio
+  // de rechazo: "cualquier polling con frecuencia propia distinta").
+  var INTERVALO_REFRESCO_MS = 5 * 60 * 1000;
+  var UMBRAL_VIENTO_KMH = 25;
+  // Códigos WMO ya normalizados por functions/weather.js.
+  var CODIGOS_LLUVIA = { 51: true, 61: true, 65: true, 71: true, 75: true };
+  var CODIGO_NIEBLA = 45;
+
+  var temporizadorClima = null;
+  var climaRealVientoActivo = false;
+  var climaRealLluviaActiva = false;
+  var climaRealNieblaActiva = false;
+  var listenerVisibilidad = null;
 
   // Variaciones climáticas posibles (Cap. 5.7 Fase 1)
   var EFECTOS_DISPONIBLES = {
@@ -87,12 +115,17 @@
     if (!clima.habilitado) {
       // Desactivar todos los efectos
       Object.keys(EFECTOS_DISPONIBLES).forEach(desactivarEfecto);
+      climaRealLluviaActiva = false;
+      climaRealVientoActivo = false;
       return;
     }
 
     // Cap. 3.7: "clima es un toggle que resolverá el futuro Weather Engine"
     // Por ahora, si está habilitado, activamos niebla sutil (Cap. 5.9 Fase 1)
-    if (clima.nieblaSutil) {
+    // Fase 6/7: niebla real (código WMO 45) se suma como OR — cualquiera
+    // de las dos razones (escena o dato real) es suficiente, ninguna
+    // anula a la otra.
+    if (clima.nieblaSutil || climaRealNieblaActiva) {
       activarEfecto('niebla');
     } else {
       desactivarEfecto('niebla');
@@ -100,7 +133,74 @@
 
     // Cap. 5.7 Fase 1: "lluvia, noche y atardecer... variaciones que se
     // superponen". Lluvia es un toggle independiente de la escena.
-    // Será activado por un future Context Manager o similar.
+    // Fase 6/7: ahora sí tiene un Context Manager real — functions/weather.js.
+    if (climaRealLluviaActiva) {
+      activarEfecto('lluvia');
+    } else {
+      desactivarEfecto('lluvia');
+    }
+    if (climaRealVientoActivo) {
+      activarEfecto('viento');
+    } else {
+      desactivarEfecto('viento');
+    }
+  }
+
+  // Fase 6 WP5 / Fase 7 §9.1: traduce el dato ya normalizado de
+  // functions/weather.js al mismo vocabulario de tres efectos que ya
+  // existía. No decide nada de negocio nuevo — solo mapea código WMO
+  // → efecto ya definido arriba (Cap. 2.3: sigue sin comunicarse
+  // lateralmente con otros subsistemas de Contenido Visual).
+  function aplicarDatosClimaReal(datos) {
+    var codigo = datos && datos.current && datos.current.weather_code;
+    var vientoKmh = datos && datos.current && datos.current.wind_speed_10m;
+
+    climaRealLluviaActiva = !!(codigo != null && CODIGOS_LLUVIA[codigo]);
+    climaRealNieblaActiva = codigo === CODIGO_NIEBLA;
+    climaRealVientoActivo = typeof vientoKmh === 'number' && vientoKmh >= UMBRAL_VIENTO_KMH;
+
+    // Re-aplica contra la escena vigente (si el clima está deshabilitado
+    // para esta escena, alCambiarParametros ya lo apaga todo igual).
+    if (parametrosActuales) alCambiarParametros({ parametros: parametrosActuales });
+  }
+
+  // Fetch con timeout corto: una falla o demora de la API externa
+  // (Cap. 15.3 Blueprint: blast radius) nunca debe bloquear ni
+  // degradar nada más del Ambient Engine — silenciosa, sin reintento
+  // agresivo, mismo criterio fail-open que el resto del motor.
+  function obtenerClimaReal() {
+    if (typeof fetch !== 'function') return;
+    var controlador = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timeoutId = controlador ? setTimeout(function () { controlador.abort(); }, 5000) : null;
+
+    fetch(URL_CLIMA, { signal: controlador ? controlador.signal : undefined })
+      .then(function (res) {
+        if (timeoutId) clearTimeout(timeoutId);
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then(function (datos) {
+        if (datos) aplicarDatosClimaReal(datos);
+      })
+      .catch(function () {
+        // Fail-open silencioso: se queda con el último estado conocido
+        // (o con el comportamiento previo basado solo en escena) en
+        // vez de romper o de reintentar agresivamente.
+        if (timeoutId) clearTimeout(timeoutId);
+      });
+  }
+
+  function pausarRefresco() {
+    if (temporizadorClima) {
+      clearInterval(temporizadorClima);
+      temporizadorClima = null;
+    }
+  }
+
+  function reanudarRefresco() {
+    if (temporizadorClima) return;
+    obtenerClimaReal();
+    temporizadorClima = setInterval(obtenerClimaReal, INTERVALO_REFRESCO_MS);
   }
 
   var api = {
@@ -136,11 +236,29 @@
         desuscribir = m.suscribir(alCambiarParametros);
         parametrosActuales = m.parametros();
       }
+
+      // Fase 6 WP5 / Fase 7 §9.1: clima real. Se pausa completamente
+      // cuando la pestaña no es visible (Cap. 8.2 Playbook: "sin
+      // listeners activos en background") y retoma con un fetch
+      // inmediato al volver, en vez de esperar el próximo intervalo.
+      if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        if (document.visibilityState !== 'hidden') reanudarRefresco();
+        listenerVisibilidad = function () {
+          if (document.visibilityState === 'hidden') pausarRefresco();
+          else reanudarRefresco();
+        };
+        document.addEventListener('visibilitychange', listenerVisibilidad);
+      }
     },
 
     // Limpiar y detener
     destruir: function () {
       if (desuscribir) desuscribir();
+      pausarRefresco();
+      if (listenerVisibilidad && typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', listenerVisibilidad);
+        listenerVisibilidad = null;
+      }
 
       // Desactivar todos los efectos
       Object.keys(EFECTOS_DISPONIBLES).forEach(desactivarEfecto);
