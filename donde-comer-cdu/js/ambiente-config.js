@@ -320,7 +320,13 @@
       tipo: 'referencia-direccional', capa: 'profundidad', carga: 'diferida'
     },
     'lineas-cartograficas': {
-      tipo: 'linea-cartografica', capa: 'profundidad', carga: 'diferida'
+      tipo: 'linea-cartografica', capa: 'profundidad', carga: 'diferida',
+      // Fase 3 (Lenguaje de Assets, Paso 2): asset SVG real ya
+      // construido. Campo aditivo puro — nada todavía lo lee, así
+      // que no cambia el comportamiento en tiempo de ejecución. Un
+      // futuro Asset Registry que resuelva binarios reales (Cap. 8.1
+      // arquitectura, "fases posteriores") lo consume desde acá.
+      archivo: 'assets/ambient/reticula/reticula--default--hairline.svg'
     },
     'coordenadas': {
       tipo: 'coordenadas', capa: 'profundidad', carga: 'diferida'

@@ -1,0 +1,91 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — Ambient Engine — assets/ambient/_tokens/ambiente-tokens-visual.css
+   Fase 3: tokens de color, opacidad por plano y peso de trazo
+   (Cap. 1.3, 3.4, 4.1, 7 del documento de Lenguaje de Assets v1.0)
+
+   Esto NO es una paleta: son los principios del Cap. 7 convertidos en
+   variables consultables. Ningún asset SVG define un color propio —
+   todos usan currentColor y heredan de estas variables (Cap. 3.4,
+   11.2 "Asignar color fijo, no tokenizado, a un asset" está prohibido).
+
+   Verificado contra el repo real antes de escribir esto (no asumido):
+   - El proyecto es dark-only. `grep` sobre `css/*.css` no encuentra
+     un solo `@media (prefers-color-scheme: light)` real, y hay una
+     nota de auditoría propia del proyecto (index.html, sección 13)
+     que lo confirma explícitamente. Por eso este archivo NO define
+     un bloque de modo claro — inventar un selector `[data-tema]` que
+     nada en el proyecto usa sería peor que no tener modo claro. Si
+     algún día se construye tema claro real, los valores del Cap. 7.2
+     ("extremo bajo de cada rango, trazos fríos-neutros oscuros") se
+     agregan acá recién en ese momento.
+   - El ciclo horario real (ambiente-capa-fondo.js) NO usa atributos
+     `data-*` discretos: interpola color continuamente y lo aplica
+     por `style.setProperty` sobre variables CSS. Por eso este archivo
+     tampoco inventa `[data-horario="amanecer"]` — sería un mecanismo
+     paralelo que el motor real no dispara. Los shifts de clima/
+     horario del Cap. 7.3 quedan como comentario de referencia más
+     abajo: la fase de integración (no esta) debe exponerlos como
+     variables que un módulo tipo ambiente-capa-fondo.js pueda
+     sobrescribir por `style.setProperty`, siguiendo el mismo patrón
+     que ya usa el motor para el cielo — no un patrón nuevo.
+
+   Regla dura respetada acá (Cap. 7.3): el shift de temperatura por
+   clima/horario nunca debe tocar --amb-p0-*. Por diseño, ninguna
+   variable de P0 aparece fuera del bloque :root — así, cuando la
+   fase de integración implemente los shifts, no hay ningún selector
+   de P0 preexistente que un desarrollador apurado pueda editar por
+   error.
+
+   Carga: antes que cualquier CSS de familia de assets.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ── Pesos de trazo — Cap. 1.3. Sistema de 3, nunca más.
+     Expresados en unidades de viewBox (100×100, Cap. 3.1), no en px
+     absolutos, para que el escalado sea matemáticamente predecible. ── */
+  --amb-trazo-hairline: 1;
+  --amb-trazo-regular:  1.5;
+  --amb-trazo-feature:  2;
+
+  /* ── Opacidad por plano — Cap. 4.1. Valor único por plano (no rango):
+     el proyecto es dark-only, así que se fija directamente en el
+     extremo alto de cada rango del Cap. 4.1 (Cap. 7.2: "en oscuro, si
+     es muy tenue, desaparece"). Los rangos completos quedan
+     documentados en el Cap. 4.1 del documento fuente por si algún día
+     hace falta interpolar dentro de ellos (clima, fidelidad reducida). ── */
+  --amb-p0-opacidad: 0.08;  /* rango Cap. 4.1: 0.04–0.08 */
+  --amb-p1-opacidad: 0.18;  /* rango Cap. 4.1: 0.10–0.18 */
+  --amb-p2-opacidad: 0.30;  /* rango Cap. 4.1: 0.18–0.30 */
+  --amb-p3-opacidad: 0.60;  /* localizado, Cap. 4.1 */
+
+  /* ── Color por plano. Trazos claros sobre fondo oscuro (Cap. 7.2),
+     construidos sobre los tokens de color ya existentes en
+     css/tokens.css — nunca un color nuevo fuera del sistema.
+     Deliberadamente se usa --color-tinta (sólida, sin alfa) y NO
+     --color-tinta-30/-60/-80: esas variantes ya traen su propio alfa
+     incorporado (están pensadas para énfasis de texto), y aplicarles
+     además --amb-pN-opacidad encima multiplicaría dos opacidades —
+     el trazo terminaría casi invisible en vez de en el extremo alto
+     del rango que pide el Cap. 7.2. Una sola fuente de opacidad por
+     asset: la variable --amb-pN-opacidad. ── */
+  --amb-p0-color: var(--color-tinta, #ECEDEF);
+  --amb-p1-color: var(--color-tinta, #ECEDEF);
+  --amb-p2-color: var(--color-tinta, #ECEDEF);
+  --amb-p3-color: var(--color-granate-clara, #C97A83);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Referencia — Cap. 7.3: shifts de clima/horario (NO implementados
+   acá, ver nota arriba). Se documentan como valores de destino para
+   que la fase de integración no tenga que releer el documento fuente
+   entero:
+
+   Lluvia    (P1/P2/P3): shift azul-gris + desaturación leve
+   Amanecer  (P2/P3 solamente): ámbar bajo
+   Atardecer (P2/P3 solamente): ámbar medio
+   Noche: cubierta por la base dark ya definida arriba; P2 puede
+          ganar shift frío puntual (sustituto de "estrellas", 2.2)
+
+   P0 nunca cambia en ninguno de estos casos — regla dura, Cap. 7.3.
+   ═══════════════════════════════════════════════════════════════════ */

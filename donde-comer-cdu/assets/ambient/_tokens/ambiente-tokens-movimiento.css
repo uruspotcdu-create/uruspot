@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — Ambient Engine — assets/ambient/_tokens/ambiente-tokens-movimiento.css
+   Fase 3: firma de movimiento "Respiración" (Cap. 5 del documento de
+   Lenguaje de Assets v1.0), compartida por las dos únicas familias
+   que la usan: Retícula cartográfica (8-12s) y Curvas topográficas
+   (>20s, "casi estático es la decisión correcta").
+
+   No se anima "opacity" directamente sobre el asset: se anima la
+   variable --amb-resp-mult (un multiplicador 0.85↔1), y cada asset
+   consume esa variable dentro de su propio cálculo de opacidad
+   (ver el atributo style del <svg> de cada familia). Esto es
+   deliberado: la opacidad "real" de cada plano sigue siendo la que
+   define --amb-pN-opacidad (Cap. 4.1) — la respiración solo la
+   module dentro de un rango estrecho, nunca la reemplaza.
+
+   Cap. 9.1: se anima únicamente `opacity` (vía la variable), nunca
+   una propiedad que dispare reflow. Cap. 9.5 / patrón ya usado en
+   css/ambiente-estilos.css y css/ambiente-capa-fondo.css: pausada
+   por completo bajo prefers-reduced-motion, no solo acortada.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes amb-respiracion {
+  0%   { --amb-resp-mult: 0.85; }
+  50%  { --amb-resp-mult: 1; }
+  100% { --amb-resp-mult: 0.85; }
+}
+
+/* Retícula cartográfica — ciclo largo, 8-12s (Cap. 5). Se fija en 10s,
+   el punto medio del rango que da el documento. */
+.amb-asset--reticula {
+  animation: amb-respiracion 10s ease-in-out infinite;
+}
+
+/* Curvas topográficas (Paso 3) — "ninguno / respiración extrema lenta
+   (>20s)" (Cap. 5): 24s, el plano más profundo debe sentirse casi
+   estático. Declarado ya acá para que ambos assets compartan un solo
+   lugar de verdad sobre la firma de movimiento del plano P0. */
+.amb-asset--topograficas {
+  animation: amb-respiracion 24s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amb-asset--reticula,
+  .amb-asset--topograficas {
+    animation: none !important;
+    --amb-resp-mult: 1;
+  }
+}
