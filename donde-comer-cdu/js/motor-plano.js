@@ -283,6 +283,24 @@
    * sintácticamente válido pero con forma equivocada pasaba antes el
    * `try/catch` de `JSON.parse` sin ningún problema y rompía más
    * adelante, en el primer acceso a una propiedad inexistente.
+   *
+   * BUG REAL corregido en esta pasada: `typeof [] === 'object'` en
+   * JS, así que un estado con `version === SCHEMA_VERSION` pero con
+   * `rechazos`/`aceptados`/`exposicion`/`sesion` corrompidos a un
+   * ARRAY (en vez de objeto) pasaba esta validación igual — el chequeo
+   * de acá solo miraba `typeof === 'object'`, sin excluir arrays.
+   * Eso hacía que `migrarEstado()` tomara el camino rápido ("ya está
+   * vigente, se devuelve tal cual") en vez del camino de
+   * reconstrucción, que SÍ filtra arrays correctamente con
+   * `!Array.isArray(...)` — la protección existía, pero solo en la
+   * mitad de los caminos que un estado corrupto puede tomar. El
+   * síntoma real: `gruposAEvitar()` (llamada en cada render() desde
+   * motor-exposicion.js) terminaba haciendo `.filter` sobre un valor
+   * que no es un array (un elemento indexado de otro array por
+   * casualidad), lanzando `TypeError: lista.filter is not a
+   * function` — un crash de producción, no solo un dato mal leído.
+   * Reproducido y verificado antes del fix. Ahora ambos caminos usan
+   * el mismo criterio: objeto real, no array.
    * @param {*} obj
    * @returns {boolean}
    */
@@ -293,11 +311,11 @@
       typeof obj.autonomia === 'number' && isFinite(obj.autonomia) &&
       typeof obj.friccion === 'number' && isFinite(obj.friccion) &&
       typeof obj.aperturas === 'number' && isFinite(obj.aperturas) &&
-      obj.rechazos !== null && typeof obj.rechazos === 'object' &&
-      obj.aceptados !== null && typeof obj.aceptados === 'object' &&
+      obj.rechazos !== null && typeof obj.rechazos === 'object' && !Array.isArray(obj.rechazos) &&
+      obj.aceptados !== null && typeof obj.aceptados === 'object' && !Array.isArray(obj.aceptados) &&
       Array.isArray(obj.guardadosRecientes) &&
-      obj.exposicion !== null && typeof obj.exposicion === 'object' &&
-      obj.sesion !== null && typeof obj.sesion === 'object';
+      obj.exposicion !== null && typeof obj.exposicion === 'object' && !Array.isArray(obj.exposicion) &&
+      obj.sesion !== null && typeof obj.sesion === 'object' && !Array.isArray(obj.sesion);
   }
 
   /**
