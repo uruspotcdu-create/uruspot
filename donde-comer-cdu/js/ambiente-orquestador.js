@@ -70,6 +70,12 @@
     // real (Cap. 1.4).
     if (!global.AmbienteEstados) return;
 
+    // Fase 5 (Integration Blueprint, Cap. 14 criterio 3): flag
+    // maestro. Ausencia de AmbienteFlags (por ejemplo, si el archivo
+    // no llegó a cargar) nunca apaga el motor — mismo criterio
+    // fail-open que el resto de este orquestador.
+    if (global.AmbienteFlags && !global.AmbienteFlags.activo('motor')) return;
+
     // ── Grupo de Infraestructura (Cap. 8.1) ─────────────────────────
     // Precalienta los assets de carga anticipada de la escena inicial
     // antes de que cualquier capa los pida — así ninguna capa visual
@@ -145,26 +151,43 @@
     // antes que la Capa de Fondo, la primera capa visual del
     // documento — para que AmbientePlanos.contenedor() ya exista
     // cuando la primera familia lo pida.
-    if (global.AmbientePlanos) global.AmbientePlanos.iniciar();
-    if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
-    if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
-    if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
-    if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
-    if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
-    // Fase 3 (Paso 8/9, roadmap Cap. 12 orden 7/8): mismo patrón que
-    // el resto de las familias — cada una inicia su propia inserción
-    // en el plano que le corresponde, el orquestador solo dispara.
-    if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
-    if (global.AmbienteHalos) global.AmbienteHalos.iniciar();
-    if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
+    // Fase 5 (Integration Blueprint, Cap. 14 criterio 3): las 7
+    // familias de assets + Capa de Fondo se apagan como grupo único
+    // ("sustratoVisual"), no una por una — porque AmbientePlanos crea
+    // los contenedores P0-P3 de los que el resto depende (ver nota
+    // de Fase 3 abajo); apagar una familia sí y otra no dejaría
+    // contenedores huérfanos sin sentido arquitectónico propio.
+    if (!global.AmbienteFlags || global.AmbienteFlags.activo('sustratoVisual')) {
+      if (global.AmbientePlanos) global.AmbientePlanos.iniciar();
+      if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
+      if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
+      if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
+      if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
+      if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
+      // Fase 3 (Paso 8/9, roadmap Cap. 12 orden 7/8): mismo patrón que
+      // el resto de las familias — cada una inicia su propia inserción
+      // en el plano que le corresponde, el orquestador solo dispara.
+      if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
+      if (global.AmbienteHalos) global.AmbienteHalos.iniciar();
+      if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
+      if (global.AmbienteParticulas) global.AmbienteParticulas.iniciar();
+      if (global.AmbienteLuz) global.AmbienteLuz.iniciar();
+    }
+    // Fase 5 (Integration Blueprint, Cap. 15.3): Horario es cómputo
+    // local puro, Clima depende de una API externa que puede fallar
+    // o tardar — se mantienen como flags separados entre sí (y del
+    // sustrato visual) precisamente para que una falla del Clima
+    // nunca pueda arrastrar nada más (aislamiento de blast radius).
     // Fase 3 (Paso 10, roadmap Cap. 12 orden 9): shift de color de
     // P2/P3 por horario — no es una familia de assets, así que se
     // inicia junto a la Capa de Fondo (misma naturaleza: lee la hora
     // real y escribe variables CSS), no junto a las 7 familias.
-    if (global.AmbienteHorarioTinte) global.AmbienteHorarioTinte.iniciar();
-    if (global.AmbienteParticulas) global.AmbienteParticulas.iniciar();
-    if (global.AmbienteLuz) global.AmbienteLuz.iniciar();
-    if (global.AmbienteClima) global.AmbienteClima.iniciar();
+    if (global.AmbienteHorarioTinte && (!global.AmbienteFlags || global.AmbienteFlags.activo('horarioTinte'))) {
+      global.AmbienteHorarioTinte.iniciar();
+    }
+    if (global.AmbienteClima && (!global.AmbienteFlags || global.AmbienteFlags.activo('clima'))) {
+      global.AmbienteClima.iniciar();
+    }
   }
 
   global.AmbientEngine = {
