@@ -51,6 +51,16 @@
    ambiente-escenas.js (que lo invoca en su fase de activación),
    ambiente-capa-fondo.js y ambiente-orquestador.js (que es quien lo
    inicia).
+
+   Fase 4 (Motion Direction Bible): este módulo ahora consulta a
+   AmbienteRitmo (Cap. 5) para resolver el registro de ritmo y la
+   duración de cada transición, en vez de calcular su propia banda de
+   forma aislada. AmbienteGramatica (Cap. 4) todavía no tiene un
+   consumidor en este archivo — el Motion Controller traduce escena +
+   restricciones a parámetros numéricos, no decide qué verbo describe
+   cada movimiento; ese es trabajo de las coreografías (Cap. 6), que
+   son las que efectivamente invocan un verbo sobre un elemento
+   concreto.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -59,6 +69,12 @@
   function rendimiento() { return global.AmbienteRendimiento || null; }
   function accesibilidad() { return global.AmbienteAccesibilidad || null; }
   function profundidad() { return global.AmbienteProfundidad || null; }
+  // Fase 4 (Motion Direction Bible, Cap. 5): fuente de verdad de los
+  // Registros de Ritmo. Opcional a propósito — si no está cargado
+  // (por ejemplo un test aislado de este archivo), todo este módulo
+  // se degrada al cálculo local que ya tenía antes de la Fase 4,
+  // nunca rompe.
+  function ritmo() { return global.AmbienteRitmo || null; }
 
   // Cap. 3.9: el Motion Controller es quien llama al Depth Manager —
   // este último "no renderiza contenido propio", solo calcula. Si el
@@ -80,6 +96,14 @@
   var listeners = [];
   var escenaActualId = null;
   var parametrosActuales = null;
+  // Fase 4 (Cap. 5): registro de ritmo vigente para la transición
+  // actual. 'conversacional' es el valor por defecto razonable — es
+  // el "registro por defecto de la navegación cotidiana" (Cap. 5) —
+  // hasta que setEscena() lo eleve a contemplativo (Cap. 6: "Cambio
+  // de escena"). Los recálculos por rendimiento/accesibilidad/
+  // visibilidad no son eventos narrativos (Cap. 9: son degradaciones
+  // de gobierno, no cambios de escena), así que no lo modifican.
+  var registroActual = 'conversacional';
 
   function emitir(motivo) {
     listeners.forEach(function (cb) {
@@ -170,7 +194,15 @@
       }),
       transicion: {
         banda: escena.transicion.banda,
-        duracionMs: duracionTransicion()
+        duracionMs: duracionTransicion(),
+        // Fase 4 (Cap. 5): informativo para quien consuma parámetros
+        // — permite que un futuro módulo de coreografías (Cap. 6)
+        // sepa en qué registro de ritmo está ocurriendo esta
+        // transición sin tener que volver a calcularlo. Nunca es la
+        // fuente de verdad del registro: eso vive únicamente en
+        // AmbienteRitmo y en la variable registroActual de este
+        // archivo.
+        registro: registroActual
       },
       presupuestoContraste: escena.presupuestoContraste,
       factoresPresupuesto: factoresPresupuesto,
@@ -186,12 +218,29 @@
   // Sin reducción, un dispositivo/nivel de fidelidad bajo se queda en
   // el extremo inferior de la banda en lugar del punto medio (Cap.
   // 6.5 Fase 1: la Transición nunca se elimina, solo se acorta).
+  //
+  // Fase 4 (Motion Direction Bible, Cap. 5): la banda 'contexto' de
+  // Arquitectura Técnica es, en el vocabulario de la Biblia, el
+  // registro conversacional o contemplativo según registroActual. Si
+  // AmbienteRitmo está cargado, es la fuente de verdad de esta
+  // duración — incluye su propio manejo de reducirMovimiento (Cap.
+  // 13), así que aquí solo queda superponer la regla de fidelidad
+  // (Cap. 12), que le es ajena a Ritmo por diseño. Si no está
+  // cargado, este módulo se degrada exactamente al cálculo que ya
+  // tenía antes de la Fase 4 — nunca deja de funcionar.
   function duracionTransicion() {
     var c = config();
     var a = accesibilidad();
     var r = rendimiento();
-    var banda = c ? c.BANDAS_VELOCIDAD.contexto : { minMs: 400, maxMs: 900 };
+    var rit = ritmo();
 
+    if (rit) {
+      if ((a && a.reducirMovimiento)) return rit.duracion(registroActual);
+      if (r && r.nivelFidelidad !== 'completa') return rit.banda(registroActual).minMs;
+      return rit.duracion(registroActual);
+    }
+
+    var banda = c ? c.BANDAS_VELOCIDAD.contexto : { minMs: 400, maxMs: 900 };
     if (a && a.reducirMovimiento) return 150;
     if (r && r.nivelFidelidad !== 'completa') return banda.minMs;
     return Math.round((banda.minMs + banda.maxMs) / 2);
@@ -225,9 +274,20 @@
     // T3→T4). Solo el Ambient Engine (raíz orquestadora) debe llamar
     // a esto — ningún subsistema de Contenido Visual debe conocer
     // siquiera que este método existe.
+    //
+    // Fase 4 (Cap. 6 "Cambio de escena", Cap. 5): un cambio de escena
+    // es, por naturaleza, un evento de registro contemplativo. Si
+    // AmbienteRitmo está cargado, se le pide resolver ese registro —
+    // aplica la regla de contraste posterior (Cap. 5: un contemplativo
+    // nunca sigue inmediatamente a otro) y puede degradarlo a
+    // conversacional si el cambio de escena anterior fue reciente. Si
+    // no está cargado, se mantiene 'contemplativo' fijo, que era el
+    // comportamiento implícito de este módulo antes de la Fase 4.
     setEscena: function (id) {
       if (escenaActualId === id) return;
       escenaActualId = id;
+      var rit = ritmo();
+      registroActual = rit ? rit.resolver('contemplativo', 'cambio-escena').registro : 'contemplativo';
       recalcularYEmitir('escena');
     },
 
