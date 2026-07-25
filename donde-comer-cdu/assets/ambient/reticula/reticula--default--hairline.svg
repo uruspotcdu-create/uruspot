@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  URU SPOT — Ambient Engine — Familia: Retícula cartográfica
+  Archivo: reticula, variante default, peso hairline (ver nombre real
+  del archivo en el sistema de carpetas — no repetido acá literal
+  porque el nombre usa doble guion, inválido dentro de un comentario XML)
+
+  Cap. 2.1: "Da estructura de fondo; sin ella todo lo demás flota sin
+  contexto." Plano P0 (Sustrato). Único peso permitido: hairline
+  (Cap. 1.3 — la retícula es, textualmente, uno de los tres usos de
+  ese peso). Movimiento heredado: Respiración (Cap. 5), aplicada
+  afuera de este archivo por reticula-movimiento.css — este SVG nunca
+  anima su propio grosor (1.3: "jamás se anima su grosor").
+
+  Construido enteramente con 2 de las 5 primitivas compartidas
+  (Cap. 3.3): línea recta (grilla) y marca de coordenada (puntos
+  cardinales). No define geometría propia.
+
+  Jerarquía cada 10 unidades con refuerzo cada 50 (Cap. 1.4): las
+  líneas menores (10/20/30/40/60/70/80/90) llevan opacity 0.6 vía
+  <g>; las mayores (x=50, y=50, los ejes centrales) opacity 1 — la
+  diferencia es de opacidad, nunca de grosor (Cap. 1.3: "el grosor
+  comunica jerarquía de plano, no énfasis emocional").
+
+  Ritmo 80/20 (Cap. 1.4): dos líneas menores (x=20, y=60) se
+  desplazan levemente de la progresión perfecta (19.4 y 60.7 en vez
+  de 20 y 60) para introducir la irregularidad deliberada que pide
+  el capítulo — el resto de la grilla se mantiene en progresión
+  regular exacta.
+
+  Color/opacidad: currentColor + la variable de color de plano P0 y
+  su variable de opacidad (ver assets/ambient/_tokens/), nunca fijos
+  (Cap. 3.4, 11.2). Grosor: variable de trazo hairline (Cap. 1.3).
+
+  Complejidad (Cap. 9.2): 3 grupos (límite 6), 22 nodos <use>
+  (límite 80 por asset). Sin filter, sin animación de propiedades
+  de layout (Cap. 9.1).
+-->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     class="amb-asset amb-asset--reticula"
+     style="color:var(--amb-p0-color);
+            opacity:calc(var(--amb-p0-opacidad) * var(--amb-resp-mult, 1));
+            stroke:currentColor; stroke-width:var(--amb-trazo-hairline);
+            fill:none;" aria-hidden="true" focusable="false">
+
+  <!-- Líneas menores — cada 10 unidades, salvo el eje central (50) que
+       se resuelve en el grupo "mayor". Verticales: se rotan 90° sobre
+       el centro óptico (50,50) y se trasladan a su columna X.
+       Horizontales: se trasladan directamente a su fila Y. -->
+  <g class="reticula-menor" opacity="0.6">
+    <!-- verticales -->
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(-40 0) rotate(90 50 50)"/>
+    <!-- x=20 desplazado a 19.4: ruptura deliberada de progresión (Cap. 1.4) -->
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(-30.6 0) rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(-20 0) rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(-10 0) rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(10 0) rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(20 0) rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(30 0) rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(40 0) rotate(90 50 50)"/>
+    <!-- horizontales -->
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(0 -40)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(0 -30)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(0 -20)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(0 -10)"/>
+    <!-- y=60 desplazado a 60.7: segunda ruptura deliberada de progresión (Cap. 1.4) -->
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(0 10.7)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(0 20)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(0 30)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(0 40)"/>
+  </g>
+
+  <!-- Eje mayor — jerarquía cada 50 unidades (Cap. 1.4: "jerarquía
+       cada 5 o cada 10 unidades"; acá 50 = la jerarquía superior de
+       la grilla, el centro óptico del asset, Cap. 3.1). -->
+  <g class="reticula-mayor" opacity="1">
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea"/>
+  </g>
+
+  <!-- Marcas de coordenada en los 4 puntos cardinales del eje mayor —
+       refuerzo semántico de "esto es un mapa de datos reales, no
+       decoración" (Cap. 2.1, familia 1). -->
+  <g class="reticula-marcas" opacity="0.85" fill="currentColor">
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 -40)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 40)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(-40 0)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(40 0)"/>
+  </g>
+
+</svg>
