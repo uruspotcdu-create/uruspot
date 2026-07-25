@@ -170,7 +170,18 @@
       if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
       if (global.AmbienteHalos) global.AmbienteHalos.iniciar();
       if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
-      if (global.AmbienteParticulas) global.AmbienteParticulas.iniciar();
+      // Fase 8 (Visual & Design Master Pass): AmbienteParticulas (Fase 2,
+      // prototipo) queda retirado del arranque. Duplicaba, con puntos
+      // azules sin tokenizar (rgba(100,180,255,…), prohibido por el
+      // Cap. 11.2 del documento de Lenguaje de Assets: "asignar color
+      // fijo, no tokenizado, a un asset"), exactamente el rol que la
+      // Familia 6 "Partículas de deriva" (AmbienteParticulasDeriva, ya
+      // iniciada arriba) ya cubre de forma oficial: SVG tokenizado,
+      // misma gramática cartográfica que el resto del sistema. Dos
+      // motores de partículas corriendo a la vez era ruido visual y
+      // costo de rendimiento por duplicado, no dos identidades. El
+      // módulo js/ambiente-particulas.js queda en el repo sin invocarse
+      // (ver css/ambiente-estilos.css para el resto del cambio).
       if (global.AmbienteLuz) global.AmbienteLuz.iniciar();
     }
     // Fase 5 (Integration Blueprint, Cap. 15.3): Horario es cómputo

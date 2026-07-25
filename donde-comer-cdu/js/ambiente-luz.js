@@ -35,21 +35,35 @@
   var desuscribir = null;
 
   // Calcular color base según intensidad (simulando ciclo horario)
+  //
+  // Fase 8 (Visual & Design Master Pass): las tres paradas usaban
+  // colores literales de app-del-tiempo genérica (celeste cielo,
+  // naranja, azul profundo) — exactamente la iconografía que el Cap.
+  // 1.1 del documento de Lenguaje de Assets excluye para el campo
+  // "Orientación/tiempo" ("Qué NO aporta: … iconografía de clima tipo
+  // app del tiempo"), y sin relación con ningún token de marca. Se
+  // reemplazan por los mismos valores RGB que ya son la fuente de
+  // verdad en css/tokens.css: --color-tinta (236,237,239) para el
+  // brillo neutro del día, --color-granate-clara (201,122,131) para
+  // la calidez de atardecer — el mismo acento que ya usa el resto del
+  // sitio (marca, hover de tarjetas, foco) — y --color-linea
+  // (148,155,171) para el frío sobrio de la noche, en vez de un azul
+  // nuevo inventado para la ocasión.
   function calcularTemperaturaColor(intensidad) {
     // Cap. 3.1 Fase 1: transición de día a atardecer a noche
-    // Intensidad alta (día) → color azul/blanco
-    // Intensidad media (atardecer) → color naranja
-    // Intensidad baja (noche) → color azul frío
-    
+    // Intensidad alta (día) → brillo neutro (--color-tinta)
+    // Intensidad media (atardecer) → cálido de marca (--color-granate-clara)
+    // Intensidad baja (noche) → frío sobrio (--color-linea)
+
     if (intensidad >= 0.7) {
-      // Día: azul claro
-      return 'rgba(135, 206, 250, 0.15)'; // light sky blue
+      // Día: brillo neutro, mismo tono que la tinta del sitio
+      return 'rgba(236, 237, 239, 0.12)';
     } else if (intensidad >= 0.4) {
-      // Atardecer: naranja cálido
-      return 'rgba(255, 165, 0, 0.15)'; // orange glow
+      // Atardecer: cálido de marca, el mismo acento granate claro
+      return 'rgba(201, 122, 131, 0.16)';
     } else {
-      // Noche: azul oscuro
-      return 'rgba(25, 45, 85, 0.2)'; // deep blue
+      // Noche: frío sobrio, el mismo gris que ya usan las líneas del sitio
+      return 'rgba(148, 155, 171, 0.14)';
     }
   }
 

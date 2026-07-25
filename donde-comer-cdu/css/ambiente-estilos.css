@@ -29,16 +29,6 @@
   pointer-events: none;
 }
 
-#ambient-particulas-contenedor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 7;
-  pointer-events: none;
-}
-
 #ambient-profundidad-contenedor {
   position: fixed;
   top: 0;
@@ -65,6 +55,12 @@
   opacity: 0.3;
 }
 
+/* Fase 8: el negro plano (rgba(0,0,0,.3)) no tenía relación con la
+   paleta del sitio — cualquier fondo, de cualquier hora del día,
+   oscurecía siempre hacia el mismo negro neutro. Se reemplaza por
+   --color-fondo-2 (el segundo tono del propio degradé de cielo, ya
+   definido en tokens.css), así el oscurecimiento de borde es una
+   profundización del mismo fondo, no un velo ajeno superpuesto. */
 #ambient-vigneta {
   position: fixed;
   top: 0;
@@ -76,41 +72,37 @@
   background: radial-gradient(
     ellipse at center,
     transparent 0%,
-    rgba(0, 0, 0, 0.3) 100%
+    var(--color-fondo-2) 100%
   );
 }
 
 /* ──────────────────────────────────────────────────────────────────
-   PARTICLE ENGINE (Capa de Partículas)
+   PARTICLE ENGINE — retirado en Fase 8.
+   Generaba puntos con color fijo sin tokenizar (rgba(100,180,255,…),
+   un celeste que no pertenece a la paleta de marca en ningún otro
+   lugar del sitio) — exactamente lo que el Cap. 11.2 del documento de
+   Lenguaje de Assets prohíbe ("asignar color fijo, no tokenizado, a
+   un asset"). El rol que cumplía (vida ambiental sutil, partículas a
+   la deriva) ya lo cubre oficialmente la Familia 6 "Partículas de
+   deriva" (assets/ambient/particulas/, vía currentColor + los tokens
+   de assets/ambient/_tokens/). js/ambiente-particulas.js y su llamada
+   en el orquestador quedaron retirados junto con estas reglas — ver
+   js/ambiente-orquestador.js e index.html.
    ────────────────────────────────────────────────────────────────── */
-
-.ambient-particula {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: rgba(100, 180, 255, 0.5);
-  pointer-events: none;
-  box-shadow: 0 0 6px rgba(100, 180, 255, 0.3);
-}
-
-/* Variaciones de partículas (para futuros tipos específicos) */
-.ambient-particula.pequeña {
-  width: 2px;
-  height: 2px;
-  background-color: rgba(150, 200, 255, 0.4);
-}
-
-.ambient-particula.grande {
-  width: 6px;
-  height: 6px;
-  background-color: rgba(80, 160, 255, 0.6);
-}
 
 /* ──────────────────────────────────────────────────────────────────
    WEATHER ENGINE (Capa de Clima)
    ────────────────────────────────────────────────────────────────── */
 
+/* Fase 8: estos tres efectos son reales (js/ambiente-clima.js los
+   activa desde clima real de Concepción del Uruguay vía functions/
+   weather.js, no son decoración de relleno) — el problema nunca fue
+   que existan, fue que su color era el gris-celeste genérico de
+   cualquier app del tiempo (rgba 200/210/220, 150/160/170…), sin
+   relación con --color-linea (rgb 148,155,171, ya el "gris frío" real
+   del sitio) ni con la calidez de --color-granate-clara. Se retintan
+   sobre esos dos tonos existentes: el sitio sigue leyéndose como URU
+   SPOT incluso cuando llueve, no como un overlay ajeno encima. */
 .ambient-niebla {
   position: fixed;
   top: 0;
@@ -119,8 +111,8 @@
   height: 100%;
   background: radial-gradient(
     circle at 50% 30%,
-    rgba(200, 210, 220, 0.15) 0%,
-    rgba(150, 160, 170, 0.08) 50%,
+    rgba(148, 155, 171, 0.14) 0%,
+    rgba(148, 155, 171, 0.07) 50%,
     transparent 100%
   );
   pointer-events: none;
@@ -137,8 +129,8 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(150, 150, 180, 0.05) 50%,
-    rgba(100, 100, 150, 0.1) 100%
+    rgba(148, 155, 171, 0.05) 50%,
+    rgba(16, 20, 28, 0.14) 100%
   );
   pointer-events: none;
   animation: ambient-lluvia-cae 4s linear infinite;
@@ -154,7 +146,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(180, 180, 200, 0.03) 50%,
+    rgba(148, 155, 171, 0.03) 50%,
     transparent 100%
   );
   pointer-events: none;
@@ -193,8 +185,7 @@
   /* Pausar todas las animaciones */
   .ambient-niebla,
   .ambient-lluvia,
-  .ambient-viento,
-  .ambient-particula {
+  .ambient-viento {
     animation: none !important;
   }
 
@@ -216,26 +207,16 @@
    RESPONSIVE Y AJUSTES POR DISPOSITIVO
    ────────────────────────────────────────────────────────────────── */
 
-/* Dispositivos pequeños: menos partículas */
-@media (max-width: 480px) {
-  .ambient-particula {
-    width: 2px;
-    height: 2px;
-    box-shadow: 0 0 3px rgba(100, 180, 255, 0.2);
-  }
-}
-
-/* Modo oscuro del sistema */
-@media (prefers-color-scheme: dark) {
-  .ambient-niebla {
-    background: radial-gradient(
-      circle at 50% 30%,
-      rgba(80, 90, 110, 0.1) 0%,
-      rgba(50, 60, 80, 0.05) 50%,
-      transparent 100%
-    );
-  }
-}
+/* Fase 8: el bloque "Modo oscuro del sistema" (@media prefers-color-
+   scheme: dark) que vivía acá quedó retirado — el propio sistema de
+   tokens (assets/ambient/_tokens/ambiente-tokens-visual.css) ya deja
+   constancia, verificada contra el repo, de que URU SPOT es dark-only
+   y no existe un solo bloque de modo claro real en ningún otro CSS
+   del proyecto. Ese `@media` era un mecanismo paralelo que el motor
+   real nunca dispara (el "modo oscuro" de acá dependía de una
+   preferencia de sistema operativo, no de --color-fondo, que es fijo)
+   — la misma clase de inconsistencia que ese archivo de tokens pide
+   evitar explícitamente. */
 
 /* ──────────────────────────────────────────────────────────────────
    DEBUGGING (opcional: descomentar para ver capas)
@@ -243,7 +224,6 @@
 
 /*
 #ambient-clima-contenedor { border: 1px solid green; }
-#ambient-particulas-contenedor { border: 1px solid blue; }
 #ambient-profundidad-contenedor { border: 1px solid red; }
 #ambient-resplandor { border: 1px solid yellow; }
 #ambient-vigneta { border: 1px solid orange; }

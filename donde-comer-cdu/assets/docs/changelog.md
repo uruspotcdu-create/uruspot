@@ -363,3 +363,45 @@ Los cuatro son, deliberadamente, el mismo tipo de pendiente: una
 limitación real de otro subsistema de la app, no una falla del
 sistema visual en sí — el criterio para cerrarlos, cuando corresponda,
 es el mismo Cap. 8.2 que ya gobernó cada paso anterior.
+
+## v1.2 — Fase 8: Visual & Design Master Pass (retiro de sistemas paralelos)
+
+No agrega assets nuevos. Corrige una discrepancia real encontrada al
+auditar el repo contra este mismo documento: dos sistemas de "fondo
+vivo" corrían al mismo tiempo sin que uno supiera del otro —
+
+1. **El sistema documentado acá** (7 familias, tokens de
+   `assets/ambient/_tokens/`, dark-only, colores siempre vía
+   `currentColor`).
+2. **Un prototipo previo (Fase 2 técnica)** — `js/ambiente-particulas.js`,
+   `js/ambiente-luz.js`, `css/ambiente-estilos.css` — que dibujaba sus
+   propios puntos, niebla, lluvia, viento y viñeta con colores fijos
+   sin tokenizar (celeste cielo, naranja, azul profundo, gris-azul
+   genérico), exactamente lo que el Cap. 11.2 de este mismo documento
+   prohíbe.
+
+Cambios de este paso:
+
+- `js/ambiente-particulas.js` (motor de partículas del prototipo) se
+  retira del arranque (`js/ambiente-orquestador.js`) y de la carga de
+  `index.html` — su rol ya lo cubre oficialmente la Familia 6
+  (Partículas de deriva, Paso 8) desde v1.0. El archivo sigue en el
+  repo, sin invocarse.
+- `js/ambiente-luz.js` (Lighting Engine, sí se mantiene: es el único
+  módulo con permiso explícito de nunca desactivarse, Cap. 7.2) se
+  retinta: sus tres paradas de color día/atardecer/noche pasan de
+  celeste-cielo/naranja/azul-profundo a los mismos RGB que ya son
+  fuente de verdad en `css/tokens.css` (`--color-tinta`,
+  `--color-granate-clara`, `--color-linea`).
+- `css/ambiente-estilos.css`: la viñeta pasa de negro plano a
+  `--color-fondo-2`; niebla/lluvia/viento (Weather Engine, real —
+  reacciona a clima real de Concepción del Uruguay vía
+  `functions/weather.js`, Fase 6/7) se retintan sobre `--color-linea`
+  en vez de un gris-celeste genérico de app del tiempo; se retira el
+  bloque `@media (prefers-color-scheme: dark)` que contradecía al
+  propio proyecto (dark-only, ya documentado en
+  `ambiente-tokens-visual.css`).
+
+Ningún asset SVG de las 7 familias cambia. Ningún plano P0-P3 cambia
+de opacidad, color base o regla de reactividad — esta auditoría tocó
+únicamente el sistema paralelo que vivía fuera de esa arquitectura.

@@ -1,4 +1,19 @@
 /* ═══════════════════════════════════════════════════════════════════
+   NOTA FASE 8 (auditoría): este archivo vive en js/ pero es CSS puro
+   (encabezado dice "css/ambiente-estilos.css") y NO está referenciado
+   por ningún <script> en index.html — se verificó contra el repo real
+   (`grep "ambiente-estilos" index.html` solo encuentra el <link> a
+   css/ambiente-estilos.css, nunca un <script src="js/ambiente-
+   estilos.js">). Es una copia huérfana, nunca ejecutada como JS (si
+   alguna vez se cargara como <script>, tiraría un error de sintaxis
+   inmediato: "#ambient-clima-contenedor {" no es JS válido). No se
+   borra en este paso para no tomar esa decisión sin consultar — ver
+   el resumen de entrega de Fase 8 para la recomendación de borrarlo.
+   La fuente de verdad real es css/ambiente-estilos.css, que sí está
+   enlazado y sí se retocó en esta fase.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
    URU SPOT — Ambient Engine — css/ambiente-estilos.css
    Fase 2: Estilos visuales para subsistemas del Grupo de Contenido Visual
 
