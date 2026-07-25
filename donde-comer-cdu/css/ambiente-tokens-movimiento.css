@@ -1,0 +1,113 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — Ambient Engine — assets/ambient/_tokens/ambiente-tokens-movimiento.css
+   Fase 3: firma de movimiento "Respiración" (Cap. 5 del documento de
+   Lenguaje de Assets v1.0), compartida por las dos únicas familias
+   que la usan: Retícula cartográfica (8-12s) y Curvas topográficas
+   (>20s, "casi estático es la decisión correcta").
+
+   No se anima "opacity" directamente sobre el asset: se anima la
+   variable --amb-resp-mult (un multiplicador 0.85↔1), y cada asset
+   consume esa variable dentro de su propio cálculo de opacidad
+   (ver el atributo style del <svg> de cada familia). Esto es
+   deliberado: la opacidad "real" de cada plano sigue siendo la que
+   define --amb-pN-opacidad (Cap. 4.1) — la respiración solo la
+   module dentro de un rango estrecho, nunca la reemplaza.
+
+   Cap. 9.1: se anima únicamente `opacity` (vía la variable), nunca
+   una propiedad que dispare reflow. Cap. 9.5 / patrón ya usado en
+   css/ambiente-estilos.css y css/ambiente-capa-fondo.css: pausada
+   por completo bajo prefers-reduced-motion, no solo acortada.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes amb-respiracion {
+  0%   { --amb-resp-mult: 0.85; }
+  50%  { --amb-resp-mult: 1; }
+  100% { --amb-resp-mult: 0.85; }
+}
+
+/* Retícula cartográfica — ciclo largo, 8-12s (Cap. 5). Se fija en 10s,
+   el punto medio del rango que da el documento. */
+.amb-asset--reticula {
+  animation: amb-respiracion 10s ease-in-out infinite;
+}
+
+/* Curvas topográficas (Paso 3) — "ninguno / respiración extrema lenta
+   (>20s)" (Cap. 5): 24s, el plano más profundo debe sentirse casi
+   estático. Declarado ya acá para que ambos assets compartan un solo
+   lugar de verdad sobre la firma de movimiento del plano P0. */
+.amb-asset--topograficas {
+  animation: amb-respiracion 24s ease-in-out infinite;
+}
+
+/* Corrientes (Fase 3, Corrientes) — Deriva direccional continua
+   (Cap. 5: "desplazamiento lento en una dirección fija, loop"; a
+   diferencia de la Respiración, acá se anima transform, no una
+   variable de opacidad — sigue siendo Cap. 9.1-compatible: transform
+   nunca dispara reflow).
+
+   El grupo .corrientes-deriva (dentro del propio SVG de la familia)
+   contiene el tile original + una copia desplazada exactamente un
+   ancho de tile (translate(100 0), ver comentario del SVG). Por eso
+   -50% acá es exactamente un tile: al llegar a 100% del ciclo, la
+   copia ocupa el lugar donde arrancó el original y el loop no se
+   nota. transform-box:fill-box hace que el porcentaje sea relativo
+   a la propia caja del grupo (el doble de ancho de un tile), no al
+   viewport — así el cálculo no depende de a qué tamaño de pantalla
+   se escale el asset.
+
+   40s: "lenta" (Cap. 4.1, tabla de planos: P1 = velocidad lenta),
+   deliberadamente más lento que la Respiración de P0 (10-24s) — P1
+   se mueve, pero menos que cualquier cosa en primer plano. linear
+   (no ease-in-out): una corriente no acelera ni frena, fluye parejo
+   — ease-in-out es la firma de Respiración, no de Deriva; usarla acá
+   mezclaría las dos personalidades de movimiento que el Cap. 5 pide
+   mantener separadas por familia. */
+@keyframes amb-deriva {
+  from { transform: translateX(0%); }
+  to   { transform: translateX(-50%); }
+}
+
+.amb-asset--corrientes .corrientes-deriva {
+  transform-box: fill-box;
+  animation: amb-deriva 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amb-asset--reticula,
+  .amb-asset--topograficas {
+    animation: none !important;
+    --amb-resp-mult: 1;
+  }
+  .amb-asset--corrientes .corrientes-deriva {
+    animation: none !important;
+    transform: none !important;
+  }
+  .amb-asset--coordenadas {
+    transition: none !important;
+  }
+}
+
+/* Coordenadas — Aparición/desaparición discreta (Cap. 5: "fade in/out
+   puntual, sin desplazamiento"). A diferencia de Respiración y
+   Deriva, esta NO es una firma cíclica (@keyframes en loop): es un
+   evento puntual disparado por estado ("hay un punto seleccionado" /
+   "no lo hay"), por eso se resuelve con transition + una clase de
+   estado, no con animation infinite. Sigue siendo Cap. 9.1-compatible
+   (solo opacity, nunca layout).
+
+   .is-visible la aplica js/ambiente-coordenadas.js cuando el módulo
+   que sepa qué punto está seleccionado se lo indique (integración
+   pendiente, ver changelog) — este archivo solo define CÓMO se ve
+   la transición, nunca CUÁNDO ocurre (esa es una decisión de datos
+   de producto, no de lenguaje visual, Cap. 8.2).
+
+   260ms: deliberadamente mucho más rápido que Respiración (8-24s) o
+   Deriva (40s) — esas son firmas de ambiente de fondo; esta es
+   feedback puntual de un dato real (selección del usuario), más
+   cerca en carácter de una micro-interacción de interfaz que de una
+   animación ambiental, aunque geométricamente pertenezca al mismo
+   sistema (Cap. 3.1/3.4, igual que ya se decidió para el Halo en el
+   Cap. 13.3 del documento fuente). */
+.amb-asset--coordenadas {
+  transition: opacity 260ms ease-out;
+}
