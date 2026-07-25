@@ -121,6 +121,16 @@
     // State Manager, sin pasar por el orquestador.
     if (global.AmbienteInteraccion) global.AmbienteInteraccion.iniciar();
 
+    // ── Comportamiento base del Ambient Engine (Fase 4, Cap. 8,
+    // roadmap Cap. 16 etapa 5) ──────────────────────────────────────
+    // Se inicia junto al resto de Gobierno/Estados, no junto a las
+    // capas visuales: no pertenece al Grupo de Contenido Visual (no
+    // dibuja nada propio, solo publica --amb-respiracion) ni depende
+    // de que ninguna escena esté activa — solo de data-ambiente-estado,
+    // que el State Manager (arriba) ya refleja en <html> antes de este
+    // punto.
+    if (global.AmbienteRespiracion) global.AmbienteRespiracion.iniciar();
+
     // ── Grupo de Contenido Visual (Cap. 2.3) ────────────────────────
     // Cada capa se suscribe por su cuenta al Motion Controller ya
     // iniciado arriba — el orquestador no les entrega parámetros
