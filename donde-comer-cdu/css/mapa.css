@@ -13,7 +13,7 @@
   border-radius:var(--radio-lg); overflow:hidden;
   box-shadow:var(--sombra-vidrio), 0 0 60px -24px var(--glow-marca);
   height:420px; position:relative;
-  animation:uru-scale-in var(--dur-lentisima) var(--easing-rebote) backwards;
+  animation:uru-scale-in var(--dur-lentisima) var(--easing-movimiento) backwards;
   transition:box-shadow var(--dur-media);
 }
 @media (hover:hover) and (pointer:fine){
@@ -100,7 +100,7 @@
    Reutiliza `uru-scale-in`, la misma keyframe que ya usa el resto del
    sitio — no se inventa un movimiento nuevo. Protegida con reduced-motion. */
 .mapa-container:not([hidden]){
-  animation:uru-scale-in var(--dur-lenta) var(--easing-rebote);
+  animation:uru-scale-in var(--dur-lenta) var(--easing-movimiento);
 }
 @media (prefers-reduced-motion: reduce){
   .mapa-container:not([hidden]){
@@ -120,7 +120,7 @@
   border-radius:var(--radio-lg); padding:var(--esp-3) var(--esp-4);
   box-shadow:var(--sombra-vidrio); font:var(--tipo-cuerpo-xs);
   backdrop-filter:blur(var(--glass-blur-fuerte)); -webkit-backdrop-filter:blur(var(--glass-blur-fuerte));
-  animation:uru-popup-in 0.22s var(--easing-rebote); z-index:5;
+  animation:uru-popup-in 0.22s var(--easing-movimiento); z-index:5;
 }
 @media (prefers-reduced-motion: reduce){
   .uru-mapa-popup{
@@ -238,7 +238,7 @@ a.uru-mapa-popup-cluster-item:focus-visible{
   background:var(--glass-bg); border:1px solid rgba(201,122,131,.3);
   border-radius:var(--radio-md); font:var(--tipo-cuerpo-xs); color:var(--color-tinta-60);
   align-items:center; backdrop-filter:blur(var(--glass-blur));
-  animation:uru-fade-up var(--dur-lenta) var(--easing-rebote);
+  animation:uru-fade-up var(--dur-lenta) var(--easing-movimiento);
 }
 @media (prefers-reduced-motion: reduce){
   .mapa-info{
