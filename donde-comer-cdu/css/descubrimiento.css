@@ -346,7 +346,15 @@ header .membrete{
 .faq-pregunta{
   width:100%; display:flex; align-items:center; justify-content:space-between; gap:var(--esp-3);
   background:none; border:none; text-align:left; cursor:pointer;
-  padding:var(--esp-4) var(--esp-5); font:var(--tipo-cuerpo); font-weight:500; color:var(--color-tinta);
+  /* BUG REAL (auditoría Fase 8): usaba var(--esp-5), que no existe —
+     tokens.css documenta explícitamente la escala como cerrada
+     (4/8/12/16/24/32/48/64, "nada fuera de esta escala"). Un var()
+     que no resuelve dentro de un shorthand de padding invalida el
+     padding COMPLETO, no solo ese valor: .faq-pregunta se quedaba sin
+     padding horizontal, con el texto de cada pregunta pegado al borde
+     de la tarjeta. --esp-6 (24px) es el escalón que sigue a --esp-4
+     en la escala real. */
+  padding:var(--esp-4) var(--esp-6); font:var(--tipo-cuerpo); font-weight:500; color:var(--color-tinta);
 }
 .faq-pregunta:focus-visible{ outline:2px solid var(--color-granate-clara); outline-offset:-2px; }
 .faq-pregunta__icono{
@@ -360,7 +368,11 @@ header .membrete{
 .faq-respuesta > p{ overflow:hidden; }
 .faq-item--abierta .faq-respuesta{ grid-template-rows:1fr; }
 .faq-respuesta p{
-  min-height:0; padding:0 var(--esp-5) var(--esp-4); margin:0;
+  /* Mismo bug real que .faq-pregunta arriba: var(--esp-5) inexistente
+     invalidaba todo el padding, dejando la respuesta también sin aire
+     lateral. Mismo reemplazo (--esp-6) para que pregunta y respuesta
+     queden alineadas horizontalmente entre sí. */
+  min-height:0; padding:0 var(--esp-6) var(--esp-4); margin:0;
   font:var(--tipo-cuerpo-sm); color:var(--color-tinta-60);
 }
 .faq-respuesta a{ color:var(--color-granate-clara); }
