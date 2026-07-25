@@ -2287,6 +2287,48 @@
     if (carta && motorMapa) motorMapa.quitarResaltado();
   }
 
+  /**
+   * Cap. 6 "Cambio de filtros" (Motion Direction Bible v1.0, pasos
+   * 19-21): "los resultados que ya no cumplen el filtro se desvanecen
+   * ANTES de que los nuevos se acerquen — nunca se superponen en el
+   * mismo instante". Sin esto, pintarTarjetas() vacía y repinta el
+   * panel de forma instantánea (innerHTML=''), el "corte seco" que el
+   * Cap. 14 tipifica como anti-patrón ("Transiciones abruptas").
+   *
+   * Reutiliza el vocabulario de css/motion-gramatica.css (Desvanecerse,
+   * Cap. 4) en vez de declarar una animación propia acá: .u-mov-saliendo
+   * fuerza la duración de salida (asimetría entrada/salida, Cap. 10)
+   * sobre la transition de opacidad que ya trae .u-mov-desvanecer.
+   *
+   * Deliberadamente solo se usa desde el click de un chip de rubro
+   * (ver manejarClickRubros, abajo) y NO desde los demás llamados a
+   * render() del archivo (búsqueda en vivo, favoritos, paginación,
+   * "cerca tuyo"): agregar esta salida ahí también introduciría una
+   * demora perceptible en interacciones que el Cap. 5 ("Cómo evitar
+   * la fatiga") pide mantener ágiles, no contemplativas.
+   */
+  function renderConTransicionDeFiltro() {
+    var existentes = DOM.panelDescubrimiento
+      ? DOM.panelDescubrimiento.querySelectorAll('.tarjeta')
+      : [];
+
+    if (!existentes.length || prefiereMovimientoReducido()) {
+      render();
+      return;
+    }
+
+    var salidaMs = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--dur-conversacional-salida')
+    ) * 1000;
+    if (!salidaMs || isNaN(salidaMs)) salidaMs = 200; // fallback si el token no resuelve
+
+    for (var i = 0; i < existentes.length; i++) {
+      existentes[i].classList.add('u-mov-desvanecer', 'u-mov-saliendo', 'is-oculto');
+    }
+
+    setTimeout(render, salidaMs);
+  }
+
   function manejarClickRubros(e) {
     var chip = e.target.closest('[data-rubro]');
     if (!chip) return;
@@ -2296,7 +2338,7 @@
     estado.sesion.curaduriaActiva = false;
     PLANO.guardarEstado(estado);
     pintarRubros();
-    render();
+    renderConTransicionDeFiltro();
     if (DOM.tituloRegion) {
       DOM.tituloRegion.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }

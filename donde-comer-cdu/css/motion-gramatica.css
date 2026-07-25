@@ -49,12 +49,22 @@
 
 /* Al retirarse: agregar esta clase en el mismo instante en que se
    dispara la salida (junto con quitar .is-visible/.is-expandido, según
-   el verbo). Solo pisa la duración — nunca la curva ni la geometría —
-   para cumplir la asimetría entrada/salida del Cap. 10 ("la salida es,
-   por defecto, igual o más rápida que la entrada") sin duplicar cada
-   verbo en una versión "de salida" aparte. */
+   el verbo). Pisa duración Y curva —nunca la geometría/propiedad, eso
+   lo sigue definiendo el verbo— para cumplir la asimetría
+   entrada/salida del Cap. 10 sin duplicar cada verbo en una versión
+   "de salida" aparte.
+
+   Fuerza también transition-timing-function, no solo la duración: un
+   componente que ya declare su propia `transition` shorthand con la
+   misma especificidad que el verbo (ej. .tarjeta en tarjeta-lugar.css)
+   puede pisar la curva del verbo por orden de carga — pasó exactamente
+   eso al cablear "Cambio de filtros" (Cap. 6) sobre .tarjeta. Sin este
+   !important, la duración de salida quedaría correcta pero con la
+   curva `ease` por defecto en vez de --easing-movimiento, por
+   casualidad de cascada y no por diseño. */
 .u-mov-saliendo{
   transition-duration: var(--mov-salida, var(--dur-conversacional-salida)) !important;
+  transition-timing-function: var(--easing-movimiento) !important;
 }
 
 /* ── Acercarse (Cap. 4: gana relevancia/foco; reduce la distancia
