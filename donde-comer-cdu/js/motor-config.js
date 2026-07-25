@@ -21,6 +21,21 @@
 
   global.URU_CONFIG = {
 
+    /* ── 0. Logging de diagnóstico ──
+       Gobierna los console.log de app.js que describen el flujo
+       normal de uso (cambios de estado, operaciones async, etc.).
+       Apagado por defecto: en producción, cualquier visitante que
+       abra la consola no debería ver el detalle interno de la
+       máquina de estados en cada búsqueda/filtro/favorito. Para
+       depurar en local, poner `debug: true` acá o, sin tocar el
+       archivo, ejecutar `window.URU_CONFIG.debug = true` en la
+       consola antes de interactuar con la página.
+       No afecta a console.error/console.warn (esos son señales de
+       algo puntual que sí vale la pena ver siempre) ni al
+       TestingSuite de DebugHelper (ese ya es on-demand, se invoca
+       explícitamente vía window.URU_APP.healthCheck()). */
+    debug: false,
+
     /* ── 1. El plano continuo (Blueprint v2, sección 1) ──
        autonomia: 0 = guiado, 1 = autónomo
        friccion:  0 = resolver ya, 1 = margen para explorar        */
