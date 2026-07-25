@@ -38,6 +38,16 @@
   var FOCUS_TRAP_DELAY_MS = 100;
   var ANIMATION_TIMEOUT_MS = 260;
   var GEOLOCATION_TIMEOUT_MS = 8000;
+
+  // Logging de diagnóstico del flujo normal (cambios de estado,
+  // operaciones async, etc.), detrás de window.URU_CONFIG.debug —
+  // ver motor-config.js §0. No reemplaza console.error/console.warn,
+  // que siguen corriendo siempre porque señalan algo puntual.
+  function debugLog() {
+    if (window.URU_CONFIG && window.URU_CONFIG.debug) {
+      console.log.apply(console, arguments);
+    }
+  }
   var GEOLOCATION_MAX_AGE_MS = 300000;
   var RENDER_FRAME_TIMEOUT_MS = 50; // fallback si RAF no dispara
   var TOOLTIP_TIMEOUT_MS = 4000;
@@ -214,7 +224,7 @@
       stateChangeLog.shift();
     }
 
-    console.log('[State] ' + estadoAnterior + ' → ' + nuevoEstado + ' (' + (razon || 'unknown') + ')');
+    debugLog('[State] ' + estadoAnterior + ' → ' + nuevoEstado + ' (' + (razon || 'unknown') + ')');
   }
 
   /**
@@ -264,7 +274,7 @@
           timestamp: Date.now(),
           abort: abortController
         };
-        console.log('[Op] ' + id + ': ' + nombre + ' iniciada');
+        debugLog('[Op] ' + id + ': ' + nombre + ' iniciada');
         return id;
       },
 
@@ -273,7 +283,7 @@
        */
       completar: function (opId) {
         if (activeOps[opId]) {
-          console.log('[Op] ' + opId + ': completada');
+          debugLog('[Op] ' + opId + ': completada');
           delete activeOps[opId];
         }
       },
@@ -284,7 +294,7 @@
       cancelar: function (opId) {
         var op = activeOps[opId];
         if (op) {
-          console.log('[Op] ' + opId + ': cancelada');
+          debugLog('[Op] ' + opId + ': cancelada');
           if (op.abort) op.abort.abort();
           delete activeOps[opId];
         }
@@ -764,7 +774,7 @@
       html: null
     };
 
-    console.log('[Cleanup] Aplicación finalizada correctamente');
+    debugLog('[Cleanup] Aplicación finalizada correctamente');
   }
 
   /**
@@ -1087,7 +1097,7 @@
       var hayoCambio = ramaDistinta(rama) || hayCambioEnLista(lastRenderCache.lista, lista);
 
       if (!hayoCambio && uiState.ultimaRamaRenderizada === rama) {
-        console.log('[Render] Sin cambios, saltando');
+        debugLog('[Render] Sin cambios, saltando');
         return;
       }
 
@@ -3088,8 +3098,13 @@
     exportDebugData: function () { return DebugHelper.exportDebugData(); },
 
     // Metadata
+    // buildDate es una constante fija, no new Date(): este repo no
+    // tiene build step/CI, así que new Date() se evaluaría en el
+    // navegador de cada visitante (fecha de visita, no de deploy),
+    // quedando inútil para diagnóstico. Actualizar a mano en cada
+    // release junto con `version`.
     version: '2.3.0',
-    buildDate: new Date().toISOString()
+    buildDate: '2026-07-25'
   };
 
   window.URU_APP.LifecycleHooks = LifecycleHooks;
