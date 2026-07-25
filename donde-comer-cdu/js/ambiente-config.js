@@ -226,8 +226,21 @@
   var ORDEN_DEGRADACION = ['clima', 'particulas', 'navegacion', 'atmosfera', 'relieve'];
 
   // ── Bandas de velocidad (Documento de diseño, Cap. 3.1) ─────────
+  // Fase 4 (Motion Direction Bible, Cap. 5): estas tres bandas ya
+  // mapean a tres de los cuatro Registros de Ritmo (respuesta →
+  // inmediato, contexto → conversacional, ambiental → fondo, este
+  // último como período de ciclo, no como duración de transición
+  // puntual). Faltaba una banda propia para el registro
+  // contemplativo — el más lento después de fondo, reservado a
+  // ingreso al sitio, cambios de escena y momentos sin resultados
+  // (Cap. 5). La Biblia declina fijar milisegundos ("no se definen
+  // milisegundos, se definen criterios", Cap. 10); este rango es una
+  // elección pragmática consistente con el resto de esta tabla, no
+  // una especificación de Fase 5 — debe revisarse cuando exista ese
+  // documento.
   var BANDAS_VELOCIDAD = {
     ambiental: { minMs: 20000, maxMs: 90000 },
+    contemplativo: { minMs: 900, maxMs: 2000 },
     contexto: { minMs: 400, maxMs: 900 },
     respuesta: { minMs: 80, maxMs: 250 }
   };
