@@ -1463,13 +1463,30 @@
     // Escape cierra la ficha abierta y devuelve el foco a donde estaba
     // antes de abrirla — sin esto, un usuario de teclado que abre un
     // popup y quiere descartarlo no tenía forma de hacerlo sin el mouse.
-    contenedor.addEventListener('keydown', function (e) {
+    // BUG REAL corregido: este listener, y los 4 de touch de más abajo,
+    // se atan a `contenedor` — el elemento que entrega quien llama a
+    // crear(), no un nodo interno que `destruir()` desmonta con
+    // `contenedor.innerHTML = ''`. Ese innerHTML='' limpia hijos
+    // (lienzo, controles, popup...) pero un listener puesto
+    // directamente sobre `contenedor` sigue vivo después de destruir()
+    // si nadie lo remueve explícitamente — a diferencia de los
+    // listeners en `global`/`document`, que sí se removían. Si algún
+    // consumidor futuro reutiliza el mismo contenedor para crear() una
+    // instancia nueva (el escenario que esta misma pasada dice cubrir,
+    // ver comentario de PREVENCIÓN DE MEMORY LEAKS más arriba), la
+    // instancia vieja quedaba pegada para siempre: memoria retenida y
+    // trabajo desperdiciado en cada evento, sin ningún efecto visible
+    // porque `redibujar()` sí corta por `vivo`, pero la mutación de
+    // estado y el propio handler no. Se nombran las 5 funciones para
+    // poder removerlas en destruir().
+    function alKeydownContenedor(e) {
       if (e.key === 'Escape' && (!popup.hidden || spiderActivo)) {
         e.stopPropagation();
         if (!popup.hidden) cerrarPopup(true);
         cerrarSpider();
       }
-    });
+    }
+    contenedor.addEventListener('keydown', alKeydownContenedor);
 
     function desplazarPx(dx, dy) {
       cancelarInercia();
@@ -1495,7 +1512,7 @@
     // cambiaba el zoom con el centro del viewport fijo, así que
     // pellizcar lejos del centro "arrastraba" el mapa de forma rara.
     var pinchDist0 = null, pinchZoom0 = null, pinchCentro0 = null;
-    contenedor.addEventListener('touchstart', function (e) {
+    function alTouchstartContenedor(e) {
       if (e.touches.length === 2) {
         enPellizco = true;
         panTactilUnico = null;
@@ -1511,8 +1528,9 @@
         cerrarPopup();
         cerrarSpider();
       }
-    }, { passive: true });
-    contenedor.addEventListener('touchmove', function (e) {
+    }
+    contenedor.addEventListener('touchstart', alTouchstartContenedor, { passive: true });
+    function alTouchmoveContenedor(e) {
       if (e.touches.length === 2 && pinchDist0) {
         var d = distanciaToques(e.touches);
         var centroActual = centroToques(e.touches);
@@ -1555,8 +1573,9 @@
         cerrarPopup();
         redibujar();
       }
-    }, { passive: true });
-    contenedor.addEventListener('touchend', function (e) {
+    }
+    contenedor.addEventListener('touchmove', alTouchmoveContenedor, { passive: true });
+    function alTouchendContenedor(e) {
       if (e.touches.length === 1 && enPellizco) {
         var t = e.touches[0];
         muestrasMovimiento = [];
@@ -1569,14 +1588,16 @@
         enPellizco = false;
         if (panTactilUnico) { panTactilUnico = null; iniciarInercia(); }
       }
-    });
-    contenedor.addEventListener('touchcancel', function () {
+    }
+    contenedor.addEventListener('touchend', alTouchendContenedor);
+    function alTouchcancelContenedor() {
       // El sistema puede interrumpir el gesto (llamada entrante,
       // gesto de sistema del propio OS) sin `touchend` — sin este
       // manejo, `panTactilUnico`/`enPellizco` quedaban pegados y el
       // próximo toque heredaba un estado de pellizco que ya no existe.
       pinchDist0 = null; pinchCentro0 = null; panTactilUnico = null; enPellizco = false;
-    });
+    }
+    contenedor.addEventListener('touchcancel', alTouchcancelContenedor);
     function distanciaToques(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
     function centroToques(t) { return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 }; }
 
@@ -2031,6 +2052,17 @@
         if (resizeFallback) global.removeEventListener('resize', resizeFallback);
         if (global.document) document.removeEventListener('visibilitychange', alCambiarVisibilidad);
         if (orientationFallback) global.removeEventListener('orientationchange', orientationFallback);
+        // BUG REAL corregido en esta pasada: estos 5 listeners viven en
+        // `contenedor`, el elemento que entrega quien llama a crear(),
+        // no en `lienzo`/`controles` (que sí desaparecen con el
+        // `contenedor.innerHTML = ''` de más abajo). Sin este remove
+        // explícito, quedaban pegados para siempre si algún consumidor
+        // futuro reinicializaba el mapa sobre el mismo contenedor.
+        contenedor.removeEventListener('keydown', alKeydownContenedor);
+        contenedor.removeEventListener('touchstart', alTouchstartContenedor);
+        contenedor.removeEventListener('touchmove', alTouchmoveContenedor);
+        contenedor.removeEventListener('touchend', alTouchendContenedor);
+        contenedor.removeEventListener('touchcancel', alTouchcancelContenedor);
         if (orientationTimeout !== null) clearTimeout(orientationTimeout);
         if (animacionZoom) cancelAnimationFrame(animacionZoom);
         if (rafRedibujo !== null) cancelAnimationFrame(rafRedibujo);
