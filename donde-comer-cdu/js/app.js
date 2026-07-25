@@ -789,8 +789,21 @@
     var abortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
     var opId = OperationManager.crear('fetchJSON: ' + url, abortController);
 
+    // BUG REAL DE RENDIMIENTO (auditoría Fase 9): 'no-store' es el modo
+    // más agresivo de RequestCache — el navegador ni siquiera consulta
+    // la caché HTTP, fuerza una descarga completa del cuerpo en CADA
+    // fetch, en cada visita, incluso si lugares-core.json/-detalles.json/
+    // -estado.json no cambiaron una sola vez desde la última carga (el
+    // catálogo se edita a mano, no en cada request). 'no-cache' es
+    // distinto pese al nombre parecido: SIGUE revalidando con el
+    // servidor en cada pedido (nunca sirve un dato viejo sin preguntar,
+    // cero riesgo de desactualización), pero si el servidor responde
+    // 304 Not Modified (ETag/Last-Modified, ya soportado por hosting
+    // estático estándar) el navegador reutiliza el cuerpo cacheado en
+    // vez de volver a transferir 224KB+240KB+88KB por visita repetida.
+    // Mismo comportamiento observable, menos bytes reales en la red.
     return fetch(url, {
-      cache: 'no-store',
+      cache: 'no-cache',
       signal: abortController ? abortController.signal : undefined
     })
       .then(function (r) {
