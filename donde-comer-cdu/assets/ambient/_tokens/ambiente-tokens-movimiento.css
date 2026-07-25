@@ -82,4 +82,32 @@
     animation: none !important;
     transform: none !important;
   }
+  .amb-asset--coordenadas {
+    transition: none !important;
+  }
+}
+
+/* Coordenadas — Aparición/desaparición discreta (Cap. 5: "fade in/out
+   puntual, sin desplazamiento"). A diferencia de Respiración y
+   Deriva, esta NO es una firma cíclica (@keyframes en loop): es un
+   evento puntual disparado por estado ("hay un punto seleccionado" /
+   "no lo hay"), por eso se resuelve con transition + una clase de
+   estado, no con animation infinite. Sigue siendo Cap. 9.1-compatible
+   (solo opacity, nunca layout).
+
+   .is-visible la aplica js/ambiente-coordenadas.js cuando el módulo
+   que sepa qué punto está seleccionado se lo indique (integración
+   pendiente, ver changelog) — este archivo solo define CÓMO se ve
+   la transición, nunca CUÁNDO ocurre (esa es una decisión de datos
+   de producto, no de lenguaje visual, Cap. 8.2).
+
+   260ms: deliberadamente mucho más rápido que Respiración (8-24s) o
+   Deriva (40s) — esas son firmas de ambiente de fondo; esta es
+   feedback puntual de un dato real (selección del usuario), más
+   cerca en carácter de una micro-interacción de interfaz que de una
+   animación ambiental, aunque geométricamente pertenezca al mismo
+   sistema (Cap. 3.1/3.4, igual que ya se decidió para el Halo en el
+   Cap. 13.3 del documento fuente). */
+.amb-asset--coordenadas {
+  transition: opacity 260ms ease-out;
 }
