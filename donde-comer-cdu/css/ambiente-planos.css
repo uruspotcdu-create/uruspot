@@ -1,0 +1,76 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — Ambient Engine — css/ambiente-planos.css
+   Fase 3: Plane Manager — contenedores de los 4 planos (Cap. 4.1 del
+   documento de Lenguaje de Assets v1.0)
+
+   Contraparte visual de js/ambiente-planos.js: ese módulo crea los
+   4 contenedores (#ambiente-plano-p0..p3), este archivo los ubica y
+   ordena. Ninguna familia de assets debería necesitar su propio
+   position/z-index — lo hereda del plano donde vive (Cap. 8.1
+   checklist punto 4: "no se define movimiento a medida por asset").
+
+   Se carga DESPUÉS de assets/ambient/_tokens/ambiente-tokens-visual.css
+   (usa sus variables --amb-pN-*) y ANTES de css/ambiente-capa-fondo.css:
+   P0 es más profundo que la Capa de Fondo en términos de contenido,
+   pero ambos son position:fixed con z-index explícito, así que el
+   orden real de profundidad lo da el z-index de cada uno, no el
+   orden de carga del CSS — ver nota de z-index más abajo.
+
+   Cap. 4.2 regla dura: "los planos P0 y P1 nunca cambian de opacidad
+   por interacción del usuario" — por eso el color/opacidad de cada
+   plano se fija acá una sola vez, vía variable, y ningún otro CSS ni
+   JS de este repo debe tocar estas reglas para P0/P1. */
+
+#ambiente-planos {
+  /* Contenedor puramente estructural: no pinta nada por sí mismo,
+     no ocupa espacio de layout (Cap. 9.1: nunca disparar reflow). */
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* por encima de #ambiente-fondo (z-index: -1, Cap. 4: "la más lejana de la más cercana"); por debajo de cualquier componente de interfaz real, que vive en flujo normal del documento */
+  pointer-events: none; /* Cap. 1.4: el Ambient Engine nunca compite por interacción salvo el caso explícito de P3 (halos), habilitado asset por asset, nunca a nivel de plano completo */
+}
+
+.ambiente-plano {
+  position: absolute;
+  inset: 0;
+  /* Cada plano es su propio contexto de apilamiento: dentro de un
+     plano, el orden de pintado lo da el orden de inserción de sus
+     assets (Cap. 4.2: "nunca dos assets de la misma familia... sin
+     espaciado deliberado" — la superposición es responsabilidad de
+     la familia, no de este archivo). */
+}
+
+/* Orden de profundidad, Cap. 4.1: P0 sustrato → P3 foco. El orden de
+   los <div> ya es P0, P1, P2, P3 en el propio DOM (ver
+   js/ambiente-planos.js), pero se fija también por z-index explícito
+   para que este archivo sea la fuente de verdad autocontenida, sin
+   depender de que nadie mantenga el orden del DOM. */
+.ambiente-plano--p0 {
+  z-index: 0;
+  color: var(--amb-p0-color);
+}
+
+.ambiente-plano--p1 {
+  z-index: 1;
+  color: var(--amb-p1-color);
+}
+
+.ambiente-plano--p2 {
+  z-index: 2;
+  color: var(--amb-p2-color);
+}
+
+.ambiente-plano--p3 {
+  z-index: 3;
+  color: var(--amb-p3-color);
+}
+
+/* Cap. 4.1: P3 es el único plano que responde 1:1 a interacción
+   directa — por eso es el único al que se le permite recibir eventos
+   de puntero. La propia familia (halos de posición, aún no
+   implementada) decide qué elemento puntual dentro del plano
+   escucha, no el plano entero: esta regla solo remueve el bloqueo
+   heredado de #ambiente-planos, nunca fuerza captura de eventos. */
+.ambiente-plano--p3 {
+  pointer-events: none;
+}

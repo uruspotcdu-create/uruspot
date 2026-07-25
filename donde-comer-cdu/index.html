@@ -54,9 +54,14 @@
        4) Motion Controller: el único subsistema de Contenido Visual
           que puede leer Gobierno y Orquestación directamente — por
           eso carga recién después de ambos.
-       5) Background Renderer (capa-fondo): Contenido Visual puro,
+       5) Plane Manager (planos, Fase 3 Cap. 4.1): Contenido Visual
+          puro, depende únicamente del Motion Controller ya cargado.
+          Crea los 4 contenedores fijos (P0-P3) donde vivirán las
+          familias de assets; debe cargar antes que cualquier capa
+          que vaya a pedirle un contenedor.
+       6) Background Renderer (capa-fondo): Contenido Visual puro,
           depende únicamente del Motion Controller ya cargado.
-       6) Orquestador: va último porque es el único módulo que conoce
+       7) Orquestador: va último porque es el único módulo que conoce
           a todos los demás (con `defer`, el orden de ejecución es el
           orden del documento).
 
@@ -75,6 +80,7 @@
 <script src="js/ambiente-particulas.js" defer></script>
 <script src="js/ambiente-clima.js" defer></script>
 <script src="js/ambiente-interaccion.js" defer></script>
+<script src="js/ambiente-planos.js" defer></script>
 <script src="js/ambiente-capa-fondo.js" defer></script>
 <script src="js/ambiente-orquestador.js" defer></script>
 <script src="js/app.js" defer></script>
@@ -146,6 +152,9 @@
      propios encabezados (tokens.css primero, siempre). -->
 <link rel="stylesheet" href="css/tokens.css">
 <!-- Ambient Engine — Fase 1: Capa de Fondo (ver docs/AMBIENT-ENGINE-FASE0-FASE1.md) -->
+<link rel="stylesheet" href="assets/ambient/_tokens/ambiente-tokens-visual.css">
+<link rel="stylesheet" href="assets/ambient/_tokens/ambiente-tokens-movimiento.css">
+<link rel="stylesheet" href="css/ambiente-planos.css">
 <link rel="stylesheet" href="css/ambiente-capa-fondo.css">
 <link rel="stylesheet" href="css/ambiente-estilos.css">
 <link rel="stylesheet" href="css/boton.css">

@@ -128,6 +128,14 @@
     // parámetros... sin haber aplicado primero las restricciones");
     // solo dispara su iniciar(), como hace desde la Fase 1 con la
     // Capa de Fondo.
+    //
+    // Fase 3 (Lenguaje de Assets, Cap. 4.1): el Plane Manager crea
+    // los 4 contenedores fijos (P0-P3) donde vivirán las 7 familias
+    // de assets. Debe iniciarse antes que cualquier familia — hoy,
+    // antes que la Capa de Fondo, la primera capa visual del
+    // documento — para que AmbientePlanos.contenedor() ya exista
+    // cuando la primera familia lo pida.
+    if (global.AmbientePlanos) global.AmbientePlanos.iniciar();
     if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
     if (global.AmbienteParticulas) global.AmbienteParticulas.iniciar();
     if (global.AmbienteLuz) global.AmbienteLuz.iniciar();
