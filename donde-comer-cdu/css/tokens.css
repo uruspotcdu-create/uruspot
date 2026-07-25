@@ -202,6 +202,88 @@
      rectangular vs canvas). No se reemplaza en los otros archivos
      todavía — es fase 2, cambia CSS fuera de tokens.css. */
   --anillo-foco: 2px solid var(--color-granate-clara);
+
+  /* ── Fase 4 (Motion Direction Bible v1.0): registros de ritmo +
+     gramática temporal ──
+     Esta capa NO introduce valores nuevos de duración: el Cap. 10 del
+     documento ("No se definen milisegundos. Se definen criterios para
+     elegirlos") deja explícito que la elección de ms es una decisión
+     de implementación, no del documento. Lo que sí fija el documento
+     son los criterios — Cap. 5 (cuatro registros de ritmo) y Cap. 10
+     (proporcionalidad + asimetría entrada/salida) — y son esos
+     criterios los que esta capa traduce, mapeando cada registro a la
+     escala de duración que YA existe arriba (--dur-instantaneo →
+     --dur-lentisima) en vez de duplicar números. Si algún --dur-* de
+     esta sección no alcanza, se amplía la escala base, nunca se
+     inventa un valor suelto acá.
+
+     El cuarto registro del Cap. 5, "de fondo", no vive acá: pertenece
+     al Ambient Engine y ya está resuelto por familia de asset en
+     assets/ambient/_tokens/ambiente-tokens-movimiento.css (Fase 3,
+     ciclos de 6-40s). Esta sección cubre los otros tres, que sí son
+     de interfaz general.
+
+     Nota de auditoría (Cap. 14, "Rebotes innecesarios" es
+     anti-patrón explícito): --easing-rebote (Fase 1, arriba) es un
+     cubic-bezier con overshoot elástico y hoy lo usa .u-reveal. Esta
+     Fase 4 no lo toca —el alcance de este paso es solo la base de
+     tokens, no tocar componentes— pero queda registrado acá como
+     conflicto real a resolver cuando se audite Coreografías de
+     navegación (próximo paso del roadmap, Cap. 16), no como
+     "olvido". */
+
+  /* Registro inmediato (Cap. 5: microfeedback directo — tocar,
+     marcar favorito). Debe sentirse instantáneo en ambos sentidos:
+     a esta escala la asimetría entrada/salida del Cap. 10 no aplica
+     con margen perceptible, así que ambas comparten el mismo valor
+     en vez de fingir una diferencia que nadie percibiría. */
+  --dur-inmediato-entrada: var(--dur-instantaneo);
+  --dur-inmediato-salida:  var(--dur-instantaneo);
+
+  /* Registro conversacional (Cap. 5: el registro por defecto — scroll,
+     apertura de fichas, cambio de filtros). "Ágil pero nunca apurado":
+     --dur-lenta como entrada (más peso que un microfeedback, menos que
+     un momento contemplativo) y --dur-media como salida — la salida
+     es más rápida que la entrada por defecto (Cap. 10, asimetría),
+     porque la atención del usuario ya se movió cuando algo se retira. */
+  --dur-conversacional-entrada: var(--dur-lenta);
+  --dur-conversacional-salida:  var(--dur-media);
+
+  /* Registro contemplativo (Cap. 5: el más lento — ingreso al sitio,
+     cambios de escena ambiental, estados sin resultados). Usa el
+     extremo superior de la escala existente para la entrada y un
+     escalón menos para la salida, conservando la misma regla de
+     asimetría que el registro conversacional pero un nivel más lento
+     en ambos sentidos, para que "contemplativo" y "conversacional"
+     sigan siendo perceptualmente distinguibles entre sí (Cap. 14:
+     "Timings inconsistentes" es anti-patrón cuando dos registros
+     terminan sintiéndose iguales). */
+  --dur-contemplativo-entrada: var(--dur-lentisima);
+  --dur-contemplativo-salida:  var(--dur-lenta);
+
+  /* Curva de aceleración/desaceleración (Cap. 2: "la cámara nunca
+     tiembla"; Cap. 3, principio Inercia: "acelera y desacelera de
+     forma creíble", nunca instantánea ni elástica). --easing-estandar
+     (Fase 0/1, arriba) ya es exactamente esa curva — ease-out sin
+     overshoot — así que se la nombra acá como la curva canónica de
+     movimiento de la Fase 4, en vez de declarar un cubic-bezier
+     nuevo que diga lo mismo con otro nombre. Todo registro (inmediato,
+     conversacional, contemplativo) usa esta misma curva por defecto:
+     lo que cambia entre registros es la duración, nunca la
+     personalidad de la curva — mezclar curvas distintas por registro
+     rompería la Cohesión (Cap. 3) del mismo modo que mezclar timings. */
+  --easing-movimiento: var(--easing-estandar);
+
+  /* Microdesfase (Cap. 10: "elementos relacionados se mueven con un
+     breve decalaje entre sí, siguiendo su orden de jerarquía... la
+     sincronización perfecta se reserva exclusivamente para casos
+     donde el mensaje deseado es 'esto es un solo bloque conceptual'").
+     Valor base para escalonar transition-delay/animation-delay entre
+     elementos hermanos (ej: delay = i * var(--motion-desfase) por
+     índice de lista) — deliberadamente más chico que cualquier
+     --dur-* de esta sección, para que se lea como decalaje y no como
+     una segunda entrada superpuesta. */
+  --motion-desfase: .04s;
 }
 
 /* ── Reset mínimo compartido ── */
