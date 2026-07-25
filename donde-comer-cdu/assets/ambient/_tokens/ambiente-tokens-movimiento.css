@@ -39,10 +39,47 @@
   animation: amb-respiracion 24s ease-in-out infinite;
 }
 
+/* Corrientes (Fase 3, Corrientes) — Deriva direccional continua
+   (Cap. 5: "desplazamiento lento en una dirección fija, loop"; a
+   diferencia de la Respiración, acá se anima transform, no una
+   variable de opacidad — sigue siendo Cap. 9.1-compatible: transform
+   nunca dispara reflow).
+
+   El grupo .corrientes-deriva (dentro del propio SVG de la familia)
+   contiene el tile original + una copia desplazada exactamente un
+   ancho de tile (translate(100 0), ver comentario del SVG). Por eso
+   -50% acá es exactamente un tile: al llegar a 100% del ciclo, la
+   copia ocupa el lugar donde arrancó el original y el loop no se
+   nota. transform-box:fill-box hace que el porcentaje sea relativo
+   a la propia caja del grupo (el doble de ancho de un tile), no al
+   viewport — así el cálculo no depende de a qué tamaño de pantalla
+   se escale el asset.
+
+   40s: "lenta" (Cap. 4.1, tabla de planos: P1 = velocidad lenta),
+   deliberadamente más lento que la Respiración de P0 (10-24s) — P1
+   se mueve, pero menos que cualquier cosa en primer plano. linear
+   (no ease-in-out): una corriente no acelera ni frena, fluye parejo
+   — ease-in-out es la firma de Respiración, no de Deriva; usarla acá
+   mezclaría las dos personalidades de movimiento que el Cap. 5 pide
+   mantener separadas por familia. */
+@keyframes amb-deriva {
+  from { transform: translateX(0%); }
+  to   { transform: translateX(-50%); }
+}
+
+.amb-asset--corrientes .corrientes-deriva {
+  transform-box: fill-box;
+  animation: amb-deriva 40s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .amb-asset--reticula,
   .amb-asset--topograficas {
     animation: none !important;
     --amb-resp-mult: 1;
+  }
+  .amb-asset--corrientes .corrientes-deriva {
+    animation: none !important;
+    transform: none !important;
   }
 }
