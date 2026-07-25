@@ -50,6 +50,25 @@
   box-shadow:var(--sombra-vidrio), 0 0 28px -10px var(--chip-color, rgba(201,122,131,.5));
 }
 }
+/* Cap. 6 "Primer clic" (Motion Direction Bible v1.0, paso 11): "el
+   elemento tocado responde de inmediato en registro inmediato,
+   confirmando la recepción del gesto antes de que ocurra cualquier
+   consecuencia mayor". Clickear la tarjeta dispara motorMapa.enfocar()
+   (paso 12, la consecuencia), que puede tardar más que un frame en
+   completar su propio pan/zoom — sin esto, entre el toque y el
+   resultado en el mapa no había ninguna señal de que el gesto se
+   había recibido. --dur-instantaneo (el mismo token de
+   --dur-inmediato-entrada/salida en tokens.css), no --dur-media como
+   el resto de las transiciones de la tarjeta: la confirmación tiene
+   que sentirse más rápida que cualquier otra transición del
+   componente. Un solo valor de transition-duration pisa los cuatro
+   canales de la shorthand de arriba por igual (Cap. 9.1: sigue siendo
+   solo transform lo que realmente cambia acá), y se revierte solo al
+   soltar, sin tocar el resto de la declaración. */
+.tarjeta:active{
+  transform:scale(.985);
+  transition-duration:var(--dur-instantaneo);
+}
 .tarjeta--narrativa{ grid-column:span 2; }
 @media (max-width:720px){ .tarjeta--narrativa{ grid-column:span 1; } }
 .tarjeta.descartada{ opacity:0; transform:scale(.92); pointer-events:none; }
@@ -162,6 +181,15 @@
   color:var(--color-tinta); border-color:var(--color-granate-clara);
   transform:translateY(-1px); background:rgba(201,122,131,.12);
 }
+}
+/* Cap. 6 "Primer clic" (paso 11), mismo criterio que .tarjeta:active
+   arriba: guardar/rechazar/aceptar/compartir/ficha/maps/tel disparan
+   su consecuencia (aplicarAccion, render, navigator.share, etc.) de
+   forma síncrona en el click — sin esto, el único feedback antes de
+   esa consecuencia era el :hover, inexistente en touch. */
+.tarjeta-btn:active:not(:disabled){
+  transform:scale(.94);
+  transition-duration:var(--dur-instantaneo);
 }
 .tarjeta-btn:focus-visible{
   outline:2px solid var(--color-granate-clara); outline-offset:1px;
