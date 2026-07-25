@@ -139,6 +139,7 @@
     if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
     if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
     if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
+    if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
     if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
     if (global.AmbienteParticulas) global.AmbienteParticulas.iniciar();
     if (global.AmbienteLuz) global.AmbienteLuz.iniciar();
