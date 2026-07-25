@@ -2297,8 +2297,18 @@
    *
    * Reutiliza el vocabulario de css/motion-gramatica.css (Desvanecerse,
    * Cap. 4) en vez de declarar una animación propia acá: .u-mov-saliendo
-   * fuerza la duración de salida (asimetría entrada/salida, Cap. 10)
-   * sobre la transition de opacidad que ya trae .u-mov-desvanecer.
+   * fuerza la duración y curva de salida (asimetría entrada/salida,
+   * Cap. 10) sobre la transition de opacidad que ya trae
+   * .u-mov-desvanecer.
+   *
+   * Espera el fin real de la transición (transitionend) + timeout de
+   * seguridad, el mismo patrón ya probado de programarRenderTrasSalida
+   * (arriba, para "rechazar"/sacar de guardados) — no vuelve a
+   * calcular la duración a mano vía getComputedStyle: eso ya se hizo
+   * acá antes y funcionaba, pero es más frágil (se desincroniza en
+   * silencio si el token cambia) que escuchar el evento real. Solo se
+   * escucha en la primera tarjeta: todas comparten clase y duración,
+   * así que su transitionend es representativo de las demás.
    *
    * Deliberadamente solo se usa desde el click de un chip de rubro
    * (ver manejarClickRubros, abajo) y NO desde los demás llamados a
@@ -2317,10 +2327,14 @@
       return;
     }
 
-    var salidaMs = parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue('--dur-conversacional-salida')
-    ) * 1000;
-    if (!salidaMs || isNaN(salidaMs)) salidaMs = 200; // fallback si el token no resuelve
+    var yaRenderizo = false;
+    var terminar = function () {
+      if (yaRenderizo) return;
+      yaRenderizo = true;
+      render();
+    };
+    existentes[0].addEventListener('transitionend', terminar, { once: true });
+    setTimeout(terminar, ANIMATION_TIMEOUT_MS);
 
     for (var i = 0; i < existentes.length; i++) {
       existentes[i].classList.add('u-mov-desvanecer', 'u-mov-saliendo', 'is-oculto');
