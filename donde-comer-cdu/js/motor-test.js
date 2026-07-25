@@ -413,7 +413,36 @@ function claveActual() {
   global.localStorage.clear();
 })();
 
-/* ── 29. localStorage ausente: leerEstado degrada, no lanza ── */
+/* ── 29. BUG REAL (encontrado en esta pasada): estado YA vigente
+   (version === SCHEMA_VERSION) pero con rechazos/aceptados/exposicion
+   corrompidos a un ARRAY, con el resto de los campos requeridos
+   presentes — a diferencia del test 28, acá esEstadoValido() SÍ debía
+   tomar el camino rápido (antes del fix, `typeof [] === 'object'`
+   colaba el array sin pasar por la reconstrucción que sí filtra
+   arrays). Sin el fix, leerEstado() no lanzaba, pero gruposAEvitar()
+   sí — TypeError: lista.filter is not a function — al llamarse desde
+   motor-exposicion.js en cada render() real. ── */
+(function () {
+  var estadoVigenteCorrupto = {
+    version: 4, ciudad: 'cdu', autonomia: 0.3, friccion: 0.3, aperturas: 2,
+    ultimaApertura: null,
+    rechazos: ['no', 'debería', 'ser', 'array'],
+    aceptados: {}, guardadosRecientes: [], exposicion: {},
+    sesion: { curaduriaActiva: false, curaduriaSugerida: false, accionDirectaForzada: null, inicioPermanenciaMs: null, empujeFriccionSesion: 0 }
+  };
+  global.localStorage.setItem(claveActual(), JSON.stringify(estadoVigenteCorrupto));
+  var e, lanzo = false, lanzoEnGruposAEvitar = false;
+  try { e = PLANO.leerEstado('cdu'); } catch (err) { lanzo = true; }
+  assert('estado vigente con rechazos-array: leerEstado no lanza', lanzo === false);
+  assert('estado vigente con rechazos-array: se normaliza a objeto vacío (no toma el camino rápido)',
+    e && !Array.isArray(e.rechazos) && typeof e.rechazos === 'object');
+  try { PLANO.gruposAEvitar(e, Date.now()); } catch (err) { lanzoEnGruposAEvitar = true; }
+  assert('estado vigente con rechazos-array: gruposAEvitar tampoco lanza (el crash real reportado)',
+    lanzoEnGruposAEvitar === false);
+  global.localStorage.clear();
+})();
+
+/* ── 30. localStorage ausente: leerEstado degrada, no lanza ── */
 (function () {
   var real = global.localStorage;
   delete global.localStorage;
@@ -424,7 +453,7 @@ function claveActual() {
   global.localStorage = real;
 })();
 
-/* ── 30. Estado ya en versión vigente y válido: se devuelve tal cual, sin reconstruir ── */
+/* ── 31. Estado ya en versión vigente y válido: se devuelve tal cual, sin reconstruir ── */
 (function () {
   var vigente = PLANO.estadoInicial('cdu');
   vigente.aperturas = 42;
@@ -434,7 +463,7 @@ function claveActual() {
   global.localStorage.clear();
 })();
 
-/* ── 31. guardarEstado + leerEstado hacen round-trip fiel para un estado real ── */
+/* ── 32. guardarEstado + leerEstado hacen round-trip fiel para un estado real ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   e = PLANO.aplicarAccion(e, 'aceptar', { lugarId: 'A', grupo: 'cafeterias' });
@@ -446,7 +475,7 @@ function claveActual() {
   global.localStorage.clear();
 })();
 
-/* ── 32. borrarEstado limpia el contexto y una lectura posterior arranca de cero ── */
+/* ── 33. borrarEstado limpia el contexto y una lectura posterior arranca de cero ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   e.aperturas = 99;
@@ -460,7 +489,7 @@ function claveActual() {
    BLOQUE 10 — Secuencias largas y estados límite
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── 33. registrarApertura reinicia los flags de sesión pero conserva madurez ── */
+/* ── 34. registrarApertura reinicia los flags de sesión pero conserva madurez ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   e = PLANO.aplicarAccion(e, 'guardar', { lugarId: 'A' });
@@ -472,7 +501,7 @@ function claveActual() {
     e2.sesion.curaduriaSugerida === false);
 })();
 
-/* ── 34. Secuencia larga mixta no deja el plano fuera de sus límites ── */
+/* ── 35. Secuencia larga mixta no deja el plano fuera de sus límites ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   for (var i = 0; i < 200; i++) {
@@ -486,7 +515,7 @@ function claveActual() {
   assert('tras 200 acciones mixtas, fricción se mantiene dentro de [0,1]', e.friccion >= 0 && e.friccion <= 1);
 })();
 
-/* ── 35. abandonar no muta el plano ── */
+/* ── 36. abandonar no muta el plano ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   e.autonomia = 0.7;
@@ -494,7 +523,7 @@ function claveActual() {
   assert('abandonar no cambia autonomía', e2.autonomia === 0.7);
 })();
 
-/* ── 36. Acción desconocida no lanza y devuelve el estado sin cambios ── */
+/* ── 37. Acción desconocida no lanza y devuelve el estado sin cambios ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var e2 = PLANO.aplicarAccion(e, 'volarPorLosAires', { x: 1 });
@@ -502,7 +531,7 @@ function claveActual() {
   assert('una acción desconocida devuelve el estado sin modificar', e2.autonomia === e.autonomia);
 })();
 
-/* ── 37. payload.segundos inválido en permanecer no rompe (NaN, negativo, string) ── */
+/* ── 38. payload.segundos inválido en permanecer no rompe (NaN, negativo, string) ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var friccionAntes = e.friccion;
@@ -518,7 +547,7 @@ function claveActual() {
    BLOQUE 11 — Pureza, determinismo y compatibilidad de API
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── 38. Acciones.aceptar no muta el estado original (copia, no referencia) ── */
+/* ── 39. Acciones.aceptar no muta el estado original (copia, no referencia) ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var autonomiaOriginal = e.autonomia;
@@ -526,7 +555,7 @@ function claveActual() {
   assert('aplicarAccion no muta el objeto de estado original', e.autonomia === autonomiaOriginal);
 })();
 
-/* ── 39. Misma secuencia de acciones produce el mismo resultado (determinismo) ── */
+/* ── 40. Misma secuencia de acciones produce el mismo resultado (determinismo) ── */
 (function () {
   function correrSecuencia() {
     var e = PLANO.estadoInicial('cdu');
@@ -541,7 +570,7 @@ function claveActual() {
     r1.autonomia === r2.autonomia && r1.friccion === r2.friccion);
 })();
 
-/* ── 40. Compatibilidad de API pública: todo lo que ya consumía app.js sigue existiendo ── */
+/* ── 41. Compatibilidad de API pública: todo lo que ya consumía app.js sigue existiendo ── */
 (function () {
   ['leerEstado', 'registrarApertura', 'guardarEstado', 'aplicarAccion', 'region',
     'rolPorAperturas', 'gruposAEvitar', 'estadoInicial'].forEach(function (nombre) {
@@ -549,7 +578,7 @@ function claveActual() {
   });
 })();
 
-/* ── 41. API pública expone la superficie nueva de esta pasada ── */
+/* ── 42. API pública expone la superficie nueva de esta pasada ── */
 (function () {
   ['gruposAfines', 'reposoForzadoActivo', 'nivelConfianza', 'borrarEstado', 'resumenEstado', 'obtenerUsuarioId'].forEach(function (nombre) {
     assert('API pública expone "' + nombre + '"', typeof PLANO[nombre] === 'function');
@@ -557,7 +586,7 @@ function claveActual() {
   assert('API pública expone SCHEMA_VERSION', typeof PLANO.SCHEMA_VERSION === 'number');
 })();
 
-/* ── 42. resumenEstado nunca lanza y siempre trae los campos de introspección ── */
+/* ── 43. resumenEstado nunca lanza y siempre trae los campos de introspección ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   e = PLANO.aplicarAccion(e, 'aceptar', { lugarId: 'A', grupo: 'bares' });
@@ -583,7 +612,7 @@ function lugar(id, grupo, lat, lng) {
   return l;
 }
 
-/* ── 43. Afinidad: un rubro con afinidad estable pesa más que uno sin señal ── */
+/* ── 44. Afinidad: un rubro con afinidad estable pesa más que uno sin señal ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   for (var i = 0; i < 3; i++) e = PLANO.aplicarAccion(e, 'aceptar', { lugarId: 'A' + i, grupo: 'cafeterias' });
@@ -594,7 +623,7 @@ function lugar(id, grupo, lat, lng) {
   assert('un lugar de rubro afín puntúa más alto que uno sin ninguna señal', conAfinidad.score > sinAfinidad.score);
 })();
 
-/* ── 44. Rechazo: un rubro con patrón de rechazo estable no participa del score (se filtra antes) ── */
+/* ── 45. Rechazo: un rubro con patrón de rechazo estable no participa del score (se filtra antes) ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var n = CFG.acciones.rechazar.repeticionesParaEstable;
@@ -606,7 +635,7 @@ function lugar(id, grupo, lat, lng) {
     recorte.every(function (l) { return l.grupo !== 'bares'; }));
 })();
 
-/* ── 45. Proximidad: con ubicación, un lugar cercano puntúa más que uno lejano ── */
+/* ── 46. Proximidad: con ubicación, un lugar cercano puntúa más que uno lejano ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var ubicacion = { lat: -32.4825, lng: -58.2372 }; // CdU centro
@@ -618,7 +647,7 @@ function lugar(id, grupo, lat, lng) {
   assert('un lugar cercano puntúa más alto que uno lejano con la misma ubicación', scoreCerca.score > scoreLejos.score);
 })();
 
-/* ── 46. Ausencia de proximidad: sin ubicación, la señal no existe y no penaliza ── */
+/* ── 47. Ausencia de proximidad: sin ubicación, la señal no existe y no penaliza ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var conCoords = EXPO.calcularScoreLugar(lugar('A', 'gastronomia', -32.48, -58.24), e, {});
@@ -626,7 +655,7 @@ function lugar(id, grupo, lat, lng) {
   assert('sin proximidad, el score sigue siendo un número válido en [0,1]', conCoords.score >= 0 && conCoords.score <= 1);
 })();
 
-/* ── 47. Ausencia de proximidad por falta de coordenadas del LUGAR (con ubicación disponible) ── */
+/* ── 48. Ausencia de proximidad por falta de coordenadas del LUGAR (con ubicación disponible) ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var sinCoords = EXPO.calcularScoreLugar(lugar('A', 'gastronomia'), e, { ubicacion: { lat: -32.48, lng: -58.24 } });
@@ -635,7 +664,7 @@ function lugar(id, grupo, lat, lng) {
   assert('lugar sin coordenadas no queda con score inválido (NaN)', !isNaN(sinCoords.score));
 })();
 
-/* ── 48. Clima presente + tabla configurada: la señal de contexto SÍ participa y cambia el orden ── */
+/* ── 49. Clima presente + tabla configurada: la señal de contexto SÍ participa y cambia el orden ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var original = CFG.exposicion.scoring.afinidadClimaPorGrupo;
@@ -649,7 +678,7 @@ function lugar(id, grupo, lat, lng) {
   CFG.exposicion.scoring.afinidadClimaPorGrupo = original;
 })();
 
-/* ── 49. Clima ausente: el motor funciona exactamente igual sin romperse ── */
+/* ── 50. Clima ausente: el motor funciona exactamente igual sin romperse ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var sinClima = EXPO.calcularScoreLugar(lugar('A', 'cafeterias'), e, {});
@@ -657,7 +686,7 @@ function lugar(id, grupo, lat, lng) {
   assert('sin clima, el score sigue siendo válido', !isNaN(sinClima.score) && sinClima.score >= 0);
 })();
 
-/* ── 50. Clima con tabla vacía (configuración por defecto real del repo): neutro, no cambia el orden ── */
+/* ── 51. Clima con tabla vacía (configuración por defecto real del repo): neutro, no cambia el orden ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var clima = { weather_code: 61, temperature_2m: 18, precipitation: 2 };
@@ -667,7 +696,7 @@ function lugar(id, grupo, lat, lng) {
     a.score === b.score);
 })();
 
-/* ── 51. Confianza baja vs alta: ambas producen un recorte válido, sin romper ── */
+/* ── 52. Confianza baja vs alta: ambas producen un recorte válido, sin romper ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 30; i++) registro.push(lugar('L' + i, 'gastronomia'));
@@ -682,7 +711,7 @@ function lugar(id, grupo, lat, lng) {
     EXPO.recortePorIniciativaPropia(registro, alto, 'guia').length === CFG.exposicion.recorteGuia);
 })();
 
-/* ── 52. Diversidad: ningún rubro ocupa más de la mitad del cupo si hay alternativas suficientes ── */
+/* ── 53. Diversidad: ningún rubro ocupa más de la mitad del cupo si hay alternativas suficientes ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 20; i++) registro.push(lugar('G' + i, 'gastronomia'));
@@ -697,7 +726,7 @@ function lugar(id, grupo, lat, lng) {
     Object.keys(conteo).every(function (g) { return conteo[g] <= maxEsperado; }));
 })();
 
-/* ── 53. Diversidad se relaja si solo hay un rubro disponible entre los candidatos ── */
+/* ── 54. Diversidad se relaja si solo hay un rubro disponible entre los candidatos ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 20; i++) registro.push(lugar('U' + i, 'unico'));
@@ -707,7 +736,7 @@ function lugar(id, grupo, lat, lng) {
     recorte.length === CFG.exposicion.recorteGuia);
 })();
 
-/* ── 54. Exploración: con candidatos de sobra, el recorte incluye al menos un lugar fuera del top-score puro ── */
+/* ── 55. Exploración: con candidatos de sobra, el recorte incluye al menos un lugar fuera del top-score puro ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 40; i++) registro.push(lugar('L' + i, 'grupo' + (i % 8)));
@@ -724,7 +753,7 @@ function lugar(id, grupo, lat, lng) {
   assert('recortePorIniciativaPropiaExplicado expone un score por lugar seleccionado', scoresOrdenadosDesc.length === recorte.length);
 })();
 
-/* ── 55. Rotación: un lugar recién aceptado por iniciativa propia no vuelve a aparecer mientras descansa ── */
+/* ── 56. Rotación: un lugar recién aceptado por iniciativa propia no vuelve a aparecer mientras descansa ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 10; i++) registro.push(lugar('L' + i, 'gastronomia'));
@@ -735,7 +764,7 @@ function lugar(id, grupo, lat, lng) {
     recorte.every(function (l) { return l.id !== 'L0'; }));
 })();
 
-/* ── 56. Determinismo: misma entrada (registro, estado, región, contexto) produce siempre la misma salida ── */
+/* ── 57. Determinismo: misma entrada (registro, estado, región, contexto) produce siempre la misma salida ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 60; i++) registro.push(lugar('L' + i, 'grupo' + (i % 6), -32.48 + i * 0.001, -58.24 + i * 0.001));
@@ -747,7 +776,7 @@ function lugar(id, grupo, lat, lng) {
   assert('la misma entrada exacta produce siempre la misma selección (determinismo)', JSON.stringify(r1) === JSON.stringify(r2));
 })();
 
-/* ── 57. Empate de scores: candidatos idénticos en todas las señales no rompen el orden ni el tamaño ── */
+/* ── 58. Empate de scores: candidatos idénticos en todas las señales no rompen el orden ni el tamaño ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 15; i++) registro.push(lugar('E' + i, 'mismoGrupo')); // todos iguales: mismo score exacto
@@ -759,7 +788,7 @@ function lugar(id, grupo, lat, lng) {
   assert('un empate total de scores no duplica lugares en el resultado', Object.keys(idsUnicos).length === recorte.length);
 })();
 
-/* ── 58. Datos incompletos: rubro desconocido / undefined no lanza excepción ── */
+/* ── 59. Datos incompletos: rubro desconocido / undefined no lanza excepción ── */
 (function () {
   var registro = [{ id: 'A', nombre: 'A' }, { id: 'B', grupo: undefined, nombre: 'B' }];
   var e = PLANO.estadoInicial('cdu');
@@ -769,14 +798,14 @@ function lugar(id, grupo, lat, lng) {
   assert('lugares con grupo undefined igual entran en la selección', recorte.length === 2);
 })();
 
-/* ── 59. Listas vacías: registro vacío no lanza y devuelve vacío ── */
+/* ── 60. Listas vacías: registro vacío no lanza y devuelve vacío ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
   var recorte = EXPO.recortePorIniciativaPropia([], e, 'guia');
   assert('registro vacío devuelve recorte vacío sin lanzar', Array.isArray(recorte) && recorte.length === 0);
 })();
 
-/* ── 60. Listas pequeñas: menos candidatos que el cupo devuelve todos, sin repetir ── */
+/* ── 61. Listas pequeñas: menos candidatos que el cupo devuelve todos, sin repetir ── */
 (function () {
   var registro = [lugar('A', 'gastronomia'), lugar('B', 'cafeterias')];
   var e = PLANO.estadoInicial('cdu');
@@ -784,7 +813,7 @@ function lugar(id, grupo, lat, lng) {
   assert('con menos candidatos que el cupo, se devuelven todos (sin inventar ni truncar de más)', recorte.length === 2);
 })();
 
-/* ── 61. Catálogo completo (1.468 lugares): correctitud + rendimiento razonable ── */
+/* ── 62. Catálogo completo (1.468 lugares): correctitud + rendimiento razonable ── */
 (function () {
   var registro = [];
   var grupos = ['gastronomia', 'cafeterias', 'bares', 'heladerias', 'compras', 'belleza', 'alojamiento', 'panaderias'];
@@ -810,7 +839,7 @@ function lugar(id, grupo, lat, lng) {
   console.log('  · rendimiento motor-exposicion.js sobre 1.468 lugares (3 llamadas): ' + (t1 - t0) + 'ms');
 })();
 
-/* ── 62. Acción Directa: la búsqueda explícita nunca pierde resultados por score bajo ── */
+/* ── 63. Acción Directa: la búsqueda explícita nunca pierde resultados por score bajo ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 100; i++) registro.push(lugar('P' + i, 'gastronomia'));
@@ -823,7 +852,7 @@ function lugar(id, grupo, lat, lng) {
     resultados.length === 100);
 })();
 
-/* ── 63. Curaduría: nunca pasa por scoring, rotación ni presupuesto, sin importar el estado ── */
+/* ── 64. Curaduría: nunca pasa por scoring, rotación ni presupuesto, sin importar el estado ── */
 (function () {
   var registro = [lugar('A', 'gastronomia'), lugar('B', 'gastronomia'), lugar('C', 'bares')];
   var e = PLANO.estadoInicial('cdu');
@@ -834,7 +863,7 @@ function lugar(id, grupo, lat, lng) {
     curada.length === 2 && curada.every(function (l) { return l.id === 'A' || l.id === 'B'; }));
 })();
 
-/* ── 64. Compatibilidad de API: superficie previa a esta pasada sigue existiendo con la misma forma ── */
+/* ── 65. Compatibilidad de API: superficie previa a esta pasada sigue existiendo con la misma forma ── */
 (function () {
   ['recortePorIniciativaPropia', 'resultadosPorAccionExplicita', 'coleccionCurada'].forEach(function (nombre) {
     assert('API pública de EXPO conserva "' + nombre + '"', typeof EXPO[nombre] === 'function');
@@ -846,14 +875,14 @@ function lugar(id, grupo, lat, lng) {
     Array.isArray(sinContexto));
 })();
 
-/* ── 65. API pública nueva de esta pasada ── */
+/* ── 66. API pública nueva de esta pasada ── */
 (function () {
   ['recortePorIniciativaPropiaExplicado', 'calcularScoreLugar'].forEach(function (nombre) {
     assert('API pública de EXPO expone "' + nombre + '" (nuevo)', typeof EXPO[nombre] === 'function');
   });
 })();
 
-/* ── 66. Pureza: recortePorIniciativaPropia no muta el estado ni el registro de entrada ── */
+/* ── 67. Pureza: recortePorIniciativaPropia no muta el estado ni el registro de entrada ── */
 (function () {
   var registro = [lugar('A', 'gastronomia'), lugar('B', 'cafeterias')];
   var registroJSONAntes = JSON.stringify(registro);
@@ -865,12 +894,12 @@ function lugar(id, grupo, lat, lng) {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════
-   BLOQUE 10 — NUEVO: motor-mapa.js, robustez agregada en esta pasada
+   BLOQUE 13 — NUEVO: motor-mapa.js, robustez agregada en esta pasada
    (validación real de coordenadas, deduplicación por id, entradas
    no-array, herramienta de diagnóstico).
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── 67. NaN no es una coordenada válida, aunque typeof NaN === 'number' ── */
+/* ── 68. NaN no es una coordenada válida, aunque typeof NaN === 'number' ── */
 (function () {
   assert('esCoordenadaValida rechaza NaN en lat', MAPA.esCoordenadaValida(NaN, -58.24) === false);
   assert('esCoordenadaValida rechaza NaN en lng', MAPA.esCoordenadaValida(-32.48, NaN) === false);
@@ -879,7 +908,7 @@ function lugar(id, grupo, lat, lng) {
   assert('esCoordenadaValida acepta una coordenada real', MAPA.esCoordenadaValida(-32.48, -58.24) === true);
 })();
 
-/* ── 68. Un lugar con lat=NaN no llega al mapa-herramienta ni cuenta para debeMostrarHerramienta ── */
+/* ── 69. Un lugar con lat=NaN no llega al mapa-herramienta ni cuenta para debeMostrarHerramienta ── */
 (function () {
   var conNaN = [{ id: 'A', lat: NaN, lng: -58.24 }, { id: 'B', lat: -32.48, lng: -58.24 }];
   assert('puntosHerramienta descarta el lugar con lat NaN',
@@ -889,7 +918,7 @@ function lugar(id, grupo, lat, lng) {
     MAPA.debeMostrarHerramienta('guia', soloNaN) === false);
 })();
 
-/* ── 69. puntosTextura filtra coordenadas inválidas ANTES de muestrear, no después ── */
+/* ── 70. puntosTextura filtra coordenadas inválidas ANTES de muestrear, no después ── */
 (function () {
   var registro = [];
   for (var i = 0; i < 30; i++) registro.push({ id: 'L' + i, lat: NaN, lng: -58.24 });
@@ -899,7 +928,7 @@ function lugar(id, grupo, lat, lng) {
     puntos.every(function (p) { return MAPA.esCoordenadaValida(p.lat, p.lng); }));
 })();
 
-/* ── 70. deduplicarPorId preserva orden y primera aparición ── */
+/* ── 71. deduplicarPorId preserva orden y primera aparición ── */
 (function () {
   var lista = [
     { id: 'A', v: 1 }, { id: 'B', v: 1 }, { id: 'A', v: 2 }, { id: 'C', v: 1 }
@@ -911,7 +940,7 @@ function lugar(id, grupo, lat, lng) {
   assert('deduplicarPorId preserva el orden original de las claves', out[1].id === 'B' && out[2].id === 'C');
 })();
 
-/* ── 71. puntosHerramienta descarta ids duplicados y preserva el orden del resto ── */
+/* ── 72. puntosHerramienta descarta ids duplicados y preserva el orden del resto ── */
 (function () {
   var lista = [
     { id: 'A', lat: -32.48, lng: -58.24 },
@@ -923,7 +952,7 @@ function lugar(id, grupo, lat, lng) {
   assert('puntosHerramienta no reordena: "A" sigue antes que "B"', out[0].id === 'A' && out[1].id === 'B');
 })();
 
-/* ── 72. Dos lugares distintos en la MISMA coordenada NO se consideran duplicados ── */
+/* ── 73. Dos lugares distintos en la MISMA coordenada NO se consideran duplicados ── */
 (function () {
   var lista = [
     { id: 'edificio-1a', lat: -32.48, lng: -58.24 },
@@ -933,7 +962,7 @@ function lugar(id, grupo, lat, lng) {
   assert('coordenada compartida entre dos ids distintos no se deduplica', out.length === 2);
 })();
 
-/* ── 73. Entradas que no son arrays no rompen ninguna función pública ── */
+/* ── 74. Entradas que no son arrays no rompen ninguna función pública ── */
 (function () {
   [null, undefined, {}, 'texto', 42].forEach(function (entradaInvalida) {
     assert('puntosTextura no lanza con entrada no-array (' + String(entradaInvalida) + ')',
@@ -945,7 +974,7 @@ function lugar(id, grupo, lat, lng) {
   });
 })();
 
-/* ── 74. diagnostico() cuenta válidos, inválidos y duplicados por id ── */
+/* ── 75. diagnostico() cuenta válidos, inválidos y duplicados por id ── */
 (function () {
   var lista = [
     { id: 'A', lat: -32.48, lng: -58.24 },
@@ -962,12 +991,12 @@ function lugar(id, grupo, lat, lng) {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════
-   BLOQUE 11 — NUEVO: proyeccion.js, sin cobertura de tests hasta esta
+   BLOQUE 14 — NUEVO: proyeccion.js, sin cobertura de tests hasta esta
    pasada. Matemática pura: round-trip, casos límite de encuadrar(),
    validación de coordenadas, distanciaMetros.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── 75. proyectar → desproyectar es la identidad (dentro de tolerancia de punto flotante) ── */
+/* ── 76. proyectar → desproyectar es la identidad (dentro de tolerancia de punto flotante) ── */
 (function () {
   var casos = [
     { lat: -32.4833, lng: -58.2333, zoom: 15 },
@@ -985,7 +1014,7 @@ function lugar(id, grupo, lat, lng) {
   });
 })();
 
-/* ── 76. esCoordenadaValida: misma definición real usada por encuadrar/distanciaMetros ── */
+/* ── 77. esCoordenadaValida: misma definición real usada por encuadrar/distanciaMetros ── */
 (function () {
   assert('PROY.esCoordenadaValida rechaza NaN', PROY.esCoordenadaValida(NaN, 0) === false);
   assert('PROY.esCoordenadaValida rechaza lat fuera de rango', PROY.esCoordenadaValida(-91, 0) === false);
@@ -993,7 +1022,7 @@ function lugar(id, grupo, lat, lng) {
   assert('PROY.esCoordenadaValida acepta un punto real', PROY.esCoordenadaValida(-32.48, -58.24) === true);
 })();
 
-/* ── 77. distanciaMetros: valor conocido (1° de latitud ≈ 111.19 km) y contrato con datos inválidos ── */
+/* ── 78. distanciaMetros: valor conocido (1° de latitud ≈ 111.19 km) y contrato con datos inválidos ── */
 (function () {
   var d = PROY.distanciaMetros(0, 0, 1, 0);
   assert('1 grado de latitud da ~111.19km (Haversine, no una aproximación burda)',
@@ -1003,14 +1032,14 @@ function lugar(id, grupo, lat, lng) {
     PROY.distanciaMetros(NaN, 0, 1, 0) === null);
 })();
 
-/* ── 78. encuadrar: un solo punto válido usa el tope de acercamiento razonable, no zoomMax ── */
+/* ── 79. encuadrar: un solo punto válido usa el tope de acercamiento razonable, no zoomMax ── */
 (function () {
   var enc = PROY.encuadrar([{ lat: -32.48, lng: -58.24 }], 800, 600, 48, 20);
   assert('un solo punto encuadra al tope de acercamiento razonable (16), no a zoomMax (20)',
     enc.zoom === 16);
 })();
 
-/* ── 79. encuadrar: puntos duplicados en la misma coordenada exacta no fuerzan zoomMax ── */
+/* ── 80. encuadrar: puntos duplicados en la misma coordenada exacta no fuerzan zoomMax ── */
 (function () {
   var enc = PROY.encuadrar(
     [{ lat: -32.48, lng: -58.24 }, { lat: -32.48, lng: -58.24 }],
@@ -1020,7 +1049,7 @@ function lugar(id, grupo, lat, lng) {
     enc.zoom === 16);
 })();
 
-/* ── 80. encuadrar: filtra puntos con coordenadas corruptas y sigue encuadrando el resto ── */
+/* ── 81. encuadrar: filtra puntos con coordenadas corruptas y sigue encuadrando el resto ── */
 (function () {
   var enc = PROY.encuadrar(
     [{ lat: -32.48, lng: -58.24 }, { lat: NaN, lng: -58.20 }, { lat: -32.46, lng: -58.22 }],
@@ -1029,19 +1058,19 @@ function lugar(id, grupo, lat, lng) {
   assert('encuadrar no lanza ni devuelve NaN con un punto corrupto en el lote', enc && isFinite(enc.lat) && isFinite(enc.lng));
 })();
 
-/* ── 81. encuadrar: si TODOS los puntos son inválidos, devuelve null (no NaN,NaN) ── */
+/* ── 82. encuadrar: si TODOS los puntos son inválidos, devuelve null (no NaN,NaN) ── */
 (function () {
   var enc = PROY.encuadrar([{ lat: NaN, lng: 1 }, { lat: 200, lng: 1 }], 800, 600, 48, 20);
   assert('encuadrar con todos los puntos inválidos devuelve null', enc === null);
 })();
 
-/* ── 82. encuadrar: contenedor sin medir (0×0) devuelve null en vez de un encuadre inservible ── */
+/* ── 83. encuadrar: contenedor sin medir (0×0) devuelve null en vez de un encuadre inservible ── */
 (function () {
   var enc = PROY.encuadrar([{ lat: 1, lng: 1 }, { lat: 2, lng: 2 }], 0, 0, 48, 20);
   assert('encuadrar con contenedor 0x0 devuelve null', enc === null);
 })();
 
-/* ── 83. encuadrar: lista vacía sigue devolviendo null (contrato preexistente, sin regresión) ── */
+/* ── 84. encuadrar: lista vacía sigue devolviendo null (contrato preexistente, sin regresión) ── */
 (function () {
   assert('encuadrar([]) sigue devolviendo null', PROY.encuadrar([], 800, 600, 48, 20) === null);
 })();
