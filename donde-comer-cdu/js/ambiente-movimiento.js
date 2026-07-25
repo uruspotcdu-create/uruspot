@@ -165,7 +165,7 @@
       luz: {
         intensidad: escena.luz.intensidad * nivel.luz
       },
-      profundidad: Object.assign(calcularProfundidad(escena.profundidad, nivel), {
+      profundidad: Object.assign({}, calcularProfundidad(escena.profundidad, nivel), {
         factorPresupuesto: factoresPresupuesto.navegacion
       }),
       transicion: {
