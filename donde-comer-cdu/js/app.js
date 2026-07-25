@@ -1711,6 +1711,20 @@
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+        // Ambient Engine — familia Coordenadas (Cap. 6.1 del documento
+        // de Lenguaje de Assets: "se activan cerca del punto elegido").
+        // Este es el único evento real de "hay un punto seleccionado"
+        // que el resto de la app expone hoy (motor-mapa.js no publica
+        // lat/lng de pantalla ni un evento de deselección/cierre de
+        // popup), así que se ancla al centro óptico del asset (Cap.
+        // 3.1) en vez de a una posición geográfica real — mostrar el
+        // marcador en el punto exacto de un mapa embebido en otra
+        // sección de la página, sobre una capa de fondo a viewport
+        // completo, no tendría correspondencia espacial real. Cablear
+        // una posición geográfica real, si se decide que vale la pena,
+        // requiere exponer esa proyección desde motor-mapa.js primero
+        // (fuera del alcance del Ambient Engine, Cap. 3.12).
+        if (window.AmbienteCoordenadas) window.AmbienteCoordenadas.mostrarEn(50, 50);
       });
     } catch (e) {
       console.error('Error al inicializar motor de mapa:', e);

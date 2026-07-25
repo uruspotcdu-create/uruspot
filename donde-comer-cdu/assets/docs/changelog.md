@@ -129,14 +129,21 @@ en loop), Aparición/desaparición discreta se resuelve con
 evento puntual. Documentado en `ambiente-tokens-movimiento.css`
 junto a los dos anteriores.
 
-**Pendiente registrado a propósito (alcance explícito de este paso,
-no una excepción del Cap. 8.2):** `mostrarEn()`/`ocultar()` NO están
-conectados todavía a ningún evento real de selección de mapa. Ese
-evento vive en otro subsystem — `motor-mapa.js` o `app.js`, fuera
-del Ambient Engine (Cap. 3.12: el Interaction Observer del propio
-motor "no interpreta el significado de negocio de la interacción, no
-sabe qué lugar fue tocado") — que todavía no se inspeccionó para
-este paso. Cablear el disparo real es el siguiente sub-paso.
+**Pendiente parcialmente resuelto (quedó registrado en el Paso 6
+original como "siguiente sub-paso"):** `mostrarEn()` ya está
+cableado a un evento real — `js/app.js`, `motorMapa.on('click', ...)`
+(el mismo evento que ya usaba la app para hacer scroll a la tarjeta
+del lugar clickeado) — así que Coordenadas deja de ser un
+instrumento sin disparo real. Queda parcial a propósito: se ancla al
+centro óptico (50,50) en vez de a la posición geográfica real del
+punto clickeado, porque `motor-mapa.js` no expone su proyección de
+lat/lng a coordenadas de pantalla como parte de su API pública —
+inventar esa correspondencia desde afuera sería una decisión de
+otro subsistema, no del Ambient Engine (Cap. 3.12). Tampoco hay
+todavía un `ocultar()` cableado a ningún evento de deselección: el
+motor de mapa no emite un evento de "popup cerrado" hoy. Ambas
+piezas quedan para un paso posterior, si se decide que valen la
+pena, en vez de resolverse con una inferencia poco confiable.
 
 Sin valores tipográficos numéricos en este paso, aunque el Cap. 2.1
 los menciona como parte de la familia ("marcas + valores
