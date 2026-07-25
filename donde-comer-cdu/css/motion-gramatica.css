@@ -1,0 +1,158 @@
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — css/motion-gramatica.css
+   Fase 4 (Motion Direction Bible v1.0), Cap. 4 — Gramática del
+   Movimiento: "No son animaciones. Son verbos. Cada uno tiene un
+   significado fijo que no puede reasignarse caso por caso."
+
+   Este archivo es vocabulario, no coreografía: define QUÉ significa
+   visualmente cada verbo, nunca CUÁNDO se dispara sobre un componente
+   real (esa es la coreografía del Cap. 6, roadmap Cap. 16, paso
+   siguiente a este). Por eso hoy no está enlazado desde ninguna
+   página — igual que assets/ambient/_tokens/ambiente-tokens-movimiento.css
+   se creó en su propio commit antes de cablearse (Fase 3, T8).
+
+   Depende de css/tokens.css (debe cargarse después): usa
+   --dur-inmediato-*/--dur-conversacional-*/--dur-contemplativo-*,
+   --easing-movimiento y --motion-desfase, todos definidos ahí.
+
+   Regla de combinación (Cap. 4): un elemento ejecuta como máximo dos
+   verbos a la vez, y solo si uno de los dos es "desvanecerse" o
+   "acercarse/alejarse" combinado con opacidad — por eso cada verbo de
+   acá ya integra su propio cambio de opacidad como parte del mismo
+   verbo, nunca como un verbo adicional apilado.
+
+   Patrón de seguridad (igual que .u-reveal en tokens.css, Fase 1): la
+   clase base de cada verbo es visible/neutra por defecto. El estado
+   "antes de aparecer" solo se activa con el modificador --armado, que
+   solo debería aplicar JS que confirmó que va a completar la
+   secuencia — así, si el JS de una coreografía nunca corre, el
+   contenido nunca queda oculto.
+
+   Solo animan opacity y transform (Cap. 12, "prioridad al menor
+   conjunto de propiedades" — ninguna de las dos dispara reflow).
+
+   Registro por defecto (sin modificador .u-registro-*): conversacional
+   — "el registro por defecto de la navegación cotidiana" (Cap. 5).
+   Aplicar .u-registro-inmediato o .u-registro-contemplativo en el
+   mismo elemento para los otros dos registros de interfaz. El cuarto
+   registro (de fondo) no aplica acá — es del Ambient Engine.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.u-registro-inmediato{
+  --mov-entrada: var(--dur-inmediato-entrada);
+  --mov-salida:  var(--dur-inmediato-salida);
+}
+.u-registro-contemplativo{
+  --mov-entrada: var(--dur-contemplativo-entrada);
+  --mov-salida:  var(--dur-contemplativo-salida);
+}
+
+/* Al retirarse: agregar esta clase en el mismo instante en que se
+   dispara la salida (junto con quitar .is-visible/.is-expandido, según
+   el verbo). Solo pisa la duración — nunca la curva ni la geometría —
+   para cumplir la asimetría entrada/salida del Cap. 10 ("la salida es,
+   por defecto, igual o más rápida que la entrada") sin duplicar cada
+   verbo en una versión "de salida" aparte. */
+.u-mov-saliendo{
+  transition-duration: var(--mov-salida, var(--dur-conversacional-salida)) !important;
+}
+
+/* ── Acercarse (Cap. 4: gana relevancia/foco; reduce la distancia
+   percibida) — foco de búsqueda, apertura de ficha, confirmación. ── */
+.u-mov-acercarse{
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--mov-entrada, var(--dur-conversacional-entrada)) var(--easing-movimiento),
+              transform var(--mov-entrada, var(--dur-conversacional-entrada)) var(--easing-movimiento);
+}
+.u-mov-acercarse.u-mov--armado{
+  opacity: 0;
+  transform: translateY(10px) scale(.97);
+}
+.u-mov-acercarse.u-mov--armado.is-visible{
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Alejarse (Cap. 4: cede relevancia SIN desaparecer del todo; sigue
+   existiendo en plano secundario) — cierre de ficha hacia la vista
+   general, retorno a un listado. A diferencia de Desvanecerse, nunca
+   llega a opacity:0 — .55 dista lo suficiente para leerse como "cedió
+   el centro de atención" sin leerse como "se fue". ── */
+.u-mov-alejarse{
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--mov-entrada, var(--dur-conversacional-entrada)) var(--easing-movimiento),
+              transform var(--mov-entrada, var(--dur-conversacional-entrada)) var(--easing-movimiento);
+}
+.u-mov-alejarse.is-cedido{
+  opacity: .55;
+  transform: scale(.96);
+}
+
+/* ── Desvanecerse (Cap. 4: deja de ser relevante para la tarea actual,
+   sin implicar pérdida de datos ni error) — elementos ambientales al
+   cambiar de escena, overlays que ya cumplieron su función. Solo
+   opacity: a diferencia de Acercarse/Alejarse no hay componente
+   espacial, porque el verbo no comunica jerarquía sino cierre. ── */
+.u-mov-desvanecer{
+  opacity: 1;
+  transition: opacity var(--mov-entrada, var(--dur-conversacional-entrada)) var(--easing-movimiento);
+}
+.u-mov-desvanecer.is-oculto{
+  opacity: 0;
+}
+
+/* ── Expandirse / Comprimirse (Cap. 4: se revela u oculta información
+   que YA pertenece al elemento — nunca información nueva ajena a él)
+   — apertura de un detalle, colapsar un filtro.
+
+   Técnica: grid-template-rows 0fr↔1fr sobre el contenedor, con un
+   único hijo directo que hace overflow:hidden. A diferencia de
+   max-height (con un valor arbitrario que hay que adivinar y que
+   nunca es exactamente el alto real del contenido), 1fr siempre es
+   "el alto real del contenido" sin medirlo por JS — la técnica
+   estándar recomendada hoy para animar alto desconocido sin layout
+   thrashing (Cap. 12: "cambios de tamaño... transiciones
+   autocontenidas"). Requiere el wrapper interno (.u-mov-expandir__inner)
+   porque grid-template-rows no se puede animar directamente sobre un
+   elemento con overflow propio. ── */
+.u-mov-expandir{
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--mov-entrada, var(--dur-conversacional-entrada)) var(--easing-movimiento);
+}
+.u-mov-expandir.is-comprimido{
+  grid-template-rows: 0fr;
+}
+.u-mov-expandir__inner{
+  overflow: hidden;
+}
+
+/* ── Rotar (Cap. 4: cambio de estado binario o cíclico de un control,
+   NO decorativo — "uso extremadamente restringido") — indicadores de
+   expansión/colapso (el chevron que acompaña a Expandirse/Comprimirse
+   de arriba), íconos de estado de carga puntuales. Nunca usar esta
+   clase para relleno visual o giro continuo: eso es el anti-patrón
+   "Rotaciones infinitas sin propósito" del Cap. 14. ── */
+.u-mov-rotar{
+  transform: rotate(0deg);
+  transition: transform var(--mov-entrada, var(--dur-conversacional-entrada)) var(--easing-movimiento);
+}
+.u-mov-rotar.is-activo{
+  transform: rotate(180deg);
+}
+
+/* ── Permanecer quieto (Cap. 4: ausencia DELIBERADA de movimiento
+   mientras todo lo demás se mueve, para dirigir la atención por
+   contraste) — un precio, un botón principal o un dato crítico
+   durante una secuencia de carga ambiental. No es "sin clase": es una
+   clase explícita que documenta la decisión y blinda al elemento
+   contra cualquier animación/transition heredada de un ancestro
+   (por ejemplo, un contenedor con stagger que por error también lo
+   alcanzara). ── */
+.u-mov-quieto{
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
