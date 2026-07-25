@@ -324,7 +324,14 @@
       tipo: 'referencia-direccional', capa: 'profundidad', carga: 'diferida'
     },
     'lineas-cartograficas': {
-      tipo: 'linea-cartografica', capa: 'profundidad', carga: 'diferida',
+      tipo: 'linea-cartografica', capa: 'profundidad', carga: 'anticipada',
+      // Fase 3 (Paso 4, integración): 'carga' pasa de 'diferida' a
+      // 'anticipada' — discrepancia que el propio changelog.md dejó
+      // anotada pendiente desde Paso 2. Como sustrato P0 (Cap. 4.1),
+      // la Retícula debe estar presente desde el primer instante de
+      // cualquier escena, igual que 'curvas-topograficas'; 'diferida'
+      // solo tiene sentido para assets atados a una escena que puede
+      // no activarse nunca (Cap. 8.1), y ese no es el caso acá.
       // Fase 3 (Lenguaje de Assets, Paso 2): asset SVG real,
       // consumido por js/ambiente-reticula.js vía
       // AmbienteAssets.obtenerBinario() e insertado en el plano P0.

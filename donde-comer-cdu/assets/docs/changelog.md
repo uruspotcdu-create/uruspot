@@ -40,3 +40,25 @@ Cap. 12.)*
 Sin discrepancias que anotar en este paso: `curvas-topograficas` ya
 tenía `carga: 'anticipada'` en el catálogo Fase 2, coherente con su
 rol de infraestructura visual base según el documento Fase 3.
+
+## v1.0 — Integración: renderizado real en pantalla (Paso 4)
+
+No se agregan assets nuevos en este paso — es el paso que faltaba
+para que los dos assets de Paso 2 y Paso 3 dejaran de ser archivos
+sueltos y pasaran a verse en pantalla:
+
+- `js/ambiente-assets.js` gana `obtenerBinario(id)`: la versión
+  asincrónica del Asset Registry que el Cap. 8.1 dejaba marcada como
+  "fase posterior" — descarga el SVG, lo cachea, y reescribe sus
+  `href`/`xlink:href` relativos para que sigan apuntando a
+  `_primitivas/primitivas-compartidas.svg` correctamente una vez
+  insertados inline dentro de `index.html`.
+- `js/ambiente-reticula.js` y `js/ambiente-topografia.js` (nuevos):
+  un módulo por familia, cada uno inserta su asset en
+  `AmbientePlanos.contenedor('p0')`.
+
+**Discrepancia de Paso 2 resuelta:** `lineas-cartograficas` pasa de
+`carga: 'diferida'` a `carga: 'anticipada'` en `ambiente-config.js`.
+Como sustrato P0, debe estar presente desde el primer instante de
+cualquier escena — "diferida" no aplicaba acá (ver nota de Paso 2
+más arriba).
