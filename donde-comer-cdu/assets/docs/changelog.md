@@ -97,7 +97,55 @@ Integración: `js/ambiente-corrientes.js` (nuevo, mismo patrón que
 llamado desde `ambiente-orquestador.js`), inserta el asset en
 `AmbientePlanos.contenedor('p1')` en vez de `'p0'`.
 
-*(Los assets de las familias restantes — Coordenadas, Brújula,
-Partículas de deriva, Halos de posición — se agregan a esta tabla a
-medida que se implementan, uno por paso, siguiendo el Roadmap del
-Cap. 12.)*
+*(Los assets de las familias restantes — Brújula, Partículas de
+deriva, Halos de posición — se agregan a esta tabla a medida que se
+implementan, uno por paso, siguiendo el Roadmap del Cap. 12.)*
+
+## v1.0 — Coordenadas (Paso 6, Roadmap Cap. 12 orden 5)
+
+| Nombre de archivo | Familia | Plano | Movimiento heredado | Reactividad | Fecha / versión | Justificación |
+|---|---|---|---|---|---|---|
+| `coordenadas/coordenadas--default--hairline.svg` | Coordenadas | P1 | Aparición/desaparición discreta (transición 260ms, sin loop) | Mapa/ubicación activa — instrumento listo, disparo real pendiente (ver nota abajo) | v1.0 | "Refuerza la promesa de precisión geográfica real, no genérica" (Cap. 2.1). Un solo marcador (primitiva marca-coordenada), sin repetición — es un marcador puntual, no un campo. |
+
+Primera familia del Roadmap con `carga: 'diferida'` real (no una
+discrepancia a resolver, como sí fue el caso de las tres anteriores):
+Coordenadas no es sustrato permanente, es un marcador que solo tiene
+sentido cuando hay un punto seleccionado (Cap. 6.1, Cap. 13.1 —
+"la familia más débil de las 7... la única sin movimiento propio
+real").
+
+Diferencia estructural con Retícula/Topográficas/Corrientes: esas
+tres se insertan una sola vez, siempre visibles, en cuanto
+`iniciar()` corre. Coordenadas no — `js/ambiente-coordenadas.js`
+prepara el elemento (oculto, `opacity:0`) pero expone `mostrarEn(x,
+y)` / `ocultar()` en vez de mostrarse solo. Motivo: Cap. 5, "aparece
+cuando hay algo que señalar y se retira, nunca flota" — insertarlo
+siempre-visible como las otras tres sería, acá, precisamente el
+error que ese capítulo pide evitar.
+
+Movimiento nuevo: a diferencia de Respiración/Deriva (`@keyframes`
+en loop), Aparición/desaparición discreta se resuelve con
+`transition: opacity` + una clase de estado — no es cíclica, es un
+evento puntual. Documentado en `ambiente-tokens-movimiento.css`
+junto a los dos anteriores.
+
+**Pendiente registrado a propósito (alcance explícito de este paso,
+no una excepción del Cap. 8.2):** `mostrarEn()`/`ocultar()` NO están
+conectados todavía a ningún evento real de selección de mapa. Ese
+evento vive en otro subsystem — `motor-mapa.js` o `app.js`, fuera
+del Ambient Engine (Cap. 3.12: el Interaction Observer del propio
+motor "no interpreta el significado de negocio de la interacción, no
+sabe qué lugar fue tocado") — que todavía no se inspeccionó para
+este paso. Cablear el disparo real es el siguiente sub-paso.
+
+Sin valores tipográficos numéricos en este paso, aunque el Cap. 2.1
+los menciona como parte de la familia ("marcas + valores
+tipográficos discretos"): el sistema de tipografía del Ambient
+Engine (fuente, tamaño, token de color de texto) no está definido en
+ningún capítulo del documento fuente ni en los tokens ya creados
+(Cap. 7 solo cubre color de trazo). Queda pendiente como decisión de
+sistema a tomar a propósito, no a colar implícita.
+
+*(Los assets de las familias restantes — Brújula, Partículas de
+deriva, Halos de posición — se agregan a esta tabla a medida que se
+implementan, uno por paso, siguiendo el Roadmap del Cap. 12.)*
