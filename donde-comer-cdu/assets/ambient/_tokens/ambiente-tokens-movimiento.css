@@ -107,7 +107,19 @@
    cerca en carácter de una micro-interacción de interfaz que de una
    animación ambiental, aunque geométricamente pertenezca al mismo
    sistema (Cap. 3.1/3.4, igual que ya se decidió para el Halo en el
-   Cap. 13.3 del documento fuente). */
+   Cap. 13.3 del documento fuente).
+
+   opacity acá (no en el <svg> del asset, a propósito, ver comentario
+   de cabecera de coordenadas--default--hairline.svg): 0 en reposo,
+   --amb-p1-opacidad (Cap. 4.1) cuando .is-visible está presente —
+   la misma variable de opacidad de plano P1 que ya usa Corrientes,
+   para que Coordenadas, una vez visible, se vea con la misma
+   intensidad que el resto del plano, nunca una intensidad propia. */
 .amb-asset--coordenadas {
   transition: opacity 260ms ease-out;
+  opacity: 0;
+}
+
+.amb-asset--coordenadas.is-visible {
+  opacity: var(--amb-p1-opacidad);
 }
