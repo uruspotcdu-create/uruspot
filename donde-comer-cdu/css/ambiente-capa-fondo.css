@@ -34,7 +34,27 @@
   z-index: -1; /* Cap. 4: capa más profunda del sistema */
   pointer-events: none; /* nunca compite por interacción (Cap. 1.4) */
 
-  background: linear-gradient(180deg, var(--ambiente-color-1) 0%, var(--ambiente-color-2) 100%);
+  /* Fase 8: el degradé de ciclado (--ambiente-color-1 → -2) es, por
+     diseño, casi imperceptible como degradé — la diferencia entre los
+     dos tonos es intencionalmente chica (Cap. 3.1: el cambio de hora
+     no debe "notarse" ocurriendo). Pero eso significa que, en el
+     tramo entre transiciones, el fondo se leía como un color sólido
+     sin ninguna sensación de profundidad propia — la única fuente de
+     relieve visual era el Ambient Engine (planos/partículas/clima)
+     por encima, nunca la Capa de Fondo en sí misma.
+     Se agrega una segunda capa: un único radial-gradient, estático
+     (sin animación, sin blur, sin @keyframes), que sugiere una fuente
+     de luz alta y difusa — el mismo lenguaje que ya usa
+     #ambient-vigneta (oscurece hacia los bordes) pero en sentido
+     inverso y mucho más tenue (3.5% vs su 100%). No introduce color
+     nuevo: es blanco a opacidad mínima sobre el propio degradé, así
+     que se lee como luz ambiental del cielo, nunca como una marca de
+     producto superpuesta. Costo: un solo gradiente estático adicional
+     en la misma capa fixed que ya existe — sin nuevo elemento en el
+     DOM, sin nuevo listener, sin nuevo ciclo de animación. */
+  background:
+    radial-gradient(120% 55% at 50% -8%, rgba(255,255,255,.035), transparent 62%),
+    linear-gradient(180deg, var(--ambiente-color-1) 0%, var(--ambiente-color-2) 100%);
 
   /* Banda ambiental (Cap. 3.1): la transición dura menos que el
      período de muestreo del JS (60s) para llegar siempre a completarse
