@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  URU SPOT — Ambient Engine — Familia: Corrientes
+  Archivo: corrientes, variante diagonal-lenta, peso hairline (nombre
+  real del archivo usa doble guion como separador de segmento; no se
+  repite acá literal porque es inválido dentro de un comentario XML).
+  Nombre y peso tomados literalmente del ejemplo del propio documento
+  (Cap. 10.2: "corrientes—diagonal-lenta—hairline.svg").
+
+  Cap. 2.1, familia 2: "Es la única familia que representa el río sin
+  literalidad." Comunica movimiento, vida, dirección, el cauce de la
+  ciudad. Plano P1 — Corriente (Cap. 4.1: opacidad 10-18%, velocidad
+  lenta, no reacciona a interacción directa).
+
+  Construida enteramente con UNA sola primitiva compartida (Cap. 3.3):
+  sinusoide. Nunca ondas "a mano alzada" (Cap. 1.2) — la única
+  geometría permitida acá es la de esa primitiva, repetida.
+
+  Progresión 80/20 (Cap. 1.4, mismo ejemplo textual que usa el propio
+  capítulo: "pasos de 1.0 / 1.3 / 1.6"): la franja A y la franja B
+  siguen esa progresión de escala (1.0 / 1.3). La franja C rompe la
+  progresión a propósito: escala fuera de la serie (0.9) y una
+  rotación adicional que ninguna de las otras dos tiene — la
+  organicidad deliberada que pide el capítulo, igual que hace el
+  cluster C de topograficas--default--hairline.svg.
+
+  Movimiento: Deriva direccional continua (Cap. 5: "un río no oscila,
+  fluye en una dirección — la deriva es la traducción honesta de esa
+  física"). A diferencia de la Respiración (Retícula/Topográficas),
+  que solo modula una variable de opacidad, acá el movimiento es
+  traslación real. Para lograr loop infinito sin salto perceptible
+  sin animar propiedades de layout (Cap. 9.1: solo transform/opacity),
+  el contenido de una franja completa ("corrientes-flujo-tile") se
+  duplica una vez, desplazado exactamente el ancho de un tile
+  (translate(100 0), el ancho total del viewBox), y el grupo padre
+  ("corrientes-deriva") anima transform:translateX(0% → -50%) con
+  transform-box:fill-box — porcentaje relativo a su propia caja
+  (el doble de ancho de un tile), por lo que -50% es exactamente un
+  tile: cuando termina el ciclo, la copia ocupa el lugar exacto donde
+  empezó el original y el loop no se nota. La animación vive en
+  assets/ambient/_tokens/ambiente-tokens-movimiento.css (clase
+  amb-asset--corrientes), no acá — mismo patrón que Retícula/
+  Topográficas: este SVG nunca anima nada por sí mismo (Cap. 1.3:
+  "jamás se anima su grosor"; acá, análogamente, tampoco su propia
+  traslación fuera del mecanismo centralizado de tokens).
+
+  "diagonal-lenta": la composición completa se rota 12° (grupo
+  "corrientes-diagonal") para que el flujo no se lea como una franja
+  puramente horizontal — sigue siendo geométricamente construida
+  (rotación exacta, Cap. 1.2), no una curva "a mano alzada".
+
+  Reactividad (Cap. 6.1): en este paso NO se implementa la reacción a
+  scroll (parallax de velocidad) ni a clima (velocidad ↑ con lluvia)
+  — quedan pendientes para el paso de integración de interacción,
+  mismo criterio que dejó pendientes los shifts de clima/horario en
+  assets/ambient/_tokens/ambiente-tokens-visual.css. Este archivo solo
+  resuelve la familia y su firma de movimiento propia (deriva).
+
+  Complejidad (Cap. 9.2): 4 grupos (límite 6: deriva > diagonal >
+  tile > franjas A/B/C, ver anidación abajo), 6 nodos <use> (límite
+  80). Sin filter, sin animación de propiedades de layout (Cap. 9.1).
+-->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     class="amb-asset amb-asset--corrientes"
+     style="color:var(--amb-p1-color);
+            opacity:var(--amb-p1-opacidad);
+            stroke:currentColor; stroke-width:var(--amb-trazo-hairline);
+            fill:none;" aria-hidden="true" focusable="false">
+
+  <defs>
+    <!-- Un tile = una franja completa (A+B+C). Se referencia dos
+         veces más abajo (original + copia desplazada) para el loop
+         de deriva sin salto (ver nota de arriba). -->
+    <g id="corrientes-flujo-tile">
+      <!-- Franja A — progresión 1.0 (Cap. 1.4). -->
+      <g class="corrientes-a" opacity="0.5">
+        <use href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" transform="translate(0 -20) scale(1.0)"/>
+      </g>
+      <!-- Franja B — progresión 1.3, misma proporción que usa el
+           propio Cap. 1.4 como ejemplo textual. -->
+      <g class="corrientes-b" opacity="0.7">
+        <use href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" transform="translate(6 4) scale(1.3)"/>
+      </g>
+      <!-- Franja C — ruptura deliberada del 20% (Cap. 1.4): escala
+           fuera de la serie (0.9) y una rotación que A/B no tienen. -->
+      <g class="corrientes-c" opacity="0.9">
+        <use href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" transform="translate(-4 28) scale(0.9) rotate(6 50 50)"/>
+      </g>
+    </g>
+  </defs>
+
+  <!-- "diagonal-lenta": composición completa rotada, geometría exacta
+       (Cap. 1.2), no aproximada. -->
+  <g class="corrientes-diagonal" transform="rotate(12 50 50)">
+
+    <!-- Grupo animado por CSS (amb-asset--corrientes, ver tokens de
+         movimiento): contiene el tile original + su copia desplazada
+         un ancho de tile completo. -->
+    <g class="corrientes-deriva">
+      <use href="#corrientes-flujo-tile" xlink:href="#corrientes-flujo-tile" transform="translate(0 0)"/>
+      <use href="#corrientes-flujo-tile" xlink:href="#corrientes-flujo-tile" transform="translate(100 0)"/>
+    </g>
+
+  </g>
+
+</svg>
