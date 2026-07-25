@@ -400,6 +400,21 @@ a{ color:inherit; }
 .u-reveal{ opacity:1; transform:none; transition:opacity var(--dur-lentisima) var(--easing-movimiento), transform var(--dur-lentisima) var(--easing-movimiento); }
 .u-reveal.u-reveal--armado{ opacity:0; transform:translateY(18px); }
 .u-reveal.u-reveal--armado.visible{ opacity:1; transform:translateY(0); }
+
+/* Cap. 6 "Primer scroll" (Motion Direction Bible v1.0, paso 10): "los
+   elementos que salen del viewport se alejan levemente antes de
+   desvanecerse, nunca cortan de forma abrupta". app.js agrega
+   .saliendo cuando la sección ya revelada sale por completo por
+   encima del viewport, junto con .u-mov-saliendo (css/motion-
+   gramatica.css, carga después de este archivo) que fuerza la
+   duración/curva de salida — la misma asimetría entrada/salida del
+   Cap. 10 que ya usa "Cambio de filtros" sobre las tarjetas. Misma
+   especificidad que la regla .visible de arriba (3 clases): se
+   resuelve por orden de aparición en el archivo, así que va después.
+   translateY negativo (no el +18px de la entrada): la sección se
+   aleja hacia arriba, en la misma dirección en la que el usuario ya
+   está desplazándose — nunca contra el sentido del scroll. */
+.u-reveal.visible.saliendo{ opacity:0; transform:translateY(-14px); }
 @media (prefers-reduced-motion: reduce){ .u-reveal.u-reveal--armado{ opacity:1; transform:none; } }
 
 /* Estado disabled reutilizable: aplicar a cualquier control

@@ -2540,15 +2540,35 @@
   // ───────────────────────────────────────────────────────────────────
 
   /**
-   * Cap. 6 "Primer scroll" (Motion Direction Bible v1.0, paso 9): "los
-   * elementos que entran en el viewport se acercan con microdesfase
-   * según su orden de aparición, nunca todos a la vez". Sin esto, dos o
-   * más secciones .u-reveal que cruzan el umbral en el mismo callback
-   * del IntersectionObserver (scroll rápido, o varias secciones cortas
-   * cabiendo juntas en la ventana) se revelan en el mismo frame — el
-   * "bloque sincronizado" que el Cap. 10 reserva únicamente para
-   * elementos que deben leerse como una sola unidad conceptual, no
-   * como secciones independientes de la página.
+   * Cap. 6 "Primer scroll" (Motion Direction Bible v1.0, pasos 9-10):
+   *
+   * Paso 9 — "los elementos que entran en el viewport se acercan con
+   * microdesfase según su orden de aparición, nunca todos a la vez".
+   * Sin esto, dos o más secciones .u-reveal que cruzan el umbral en el
+   * mismo callback del IntersectionObserver (scroll rápido, o varias
+   * secciones cortas cabiendo juntas en la ventana) se revelan en el
+   * mismo frame — el "bloque sincronizado" que el Cap. 10 reserva
+   * únicamente para elementos que deben leerse como una sola unidad
+   * conceptual, no como secciones independientes de la página.
+   *
+   * Paso 10 — "los elementos que salen del viewport se alejan
+   * levemente antes de desvanecerse, nunca cortan de forma abrupta".
+   * Por eso el observer ya no se desconecta tras la primera revelación
+   * (antes con observador.unobserve): sigue vivo para detectar cuándo
+   * una sección ya vista sale por completo por arriba del viewport
+   * (entrada.boundingClientRect.bottom <= 0) y agregarle .saliendo +
+   * .u-mov-saliendo (css/tokens.css + css/motion-gramatica.css), y
+   * para revertir ese estado si el usuario vuelve a scrollear hacia
+   * arriba y la sección reingresa. La condición de salida (0% visible,
+   * afuera por completo) y la de reingreso (12%, el mismo umbral de la
+   * primera entrada) son deliberadamente distintas: si fueran la misma
+   * marca de scroll, un usuario oscilando cerca del borde podría
+   * activar y desactivar la clase en cada frame — el "temblor" que el
+   * Cap. 14 prohíbe.
+   *
+   * dataset.uReveal marca "ya tuvo su primera entrada", para que la
+   * lógica de salida/reingreso nunca compita con la del paso 9 sobre
+   * el mismo elemento en el mismo callback.
    *
    * --motion-desfase (css/tokens.css) ya existía desde el paso de
    * tokens pero no se consumía en ningún lado todavía; este es su
@@ -2572,18 +2592,34 @@
         // no necesariamente el del documento), sino el orden real en
         // el DOM — así el decalaje siempre sigue la jerarquía visual
         // de la página, nunca un orden incidental del navegador.
-        var entrantes = entradas
-          .filter(function (entrada) { return entrada.isIntersecting; })
+        var primerasEntradas = entradas
+          .filter(function (entrada) {
+            return entrada.isIntersecting && !entrada.target.dataset.uReveal;
+          })
           .sort(function (a, b) {
             return a.target.compareDocumentPosition(b.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
           });
 
-        entrantes.forEach(function (entrada, indice) {
+        primerasEntradas.forEach(function (entrada, indice) {
           entrada.target.style.transitionDelay = (indice * desfaseMs) + 'ms';
           entrada.target.classList.add('visible');
-          observador.unobserve(entrada.target);
+          entrada.target.dataset.uReveal = 'visto';
         });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+        // Salida/reingreso (Cap. 6, paso 10) — solo sobre secciones que
+        // ya pasaron por su primera entrada de arriba.
+        entradas.forEach(function (entrada) {
+          if (!entrada.target.dataset.uReveal) return;
+
+          var estaSaliendo = entrada.target.classList.contains('saliendo');
+          if (!entrada.isIntersecting && entrada.boundingClientRect.bottom <= 0 && !estaSaliendo) {
+            entrada.target.classList.add('saliendo', 'u-mov-saliendo');
+          } else if (entrada.isIntersecting && entrada.intersectionRatio >= 0.12 && estaSaliendo) {
+            entrada.target.classList.remove('saliendo', 'u-mov-saliendo');
+            entrada.target.style.transitionDelay = '';
+          }
+        });
+      }, { threshold: [0, 0.12], rootMargin: '0px 0px -40px 0px' });
 
       document.querySelectorAll('.u-reveal').forEach(function (el) {
         el.classList.add('u-reveal--armado');
