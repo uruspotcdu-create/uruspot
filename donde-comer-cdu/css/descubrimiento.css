@@ -124,7 +124,24 @@ header .membrete{
      busca"; dependía 100% del placeholder de texto. */
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(236,237,239,0.35)' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:14px center; background-size:16px;
-  transition:border-color var(--dur-media) var(--easing-estandar), box-shadow var(--dur-media) var(--easing-estandar), background-color var(--dur-rapido);
+  transition:border-color var(--dur-media) var(--easing-estandar), box-shadow var(--dur-media) var(--easing-estandar), background-color var(--dur-rapido),
+             transform var(--dur-inmediato-entrada) var(--easing-movimiento);
+  transform-origin:center;
+}
+/* Fase 4, Cap. 6 "Primera búsqueda": "El campo de búsqueda se expande
+   levemente al recibir foco, anticipando que va a ocurrir una acción
+   de entrada de datos." Registro inmediato (Cap. 5) porque es una
+   respuesta directa al gesto de foco, no una coreografía de consecuencia
+   — por eso usa --dur-inmediato-entrada, no --dur-conversacional-entrada.
+   :focus (no :focus-visible): el gesto de "voy a escribir" es el mismo
+   con mouse, touch o teclado; :focus-visible acá seguiría gobernando
+   solo el anillo de foco (regla ya existente, sin tocar). Escala mínima
+   (1.012) a propósito: Cap. 3 "Economía" — es notable si se la busca,
+   invisible si no se la busca. */
+.buscador__campo input:focus{ transform:scale(1.012); }
+@media (prefers-reduced-motion: reduce){
+  .buscador__campo input{ transition:border-color var(--dur-media) var(--easing-estandar), box-shadow var(--dur-media) var(--easing-estandar), background-color var(--dur-rapido); }
+  .buscador__campo input:focus{ transform:none; }
 }
 /* Oculta el ícono "x" nativo de type=search en Chrome/Edge — Firefox
    directamente nunca lo tuvo, así que dejarlo era una afordancia que
