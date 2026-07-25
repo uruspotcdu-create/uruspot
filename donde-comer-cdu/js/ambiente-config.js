@@ -360,7 +360,15 @@
       archivo: 'assets/ambient/corrientes/corrientes--diagonal-lenta--hairline.svg'
     },
     'coordenadas': {
-      tipo: 'coordenadas', capa: 'profundidad', carga: 'diferida'
+      tipo: 'coordenadas', capa: 'profundidad', carga: 'diferida',
+      // Fase 3 (Lenguaje de Assets, familia Coordenadas): asset SVG
+      // real, consumido por js/ambiente-coordenadas.js. A diferencia
+      // de 'lineas-cartograficas'/'curvas-topograficas'/'corrientes',
+      // acá 'diferida' es correcto tal cual estaba (no una
+      // discrepancia a resolver): Coordenadas no es sustrato
+      // permanente, es un marcador que se activa solo cuando hay un
+      // punto seleccionado (Cap. 6.1) — carga anticipada no aplica.
+      archivo: 'assets/ambient/coordenadas/coordenadas--default--hairline.svg'
     },
     'clima-lluvia-lineas': {
       tipo: 'elemento-climatico', capa: 'clima', carga: 'diferida'
