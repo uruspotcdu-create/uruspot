@@ -124,7 +124,7 @@
 
 <!-- CANONICAL Y MANIFEST -->
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/">
-<link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+<link rel="manifest" href="/manifest.json">
 
 <!-- FAVICON — múltiples formatos, cada uno con su consumidor real:
      SVG para navegadores modernos, PNG para los que no soportan SVG
@@ -207,22 +207,17 @@
      de rubros, guía práctica, glosario, hoja de ruta, accesibilidad).
      Depende de descubrimiento.css porque reutiliza .manifiesto-card
      en vez de duplicarla — debe cargarse después. -->
-<!-- contenido-editorial.css se carga sin bloquear el render (ver
-     script inline más abajo, permitido por CSP §8/I5): gobierna
-     "Sobre la ciudad" en adelante, contenido que ningún usuario ve
-     sin scrollear más allá del hero y de Descubrimiento. Bloquear el
-     primer paint por una hoja que solo pinta contenido fuera de
-     pantalla no tenía justificación — el <noscript> abajo cubre el
-     caso sin JS, mismo criterio que el resto del documento (§7). -->
+<!-- contenido-editorial.css se carga sin bloquear el render, vía
+     js/lazy-css-editorial.js (script con src, permitido por
+     script-src 'self' — un bloque inline aquí NO lo estaría, ver
+     fix de la auditoría §I5): gobierna "Sobre la ciudad" en adelante,
+     contenido que ningún usuario ve sin scrollear más allá del hero y
+     de Descubrimiento. Bloquear el primer paint por una hoja que solo
+     pinta contenido fuera de pantalla no tenía justificación — el
+     <noscript> abajo cubre el caso sin JS, mismo criterio que el
+     resto del documento (§7). -->
 <link rel="preload" href="css/contenido-editorial.css" as="style">
-<script>
-  (function(){
-    var l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = 'css/contenido-editorial.css';
-    document.head.appendChild(l);
-  })();
-</script>
+<script src="js/lazy-css-editorial.js" defer></script>
 <noscript><link rel="stylesheet" href="css/contenido-editorial.css"></noscript>
 
 <!-- La deuda de §10 ("migrar a css/boton.css") queda saldada en esta
@@ -1645,44 +1640,13 @@
   </p>
 </footer>
 
-<!-- RED DE SEGURIDAD: detección de timeout en carga. Ver §7. -->
-<script>
-/**
- * RESILIENCE SCRIPT: detección de falla silenciosa en carga de datos.
- *
- * Si sigue habiendo un placeholder ".vacio" (y no ".vacio.error", que
- * ya sería un error ya manejado) pasados 12s desde que se ejecutó
- * este bloque, algo falló sin avisar: motor-render.js caído, un
- * fetch colgado, o una excepción silenciosa en algún módulo previo.
- * Se reemplaza el contenido de #panelDescubrimiento por un aviso
- * accesible (role="alert") con botón de recarga, sin tocar el resto
- * del flujo normal ni asumir nada sobre qué falló exactamente.
- */
-(function () {
-  var TIMEOUT_MS = 12000;
-
-  var failsafeTimer = window.setTimeout(function () {
-    var placeholder = document.querySelector('[class*="vacio"]:not(.error)');
-    if (!placeholder) return; // ya se renderizó algo real, todo bien
-
-    var container = document.getElementById('panelDescubrimiento');
-    if (!container) return;
-
-    container.innerHTML = '';
-    var alerta = document.createElement('div');
-    alerta.className = 'vacio error';
-    alerta.setAttribute('role', 'alert');
-    alerta.innerHTML =
-      '<p>Esto está tardando más de lo esperado. Puede ser tu conexión o un problema nuestro.</p>' +
-      '<button type="button" class="btn btn--small" onclick="window.location.reload()">Reintentar</button>';
-    container.appendChild(alerta);
-  }, TIMEOUT_MS);
-
-  // Limpia el timer si la página se descarga antes de los 12s, para
-  // no dejar un setTimeout colgado innecesariamente.
-  window.addEventListener('unload', function () { clearTimeout(failsafeTimer); });
-})();
-</script>
+<!-- RED DE SEGURIDAD: detección de timeout en carga. Ver §7.
+     Externalizado a js/failsafe-reintentar.js: este bloque era un
+     <script> inline, bloqueado por completo por la CSP actual
+     (script-src 'self' sin nonce/hash/unsafe-inline), y además
+     contenía un onclick="..." — doblemente bloqueado. Ver fix de
+     la auditoría §I5. -->
+<script src="js/failsafe-reintentar.js" defer></script>
 
 <!-- ESTRATEGIA DE LAZY LOADING PARA IMÁGENES DINÁMICAS — documentación
      de contrato para motor-render.js, no código ejecutable. Vive acá
@@ -1959,15 +1923,23 @@
          cosmético. Reordenarlos sin entender esas dependencias puede
          romper el mapa con un error de consola sutil
          ("URU_MOTOR_MAPA_RENDER: falta URU_PROYECCION...").
-     I5. El único `<script>` inline permitido es el de resiliencia
-         (sección 7) y el bloque de documentación de lazy-loading —
-         ambos existen deliberadamente fuera de los módulos con
-         nombre porque no son parte de la lógica de negocio, son
-         salvaguardas del propio documento. La CSP (`script-src
-         'self'`) NO bloquea estos porque no usan atributos `on*` ni
-         `javascript:` URIs — son bloques `<script>` normales del
-         mismo documento, que sí están permitidos aunque `'self'` no
-         incluya `'unsafe-inline'`. Ver sección 8 para el detalle.
+     I5. CORREGIDO (auditoría posterior): el único `<script>` inline
+         que queda a propósito es el bloque de documentación de
+         lazy-loading (comentario puro, sin código ejecutable, así
+         que no importa que la CSP lo trate como inline). El de
+         resiliencia (sección 7) YA NO es inline — se externalizó a
+         `js/failsafe-reintentar.js` porque el supuesto anterior acá
+         era incorrecto: `script-src 'self'` cubre *fuentes* (URLs
+         de `<script src>`), NO autoriza automáticamente bloques
+         `<script>` sin `src` solo por ser del mismo documento. Un
+         `<script>` inline necesita además `'unsafe-inline'`, un
+         `'nonce-...'` que matchee, o un `'sha256-...'` del contenido
+         exacto — ninguna de las tres cosas está en esta CSP. El
+         bloque de resiliencia además tenía un `onclick="..."`, que
+         para CSP es equivalente a inline (doble motivo de bloqueo).
+         Regla práctica: si un `<script>` de acá ejecuta lógica real,
+         va con `src` en `js/`, no inline. Ver sección 8 para el
+         detalle de la CSP.
      I6. `lang="es-AR"` en `<html>` es el idioma real de TODO el
          contenido estático de este archivo. Si en el futuro se agrega
          contenido en otro idioma (una guía en inglés, por ejemplo),
