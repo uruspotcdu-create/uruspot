@@ -2539,18 +2539,49 @@
   // 22. SCROLL REVEAL (Progressive Enhancement)
   // ───────────────────────────────────────────────────────────────────
 
+  /**
+   * Cap. 6 "Primer scroll" (Motion Direction Bible v1.0, paso 9): "los
+   * elementos que entran en el viewport se acercan con microdesfase
+   * según su orden de aparición, nunca todos a la vez". Sin esto, dos o
+   * más secciones .u-reveal que cruzan el umbral en el mismo callback
+   * del IntersectionObserver (scroll rápido, o varias secciones cortas
+   * cabiendo juntas en la ventana) se revelan en el mismo frame — el
+   * "bloque sincronizado" que el Cap. 10 reserva únicamente para
+   * elementos que deben leerse como una sola unidad conceptual, no
+   * como secciones independientes de la página.
+   *
+   * --motion-desfase (css/tokens.css) ya existía desde el paso de
+   * tokens pero no se consumía en ningún lado todavía; este es su
+   * primer uso real. Se lee una sola vez acá (no en cada callback del
+   * observer) porque es un token global que no cambia en runtime.
+   */
   function inicializarScrollReveal() {
     if (prefiereMovimientoReducido()) {
       document.querySelectorAll('.u-reveal').forEach(function (el) {
         el.classList.add('visible');
       });
     } else if ('IntersectionObserver' in window) {
+      var desfaseMs = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--motion-desfase')
+      ) * 1000;
+      if (!desfaseMs || isNaN(desfaseMs)) desfaseMs = 40; // fallback si el token no resuelve
+
       var observador = new IntersectionObserver(function (entradas) {
-        entradas.forEach(function (entrada) {
-          if (entrada.isIntersecting) {
-            entrada.target.classList.add('visible');
-            observador.unobserve(entrada.target);
-          }
+        // Orden de aparición (Cap. 6, paso 9): no el orden en que el
+        // observer las entrega (que es el de intersección detectada,
+        // no necesariamente el del documento), sino el orden real en
+        // el DOM — así el decalaje siempre sigue la jerarquía visual
+        // de la página, nunca un orden incidental del navegador.
+        var entrantes = entradas
+          .filter(function (entrada) { return entrada.isIntersecting; })
+          .sort(function (a, b) {
+            return a.target.compareDocumentPosition(b.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+          });
+
+        entrantes.forEach(function (entrada, indice) {
+          entrada.target.style.transitionDelay = (indice * desfaseMs) + 'ms';
+          entrada.target.classList.add('visible');
+          observador.unobserve(entrada.target);
         });
       }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
