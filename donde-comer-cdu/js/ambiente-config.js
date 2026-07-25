@@ -342,6 +342,23 @@
       // del catálogo, pero queda documentado acá la diferencia.
       archivo: 'assets/ambient/reticula/reticula--default--hairline.svg'
     },
+    'corrientes': {
+      tipo: 'linea-flujo', capa: 'profundidad', carga: 'anticipada',
+      // Fase 3 (Lenguaje de Assets, familia Corrientes): asset SVG
+      // real, consumido por js/ambiente-corrientes.js vía
+      // AmbienteAssets.obtenerBinario() e insertado en el plano P1
+      // (Cap. 4.1: "Corriente" — corrientes + coordenadas). 'carga:
+      // anticipada' por el mismo criterio que 'lineas-cartograficas'
+      // y 'curvas-topograficas': es sustrato ambiental permanente de
+      // cualquier escena, no un asset atado a una escena que puede
+      // no activarse nunca (Cap. 8.1) — 'diferida' no aplicaría acá.
+      // 'capa: profundidad' es la taxonomía conceptual previa a la
+      // Fase 3 (Cap. 7.10 Fase 1), igual que en 'lineas-cartograficas'
+      // (ver esa nota): el plano real que usa este asset es P1 del
+      // Plane Manager (Cap. 4.1), no se renombra el campo para no
+      // romper otros lectores existentes del catálogo.
+      archivo: 'assets/ambient/corrientes/corrientes--diagonal-lenta--hairline.svg'
+    },
     'coordenadas': {
       tipo: 'coordenadas', capa: 'profundidad', carga: 'diferida'
     },
