@@ -90,6 +90,19 @@
     animation: none !important;
     transform: none !important;
   }
+  .amb-asset--particulas .particulas-parallax,
+  .amb-asset--particulas .particulas-mota {
+    animation: none !important;
+    transform: none !important;
+  }
+  /* El halo NO se apaga entero: sigue siendo el único feedback
+     directo de "qué está seleccionado" (Cap. 6.2), así que debe
+     seguir apareciendo — solo se le quita la transición de escala/
+     opacidad (Cap. 9.5: mismo criterio que ya usa
+     css/ambiente-estilos.css para otras transiciones puntuales). */
+  .amb-asset--halo {
+    transition: none !important;
+  }
 }
 
 /* Coordenadas — Aparición/desaparición discreta (Cap. 5: "fade in/out
@@ -179,4 +192,109 @@
      (Cap. 6.1), esta oscilación libre es el estado "sin selección";
      no se toca acá — es alcance explícito de un paso posterior. */
   animation: amb-oscilacion-aguja 6s ease-in-out infinite;
+}
+
+/* Partículas de deriva (Fase 3, Paso 8, roadmap Cap. 12 orden 7) —
+   Flotación libre con parallax (Cap. 5: "trayectorias suaves, no
+   lineales, responde a scroll"). Dos ejes de movimiento distintos,
+   cada uno en su propio grupo (Cap. 5, máximo dos por familia):
+
+   1. .particulas-parallax — sin @keyframes: js/ambiente-particulas-
+      deriva.js escribe la variable --amb-particulas-scroll en cada
+      scroll (rAF, sin disparar reflow — Cap. 9.1) y esta regla solo
+      la traduce a transform:translateY. Sin JS o con
+      prefers-reduced-motion, la variable nunca se actualiza y el
+      grupo queda estático — no hace falta un caso especial acá.
+   2. .particulas-mota--* — @keyframes con más de dos puntos de
+      control (nunca ida-y-vuelta lineal, Cap. 5): cada mota tiene su
+      propia trayectoria, duración y demora para que el conjunto no
+      respire en sincronía (leerse como cinco copias del mismo
+      elemento sería, precisamente, el "ritmo perfectamente uniforme"
+      que el Cap. 1.4 pide evitar). */
+.amb-asset--particulas .particulas-parallax {
+  transform: translateY(calc(var(--amb-particulas-scroll, 0) * 1px));
+}
+
+@keyframes amb-flotacion-a {
+  0%   { transform: translate(0px, 0px); }
+  35%  { transform: translate(3.5px, -2.4px); }
+  70%  { transform: translate(-2px, 3.1px); }
+  100% { transform: translate(0px, 0px); }
+}
+.particulas-mota--a {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: amb-flotacion-a 22s ease-in-out infinite;
+}
+/* Segunda instancia de la progresión 1.0 (mota D del SVG): misma
+   firma de trayectoria, duración y demora distintas para que ambas
+   copias no se muevan en sincronía. */
+.particulas-mota--a2 {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: amb-flotacion-a 27s ease-in-out infinite;
+  animation-delay: -9s;
+}
+
+@keyframes amb-flotacion-b {
+  0%   { transform: translate(0px, 0px); }
+  40%  { transform: translate(-3px, -3.4px); }
+  75%  { transform: translate(2.6px, 1.6px); }
+  100% { transform: translate(0px, 0px); }
+}
+.particulas-mota--b {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: amb-flotacion-b 30s ease-in-out infinite;
+}
+
+@keyframes amb-flotacion-c {
+  0%   { transform: translate(0px, 0px); }
+  30%  { transform: translate(2.2px, 3.6px); }
+  65%  { transform: translate(-3.4px, -1.4px); }
+  100% { transform: translate(0px, 0px); }
+}
+.particulas-mota--c {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: amb-flotacion-c 25s ease-in-out infinite;
+}
+
+/* Ruptura del 20% (Cap. 1.4): además de la escala no uniforme ya
+   definida en el propio SVG, esta mota tiene el ciclo más largo e
+   irregular de las cinco — organicidad deliberada, no descuido. */
+@keyframes amb-flotacion-ruptura {
+  0%   { transform: translate(0px, 0px) rotate(0deg); }
+  22%  { transform: translate(-2.8px, 2px) rotate(-4deg); }
+  58%  { transform: translate(1.6px, -3.2px) rotate(3deg); }
+  85%  { transform: translate(3px, 1px) rotate(0deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+.particulas-mota--ruptura {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: amb-flotacion-ruptura 34s ease-in-out infinite;
+}
+
+/* Halos de posición (Fase 3, Paso 9, roadmap Cap. 12 orden 8) —
+   Iluminación reactiva (Cap. 5: "crecimiento/atenuación ligado 1:1 a
+   la interacción, sin loop propio"). Único asset con transition en
+   vez de animation infinite — mismo mecanismo que ya usa Coordenadas
+   (.is-visible), con la diferencia de que acá también anima scale:
+   el crecimiento ES la semántica de esta familia (ver comentario del
+   propio SVG), no un adorno prohibido por el Cap. 1.3. Rango de
+   banda "respuesta" del sistema (motor-config/AmbienteConfig:
+   80-250ms) — 220ms, coherente con ser feedback directo de una
+   interacción del usuario, no ambiente de fondo. */
+.amb-asset--halo {
+  transition: opacity 220ms ease-out, transform 220ms ease-out;
+  opacity: 0;
+  transform: scale(0.6);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.amb-asset--halo.is-visible {
+  opacity: var(--amb-p3-opacidad);
+  transform: scale(1);
 }

@@ -1700,10 +1700,17 @@
 
       motorMapa.on('hover', function (punto) {
         resaltarTarjeta(punto.id, true);
+        // Ambient Engine — familia Halos de posición (Cap. 6.1 del
+        // documento de Lenguaje de Assets: reactividad "Sí, directo"
+        // a hover/click). Mismo límite ya documentado para
+        // Coordenadas: sin proyección real de lat/lng expuesta por
+        // motor-mapa.js, se ancla al centro óptico del plano P3.
+        if (window.AmbienteHalos) window.AmbienteHalos.mostrarEn(50, 50);
       });
 
       motorMapa.on('hoverOut', function () {
         resaltarTarjeta(null, false);
+        if (window.AmbienteHalos) window.AmbienteHalos.ocultar();
       });
 
       motorMapa.on('click', function (punto) {
@@ -1725,6 +1732,7 @@
         // requiere exponer esa proyección desde motor-mapa.js primero
         // (fuera del alcance del Ambient Engine, Cap. 3.12).
         if (window.AmbienteCoordenadas) window.AmbienteCoordenadas.mostrarEn(50, 50);
+        if (window.AmbienteHalos) window.AmbienteHalos.mostrarEn(50, 50);
       });
     } catch (e) {
       console.error('Error al inicializar motor de mapa:', e);

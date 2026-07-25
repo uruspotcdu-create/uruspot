@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  URU SPOT — Ambient Engine — Familia: Partículas de deriva
+  Archivo: particulas, variante deriva-libre, peso hairline.
+
+  Cap. 2.1, familia 6: "Único elemento con movimiento verdaderamente
+  libre; introduce vida orgánica" — clima, tiempo pasando. Plano P2
+  (Orientación, junto a Brújula, Cap. 4.1).
+
+  Construida enteramente con UNA primitiva compartida (Cap. 3.3):
+  circulo-concentrico, instanciada a escala muy reducida — un anillo
+  minúsculo, no un punto relleno (Cap. 1.2: "líneas, no rellenos";
+  Cap. 11.2: relleno sólido prohibido fuera de P0). Esto es, a
+  propósito, geometría idéntica a la del aro de la Brújula, solo que
+  a otra escala: "mismas 5 primitivas en distinta composición"
+  (Cap. 3.3), nunca una forma nueva de "punto" o "mota".
+
+  Progresión 80/20 (Cap. 1.4): 4 de las 5 motas siguen una
+  progresión de escala 0.12 / 0.16 / 0.20 (≈ 1.0 / 1.33 / 1.67, mismo
+  criterio de paso que ya usa Corrientes con 1.0/1.3). La quinta mota
+  rompe la progresión a propósito: escala fuera de serie (0.09) y,
+  además, escala no uniforme (0.09 x / 0.13 y) — una elipse leve en
+  vez de un círculo perfecto, geometría construida igual (Cap. 1.2:
+  "arcos elípticos" es vocabulario explícitamente permitido), no una
+  curva a mano alzada.
+
+  Posicionamiento: cada mota vive en un <g> propio con dos niveles —
+  un <g> exterior con transform estático de posición (translate fijo,
+  nunca tocado por CSS) y un <g class="particulas-mota"> interior
+  que es el que anima la Flotación libre (ver tokens de movimiento).
+  Separar posición de animación evita que la animación (que solo
+  debe describir el desplazamiento relativo del recorrido) tenga que
+  conocer o repetir la posición absoluta de cada mota — mismo
+  principio de capas anidadas que ya usa Corrientes (diagonal estático
+  > deriva animada > tile).
+
+  Un <g class="particulas-parallax"> envuelve a las cinco motas: es
+  el que js/ambiente-particulas-deriva.js traslada verticalmente en
+  cada scroll (Cap. 6.1: "Sí (parallax)", la única reactividad a
+  scroll que exige la matriz de este paso — a diferencia de
+  Corrientes, que la deja pendiente a propósito, acá es alcance
+  explícito del Paso 8). Ese desplazamiento se aplica vía la variable
+  la variable amb-particulas-scroll (ver tokens de movimiento), nunca reescrito
+  por este archivo — el SVG nunca sabe cuánto se hizo scroll, solo
+  expone el punto de enganche.
+
+  Movimiento (Cap. 5: "Flotación libre con parallax, trayectorias
+  suaves, no lineales"): cada mota tiene su propia firma de
+  trayectoria (amb-flotacion-a/b/c/ruptura, ver tokens de movimiento),
+  con más de dos puntos de control — nunca un simple ida-y-vuelta
+  lineal — y duración/retraso distintos entre motas para que el
+  conjunto no respire en sincronía (eso se leería como un solo
+  elemento repetido, no como partículas independientes). Dos ejes de
+  movimiento en total para la familia (flotación individual +
+  parallax de grupo, Cap. 5: "máximo dos ejes de movimiento
+  simultáneos" — acá viven en grupos distintos, nunca sumados sobre
+  el mismo elemento).
+
+  Reactividad a clima (Cap. 6.1: "densidad ↑ con lluvia, dirección
+  con viento simulado") y a horario (Cap. 7.3: color) NO se
+  implementan en este archivo — no existe hoy ninguna señal real de
+  lluvia/viento en la app (mismo límite ya documentado en
+  js/ambiente-clima.js: "toggle que resolverá el futuro Weather
+  Engine"); inventar una acá sería una excepción silenciosa (Cap.
+  8.2). Sí se implementa el shift de color por horario (Paso 10),
+  porque ese sí es un dato real ya computado por
+  js/ambiente-capa-fondo.js.
+
+  Complejidad (Cap. 9.2): 3 grupos anidados de profundidad máxima
+  (parallax > posición > animación), 5 nodos <use> (límite 80), sin
+  filter, sin animación de propiedades de layout (Cap. 9.1).
+-->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     class="amb-asset amb-asset--particulas"
+     style="color:var(--amb-p2-color);
+            opacity:var(--amb-p2-opacidad);
+            stroke:currentColor; stroke-width:var(--amb-trazo-hairline);
+            fill:none;" aria-hidden="true" focusable="false">
+
+  <g class="particulas-parallax">
+
+    <!-- Mota A — progresión 1.0 -->
+    <g transform="translate(12 18)">
+      <g class="particulas-mota particulas-mota--a">
+        <use href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" transform="scale(0.12)"/>
+      </g>
+    </g>
+
+    <!-- Mota B — progresión 1.33 -->
+    <g transform="translate(64 10)">
+      <g class="particulas-mota particulas-mota--b">
+        <use href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" transform="scale(0.16)"/>
+      </g>
+    </g>
+
+    <!-- Mota C — progresión 1.67 -->
+    <g transform="translate(36 52)">
+      <g class="particulas-mota particulas-mota--c">
+        <use href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" transform="scale(0.20)"/>
+      </g>
+    </g>
+
+    <!-- Mota D — segunda instancia de la progresión 1.0, a otra
+         posición: el 80% de las instancias sigue la progresión
+         regular (Cap. 1.4), no significa una instancia por paso.
+         Clase propia (a2, no la clase "a" repetida) para que su trayectoria
+         de Flotación libre pueda tener duración/demora distinta sin
+         depender de selectores CSS posicionales frágiles. -->
+    <g transform="translate(78 64)">
+      <g class="particulas-mota particulas-mota--a2">
+        <use href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" transform="scale(0.12)"/>
+      </g>
+    </g>
+
+    <!-- Mota E — ruptura deliberada del 20% (Cap. 1.4): escala fuera
+         de serie y no uniforme (elipse leve, Cap. 1.2). -->
+    <g transform="translate(5.5 75.5)">
+      <g class="particulas-mota particulas-mota--ruptura">
+        <use href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" transform="scale(0.09 0.13)"/>
+      </g>
+    </g>
+
+  </g>
+
+</svg>

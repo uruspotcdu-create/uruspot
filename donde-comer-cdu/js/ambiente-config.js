@@ -388,6 +388,36 @@
       // había ningún asset previo de este tipo antes de la Fase 3.
       archivo: 'assets/ambient/brujula/brujula--default--regular.svg'
     },
+    'particulas-deriva': {
+      tipo: 'particula-deriva', capa: 'particulas', carga: 'anticipada',
+      // Fase 3 (Lenguaje de Assets, familia Partículas de deriva,
+      // Paso 8, roadmap Cap. 12 orden 7): asset SVG real, consumido
+      // por js/ambiente-particulas-deriva.js e insertado en el plano
+      // P2 (Cap. 4.1: "Orientación" — brújula + partículas de
+      // deriva). 'carga: anticipada' por el mismo criterio que
+      // 'brujula': es sustrato ambiental de identidad ("vida
+      // orgánica", Cap. 2.1), presente desde el arranque, no un
+      // asset atado a una selección que puede no ocurrir (Cap. 8.1).
+      // Distinto de 'forma-particula-punto'/'forma-particula-mota'
+      // (arriba, Fase 2, Particle Engine): ese catálogo describe el
+      // sistema anterior basado en <div>, no la familia SVG real de
+      // este documento — no se reutilizan esas entradas para no
+      // mezclar dos generaciones de assets bajo el mismo id.
+      archivo: 'assets/ambient/particulas/particulas--deriva-libre--hairline.svg'
+    },
+    'halo': {
+      tipo: 'halo-foco', capa: 'foco', carga: 'diferida',
+      // Fase 3 (Lenguaje de Assets, familia Halos de posición, Paso
+      // 9, roadmap Cap. 12 orden 8): asset SVG real, consumido por
+      // js/ambiente-halos.js e insertado en el plano P3 (Cap. 4.1:
+      // "Foco"). 'carga: diferida', mismo criterio que 'coordenadas':
+      // no es sustrato permanente, es un asset reactivo que solo
+      // tiene sentido cuando hay un punto activo (Cap. 2.1: "el
+      // único asset reactivo al usuario"). 'capa: foco' es
+      // taxonomía nueva (no existía antes de esta familia), mismo
+      // criterio que ya se usó para 'capa: orientacion' con Brújula.
+      archivo: 'assets/ambient/halos/halos--foco-activo--feature.svg'
+    },
     'clima-lluvia-lineas': {
       tipo: 'elemento-climatico', capa: 'clima', carga: 'diferida'
     },

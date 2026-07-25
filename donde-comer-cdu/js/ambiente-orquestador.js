@@ -141,7 +141,17 @@
     if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
     if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
     if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
+    // Fase 3 (Paso 8/9, roadmap Cap. 12 orden 7/8): mismo patrón que
+    // el resto de las familias — cada una inicia su propia inserción
+    // en el plano que le corresponde, el orquestador solo dispara.
+    if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
+    if (global.AmbienteHalos) global.AmbienteHalos.iniciar();
     if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
+    // Fase 3 (Paso 10, roadmap Cap. 12 orden 9): shift de color de
+    // P2/P3 por horario — no es una familia de assets, así que se
+    // inicia junto a la Capa de Fondo (misma naturaleza: lee la hora
+    // real y escribe variables CSS), no junto a las 7 familias.
+    if (global.AmbienteHorarioTinte) global.AmbienteHorarioTinte.iniciar();
     if (global.AmbienteParticulas) global.AmbienteParticulas.iniciar();
     if (global.AmbienteLuz) global.AmbienteLuz.iniciar();
     if (global.AmbienteClima) global.AmbienteClima.iniciar();

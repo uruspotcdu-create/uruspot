@@ -71,21 +71,55 @@
      asset: la variable --amb-pN-opacidad. ── */
   --amb-p0-color: var(--color-tinta, #ECEDEF);
   --amb-p1-color: var(--color-tinta, #ECEDEF);
-  --amb-p2-color: var(--color-tinta, #ECEDEF);
-  --amb-p3-color: var(--color-granate-clara, #C97A83);
+
+  /* ── Paso 10 (roadmap Cap. 12 orden 9): shift de temperatura por
+     horario (Cap. 7.3), P2/P3 solamente — P0/P1 quedan arriba sin
+     tocar, a propósito (regla dura del propio Cap. 7.3). Se resuelve
+     con color-mix() en vez de una segunda variable de color fija: el
+     token base (--color-tinta) sigue siendo la única fuente de
+     verdad de color, y el shift es un porcentaje de mezcla hacia un
+     tinte, nunca un color nuevo hardcodeado sobre el asset (Cap.
+     11.2: "asignar color fijo, no tokenizado" sigue prohibido — acá
+     lo tokenizado es tanto el color base como el monto de mezcla).
+
+     --amb-tinte-color-p2/p3 y --amb-tinte-monto-p2/p3 arrancan en
+     "sin cambio" (mezcla 0%) y los escribe en tiempo real
+     js/ambiente-horario-tinte.js, con el mismo mecanismo
+     (style.setProperty sobre variables CSS) que ya usa
+     js/ambiente-capa-fondo.js para el cielo — no un patrón nuevo,
+     tal como pedía la nota original de este archivo. ── */
+  --amb-tinte-color-p2: var(--color-tinta, #ECEDEF);
+  --amb-tinte-monto-p2: 0%;
+  --amb-tinte-color-p3: var(--color-granate-clara, #C97A83);
+  --amb-tinte-monto-p3: 0%;
+
+  --amb-p2-color: color-mix(in srgb, var(--color-tinta, #ECEDEF), var(--amb-tinte-color-p2) var(--amb-tinte-monto-p2));
+  --amb-p3-color: color-mix(in srgb, var(--color-granate-clara, #C97A83), var(--amb-tinte-color-p3) var(--amb-tinte-monto-p3));
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   Referencia — Cap. 7.3: shifts de clima/horario (NO implementados
-   acá, ver nota arriba). Se documentan como valores de destino para
-   que la fase de integración no tenga que releer el documento fuente
-   entero:
+   Paso 10 (roadmap Cap. 12 orden 9) — estado real de la integración
+   de clima/horario (Cap. 7.3), verificado contra el repo, no asumido:
 
-   Lluvia    (P1/P2/P3): shift azul-gris + desaturación leve
-   Amanecer  (P2/P3 solamente): ámbar bajo
-   Atardecer (P2/P3 solamente): ámbar medio
-   Noche: cubierta por la base dark ya definida arriba; P2 puede
-          ganar shift frío puntual (sustituto de "estrellas", 2.2)
+   Implementado acá: Amanecer y Atardecer, porque la hora real del
+   día YA es un dato que existe en la app (js/ambiente-capa-fondo.js
+   la calcula cada 60s para el color del cielo) — js/ambiente-
+   horario-tinte.js reutiliza el mismo cálculo para escribir
+   --amb-tinte-monto-p2/p3 y --amb-tinte-color-p2/p3 (arriba) con un
+   ámbar bajo en amanecer y un ámbar medio en atardecer, tal como
+   pide la tabla del Cap. 7.3. Noche queda cubierta por la propia
+   base dark del sistema (ya documentado arriba) — no se le suma
+   ningún tinte adicional en este paso.
+
+   NO implementado acá, a propósito, no por olvido: el shift de
+   Lluvia (Cap. 7.3, P1/P2/P3, azul-gris + desaturación). A
+   diferencia de la hora real, hoy no existe en ningún subsistema de
+   la app una señal real de "está lloviendo" — js/ambiente-clima.js
+   ya documenta esa misma ausencia textualmente ("toggle que
+   resolverá el futuro Weather Engine"). Inventar acá un valor fijo
+   o un toggle de mentira sería una excepción silenciosa (Cap. 8.2),
+   exactamente lo que este documento pide evitar. Queda pendiente,
+   registrado, para cuando exista una fuente real de clima.
 
    P0 nunca cambia en ninguno de estos casos — regla dura, Cap. 7.3.
    ═══════════════════════════════════════════════════════════════════ */
