@@ -16,6 +16,19 @@
     DATA = {};
   }
 
+  /* ───────────────────────── CONTINUIDAD DE APERTURA (Fase 4, Cap. 6) ─────
+     "El elemento de origen (la tarjeta tocada) se convierte visualmente en
+     el encabezado de la ficha". Contraparte de la view-transition-name que
+     ya pinta app.js en .tarjeta-nombre (mismo slug, tomado acá de la URL
+     en vez de datos propios porque #ficha-data no incluye el id/slug). */
+  function aplicarNombreDeTransicion() {
+    var titulo = document.querySelector(".hero-title");
+    if (!titulo || !titulo.style) return;
+    var m = location.pathname.match(/\/locales\/([^\/]+)\/?$/);
+    if (!m) return;
+    titulo.style.viewTransitionName = "vt-titulo-" + m[1];
+  }
+
   /* ───────────────────────── ESTADO ABIERTO/CERRADO ───────────────────────── */
 
   // Nombres completos, plurales y abreviaturas (con y sin tilde) -> índice 0=domingo .. 6=sábado.
@@ -249,5 +262,6 @@
     aplicarEstado();
     animarScores();
     initShare();
+    aplicarNombreDeTransicion();
   });
 })();

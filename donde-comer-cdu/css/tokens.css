@@ -10,6 +10,21 @@
    estilos propios de una página).
    ═══════════════════════════════════════════════════════════════════ */
 
+/* Fase 4, Cap. 6 "Apertura de ficha" y "Regreso": continuidad visual
+   entre este índice y las 51 páginas de locales/ (documentos propios,
+   no una SPA). @view-transition con navigation:auto es progresivo —
+   sin soporte del navegador, la navegación sigue siendo exactamente
+   la de siempre, sin ningún cambio de comportamiento (Cap. 13:
+   ningún elemento funcional depende exclusivamente del movimiento).
+   Requiere la misma regla también en locales/ficha.css (el documento
+   de destino tiene que optar por su cuenta también). El puente real
+   es el nombre compartido en .tarjeta-nombre/.hero-title (ver
+   js/app.js y locales/ficha.js). Bajo movimiento reducido, no se
+   opta: el salto entre documentos vuelve a ser instantáneo. */
+@media (prefers-reduced-motion: no-preference){
+  @view-transition{ navigation:auto; }
+}
+
 :root{
 
   /* ── Color: superficie e ink (modo oscuro, el modo real del producto) ── */

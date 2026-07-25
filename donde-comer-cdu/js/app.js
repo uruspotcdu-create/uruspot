@@ -1485,7 +1485,17 @@
 
       art.innerHTML =
         '<div class="tarjeta-rubro">' + escapeHTML(rubro) + pendienteTxt + (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') + '</div>' +
-        '<h3 class="tarjeta-nombre">' + escapeHTML(lugar.nombre) + '</h3>' +
+        // Fase 4, Cap. 6 "Apertura de ficha": "El elemento de origen (la
+        // tarjeta tocada) se convierte visualmente en el encabezado de
+        // la ficha — continuidad de forma, no un salto a una pantalla
+        // nueva y ajena". Con las fichas como páginas estáticas propias
+        // (no una SPA), el único puente real disponible sin reescribir
+        // la navegación es View Transitions cross-document (progresivo:
+        // sin soporte, navega igual que siempre — cero riesgo de
+        // regresión). El nombre usa el mismo slug que ya resuelve el
+        // href de "ver ficha" (ver locales/ficha.js, mismo criterio de
+        // apareo del otro lado).
+        '<h3 class="tarjeta-nombre"' + (slugLugar ? ' style="view-transition-name:vt-titulo-' + slugLugar + '"' : '') + '>' + escapeHTML(lugar.nombre) + '</h3>' +
         (miniTexto
           ? '<div class="tarjeta-mini' + (miniEsGenerica ? ' tarjeta-mini--generica' : '') + '">' + escapeHTML(miniTexto) + '</div>'
           : '<div class="tarjeta-direccion">' + (lugar.direccion ? escapeHTML(lugar.direccion) : 'cargando dirección…') + '</div>') +
