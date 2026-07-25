@@ -146,6 +146,17 @@ ningún capítulo del documento fuente ni en los tokens ya creados
 (Cap. 7 solo cubre color de trazo). Queda pendiente como decisión de
 sistema a tomar a propósito, no a colar implícita.
 
+**Nota de cierre real del Paso 6:** la ficha de arriba se había
+documentado en el commit `d32b241`, pero los dos archivos que
+describe (`coordenadas/coordenadas--default--hairline.svg` y
+`js/ambiente-coordenadas.js`) nunca se habían commiteado — el
+catálogo e `index.html` ya los referenciaban (script 404 real, asset
+inexistente). Se crean ambos archivos y se completan las dos reglas
+de opacidad que faltaban en `ambiente-tokens-movimiento.css`
+(estaban en un archivo duplicado en la ruta equivocada, `css/`, sin
+efecto real — también corregido). El Paso 6 queda cerrado de verdad
+recién en el commit `f6adbd8`, no en `d32b241`.
+
 *(Los assets de las familias restantes — Brújula, Partículas de
 deriva, Halos de posición — se agregan a esta tabla a medida que se
 implementan, uno por paso, siguiendo el Roadmap del Cap. 12.)*
