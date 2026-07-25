@@ -65,6 +65,31 @@
   color: var(--amb-p3-color);
 }
 
+/* Fase 4, Cap. 8 ("Cómo acompaña"): "Durante estados de espera (carga,
+   búsqueda en curso), el Ambient Engine se vuelve momentáneamente más
+   presente, ocupando el vacío con vida en lugar de silencio absoluto."
+
+   Primer consumidor real de data-ambiente-estado (Cap. 11.1: el
+   contrato es justamente ese atributo en <html>; hasta este paso
+   ningún CSS ni JS de la app lo leía). Se aplica solo a P2 — nunca a
+   P0/P1 (Cap. 4.2, regla dura de más arriba) ni a P3 (foco reactivo al
+   usuario, semántica distinta, Cap. 4.1). No toca --amb-p2-opacidad
+   (Cap. 4.1: rango fijo 0.18–0.30 ya está en su techo, 0.30): es un
+   pulso de opacidad del propio contenedor, multiplicador sobre lo que
+   cada asset ya pinta, nunca un valor absoluto nuevo — por eso "más
+   presente" se logra con más vida perceptible (un latido más notorio
+   sobre el de cada familia), no con más brillo. */
+@keyframes amb-carga-presencia {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .82; }
+}
+html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
+  animation: amb-carga-presencia 1.1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ambiente-estado="carga"] #ambiente-plano-p2 { animation: none; }
+}
+
 /* Cap. 4.1: P3 es el único plano que responde 1:1 a interacción
    directa. Fase 3 (Paso 9): la familia Halos de posición ya existe
    (js/ambiente-halos.js) pero, hoy, reacciona a eventos que ya

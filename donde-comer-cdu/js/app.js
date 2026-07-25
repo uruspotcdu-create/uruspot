@@ -407,6 +407,12 @@
        */
       recuperarDeCarguaCatalogo: function () {
         if (uiState.lastErrorState && uiState.lastErrorState.tipo === ERROR_TYPE.CATALOG_FETCH) {
+          // Cap. 6.3 (Estados del Ambient Engine): "Error → Activo
+          // solo vía reintento explícito" — este es exactamente ese
+          // reintento explícito. Sin este paso, iniciarCarga() de
+          // cargarCatalogo() sería un no-op (solo transiciona desde
+          // Activo) y el Ambient Engine quedaría en Error para siempre.
+          if (window.AmbientEngine) window.AmbientEngine.reintentar();
           transicionarEstado(STATE.RECOVERING, 'reintentando_catalogo');
           pintarEsqueleto();
           cargarCatalogo();
@@ -812,6 +818,18 @@
    * Orquesta la secuencia de carga de detalles, stats, highlights.
    */
   function cargarCatalogo() {
+    // Fase 4, Cap. 6 "Carga" / Cap. 8: "ningún estado de carga es una
+    // pantalla vacía o congelada: el Ambient Engine ocupa ese instante
+    // con su registro de fondo habitual". iniciarCarga()/finalizarCarga()
+    // ya existían como superficie pública de window.AmbientEngine desde
+    // Fase 0/2 pero no tenían ningún llamador real en la app — esta es
+    // la primera fuente de carga real y perceptible (fetch de red, no
+    // el debounce sintético de 160ms del buscador, que se mantiene
+    // deliberadamente ágil, Cap. 5). No-op seguro si el Ambient Engine
+    // todavía no terminó de inicializarse (chequeo interno del propio
+    // AmbienteEstados) o si ya está en Carga por otra vía.
+    if (window.AmbientEngine) window.AmbientEngine.iniciarCarga();
+
     fetchJSON('lugares-core.json')
       .then(function (core) {
         if (!Array.isArray(core) || core.length === 0) {
@@ -838,6 +856,7 @@
         });
 
         transicionarEstado(STATE.READY, 'catalogo_cargado');
+        if (window.AmbientEngine) window.AmbientEngine.finalizarCarga(true);
 
         // Parallelizar carga de detalles (segundo plano)
         cargarDetallesEnSegundoPlano();
@@ -849,6 +868,7 @@
 
       })
       .catch(function (err) {
+        if (window.AmbientEngine) window.AmbientEngine.finalizarCarga(false);
         ErrorRecovery.procesar(err, ERROR_TYPE.CATALOG_FETCH, 'cargarCatalogo');
         mostrarPanelErrorConReintento();
       });
