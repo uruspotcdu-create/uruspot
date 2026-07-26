@@ -2592,6 +2592,66 @@
      pasada): 306 lugares del catálogo necesitan una auditoría real
      (confirmar horario, actividad, teléfono) para pasar de "pendiente" a
      "verificado". Ese trabajo de campo/auditoría web queda abierto.
+     ═══════════════════════════════════════════════════════════════════════
+
+     18. FASE 4 — Accesibilidad: contraste del badge Abierto/Cerrado
+     (26/07/2026)
+
+     Deuda WCAG AA ya documentada: los colores semánticos de estado
+     medían 4.34:1 (abierto) y 2.98:1 (cerrado) contra su propia píldora,
+     por debajo del mínimo 4.5:1 para texto normal. Se aclararon
+     manteniendo el mismo matiz (hue/saturación intactos, solo más
+     luminosidad):
+     · --color-estado-abierto: #40916C → #44996F (4.34:1 → 4.72:1)
+     · --color-estado-cerrado: #C1121F → #F04552 (2.98:1 → 4.74:1)
+     Cambio hecho en `css/tokens.css` (única fuente de verdad), con
+     `--color-estado-*-fondo` y `--glow-abierto` recalculados en rgb para
+     seguir siendo el mismo color en distinta opacidad. `css/badge-estado.css`
+     tenía además un box-shadow con el rgb del rojo viejo hardcodeado
+     (`rgba(193,18,31,.3)`, no vía var()) — corregido también.
+
+     HALLAZGO fuera del alcance original del roadmap (que decía "Archivos:
+     css/badge-estado.css únicamente"): el mismo patrón visual — píldora
+     "Abierto ahora"/"Cerrado" con los mismos dos colores — estaba
+     duplicado a mano en las 51 páginas estáticas de `locales/`, con los
+     valores viejos, sin pasar por `tokens.css` ni por `badge-estado.css`
+     en absoluto:
+     · `locales/ficha.js` — variables `openColor`/`closedColor` con los
+       hex viejos (única fuente real para 50 de las 51 páginas: el color
+       final que ve el usuario lo pone este script en tiempo de carga,
+       no el HTML).
+     · Las 50 páginas de `locales/*/index.html` (todas menos
+       `gimnasio-538`, que no tiene panel de horario) — el `<span
+       id="schedStatusPill">` y el `<span id="schedDot">` traían el color
+       "abierto" viejo hardcodeado inline, como estado inicial antes de
+       que `ficha.js` lo pise.
+     · `locales/ficha.css` — `--green-bright`/`--red-accent` con los
+       mismos hex viejos, declaradas pero sin ningún `var()` que las
+       lea en todo el repo (variables muertas, no se tocó su uso porque
+       no tienen uso; se actualizó el valor para que si alguien las
+       activa en el futuro no reintroduzca el bug). `.schedule-time-closed`
+       (texto "Cerrado" en la fila del día, 21 páginas) también tenía el
+       rojo viejo hardcodeado — corregido.
+     · `--green-accent` (#2D6A4F, checks ✓ de amenities) NO se tocó:
+       es un verde distinto, sin relación semántica con el badge
+       abierto/cerrado, fuera de este bug.
+
+     Fondo real verificado antes de aplicar el mismo valor: el panel de
+     horario de las fichas (`.schedule-block`) usa `background:var(--ink)`
+     = `#0d0d0d`, prácticamente idéntico al `--color-fondo` del índice
+     (`#0A0D13`) — el mismo par de colores corregidos sirve para ambos
+     contextos sin recalcular. Contraste verificado directamente:
+     `schedule-time-closed` viejo 3.12:1 → nuevo 5.26:1 (texto plano,
+     sin transparencia); píldora abierto/cerrado en fichas 4.72:1/4.73:1
+     (coincide con el índice, transparencia de fondo igual).
+
+     Invariantes verificadas sin cambios: `node js/run-tests.js` → exit 0,
+     202/202 + 52/52 + contrato OK (ninguno de estos tests cubre CSS ni
+     las páginas estáticas de locales/, así que la verificación de
+     contraste fue manual, con el mismo método de cálculo WCAG 2.1 en
+     los dos casos). Grep final sobre todo el repo (`.css`/`.html`/`.js`)
+     confirma cero apariciones de los hex/rgb viejos fuera de los
+     comentarios de esta misma documentación.
      ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>

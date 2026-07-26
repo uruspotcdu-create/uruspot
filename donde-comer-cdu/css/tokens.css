@@ -62,11 +62,16 @@
   --color-rubro-transporte:         #D98B5F;
 
   /* Semántico: estado abierto/cerrado — el único uso legítimo de
-     verde/rojo puro en toda la plataforma, reservado para esto. */
-  --color-estado-abierto:        #40916C;
-  --color-estado-abierto-fondo:  rgba(64,145,108,.15);
-  --color-estado-cerrado:        #C1121F;
-  --color-estado-cerrado-fondo:  rgba(193,18,31,.12);
+     verde/rojo puro en toda la plataforma, reservado para esto.
+     FASE 4 (26/07/2026): valores originales (#40916C / #C1121F) no
+     alcanzaban WCAG AA 4.5:1 contra su propia píldora — medían 4.34:1
+     y 2.98:1 respectivamente. Se aclararon manteniendo el mismo matiz
+     (mismo hue/saturación, solo más luminosidad) hasta pasar el
+     mínimo con margen: abierto 4.72:1, cerrado 4.74:1. */
+  --color-estado-abierto:        #44996F;
+  --color-estado-abierto-fondo:  rgba(68,153,111,.15);
+  --color-estado-cerrado:        #F04552;
+  --color-estado-cerrado-fondo:  rgba(240,69,82,.12);
 
   /* ── Tipografía ── */
   --f-display: 'Fraunces', serif;       /* títulos, nombres de lugar */
@@ -201,9 +206,10 @@
      tenía el anillo de 1px que sí tiene, simétricamente, el badge
      "Cerrado" (rgba(193,18,31,.3), calcado del --color-estado-cerrado
      de más arriba). Se define acá con el mismo criterio: el propio
-     --color-estado-abierto (#40916C → rgb 64,145,108) a la misma
-     opacidad que su contraparte cerrada. */
-  --glow-abierto: rgba(64,145,108,.35);
+     --color-estado-abierto a la misma opacidad que su contraparte
+     cerrada. FASE 4 (26/07/2026): rgb actualizado junto con
+     --color-estado-abierto (#44996F → rgb 68,153,111). */
+  --glow-abierto: rgba(68,153,111,.35);
 
   /* BUG REAL (auditoría Fase 8): --anillo-foco-offset se usaba cuatro
      veces en css/boton.css (.btn:focus-visible, las cuatro variantes)

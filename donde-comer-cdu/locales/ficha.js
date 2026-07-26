@@ -191,8 +191,14 @@
     var estado = calcularEstado(DATA.schedule_rows);
     if (!estado) return;
 
-    var openColor = "#40916c", openBg = "rgba(64,145,108,0.15)";
-    var closedColor = "#c1121f", closedBg = "rgba(193,18,31,0.12)";
+    // FASE 4 (26/07/2026): mismos valores que --color-estado-abierto/
+    // --color-estado-cerrado en css/tokens.css, actualizados juntos
+    // para pasar WCAG AA 4.5:1 (antes 4.34:1 / 2.98:1, no alcanzaban).
+    // Este archivo no puede leer variables CSS desde JS, así que los
+    // valores quedan duplicados a mano — si tokens.css vuelve a
+    // cambiar estos dos colores, hay que actualizar acá también.
+    var openColor = "#44996f", openBg = "rgba(68,153,111,0.15)";
+    var closedColor = "#f04552", closedBg = "rgba(240,69,82,0.12)";
     var neutralColor = "#a0a0a0", neutralBg = "rgba(160,160,160,0.15)";
 
     var color = estado.abierto === null ? neutralColor : (estado.abierto ? openColor : closedColor);
