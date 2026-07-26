@@ -405,3 +405,47 @@ Cambios de este paso:
 Ningún asset SVG de las 7 familias cambia. Ningún plano P0-P3 cambia
 de opacidad, color base o regla de reactividad — esta auditoría tocó
 únicamente el sistema paralelo que vivía fuera de esa arquitectura.
+
+## v1.3 — Fase 8 (continuación): auditoría de conexiones
+
+Dos hallazgos de una auditoría enfocada en conexiones faltantes entre
+módulos que ya existían (no assets nuevos, no familias nuevas):
+
+**1. `js/ambiente-respiracion.js` estaba huérfano.** El módulo (Fase
+4, Cap. 8) tenía su configuración en `ambiente-config.js`
+(`RESPIRACION`) y su arranque ya escrito en `ambiente-orquestador.js`
+(`if (global.AmbienteRespiracion) ...iniciar();`), pero nunca figuraba
+en la lista de `<script>` de `index.html` — nunca se ejecutó en
+producción. Además, la regla que debía consumir su variable
+(`#ambient-resplandor` en `css/ambiente-estilos.css`) tenía la
+opacidad fija en `0.3` en vez del `calc(var(--amb-resplandor-base) +
+var(--amb-respiracion))` que los propios comentarios de
+`ambiente-luz.js` describían como el contrato. Corregidos ambos
+puntos: el módulo ahora se carga (después de `ambiente-ritmo.js`, del
+que depende) y la regla CSS realmente suma las dos variables.
+
+**2. Reactividad a clima real de Corrientes/Partículas de deriva,
+antes bloqueada.** v1.0 y v1.1 registraban esto como pendiente "a
+propósito" por falta de una señal real de clima. Esa señal existe
+desde Fase 6/7 (`js/ambiente-clima.js` vía `functions/weather.js`),
+pero nunca salía del módulo. Se agrega `publicarSenalVientoDOM()`,
+que escribe `--amb-clima-viento` (0|1) sobre `<html>` — mismo patrón
+de "publicar una variable, cero acoplamiento lateral" que ya usa
+`ambiente-respiracion.js` (Cap. 2.3). `ambiente-tokens-movimiento.css`
+consume esa variable vía `calc()` sobre `animation-duration` (nunca
+sobre `transform`, Cap. 9.1 intacto) para acelerar moderadamente la
+Deriva de Corrientes (factor 0.8) y, más sutilmente, la Flotación de
+las cinco Partículas (factor 0.35). Deliberadamente solo viento, no
+lluvia/niebla: es la única señal con una traducción de movimiento
+directa: lluvia y niebla ya tienen su propia expresión visual (los
+overlays de Clima) y forzarlas también acá sería la "excepción
+silenciosa" que el Cap. 8.2 pide evitar.
+
+**No tocado en este paso, a propósito — mismos cuatro pendientes que
+v1.1 ya dejó registrados** (rumbo real de Brújula, posición real de
+Coordenadas/Halos, tipografía de Coordenadas, shift de temperatura por
+Lluvia sobre P1/P2/P3): siguen bloqueados por la misma causa real
+(sin proyección lat/lng expuesta por `motor-mapa.js` / sin sistema de
+tipografía del motor definido), no por falta de señal — inventar una
+sin esa base seguiría siendo la misma excepción silenciosa que ya
+evitó v1.0.

@@ -80,6 +80,15 @@
 <script src="js/ambiente-profundidad.js" defer></script>
 <script src="js/ambiente-gramatica.js" defer></script>
 <script src="js/ambiente-ritmo.js" defer></script>
+<!-- ambiente-respiracion.js — auditoría de conexiones: módulo completo
+     (Fase 4, Cap. 8) que ya tenía su config en ambiente-config.js
+     (RESPIRACION) y su arranque en ambiente-orquestador.js
+     (`if (global.AmbienteRespiracion) global.AmbienteRespiracion.iniciar();`),
+     pero nunca estaba en esta lista de carga: quedaba huérfano y el
+     ciclo de respiración jamás corría. Depende de ambiente-config.js,
+     ambiente-ritmo.js y ambiente-accesibilidad.js (ya cargados arriba);
+     no depende de ambiente-movimiento.js, así que puede ir antes. -->
+<script src="js/ambiente-respiracion.js" defer></script>
 <script src="js/ambiente-movimiento.js" defer></script>
 <script src="js/ambiente-escenas.js" defer></script>
 <script src="js/ambiente-luz.js" defer></script>

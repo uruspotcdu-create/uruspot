@@ -52,7 +52,21 @@
   z-index: 1;
   pointer-events: none;
   mix-blend-mode: screen;
-  opacity: 0.3;
+  /* Auditoría de conexiones: esta regla vivía con un 0.3 fijo pese a
+     que js/ambiente-luz.js (ver su función crearResplandor) publica
+     --amb-resplandor-base a propósito "para que css/ambiente-estilos.css
+     la calcule sumada a --amb-respiracion" — la suma nunca se había
+     escrito acá, así que la respiración (Fase 4, Cap. 8) no tenía
+     ningún efecto visible aunque el módulo llegara a correr. Ambos
+     valores llegan por herencia de variables CSS (--amb-resplandor-base
+     inline en este mismo elemento, --amb-respiracion en <html> desde
+     js/ambiente-respiracion.js) — ninguno de los dos módulos se conoce
+     entre sí (Cap. 2.3), convergen únicamente acá. clamp() evita que
+     el techo/piso de --amb-respiracion (documentado hasta ±TECHO en
+     ambiente-respiracion.js) empuje la opacidad fuera de un rango
+     visualmente razonable si algún valor de --amb-resplandor-base
+     futuro se acerca a 0 o 1. */
+  opacity: clamp(0, calc(var(--amb-resplandor-base, 0.3) + var(--amb-respiracion, 0)), 1);
 }
 
 /* Fase 8: el negro plano (rgba(0,0,0,.3)) no tenía relación con la

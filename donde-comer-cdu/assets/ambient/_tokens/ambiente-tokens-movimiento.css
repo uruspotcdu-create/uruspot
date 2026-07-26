@@ -67,9 +67,22 @@
   to   { transform: translateX(-50%); }
 }
 
+/* Auditoría de conexiones (Fase 8): changelog.md v1.0/v1.1 registraba
+   "reactividad a clima (viento) de Corrientes" como pendiente, a
+   propósito, por falta de una señal real — esa señal ya existe desde
+   Fase 6/7 (js/ambiente-clima.js, functions/weather.js) y ahora se
+   publica como --amb-clima-viento (0|1) sobre <html>. calc() sobre
+   animation-duration (nunca sobre transform directamente, Cap. 9.1
+   sigue intacto): con viento real, el ciclo de 40s baja a 40/1.8≈22s
+   — más rápido, nunca instantáneo ni un efecto nuevo, la misma Deriva
+   de siempre con más energía. Sin viento (valor por defecto 0), el
+   cálculo da exactamente 40s, idéntico al comportamiento previo. */
 .amb-asset--corrientes .corrientes-deriva {
   transform-box: fill-box;
-  animation: amb-deriva 40s linear infinite;
+  animation-name: amb-deriva;
+  animation-duration: calc(40s / (1 + (var(--amb-clima-viento, 0) * 0.8)));
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -221,10 +234,22 @@
   70%  { transform: translate(-2px, 3.1px); }
   100% { transform: translate(0px, 0px); }
 }
+/* Auditoría de conexiones (Fase 8): mismo criterio y misma variable
+   que .corrientes-deriva arriba — changelog.md registraba esta
+   familia junto a Corrientes en el mismo pendiente. Factor más suave
+   acá a propósito (0.35, no 0.8): Partículas es "flotación libre",
+   no una corriente direccional — el viento la agita, no la apura, así
+   que el cambio de ritmo debe notarse menos. Cada mota conserva su
+   propia duración base (Cap. 5: "ninguna respira en sincronía"); el
+   multiplicador de viento es el mismo para las cinco a propósito, es
+   una única señal ambiental compartida, no cinco lecturas distintas. */
 .particulas-mota--a {
   transform-box: fill-box;
   transform-origin: center;
-  animation: amb-flotacion-a 22s ease-in-out infinite;
+  animation-name: amb-flotacion-a;
+  animation-duration: calc(22s / (1 + (var(--amb-clima-viento, 0) * 0.35)));
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 /* Segunda instancia de la progresión 1.0 (mota D del SVG): misma
    firma de trayectoria, duración y demora distintas para que ambas
@@ -232,7 +257,10 @@
 .particulas-mota--a2 {
   transform-box: fill-box;
   transform-origin: center;
-  animation: amb-flotacion-a 27s ease-in-out infinite;
+  animation-name: amb-flotacion-a;
+  animation-duration: calc(27s / (1 + (var(--amb-clima-viento, 0) * 0.35)));
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
   animation-delay: -9s;
 }
 
@@ -245,7 +273,10 @@
 .particulas-mota--b {
   transform-box: fill-box;
   transform-origin: center;
-  animation: amb-flotacion-b 30s ease-in-out infinite;
+  animation-name: amb-flotacion-b;
+  animation-duration: calc(30s / (1 + (var(--amb-clima-viento, 0) * 0.35)));
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 
 @keyframes amb-flotacion-c {
@@ -257,7 +288,10 @@
 .particulas-mota--c {
   transform-box: fill-box;
   transform-origin: center;
-  animation: amb-flotacion-c 25s ease-in-out infinite;
+  animation-name: amb-flotacion-c;
+  animation-duration: calc(25s / (1 + (var(--amb-clima-viento, 0) * 0.35)));
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 
 /* Ruptura del 20% (Cap. 1.4): además de la escala no uniforme ya
@@ -273,7 +307,10 @@
 .particulas-mota--ruptura {
   transform-box: fill-box;
   transform-origin: center;
-  animation: amb-flotacion-ruptura 34s ease-in-out infinite;
+  animation-name: amb-flotacion-ruptura;
+  animation-duration: calc(34s / (1 + (var(--amb-clima-viento, 0) * 0.35)));
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 
 /* Halos de posición (Fase 3, Paso 9, roadmap Cap. 12 orden 8) —

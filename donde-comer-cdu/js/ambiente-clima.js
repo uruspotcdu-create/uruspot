@@ -159,9 +159,37 @@
     climaRealNieblaActiva = codigo === CODIGO_NIEBLA;
     climaRealVientoActivo = typeof vientoKmh === 'number' && vientoKmh >= UMBRAL_VIENTO_KMH;
 
+    publicarSenalVientoDOM();
+
     // Re-aplica contra la escena vigente (si el clima está deshabilitado
     // para esta escena, alCambiarParametros ya lo apaga todo igual).
     if (parametrosActuales) alCambiarParametros({ parametros: parametrosActuales });
+  }
+
+  // Auditoría de conexiones (Fase 8): changelog.md v1.0 registraba
+  // "Reactividad a clima (lluvia/viento) de Corrientes y Partículas
+  // de deriva" como pendiente, a propósito, por "sin señal real de
+  // clima en la app". Esa señal ya existe acá desde Fase 6/7 — solo
+  // nunca salía de este módulo. Mismo patrón exacto que
+  // ambiente-respiracion.js (Cap. 2.3: "publica un valor que
+  // cualquier CSS puede leer", nunca llama directo a otro subsistema
+  // de Contenido Visual): se escribe una única variable numérica
+  // --amb-clima-viento (0 o 1) sobre <html>, que
+  // assets/ambient/_tokens/ambiente-tokens-movimiento.css usa para
+  // acelerar la Deriva de Corrientes y la Flotación de Partículas —
+  // ninguna de las dos familias necesita conocer a este módulo.
+  // Deliberadamente solo viento: es la única de las tres señales de
+  // clima real con una traducción de movimiento obvia y no forzada
+  // (una corriente/partícula que "se apura" con viento real; lluvia y
+  // niebla ya tienen su propia traducción visual — los overlays — y
+  // forzarlas también sobre Corrientes/Partículas sería inventar una
+  // asociación que el Cap. 8.2 pide evitar).
+  function publicarSenalVientoDOM() {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    document.documentElement.style.setProperty(
+      '--amb-clima-viento',
+      climaRealVientoActivo ? '1' : '0'
+    );
   }
 
   // Fetch con timeout corto: una falla o demora de la API externa
@@ -266,6 +294,14 @@
       // Remover contenedor
       if (contenedor && contenedor.parentNode) {
         contenedor.parentNode.removeChild(contenedor);
+      }
+
+      // Auditoría de conexiones: limpiar también la señal publicada,
+      // para que Corrientes/Partículas no queden "aceleradas" por un
+      // viento que ya nadie está midiendo.
+      climaRealVientoActivo = false;
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.style.removeProperty('--amb-clima-viento');
       }
     }
   };
