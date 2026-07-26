@@ -875,7 +875,16 @@
             direccion: null,
             telefono: null,
             descripcion: null,
-            estado: 'verificado',
+            // Default seguro (Fase 3 del roadmap de mejora, 2026-07-26):
+            // antes decía 'verificado'. Un lugar sin entrada en
+            // lugares-estado.json (porque split_dataset.py filtra los que
+            // no tienen estado_verificacion) se quedaba con este default
+            // para siempre y se mostraba como verificado sin ningún dato
+            // que lo respalde. 'pendiente' es el estado correcto hasta que
+            // lugares-estado.json confirme lo contrario (ver
+            // cargarDetallesEnSegundoPlano más abajo, que sí sobreescribe
+            // a 'verificado' cuando corresponde).
+            estado: 'pendiente',
             rating: (typeof l.rating === 'number') ? l.rating : null,
             ratingCount: (typeof l.rating_count === 'number') ? l.rating_count : null
           };

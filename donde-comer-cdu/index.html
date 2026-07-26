@@ -2544,6 +2544,54 @@
      `node js/run-tests.js` corre las tres suites y confirma exit code
      0: 202/202 (motor-test.js), 52/52 assets (smoke-tests.js), 0 ids
      duplicados y orden de carga correcto (contract-tests.js).
+     ═══════════════════════════════════════════════════════════════════════
+
+     17. FASE 3 — Calidad de datos: 306 lugares sin estado_verificacion
+     (26/07/2026)
+
+     Hallazgo previo a la decisión editorial: 306 de 1468 registros de
+     `lugares-mapa.json` no tenían `estado_verificacion`. `split_dataset.py`
+     ya filtraba correctamente esos casos al generar `lugares-estado.json`
+     (build_estado devuelve null y se descarta) — pero eso tenía un efecto
+     colateral no detectado hasta ahora: en `js/app.js`, cada lugar arranca
+     con `estado: 'verificado'` por defecto (línea ~878) al cargar
+     `lugares-core.json`, y solo se corrige a 'pendiente' si aparece en
+     `lugares-estado.json`. Como esos 306 nunca aparecían ahí, se quedaban
+     con el default para siempre — se mostraban como verificados sin
+     ningún dato real que lo respalde.
+
+     Verificación de los 306: 303 de 306 tienen `place_id` de Google y
+     coordenadas válidas (no son basura ni duplicados: son lugares reales
+     que nunca pasaron por una auditoría). Dispersos en 52 tramos no
+     contiguos a lo largo de todo el rango de ids (URU-00197 a URU-01345),
+     concentrados sobre todo en `compras` (98) y `oficios_tecnicos` (81)
+     pero presentes en casi todos los grupos — deuda acumulada de varias
+     tandas de carga, no un lote reciente único.
+
+     CORREGIDO:
+     · `js/app.js` — default de `estado` cambiado de `'verificado'` a
+       `'pendiente'`. Un lugar sin dato de verificación ahora se muestra
+       como pendiente hasta que `lugares-estado.json` confirme lo
+       contrario, en vez de mostrarse como verificado por omisión.
+     · `lugares-mapa.json` — los 306 registros sin `estado_verificacion`
+       quedaron marcados explícitamente como `"Pendiente de verificación"`
+       (decisión editorial: visibilidad honesta del estado real en vez de
+       dejarlos en null).
+     · `lugares-core.json` / `lugares-estado.json` regenerados con
+       `python3 split_dataset.py` a partir del `lugares-mapa.json`
+       actualizado. `lugares-estado.json` pasa de cubrir 1162 a cubrir los
+       1468 registros completos.
+
+     Invariantes verificadas sin cambios: `node js/run-tests.js` → exit 0,
+     202/202 + 52/52 + contrato OK. `lugares-detalles.json` no cambió
+     (no depende de `estado_verificacion`). El comportamiento de
+     `motor-exposicion.js` no se tocó — su lectura de rechazos/afinidad es
+     independiente de este campo.
+
+     Pendiente real de negocio (no técnico, fuera de alcance de esta
+     pasada): 306 lugares del catálogo necesitan una auditoría real
+     (confirmar horario, actividad, teléfono) para pasar de "pendiente" a
+     "verificado". Ese trabajo de campo/auditoría web queda abierto.
      ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>
