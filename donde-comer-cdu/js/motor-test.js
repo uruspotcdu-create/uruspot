@@ -894,6 +894,89 @@ function lugar(id, grupo, lat, lng) {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════
+   Fase 5 — tests nuevos (auditoría FASE5_AUDITORIA_motor-exposicion),
+   uno por cada hallazgo de §2/§3 que no tenía cobertura todavía.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 68. §2.1/§6.1: descansando() con ultimaVez corrupto no lanza y no hace "descansar" en falso ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  e.exposicion.L0 = { ultimaVez: 'ayer', vecesMostrado: 1 }; // corrupto a mano, tipo incorrecto
+  var registro = [lugar('L0', 'gastronomia')];
+  var lanzo = false, recorte;
+  try { recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia'); } catch (err) { lanzo = true; }
+  assert('descansando() con ultimaVez corrupto (string) no lanza excepción', lanzo === false);
+  assert('descansando() con ultimaVez corrupto trata al lugar como NO descansando (aparece en el recorte)',
+    recorte.some(function (l) { return l.id === 'L0'; }));
+})();
+
+/* ── 69. §2.2/§6.3: recortePorIniciativaPropiaExplicado con ahoraMs fijo da confianza estable entre llamadas ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  for (var i = 0; i < 3; i++) e = PLANO.aplicarAccion(e, 'aceptar', { lugarId: 'A' + i, grupo: 'cafeterias' });
+  var registro = [lugar('X', 'cafeterias'), lugar('Y', 'bares')];
+  var contexto = { ahoraMs: 12345 };
+  var r1 = EXPO.recortePorIniciativaPropiaExplicado(registro, e, 'guia', contexto);
+  var r2 = EXPO.recortePorIniciativaPropiaExplicado(registro, e, 'guia', contexto);
+  assert('confianza es estable entre dos llamadas idénticas con el mismo ahoraMs simulado',
+    r1.confianza === r2.confianza);
+  assert('confianza coincide con PLANO.nivelConfianza calculado con el mismo ahoraMs',
+    r1.confianza === PLANO.nivelConfianza(e, 12345));
+})();
+
+/* ── 70. §2.3/§6.2: el umbral de proximidad de razones vive en config y se respeta al límite exacto ── */
+(function () {
+  var umbral = CFG.exposicion.scoring.explicacion.umbralProximidadRazon;
+  var e = PLANO.estadoInicial('cdu');
+  // Lugar a exactamente distanciaReferenciaMetros * (1 - umbral) metros de la ubicación:
+  // proximidad = 1 - d/ref = umbral exacto.
+  var ref = CFG.exposicion.scoring.proximidad.distanciaReferenciaMetros;
+  var metrosParaUmbral = ref * (1 - umbral);
+  var gradosLat = metrosParaUmbral / 111190; // ~ metros por grado de latitud
+  var ubicacion = { lat: -32.48, lng: -58.24 };
+  var lugarEnUmbral = lugar('EnUmbral', 'gastronomia', -32.48 - gradosLat, -58.24);
+  var scoreInfo = EXPO.calcularScoreLugar(lugarEnUmbral, e, { ubicacion: ubicacion });
+  assert('un lugar con proximidad justo en el umbral configurado queda dentro de tolerancia numérica',
+    Math.abs(scoreInfo.señales.proximidad - umbral) < 0.01);
+})();
+
+/* ── 71. §3.3/§6.4: vecesMostrado negativo o NaN no produce un score de frescura fuera de [0,1] ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  e.exposicion.Neg = { ultimaVez: null, vecesMostrado: -5 };
+  e.exposicion.Nan = { ultimaVez: null, vecesMostrado: NaN };
+  var scoreNeg = EXPO.calcularScoreLugar(lugar('Neg', 'gastronomia'), e, {});
+  var scoreNan = EXPO.calcularScoreLugar(lugar('Nan', 'gastronomia'), e, {});
+  assert('vecesMostrado negativo se sanea a "nunca mostrado" (frescura = 1)', scoreNeg.señales.frescura === 1);
+  assert('vecesMostrado NaN se sanea a "nunca mostrado" (frescura = 1, no NaN)', scoreNan.señales.frescura === 1);
+})();
+
+/* ── 72. §3.2/§6 punto 4: distanciaReferenciaMetros en 0 no produce NaN en el score final ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var refOriginal = CFG.exposicion.scoring.proximidad.distanciaReferenciaMetros;
+  CFG.exposicion.scoring.proximidad.distanciaReferenciaMetros = 0; // config pathológica
+  var scoreInfo;
+  try {
+    scoreInfo = EXPO.calcularScoreLugar(lugar('Z', 'gastronomia', -32.48, -58.24), e, { ubicacion: { lat: -32.48, lng: -58.24 } });
+  } finally {
+    CFG.exposicion.scoring.proximidad.distanciaReferenciaMetros = refOriginal; // restaurar config real
+  }
+  assert('distanciaReferenciaMetros=0 no deja NaN en el score final', isFinite(scoreInfo.score));
+  assert('distanciaReferenciaMetros=0 trata la proximidad como señal ausente, no como NaN',
+    scoreInfo.señales.proximidad === undefined);
+})();
+
+/* ── 73. §3.1: ids duplicados en el registro — comportamiento documentado, no corregido acá ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var registro = [lugar('DUP', 'gastronomia'), lugar('DUP', 'bares')]; // mismo id, dos objetos distintos
+  var lanzo = false, recorte;
+  try { recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia'); } catch (err) { lanzo = true; }
+  assert('ids duplicados en el registro no hacen lanzar al motor (comportamiento conocido, no corregido)', lanzo === false);
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
    BLOQUE 13 — NUEVO: motor-mapa.js, robustez agregada en esta pasada
    (validación real de coordenadas, deduplicación por id, entradas
    no-array, herramienta de diagnóstico).

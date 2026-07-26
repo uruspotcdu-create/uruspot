@@ -543,11 +543,9 @@
 
   /**
    * Rubros con afinidad positiva estable hoy — la señal simétrica de
-   * `gruposAEvitar()`. No tiene consumidor todavía en
-   * motor-exposicion.js (fuera de alcance de esta pasada); queda
-   * expuesta públicamente para que ese módulo pueda usarla el día que
-   * se decida priorizar por afinidad, sin que motor-plano.js necesite
-   * otro cambio de superficie cuando eso pase.
+   * `gruposAEvitar()`. Consumida hoy por motor-exposicion.js en
+   * `recortePorIniciativaPropia()` y `recortePorIniciativaPropiaExplicado()`
+   * (construyendo `afinesSet` para `scoreAfinidad`).
    * @param {object} estado
    * @param {number} ahoraMs
    * @returns {string[]}
@@ -882,10 +880,14 @@
    * sin inventar ningún dato — hoy no tiene consumidor en app.js, se
    * expone lista para cuando haga falta.
    * @param {object} estado
+   * @param {number} [ahoraMs] — opcional, default Date.now(). Permite
+   *   que un llamador que ya simula "ahora" (tests, depuración de "qué
+   *   habría pasado el día X") mantenga coherencia interna en vez de
+   *   mezclar un ahora simulado con el reloj real de la máquina.
    * @returns {'bajo'|'medio'|'alto'}
    */
-  function nivelConfianza(estado) {
-    var ahora = Date.now();
+  function nivelConfianza(estado, ahoraMs) {
+    var ahora = (typeof ahoraMs === 'number' && isFinite(ahoraMs)) ? ahoraMs : Date.now();
     var gruposConSenal = gruposAEvitar(estado, ahora).length + gruposAfines(estado, ahora).length;
     if (estado.aperturas >= CFG.madurez.umbralAperturas.complice && gruposConSenal >= 2) return 'alto';
     if (estado.aperturas >= CFG.madurez.umbralAperturas.conocido || gruposConSenal >= 1) return 'medio';

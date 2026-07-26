@@ -144,7 +144,7 @@
 
   function descansando(estado, lugarId, ahoraMs) {
     var reg = estado.exposicion[lugarId];
-    if (!reg || !reg.ultimaVez) return false;
+    if (!reg || typeof reg.ultimaVez !== 'number') return false;
     var descansoMs = CFG.exposicion.descansoHoras * 3600 * 1000;
     return (ahoraMs - reg.ultimaVez) < descansoMs;
   }
@@ -170,6 +170,7 @@
   function scoreProximidad(lugar, ubicacion, distanciaReferenciaMetros) {
     if (!ubicacion || typeof ubicacion.lat !== 'number' || typeof ubicacion.lng !== 'number') return null;
     if (typeof lugar.lat !== 'number' || typeof lugar.lng !== 'number') return null;
+    if (typeof distanciaReferenciaMetros !== 'number' || distanciaReferenciaMetros <= 0) return null;
     var d = distanciaMetros(ubicacion.lat, ubicacion.lng, lugar.lat, lugar.lng);
     return clamp01(1 - d / distanciaReferenciaMetros);
   }
@@ -182,7 +183,9 @@
   // quedaron).
   function scoreFrescura(lugar, estado, decaimientoPorVez) {
     var reg = estado.exposicion && estado.exposicion[lugar.id];
-    var vecesMostrado = (reg && typeof reg.vecesMostrado === 'number') ? reg.vecesMostrado : 0;
+    var vecesMostrado = (reg && typeof reg.vecesMostrado === 'number' && reg.vecesMostrado > 0)
+      ? reg.vecesMostrado
+      : 0;
     if (vecesMostrado <= 0) return 1;
     return clamp01(1 / (1 + vecesMostrado * decaimientoPorVez));
   }
@@ -478,7 +481,7 @@
           razones: razonesDesdeSeñales(p.señales)
         };
       }),
-      confianza: PLANO.nivelConfianza(estado),
+      confianza: PLANO.nivelConfianza(estado, ahora),
       tamanoObjetivo: tamano,
       candidatosEvaluados: candidatos.length
     };
@@ -489,7 +492,8 @@
   function razonesDesdeSeñales(señales) {
     var razones = [];
     if (señales.afinidad >= 1) razones.push('te interesaron lugares similares antes');
-    if (typeof señales.proximidad === 'number' && señales.proximidad >= 0.6) razones.push('está cerca tuyo');
+    var umbralProximidad = CFG.exposicion.scoring.explicacion.umbralProximidadRazon;
+    if (typeof señales.proximidad === 'number' && señales.proximidad >= umbralProximidad) razones.push('está cerca tuyo');
     if (señales.frescura >= 1) razones.push('todavía no te lo mostramos');
     if (typeof señales.contexto === 'number') razones.push('encaja con el clima de hoy');
     if (!razones.length) razones.push('parte de la selección de hoy para vos');

@@ -199,6 +199,14 @@
           // Con muy pocos candidatos no tiene sentido reservar cupo de
           // exploración — se prioriza mostrar lo que hay.
         },
+        explicacion: {
+          umbralProximidadRazon: 0.6
+          // A partir de qué score de proximidad vale la pena mencionar
+          // "está cerca tuyo" como razón en recortePorIniciativaPropiaExplicado().
+          // Puro umbral de calibración editorial (no un techo matemático,
+          // a diferencia de los ">= 1" de afinidad/frescura) — por eso
+          // vive acá y no hardcodeado en motor-exposicion.js.
+        },
         afinidadClimaPorGrupo: {}
         // Vacío A PROPÓSITO. Mapear qué rubro conviene más con qué
         // condición climática ("lluvia" favorece gastronomía con techo,
