@@ -5,8 +5,8 @@
 // suites reales del repo y agrega el resultado:
 //
 //   1. motor-test.js      — lógica de negocio pura (202/202 conocido)
-//   2. smoke-test.js      — integridad de assets referenciados (Fase 0)
-//   3. contract-test.js   — contrato DOM↔JS + orden de carga (Fase 2)
+//   2. smoke-tests.js     — integridad de assets referenciados (Fase 0)
+//   3. contract-tests.js  — contrato DOM↔JS + orden de carga (Fase 2)
 //
 // Uso: `node js/run-tests.js`
 // Sale con código 0 solo si las tres suites pasan.
@@ -16,7 +16,7 @@
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const SUITES = ['motor-test.js', 'smoke-test.js', 'contract-test.js'];
+const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js'];
 
 let algunoFallo = false;
 

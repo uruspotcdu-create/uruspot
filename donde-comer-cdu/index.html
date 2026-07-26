@@ -96,9 +96,10 @@
      sin tokenizar) retirado en Fase 8 — ver css/ambiente-estilos.css y
      js/ambiente-orquestador.js. La Familia 6 "Partículas de deriva"
      (js/ambiente-particulas-deriva.js, ya cargado más abajo) cubre el
-     mismo rol dentro del sistema visual documentado. El archivo sigue
-     en el repo, sin referenciarse, por si hace falta revisar su
-     historia. -->
+     mismo rol dentro del sistema visual documentado. El archivo se
+     eliminó físicamente del repo en la Fase 1 del roadmap de mejora
+     (2026-07-26), tras confirmar cero referencias funcionales; su
+     historia queda en este comentario y en el control de versiones. -->
 <script src="js/ambiente-clima.js" defer></script>
 <script src="js/ambiente-interaccion.js" defer></script>
 <script src="js/ambiente-planos.js" defer></script>
@@ -2471,19 +2472,31 @@
      esa auditoría.
 
      FASE 0 — Red de seguridad (nuevo, sin dependencias externas):
-     · `js/smoke-test.js` — verifica que todo asset local referenciado
+     · `js/smoke-tests.js` — verifica que todo asset local referenciado
        en este HTML (`<script src="js/...">`, `<link href="css/...">`)
        exista físicamente en disco. Este test, de haber existido
        antes, habría atrapado automáticamente la referencia rota a
        `js/lazy-css-editorial.js` el día que se rompió.
      · `js/run-tests.js` — punto de entrada único que corre
-       `motor-test.js` + `smoke-test.js` + `contract-test.js` en
-       secuencia y agrega el resultado.
+       `motor-test.js` + `smoke-tests.js` + `contract-tests.js` en
+       secuencia y agrega el resultado. CORRECCIÓN (26/07/2026, mismo
+       día): el commit original de este archivo apuntaba a los nombres
+       `smoke-test.js`/`contract-test.js` (singular), que no existen
+       — el runner fallaba con `MODULE_NOT_FOUND` antes de ejecutar
+       una sola suite. Se corrigió a los nombres reales
+       (`smoke-tests.js`/`contract-tests.js`, plural) y se verificó
+       `node js/run-tests.js` → exit code 0, 3/3 suites.
 
      FASE 1 — Limpieza de código muerto ya confirmado (sin ambigüedad,
      verificado con grep exhaustivo antes de borrar — ningún `<script
      src>`/`<link href>` real los referenciaba, solo comentarios
-     históricos):
+     históricos). NOTA DE PRECISIÓN: un commit anterior de este mismo
+     archivo ("Update index.html", 26/07/2026) ya afirmaba que estos 5
+     archivos estaban "ELIMINADOS", pero esa fue solo una actualización
+     de documentación — los archivos seguían físicamente presentes en
+     el repo. El borrado real (`git rm`) se ejecutó recién en esta
+     pasada, después de repetir la búsqueda exhaustiva de referencias
+     y confirmar cero consumidores funcionales:
      · ELIMINADOS: `js/ambiente-estilos.js`, `js/ambiente-particulas.js`,
        `js/ambiente-senales.js` — los 3 módulos del Ambient Engine que
        existían en el repo pero nunca se cargaban (su retiro ya estaba
@@ -2510,7 +2523,7 @@
      FASE 2 — Test de contrato DOM↔JS (nuevo, sin navegador disponible
      en este entorno — ver limitación explícita dentro del propio
      archivo):
-     · `js/contract-test.js` — lee `REQUIRED_DOM_IDS`/`OPTIONAL_DOM_IDS`
+     · `js/contract-tests.js` — lee `REQUIRED_DOM_IDS`/`OPTIONAL_DOM_IDS`
        directamente de `js/app.js` (no los duplica a mano) y verifica
        que cada id requerido exista en este HTML, que no haya ids
        duplicados, y que el orden real de `<script defer>` respete las
@@ -2526,8 +2539,11 @@
      `<script defer>` de negocio y del Ambient Engine activo NO
      cambió — solo se acortó la lista total de `<script>` en 1 (la
      línea rota eliminada) y el Ambient Engine perdió 3 archivos que
-     de todos modos nunca se cargaban. `node js/run-tests.js` corre las
-     tres suites y confirma 0 fallos después de este cambio.
+     de todos modos nunca se cargaban. Tras el fix del typo en
+     `run-tests.js` y el borrado real de los 5 archivos de Fase 1,
+     `node js/run-tests.js` corre las tres suites y confirma exit code
+     0: 202/202 (motor-test.js), 52/52 assets (smoke-tests.js), 0 ids
+     duplicados y orden de carga correcto (contract-tests.js).
      ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>
