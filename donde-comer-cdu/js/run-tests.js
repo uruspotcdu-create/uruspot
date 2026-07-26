@@ -1,0 +1,44 @@
+// js/run-tests.js — URU SPOT
+// ---------------------------------------------------------------------
+// Punto de entrada único de la red de seguridad (Fases 0-2 del
+// roadmap de mejora, 2026-07-26). Corre, en este orden, las tres
+// suites reales del repo y agrega el resultado:
+//
+//   1. motor-test.js      — lógica de negocio pura (202/202 conocido)
+//   2. smoke-test.js      — integridad de assets referenciados (Fase 0)
+//   3. contract-test.js   — contrato DOM↔JS + orden de carga (Fase 2)
+//
+// Uso: `node js/run-tests.js`
+// Sale con código 0 solo si las tres suites pasan.
+
+'use strict';
+
+const { spawnSync } = require('child_process');
+const path = require('path');
+
+const SUITES = ['motor-test.js', 'smoke-test.js', 'contract-test.js'];
+
+let algunoFallo = false;
+
+SUITES.forEach((suite, i) => {
+  const ruta = path.join(__dirname, suite);
+  console.log('═'.repeat(70));
+  console.log(`(${i + 1}/${SUITES.length}) node js/${suite}`);
+  console.log('═'.repeat(70));
+
+  const res = spawnSync(process.execPath, [ruta], { stdio: 'inherit' });
+
+  if (res.status !== 0) {
+    algunoFallo = true;
+    console.error(`\n✗ ${suite} salió con código ${res.status}`);
+  }
+  console.log('');
+});
+
+console.log('═'.repeat(70));
+if (algunoFallo) {
+  console.error('RESULTADO FINAL: al menos una suite falló. Ver detalle arriba.');
+  process.exit(1);
+}
+console.log('RESULTADO FINAL: las 3 suites pasaron.');
+process.exit(0);
