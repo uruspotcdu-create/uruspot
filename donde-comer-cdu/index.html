@@ -226,7 +226,6 @@
      <noscript> abajo cubre el caso sin JS, mismo criterio que el
      resto del documento (§7). -->
 <link rel="preload" href="css/contenido-editorial.css" as="style">
-<script src="js/lazy-css-editorial.js" defer></script>
 <noscript><link rel="stylesheet" href="css/contenido-editorial.css"></noscript>
 
 <!-- La deuda de §10 ("migrar a css/boton.css") queda saldada en esta
@@ -2459,6 +2458,76 @@
      cantidad (WP0 no agrega ningún módulo nuevo — eso es WP2/F0, el
      siguiente Work Package, pendiente de la confirmación de alcance
      de WP1), y el contenido editorial visible no cambió en absoluto.
+
+     16. AUDITORÍA 6ª PASADA — Fases 0-2 del roadmap de mejora (26/07/2026)
+
+     Punto de partida: una auditoría de precisión externa (ver
+     REPO_CONTEXT_MASTER.md / REPO_FILE_CATALOG.md /
+     REPO_ARCHITECTURE_MAP.md) verificó línea por línea este
+     repositorio y confirmó 6 hallazgos, dos de ellos con corrección
+     de código real pendiente (los otros 4 eran solo de documentación
+     y ya se corrigieron en esos tres archivos, sin tocar código).
+     Esta pasada ejecuta las Fases 0, 1 y 2 del roadmap derivado de
+     esa auditoría.
+
+     FASE 0 — Red de seguridad (nuevo, sin dependencias externas):
+     · `js/smoke-test.js` — verifica que todo asset local referenciado
+       en este HTML (`<script src="js/...">`, `<link href="css/...">`)
+       exista físicamente en disco. Este test, de haber existido
+       antes, habría atrapado automáticamente la referencia rota a
+       `js/lazy-css-editorial.js` el día que se rompió.
+     · `js/run-tests.js` — punto de entrada único que corre
+       `motor-test.js` + `smoke-test.js` + `contract-test.js` en
+       secuencia y agrega el resultado.
+
+     FASE 1 — Limpieza de código muerto ya confirmado (sin ambigüedad,
+     verificado con grep exhaustivo antes de borrar — ningún `<script
+     src>`/`<link href>` real los referenciaba, solo comentarios
+     históricos):
+     · ELIMINADOS: `js/ambiente-estilos.js`, `js/ambiente-particulas.js`,
+       `js/ambiente-senales.js` — los 3 módulos del Ambient Engine que
+       existían en el repo pero nunca se cargaban (su retiro ya estaba
+       documentado dentro de los propios archivos y en comentarios de
+       `ambiente-orquestador.js`/`ambiente-config.js`/etc.). El Ambient
+       Engine pasa de 30 archivos (27 activos) a **27 archivos, los 27
+       activos** — ya no quedan huérfanos físicos en el repo.
+     · ELIMINADOS: `css/code.css` (huérfano, ya documentado como
+       "eliminado" en la sección 15 de arriba desde la 5ª auditoría,
+       pero seguía presente físicamente — ahora sí se eliminó de
+       verdad) y `css/lazy-editorial.css` (huérfano, cero referencias).
+     · CORREGIDO en ESTE archivo: se quitó la línea
+       `<script src="js/lazy-css-editorial.js" defer></script>`
+       (línea ~229 antes de este cambio) — el archivo nunca existió en
+       el repositorio, así que esa etiqueta resolvía en un 404 en cada
+       carga de página. Decisión tomada: eliminar la referencia rota
+       en vez de crear un archivo nuevo cuyo contenido/intención
+       original no se pudo determinar con certeza — no se encontró
+       ningún otro módulo que dependiera de que ese script expusiera
+       algo. Si en el futuro se decide que el mecanismo de carga
+       perezosa de CSS editorial sigue siendo necesario, debe
+       diseñarse como una pieza nueva, no reconstruirse a ciegas.
+
+     FASE 2 — Test de contrato DOM↔JS (nuevo, sin navegador disponible
+     en este entorno — ver limitación explícita dentro del propio
+     archivo):
+     · `js/contract-test.js` — lee `REQUIRED_DOM_IDS`/`OPTIONAL_DOM_IDS`
+       directamente de `js/app.js` (no los duplica a mano) y verifica
+       que cada id requerido exista en este HTML, que no haya ids
+       duplicados, y que el orden real de `<script defer>` respete las
+       dependencias documentadas en la sección 5 de arriba (motor-config
+       antes de motor-plano/motor-exposicion/motor-mapa, proyeccion
+       antes de motor-render, app.js al final, ambiente-orquestador
+       antes de app.js y después de los demás ambiente-*.js).
+
+     Invariantes verificadas sin cambios: `node js/motor-test.js` sigue
+     en 202/202 (línea base ya corregida en la 6ª pasada de la
+     auditoría de precisión externa, no en esta). Ningún `id` de la
+     tabla de contrato de la sección 3 cambió. El orden relativo de los
+     `<script defer>` de negocio y del Ambient Engine activo NO
+     cambió — solo se acortó la lista total de `<script>` en 1 (la
+     línea rota eliminada) y el Ambient Engine perdió 3 archivos que
+     de todos modos nunca se cargaban. `node js/run-tests.js` corre las
+     tres suites y confirma 0 fallos después de este cambio.
      ═══════════════════════════════════════════════════════════════════════ -->
 
 </body>
