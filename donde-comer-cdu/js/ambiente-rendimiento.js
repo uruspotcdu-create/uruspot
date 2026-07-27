@@ -158,16 +158,23 @@
     }
   }
 
+  // Fase 6 (auditoría §1): antes, esta función se reprogramaba a sí
+  // misma aun con la pestaña oculta (descartaba la ventana pero
+  // seguía pidiendo frames). Ahora el rAF se cancela por completo
+  // mientras está oculta y se reanuda desde un listener de
+  // visibilidad — cumple de forma literal el propio Cap. 9.2 citado
+  // en la cabecera del archivo ("no debe existir ciclo de animación
+  // ejecutándose en segundo plano"), sin cambiar el criterio ya
+  // existente de descartar la ventana en curso al ocultarse.
+  var pausadoPorVisibilidad = false;
+
   function pasoFrame(marcaTiempo) {
-    // Cap. 9.2: ningún ciclo de animación debe seguir corriendo en
-    // segundo plano. Si la pestaña deja de ser visible a mitad de
-    // ventana, se descarta la ventana en curso en lugar de
-    // computarla con un hueco de tiempo real oculto.
     if (!pestanaVisible()) {
       ultimoFrame = null;
       inicioVentana = null;
       framesEnVentana = 0;
-      rafId = global.requestAnimationFrame(pasoFrame);
+      pausadoPorVisibilidad = true;
+      rafId = null; // detenido, no reprogramado
       return;
     }
 
@@ -193,6 +200,15 @@
 
     rafId = global.requestAnimationFrame(pasoFrame);
   }
+
+  function alCambiarVisibilidad() {
+    if (pestanaVisible() && pausadoPorVisibilidad && rafId === null) {
+      pausadoPorVisibilidad = false;
+      rafId = global.requestAnimationFrame(pasoFrame);
+    }
+  }
+
+  var listenerRegistrado = false;
 
   var api = {
     get nivelFidelidad() { return nivelActual; },
@@ -223,6 +239,14 @@
       var a = assets();
       if (a) aplicarTamanoCache(nivelActual); // aplica el punto de partida ya al arrancar
       rafId = global.requestAnimationFrame(pasoFrame);
+
+      // Reanudación tras pausa por 2º plano (registrado una sola vez;
+      // una segunda llamada a iniciar() ya vuelve por el guard de
+      // arriba antes de llegar acá).
+      if (!listenerRegistrado && typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        listenerRegistrado = true;
+        document.addEventListener('visibilitychange', alCambiarVisibilidad);
+      }
     },
 
     // Solo para pruebas / apagado explícito (por ejemplo, la app

@@ -159,17 +159,28 @@
     document.documentElement.style.setProperty('--amb-respiracion', valor.toFixed(4));
   }
 
-  function tick(timestamp) {
-    rafId = global.requestAnimationFrame(tick);
+  // Fase 6 (auditoría §1): antes, este tick se reprogramaba a sí mismo
+  // incluso con la pestaña oculta (solo saltaba el cálculo) — el rAF
+  // seguía "vivo", apoyado únicamente en que los navegadores lo
+  // regulan a ~1/s en 2º plano. Cap. 9.2 en la cabecera de este
+  // archivo dice explícitamente "no debe existir ciclo de animación
+  // ejecutándose en segundo plano": ahora se cumple de forma literal
+  // — cuando se oculta, este tick NO vuelve a pedir el próximo frame;
+  // el ciclo queda cancelado por completo hasta que un listener de
+  // visibilitychange lo reanuda. No se acumula fase mientras está
+  // pausado (mismo criterio que ya tenía este archivo antes de este
+  // cambio), así que al volver no hay salto visual.
+  var pausadoPorVisibilidad = false;
 
+  function tick(timestamp) {
     if (!pestanaVisible()) {
-      // Cap. 9.2: no se anima nada en 2º plano. No se acumula fase
-      // acá a propósito — al volver a primer plano se retoma desde el
-      // mismo punto del ciclo en vez de "recuperar" de golpe el tiempo
-      // que estuvo oculta.
       ultimoTimestamp = null;
+      pausadoPorVisibilidad = true;
+      rafId = null; // el ciclo queda detenido, no reprogramado
       return;
     }
+
+    rafId = global.requestAnimationFrame(tick);
 
     if (ultimoTimestamp === null) ultimoTimestamp = timestamp;
     faseAcumuladaMs += (timestamp - ultimoTimestamp);
@@ -177,6 +188,15 @@
 
     aplicar();
   }
+
+  function alCambiarVisibilidad() {
+    if (pestanaVisible() && pausadoPorVisibilidad && rafId === null) {
+      pausadoPorVisibilidad = false;
+      rafId = global.requestAnimationFrame(tick);
+    }
+  }
+
+  var listenerRegistrado = false;
 
   var api = {
     // Diagnóstico de solo lectura — ningún otro módulo debería
@@ -188,6 +208,25 @@
       if (rafId !== null) return; // idempotente
       periodoMs = calcularPeriodoMs();
       rafId = global.requestAnimationFrame(tick);
+
+      // Reanudación: preferimos el evento propio de AmbienteMovimiento
+      // (Cap. 2.3 — "ningún módulo de Contenido Visual necesita su
+      // propio listener de visibilidad"), y solo si no está cargado
+      // caemos a un listener directo de document (mismo respaldo que
+      // ya usa pestanaVisible() arriba). En ambos casos, registrado
+      // una sola vez — una segunda llamada a iniciar() ya vuelve por
+      // el guard de arriba.
+      if (!listenerRegistrado) {
+        listenerRegistrado = true;
+        var m = movimiento();
+        if (m && typeof m.suscribir === 'function') {
+          m.suscribir(function (evento) {
+            if (evento.motivo === 'visibilidad') alCambiarVisibilidad();
+          });
+        } else if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+          document.addEventListener('visibilitychange', alCambiarVisibilidad);
+        }
+      }
     }
   };
 

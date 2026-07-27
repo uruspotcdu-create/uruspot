@@ -245,8 +245,15 @@
     },
 
     // Inicializar el subsistema
+    // Fase 6 (auditoría §1/§3): idempotente — sin esta guarda, una
+    // segunda llamada duplicaba el contenedor DOM, la suscripción al
+    // Motion Controller y el listener de visibilitychange (el segundo
+    // sobrescribía la referencia del primero en listenerVisibilidad,
+    // por lo que ese primer listener quedaba huérfano, imposible de
+    // remover, acumulándose en cada iniciar() repetido).
     iniciar: function () {
       if (typeof document === 'undefined') return;
+      if (contenedor) return; // ya inicializado
 
       // Crear contenedor
       contenedor = document.createElement('div');

@@ -63,7 +63,20 @@
     if (r) document.documentElement.setAttribute('data-ambiente-rendimiento', r.nivelFidelidad);
   }
 
+  // Fase 6 (auditoría §1/§3): guarda de nivel superior. La mayoría de
+  // los subsistemas de abajo ya eran idempotentes por su cuenta, pero
+  // este archivo es el único punto que efectivamente cascadea a todos
+  // ellos — sin esta guarda, una segunda invocación de iniciar()
+  // (llamada manual repetida, por ejemplo) igual duplicaría las
+  // suscripciones de reflejarGobiernoEnDOM (líneas más abajo) y el
+  // listener AmbienteEstados.on('cambio', ...), ninguno de los cuales
+  // tiene guarda propia porque no la necesitaban mientras este único
+  // punto de entrada se llamara una sola vez.
+  var yaIniciado = false;
+
   function iniciar() {
+    if (yaIniciado) return;
+
     // Fase 0 incompleta sin máquina de estados: se aborta
     // silenciosamente en vez de fallar a medias. Mejor no tener
     // Ambient Engine que tenerlo roto compitiendo con el contenido
@@ -75,6 +88,12 @@
     // no llegó a cargar) nunca apaga el motor — mismo criterio
     // fail-open que el resto de este orquestador.
     if (global.AmbienteFlags && !global.AmbienteFlags.activo('motor')) return;
+
+    // Recién acá se sabe que la inicialización va a proceder de
+    // verdad — la guarda se activa después de los dos early-returns
+    // de arriba para que un bloqueo por flag/estado no impida
+    // permanentemente un intento posterior legítimo.
+    yaIniciado = true;
 
     // ── Grupo de Infraestructura (Cap. 8.1) ─────────────────────────
     // Precalienta los assets de carga anticipada de la escena inicial
