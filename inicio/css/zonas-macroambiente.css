@@ -2,80 +2,53 @@
   zonas-macroambiente.css
   -----------------------
   Sistema de fondo por macrozonas ("Barrios" + "Mareas") para inicio/index.html.
+  YA APLICADO en index.html — este archivo documenta lo que se hizo.
 
   QUÉ ES:
-  - "Barrios": cada macrozona (wrapper .zona) tiene su propio fondo real y
-    un umbral de entrada (.zona-umbral) que marca el cambio de ambiente.
+  - "Barrios": cada macrozona (wrapper .zona) tiene su propio fondo real.
+    El cambio de zona se marca reutilizando el componente .group-divider
+    que el sitio YA tenía (icono + label + línea) — no se inventó un
+    componente nuevo. Solo se le da color de acento por zona vía CSS.
   - "Mareas": dentro de cada zona, el fondo no es un color plano sino un
-    degradé que corre a lo largo de LA ALTURA DE ESA ZONA (no de toda la
-    página), vía background-attachment:local — así no se desincroniza
+    degradé que corre a lo largo de LA ALTURA DE ESA ZONA (no la del
+    viewport), vía background-attachment:local — así no se desincroniza
     entre zonas cortas (Llegada) y largas (Mesa).
 
-  QUÉ NO ES:
-  - No toca deferred-styles.min.css, refactor-utilities.css, ni el <style>
-    inline de index.html.
-  - No renombra ni elimina ninguna clase existente (.us-section, .rcard,
-    .gcard, etc. quedan intactas). Los <section id="..."> reales NO se
-    tocan — solo se ENVUELVEN en un <div class="zona zona-X"> nuevo.
-  - No agrega JS. El reveal del umbral reutiliza el patrón .reveal /
-    IntersectionObserver que el sitio ya corre (ver nota de integración
-    al final de este archivo).
+  ESTRUCTURA REAL APLICADA (orden físico del HTML, no el orden temático):
+    zona-llegada    → circuitos, como-llegar, alojamiento
+    zona-servicios  → veterinarias, remiserias, supermercados, bancos
+                      (usa el divider existente "Información práctica")
+    zona-mesa       → categorias, restaurantes, cafes, bares, panaderias,
+                      hosterias, gimnasios
+                      (sin divider propio: el existente "Sabores de CdU"
+                      queda DENTRO de la zona, entre categorias y
+                      restaurantes — no marca la entrada a la zona, la
+                      entrada se percibe solo por el cambio de fondo)
+    zona-servicios  → servicios  ← REAPARECE, no es contigua a la de arriba
+                      (se agregó un divider nuevo "Información esencial",
+                      mismo patrón .group-divider, porque volver a una
+                      zona después de haber pasado por Mesa sí necesita
+                      señal explícita)
+    zona-identidad  → naturaleza, patrimonio, carnaval, historia, deporte,
+                      gastronomia-regional, uni-ruta
+                      (usa el divider existente "La ciudad")
+    zona-cierre     → aplicada directamente sobre el <footer> existente,
+                      sin wrapper nuevo
 
-  CÓMO APLICAR (instrucciones, no ejecutado — ver mensaje del chat):
-  Envolver en index.html, sin tocar nada dentro:
+  Por qué "servicios" (el section) quedó separado de veterinarias/
+  remiserias/supermercados/bancos: en el HTML real esas 4 secciones y
+  "servicios" NO son contiguas — Mesa está físicamente en el medio.
+  Reordenar el HTML para hacerlas contiguas está fuera del alcance de un
+  cambio de CSS/fondo (afectaría el orden real del contenido, el nav y
+  el scroll-spy). Se resolvió con la MISMA clase .zona-servicios en dos
+  wrappers no contiguos: visualmente es un solo ambiente que se
+  abandona y se retoma, no dos ambientes distintos — sigue contando como
+  una sola de las 5 macrozonas.
 
-    <div class="zona zona-llegada">
-      <div class="zona-umbral reveal" data-zona-umbral>
-        <span class="zona-umbral-label">Llegando a Concepción del Uruguay</span>
-      </div>
-      <section class="us-section" id="circuitos">...</section>
-      <section class="us-section" id="como-llegar">...</section>
-      <section class="us-section" id="alojamiento">...</section>
-    </div>
-
-    <div class="zona zona-mesa">
-      <div class="zona-umbral reveal" data-zona-umbral>
-        <span class="zona-umbral-label">La mesa de la ciudad</span>
-      </div>
-      <section id="categorias">...</section>
-      <section class="us-section" id="restaurantes">...</section>
-      <section class="us-section" id="cafes">...</section>
-      <section class="us-section" id="bares">...</section>
-      <section class="us-section" id="panaderias">...</section>
-      <section class="us-section" id="hosterias">...</section>
-      <section class="us-section" id="gimnasios">...</section>
-    </div>
-
-    <div class="zona zona-servicios">
-      <div class="zona-umbral reveal" data-zona-umbral>
-        <span class="zona-umbral-label">Lo esencial</span>
-      </div>
-      <section class="us-section" id="veterinarias">...</section>
-      <section class="us-section" id="remiserias">...</section>
-      <section class="us-section" id="supermercados">...</section>
-      <section class="us-section" id="bancos">...</section>
-      <section id="servicios">...</section>
-    </div>
-
-    <div class="zona zona-identidad">
-      <div class="zona-umbral reveal" data-zona-umbral>
-        <span class="zona-umbral-label">La ciudad y su historia</span>
-      </div>
-      <section class="us-section" id="naturaleza">...</section>
-      <section class="us-section" id="patrimonio">...</section>
-      <section class="us-section" id="carnaval">...</section>
-      <section class="us-section" id="historia">...</section>
-      <section class="us-section" id="deporte">...</section>
-      <section class="us-section" id="gastronomia-regional">...</section>
-      <section class="ru-section" id="uni-ruta">...</section>
-    </div>
-
-  El footer NO necesita wrapper .zona nuevo: usa directamente
-  .zona-cierre sobre el .footer existente (ver bloque final).
-
-  El .main-body sigue existiendo como ANCESTRO de todo esto (padding,
-  overflow) — las .zona van DENTRO, no lo reemplazan. Por eso .main-body
-  se pone transparent acá: cada .zona pinta su propio fondo.
+  QUÉ NO SE TOCÓ:
+  - deferred-styles.min.css, refactor-utilities.css, el <style> inline.
+  - Ningún id, class o atributo de los <section> reales (ni su JS).
+  - Cero JS nuevo.
 */
 
 .main-body{
@@ -147,36 +120,21 @@
   background-image:linear-gradient(180deg, #0A1E30 0%, var(--bio-deep) 100%);
 }
 
-/* ============ Umbral (Barrios) ============ */
-/* La entrada (opacity/transform/transition) la maneja la clase .reveal
-   ya existente en el sitio (ver deferred-styles.min.css) — acá solo
-   layout, para no duplicar ni pisar esa transición. */
-.zona-umbral{
-  position:relative;
-  display:flex;
-  align-items:center;
-  gap:16px;
-  padding:28px var(--gutter) 8px;
-}
-.zona-umbral::before{
-  content:"";
-  flex:1;
-  height:1px;
-  background:linear-gradient(90deg, var(--zona-accent), transparent);
-  opacity:.45;
-}
-.zona-umbral-label{
-  font-family:var(--f-ui);
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:2.5px;
-  text-transform:uppercase;
+/* ============ Umbral (Barrios) — reutiliza .group-divider existente ============ */
+/* .group-divider ya trae display:flex, gap, padding, línea ::after y
+   label en mayúsculas (ver <style> inline). Acá SOLO se sobreescribe el
+   color por zona, porque el original está pensado para fondo claro
+   (color oscuro fijo) y la mayoría de las zonas nuevas son oscuras. */
+.zona .group-divider-label{
   color:var(--zona-accent);
-  white-space:nowrap;
 }
-
-@media (max-width:768px){
-  .zona-umbral{ padding:20px 20px 6px; }
+.zona > .group-divider::after{
+  background:linear-gradient(90deg, var(--zona-accent), transparent);
+  opacity:.5;
 }
-/* prefers-reduced-motion ya está cubierto globalmente por la regla
-   existente sobre *,::before,::after en el <style> inline de index.html */
+/* zona-servicios es clara (paleta original), su group-divider ya se lee
+   bien en tono oscuro — no forzamos accent ahí para no perder contraste
+   con el ícono, solo la línea se sincroniza con el verde de esa zona */
+.zona-servicios .group-divider-label{
+  color:rgba(26,25,22,.6);
+}
