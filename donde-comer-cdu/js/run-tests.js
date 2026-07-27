@@ -9,16 +9,20 @@
 //   3. contract-tests.js           — contrato DOM↔JS + orden de carga (Fase 2)
 //   4. ambiente-lifecycle-tests.js — ciclo de vida rAF/timers/listeners del
 //                                    Ambient Engine (Fase 6)
+//   5. coreografias-tests.js       — gramática/ritmo/fatiga/reentrada de las
+//                                    coreografías reales de interfaz, y
+//                                    regresión de slugs de fichas
+//                                    (Motion Direction Bible v2.0, Parte M.2)
 //
 // Uso: `node js/run-tests.js`
-// Sale con código 0 solo si las cuatro suites pasan.
+// Sale con código 0 solo si las cinco suites pasan.
 
 'use strict';
 
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js'];
+const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js'];
 
 let algunoFallo = false;
 

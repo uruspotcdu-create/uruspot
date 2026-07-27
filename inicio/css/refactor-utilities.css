@@ -39,3 +39,188 @@
   object-fit: cover;
   transition: transform 0.65s cubic-bezier(0.23, 1, 0.32, 1);
 }
+
+/* ===================================================================
+   Fase 3 — Circuitos: mini-mapa bajo demanda (Leaflet, carga perezosa)
+   Secundario dentro de #circuitos, nunca autocargado. Reutiliza la
+   paleta y el lenguaje visual ya existente de .circ-card / .circ-*
+   (ver deferred-styles.min.css) en vez de reinventar un estilo nuevo.
+   =================================================================== */
+.rf-circ-map-block {
+  margin: 8px 0 24px;
+}
+.rf-circ-map-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(196, 135, 42, 0.10);
+  border: 1px solid rgba(196, 135, 42, 0.35);
+  border-radius: 100px;
+  padding: 12px 24px;
+  font-family: var(--f-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--oro2, #E07828);
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+.rf-circ-map-toggle:hover {
+  background: rgba(196, 135, 42, 0.18);
+  border-color: rgba(196, 135, 42, 0.55);
+}
+.rf-circ-map-toggle[aria-expanded="true"] {
+  background: rgba(196, 135, 42, 0.20);
+  border-color: rgba(196, 135, 42, 0.6);
+}
+@media (hover: hover) and (pointer: fine) {
+  .rf-circ-map-toggle:hover { transform: translateY(-2px); }
+}
+.rf-circ-map-toggle-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.rf-circ-map-panel {
+  margin-top: 16px;
+  border: 1px solid rgba(10, 180, 200, 0.20);
+  border-radius: var(--radius-card, 8px);
+  background: linear-gradient(160deg, #050F18 0%, #070D1C 100%);
+  padding: 18px;
+  animation: rf-circ-map-in 0.4s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-circ-map-panel { animation: none; }
+}
+@keyframes rf-circ-map-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rf-circ-map-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.rf-circ-map-tab {
+  font-family: var(--f-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 100px;
+  background: rgba(242, 237, 227, 0.06);
+  border: 1px solid rgba(242, 237, 227, 0.14);
+  color: rgba(242, 237, 227, 0.60);
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+.rf-circ-map-tab:hover {
+  color: rgba(242, 237, 227, 0.85);
+}
+.rf-circ-map-tab.is-active {
+  background: rgba(10, 180, 200, 0.16);
+  border-color: rgba(10, 255, 239, 0.45);
+  color: var(--bio-glow, #0AFFEF);
+}
+
+.rf-circ-map-canvas {
+  width: 100%;
+  height: 340px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(242, 237, 227, 0.04);
+  position: relative;
+}
+@media (max-width: 640px) {
+  .rf-circ-map-canvas { height: 280px; }
+}
+.rf-circ-map-loading,
+.rf-circ-map-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 20px;
+  font-family: var(--f-ui);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(242, 237, 227, 0.5);
+}
+
+.rf-circ-map-footer {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.rf-circ-map-note {
+  font-family: var(--f-ui);
+  font-size: 9px;
+  color: rgba(242, 237, 227, 0.35);
+}
+.rf-circ-map-note a {
+  color: rgba(242, 237, 227, 0.5);
+  text-decoration: underline;
+}
+.rf-circ-map-gmaps {
+  font-family: var(--f-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--bio-glow, #0AFFEF);
+  border-bottom: 1px solid rgba(10, 255, 239, 0.4);
+  padding-bottom: 2px;
+  white-space: nowrap;
+}
+.rf-circ-map-gmaps:hover {
+  color: #fff;
+  border-color: rgba(10, 255, 239, 0.8);
+}
+
+/* Overrides de Leaflet para calzar con la paleta oscura del sitio.
+   Namespaced con .rf-circ-leaflet-popup (pasado como className en
+   bindPopup) para no afectar ningún otro uso futuro de Leaflet. */
+.rf-circ-leaflet-popup .leaflet-popup-content-wrapper {
+  background: rgba(6, 6, 5, 0.95);
+  color: var(--parchment, #F5EED8);
+  border: 1px solid rgba(196, 135, 42, 0.35);
+  border-radius: 6px;
+  font-family: var(--f-ui);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+.rf-circ-leaflet-popup .leaflet-popup-tip {
+  background: rgba(6, 6, 5, 0.95);
+}
+.rf-circ-leaflet-popup .leaflet-popup-content {
+  margin: 10px 14px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.rf-circ-leaflet-popup .leaflet-popup-close-button {
+  color: rgba(242, 237, 227, 0.5);
+}
+.rf-circ-marker-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--verde2, #267A4D);
+  color: #fff;
+  font-family: var(--f-ui);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(245, 238, 216, 0.85);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}

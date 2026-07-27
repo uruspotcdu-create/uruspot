@@ -138,12 +138,13 @@
     lastErrorState: null,
     focusedElement: null,
     scrollPosition: 0,
-    cartasActuales: [], // referencia a tarjetas pintadas para reconciliación
-    // Fase 4, Cap. 5 "Cómo evitar la fatiga": "a partir de la segunda
-    // repetición en una misma sesión, la respuesta se simplifica al
-    // registro inmediato" — cuenta clicks de rubro que efectivamente
-    // dispararon la coreografía completa de renderConTransicionDeFiltro().
-    vecesTransicionFiltro: 0
+    cartasActuales: [] // referencia a tarjetas pintadas para reconciliación
+    // Fase 4 (Motion Direction Bible v2.0, Parte K.10): la fatiga de
+    // "Cambio de filtros" (Cap. 5) ya no se cuenta acá — la resuelve
+    // AmbienteRitmo por claveAccion 'filtro:rubro' vía
+    // Coreografias.cambioFiltro(), único lugar dueño de esa regla en
+    // toda la app. Antes había un contador local (vecesTransicionFiltro)
+    // que duplicaba esa lógica.
   };
 
   // Timers y operaciones async activas
@@ -727,6 +728,15 @@
       pintarEsqueleto();
       actualizarContadorGuardados();
 
+      // Fase 4 (Motion Direction Bible v2.0, G.4.2): si el navegador
+      // llegó acá de vuelta desde una ficha, deja registro de sesión
+      // del regreso (fatiga/contraste) antes de que el primer render()
+      // real active la escena ambiental que corresponda al estado
+      // restaurado (Coreografias.activarEscenaPorRama, dentro de render()).
+      if (window.Coreografias && window.Coreografias.vieneDeFicha()) {
+        window.Coreografias.cierreFicha();
+      }
+
       // Inicialización de listeners
       inicializarListeners();
       inicializarTecladoNavegacion();
@@ -1123,6 +1133,17 @@
       actualizarBannerCuraduriaSugerida(reg);
       pintarTarjetas(lista, favoritos, opts);
       actualizarMapaHerramienta(reg.nombre, lista || []);
+
+      // Fase 4 (Motion Direction Bible v2.0, Parte I / G.5.3): único
+      // punto de activación real de la escena ambiental narrativa —
+      // 'buscando' con búsqueda/filtro activo, 'sinResultados' cuando
+      // el listado quedó vacío, 'explorando' en el resto de los casos
+      // (paseo/curiosidad, incluida la curaduría de favoritos). Antes
+      // de esta migración, AmbientEngine.setEscena() solo se llamaba
+      // para la escena inicial 'home'.
+      if (window.Coreografias) {
+        window.Coreografias.activarEscenaPorRama(rama, lista ? lista.length : 0);
+      }
 
       // Restaurar scroll a posición previa si es el mismo listado
       if (uiState.scrollPosition && rama === uiState.ultimaRamaRenderizada) {
@@ -1940,7 +1961,16 @@
   // 17. UTILIDADES VARIAS
   // ───────────────────────────────────────────────────────────────────
 
+  // Fase 4 (Motion Direction Bible v2.0, K.11/B.2.2): antes leía
+  // matchMedia directamente acá, una segunda fuente de verdad
+  // independiente de AmbienteAccesibilidad — el día que se activara la
+  // preferencia manual de producto (ambiente-accesibilidad.js, Cap.
+  // 10.4), esta función nunca se habría enterado. Ahora delega en
+  // Coreografias.reducirMovimiento(), que consulta AmbienteAccesibilidad
+  // y solo cae de vuelta a matchMedia si ese módulo no llegó a cargar
+  // (fail-open, mismo criterio que el resto del código).
   function prefiereMovimientoReducido() {
+    if (window.Coreografias) return window.Coreografias.reducirMovimiento();
     return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
 
@@ -2304,6 +2334,13 @@
         grupo: grupo1
       });
       PLANO.guardarEstado(estado);
+      // Fase 4 (Motion Direction Bible v2.0, G.4.1): nunca bloquea ni
+      // hace preventDefault del <a href> real hacia la ficha — solo
+      // adelanta la escena ambiental y la claveAccion por slug antes
+      // de que el navegador siga la navegación cross-document.
+      if (window.Coreografias && porId[id1]) {
+        window.Coreografias.aperturaFicha(slug(porId[id1]));
+      }
       return;
     }
 
@@ -2384,39 +2421,33 @@
    * demora perceptible en interacciones que el Cap. 5 ("Cómo evitar
    * la fatiga") pide mantener ágiles, no contemplativas.
    */
+  /**
+   * Fase 4 (Motion Direction Bible v2.0, Parte K.10): la coreografía
+   * de "salida antes que entrada" y su regla de fatiga ("solo la
+   * primera vez en la sesión corre completa") ya no viven acá a mano
+   * — Coreografias.cambioFiltro() delega ambas en AmbienteRitmo vía la
+   * claveAccion 'filtro:rubro', que ya resuelve exactamente el mismo
+   * criterio (registro 'inmediato' desde la 2ª repetición) sin un
+   * contador local duplicado. Antes de esta migración, la última línea
+   * de esta función llamaba setTimeout(render, salidaMs) con salidaMs
+   * nunca definida en el archivo — un ReferenceError real en cada
+   * cambio de filtro, enmascarado en la práctica por el failsafe de
+   * transitionend/timeout que sí corría antes de esa línea.
+   */
   function renderConTransicionDeFiltro() {
     var existentes = DOM.panelDescubrimiento
       ? DOM.panelDescubrimiento.querySelectorAll('.tarjeta')
       : [];
 
-    // Cap. 5 "Cómo evitar la fatiga": la coreografía completa (salida
-    // antes que entrada) solo corre la primera vez en la sesión;
-    // desde la segunda repetición de la misma acción, se simplifica
-    // al registro inmediato — repetir la ceremonia completa cada vez
-    // que alguien prueba varios rubros seguidos es, en la práctica,
-    // la fatiga que ese capítulo pide evitar.
-    uiState.vecesTransicionFiltro++;
-    var simplificar = uiState.vecesTransicionFiltro > 1;
-
-    if (!existentes.length || prefiereMovimientoReducido() || simplificar) {
-      render();
+    if (window.Coreografias) {
+      window.Coreografias.cambioFiltro(existentes, render);
       return;
     }
 
-    var yaRenderizo = false;
-    var terminar = function () {
-      if (yaRenderizo) return;
-      yaRenderizo = true;
-      render();
-    };
-    existentes[0].addEventListener('transitionend', terminar, { once: true });
-    setTimeout(terminar, ANIMATION_TIMEOUT_MS);
-
-    for (var i = 0; i < existentes.length; i++) {
-      existentes[i].classList.add('u-mov-desvanecer', 'u-mov-saliendo', 'is-oculto');
-    }
-
-    setTimeout(render, salidaMs);
+    // Fail-open: si coreografias.js no llegó a cargar por algún
+    // motivo, no bloquear el filtro — reemplazo instantáneo, igual
+    // que ya hace esta misma función bajo reduced-motion.
+    render();
   }
 
   function manejarClickRubros(e) {
@@ -2680,6 +2711,9 @@
           entrada.target.style.transitionDelay = (indice * desfaseMs) + 'ms';
           entrada.target.classList.add('visible');
           entrada.target.dataset.uReveal = 'visto';
+          if (window.Coreografias) {
+            window.Coreografias.registrarRevelado(entrada.target.id || entrada.target.className);
+          }
         });
 
         // Salida/reingreso (Cap. 6, paso 10) — solo sobre secciones que

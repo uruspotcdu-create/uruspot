@@ -17,7 +17,16 @@
  * permitido por la CSP actual sin tener que tocarla.
  */
 (function () {
-  var TIMEOUT_MS = 12000;
+  // Fase 4 (Motion Direction Bible v2.0, K.11/B.2.3): antes era un
+  // literal local independiente de AmbienteConfig.UMBRALES.timeoutCargaMs
+  // (que a su vez era 8000 y sin consumidores reales) — dos timeouts de
+  // "carga" que podían desincronizarse. Ahora hay un solo número: si
+  // AmbienteConfig ya cargó (carga antes que este script, ver orden de
+  // <script defer> en index.html), se lee de ahí; si no, cae al mismo
+  // 12000 que ya funcionaba en producción (fail-open, nunca deja el
+  // failsafe sin timeout).
+  var TIMEOUT_MS = (window.AmbienteConfig && window.AmbienteConfig.UMBRALES &&
+    window.AmbienteConfig.UMBRALES.timeoutCargaMs) || 12000;
 
   var failsafeTimer = window.setTimeout(function () {
     var placeholder = document.querySelector('[class*="vacio"]:not(.error)');
