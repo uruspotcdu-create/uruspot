@@ -1,0 +1,182 @@
+/*
+  zonas-macroambiente.css
+  -----------------------
+  Sistema de fondo por macrozonas ("Barrios" + "Mareas") para inicio/index.html.
+
+  QUÉ ES:
+  - "Barrios": cada macrozona (wrapper .zona) tiene su propio fondo real y
+    un umbral de entrada (.zona-umbral) que marca el cambio de ambiente.
+  - "Mareas": dentro de cada zona, el fondo no es un color plano sino un
+    degradé que corre a lo largo de LA ALTURA DE ESA ZONA (no de toda la
+    página), vía background-attachment:local — así no se desincroniza
+    entre zonas cortas (Llegada) y largas (Mesa).
+
+  QUÉ NO ES:
+  - No toca deferred-styles.min.css, refactor-utilities.css, ni el <style>
+    inline de index.html.
+  - No renombra ni elimina ninguna clase existente (.us-section, .rcard,
+    .gcard, etc. quedan intactas). Los <section id="..."> reales NO se
+    tocan — solo se ENVUELVEN en un <div class="zona zona-X"> nuevo.
+  - No agrega JS. El reveal del umbral reutiliza el patrón .reveal /
+    IntersectionObserver que el sitio ya corre (ver nota de integración
+    al final de este archivo).
+
+  CÓMO APLICAR (instrucciones, no ejecutado — ver mensaje del chat):
+  Envolver en index.html, sin tocar nada dentro:
+
+    <div class="zona zona-llegada">
+      <div class="zona-umbral reveal" data-zona-umbral>
+        <span class="zona-umbral-label">Llegando a Concepción del Uruguay</span>
+      </div>
+      <section class="us-section" id="circuitos">...</section>
+      <section class="us-section" id="como-llegar">...</section>
+      <section class="us-section" id="alojamiento">...</section>
+    </div>
+
+    <div class="zona zona-mesa">
+      <div class="zona-umbral reveal" data-zona-umbral>
+        <span class="zona-umbral-label">La mesa de la ciudad</span>
+      </div>
+      <section id="categorias">...</section>
+      <section class="us-section" id="restaurantes">...</section>
+      <section class="us-section" id="cafes">...</section>
+      <section class="us-section" id="bares">...</section>
+      <section class="us-section" id="panaderias">...</section>
+      <section class="us-section" id="hosterias">...</section>
+      <section class="us-section" id="gimnasios">...</section>
+    </div>
+
+    <div class="zona zona-servicios">
+      <div class="zona-umbral reveal" data-zona-umbral>
+        <span class="zona-umbral-label">Lo esencial</span>
+      </div>
+      <section class="us-section" id="veterinarias">...</section>
+      <section class="us-section" id="remiserias">...</section>
+      <section class="us-section" id="supermercados">...</section>
+      <section class="us-section" id="bancos">...</section>
+      <section id="servicios">...</section>
+    </div>
+
+    <div class="zona zona-identidad">
+      <div class="zona-umbral reveal" data-zona-umbral>
+        <span class="zona-umbral-label">La ciudad y su historia</span>
+      </div>
+      <section class="us-section" id="naturaleza">...</section>
+      <section class="us-section" id="patrimonio">...</section>
+      <section class="us-section" id="carnaval">...</section>
+      <section class="us-section" id="historia">...</section>
+      <section class="us-section" id="deporte">...</section>
+      <section class="us-section" id="gastronomia-regional">...</section>
+      <section class="ru-section" id="uni-ruta">...</section>
+    </div>
+
+  El footer NO necesita wrapper .zona nuevo: usa directamente
+  .zona-cierre sobre el .footer existente (ver bloque final).
+
+  El .main-body sigue existiendo como ANCESTRO de todo esto (padding,
+  overflow) — las .zona van DENTRO, no lo reemplazan. Por eso .main-body
+  se pone transparent acá: cada .zona pinta su propio fondo.
+*/
+
+.main-body{
+  background:transparent;
+}
+.main-body::before,
+.main-body::after{
+  content:none; /* las radiales genéricas de main-body quedan reemplazadas por las de cada zona */
+}
+
+.zona{
+  position:relative;
+  isolation:isolate;
+  background-repeat:no-repeat;
+  background-attachment:local; /* clave: el degradé recorre SU propia altura de scroll, no la del viewport */
+  background-size:100% 100%;
+}
+
+/* ---------- Llegada ---------- */
+.zona-llegada{
+  --zona-a:#0A2A2E;      /* sale del bio-deep del hero */
+  --zona-b:#2E2A20;      /* entra a un cálido neutro */
+  --zona-accent:#0AFFEF;
+  --zona-text:var(--parchment);
+  background-image:
+    radial-gradient(ellipse 70% 40% at 20% 0%, rgba(10,255,239,.08), transparent 55%),
+    linear-gradient(180deg, var(--zona-a) 0%, var(--zona-b) 100%);
+  color:var(--zona-text);
+}
+
+/* ---------- Mesa (gastronomía) ---------- */
+.zona-mesa{
+  --zona-a:#2E2216;
+  --zona-b:#1C1410;
+  --zona-accent:var(--oro2);
+  --zona-text:var(--parchment3);
+  background-image:
+    radial-gradient(ellipse 60% 35% at 85% 10%, rgba(224,136,40,.10), transparent 55%),
+    radial-gradient(ellipse 50% 30% at 10% 90%, rgba(196,98,26,.08), transparent 60%),
+    linear-gradient(180deg, var(--zona-a) 0%, var(--zona-b) 100%);
+  color:var(--zona-text);
+}
+
+/* ---------- Servicios (deliberadamente sobrio) ---------- */
+.zona-servicios{
+  --zona-a:#F0EBE0;
+  --zona-b:#E8E2D4;
+  --zona-accent:var(--verde2);
+  --zona-text:var(--ink);
+  background-image:linear-gradient(180deg, var(--zona-a) 0%, var(--zona-b) 100%);
+  color:var(--zona-text);
+}
+
+/* ---------- Identidad (cultura/historia) ---------- */
+.zona-identidad{
+  --zona-a:#16241C;
+  --zona-b:#101A14;
+  --zona-accent:var(--verde2);
+  --zona-text:var(--parchment3);
+  background-image:
+    radial-gradient(ellipse 55% 35% at 15% 5%, rgba(38,122,77,.10), transparent 55%),
+    linear-gradient(180deg, var(--zona-a) 0%, var(--zona-b) 100%);
+  color:var(--zona-text);
+}
+
+/* ---------- Cierre (footer) ---------- */
+.zona-cierre{
+  --zona-accent:var(--bio-glow);
+  background-image:linear-gradient(180deg, #0A1E30 0%, var(--bio-deep) 100%);
+}
+
+/* ============ Umbral (Barrios) ============ */
+/* La entrada (opacity/transform/transition) la maneja la clase .reveal
+   ya existente en el sitio (ver deferred-styles.min.css) — acá solo
+   layout, para no duplicar ni pisar esa transición. */
+.zona-umbral{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:28px var(--gutter) 8px;
+}
+.zona-umbral::before{
+  content:"";
+  flex:1;
+  height:1px;
+  background:linear-gradient(90deg, var(--zona-accent), transparent);
+  opacity:.45;
+}
+.zona-umbral-label{
+  font-family:var(--f-ui);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  color:var(--zona-accent);
+  white-space:nowrap;
+}
+
+@media (max-width:768px){
+  .zona-umbral{ padding:20px 20px 6px; }
+}
+/* prefers-reduced-motion ya está cubierto globalmente por la regla
+   existente sobre *,::before,::after en el <style> inline de index.html */
