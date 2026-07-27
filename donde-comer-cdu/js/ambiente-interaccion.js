@@ -25,7 +25,15 @@
   var listeners = [];
   var ultimoGesto = null; // timestamp del último gesto detectado
   var elementoFoco = null; // elemento que tiene foco actual
-  var tiempoInactividadMs = 8000; // Cap. 4.6: inactividad prolongada
+
+  // Fase 4 (Motion Direction Bible v2.0, K.11/B.2.4): antes era un
+  // literal local (8000ms) que nunca leía AmbienteConfig — tres veces
+  // más corto que AmbienteConfig.UMBRALES.inactividadMs (25000ms,
+  // "punto medio del rango 20-30s" según el propio catálogo, la fuente
+  // de verdad declarada). Fail-open: si AmbienteConfig no cargó
+  // todavía, cae al mismo valor que ya usaba este módulo.
+  var tiempoInactividadMs = (global.AmbienteConfig && global.AmbienteConfig.UMBRALES &&
+    global.AmbienteConfig.UMBRALES.inactividadMs) || 8000;
   var timerInactividad = null;
 
   function emitir(evento) {
