@@ -260,7 +260,16 @@
     // "todo estado de Carga debe tener un límite temporal máximo" —
     // más allá de esto, Carga pasa a Error por timeout aunque la
     // solicitud original siga pendiente (Cap. 6.5 Fase 1).
-    timeoutCargaMs: 8000,
+    //
+    // Fase 4 (Motion Direction Bible v2.0, K.11/B.2.3): antes era 8000,
+    // un número puramente ambiental sin ningún consumidor real en el
+    // código — mientras que js/failsafe-reintentar.js (la red de
+    // seguridad real de datos) usaba 12000 de forma independiente. Se
+    // sube este valor a 12000 y failsafe-reintentar.js pasa a leerlo,
+    // para que ambos timeouts sean uno solo: el dato real es lo que no
+    // puede fallar primero, así que gana el número que ya funciona en
+    // producción, no el ambiental teórico.
+    timeoutCargaMs: 12000,
     // "un breve instante de quietud total (200-300 ms) antes de una
     // transición importante" (Cap. 3.5 Fase 1).
     pausaPreTransicionMs: { minMs: 200, maxMs: 300 },
