@@ -252,6 +252,25 @@ header .membrete{
 #tituloRegion{ font:var(--tipo-display-md); color:var(--color-tinta); transition:opacity var(--dur-media); }
 #subtituloRegion{ font:var(--tipo-cuerpo-sm); color:var(--color-tinta-60); margin-top:var(--esp-1); }
 
+/* ── Cambio de región perceptible (Fase 4 MUST HAVE #3, Fase 3C §3) ──
+   app.js (mostrarMicroSenalCambioRegion) crea/destruye este <span>
+   cuando lastRenderCache.region cambia de un render al siguiente —
+   antes ese dato se guardaba pero nadie lo comparaba contra el valor
+   previo. Mismo acento que ya usa .btn--cerca-tuyo.activo (granate
+   claro sobre fondo translúcido) para no sumar un tercer color de
+   "aviso" además de --color-alerta-* (errores) y el granate de marca
+   (estado activo). Misma keyframe que .aviso-cerca-tuyo — cero
+   @keyframes nuevo. */
+.aviso-cambio-region{
+  display:block; width:fit-content; max-width:100%;
+  margin-top:var(--esp-2); padding:var(--esp-1) var(--esp-3);
+  border-radius:var(--radio-md); background:rgba(201,122,131,.12);
+  border:1px solid var(--color-granate-clara); color:var(--color-granate-clara);
+  font:var(--tipo-cuerpo-xs); letter-spacing:.01em;
+  animation:uru-fade-up var(--dur-media) var(--easing-movimiento);
+}
+@media (prefers-reduced-motion:reduce){ .aviso-cambio-region{ animation-duration:.001ms; } }
+
 /* ── Manifiesto: grid de tarjetas de vidrio ── */
 .manifiesto h2{ font:var(--tipo-display-md); color:var(--color-tinta); margin-bottom:var(--esp-6); }
 .manifiesto-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:var(--esp-4); }

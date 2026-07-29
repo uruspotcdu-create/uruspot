@@ -1,0 +1,147 @@
+diff --git a/donde-comer-cdu/css/descubrimiento.css b/donde-comer-cdu/css/descubrimiento.css
+index 522d1d9..9dd5c90 100644
+--- a/donde-comer-cdu/css/descubrimiento.css
++++ b/donde-comer-cdu/css/descubrimiento.css
+@@ -252,6 +252,25 @@ header .membrete{
+ #tituloRegion{ font:var(--tipo-display-md); color:var(--color-tinta); transition:opacity var(--dur-media); }
+ #subtituloRegion{ font:var(--tipo-cuerpo-sm); color:var(--color-tinta-60); margin-top:var(--esp-1); }
+ 
++/* ── Cambio de región perceptible (Fase 4 MUST HAVE #3, Fase 3C §3) ──
++   app.js (mostrarMicroSenalCambioRegion) crea/destruye este <span>
++   cuando lastRenderCache.region cambia de un render al siguiente —
++   antes ese dato se guardaba pero nadie lo comparaba contra el valor
++   previo. Mismo acento que ya usa .btn--cerca-tuyo.activo (granate
++   claro sobre fondo translúcido) para no sumar un tercer color de
++   "aviso" además de --color-alerta-* (errores) y el granate de marca
++   (estado activo). Misma keyframe que .aviso-cerca-tuyo — cero
++   @keyframes nuevo. */
++.aviso-cambio-region{
++  display:block; width:fit-content; max-width:100%;
++  margin-top:var(--esp-2); padding:var(--esp-1) var(--esp-3);
++  border-radius:var(--radio-md); background:rgba(201,122,131,.12);
++  border:1px solid var(--color-granate-clara); color:var(--color-granate-clara);
++  font:var(--tipo-cuerpo-xs); letter-spacing:.01em;
++  animation:uru-fade-up var(--dur-media) var(--easing-movimiento);
++}
++@media (prefers-reduced-motion:reduce){ .aviso-cambio-region{ animation-duration:.001ms; } }
++
+ /* ── Manifiesto: grid de tarjetas de vidrio ── */
+ .manifiesto h2{ font:var(--tipo-display-md); color:var(--color-tinta); margin-bottom:var(--esp-6); }
+ .manifiesto-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:var(--esp-4); }
+diff --git a/donde-comer-cdu/js/app.js b/donde-comer-cdu/js/app.js
+index bbf7f85..adc62df 100644
+--- a/donde-comer-cdu/js/app.js
++++ b/donde-comer-cdu/js/app.js
+@@ -51,6 +51,12 @@
+   var GEOLOCATION_MAX_AGE_MS = 300000;
+   var RENDER_FRAME_TIMEOUT_MS = 50; // fallback si RAF no dispara
+   var TOOLTIP_TIMEOUT_MS = 4000;
++  // Fase 4 — MUST HAVE #3 (Fase 3C §3, Fase 3D §7): duración del
++  // aviso transitorio de cambio de región. Más corto que
++  // TOOLTIP_TIMEOUT_MS a propósito — es un aviso pasivo ("cambió lo
++  // que ves"), no un mensaje de error que requiera acción del
++  // usuario, así que no necesita quedarse tanto tiempo en pantalla.
++  var CAMBIO_REGION_AVISO_MS = 2600;
+   var NETWORK_RETRY_ATTEMPTS = 2;
+   var NETWORK_RETRY_DELAY_MS = 800;
+   var MAX_CONCURRENT_OPERATIONS = 4;
+@@ -196,7 +202,8 @@
+     btnVerCatalogoCompleto: null,
+     btnVolverATodos: null,
+     bannerCuraduria: null,
+-    tooltipGeolocation: null
++    tooltipGeolocation: null,
++    avisoCambioRegion: null
+   };
+ 
+   // ───────────────────────────────────────────────────────────────────
+@@ -1149,6 +1156,18 @@
+         return;
+       }
+ 
++      // Fase 4 — MUST HAVE #3 (Fase 3C §3, Fase 3D §7): lastRenderCache.region
++      // ya se guardaba en cada render() pero nada lo comparaba contra
++      // el valor anterior — era un dato escrito sin consumidor. Se
++      // captura acá, ANTES de pisarlo un par de líneas más abajo, para
++      // poder detectar un cambio real de región (guia ⇄ exploracion ⇄
++      // accionDirecta ⇄ curaduria) y disparar una microseñal perceptible.
++      // 'curaduria'/'buscador' no son nombres de región (son ramas
++      // derivadas — ver ramaActual()), así que la comparación es
++      // siempre región-contra-región, nunca región-contra-rama.
++      var regionAnterior = lastRenderCache.region;
++      var huboCambioDeRegion = !!regionAnterior && regionAnterior !== reg.nombre;
++
+       // Actualizar cache
+       lastRenderCache.lista = lista;
+       lastRenderCache.rama = rama;
+@@ -1158,6 +1177,9 @@
+ 
+       // Actualizar encabezado, estado visual, tarjetas y mapa
+       actualizarCabecera(reg, rama);
++      if (huboCambioDeRegion) {
++        mostrarMicroSenalCambioRegion();
++      }
+       actualizarMapaTextura();
+       actualizarBannerCuraduriaSugerida(reg);
+       pintarTarjetas(lista, favoritos, opts);
+@@ -2670,6 +2692,60 @@
+     render();
+   }
+ 
++  /**
++   * Fase 4 — MUST HAVE #3 (Fase 3C §3, Fase 3D §7): microseñal
++   * perceptible cuando la región cambia entre un render() y el
++   * siguiente. Antes de esto, guia/exploracion/accionDirecta/
++   * curaduria cambiaban el título y el subtítulo del encabezado,
++   * pero era un reemplazo de texto silencioso — indistinguible de
++   * cualquier otro refresco de contenido, tal como documentaba
++   * Fase 3C §3.
++   *
++   * Deliberadamente NO mueve el foco (a diferencia de
++   * manejarClickVerGuardados/asegurarBotonVolverATodos, que sí lo
++   * hacen): esos dos son reacciones a un click explícito del
++   * usuario; un cambio de región puede dispararse como efecto
++   * secundario de guardar/descartar una tarjeta, y robar el foco en
++   * ese momento sería más disruptivo que informativo.
++   *
++   * Deliberadamente NO reutiliza `#estadoResultados` (ver el
++   * comentario en index.html junto a ese nodo): esa live region está
++   * reservada a propósito para conteos de "N resultados" tras
++   * búsqueda/filtro, para que un lector de pantalla no tenga que
++   * volver a escuchar el título completo en cada tecla. En cambio,
++   * `role="status"` en el propio aviso ya es una live region
++   * implícita (polite) — se anuncia solo, sin pisar la otra.
++   *
++   * Mismo patrón de ciclo de vida que mostrarTooltipGeolocation():
++   * crear, insertar, autodestruir con setTimeout. Mismo vocabulario
++   * visual que .aviso-cerca-tuyo (uru-fade-up, css/tokens.css) — cero
++   * @keyframes nuevo para un aviso chico más.
++   */
++  function mostrarMicroSenalCambioRegion() {
++    if (!DOM.tituloRegion || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
++
++    if (dynamicElements.avisoCambioRegion) {
++      dynamicElements.avisoCambioRegion.remove();
++      dynamicElements.avisoCambioRegion = null;
++    }
++
++    var tituloNuevo = DOM.tituloRegion.textContent || '';
++    var aviso = document.createElement('span');
++    aviso.className = 'aviso-cambio-region';
++    aviso.setAttribute('role', 'status');
++    aviso.textContent = tituloNuevo ? 'Cambió lo que ves: ' + tituloNuevo : 'Cambió lo que ves.';
++
++    DOM.subtituloRegion.insertAdjacentElement('afterend', aviso);
++    dynamicElements.avisoCambioRegion = aviso;
++
++    setTimeout(function () {
++      if (aviso.parentNode) aviso.remove();
++      if (dynamicElements.avisoCambioRegion === aviso) {
++        dynamicElements.avisoCambioRegion = null;
++      }
++    }, CAMBIO_REGION_AVISO_MS);
++  }
++
+   function mostrarTooltipGeolocation(texto) {
+     if (dynamicElements.tooltipGeolocation) {
+       dynamicElements.tooltipGeolocation.remove();
