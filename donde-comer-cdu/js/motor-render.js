@@ -283,7 +283,6 @@
   // criterio que motor-config.js aplica al resto del sistema.
   var COLOR_DEFECTO = '#C97A83';
   var COLOR_FONDO_MAPA = '#12151b';   // relleno base mientras cargan los tiles, o si fallan
-  var COLOR_ONDA_DEFECTO = '#ECEDEF';
   var DURACION_ONDA_MS = 550;
   var DURACION_VUELO_MS = 420;
   var MAX_TILES_EN_CACHE = 400;       // tope simple para no crecer sin límite en sesiones largas
