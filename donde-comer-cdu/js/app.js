@@ -328,6 +328,23 @@
    * Determina si el contenido de la lista cambió significativamente.
    * Usa hash rápido de IDs de lugares para evitar comparación profunda.
    */
+  /**
+   * Fase 4 — MUST HAVE (Fase 3A §4, Fase 3D §7): reduce el resultado de
+   * recortePorIniciativaPropiaExplicado() a un mapa { id: primeraRazon }
+   * — razonesDesdeSeñales() siempre devuelve al menos una razón (incluye
+   * un fallback genérico), así que este mapa siempre tiene entrada para
+   * cada lugar del recorte, nunca queda vacío para un id presente.
+   */
+  function razonesPorLugarId(lugaresConRazones) {
+    var mapa = {};
+    (lugaresConRazones || []).forEach(function (x) {
+      if (x.lugar && x.lugar.id != null && x.razones && x.razones.length) {
+        mapa[x.lugar.id] = x.razones[0];
+      }
+    });
+    return mapa;
+  }
+
   function hayCambioEnLista(listaAnterior, listaActual) {
     if (!listaAnterior || !listaActual) return true;
     if (listaAnterior.length !== listaActual.length) return true;
@@ -1106,10 +1123,22 @@
         lista = ordenarPorCercania(lista);
         opts = { origen: 'accion_explicita', narrativa: false };
       } else {
-        // Recorte por iniciativa propia (Guía/Exploración)
-        lista = EXPO.recortePorIniciativaPropia(REGISTRO, estado, reg.nombre);
+        // Recorte por iniciativa propia (Guía/Exploración).
+        // Fase 4 — MUST HAVE (Fase 3A §4/§10, Fase 3B §2, Fase 3D §7):
+        // se usa la versión "explicada" en vez de recortePorIniciativaPropia()
+        // — misma selección (mismo motor, mismos candidatos/score), pero
+        // trae además la razón legible por lugar (razonesDesdeSeñales).
+        // Una sola llamada al algoritmo de selección: se deriva la lista
+        // Y el mapa de razones del mismo resultado, para no invocar
+        // calcularRecorte() dos veces con el mismo estado.
+        var explicado = EXPO.recortePorIniciativaPropiaExplicado(REGISTRO, estado, reg.nombre);
+        lista = explicado.lugares.map(function (x) { return x.lugar; });
         lista = ordenarPorCercania(lista);
-        opts = { origen: 'iniciativa_propia', narrativa: false };
+        opts = {
+          origen: 'iniciativa_propia',
+          narrativa: false,
+          razones: razonesPorLugarId(explicado.lugares)
+        };
       }
 
       // Verificar si hubo cambio real
@@ -1551,6 +1580,13 @@
           (typeof lugar.ratingCount === 'number' ? ' (' + lugar.ratingCount.toLocaleString('es-AR') + ')' : '')
         : null;
 
+      // Fase 4 — MUST HAVE (Fase 3A §4/§10, Fase 3B §2, Fase 3D §7): la
+      // razón solo llega en opts.razones cuando origen es
+      // 'iniciativa_propia' (búsqueda/curaduría nunca la traen, y no
+      // deben — Blueprint V2 invariante: nunca aplican scoring). Ausencia
+      // silenciosa si por lo que sea no hay razón para ese id puntual.
+      var razonTxt = (opts.razones && opts.razones[lugar.id]) ? opts.razones[lugar.id] : null;
+
       art.innerHTML =
         '<div class="tarjeta-rubro">' + escapeHTML(rubro) + pendienteTxt +
         (ratingTxt ? '<span class="tarjeta-rating">' + escapeHTML(ratingTxt) + '</span>' : '') +
@@ -1569,6 +1605,7 @@
         (miniTexto
           ? '<div class="tarjeta-mini' + (miniEsGenerica ? ' tarjeta-mini--generica' : '') + '">' + escapeHTML(miniTexto) + '</div>'
           : '<div class="tarjeta-direccion">' + (lugar.direccion ? escapeHTML(lugar.direccion) : 'cargando dirección…') + '</div>') +
+        (razonTxt ? '<div class="tarjeta-razon">' + escapeHTML(razonTxt) + '</div>' : '') +
         '<div class="tarjeta-acciones">' +
         (slugLugar ? '<a class="tarjeta-btn' + (primaria === 'ficha' ? ' tarjeta-btn--primaria' : '') + '" data-accion="aceptar" data-origen="' + opts.origen + '" href="locales/' + slugLugar + '/">ver ficha</a>' : '') +
         (linkMaps ? '<a class="tarjeta-btn tarjeta-btn--maps' + (primaria === 'maps' ? ' tarjeta-btn--primaria' : '') + '" data-accion="maps" href="' + linkMaps + '" target="_blank" rel="noopener" aria-label="Abrir en Google Maps">' + (primaria === 'maps' ? '📍 cómo llegar' : '📍 mapa') + '</a>' : '') +
