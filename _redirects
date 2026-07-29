@@ -1,0 +1,21 @@
+# URU SPOT — reglas de Cloudflare Pages
+# ---------------------------------------------------------------------
+# Cierra URUSPOT-PENDIENTES §7: "lugares-mapa.json (722K) sigue presente
+# en la carpeta pública del repo, sin ningún _headers/_redirects/
+# wrangler.toml que confirme su exclusión del deploy".
+#
+# lugares-mapa.json es la fuente cruda que edita DSA a mano (13 campos,
+# incluye registros sin `estado_verificacion` todavía) — split_dataset.py
+# la lee en local para generar lugares-core.json/lugares-detalles.json,
+# que son los que el sitio realmente sirve en producción. La app nunca
+# hace fetch() de lugares-mapa.json (verificado: cero referencias en
+# donde-comer-cdu/js/*.js). No se puede simplemente mover el archivo de
+# carpeta porque split_dataset.py lo lee con una ruta relativa fija
+# (`BASE_DIR / "lugares-mapa.json"`) — así que se lo deja donde está y
+# se bloquea el acceso HTTP directo acá.
+#
+# Formato: origen  destino  código-de-estado
+# Con 404/410, Cloudflare Pages sirve el contenido del destino pero
+# devuelve ese código de estado — no es un redirect real, el navegador
+# nunca ve la URL de destino ni su contenido "de verdad" como un 302.
+/donde-comer-cdu/lugares-mapa.json   /   404
