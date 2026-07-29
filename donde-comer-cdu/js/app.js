@@ -1333,7 +1333,7 @@
           card.rel = 'noopener';
         }
       }
-      if (metaRubro) card.style.setProperty('--chip-color', metaRubro[2]);
+      if (metaRubro) card.style.setProperty('--chip-color', 'var(' + metaRubro[2] + ')');
       card.innerHTML =
         '<div class="destacado-card__rubro">' + escapeHTML(rubro) + '</div>' +
         '<div class="destacado-card__nombre">' + escapeHTML(lugar.nombre) + '</div>' +
@@ -1372,7 +1372,7 @@
       var icono = window.URU_RUBROS_ICONO_SVG ? window.URU_RUBROS_ICONO_SVG(k, { tam: 15 }) : '';
       return '<button type="button" class="chip' + (activo ? ' chip--activo' : '') +
         '" data-rubro="' + k + '" aria-pressed="' + activo +
-        '" style="--chip-color:' + meta[2] + '">' +
+        '" style="--chip-color:var(' + meta[2] + ')">' +
         icono +
         escapeHTML(meta[0]) + '<span class="chip__conteo">' + conteo[k] + '</span>' +
         '</button>';
@@ -1409,7 +1409,7 @@
         var meta = window.URU_RUBROS_META[k];
         var icono = window.URU_RUBROS_ICONO_SVG ? window.URU_RUBROS_ICONO_SVG(k, { tam: 15 }) : '';
         return '<button type="button" class="sugerencia-chip" data-rubro="' + k +
-          '" style="--chip-color:' + meta[2] + '">' + icono + escapeHTML(meta[0]) + '</button>';
+          '" style="--chip-color:var(' + meta[2] + ')">' + icono + escapeHTML(meta[0]) + '</button>';
       }).join('');
 
     if (navigator.geolocation) {
@@ -1460,7 +1460,7 @@
       var nombreRubro = meta ? meta[0] : uiState.filtroRubroActivo;
       pills.push(
         '<span class="filtro-pill" data-filtro="rubro" style="--chip-color:' +
-        (meta ? meta[2] : 'var(--color-granate-clara)') + '">' +
+        (meta ? 'var(' + meta[2] + ')' : 'var(--color-granate-clara)') + '">' +
         '<span class="filtro-pill__texto">' + escapeHTML(nombreRubro) + '</span>' +
         '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="rubro" ' +
         'aria-label="Quitar filtro de rubro ' + escapeHTML(nombreRubro) + '">×</button>' +
@@ -1582,7 +1582,7 @@
 
       var metaRubro = window.URU_RUBROS_META && window.URU_RUBROS_META[lugar.grupo];
       var rubro = metaRubro ? metaRubro[0] : lugar.categoria;
-      if (metaRubro) art.style.setProperty('--chip-color', metaRubro[2]);
+      if (metaRubro) art.style.setProperty('--chip-color', 'var(' + metaRubro[2] + ')');
 
       if (!movimientoReducido) {
         art.style.animationDelay = (Math.min(i, 24) * 0.03) + 's';
@@ -1971,7 +1971,15 @@
         nombre: l.nombre,
         direccion: l.direccion,
         href: slugL ? 'locales/' + slugL + '/' : null,
-        color: meta ? meta[2] : '#C97A83',
+        // Este punto viaja a motorMapa (Canvas): necesita el hex ya
+        // resuelto, no el nombre del token (colorSeguro() en
+        // motor-render.js valida contra un regex de hex — un
+        // 'var(...)' ahí adentro cae en silencio al color por
+        // defecto para TODOS los pines). window.URU_RUBROS_COLOR_RESUELTO
+        // (rubros-meta.js) resuelve una sola vez por rubro y cachea.
+        color: l.grupo && window.URU_RUBROS_COLOR_RESUELTO
+          ? window.URU_RUBROS_COLOR_RESUELTO(l.grupo, '#C97A83')
+          : '#C97A83',
         rubroNombre: meta ? meta[0] : l.categoria,
         rubroKey: l.grupo,
         rubroIcono: meta ? meta[3] : null
