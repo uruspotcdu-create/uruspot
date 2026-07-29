@@ -39,6 +39,18 @@
   var ANIMATION_TIMEOUT_MS = 260;
   var GEOLOCATION_TIMEOUT_MS = 8000;
 
+  // Fase 4 — MUST HAVE #4 (Fase 3A §2, Fase 3D §7): encuadre del mapa
+  // por región. Antes `encuadrarTodos()` siempre recibía el mismo
+  // padding fijo (48px) sin importar la región activa — el mapa
+  // "protagonista" de Exploración no existía ni siquiera en cómo se
+  // encuadraba a sí mismo. Un padding mayor = más margen alrededor
+  // del conjunto de puntos = vista más abierta/alejada, coherente con
+  // "más variedad para curiosear" (mismo subtítulo que ya usa
+  // actualizarCabecera() para esta región). Guía mantiene el valor
+  // original: foco cerrado sobre una selección chica.
+  var MAPA_PADDING_GUIA_PX = 48;
+  var MAPA_PADDING_EXPLORACION_PX = 96;
+
   // Logging de diagnóstico del flujo normal (cambios de estado,
   // operaciones async, etc.), detrás de window.URU_CONFIG.debug —
   // ver motor-config.js §0. No reemplaza console.error/console.warn,
@@ -1917,6 +1929,16 @@
   function actualizarMapaHerramienta(nombreRegion, lista) {
     if (!DOM.mapaHerramienta) return;
 
+    // Fase 4 — MUST HAVE #4 (Fase 3A §2, Fase 3D §7): `nombreRegion`
+    // ya llegaba como parámetro pero solo se usaba para decidir SI el
+    // mapa aparece (MAPA.debeMostrarHerramienta), nunca CÓMO se ve —
+    // Guía y Exploración eran visualmente idénticas salvo por la
+    // cantidad de puntos, tal como documentaba la auditoría. Se
+    // expone como data-attribute para que css/mapa.css decida el
+    // tratamiento visual (protagonismo en Exploración) sin que este
+    // archivo tenga que conocer esos detalles de estilo.
+    if (DOM.mapaContainer) DOM.mapaContainer.dataset.region = nombreRegion || '';
+
     var debeMostrar = MAPA.debeMostrarHerramienta(nombreRegion, lista);
 
     if (!debeMostrar) {
@@ -1957,7 +1979,7 @@
     });
 
     motorMapa.establecerPuntos(puntos);
-    motorMapa.encuadrarTodos(48);
+    motorMapa.encuadrarTodos(nombreRegion === 'exploracion' ? MAPA_PADDING_EXPLORACION_PX : MAPA_PADDING_GUIA_PX);
     pintarLeyenda(puntos);
 
     if (DOM.mapaInfo) {

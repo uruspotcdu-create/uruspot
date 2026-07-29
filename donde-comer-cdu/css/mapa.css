@@ -14,7 +14,7 @@
   box-shadow:var(--sombra-vidrio), 0 0 60px -24px var(--glow-marca);
   height:420px; position:relative;
   animation:uru-scale-in var(--dur-lentisima) var(--easing-movimiento) backwards;
-  transition:box-shadow var(--dur-media);
+  transition:box-shadow var(--dur-media), height var(--dur-media) var(--easing-movimiento), border-color var(--dur-media);
 }
 @media (hover:hover) and (pointer:fine){
 #mapaHerramienta:hover{
@@ -34,6 +34,31 @@
   #mapaHerramienta{
     height:300px; margin:var(--esp-4) 0;
   }
+}
+
+/* ── Mapa protagonista en Exploración (Fase 4 MUST HAVE #4, Fase 3A §2) ──
+   Antes Guía y Exploración eran indistinguibles salvo por cuántos
+   puntos traían — la propia auditoría lo marcaba como "diferenciación
+   solo de cantidad, nunca cualitativa". app.js ya setea
+   #mapaContainer[data-region] en actualizarMapaHerramienta() y encuadra
+   con más margen en esta región (ver MAPA_PADDING_EXPLORACION_PX) — acá
+   se completa con el tratamiento visual: más alto (más protagonismo
+   real en el layout, no solo "se siente más grande") y un borde de
+   acento que lo distingue de la variante compacta de Guía sin
+   introducir un color nuevo (mismo --color-granate-clara que ya usan
+   .btn--cerca-tuyo.activo y .aviso-cambio-region). Guía no tiene su
+   propio selector acá a propósito: es la variante compacta original,
+   sin cambios — no necesita reafirmarse contra nada. */
+#mapaContainer[data-region="exploracion"] #mapaHerramienta{
+  height:520px;
+  border-color:var(--color-granate-clara);
+  box-shadow:var(--sombra-vidrio), 0 0 80px -18px var(--glow-marca-hover);
+}
+@media (max-width:960px){
+  #mapaContainer[data-region="exploracion"] #mapaHerramienta{ height:440px; }
+}
+@media (max-width:720px){
+  #mapaContainer[data-region="exploracion"] #mapaHerramienta{ height:360px; }
 }
 
 /* Viñeta suave en los bordes del canvas: sin esto el basemap claro
