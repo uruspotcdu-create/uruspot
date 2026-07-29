@@ -444,13 +444,33 @@
     etiqueta.hidden = true;
     contenedor.appendChild(etiqueta);
 
+    // resolverVarCSS: puente de lectura hacia la capa "Tokens de
+    // Canvas" de css/tokens.css (Blueprint V2 §2 — puente exclusivo
+    // hacia este archivo, ningún literal hardcodeado). Generalizada
+    // (Fase 4, paso 3): antes se usaba una única vez, con un nombre
+    // de variable que nunca existió (--granate-clara, sin el prefijo
+    // "color-" real), así que caía en silencio a su fallback
+    // hardcodeado sin que nada lo señalara — el BUG REAL que motivó
+    // este paso. Se agrega caché por nombre de variable dentro de
+    // esta instancia de mapa: el valor de un custom property no
+    // cambia durante la vida de un mismo mapa (no hay cambio de tema
+    // en caliente hoy), así que releer getComputedStyle en cada
+    // punto/redibujo sería trabajo repetido sin ninguna ganancia.
+    // Firma sin cambios (nombre, fallback) — cualquier llamador nuevo
+    // que se agregue en el paso 5 (color del mapa) puede reusarla tal
+    // cual, sin duplicar esta lógica en otro punto del archivo.
+    var cacheVarCSS = Object.create(null);
     function resolverVarCSS(nombre, fallback) {
+      if (nombre in cacheVarCSS) return cacheVarCSS[nombre];
+      var val;
       try {
-        var val = getComputedStyle(contenedor).getPropertyValue(nombre).trim();
-        return val || fallback;
-      } catch (e) { return fallback; }
+        val = getComputedStyle(contenedor).getPropertyValue(nombre).trim();
+      } catch (e) {
+        val = '';
+      }
+      return (cacheVarCSS[nombre] = val || fallback);
     }
-    var colorFoco = resolverVarCSS('--granate-clara', '#E8A2AB');
+    var colorFoco = resolverVarCSS('--canvas-color-foco', '#E8A2AB');
 
     var viewport = { lat: opciones.lat || -32.4833, lng: opciones.lng || -58.2333, zoom: opciones.zoom || 14, ancho: 0, alto: 0 };
     var puntos = [];
@@ -684,7 +704,7 @@
       // Relleno base primero: así un tile que todavía no cargó, o que
       // falló definitivamente, nunca deja un hueco crudo — se ve el
       // fondo del mapa en su lugar.
-      ctx.fillStyle = COLOR_FONDO_MAPA;
+      ctx.fillStyle = resolverVarCSS('--canvas-color-fondo-mapa', COLOR_FONDO_MAPA);
       ctx.fillRect(0, 0, viewport.ancho, viewport.alto);
 
       var zTiles = PROY.clamp(Math.round(viewport.zoom), ZOOM_MIN, ZOOM_MAX);
@@ -742,11 +762,11 @@
       var w = Math.min(viewport.ancho - 16, anchoTexto + 24);
       var h = 24;
       var x = 8, y = viewport.alto - h - 8;
-      ctx.fillStyle = 'rgba(10,13,19,.78)';
+      ctx.fillStyle = resolverVarCSS('--canvas-color-superficie-flotante', 'rgba(10,13,19,.78)');
       ctx.beginPath();
       if (ctx.roundRect) ctx.roundRect(x, y, w, h, 6); else ctx.rect(x, y, w, h);
       ctx.fill();
-      ctx.fillStyle = '#ECEDEF';
+      ctx.fillStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.fillText(texto, x + 10, y + h / 2 + 1, w - 16);
@@ -781,7 +801,7 @@
       if (!establecioAlgunaVez) return;
       ctx.save();
       ctx.globalAlpha = 0.85;
-      ctx.fillStyle = '#ECEDEF';
+      ctx.fillStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
       ctx.font = '600 13px "IBM Plex Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -903,20 +923,20 @@
       grad.addColorStop(0, aclarar(color, 18));
       grad.addColorStop(1, color);
       ctx.fillStyle = grad;
-      ctx.shadowColor = 'rgba(0,0,0,.45)';
+      ctx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.45)');
       ctx.shadowBlur = activo ? 10 : 5;
       ctx.shadowOffsetY = 2;
       ctx.fill();
       ctx.shadowColor = 'transparent';
       ctx.lineWidth = activo ? 2.5 : 2;
-      ctx.strokeStyle = '#ECEDEF';
+      ctx.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
       ctx.stroke();
       // Centro claro: hace de "ventana" del pin, referencia visual de
       // mapas profesionales (Google/Apple Maps usan el mismo recurso)
       var rVentana = r * RATIO_VENTANA;
       ctx.beginPath();
       ctx.arc(0, -r * 0.35, rVentana, 0, Math.PI * 2);
-      ctx.fillStyle = '#0A0D13';
+      ctx.fillStyle = resolverVarCSS('--canvas-color-cluster-fondo', '#0A0D13');
       ctx.fill();
       // Pictograma del rubro dentro de la ventana — segundo canal de
       // distinción además del color (ver comentario arriba: dos
@@ -1005,19 +1025,19 @@
         gradCluster.addColorStop(0, aclarar(colorDominante, 22));
         gradCluster.addColorStop(1, colorDominante);
       } else {
-        gradCluster.addColorStop(0, 'rgba(32,38,50,.96)');
-        gradCluster.addColorStop(1, 'rgba(14,17,24,.96)');
+        gradCluster.addColorStop(0, resolverVarCSS('--canvas-color-cluster-mixto-inicio', 'rgba(32,38,50,.96)'));
+        gradCluster.addColorStop(1, resolverVarCSS('--canvas-color-cluster-mixto-fin', 'rgba(14,17,24,.96)'));
       }
       ctx.fillStyle = gradCluster;
-      ctx.shadowColor = 'rgba(0,0,0,.4)';
+      ctx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.4)');
       ctx.shadowBlur = 6;
       ctx.shadowOffsetY = 1;
       ctx.fill();
       ctx.shadowColor = 'transparent';
       ctx.lineWidth = 2.5;
-      ctx.strokeStyle = esUnRubro ? '#ECEDEF' : colorDominante;
+      ctx.strokeStyle = esUnRubro ? resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF') : colorDominante;
       ctx.stroke();
-      ctx.fillStyle = esUnRubro ? '#0A0D13' : '#ECEDEF';
+      ctx.fillStyle = esUnRubro ? resolverVarCSS('--canvas-color-cluster-fondo', '#0A0D13') : resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
       ctx.font = '700 12px "IBM Plex Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -1088,7 +1108,7 @@
       var t = prefiereMovimientoReducido() ? 1 : Math.min(1, (performance.now() - spiderActivo.inicio) / DURACION_SPIDER_MS);
       var e = easeOutCubic(t);
       ctx.save();
-      ctx.strokeStyle = 'rgba(236,237,239,.55)';
+      ctx.strokeStyle = resolverVarCSS('--canvas-color-trazo-conexion', 'rgba(236,237,239,.55)');
       ctx.lineWidth = 1.5;
       spiderActivo.posiciones.forEach(function (pos) {
         var px = spiderActivo.cx + (pos.x - spiderActivo.cx) * e;
@@ -1697,7 +1717,7 @@
       popup.setAttribute('role', 'group');
       popup.setAttribute('aria-label', punto.nombre || 'Detalle del lugar');
       popup.hidden = false;
-      var colorBorde = (punto.color && RE_HEX.test(punto.color)) ? punto.color : 'var(--granate-clara)';
+      var colorBorde = (punto.color && RE_HEX.test(punto.color)) ? punto.color : 'var(--color-granate-clara)';
       popup.style.borderLeft = '3px solid ' + colorBorde;
       var btnCerrar = popup.querySelector('.uru-mapa-popup-cerrar');
       btnCerrar.addEventListener('click', function () { cerrarPopup(true); });
@@ -1778,7 +1798,7 @@
       popup.setAttribute('role', 'group');
       popup.setAttribute('aria-label', c.miembros.length + ' lugares en este punto del mapa');
       popup.hidden = false;
-      popup.style.borderLeft = '3px solid var(--granate-clara)';
+      popup.style.borderLeft = '3px solid var(--color-granate-clara)';
       var btnCerrar = popup.querySelector('.uru-mapa-popup-cerrar');
       btnCerrar.addEventListener('click', function () { cerrarPopup(true); });
       // Posición síncrona (ver nota en abrirPopup): c.x/c.y son las

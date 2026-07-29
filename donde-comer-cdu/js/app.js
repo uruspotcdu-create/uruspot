@@ -1541,8 +1541,20 @@
 
       var pendienteTxt = lugar.estado === 'pendiente' ? '<span class="tarjeta-pendiente">en revisión</span>' : '';
 
+      // Fase 4 — MUST HAVE (Fase 3A §7/§10, Fase 3D §7): el rating ya
+      // vivía en el registro (ver cargarCatalogo) pero solo se pintaba
+      // en pintarDestacados() — el flujo principal de tarjetas nunca lo
+      // mostró. Mismo formato que destacados (★ 4,8) para no introducir
+      // una segunda convención visual del mismo dato.
+      var ratingTxt = (typeof lugar.rating === 'number')
+        ? '★ ' + lugar.rating.toFixed(1).replace('.', ',') +
+          (typeof lugar.ratingCount === 'number' ? ' (' + lugar.ratingCount.toLocaleString('es-AR') + ')' : '')
+        : null;
+
       art.innerHTML =
-        '<div class="tarjeta-rubro">' + escapeHTML(rubro) + pendienteTxt + (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') + '</div>' +
+        '<div class="tarjeta-rubro">' + escapeHTML(rubro) + pendienteTxt +
+        (ratingTxt ? '<span class="tarjeta-rating">' + escapeHTML(ratingTxt) + '</span>' : '') +
+        (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') + '</div>' +
         // Fase 4, Cap. 6 "Apertura de ficha": "El elemento de origen (la
         // tarjeta tocada) se convierte visualmente en el encabezado de
         // la ficha — continuidad de forma, no un salto a una pantalla

@@ -349,6 +349,66 @@
      --dur-* de esta sección, para que se lea como decalaje y no como
      una segunda entrada superpuesta. */
   --motion-desfase: .04s;
+
+  /* ── Tokens de Canvas (Fase 4, Blueprint V2 §2) ──
+     Puente exclusivo hacia motor-render.js, vía el mecanismo de
+     lectura de custom properties que el propio archivo ya usa
+     parcialmente (resolverVarCSS, línea 453) — hoy generalizado a un
+     solo caso (colorFoco) y encima roto: lee "--granate-clara", que
+     nunca existió con ese nombre (el real es --color-granate-clara),
+     así que ese resolverVarCSS puntual siempre caía en silencio a su
+     fallback hardcodeado.
+     Regla del Blueprint (Cap. 2): cada token de Canvas mapea 1:1 a un
+     semántico/primitivo que YA existe arriba — ninguno introduce un
+     valor propio. Se agregan acá, antes de tocar motor-render.js,
+     para que el paso siguiente (generalizar resolverVarCSS) tenga
+     nombres correctos contra los que resolver, en vez de generalizar
+     un mecanismo que ya apuntaba mal. Ningún literal de este archivo
+     cambia de valor — son alias nuevos, no reemplazos. */
+  --canvas-color-fondo-mapa:       var(--color-fondo-2);
+  --canvas-color-texto-pin:        var(--color-tinta);
+  --canvas-color-pin-defecto:      var(--color-granate-clara);
+  --canvas-color-foco:             var(--color-granate-clara);
+  --canvas-color-onda-seleccion:   var(--color-tinta);
+  --canvas-color-cluster-fondo:    var(--color-fondo);
+  --canvas-color-cluster-borde:    var(--color-tinta-60);
+  --canvas-color-sombra-marcador:  rgba(0,0,0,.4);
+
+  /* Fase 4, paso 5 (rediseño visual del Canvas) — 4 tokens de Canvas
+     agregados tras auditar todos los colores/sombras hardcodeados de
+     motor-render.js. Ninguno es un valor inventado: cada uno resuelve
+     una inconsistencia real detectada en el código, consolidando a la
+     paleta ya existente en vez de sumar un tono nuevo al sistema. */
+
+  /* El gradiente de "cluster mixto" (miembros de más de un rubro)
+     usaba dos negros-azulados propios (rgb(32,38,50) / rgb(14,17,24))
+     que no correspondían a ningún token — casi idénticos a
+     --color-fondo-2/--color-fondo pero no iguales, el mismo patrón de
+     "casi-duplicado" que el Blueprint V2 pide resolver a un único
+     valor con un único nombre (Cap. 2, capa Primitivos). Se
+     consolidan acá contra la escala real de fondo ya en uso en todo
+     el resto del sitio, en vez de mantener un tercer/cuarto negro
+     paralelo solo para este gradiente. */
+  --canvas-color-cluster-mixto-inicio: rgba(16,20,28,.96);
+  --canvas-color-cluster-mixto-fin:    rgba(10,13,19,.96);
+
+  /* Fondo del badge flotante de "Conexión limitada al mapa": usaba un
+     rgba(10,13,19,.78) propio, calcado a mano del sistema de vidrio
+     que ya existe (--glass-bg-fuerte, arriba) pero sin pasar por él.
+     Se resuelve como alias directo — el badge pasa a compartir
+     textura con tarjetas/chips/popups en vez de tener su propio
+     "vidrio" paralelo, más coherente con que es una superficie
+     flotante sobre el mapa, igual que esos otros componentes. */
+  --canvas-color-superficie-flotante: var(--glass-bg-fuerte);
+
+  /* Piernas del abanico de cluster (spider): usaban
+     rgba(236,237,239,.55), un alpha de un solo uso sobre --color-tinta
+     que no correspondía a ningún escalón de la rampa ya declarada
+     (--color-tinta-30/-60/-80). Se resuelve contra el escalón
+     existente más cercano (--color-tinta-60, .62) en vez de agregar
+     un cuarto escalón a la rampa para un único consumidor — la
+     diferencia (.55 → .62) es imperceptible en una línea de 1.5px. */
+  --canvas-color-trazo-conexion: var(--color-tinta-60);
 }
 
 /* ── Reset mínimo compartido ── */
