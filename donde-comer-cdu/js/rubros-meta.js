@@ -6,6 +6,24 @@
 
    Formato de cada entrada: [nombre, descripción, colorMapa, icono]
 
+   Migración a tokens (Blueprint V2, Cap. 2, punto 3 — ver
+   blueprint-v2-carta-de-navegacion): `colorMapa` deja de portar el
+   hex como dato propio. Antes vivía duplicado acá Y en
+   css/tokens.css (mismo valor, dos fuentes de verdad — el hallazgo
+   verificado en la auditoría Fase 1/1B). Ahora porta el NOMBRE del
+   token semántico (ej. '--color-rubro-alojamiento'), y el valor real
+   se resuelve en tiempo de ejecución contra css/tokens.css, que
+   vuelve a ser la única fuente:
+     - Consumo DOM (chips, tarjetas, leyenda): trivial, se envuelve
+       en var() al armar el inline style — `--chip-color:var(' +
+       meta[2] + ')'` — y el navegador lo resuelve solo.
+     - Consumo Canvas (motor-render.js, vía colorSeguro()/hexARgba()):
+       Canvas no entiende var(), necesita el hex real. Se resuelve
+       con URU_RUBROS_COLOR_RESUELTO() más abajo, mismo mecanismo
+       (getComputedStyle + cache) que motor-render.js ya usa en
+       resolverVarCSS() para los tokens de Canvas — no se inventa un
+       segundo mecanismo de lectura de CSS en el repo.
+
    `icono` es un único string de datos de trazo SVG (atributo `d`),
    dibujado sobre una grilla de 24×24 con viewBox 0 0 24 24, pensado
    para renderizarse SIN relleno (`fill:none`) y con trazo de grosor
@@ -33,33 +51,33 @@
   var ICONO_GROSOR = 1.75;
 
   global.URU_RUBROS_META = {
-    alojamiento:        ['Alojamiento', 'hospedaje verificado puerta a puerta', '#E0C46C',
+    alojamiento:        ['Alojamiento', 'hospedaje verificado puerta a puerta', '--color-rubro-alojamiento',
       'M4 19V6 M4 10h15a2 2 0 0 1 2 2v7 M4 17h17 M8 10V7a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v3'],
-    belleza:            ['Belleza', 'peluquerías, barberías y centros de estética', '#C58FCE',
+    belleza:            ['Belleza', 'peluquerías, barberías y centros de estética', '--color-rubro-belleza',
       'M7.5 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z M16.5 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z M9 14.5 19 5 M15 14.5 5 5'],
-    compras:            ['Compras', 'comercios, desde kioscos hasta grandes superficies', '#D9A05B',
+    compras:            ['Compras', 'comercios, desde kioscos hasta grandes superficies', '--color-rubro-compras',
       'M6 8h12l-1 12.5a1.5 1.5 0 0 1-1.5 1.5h-7a1.5 1.5 0 0 1-1.5-1.5L6 8Z M9 8V6.5a3 3 0 0 1 6 0V8'],
-    deporte:            ['Deporte', 'clubes, gimnasios y espacios para moverse', '#E8A33D',
+    deporte:            ['Deporte', 'clubes, gimnasios y espacios para moverse', '--color-rubro-deporte',
       'M3.5 12h17 M3.5 9v6 M20.5 9v6 M7 6.5v11 M17 6.5v11'],
-    educacion:          ['Educación', 'escuelas, institutos y academias', '#7EA6E0',
+    educacion:          ['Educación', 'escuelas, institutos y academias', '--color-rubro-educacion',
       'M3 9.5 12 5l9 4.5-9 4.5-9-4.5Z M7 11.7v3.8c0 1.4 2.5 2.5 5 2.5s5-1.1 5-2.5v-3.8 M21 9.5v6'],
-    finanzas:           ['Finanzas', 'bancos, financieras y casas de cambio', '#6FA8DC',
+    finanzas:           ['Finanzas', 'bancos, financieras y casas de cambio', '--color-rubro-finanzas',
       'M3 10 12 4l9 6 M4 10v9.5 M8 10v9.5 M12 10v9.5 M16 10v9.5 M20 10v9.5 M3.5 20.5h17'],
-    gastronomia:        ['Gastronomía', 'restaurantes, bares y rotiserías', '#C97A83',
+    gastronomia:        ['Gastronomía', 'restaurantes, bares y rotiserías', '--color-rubro-gastronomia',
       'M6 3v6 M7.5 3v6 M9 3v6 M6 9a1.5 1.5 0 0 0 1.5 1.5A1.5 1.5 0 0 0 9 9 M7.5 10.5V21 M17 3c-2 0-3.5 2-3.5 4.5S15 12 17 12 M17 3v18'],
-    mascotas:           ['Mascotas', 'veterinarias y pet shops', '#8FBF7F',
+    mascotas:           ['Mascotas', 'veterinarias y pet shops', '--color-rubro-mascotas',
       'M12 15.3c-2.6 0-4.6 1.8-4.6 4.1 0 1 .9 1.8 1.9 1.5.8-.2 1.7-.4 2.7-.4s1.9.2 2.7.4c1 .3 1.9-.5 1.9-1.5 0-2.3-2-4.1-4.6-4.1Z M7.3 12.2a1.9 1.9 0 1 0 0-3.8 1.9 1.9 0 0 0 0 3.8Z M16.7 12.2a1.9 1.9 0 1 0 0-3.8 1.9 1.9 0 0 0 0 3.8Z M9.6 8.1a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4Z M14.4 8.1a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4Z'],
-    naturaleza:         ['Naturaleza', 'plazas, costaneras y espacios verdes', '#6FBF8B',
+    naturaleza:         ['Naturaleza', 'plazas, costaneras y espacios verdes', '--color-rubro-naturaleza',
       'M12 3 8 9.5h2.3L6.8 15h2.6L6 20.5h12l-3.4-5.5h2.6L13.7 9.5H16Z M12 20.5v1.5'],
-    oficios_tecnicos:   ['Oficios técnicos', 'electricistas, plomeros, gasistas y afines', '#ABAFB8',
+    oficios_tecnicos:   ['Oficios técnicos', 'electricistas, plomeros, gasistas y afines', '--color-rubro-oficios-tecnicos',
       'M14.7 6.3a3.8 3.8 0 1 0-5.1 5.4L4 17.3l2.7 2.7 5.6-5.6a3.8 3.8 0 0 0 5.1-5.4l-2.6 2.6-2.7-2.7Z'],
-    patrimonio:         ['Patrimonio', 'sitios históricos y culturales', '#C9A15A',
+    patrimonio:         ['Patrimonio', 'sitios históricos y culturales', '--color-rubro-patrimonio',
       'M5.5 20.5V11a6.5 6.5 0 0 1 13 0v9.5 M4 20.5h16 M9.5 20.5v-6h5v6'],
-    salud:              ['Salud', 'consultorios, farmacias y centros médicos', '#7FC8A9',
+    salud:              ['Salud', 'consultorios, farmacias y centros médicos', '--color-rubro-salud',
       'M9 3.5h6v5.5h5.5v6H15v5.5H9V15H3.5V9H9Z'],
-    servicios_publicos: ['Servicios públicos', 'trámites, correo y organismos', '#8296B0',
+    servicios_publicos: ['Servicios públicos', 'trámites, correo y organismos', '--color-rubro-servicios-publicos',
       'M4 6.5h16v11H4Z M4 6.5 12 13l8-6.5'],
-    transporte:         ['Transporte', 'remises, terminales y estaciones', '#D98B5F',
+    transporte:         ['Transporte', 'remises, terminales y estaciones', '--color-rubro-transporte',
       'M4.5 16 5.7 10.5a1.5 1.5 0 0 1 1.5-1.2h9.6a1.5 1.5 0 0 1 1.5 1.2L19.5 16 M3.5 16h17v3.5H3.5Z M7.5 19.5a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4Z M16.5 19.5a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4Z']
   };
 
@@ -88,6 +106,28 @@
       '" viewBox="0 0 ' + ICONO_VIEWBOX + ' ' + ICONO_VIEWBOX + '" fill="none" stroke="' + color +
       '" stroke-width="' + ICONO_GROSOR + '" stroke-linecap="round" stroke-linejoin="round"' +
       ' aria-hidden="true" focusable="false"><path d="' + meta[3] + '"/></svg>';
+  };
+
+  // Resolver de color para Canvas: mismo mecanismo que resolverVarCSS
+  // en motor-render.js (getComputedStyle + cache), pero vive acá
+  // porque es rubros-meta.js quien conoce el mapeo rubroKey→nombre-
+  // de-token, no motor-render.js. Éste solo pide "el color resuelto
+  // de tal rubro", nunca el nombre del token directamente — así el
+  // mapeo queda en un solo lugar si algún día cambia.
+  //
+  // Cache sin invalidación (igual que resolverVarCSS): tokens.css no
+  // cambia en caliente en este sitio, así que una lectura por sesión
+  // por rubro es correcto, no una limitación aceptada a medias.
+  var cacheColorResuelto = Object.create(null);
+  global.URU_RUBROS_COLOR_RESUELTO = function (rubroKey, fallback) {
+    if (rubroKey in cacheColorResuelto) return cacheColorResuelto[rubroKey];
+    var meta = global.URU_RUBROS_META && global.URU_RUBROS_META[rubroKey];
+    var tokenNombre = meta && meta[2];
+    var val = '';
+    if (tokenNombre && typeof getComputedStyle === 'function') {
+      val = getComputedStyle(document.documentElement).getPropertyValue(tokenNombre).trim();
+    }
+    return (cacheColorResuelto[rubroKey] = val || fallback || '#C97A83');
   };
 
   /* ── Nota de estilo (para quien agregue un rubro nuevo) ──────────
