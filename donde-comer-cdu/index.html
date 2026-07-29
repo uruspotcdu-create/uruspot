@@ -418,6 +418,19 @@
   ]
 }
 </script>
+<script>
+/* Fase 4 — registro de Service Worker (URUSPOT-PENDIENTES §7: "no existe
+   Service Worker", PWA "solo de nombre"). Scope '/' cubre todo el sitio;
+   basta con registrarlo desde una página para que controle las demás en
+   visitas siguientes. */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').catch(function (err) {
+      console.warn('URU SPOT: no se pudo registrar el service worker.', err);
+    });
+  });
+}
+</script>
 </head>
 
 <body data-app-root>
