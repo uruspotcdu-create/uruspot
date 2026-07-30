@@ -61,7 +61,6 @@
     }
   }
   var GEOLOCATION_MAX_AGE_MS = 300000;
-  var RENDER_FRAME_TIMEOUT_MS = 50; // fallback si RAF no dispara
   var TOOLTIP_TIMEOUT_MS = 4000;
   // Fase 4 — MUST HAVE #3 (Fase 3C §3, Fase 3D §7): duración del
   // aviso transitorio de cambio de región. Más corto que
@@ -71,8 +70,11 @@
   var CAMBIO_REGION_AVISO_MS = 2600;
   var NETWORK_RETRY_ATTEMPTS = 2;
   var NETWORK_RETRY_DELAY_MS = 800;
-  var MAX_CONCURRENT_OPERATIONS = 4;
-  var VIRTUAL_SCROLL_THRESHOLD = 50; // items antes de considerar virtualization
+  // Auditoría producción, 2026-07-30: se eliminan MAX_CONCURRENT_OPERATIONS
+  // y VIRTUAL_SCROLL_THRESHOLD — declaradas pero sin ningún consumidor real
+  // (OperationManager.crear() nunca comparaba contra un límite; el listado
+  // ya se pagina con TARJETAS_POR_PAGINA, así que la virtualización nunca
+  // llegó a evaluarse). Confirmado con análisis estático antes de borrar.
 
   var UMBRAL_RATING = 4.6;
   var UMBRAL_RESEÑAS = 15;
@@ -374,59 +376,13 @@
     return hashAnterior !== hashActual;
   }
 
-  /**
-   * Calcula diferencias incremental entre renders para evitar reflow.
-   * Retorna: { debeReconstruir: bool, itemsAgregados: [], itemsRemovidos: [], itemsActualizados: [] }
-   */
-  function calcularDiferenciasRender(listaAnterior, listaActual) {
-    var resultado = {
-      debeReconstruir: false,
-      itemsAgregados: [],
-      itemsRemovidos: [],
-      itemsActualizados: []
-    };
+  // Fase de deuda técnica (auditoría producción, 2026-07-30): se elimina
+  // calcularDiferenciasRender() — motor de diff incremental (reconciliación
+  // de itemsAgregados/itemsRemovidos/itemsActualizados) escrito pero jamás
+  // invocado ni exportado; render() usa hayCambioEnLista() (hash de IDs) como
+  // único chequeo real de cambio. Confirmado sin llamadores vía análisis
+  // estático (0 referencias fuera de su propia definición) antes de borrar.
 
-    if (!listaAnterior || listaAnterior.length === 0) {
-      resultado.debeReconstruir = true;
-      return resultado;
-    }
-
-    // Cambio fundamental de tamaño: reconstruir
-    if (Math.abs(listaAnterior.length - listaActual.length) > 2) {
-      resultado.debeReconstruir = true;
-      return resultado;
-    }
-
-    // Mapeo rápido de IDs anteriores
-    var idsAnteriores = Object.create(null);
-    listaAnterior.forEach(function (l, i) {
-      idsAnteriores[l.id] = i;
-    });
-
-    // Detectar cambios
-    var idsActuales = Object.create(null);
-    listaActual.forEach(function (l) {
-      idsActuales[l.id] = true;
-      if (!idsAnteriores[l.id]) {
-        resultado.itemsAgregados.push(l);
-      }
-    });
-
-    listaAnterior.forEach(function (l) {
-      if (!idsActuales[l.id]) {
-        resultado.itemsRemovidos.push(l);
-      }
-    });
-
-    // Si hay cambios pero son menores, se puede hacer update incremental
-    if (resultado.itemsAgregados.length > 0 || resultado.itemsRemovidos.length > 0) {
-      if (resultado.itemsRemovidos.length > 3 || resultado.itemsAgregados.length > 3) {
-        resultado.debeReconstruir = true;
-      }
-    }
-
-    return resultado;
-  }
 
   // ───────────────────────────────────────────────────────────────────
   // 6. MANEJO DE ERRORES Y RECUPERACIÓN
@@ -631,53 +587,14 @@
   })();
 
   // ───────────────────────────────────────────────────────────────────
-  // 9. UTILIDADES DE PERFORMANCE Y BATCHING
+  // 9. (vacía) — PerformanceManager eliminado en auditoría producción
+  // 2026-07-30: módulo de batching/medición (programarEnFrame, medir)
+  // escrito pero nunca invocado ni exportado (0 referencias fuera de su
+  // propia definición, confirmado con análisis estático). Se numeran las
+  // secciones deliberadamente sin renumerar el resto del archivo para no
+  // invalidar los comentarios de fase que referencian números de sección
+  // en otros módulos ambiente-*.js/tests.
   // ───────────────────────────────────────────────────────────────────
-
-  var PerformanceManager = (function () {
-    var pendingWork = [];
-    var workScheduled = false;
-
-    return {
-      /**
-       * Agrega trabajo que se ejecutará en el próximo frame (batching).
-       */
-      programarEnFrame: function (trabajo) {
-        pendingWork.push(trabajo);
-        if (!workScheduled) {
-          workScheduled = true;
-          if ('requestAnimationFrame' in window) {
-            requestAnimationFrame(function () {
-              var work = pendingWork;
-              pendingWork = [];
-              workScheduled = false;
-              work.forEach(function (fn) { try { fn(); } catch (e) { console.error(e); } });
-            });
-          } else {
-            setTimeout(function () {
-              var work = pendingWork;
-              pendingWork = [];
-              workScheduled = false;
-              work.forEach(function (fn) { try { fn(); } catch (e) { console.error(e); } });
-            }, RENDER_FRAME_TIMEOUT_MS);
-          }
-        }
-      },
-
-      /**
-       * Mide el tiempo de ejecución de una función.
-       */
-      medir: function (nombre, fn) {
-        var inicio = performance.now ? performance.now() : Date.now();
-        var resultado = fn();
-        var duracion = (performance.now ? performance.now() : Date.now()) - inicio;
-        if (duracion > 50) {
-          console.warn('[Perf] ' + nombre + ': ' + duracion.toFixed(1) + 'ms (lento)');
-        }
-        return resultado;
-      }
-    };
-  })();
 
   // ───────────────────────────────────────────────────────────────────
   // 10. INICIALIZACIÓN Y CICLO DE VIDA
@@ -1109,6 +1026,14 @@
 
     try {
       actualizarBotonLimpiar();
+      // Auditoría producción, 2026-07-30: actualizarVisibilidadSugerencias()
+      // solo se llamaba una vez al cargar el catálogo (pintarSugerenciasRapidas),
+      // pese a que su propio comentario documenta que debe decidirse "en cada
+      // render()" — con eso, los chips de arranque no se ocultaban al buscar
+      // o filtrar. pintarFiltrosActivos() directamente nunca se llamaba desde
+      // ningún lado: la fila de píldoras de filtro activo estaba muerta.
+      actualizarVisibilidadSugerencias();
+      pintarFiltrosActivos();
 
       // 1 carácter, sin filtro de rubro: ni "cargando" ni "resultados",
       // un estado propio (ver pintarEstadoEscribiendo). Con 0, 2+
@@ -2230,6 +2155,21 @@
       DOM.faqLista.addEventListener('click', manejarClickFAQ);
     }
 
+    // Sugerencias rápidas ("Empezá por acá" + "cerca tuyo") y resumen de
+    // filtros activos (píldoras con ×): las funciones que reaccionan a
+    // estos clicks (manejarClickSugerencias, manejarClickFiltrosActivos)
+    // existían desde antes pero nunca se enganchaban a un listener real —
+    // los elementos se pintaban (pintarSugerenciasRapidas) o quedaban sin
+    // pintar nunca (pintarFiltrosActivos, ver fix en render() más abajo)
+    // pero ningún click sobre ellos hacía nada. Auditoría producción,
+    // 2026-07-30.
+    if (DOM.sugerenciasRapidas) {
+      DOM.sugerenciasRapidas.addEventListener('click', manejarClickSugerencias);
+    }
+    if (DOM.filtrosActivos) {
+      DOM.filtrosActivos.addEventListener('click', manejarClickFiltrosActivos);
+    }
+
     // Permanencia y sesión
     activeOperations.permanenciaTimer = setInterval(tickPermanencia, PERMANENCIA_TICK_MS);
 
@@ -2570,10 +2510,18 @@
     render();
   }
 
-  function manejarClickRubros(e) {
-    var chip = e.target.closest('[data-rubro]');
-    if (!chip) return;
-    var rubro = chip.dataset.rubro;
+  /**
+   * Selecciona (o deselecciona si ya estaba activo) un rubro como filtro.
+   * Único punto de esta lógica — compartido entre el índice de rubros
+   * (manejarClickRubros) y los atajos de "Empezá por acá"
+   * (manejarClickSugerencias), que documentaban desde su propio
+   * comentario la intención de no duplicarla pero nunca llegaron a
+   * extraerla de manejarClickRubros: manejarClickSugerencias llamaba a
+   * `seleccionarRubro()` sin que esa función existiera en ningún lado
+   * — ReferenceError real en cuanto ese listener quedó cableado.
+   * Auditoría producción, 2026-07-30.
+   */
+  function seleccionarRubro(rubro) {
     uiState.filtroRubroActivo = (uiState.filtroRubroActivo === rubro) ? null : rubro;
     uiState.paginaTarjetas = 1;
     estado.sesion.curaduriaActiva = false;
@@ -2583,6 +2531,12 @@
     if (DOM.tituloRegion) {
       DOM.tituloRegion.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  function manejarClickRubros(e) {
+    var chip = e.target.closest('[data-rubro]');
+    if (!chip) return;
+    seleccionarRubro(chip.dataset.rubro);
   }
 
   function manejarClickVerGuardados() {
