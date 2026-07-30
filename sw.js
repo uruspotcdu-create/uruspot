@@ -30,7 +30,7 @@
 
 'use strict';
 
-var VERSION = 'v1';
+var VERSION = 'v2';
 var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
 var CACHE_DATOS = 'uruspot-datos-' + VERSION;
 var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;
