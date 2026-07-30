@@ -1206,6 +1206,27 @@
       // puros — procesar acá el mismo gesto como "hover" produciría un
       // resaltado que titila mientras el mapa se mueve por otro lado.
       if (panTactilUnico) return;
+      // BUG REAL corregido: un pellizco de 2 dedos se maneja con Touch
+      // Events (ver alTouchstartContenedor/alTouchmoveContenedor), pero
+      // el navegador SIGUE disparando Pointer Events por cada dedo
+      // individual mientras el pellizco está en curso — el dedo que
+      // queda apoyado genera `pointermove` reales sobre este `lienzo`.
+      // `alTouchstartContenedor` ya pone `arrastrando = false` y
+      // `pointerActivoId = null` al empezar el pellizco (para cederle
+      // el control), pero sin este chequeo de `enPellizco` esos
+      // `pointermove` del dedo apoyado caían derecho en la rama de
+      // hover de abajo: hit-testing contra marcadores usando la
+      // posición del dedo como si fuera un cursor de mouse, con
+      // `emisor.emitir('hover'/'hoverOut', ...)` real hacia app.js
+      // (resalta una tarjeta del panel, dispara el Ambient Engine)
+      // en medio de un gesto que no tiene nada que ver con hover —
+      // más un recálculo de clustering redundante (procesarHoverPendiente
+      // → clustersActuales() invalida su caché en cada frame porque el
+      // propio pellizco ya cambió viewport.zoom/lat/lng ese mismo tick),
+      // justo el gesto más sensible a rendimiento en un dispositivo
+      // táctil. Se suspende también acá, mismo criterio que ya se
+      // aplica a `arrastrando`/`panTactilUnico`.
+      if (enPellizco) return;
       if (arrastrando) {
         if (e.pointerId !== pointerActivoId) return; // ignorar punteros secundarios mientras se arrastra
         var dx = e.clientX - ultimoX, dy = e.clientY - ultimoY;
@@ -1236,7 +1257,12 @@
     var hoverRAF = null;
     function procesarHoverPendiente() {
       hoverRAF = null;
-      if (!vivo || !hoverPendiente || arrastrando || panTactilUnico) { hoverPendiente = null; return; }
+      // Mismo chequeo de `enPellizco` que en el listener de arriba:
+      // este rAF puede haber quedado encolado desde un `pointermove`
+      // que llegó ANTES de que empezara el pellizco (el segundo dedo
+      // puede bajar entre el evento y el frame que lo procesa), así
+      // que se revalida acá también, no solo en el listener.
+      if (!vivo || !hoverPendiente || arrastrando || panTactilUnico || enPellizco) { hoverPendiente = null; return; }
       var evt = hoverPendiente; hoverPendiente = null;
       var clusters = clustersActuales();
       var cerca = buscarMarcadorEn(evt, clusters);
@@ -1545,6 +1571,19 @@
         cancelarInercia();
         cerrarPopup();
         cerrarSpider();
+        // COROLARIO del mismo hallazgo (pointermove sin chequeo de
+        // enPellizco): en un dispositivo híbrido mouse+touch puede
+        // haber un hover de mouse activo (idResaltado/puntoResaltado)
+        // justo antes de que empiecen los 2 dedos del pellizco. Sin
+        // esto, esa tarjeta quedaba resaltada en el panel de app.js
+        // durante todo el gesto — nada bajo el cursor real la
+        // justifica ya, y el `pointermove` que la limpiaría normal-
+        // mente ahora se ignora a propósito mientras `enPellizco` es
+        // true.
+        if (idResaltado !== null || clusterResaltadoKey !== null) {
+          idResaltado = null; puntoResaltado = null; clusterResaltadoKey = null;
+          emisor.emitir('hoverOut');
+        }
       }
     }
     contenedor.addEventListener('touchstart', alTouchstartContenedor, { passive: true });
