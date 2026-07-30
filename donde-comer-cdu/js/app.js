@@ -1105,6 +1105,15 @@
       var regionAnterior = lastRenderCache.region;
       var huboCambioDeRegion = !!regionAnterior && regionAnterior !== reg.nombre;
 
+      // BUGFIX (auditoría): capturar la rama del render ANTERIOR antes de
+      // pisarla. `uiState.ultimaRamaRenderizada` se sobreescribe dos líneas
+      // más abajo con el valor de `rama` del render ACTUAL — cualquier
+      // comparación `rama === uiState.ultimaRamaRenderizada` hecha después de
+      // esa asignación es una tautología (siempre true), sin importar si la
+      // rama realmente cambió. `ramaAnterior` es el único consumidor real de
+      // este valor previo, usado más abajo para la restauración de scroll.
+      var ramaAnterior = uiState.ultimaRamaRenderizada;
+
       // Actualizar cache
       lastRenderCache.lista = lista;
       lastRenderCache.rama = rama;
@@ -1133,8 +1142,15 @@
         window.Coreografias.activarEscenaPorRama(rama, lista ? lista.length : 0);
       }
 
-      // Restaurar scroll a posición previa si es el mismo listado
-      if (uiState.scrollPosition && rama === uiState.ultimaRamaRenderizada) {
+      // Restaurar scroll a posición previa si es el mismo listado.
+      // BUGFIX (auditoría): antes comparaba `rama` contra
+      // `uiState.ultimaRamaRenderizada`, pero ese campo ya había sido
+      // reasignado a `rama` unas líneas más arriba (línea "Actualizar
+      // cache") — la condición era siempre true y esta rama de scroll se
+      // ejecutaba en TODOS los renders con hayoCambio, incluidos los que
+      // cambiaban de rama/región. Ahora compara contra `ramaAnterior`,
+      // capturada antes de esa reasignación.
+      if (uiState.scrollPosition && rama === ramaAnterior) {
         window.scrollTo(0, uiState.scrollPosition);
       }
 
@@ -2059,20 +2075,52 @@
     return window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
   }
 
+  // BUG REAL corregido en esta pasada — race condition entre salidas
+  // animadas concurrentes: cada llamada a programarRenderTrasSalida()
+  // tenía su propio guard local (yaRenderizo) sin ninguna coordinación
+  // con otras llamadas en vuelo. Si el usuario rechazaba/desguardaba
+  // dos tarjetas dentro de la misma ventana de animación (~260ms,
+  // ANIMATION_TIMEOUT_MS, o la duración real de --dur-media si
+  // transitionend llega antes), la PRIMERA tarjeta en terminar
+  // disparaba render() -> pintarTarjetas() -> DOM.panelDescubrimiento
+  // .innerHTML = '' — que desmonta el nodo de la SEGUNDA tarjeta
+  // mientras esta seguía animando su salida. Consecuencia doble:
+  // (a) la animación de la segunda tarjeta se corta a mitad de camino
+  //     (su nodo ya no existe cuando debería llegar su transitionend);
+  // (b) su `setTimeout(terminar, ANIMATION_TIMEOUT_MS)` de todos modos
+  //     sigue en pie (los timers no se cancelan al perder el nodo) y
+  //     dispara un SEGUNDO render() redundante cuando vence, sobre un
+  //     estado que el primer render ya había pintado.
+  // Fix: un contador compartido de salidas pendientes (mismo espíritu
+  // que `generacionFiltro` en coreografias.js, pero coalescente en vez
+  // de invalidante: acá no hay una salida "abandonada" que descartar,
+  // hay N salidas legítimas en simultáneo que deben resolver en UN
+  // solo render, no en N). El render real se dispara una única vez,
+  // cuando la última salida pendiente termina (por transitionend o por
+  // su propio timeout de seguridad) y el contador vuelve a cero — así
+  // ningún render intermedio llega a desmontar una tarjeta que todavía
+  // está animando.
+  var salidasPendientes = 0;
+
   function programarRenderTrasSalida(carta) {
     if (prefiereMovimientoReducido()) {
       render();
       return;
     }
     carta.classList.add('descartada');
-    var yaRenderizo = false;
-    var terminar = function () {
-      if (yaRenderizo) return;
-      yaRenderizo = true;
-      render();
+    var yaResuelto = false;
+    salidasPendientes++;
+    var resolver = function () {
+      if (yaResuelto) return;
+      yaResuelto = true;
+      salidasPendientes--;
+      if (salidasPendientes <= 0) {
+        salidasPendientes = 0; // defensivo: nunca debería quedar negativo
+        render();
+      }
     };
-    carta.addEventListener('transitionend', terminar, { once: true });
-    setTimeout(terminar, ANIMATION_TIMEOUT_MS);
+    carta.addEventListener('transitionend', resolver, { once: true });
+    setTimeout(resolver, ANIMATION_TIMEOUT_MS);
   }
 
   // ───────────────────────────────────────────────────────────────────
