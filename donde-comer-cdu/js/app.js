@@ -1604,6 +1604,16 @@
 
       var pendienteTxt = lugar.estado === 'pendiente' ? '<span class="tarjeta-pendiente">en revisión</span>' : '';
 
+      // Pictograma de rubro compartido Canvas↔DOM (URUSPOT-PENDIENTES §6):
+      // ya se usaba en el filtro "Por rubro", la leyenda del mapa y la
+      // ficha — acá se conecta la tarjeta de descubrimiento, la superficie
+      // de mayor tráfico y la que faltaba. Reusa exactamente la misma
+      // función/clase (.rubro-icono, chip.css) para no introducir una
+      // segunda convención visual del mismo dato.
+      var iconoRubro = (metaRubro && window.URU_RUBROS_ICONO_SVG)
+        ? window.URU_RUBROS_ICONO_SVG(lugar.grupo, { tam: 13 })
+        : '';
+
       // Fase 4 — MUST HAVE (Fase 3A §7/§10, Fase 3D §7): el rating ya
       // vivía en el registro (ver cargarCatalogo) pero solo se pintaba
       // en pintarDestacados() — el flujo principal de tarjetas nunca lo
@@ -1622,7 +1632,7 @@
       var razonTxt = (opts.razones && opts.razones[lugar.id]) ? opts.razones[lugar.id] : null;
 
       art.innerHTML =
-        '<div class="tarjeta-rubro">' + escapeHTML(rubro) + pendienteTxt +
+        '<div class="tarjeta-rubro">' + iconoRubro + escapeHTML(rubro) + pendienteTxt +
         (ratingTxt ? '<span class="tarjeta-rating">' + escapeHTML(ratingTxt) + '</span>' : '') +
         (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') + '</div>' +
         // Fase 4, Cap. 6 "Apertura de ficha": "El elemento de origen (la
