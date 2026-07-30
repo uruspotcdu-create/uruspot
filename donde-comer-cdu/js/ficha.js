@@ -250,6 +250,27 @@
     }
   }
 
+  /* ───────────────────────── PICTOGRAMA DE RUBRO (5ta superficie) ─────────
+     Fase 4 — URUSPOT-PENDIENTES §6: URU_RUBROS_ICONO_SVG() ya se usaba en
+     el filtro "Por rubro", la leyenda del mapa y la tarjeta de
+     descubrimiento (3 de 5 superficies) — acá se conecta la 5ta: la
+     ficha. Reusa exactamente la misma función compartida (rubros-meta.js,
+     cargado en esta página junto a ficha.js) en vez de rearmar el SVG a
+     mano, para no duplicar la fuente de verdad de los íconos. */
+  function aplicarIconoRubro() {
+    if (!DATA.rubro || typeof window.URU_RUBROS_ICONO_SVG !== "function") return;
+    var eyebrow = document.querySelector(".hero-eyebrow");
+    if (!eyebrow || eyebrow.querySelector(".rubro-icono")) return;
+    var icono = window.URU_RUBROS_ICONO_SVG(DATA.rubro, { tam: 14, clase: "hero-eyebrow-icono" });
+    if (!icono) return;
+    var linea = eyebrow.querySelector(".eyebrow-line");
+    if (linea) {
+      linea.insertAdjacentHTML("afterend", icono);
+    } else {
+      eyebrow.insertAdjacentHTML("afterbegin", icono);
+    }
+  }
+
   /* ───────────────────────── COMPARTIR ───────────────────────── */
 
   function initShare() {
@@ -276,5 +297,6 @@
     animarScores();
     initShare();
     aplicarNombreDeTransicion();
+    aplicarIconoRubro();
   });
 })();
