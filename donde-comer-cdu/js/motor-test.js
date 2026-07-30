@@ -1158,5 +1158,54 @@ function lugar(id, grupo, lat, lng) {
   assert('encuadrar([]) sigue devolviendo null', PROY.encuadrar([], 800, 600, 48, 20) === null);
 })();
 
+/* ── 85. AUDITORÍA: entrarCuraduria activa curaduriaActiva y apaga la sugerencia ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  e.sesion.curaduriaSugerida = true;
+  var r = PLANO.aplicarAccion(e, 'entrarCuraduria');
+  assert('entrarCuraduria: curaduriaActiva queda true', r.sesion.curaduriaActiva === true);
+  assert('entrarCuraduria: curaduriaSugerida se apaga (banner ya atendido)', r.sesion.curaduriaSugerida === false);
+  assert('entrarCuraduria: no muta el estado original (función pura)', e.sesion.curaduriaActiva === false);
+})();
+
+/* ── 86. AUDITORÍA: salirCuraduria apaga curaduriaActiva sin tocar curaduriaSugerida ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  e.sesion.curaduriaActiva = true;
+  e.sesion.curaduriaSugerida = true;
+  var r = PLANO.aplicarAccion(e, 'salirCuraduria');
+  assert('salirCuraduria: curaduriaActiva queda false', r.sesion.curaduriaActiva === false);
+  assert('salirCuraduria: NO toca curaduriaSugerida (el banner puede reaparecer)', r.sesion.curaduriaSugerida === true);
+  assert('salirCuraduria: no muta el estado original (función pura)', e.sesion.curaduriaActiva === true);
+})();
+
+/* ── 87. AUDITORÍA: descartarSugerenciaCuraduria apaga solo la sugerencia ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  e.sesion.curaduriaActiva = true;
+  e.sesion.curaduriaSugerida = true;
+  var r = PLANO.aplicarAccion(e, 'descartarSugerenciaCuraduria');
+  assert('descartarSugerenciaCuraduria: curaduriaSugerida queda false', r.sesion.curaduriaSugerida === false);
+  assert('descartarSugerenciaCuraduria: NO toca curaduriaActiva', r.sesion.curaduriaActiva === true);
+})();
+
+/* ── 88. AUDITORÍA: despejarBusqueda revierte exactamente lo que activa nombrar() ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var conBusqueda = PLANO.aplicarAccion(e, 'nombrar', { consulta: 'pizza' });
+  assert('nombrar activa accionDirectaForzada', conBusqueda.sesion.accionDirectaForzada === 'nombrada');
+  var limpio = PLANO.aplicarAccion(conBusqueda, 'despejarBusqueda');
+  assert('despejarBusqueda revierte accionDirectaForzada a null', limpio.sesion.accionDirectaForzada === null);
+  assert('despejarBusqueda: no muta el estado que recibe (función pura)',
+    conBusqueda.sesion.accionDirectaForzada === 'nombrada');
+})();
+
+/* ── 89. AUDITORÍA: aplicarAccion sigue sin lanzar ante un tipo inexistente ── */
+(function () {
+  var e = PLANO.estadoInicial('cdu');
+  var r = PLANO.aplicarAccion(e, 'unaAccionQueNoExiste', {});
+  assert('acción desconocida devuelve el estado sin cambios, no lanza', r === e);
+})();
+
 console.log('\n' + (total - fallos) + '/' + total + ' pruebas OK');
 if (fallos > 0) process.exit(1);
