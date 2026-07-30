@@ -121,6 +121,39 @@
     UNKNOWN: 'unknown'
   };
 
+  // AUDITORÍA — agregado en esta pasada. Tipos de error que sí o sí
+  // deben detener la app (transicionar a STATE.ERROR y reemplazar el
+  // panel de resultados por un mensaje, vía mostrarEstadoError()). El
+  // resto de los tipos en ERROR_TYPE corresponden a fallos que el
+  // propio punto de origen YA maneja con un fallback seguro
+  // (leerFavoritos()/guardarFavoritos() devuelven `{}`/no-op ante un
+  // error de storage) — para esos alcanza con loguear, nunca hace
+  // falta apagar el resto de la aplicación por un subsistema no
+  // crítico que ya se recuperó solo.
+  //
+  // BUG REAL corregido en esta pasada: `ErrorRecovery.procesar()`
+  // trataba TODOS los ERROR_TYPE por igual — cualquier hiccup
+  // transitorio de localStorage al leer/guardar favoritos (cuota
+  // agotada, modo privado estricto, storage bloqueado por política)
+  // tiraba `currentState` a STATE.ERROR y borraba TODO
+  // `DOM.panelDescubrimiento` con el mensaje genérico de error, pese a
+  // que `leerFavoritos()` ya había devuelto `{}` con normalidad un
+  // instante antes. Como no hay ningún camino que regrese
+  // automáticamente de STATE.ERROR a STATE.READY para ERROR_TYPE.STORAGE
+  // (a diferencia de CATALOG_FETCH, que sí tiene
+  // `recuperarDeCarguaCatalogo()`), el sitio quedaba con el panel de
+  // resultados borrado y todo `render()` futuro cortado en su primera
+  // línea (`if (estadoActual() !== STATE.READY ...) return;`) — hasta
+  // recargar la página — por un problema que, de hecho, ya estaba
+  // resuelto. Reproducido extrayendo la lógica real de este archivo
+  // (ver auditoría) antes del fix: `leerFavoritos()` devolvía `{}`
+  // correctamente y aun así `currentState` terminaba en `'error'`.
+  var ERROR_TYPES_FATALES = [
+    ERROR_TYPE.CATALOG_FETCH,
+    ERROR_TYPE.STATE_INVALID,
+    ERROR_TYPE.UNKNOWN
+  ];
+
   // Flags de visualización
   var VISUAL_STATE = {
     LOADING: 'loading',
@@ -401,10 +434,17 @@
         };
 
         console.error('[Error] ' + tipoError + ':', detalles);
-
         uiState.lastErrorState = detalles;
-        mostrarEstadoError(tipoError, detalles);
-        transicionarEstado(STATE.ERROR, tipoError);
+
+        // Ver ERROR_TYPES_FATALES (declarado junto a ERROR_TYPE) para
+        // la justificación completa: un error ya recuperado en su
+        // propio origen (p. ej. ERROR_TYPE.STORAGE desde
+        // leerFavoritos/guardarFavoritos) se registra para debug pero
+        // NO detiene el resto de la aplicación.
+        if (ERROR_TYPES_FATALES.indexOf(tipoError) !== -1) {
+          mostrarEstadoError(tipoError, detalles);
+          transicionarEstado(STATE.ERROR, tipoError);
+        }
 
         return detalles;
       },
@@ -465,13 +505,28 @@
           errores.push('estado es null pero REGISTRO tiene ' + REGISTRO.length + ' items');
         }
 
-        // Conteo de favoritos debe ser consistente
-        if (estado && estado.sesion && estado.sesion.guardados) {
-          var conteo = Object.keys(estado.sesion.guardados).length;
-          var contador = DOM.contadorCuraduria ? parseInt(DOM.contadorCuraduria.textContent, 10) : 0;
-          if (conteo !== contador && contador > 0) {
-            console.warn('[Validación] Inconsistencia en conteo de guardados: estado=' + conteo + ', DOM=' + contador);
-          }
+        // Conteo de favoritos debe ser consistente.
+        //
+        // BUG REAL corregido en esta pasada: esta rama comparaba contra
+        // `estado.sesion.guardados`, un campo que NUNCA existió en el
+        // shape de `estado.sesion` que define motor-plano.js (ver
+        // `estadoInicial()` ahí: curaduriaActiva, curaduriaSugerida,
+        // accionDirectaForzada, inicioPermanenciaMs,
+        // empujeFriccionSesion — nada de `guardados`). Confirmado en
+        // runtime, no solo por lectura: `'guardados' in
+        // PLANO.estadoInicial(ciudad).sesion` da `false`. El
+        // almacenamiento real de favoritos es `leerFavoritos()`, sobre
+        // la clave `uruspot_favoritos` de localStorage — un store
+        // aparte que nunca pasó por PLANO. Resultado: esta condición
+        // era `if (falsy)` siempre, así que el chequeo de consistencia
+        // nunca corrió ni una sola vez en producción.
+        var favoritosActuales = leerFavoritos();
+        var conteo = Object.keys(favoritosActuales).filter(function (id) {
+          return favoritosActuales[id];
+        }).length;
+        var contador = DOM.contadorCuraduria ? parseInt(DOM.contadorCuraduria.textContent, 10) : 0;
+        if (conteo !== contador && !isNaN(contador)) {
+          console.warn('[Validación] Inconsistencia en conteo de guardados: favoritos=' + conteo + ', DOM=' + contador);
         }
 
         // El filtro de rubro debe existir en REGISTRO si está activo
@@ -495,13 +550,29 @@
       reparar: function () {
         if (!estado) return;
 
-        // Reparar guardados huérfanos
-        if (estado.sesion && estado.sesion.guardados) {
-          Object.keys(estado.sesion.guardados).forEach(function (id) {
-            if (!porId[id]) {
-              delete estado.sesion.guardados[id];
-            }
-          });
+        // Reparar guardados huérfanos.
+        //
+        // BUG REAL corregido en esta pasada: apuntaba a
+        // `estado.sesion.guardados` (inexistente — ver fix de
+        // `validarEstado()` arriba), así que nunca borraba nada. Un
+        // favorito guardado para un lugar que después se retira de
+        // `lugares-core.json` (negocio delistado) quedaba huérfano en
+        // `uruspot_favoritos` para siempre: no rompe el render (
+        // `EXPO.coleccionCurada()` ya filtra contra `registro`), pero
+        // sí infla `DOM.contadorCuraduria` de forma permanente y
+        // silenciosa (ver `actualizarContadorGuardados()`, que cuenta
+        // sobre el store crudo sin filtrar contra `porId`). Ahora
+        // opera sobre el store real y persiste el resultado.
+        var favoritosActuales = leerFavoritos();
+        var cambio = false;
+        Object.keys(favoritosActuales).forEach(function (id) {
+          if (favoritosActuales[id] && !porId[id]) {
+            delete favoritosActuales[id];
+            cambio = true;
+          }
+        });
+        if (cambio) {
+          guardarFavoritos(favoritosActuales);
         }
 
         // Reiniciar contador si está desincronizado
@@ -1728,7 +1799,7 @@
     btn.textContent = '← Ver todos los lugares';
     btn.hidden = true;
     btn.addEventListener('click', function () {
-      estado.sesion.curaduriaActiva = false;
+      estado = PLANO.aplicarAccion(estado, 'salirCuraduria');
       PLANO.guardarEstado(estado);
       uiState.paginaTarjetas = 1;
       render();
@@ -1784,8 +1855,7 @@
     btnIr.className = 'btn btn--activo';
     btnIr.textContent = 'Ver tus guardados';
     btnIr.addEventListener('click', function () {
-      estado.sesion.curaduriaActiva = true;
-      estado.sesion.curaduriaSugerida = false;
+      estado = PLANO.aplicarAccion(estado, 'entrarCuraduria');
       PLANO.guardarEstado(estado);
       uiState.paginaTarjetas = 1;
       render();
@@ -1797,7 +1867,7 @@
     btnCerrar.setAttribute('aria-label', 'Descartar aviso');
     btnCerrar.textContent = '✕';
     btnCerrar.addEventListener('click', function () {
-      estado.sesion.curaduriaSugerida = false;
+      estado = PLANO.aplicarAccion(estado, 'descartarSugerenciaCuraduria');
       PLANO.guardarEstado(estado);
       banner.hidden = true;
     });
@@ -2247,7 +2317,7 @@
     if (uiState.consultaActual.trim().length >= 2) {
       estado = PLANO.aplicarAccion(estado, 'nombrar', { consulta: uiState.consultaActual });
     } else {
-      estado.sesion.accionDirectaForzada = null;
+      estado = PLANO.aplicarAccion(estado, 'despejarBusqueda');
     }
     PLANO.guardarEstado(estado);
 
@@ -2291,7 +2361,7 @@
       DOM.inputBuscar.focus();
     }
     actualizarBotonLimpiar();
-    estado.sesion.accionDirectaForzada = null;
+    estado = PLANO.aplicarAccion(estado, 'despejarBusqueda');
     PLANO.guardarEstado(estado);
     clearTimeout(activeOperations.debounceBuscarId);
     render();
@@ -2571,7 +2641,7 @@
   function seleccionarRubro(rubro) {
     uiState.filtroRubroActivo = (uiState.filtroRubroActivo === rubro) ? null : rubro;
     uiState.paginaTarjetas = 1;
-    estado.sesion.curaduriaActiva = false;
+    estado = PLANO.aplicarAccion(estado, 'salirCuraduria');
     PLANO.guardarEstado(estado);
     pintarRubros();
     renderConTransicionDeFiltro();
@@ -2587,7 +2657,7 @@
   }
 
   function manejarClickVerGuardados() {
-    estado.sesion.curaduriaActiva = true;
+    estado = PLANO.aplicarAccion(estado, 'entrarCuraduria');
     PLANO.guardarEstado(estado);
     uiState.paginaTarjetas = 1;
     render();
@@ -2670,7 +2740,7 @@
     // Escape: salir de modal/curaduría
     if (e.key === 'Escape') {
       if (estado && estado.sesion.curaduriaActiva) {
-        estado.sesion.curaduriaActiva = false;
+        estado = PLANO.aplicarAccion(estado, 'salirCuraduria');
         PLANO.guardarEstado(estado);
         uiState.paginaTarjetas = 1;
         render();
