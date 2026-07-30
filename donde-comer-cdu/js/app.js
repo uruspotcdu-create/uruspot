@@ -153,7 +153,6 @@
     verCatalogoCompleto: false,
     paginaTarjetas: 1,
     ultimaRamaRenderizada: null,
-    ultimaRegionRenderizada: '',
     visualState: VISUAL_STATE.LOADING,
     lastErrorState: null,
     focusedElement: null,
@@ -2622,6 +2621,31 @@
     span.addEventListener('animationend', function () { span.remove(); });
   }
 
+  // BUG REAL corregido en esta pasada: esta función comparaba contra
+  // `uiState.ultimaRegionRenderizada`, un campo que se inicializaba en
+  // '' (línea de arriba, sección "Estado local de UI") y NUNCA se
+  // volvía a escribir en ningún otro lugar del archivo — verificado
+  // por grep de `ultimaRegionRenderizada` en todo `js/`, cero
+  // asignaciones fuera de la inicialización. Como cualquier nombre de
+  // región real ('guia', 'exploracion', 'accionDirecta', 'curaduria')
+  // es distinto de '', la condición de abajo era efectivamente
+  // `if (true)` en todos los ticks: cada 5s (PERMANENCIA_TICK_MS),
+  // para siempre mientras la pestaña siguiera en STATE.READY, se
+  // llamaba a render() sin importar si la región había cambiado o no
+  // — exactamente lo que este `if` existe para evitar. render() sí
+  // corta el pintado real por su propio guard interno de `hayoCambio`,
+  // pero antes de llegar a ese guard ya pagó el costo completo de
+  // EXPO.recortePorIniciativaPropiaExplicado() (filtro + scoring +
+  // orden sobre todo el catálogo candidato) en cada uno de esos ticks
+  // — trabajo duplicado real, medible, indefinidamente mientras la
+  // pestaña esté abierta e inactiva.
+  // Fix: comparar contra `lastRenderCache.region`, que es la variable
+  // que YA existe en este archivo con exactamente esa responsabilidad
+  // (ver Fase 4, más arriba en render()) y que SÍ se actualiza en cada
+  // render real — evita mantener dos fuentes de verdad separadas
+  // (`uiState.ultimaRegionRenderizada` y `lastRenderCache.region`)
+  // para el mismo hecho, una de las cuales podía (y de hecho, estaba)
+  // desincronizada de la otra.
   function tickPermanencia() {
     if (estadoActual() !== STATE.READY) return;
 
@@ -2629,7 +2653,7 @@
     PLANO.guardarEstado(estado);
 
     var regionNueva = PLANO.region(estado).nombre;
-    if (regionNueva !== uiState.ultimaRegionRenderizada) {
+    if (regionNueva !== lastRenderCache.region) {
       render();
     }
   }
