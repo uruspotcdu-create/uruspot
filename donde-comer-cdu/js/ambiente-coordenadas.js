@@ -39,6 +39,14 @@
   var ID_ASSET = 'coordenadas';
   var elemento = null; // referencia al <svg> ya insertado en el DOM
   var promesaInsercion = null;
+  // BUG REAL corregido (race condition) — mismo hallazgo que
+  // ambiente-halos.js, mismo patrón compartido, mismo fix: ver la
+  // explicación completa ahí. Resumen: `mostrarEn()` es asíncrono (fetch
+  // real vía AmbienteAssets.obtenerBinario la primera vez), `ocultar()`
+  // es síncrono y no cancelaba un `mostrarEn()` en vuelo — un click
+  // seguido de otra acción antes de que el asset cargue podía dejar la
+  // marca de coordenadas visible sin ningún punto seleccionado.
+  var tokenVisibilidad = 0;
 
   function insertarEnPlano(markupSvg) {
     if (elemento || !markupSvg) return null;
@@ -95,14 +103,17 @@
     // producto, ver nota de cabecera). x, y en unidades 0-100 del
     // viewBox del plano P1.
     mostrarEn: function (x, y) {
+      var miToken = ++tokenVisibilidad;
       asegurarInsertado().then(function (svg) {
         if (!svg) return;
+        if (miToken !== tokenVisibilidad) return; // ver nota de arriba / ambiente-halos.js
         posicionar(svg, x, y);
         svg.classList.add('is-visible');
       });
     },
 
     ocultar: function () {
+      tokenVisibilidad++;
       if (!elemento) return;
       elemento.classList.remove('is-visible');
     }
