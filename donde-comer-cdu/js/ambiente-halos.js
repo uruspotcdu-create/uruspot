@@ -34,6 +34,22 @@
   var ID_ASSET = 'halo';
   var elemento = null;
   var promesaInsercion = null;
+  // BUG REAL corregido (race condition): `mostrarEn()` es asíncrono (la
+  // primera vez, `asegurarInsertado()` dispara un `fetch()` real del SVG
+  // vía AmbienteAssets.obtenerBinario — no una promesa ya resuelta), pero
+  // `ocultar()` es síncrono y no tenía forma de cancelar un `mostrarEn()`
+  // en vuelo. Secuencia real: hover → mostrarEn() dispara el fetch →
+  // el usuario ya se movió (hoverOut) antes de que resuelva → ocultar()
+  // no hace nada porque `elemento` todavía es null → el fetch resuelve
+  // más tarde y el halo aparece igual, sin ningún hover activo — un
+  // halo "fantasma" que solo desaparece en el próximo ciclo real de
+  // hover/hoverOut. Más probable cuanto más lenta la red (móvil/PWA).
+  // Se agrega un token de generación: cada `mostrarEn()`/`ocultar()` lo
+  // incrementa, y una resolución async que ya no coincide con el token
+  // vigente se descarta — mismo criterio que un AbortController, sin
+  // necesitar cancelar el fetch en sí (el binario igual queda cacheado
+  // para el próximo uso legítimo).
+  var tokenVisibilidad = 0;
 
   function insertarEnPlano(markupSvg) {
     if (elemento || !markupSvg) return null;
@@ -79,14 +95,21 @@
 
     // x, y en unidades 0-100 del viewBox del plano P3.
     mostrarEn: function (x, y) {
+      var miToken = ++tokenVisibilidad;
       asegurarInsertado().then(function (svg) {
         if (!svg) return;
+        // Si `ocultar()` (u otro `mostrarEn()` más nuevo) se llamó
+        // mientras esto cargaba, este resultado ya quedó obsoleto —
+        // aplicarlo ahora reabriría un halo que el usuario ya pidió
+        // cerrar (o pisaría una posición más reciente con una vieja).
+        if (miToken !== tokenVisibilidad) return;
         posicionar(svg, x, y);
         svg.classList.add('is-visible');
       });
     },
 
     ocultar: function () {
+      tokenVisibilidad++; // invalida cualquier mostrarEn() todavía en vuelo
       if (!elemento) return;
       elemento.classList.remove('is-visible');
     }
