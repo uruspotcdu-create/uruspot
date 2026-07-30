@@ -517,7 +517,6 @@
     // Ver justificación completa junto al listener de touchstart/
     // touchmove/touchend más abajo.
     var enPellizco = false;
-    var pellizcoTerminoEn = 0;
     var panTactilUnico = null; // { id, x, y }
 
     // Seguido por animarA(): permite completar un vuelo instantáneamente
@@ -649,7 +648,7 @@
           claveClusters = clusteringVigente();
           dibujarMarcadores(clusters);
           dibujarSpider();
-          posicionarPopupAbierto(proyectados);
+          posicionarPopupAbierto(proyectados, clusters);
           posicionarEtiqueta(proyectados);
         }
         dibujarOndas();
@@ -1603,7 +1602,6 @@
       }
       if (e.touches.length < 2) { pinchDist0 = null; pinchCentro0 = null; }
       if (e.touches.length === 0) {
-        if (enPellizco) pellizcoTerminoEn = performance.now();
         enPellizco = false;
         if (panTactilUnico) { panTactilUnico = null; iniciarInercia(); }
       }
@@ -1806,17 +1804,47 @@
       if (typeof btnCerrar.focus === 'function') btnCerrar.focus({ preventScroll: true });
       redibujar();
     }
-    function posicionarPopupAbierto(proyectados) {
-      if (popup.hidden || idAbierto === null) return;
-      if (spiderActivo) {
-        var posSpider = spiderActivo.posiciones.filter(function (ps) { return ps.punto.id === idAbierto; })[0];
-        if (posSpider) { posicionarPopupEn(posSpider._xActual || posSpider.x, posSpider._yActual || posSpider.y); return; }
+    // Identifica un cluster de forma estable entre frames por el
+    // conjunto de ids de sus miembros (orden-independiente) — la clave
+    // de pantalla (`Math.round(c.x)+':'+Math.round(c.y)`, usada para
+    // el resaltado por hover) no sirve acá porque cambia en cada pan/
+    // zoom, que es justo cuando necesitamos reencontrar el mismo
+    // cluster.
+    function firmaMiembrosCluster(miembros) {
+      return miembros.map(function (p) { return p.id; }).sort().join(',');
+    }
+
+    function posicionarPopupAbierto(proyectados, clusters) {
+      if (popup.hidden) return;
+      if (idAbierto !== null) {
+        if (spiderActivo) {
+          var posSpider = spiderActivo.posiciones.filter(function (ps) { return ps.punto.id === idAbierto; })[0];
+          if (posSpider) { posicionarPopupEn(posSpider._xActual || posSpider.x, posSpider._yActual || posSpider.y); return; }
+        }
+        var p = proyectados.filter(function (pr) { return pr.punto.id === idAbierto; })[0];
+        if (!p) { cerrarPopup(); return; }
+        // Clamp para que el popup nunca quede parcialmente fuera del
+        // contenedor cuando el marcador está cerca de un borde.
+        posicionarPopupEn(p.x, p.y);
+        return;
       }
-      var p = proyectados.filter(function (pr) { return pr.punto.id === idAbierto; })[0];
-      if (!p) { cerrarPopup(); return; }
-      // Clamp para que el popup nunca quede parcialmente fuera del
-      // contenedor cuando el marcador está cerca de un borde.
-      posicionarPopupEn(p.x, p.y);
+      // GAP REAL corregido (auditoría producción, 2026-07-30):
+      // clusterAbierto se escribía en abrirPopupCluster()/cerrarPopup()
+      // pero nunca se leía en ningún lado — el popup de un cluster no
+      // seguía al mapa en pan/zoom, a diferencia del de un lugar
+      // individual (arriba). Mismo criterio que esa rama: si el
+      // cluster ya no existe con la misma composición de miembros en
+      // este frame (se separó al hacer zoom, o la búsqueda cambió la
+      // lista), se cierra el popup en vez de dejarlo huérfano.
+      if (clusterAbierto !== null) {
+        var firma = firmaMiembrosCluster(clusterAbierto.miembros);
+        var actual = (clusters || []).filter(function (c) {
+          return c.tipo === 'cluster' && firmaMiembrosCluster(c.miembros) === firma;
+        })[0];
+        if (!actual) { cerrarPopup(); return; }
+        clusterAbierto = actual;
+        posicionarPopupEn(actual.x, actual.y);
+      }
     }
 
     function posicionarEtiqueta(proyectados) {
@@ -1831,33 +1859,15 @@
       etiqueta.hidden = false;
     }
 
-    // ── Prioridad visual derivada del orden de exposición ──
-    // INTELIGENCIA VISUAL, no un motor de scoring paralelo: este
-    // archivo NUNCA debe decidir qué lugar es "mejor" — esa decisión
-    // es enteramente de motor-exposicion.js (ver `ordenarPorScore`,
-    // que ya deja los resultados ordenados por score descendente antes
-    // de que lleguen a app.js y de ahí a `establecerPuntos`). Pero ese
-    // orden YA es información real y gratuita: el índice de un punto
-    // dentro del array de entrada es, en los hechos, su rango de
-    // relevancia. Ignorar esa señal y tratar a todos los marcadores
-    // igual visualmente sería desperdiciar algo que el resto del
-    // sistema ya calculó con más contexto del que este renderer tiene
-    // o debería tener. Por eso: los primeros `TOP_PRIORIDAD_VISUAL`
-    // puntos del array (tal cual llegan) se dibujan con una leve
-    // jerarquía — halo sutil + se dibujan al final (encima del resto
-    // cuando hay solapamiento visual) — sin inventar ninguna métrica
-    // propia y sin exponer ninguna API nueva que motor-exposicion.js
-    // tendría que aprender a llenar. Si `establecerPuntos` recibe un
-    // conjunto que no viene ordenado por relevancia (p. ej. otro
-    // consumidor futuro), el peor caso es una jerarquía visual
-    // arbitraria pero inofensiva — nunca un error.
-    var TOP_PRIORIDAD_VISUAL = 3;
-    var rangoPorId = Object.create(null); // id -> índice en el array de entrada (0 = más relevante)
-
-    function esPrioridadVisual(id) {
-      var rango = rangoPorId[id];
-      return rango !== undefined && rango < TOP_PRIORIDAD_VISUAL;
-    }
+    // Auditoría producción, 2026-07-30: se elimina el andamiaje de
+    // "prioridad visual" (halo + z-order para los primeros N puntos
+    // del array de entrada) — quedó documentado en un comentario largo
+    // pero nunca se completó en ninguno de sus dos extremos:
+    // rangoPorId nunca se poblaba desde establecerPuntos() y
+    // esPrioridadVisual() nunca se consultaba desde dibujarMarcador().
+    // Cero comportamiento visible dependía de esto. Si se retoma la
+    // idea a futuro, es una funcionalidad nueva a diseñar de cero, no
+    // una corrección de bug.
 
     /* ── Lista accesible en paralelo (teclado / lectores de pantalla) ── */
     function reconstruirListaAccesible() {
