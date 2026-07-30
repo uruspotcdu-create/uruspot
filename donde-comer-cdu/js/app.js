@@ -1333,9 +1333,18 @@
           card.rel = 'noopener';
         }
       }
-      if (metaRubro) card.style.setProperty('--chip-color', 'var(' + metaRubro[2] + ')');
+      if (metaRubro) card.style.setProperty('--rubro-color', 'var(' + metaRubro[2] + ')');
+
+      // Pictograma de rubro (mismo criterio que en pintarTarjetas): los
+      // destacados son la primera superficie que ve alguien al entrar,
+      // tenía más sentido cerrarla acá que dejarla como única tarjeta
+      // sin ícono del sitio.
+      var iconoDestacado = (metaRubro && window.URU_RUBROS_ICONO_SVG)
+        ? window.URU_RUBROS_ICONO_SVG(lugar.grupo, { tam: 12, clase: 'destacado-card__icono' })
+        : '';
+
       card.innerHTML =
-        '<div class="destacado-card__rubro">' + escapeHTML(rubro) + '</div>' +
+        '<div class="destacado-card__rubro">' + iconoDestacado + escapeHTML(rubro) + '</div>' +
         '<div class="destacado-card__nombre">' + escapeHTML(lugar.nombre) + '</div>' +
         '<div class="destacado-card__rating">★ ' + lugar.rating.toFixed(1).replace('.', ',') +
         '<span class="destacado-card__conteo">(' + lugar.ratingCount.toLocaleString('es-AR') + ')</span></div>';
