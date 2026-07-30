@@ -599,9 +599,24 @@
   }
 
   /* ─────────────────────────────────────────────────────────────
-     6. Las seis acciones mínimas — Vocabulario de Interacción
+     6. Acciones del Vocabulario de Interacción
      Cada una recibe el estado actual y devuelve un estado NUEVO
      (no muta el original) — más fácil de testear y de razonar.
+
+     Eran seis hasta esta pasada (permanecer, aceptar, rechazar,
+     nombrar, guardar, abandonar — las del Blueprint original, que
+     mueven autonomía/fricción/exposición). Auditoría de esta pasada,
+     verificada con `grep -n "estado\.sesion\.\w* = " js/app.js`:
+     `app.js` tenía 9 sitios que escribían directo sobre
+     `estado.sesion` (abrir/cerrar Curaduría, descartar su banner,
+     limpiar la búsqueda) sin pasar por `aplicarAccion` — cuatro
+     transiciones de sesión reales que nunca tuvieron una función
+     pura propia acá, y que por lo tanto no tenía forma de cubrir
+     `motor-test.js`. Se agregan `entrarCuraduria`, `salirCuraduria`,
+     `descartarSugerenciaCuraduria` y `despejarBusqueda` — mismo
+     efecto observable que la mutación directa que reemplazan, ahora
+     como funciones puras. Ver el hallazgo de auditoría completo
+     (con los 9 call sites) en `app.js`.
      ───────────────────────────────────────────────────────────── */
 
   function copiarEstado(estado) {
@@ -760,6 +775,78 @@
      */
     abandonar: function (estado) {
       return copiarEstado(estado);
+    },
+
+    /**
+     * AUDITORÍA — agregada en esta pasada. Entra al modo Curaduría por
+     * una acción explícita: click en "Ver tus guardados" o en el botón
+     * "Ver tus guardados" del banner de sugerencia. Apaga la sugerencia
+     * pendiente porque ya fue atendida (evita que el banner reaparezca
+     * detrás de la vista de Curaduría).
+     *
+     * Antes de esta pasada, `app.js` ponía `curaduriaActiva = true` y
+     * `curaduriaSugerida = false` escribiendo directo sobre
+     * `estado.sesion` en 2 lugares distintos (manejarClickVerGuardados,
+     * asegurarBannerCuraduria) — mutación fuera del Vocabulario, sin
+     * cobertura de motor-test.js, ver hallazgo de auditoría.
+     */
+    entrarCuraduria: function (estado) {
+      var e = copiarEstado(estado);
+      e.sesion.curaduriaActiva = true;
+      e.sesion.curaduriaSugerida = false;
+      return e;
+    },
+
+    /**
+     * AUDITORÍA — agregada en esta pasada. Sale del modo Curaduría:
+     * click en "← Ver todos los lugares", selección de un rubro desde
+     * fuera de Curaduría, o Escape. No toca `curaduriaSugerida`: si el
+     * usuario vuelve a guardar más adelante, el banner puede sugerir
+     * Curaduría otra vez con normalidad.
+     *
+     * Antes de esta pasada, 4 lugares distintos de `app.js`
+     * (asegurarBotonVolverATodos, seleccionarRubro,
+     * manejarTecladoGlobal/Escape) ponían
+     * `estado.sesion.curaduriaActiva = false` por mutación directa.
+     */
+    salirCuraduria: function (estado) {
+      var e = copiarEstado(estado);
+      e.sesion.curaduriaActiva = false;
+      return e;
+    },
+
+    /**
+     * AUDITORÍA — agregada en esta pasada. Descarta el banner "armaste
+     * una lista" sin navegar a Curaduría (botón ✕ del banner). No
+     * mueve `curaduriaActiva`.
+     */
+    descartarSugerenciaCuraduria: function (estado) {
+      var e = copiarEstado(estado);
+      e.sesion.curaduriaSugerida = false;
+      return e;
+    },
+
+    /**
+     * AUDITORÍA — agregada en esta pasada. Vacía el campo de búsqueda:
+     * sale de Acción Directa forzada por `nombrar` sin pasar a ninguna
+     * otra región de forma explícita — espejo inverso exacto de
+     * `nombrar`. Antes, `manejarInputBusqueda` y `limpiarBusqueda` en
+     * `app.js` ponían `estado.sesion.accionDirectaForzada = null` por
+     * mutación directa, incluyendo un camino (`manejarInputBusqueda`,
+     * cada vez que el campo baja de 2 caracteres) que corría sin
+     * ningún `if (!estado)` de guarda — si `estado` llegaba `null` por
+     * un fallo previo de `inicializarEstado()` (que hoy tampoco corta
+     * el arranque si falla — ver hallazgo de auditoría en `app.js`),
+     * esto lanzaba `TypeError` de forma no controlada dentro de un
+     * listener de `input`. `aplicarAccion` no elimina esa causa raíz
+     * (un `estado` null sigue rompiendo dentro de `copiarEstado` vía
+     * `JSON.parse(JSON.stringify(null)) → null`), pero al menos saca
+     * esta transición del Vocabulario informal y la deja testeable.
+     */
+    despejarBusqueda: function (estado) {
+      var e = copiarEstado(estado);
+      e.sesion.accionDirectaForzada = null;
+      return e;
     }
   };
 
