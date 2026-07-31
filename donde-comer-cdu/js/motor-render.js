@@ -600,16 +600,49 @@
     }
 
     var rafOndas = null;
+    // PERF (auditoría performance, 2026-07-30): `dispararOnda()` llamaba
+    // a `animarOndas()` de forma SÍNCRONA (no vía rAF), y `animarOndas()`
+    // llamaba a `dibujar()` DIRECTO — el único de los ~8 ciclos de
+    // animación de este archivo (aparición, spider, inercia, wheel,
+    // hover, vuelo) que no pasa por `redibujar()`, el punto único de
+    // deduplicación (rafRedibujo) que ya usan todos los demás.
+    // `manejarClick()` (ver más abajo) llama `cerrarSpider()` →
+    // `redibujar()`, LUEGO `dispararOnda()`, LUEGO `abrirPopup()` →
+    // `redibujar()` de nuevo — es decir, CADA click sobre un marcador
+    // (la interacción más frecuente de todo el mapa) disparaba:
+    //   1) un `dibujar()` síncrono, en medio del handler de click,
+    //      fuera de cualquier `requestAnimationFrame` — trabajo
+    //      completo (clear + tiles + proyección + clustering +
+    //      marcadores) potencialmente antes de que el propio
+    //      `abrirPopup()` de la misma función terminara de mutar el
+    //      DOM, y de cualquier forma descartado un frame después;
+    //   2) en el frame siguiente, DOS dibujados más: uno por el
+    //      `rafRedibujo` ya agendado por cerrarSpider/abrirPopup, y
+    //      otro por el propio tick de `animarOndas()` (que sigue
+    //      llamando a `dibujar()` directo) — dos redibujados
+    //      idénticos del mismo frame visual, ninguno necesario más
+    //      que el último.
+    // Reproducción con conteo de llamadas (ver auditoría): 3 `dibujar()`
+    // por click antes de este cambio, 1 después, en una réplica fiel
+    // del mecanismo real (mismas guardas, mismo orden de llamadas).
+    // Fix: `dispararOnda()` agenda el primer tick vía rAF en vez de
+    // llamar directo, y `animarOndas()` pasa a usar `redibujar()` como
+    // el resto del motor — la propia dedup de `rafRedibujo` absorbe
+    // el caso (muy común) de que otra animación quiera dibujar en el
+    // mismo frame. Costo: el primer frame de la onda se ve 1 frame
+    // (~16ms) más tarde — mismo delay de arranque que ya tienen
+    // aparición, spider y hover; imperceptible e inaudible frente a
+    // los 400ms de duración total de la animación.
     function dispararOnda(x, y, color) {
       if (prefiereMovimientoReducido()) return; // el estado (popup, tarjeta resaltada) ya comunica la acción sin necesidad de animación
       ondas.push({ x: x, y: y, inicio: performance.now(), color: colorSeguro(color) });
-      animarOndas();
+      if (rafOndas === null) rafOndas = requestAnimationFrame(animarOndas);
     }
     function animarOndas() {
       if (!vivo || !ondas.length) { rafOndas = null; return; }
       var ahora = performance.now();
       ondas = ondas.filter(function (o) { return ahora - o.inicio < DURACION_ONDA_MS; });
-      dibujar();
+      redibujar();
       rafOndas = ondas.length ? requestAnimationFrame(animarOndas) : null;
     }
     function dibujarOndas() {
