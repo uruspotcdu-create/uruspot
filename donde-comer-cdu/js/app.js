@@ -910,7 +910,9 @@
           throw new Error('Core invÃ¡lido o vacÃ­o');
         }
 
-        REGISTRO = core.map(function (l) {
+// Construir índice invertido para búsqueda O(1)
+        if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
+                REGISTRO = core.map(function (l) {
           var reg = {
             id: l.id,
             nombre: l.nombre,
@@ -3479,6 +3481,7 @@
   });
 
 })();
+
 
 
 
