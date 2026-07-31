@@ -532,8 +532,19 @@
     var ultimosClusters = [];
     var claveClusters = '';
     function clusteringVigente() {
+      // PERF (auditoría performance, 2026-07-30): antes usaba `puntos.length`
+      // como proxy del conjunto de puntos. Dos búsquedas/filtros distintos
+      // que devuelven la MISMA CANTIDAD de resultados (común: 8 curados vs.
+      // 8 filtrados) producían la misma clave sin viewport haber cambiado,
+      // así que un consumidor que cacheara sobre esta clave (ver
+      // clustersActuales() y dibujar() más abajo) podía reusar clusters de
+      // un conjunto de lugares que ya no es el que está en pantalla.
+      // `huellaListaPrevia` (ver establecerPuntos()/calcularHuella()) ya es
+      // una huella real de contenido (ids en orden) que se recalcula una
+      // sola vez por llamada a establecerPuntos(), no por frame — reusarla
+      // acá no agrega costo por frame y cierra el hueco.
       return viewport.lat + ',' + viewport.lng + ',' + viewport.zoom + ',' +
-        viewport.ancho + ',' + viewport.alto + ',' + puntos.length;
+        viewport.ancho + ',' + viewport.alto + ',' + huellaListaPrevia;
     }
     function clustersActuales() {
       var clave = clusteringVigente();
@@ -643,9 +654,31 @@
           dibujarEstadoVacio();
         } else {
           var proyectados = proyectarPuntos();
-          var clusters = agruparEnClusters(proyectados);
-          ultimosClusters = clusters;
-          claveClusters = clusteringVigente();
+          // PERF (auditoría performance, 2026-07-30): agruparEnClusters() es
+          // O(n²) (comentario original en su definición) y ya existía
+          // clustersActuales()/claveClusters/ultimosClusters exactamente
+          // para no repetir ese trabajo cuando el viewport y el conjunto de
+          // puntos no cambiaron entre frames — pero dibujar(), que es el
+          // ÚNICO llamador real del loop de rAF (pan, zoom, inercia, ondas
+          // de clic, aparición de marcador, spider — ver los ~10 puntos de
+          // requestAnimationFrame de este archivo, todos terminan acá),
+          // nunca lo usaba: llamaba a agruparEnClusters() directo, siempre,
+          // incondicionalmente. El cache existía pero protegía al
+          // consumidor equivocado (solo lo leía el hit-testing de hover,
+          // clustersActuales() en buscarMarcadorEn()). Con el viewport
+          // estático durante cualquier animación (onda de clic ~400ms,
+          // aparición de marcador 220ms, spider), esto repetía el O(n²)
+          // completo en cada uno de esos frames sin que ni `viewport` ni
+          // los puntos hubieran cambiado un solo bit.
+          var claveActual = clusteringVigente();
+          var clusters;
+          if (claveActual === claveClusters) {
+            clusters = ultimosClusters;
+          } else {
+            clusters = agruparEnClusters(proyectados);
+            ultimosClusters = clusters;
+            claveClusters = claveActual;
+          }
           dibujarMarcadores(clusters);
           dibujarSpider();
           posicionarPopupAbierto(proyectados, clusters);
