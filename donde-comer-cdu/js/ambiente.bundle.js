@@ -4,7 +4,7 @@
  * Para modificar el Ambient Engine, editá el módulo ambiente-*.js
  * correspondiente y volvé a correr:
  *   node scripts/build-ambiente-bundle.js
- * Generado: 2026-07-31T18:23:59.048Z
+ * Generado: 2026-07-31T18:39:25.564Z
  */
 
 /* ==== ambiente-config.js ==== */
@@ -3280,6 +3280,24 @@
   'use strict';
 
   function movimiento() { return global.AmbienteMovimiento || null; }
+  function rendimiento() { return global.AmbienteRendimiento || null; }
+
+  // Etapa 3 (Roadmap A+B — Contrato común, ver ambiente-contrato.js):
+  // mismo umbral que ya usa AmbienteConfig.NIVELES_FIDELIDAD.clima (0
+  // en 'reducida' y 'minima', 1 en 'completa') — hoy ese umbral solo
+  // apagaba el EFECTO visual vía Motion Controller (climaHabilitado
+  // en ambiente-movimiento.js), nunca el polling real de red de este
+  // módulo. Pura y sin leer AmbienteRendimiento por su cuenta (recibe
+  // el nivel como parámetro), para que se pueda testear aislada sin
+  // mockear el Performance Manager completo.
+  function isActive(fidelidad) {
+    return fidelidad !== 'reducida' && fidelidad !== 'minima';
+  }
+
+  function fidelidadActual() {
+    var r = rendimiento();
+    return r ? r.nivelFidelidad : 'completa';
+  }
 
   var efectosActivos = {}; // { lluvia: boolean, niebla: boolean, viento: boolean }
   var contenedor = null;
@@ -3303,6 +3321,28 @@
   var climaRealLluviaActiva = false;
   var climaRealNieblaActiva = false;
   var listenerVisibilidad = null;
+  var desuscribirRendimiento = null;
+
+  // Etapa 3: dos razones independientes para pausar el polling, cada
+  // una dueña de su propio booleano — igual que ya hacía el listener
+  // de visibilidad antes de este cambio, solo que ahora hay dos en vez
+  // de una. Ninguna anula el registro de la otra: si la pestaña está
+  // oculta Y la fidelidad está degradada a la vez, al volver a
+  // fidelidad completa con la pestaña todavía oculta, el polling debe
+  // seguir pausado (por visibilidad), no reanudarse a medias.
+  var visibilidadPermitePolling = true;
+  var fidelidadPermitePolling = true;
+
+  // Única función que decide arrancar/parar el intervalo real,
+  // consultando ambas señales — así ninguna de las dos puede reanudar
+  // el polling por su cuenta mientras la otra lo esté vetando.
+  function actualizarEstadoPolling() {
+    if (visibilidadPermitePolling && fidelidadPermitePolling) {
+      reanudarRefresco();
+    } else {
+      pausarRefresco();
+    }
+  }
 
   // Variaciones climáticas posibles (Cap. 5.7 Fase 1)
   var EFECTOS_DISPONIBLES = {
@@ -3518,13 +3558,31 @@
       // cuando la pestaña no es visible (Cap. 8.2 Playbook: "sin
       // listeners activos en background") y retoma con un fetch
       // inmediato al volver, en vez de esperar el próximo intervalo.
+      //
+      // Etapa 3: mismo mecanismo de pausa, ahora también gateado por
+      // fidelidad (isActive arriba) — antes ese umbral solo apagaba el
+      // EFECTO visual vía Motion Controller, nunca el polling de red
+      // real de este módulo. En 'reducida'/'minima' no tiene sentido
+      // seguir pidiendo datos que van a alimentar un efecto que ya
+      // está desactivado.
       if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
-        if (document.visibilityState !== 'hidden') reanudarRefresco();
+        visibilidadPermitePolling = document.visibilityState !== 'hidden';
+        fidelidadPermitePolling = isActive(fidelidadActual());
+        actualizarEstadoPolling();
+
         listenerVisibilidad = function () {
-          if (document.visibilityState === 'hidden') pausarRefresco();
-          else reanudarRefresco();
+          visibilidadPermitePolling = document.visibilityState !== 'hidden';
+          actualizarEstadoPolling();
         };
         document.addEventListener('visibilitychange', listenerVisibilidad);
+
+        var r = rendimiento();
+        if (r) {
+          desuscribirRendimiento = r.suscribir(function (evento) {
+            fidelidadPermitePolling = isActive(evento.actual);
+            actualizarEstadoPolling();
+          });
+        }
       }
     },
 
@@ -3536,6 +3594,12 @@
         document.removeEventListener('visibilitychange', listenerVisibilidad);
         listenerVisibilidad = null;
       }
+      if (desuscribirRendimiento) {
+        desuscribirRendimiento();
+        desuscribirRendimiento = null;
+      }
+      visibilidadPermitePolling = true;
+      fidelidadPermitePolling = true;
 
       // Desactivar todos los efectos
       Object.keys(EFECTOS_DISPONIBLES).forEach(desactivarEfecto);
