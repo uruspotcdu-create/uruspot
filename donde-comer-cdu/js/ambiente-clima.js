@@ -81,6 +81,27 @@
   var listenerVisibilidad = null;
   var desuscribirRendimiento = null;
 
+  // Etapa 3: dos razones independientes para pausar el polling, cada
+  // una dueña de su propio booleano — igual que ya hacía el listener
+  // de visibilidad antes de este cambio, solo que ahora hay dos en vez
+  // de una. Ninguna anula el registro de la otra: si la pestaña está
+  // oculta Y la fidelidad está degradada a la vez, al volver a
+  // fidelidad completa con la pestaña todavía oculta, el polling debe
+  // seguir pausado (por visibilidad), no reanudarse a medias.
+  var visibilidadPermitePolling = true;
+  var fidelidadPermitePolling = true;
+
+  // Única función que decide arrancar/parar el intervalo real,
+  // consultando ambas señales — así ninguna de las dos puede reanudar
+  // el polling por su cuenta mientras la otra lo esté vetando.
+  function actualizarEstadoPolling() {
+    if (visibilidadPermitePolling && fidelidadPermitePolling) {
+      reanudarRefresco();
+    } else {
+      pausarRefresco();
+    }
+  }
+
   // Variaciones climáticas posibles (Cap. 5.7 Fase 1)
   var EFECTOS_DISPONIBLES = {
     lluvia: { elemento: null, claseCSS: 'ambient-lluvia' },
@@ -295,13 +316,31 @@
       // cuando la pestaña no es visible (Cap. 8.2 Playbook: "sin
       // listeners activos en background") y retoma con un fetch
       // inmediato al volver, en vez de esperar el próximo intervalo.
+      //
+      // Etapa 3: mismo mecanismo de pausa, ahora también gateado por
+      // fidelidad (isActive arriba) — antes ese umbral solo apagaba el
+      // EFECTO visual vía Motion Controller, nunca el polling de red
+      // real de este módulo. En 'reducida'/'minima' no tiene sentido
+      // seguir pidiendo datos que van a alimentar un efecto que ya
+      // está desactivado.
       if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
-        if (document.visibilityState !== 'hidden') reanudarRefresco();
+        visibilidadPermitePolling = document.visibilityState !== 'hidden';
+        fidelidadPermitePolling = isActive(fidelidadActual());
+        actualizarEstadoPolling();
+
         listenerVisibilidad = function () {
-          if (document.visibilityState === 'hidden') pausarRefresco();
-          else reanudarRefresco();
+          visibilidadPermitePolling = document.visibilityState !== 'hidden';
+          actualizarEstadoPolling();
         };
         document.addEventListener('visibilitychange', listenerVisibilidad);
+
+        var r = rendimiento();
+        if (r) {
+          desuscribirRendimiento = r.suscribir(function (evento) {
+            fidelidadPermitePolling = isActive(evento.actual);
+            actualizarEstadoPolling();
+          });
+        }
       }
     },
 
@@ -313,6 +352,12 @@
         document.removeEventListener('visibilitychange', listenerVisibilidad);
         listenerVisibilidad = null;
       }
+      if (desuscribirRendimiento) {
+        desuscribirRendimiento();
+        desuscribirRendimiento = null;
+      }
+      visibilidadPermitePolling = true;
+      fidelidadPermitePolling = true;
 
       // Desactivar todos los efectos
       Object.keys(EFECTOS_DISPONIBLES).forEach(desactivarEfecto);
