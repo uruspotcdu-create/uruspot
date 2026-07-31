@@ -36,8 +36,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
-const INDEX_HTML = path.join(__dirname, '..', 'donde-comer-cdu', 'index.html');
+// BUGFIX (2026-07-31, hallado al validar la Etapa 5): este archivo vive
+// en donde-comer-cdu/js/scripts/, no en donde-comer-cdu/scripts/ — la
+// ruta relativa original ('..','donde-comer-cdu','js') asumía lo
+// segundo y terminaba apuntando a donde-comer-cdu/js/donde-comer-cdu/js
+// (inexistente), rompiendo el build con ENOENT en cualquier checkout
+// limpio. Con el script un nivel más adentro, subir un solo nivel
+// (__dirname/..) ya da directamente donde-comer-cdu/js.
+const JS_DIR = path.join(__dirname, '..');
 const SALIDA = path.join(JS_DIR, 'ambiente.bundle.js');
 
 // Orden real, copiado del grafo de dependencias documentado en
@@ -45,6 +51,7 @@ const SALIDA = path.join(JS_DIR, 'ambiente.bundle.js');
 const ORDEN = [
   'ambiente-config.js',
   'ambiente-contrato.js',
+  'ambiente-scheduler.js',
   'ambiente-assets.js',
   'ambiente-diagnostico.js',
   'ambiente-metrics.js',
