@@ -124,6 +124,15 @@
         registros.fidelidad.splice(0, registros.fidelidad.length - LIMITES_RETENCION.fidelidad);
       }
     },
+    // Etapa 1 (Roadmap A+B, Instrumentación): consumidores previstos
+    // son ambiente-metrics.js (frame-a-frame) — mismo patrón de
+    // entrada que registrarFPS, un valor numérico por evento.
+    registrarFrameTime: function (ms) {
+      if (typeof ms === 'number' && isFinite(ms)) registrar('frameTime', ms);
+    },
+    registrarTareaLarga: function (ms) {
+      if (typeof ms === 'number' && isFinite(ms)) registrar('tareaLarga', ms);
+    },
 
     // ── Salidas de lectura, exclusivamente para consulta pasiva
     // (equipo de producto / debugging) — nunca deben usarse como
@@ -138,7 +147,17 @@
         cargasFallidas: registros.cargaFallida.length,
         ultimoNivelFidelidad: registros.fidelidad.length
           ? registros.fidelidad[registros.fidelidad.length - 1].valor
-          : null
+          : null,
+        // Etapa 1 (Roadmap A+B, Instrumentación): mismo nivel de
+        // detalle que fps arriba, más el peor caso (maximo) porque
+        // para frame time y long tasks un solo pico ya es la señal
+        // relevante (un jank puntual), no solo el promedio.
+        frameTimePromedioMs: promedio(registros.frameTime),
+        frameTimeMaxMs: maximo(registros.frameTime),
+        frameTimeMuestras: registros.frameTime.length,
+        tareaLargaCantidad: registros.tareaLarga.length,
+        tareaLargaTotalMs: suma(registros.tareaLarga),
+        tareaLargaMaxMs: maximo(registros.tareaLarga)
       };
     },
 
