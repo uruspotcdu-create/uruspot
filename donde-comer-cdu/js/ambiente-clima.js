@@ -95,6 +95,7 @@
   var climaRealLluviaActiva = false;
   var climaRealNieblaActiva = false;
   var listenerVisibilidad = null;
+  var desuscribirVisibilidadMovimiento = null;
   var desuscribirRendimiento = null;
 
   // Etapa 3: dos razones independientes para pausar el polling, cada
@@ -389,16 +390,41 @@
       // real de este módulo. En 'reducida'/'minima' no tiene sentido
       // seguir pidiendo datos que van a alimentar un efecto que ya
       // está desactivado.
-      if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+      //
+      // PERF (auditoría de arquitectura, 2026-07-31): este módulo
+      // tenía su propio listener directo de document.visibilitychange
+      // — la misma señal cruda que Cap. 2.3 le asigna en exclusiva a
+      // AmbienteMovimiento como fuente única para todo el Grupo de
+      // Contenido Visual ("ningún módulo... necesita su propio
+      // listener de visibilidad"), y que ambiente-respiracion.js ya
+      // consume correctamente por esa vía. Ahora clima.js sigue el
+      // mismo patrón: se suscribe al evento motivo:'visibilidad' del
+      // Motion Controller en vez de escuchar document directamente, y
+      // solo cae al listener directo si AmbienteMovimiento no llegó a
+      // cargar (mismo respaldo defensivo que el resto del motor usa
+      // ante una dependencia ausente). Cero cambio de comportamiento
+      // — document.visibilitychange dispara exactamente el mismo
+      // evento en ambos casos — es una corrección puramente
+      // arquitectónica: una fuente de la señal, no dos.
+      if (typeof document !== 'undefined') {
         visibilidadPermitePolling = document.visibilityState !== 'hidden';
         fidelidadPermitePolling = isActive(fidelidadActual());
         actualizarEstadoPolling();
 
-        listenerVisibilidad = function () {
+        var alCambiarVisibilidad = function () {
           visibilidadPermitePolling = document.visibilityState !== 'hidden';
           actualizarEstadoPolling();
         };
-        document.addEventListener('visibilitychange', listenerVisibilidad);
+
+        var m = movimiento();
+        if (m && typeof m.suscribir === 'function') {
+          desuscribirVisibilidadMovimiento = m.suscribir(function (evento) {
+            if (evento.motivo === 'visibilidad') alCambiarVisibilidad();
+          });
+        } else if (typeof document.addEventListener === 'function') {
+          listenerVisibilidad = alCambiarVisibilidad;
+          document.addEventListener('visibilitychange', listenerVisibilidad);
+        }
 
         var r = rendimiento();
         if (r) {
@@ -417,6 +443,10 @@
       if (listenerVisibilidad && typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', listenerVisibilidad);
         listenerVisibilidad = null;
+      }
+      if (desuscribirVisibilidadMovimiento) {
+        desuscribirVisibilidadMovimiento();
+        desuscribirVisibilidadMovimiento = null;
       }
       if (desuscribirRendimiento) {
         desuscribirRendimiento();
