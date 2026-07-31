@@ -17,21 +17,40 @@
 // controlables a mano (sin temporizadores reales: los frames y los
 // intervalos se disparan explícitamente desde el test).
 //
-// Qué verifica (Fase 6, auditoría §7 "tests"):
+// Qué verifica (Fase 6, auditoría §7 "tests"; Suites 2-4 actualizadas
+// en la revisión 2026-07-31 tras la Etapa 5 — ver nota más abajo):
 //   1. Inicialización idempotente (ambiente-clima.js, ambiente-
 //      rendimiento.js) — una segunda llamada a iniciar() no debe
 //      duplicar contenedores DOM, suscripciones ni listeners.
 //   2. Ausencia de timers duplicados (ambiente-clima.js): iniciar()
 //      llamado dos veces deja exactamente un setInterval activo.
-//   3. Pausa/reanudación real de rAF ante ocultamiento de pestaña
-//      (ambiente-respiracion.js, ambiente-rendimiento.js): al ocultar,
-//      el ciclo se cancela por completo (cero frames pendientes) en
-//      vez de seguir reprogramándose; al volver a mostrar, se reanuda
-//      exactamente una vez.
-//   4. Ausencia de listeners duplicados de visibilitychange tras
-//      ciclos repetidos de iniciar()/detener() (ambiente-rendimiento.js).
+//   3. Pausa/reanudación real del rAF compartido ante ocultamiento de
+//      pestaña (ambiente-scheduler.js, hoy el único dueño del rAF
+//      permanente): al ocultar, el ciclo se cancela por completo
+//      (cero frames pendientes) en vez de seguir reprogramándose; al
+//      volver a mostrar, se reanuda exactamente una vez.
+//   4. Ausencia de listeners/tareas duplicadas tras ciclos repetidos
+//      de iniciar()/detener() y de múltiples tareas compartiendo un
+//      único scheduler (ambiente-rendimiento.js, ambiente-
+//      respiracion.js, ambiente-scheduler.js).
 //   5. No regresión de la API pública: cada módulo sigue exponiendo
 //      los mismos métodos que antes de la Fase 6.
+//
+// Nota (revisión 2026-07-31): la Etapa 5 (perf) movió la propiedad del
+// rAF/visibilitychange permanente DESDE ambiente-respiracion.js y
+// ambiente-rendimiento.js HACIA ambiente-scheduler.js (un único loop
+// compartido en vez de uno por módulo — ver cabecera de ese archivo).
+// Las Suites 2 y 3 de esta prueba seguían verificando el contrato
+// VIEJO (cada módulo pidiendo su propio rAF) cargando esos dos
+// archivos SIN ambiente-scheduler.js en el sandbox: con el código
+// real ya migrado, `iniciar()` no encontraba `AmbienteScheduler` y se
+// degradaba fail-open (comportamiento documentado y correcto), así
+// que los contadores de frames/listeners daban 0 en vez del 1
+// esperado por la aserción vieja — 9 falsos negativos, no una
+// regresión de comportamiento real. Se reescribieron ambas suites
+// para cargar ambiente-scheduler.js junto con el módulo bajo prueba y
+// verificar el contrato ACTUAL: registro/desregistro en el scheduler
+// compartido, no un rAF propio.
 //
 // Qué NO verifica (requiere navegador real, ver informe de la Fase 6
 // entregado junto a este cambio): FPS real, compositing/will-change,
@@ -209,12 +228,76 @@ function cargarModulo(entorno, nombreArchivo) {
   afirmar(entorno.cantidadListenersVisibilitychange() === 0, 'destruir() remueve el listener de visibilitychange');
 })();
 
-// ── Suite 2: ambiente-respiracion.js — pausa/reanudación real de rAF ─
+// ── Suite 2: ambiente-scheduler.js — loop compartido (Etapa 5) ──────
+// Dueño único del rAF/visibilitychange permanente desde la Etapa 5.
+// Se prueba de forma aislada (sin tareas reales) para separar su
+// contrato del de las tareas que se registran en él.
+
+(function suiteScheduler() {
+  const entorno = crearEntorno();
+  cargarModulo(entorno, 'ambiente-scheduler.js');
+  const Scheduler = entorno.sandbox.AmbienteScheduler;
+
+  afirmar(typeof Scheduler === 'object' && Scheduler !== null, 'ambiente-scheduler.js expone AmbienteScheduler');
+  afirmar(typeof Scheduler.registrar === 'function', 'ambiente-scheduler.js expone registrar()');
+
+  afirmar(entorno.cantidadFramesPendientes() === 0, 'sin tareas registradas, el loop no arranca solo (nada que correr)');
+
+  const llamadas = [];
+  const desregistrar = Scheduler.registrar('tarea-a', (ts) => llamadas.push(ts));
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'la primera tarea registrada arranca el loop compartido (un frame en cola)');
+  afirmar(entorno.cantidadListenersVisibilitychange() === 1, 'registrar() suscribe un único listener de visibilitychange');
+
+  Scheduler.registrar('tarea-b', () => {});
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'una segunda tarea no duplica el rAF (sigue siendo un único loop)');
+  afirmar(entorno.cantidadListenersVisibilitychange() === 1, 'una segunda tarea no duplica el listener de visibilitychange');
+  afirmar(Scheduler.tareasActivas.length === 2, 'ambas tareas quedan registradas en orden');
+
+  entorno.dispararFrame(1000);
+  afirmar(llamadas.length === 1, 'cada frame ejecuta las tareas registradas con el timestamp real');
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'con la pestaña visible, el tick reprograma el siguiente frame (ciclo continuo)');
+
+  entorno.ocultar();
+  entorno.dispararFrame(1016);
+  afirmar(entorno.cantidadFramesPendientes() === 0, 'al ocultar la pestaña, el loop se cancela por completo (cero frames en cola) en vez de seguir reprogramándose');
+
+  entorno.dispararVisibilitychange(); // sigue oculta — no debería reanudar
+  afirmar(entorno.cantidadFramesPendientes() === 0, 'un visibilitychange mientras sigue oculta no reanuda el loop');
+
+  entorno.mostrar();
+  entorno.dispararVisibilitychange();
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'al volver a mostrarse, el loop se reanuda con exactamente un frame nuevo');
+
+  entorno.dispararVisibilitychange();
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'un segundo visibilitychange ya visible no agrega un frame adicional (no hay doble reanudación)');
+
+  const llamadasAntes = llamadas.length;
+  desregistrar();
+  afirmar(Scheduler.tareasActivas.length === 1, 'desregistrar() saca solo la tarea indicada, la otra sigue activa');
+  entorno.dispararFrame(2000);
+  afirmar(llamadas.length === llamadasAntes, 'una tarea desregistrada deja de recibir frames');
+
+  const entornoAislado = crearEntorno();
+  entornoAislado.sandbox.testExplotoAlgunaVez = false;
+  cargarModulo(entornoAislado, 'ambiente-scheduler.js');
+  entornoAislado.sandbox.AmbienteScheduler.registrar('rota', () => { throw new Error('tarea rota'); });
+  let laOtraCorrio = false;
+  entornoAislado.sandbox.AmbienteScheduler.registrar('sana', () => { laOtraCorrio = true; });
+  entornoAislado.dispararFrame(1000);
+  afirmar(laOtraCorrio === true, 'una tarea que arroja excepción no tumba al resto de las tareas del mismo frame');
+})();
+
+// ── Suite 3: ambiente-respiracion.js — integración con el scheduler ─
+// Etapa 5: este módulo ya no pide su propio rAF, se registra en
+// AmbienteScheduler (cargado en el mismo sandbox, mismo orden que en
+// el bundle real — ver contract-tests.js).
 
 (function suiteRespiracion() {
   const entorno = crearEntorno();
+  cargarModulo(entorno, 'ambiente-scheduler.js');
   cargarModulo(entorno, 'ambiente-respiracion.js');
   const Respiracion = entorno.sandbox.AmbienteRespiracion;
+  const Scheduler = entorno.sandbox.AmbienteScheduler;
 
   afirmar(typeof Respiracion === 'object' && Respiracion !== null, 'ambiente-respiracion.js expone AmbienteRespiracion');
   afirmar(
@@ -222,33 +305,45 @@ function cargarModulo(entorno, nombreArchivo) {
     'ambiente-respiracion.js conserva su API pública (iniciar/amplitudActual)'
   );
 
+  afirmar(Scheduler.tareasActivas.length === 0, 'antes de iniciar(), no hay ninguna tarea registrada en el scheduler');
+
   Respiracion.iniciar();
-  afirmar(entorno.cantidadFramesPendientes() === 1, 'iniciar() deja exactamente un frame en cola');
+  afirmar(Scheduler.tareasActivas.indexOf('respiracion') > -1, 'iniciar() registra la tarea "respiracion" en el scheduler compartido');
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'iniciar() arranca el loop compartido (un frame en cola)');
 
+  Respiracion.iniciar(); // segunda llamada — debe ser idempotente
+  afirmar(Scheduler.tareasActivas.filter((t) => t === 'respiracion').length === 1, 'una segunda llamada a iniciar() no duplica el registro en el scheduler');
+
+  // Sin AmbienteScheduler disponible, iniciar() debe degradarse
+  // fail-open (Cap. 1.4) en vez de reintroducir un rAF propio.
+  const entornoSinScheduler = crearEntorno();
+  cargarModulo(entornoSinScheduler, 'ambiente-respiracion.js');
+  entornoSinScheduler.sandbox.AmbienteRespiracion.iniciar();
+  afirmar(entornoSinScheduler.cantidadFramesPendientes() === 0, 'sin AmbienteScheduler cargado, iniciar() se degrada fail-open (no reintroduce un rAF propio)');
+
+  // Gap-detection: un salto de tiempo grande (equivalente a la
+  // pestaña habiendo estado oculta) no debe acumular fase de golpe —
+  // el primer tick tras el salto solo fija la marca, no avanza el
+  // ciclo (ver comentario de tick() en ambiente-respiracion.js).
   entorno.dispararFrame(1000);
-  afirmar(entorno.cantidadFramesPendientes() === 1, 'con la pestaña visible, cada frame reprograma el siguiente (ciclo continuo)');
-
-  entorno.ocultar();
-  entorno.dispararFrame(1016);
-  afirmar(entorno.cantidadFramesPendientes() === 0, 'al ocultar la pestaña, el ciclo se cancela por completo (cero frames en cola) en vez de seguir reprogramándose');
-
-  entorno.dispararVisibilitychange(); // sigue oculta — no debería reanudar
-  afirmar(entorno.cantidadFramesPendientes() === 0, 'un visibilitychange mientras sigue oculta no reanuda el ciclo');
-
-  entorno.mostrar();
-  entorno.dispararVisibilitychange();
-  afirmar(entorno.cantidadFramesPendientes() === 1, 'al volver a mostrarse, el ciclo se reanuda con exactamente un frame nuevo');
-
-  entorno.dispararVisibilitychange();
-  afirmar(entorno.cantidadFramesPendientes() === 1, 'un segundo visibilitychange ya visible no agrega un frame adicional (no hay doble reanudación)');
+  const amplitudTrasPrimerFrame = Respiracion.amplitudActual;
+  entorno.dispararFrame(1000 + 5000); // salto > GAP_RESET_MS (500ms)
+  afirmar(Respiracion.amplitudActual === amplitudTrasPrimerFrame, 'un salto de timestamp mayor al umbral no hace avanzar el ciclo de golpe (gap-detection)');
 })();
 
-// ── Suite 3: ambiente-rendimiento.js — pausa/reanudación + listeners ─
+// ── Suite 4: ambiente-rendimiento.js — integración con el scheduler ─
+// Etapa 5: igual que respiracion, se registra en AmbienteScheduler en
+// vez de pedir su propio rAF. Además se prueba junto con respiracion
+// en el MISMO scheduler, para verificar que dos tareas reales
+// comparten un único loop sin pisarse (el caso real en producción:
+// ambos módulos conviven en la misma página).
 
 (function suiteRendimiento() {
   const entorno = crearEntorno();
-  cargarModulo(entorno, 'ambiente-rendimiento.js');
+  cargarModulo(entorno, 'ambiente-scheduler.js');
+  cargarModulo(entorno, 'ambiente-rendimiento.js'); // se auto-inicia al cargar
   const Rendimiento = entorno.sandbox.AmbienteRendimiento;
+  const Scheduler = entorno.sandbox.AmbienteScheduler;
 
   afirmar(typeof Rendimiento === 'object' && Rendimiento !== null, 'ambiente-rendimiento.js expone AmbienteRendimiento');
   afirmar(
@@ -258,31 +353,41 @@ function cargarModulo(entorno, nombreArchivo) {
   );
 
   // El módulo se auto-inicia al cargarse (última línea del archivo:
-  // api.iniciar()) — ya debería haber un frame en cola.
-  afirmar(entorno.cantidadFramesPendientes() === 1, 'ambiente-rendimiento.js se auto-inicia al cargar (un frame en cola)');
+  // api.iniciar()) — ya debería estar registrado en el scheduler.
+  afirmar(Scheduler.tareasActivas.indexOf('rendimiento') > -1, 'ambiente-rendimiento.js se auto-registra en el scheduler al cargar');
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'la auto-inicialización arranca el loop compartido (un frame en cola)');
 
   Rendimiento.iniciar(); // segunda llamada explícita — idempotente
-  afirmar(entorno.cantidadFramesPendientes() === 1, 'una segunda llamada a iniciar() no agrega un frame adicional');
-  afirmar(entorno.cantidadListenersVisibilitychange() === 1, 'un único listener de visibilitychange tras múltiples llamadas a iniciar()');
+  afirmar(Scheduler.tareasActivas.filter((t) => t === 'rendimiento').length === 1, 'una segunda llamada a iniciar() no duplica el registro en el scheduler');
+  afirmar(entorno.cantidadListenersVisibilitychange() === 1, 'un único listener de visibilitychange (propiedad del scheduler compartido, no del módulo)');
+
+  // Se registra también respiracion en el MISMO scheduler: el caso
+  // real de producción, ambos módulos activos a la vez.
+  cargarModulo(entorno, 'ambiente-respiracion.js');
+  entorno.sandbox.AmbienteRespiracion.iniciar();
+  afirmar(Scheduler.tareasActivas.length === 2, 'rendimiento y respiracion conviven como dos tareas separadas en el mismo scheduler');
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'dos tareas activas siguen compartiendo un único rAF (no uno por tarea)');
 
   entorno.ocultar();
   entorno.dispararFrame(1000);
-  afirmar(entorno.cantidadFramesPendientes() === 0, 'al ocultar, el muestreo de FPS cancela el ciclo por completo (cero frames en cola)');
+  afirmar(entorno.cantidadFramesPendientes() === 0, 'al ocultar, el loop compartido se cancela por completo (cero frames en cola) — afecta a ambas tareas por igual');
 
   entorno.mostrar();
   entorno.dispararVisibilitychange();
-  afirmar(entorno.cantidadFramesPendientes() === 1, 'al volver a mostrarse, el muestreo de FPS se reanuda con un único frame nuevo');
+  afirmar(entorno.cantidadFramesPendientes() === 1, 'al volver a mostrarse, el loop se reanuda con un único frame nuevo para ambas tareas');
 
-  // Ciclo detener()/iniciar() repetido — no debe acumular listeners.
+  // Ciclo detener()/iniciar() repetido — no debe acumular registros.
   Rendimiento.detener();
-  afirmar(entorno.cantidadFramesPendientes() === 0, 'detener() cancela el frame en cola');
+  afirmar(Scheduler.tareasActivas.indexOf('rendimiento') === -1, 'detener() desregistra la tarea del scheduler');
+  afirmar(Scheduler.tareasActivas.length === 1, 'detener() de una tarea no afecta a la otra tarea activa (respiracion sigue registrada)');
   Rendimiento.iniciar();
   Rendimiento.detener();
   Rendimiento.iniciar();
+  afirmar(Scheduler.tareasActivas.filter((t) => t === 'rendimiento').length === 1, 'ciclos repetidos de detener()/iniciar() no acumulan registros duplicados');
   afirmar(entorno.cantidadListenersVisibilitychange() === 1, 'ciclos repetidos de detener()/iniciar() no acumulan listeners de visibilitychange');
 })();
 
-// ── Suite 4: ambiente-orquestador.js — guarda de nivel superior ─────
+// ── Suite 5: ambiente-orquestador.js — guarda de nivel superior ─────
 
 (function suiteOrquestador() {
   const entorno = crearEntorno();
