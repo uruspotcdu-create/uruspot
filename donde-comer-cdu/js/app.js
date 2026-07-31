@@ -172,7 +172,16 @@
   // ───────────────────────────────────────────────────────────────────
 
   var REGISTRO = [];
-  var porId = Object.create(null);
+    var porId = Object.create(null);
+
+  // VIRTUALIZADOR: Carga lazy de lugares por viewport (auditor�a 2026-07-31)
+  function cargarLugaresDelViewport() {
+    if (!window.Virtualizador) return;
+    var bounds = { south: -32.5, north: -32.4, west: -58.3, east: -58.2 };
+    window.Virtualizador.cargarParaViewport(bounds)
+      .then(function(lugares) { console.log('[Virtualizador] Precargados ' + lugares.length + ' lugares'); })
+      .catch(function(e) { console.warn('[Virtualizador]', e); });
+  }
 
   // Estado de sesión (mutante, persistido con PLANO.guardarEstado)
   var estado = null;
@@ -938,6 +947,7 @@
         pintarStatsRapidas();
         pintarDestacados();
         pintarSugerenciasRapidas();
+        cargarLugaresDelViewport(); // Precarga lazy de tiles
         render();
 
       })
@@ -3469,3 +3479,6 @@
   });
 
 })();
+
+
+
