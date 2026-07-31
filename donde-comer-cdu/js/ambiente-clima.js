@@ -33,6 +33,22 @@
 
    Debe cargarse después de ambiente-movimiento.js y antes de
    ambiente-orquestador.js.
+
+   PENDIENTE (no relacionado a este módulo, anotado acá para que no
+   se vuelva a perder): scripts/build-ambiente-bundle.js en la raíz
+   del repo sigue validando contra los <script> de index.html
+   (validarContraIndexHtml), que ya no existen ahí desde que los 27
+   módulos se concatenaron en ambiente.bundle.js — por eso ese script
+   falla siempre con "En index.html: []". Hay que reemplazarlo por la
+   versión que valida contra el directorio (validarContraDirectorio,
+   comparando ORDEN contra los archivos ambiente-*.js en disco) y que
+   ya incluye ambiente-contrato.js + ambiente-metrics.js en ORDEN.
+   También queda un duplicado sobrante en
+   donde-comer-cdu/js/build-ambiente-bundle.js (lugar incorrecto) para
+   borrar. Mientras tanto, ambiente.bundle.js se sigue regenerando a
+   mano con esa versión corregida del script cada vez que se edita
+   este archivo — el bundle no está desactualizado, solo el script que
+   lo genera.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -272,6 +288,56 @@
   }
 
   var api = {
+    // Etapa 3 (Roadmap A+B — Contrato común, ver ambiente-contrato.js):
+    // campos de forma. id/tier/frequency son metadata declarativa; el
+    // comportamiento real de este módulo sigue siendo el mismo de
+    // siempre (dirigido por eventos del Motion Controller + polling
+    // async), no por un loop de frames — ver la nota en step() más
+    // abajo sobre por qué eso es, a propósito, un no-op por ahora.
+    id: 'clima',
+    // tier:'visual' (nunca 'core'): Cap. 7.2 dice explícitamente que
+    // clima es el primer subsistema en desactivarse ante restricción
+    // de recursos — mismo criterio que ya expresa isActive() arriba.
+    tier: 'visual',
+    // frequency:'static' (no 'full' ni 'reduced'): a diferencia de un
+    // módulo que recalcula algo en cada frame o cada N ms, clima no
+    // tiene una animación continua propia — solo prende/apaga tres
+    // clases CSS ante un evento (cambio de escena o de dato real de
+    // viento/lluvia/niebla) y se queda quieto entre esos eventos. No
+    // hay "cada cuánto" que declarar porque no hay recómputo
+    // periódico que gatear.
+    frequency: 'static',
+    isActive: isActive,
+
+    // step(dt, sharedState): intencionalmente un no-op. El contrato
+    // (ver ambiente-contrato.js) pide que step() sea cómputo puro sin
+    // tocar DOM/CSS, y que read() sea lo único que el futuro
+    // orquestador consulte para escribir en un único batch (Etapa 5).
+    // Este módulo hoy escribe DOM directamente desde sus propios
+    // callbacks (alCambiarParametros, aplicarDatosClimaReal) porque
+    // esos callbacks no corren en el loop de frames — corren cuando
+    // el Motion Controller emite un cambio o cuando responde el
+    // fetch. Forzarlos hoy a vivir dentro de step() obligaría a cachear
+    // su resultado un frame entero antes de aplicarlo, agregando
+    // latencia sin ganar nada (nadie más necesita leer ese estado
+    // intermedio todavía). Se documenta como desviación explícita,
+    // no aplicada en silencio — separar de verdad "calcular" de
+    // "escribir" en este módulo queda para cuando el orquestador
+    // realmente lo consuma (Etapa 5, writer único), no antes.
+    step: function (dt, sharedState) {},
+
+    // read(): lo único que hoy expone al espíritu del contrato — el
+    // último estado ya calculado, sin recalcular nada. Incluye lo
+    // mismo que ya devolvía obtenerActivos(), en la forma de objeto
+    // que un futuro consumidor esperaría de read().
+    read: function () {
+      return {
+        lluvia: !!efectosActivos.lluvia,
+        niebla: !!efectosActivos.niebla,
+        viento: !!efectosActivos.viento
+      };
+    },
+
     // Verificar si un efecto está actualmente activo
     estaActivo: function (nombreEfecto) {
       return !!efectosActivos[nombreEfecto];
@@ -377,6 +443,16 @@
     }
   };
 
-  global.AmbienteClima = api;
+  // Etapa 3: envuelto con AmbienteContrato.crear() para validar la
+  // forma contra el contrato común (loggea un warning si algo no
+  // calza, nunca lanza — mismo criterio fail-open del resto del
+  // motor). Fallback defensivo si por algún desorden de carga
+  // AmbienteContrato no existiera todavía: se expone igual el api
+  // crudo, sin validar, en vez de romper el arranque — un módulo
+  // sin validar es preferible a un módulo ausente (mismo espíritu
+  // que ya documenta ambiente-contrato.js sobre módulos inválidos).
+  global.AmbienteClima = global.AmbienteContrato
+    ? global.AmbienteContrato.crear(api)
+    : api;
 
 })(window);
