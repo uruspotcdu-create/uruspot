@@ -572,7 +572,9 @@
   // = no matchea nada. El orden de los checks —nombre exacto > nombre
   // empieza con > nombre contiene > categoría > dirección— es el
   // mismo criterio con el que una persona escanearía los resultados:
-  // lo más parecido a lo que escribiste, primero.
+  // lo más parecido a lo que escribiste, primero. Rango 6 (tolerante a
+  // errores tipográficos) se asigna aparte, más abajo — no es un check
+  // de substring como estos, así que no vive acá.
   function rangoDeCoincidencia(nombre, categoria, direccion, q) {
     if (nombre === q) return 0;
     if (nombre.indexOf(q) === 0) return 1;
@@ -581,6 +583,40 @@
     if (categoria.indexOf(q) !== -1) return 4;
     if (direccion.indexOf(q) !== -1) return 5;
     return null;
+  }
+
+  // Distancia de edición (Levenshtein) acotada a `maxDistancia`: no hace
+  // falta el valor exacto más allá del umbral de tolerancia, así que
+  // corta apenas puede confirmar que ninguna celda de la fila actual
+  // puede terminar por debajo de ese umbral — evita pagar el costo
+  // O(n·m) completo en el caso común (negativo, dos palabras sin
+  // relación), que es la mayoría de los candidatos difusos reales.
+  function distanciaAcotada(a, b, maxDistancia) {
+    if (Math.abs(a.length - b.length) > maxDistancia) return maxDistancia + 1;
+    var prev = [];
+    for (var j = 0; j <= b.length; j++) prev[j] = j;
+    for (var i = 1; i <= a.length; i++) {
+      var curr = [i];
+      var minFila = curr[0];
+      for (var k = 1; k <= b.length; k++) {
+        var costo = a[i - 1] === b[k - 1] ? 0 : 1;
+        curr[k] = Math.min(prev[k] + 1, curr[k - 1] + 1, prev[k - 1] + costo);
+        if (curr[k] < minFila) minFila = curr[k];
+      }
+      if (minFila > maxDistancia) return maxDistancia + 1; // esta fila ya no puede mejorar
+      prev = curr;
+    }
+    return prev[b.length];
+  }
+
+  // Cuántos errores tipográficos se toleran, en función del largo de la
+  // consulta ya normalizada. Consultas de 1-3 caracteres NO toleran
+  // nada: a esa longitud, "1 error" cambia el significado por completo
+  // (heurística estándar tipo Elasticsearch fuzziness "AUTO").
+  function toleranciaParaLongitud(len) {
+    if (len < 4) return 0;
+    if (len <= 6) return 1;
+    return 2;
   }
 
   /**
@@ -620,19 +656,60 @@
     for (var k = 0; k < registro.length; k++) indiceOriginalPorLugar.set(registro[k], k);
 
     var candidatos = [];
+    var yaCoincide = new Set();
     for (var i = 0; i < universo.length; i++) {
       var lugar = universo[i];
       var norm = normalizadoDe(lugar);
       var rango = rangoDeCoincidencia(norm.nombre, norm.categoria, norm.direccion, q);
       if (rango === null) continue;
-      candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: indiceOriginalPorLugar.get(lugar) });
+      candidatos.push({ lugar: lugar, rango: rango, distancia: 0, indiceOriginal: indiceOriginalPorLugar.get(lugar) });
+      yaCoincide.add(lugar);
+    }
+
+    // TOLERANCIA A ERRORES TIPOGRÁFICOS (2026-07-31): tier de menor
+    // prioridad (rango 6) para lugares que NO matchearon por substring
+    // exacto pero cuyo nombre está a 1-2 ediciones de la consulta —
+    // "pizeria" encuentra "pizzería", "eladeria" encuentra "heladería".
+    // Nunca reemplaza ni reordena un match exacto (rangos 0-5): se
+    // agrega al final, y solo corre si IndiceInvertido está disponible
+    // — mismo criterio de "cero riesgo de regresión" que el resto de
+    // este archivo (ver PERF más arriba). Sin índice, este tier
+    // simplemente no se activa: la búsqueda exacta de siempre sigue
+    // funcionando idéntica.
+    var tolerancia = toleranciaParaLongitud(q.length);
+    if (tolerancia > 0 && global.IndiceInvertido && typeof global.IndiceInvertido.candidatosDifusos === 'function') {
+      var candidatosFuzzy = global.IndiceInvertido.candidatosDifusos(q, tolerancia);
+      if (candidatosFuzzy) {
+        for (var f = 0; f < candidatosFuzzy.length; f++) {
+          var lugarF = candidatosFuzzy[f];
+          if (yaCoincide.has(lugarF)) continue; // ya entró por match exacto, no se duplica ni se degrada
+
+          var normF = normalizadoDe(lugarF);
+          var tokens = normF.nombre.split(/\s+/).filter(Boolean);
+          var mejorDistancia = tolerancia + 1;
+          for (var t = 0; t < tokens.length; t++) {
+            var token = tokens[t];
+            if (Math.abs(token.length - q.length) > tolerancia) continue; // no puede estar a <= tolerancia ediciones
+            var d = distanciaAcotada(q, token, tolerancia);
+            if (d < mejorDistancia) mejorDistancia = d;
+            if (mejorDistancia === 1) break; // no hay nada mejor que buscar (0 ya fue match exacto, descartado arriba)
+          }
+
+          if (mejorDistancia <= tolerancia) {
+            candidatos.push({ lugar: lugarF, rango: 6, distancia: mejorDistancia, indiceOriginal: indiceOriginalPorLugar.get(lugarF) });
+            yaCoincide.add(lugarF);
+          }
+        }
+      }
     }
 
     // Desempate explícito por índice original en vez de confiar en que
     // Array.prototype.sort sea estable: mantiene el orden del catálogo
-    // entre lugares con el mismo nivel de relevancia.
+    // entre lugares con el mismo nivel de relevancia. Dentro del rango 6
+    // (tolerante), además se ordena primero por distancia de edición —
+    // 1 error antes que 2 — antes de caer al desempate por catálogo.
     candidatos.sort(function (a, b) {
-      return (a.rango - b.rango) || (a.indiceOriginal - b.indiceOriginal);
+      return (a.rango - b.rango) || (a.distancia - b.distancia) || (a.indiceOriginal - b.indiceOriginal);
     });
 
     return candidatos.map(function (c) { return c.lugar; });

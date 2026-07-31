@@ -110,9 +110,53 @@
     return acumulado;
   }
 
+  /**
+   * Variante tolerante a errores tipográficos de candidatosPara(): en vez
+   * de exigir TODOS los trigramas de la consulta (intersección estricta),
+   * cuenta cuántos trigramas de la consulta tiene cada lugar y exige un
+   * mínimo — la misma idea de "similarity threshold" de pg_trgm, calculada
+   * acá en vez de depender de una extensión de base de datos. Sigue
+   * siendo NECESARIO-PERO-NO-SUFICIENTE: motor-exposicion.js decide con
+   * distancia de edición real si el lugar entra y con qué prioridad —
+   * esto solo evita recorrer el catálogo completo para calcularla.
+   *
+   * `maxDistancia` es la cantidad de errores tipográficos tolerados (1 o
+   * 2 en la práctica). Cada carácter distinto entre la consulta y el
+   * texto real puede destruir hasta 3 trigramas (los que lo contienen),
+   * así que el mínimo de trigramas en común exigido es (total de
+   * trigramas de la consulta) - 3 * maxDistancia, con un piso de 1 para
+   * no exigir cero coincidencias.
+   */
+  function candidatosDifusos(query, maxDistancia) {
+    if (!indexado) return null;
+    var q = normalizarTexto(String(query || '').trim());
+    if (q.length < 4) return null; // con 1-3 chars, un typo es indistinguible de otra palabra
+
+    var tris = trigramas(q);
+    if (!tris.length) return null;
+
+    var conteo = new Map();
+    for (var i = 0; i < tris.length; i++) {
+      var lista = postings[tris[i]];
+      if (!lista) continue;
+      for (var j = 0; j < lista.length; j++) {
+        var lugar = lista[j];
+        conteo.set(lugar, (conteo.get(lugar) || 0) + 1);
+      }
+    }
+
+    var umbral = Math.max(1, tris.length - 3 * maxDistancia);
+    var resultado = [];
+    conteo.forEach(function (veces, lugar) {
+      if (veces >= umbral) resultado.push(lugar);
+    });
+    return resultado;
+  }
+
   global.IndiceInvertido = {
     construir: construir,
-    candidatosPara: candidatosPara
+    candidatosPara: candidatosPara,
+    candidatosDifusos: candidatosDifusos
   };
 })(typeof window !== 'undefined' ? window : global);
 

@@ -40,7 +40,6 @@ const fs = require('fs');
 const path = require('path');
 
 const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
-const INDEX_HTML = path.join(__dirname, '..', 'donde-comer-cdu', 'index.html');
 const SALIDA = path.join(JS_DIR, 'motor.bundle.js');
 
 const ORDEN = [
@@ -56,20 +55,22 @@ const ORDEN = [
   'datos-virtualizador.js'
 ];
 
-function ordenEnIndexHtml() {
-  const html = fs.readFileSync(INDEX_HTML, 'utf8');
-  const matches = [...html.matchAll(/<script src="js\/([\w-]+\.js)" defer><\/script>/g)];
-  const nombresValidos = new Set(ORDEN);
-  return matches.map((m) => m[1]).filter((f) => nombresValidos.has(f));
-}
-
-function validarContraIndexHtml() {
-  const real = ordenEnIndexHtml();
-  const iguales = real.length === ORDEN.length && real.every((f, i) => f === ORDEN[i]);
-  if (!iguales) {
-    console.error('El orden de ORDEN en este script NO coincide con los <script> de index.html.');
-    console.error('En index.html:', real);
-    console.error('En este script:', ORDEN);
+// La comparación contra <script> individuales de index.html quedó
+// obsoleta el mismo 2026-07-31 en que estos 10 módulos se concatenaron
+// a motor.bundle.js: desde entonces index.html solo tiene el <script>
+// del bundle, así que esa comparación siempre daba "En index.html: []"
+// y el build fallaba siempre (ver misma clase de bug ya corregida en
+// build-ambiente-bundle.js). El invariante que sigue vivo y vale la
+// pena proteger acá es más simple: que cada archivo de ORDEN exista
+// realmente en JS_DIR — así un nombre mal escrito o un módulo borrado
+// sigue haciendo fallar el build en vez de generar un bundle roto o
+// incompleto en silencio. El orden real dentro del bundle lo sigue
+// verificando js/contract-tests.js leyendo los marcadores.
+function validarQueArchivosExisten() {
+  const faltantes = ORDEN.filter((archivo) => !fs.existsSync(path.join(JS_DIR, archivo)));
+  if (faltantes.length) {
+    console.error('ORDEN en scripts/build-motor-bundle.js incluye archivos que no existen en js/:');
+    console.error(faltantes);
     process.exit(1);
   }
 }
@@ -79,7 +80,7 @@ function quitarBOM(texto) {
 }
 
 function build() {
-  validarContraIndexHtml();
+  validarQueArchivosExisten();
 
   const partes = ORDEN.map((archivo) => {
     const contenido = quitarBOM(fs.readFileSync(path.join(JS_DIR, archivo), 'utf8'));
