@@ -110,7 +110,9 @@
 
   // ── Muestreo real de FPS (Cap. 9.6: "un valor único... consultado
   // antes de generar cualquier parámetro") ────────────────────────
-  var rafId = null;
+  var registradoEnScheduler = false;
+  var desregistrarScheduler = null;
+  var GAP_RESET_MS = 500; // ver nota en ambiente-scheduler.js sobre gap-detection
   var ultimoFrame = null;
   var inicioVentana = null;
   var framesEnVentana = 0;
@@ -158,31 +160,23 @@
     }
   }
 
-  // Fase 6 (auditoría §1): antes, esta función se reprogramaba a sí
-  // misma aun con la pestaña oculta (descartaba la ventana pero
-  // seguía pidiendo frames). Ahora el rAF se cancela por completo
-  // mientras está oculta y se reanuda desde un listener de
-  // visibilidad — cumple de forma literal el propio Cap. 9.2 citado
-  // en la cabecera del archivo ("no debe existir ciclo de animación
-  // ejecutándose en segundo plano"), sin cambiar el criterio ya
-  // existente de descartar la ventana en curso al ocultarse.
-  var pausadoPorVisibilidad = false;
-
+  // Etapa 5 (perf, 2026-07-31): antes, esta función pedía y
+  // cancelaba su propio rAF, con su propio listener de
+  // visibilitychange casi idéntico al que también tenía
+  // ambiente-respiracion.js (ver nota de cabecera de
+  // ambiente-scheduler.js). Ahora es una tarea "pura" registrada en
+  // el scheduler compartido: nunca vuelve a pedir su propio frame —
+  // eso lo decide el scheduler — y detecta ella misma un salto
+  // anómalo de timestamp (pestaña que estuvo oculta) para descartar
+  // esa ventana en vez de computar un delta falso, en lugar de
+  // depender de un cancelAnimationFrame propio. Mismo criterio de
+  // fondo que antes (Cap. 9.2: nunca contar como jank real un salto
+  // de segundo plano), ahora sin necesitar su propio listener.
   function pasoFrame(marcaTiempo) {
-    if (!pestanaVisible()) {
-      ultimoFrame = null;
-      inicioVentana = null;
-      framesEnVentana = 0;
-      pausadoPorVisibilidad = true;
-      rafId = null; // detenido, no reprogramado
-      return;
-    }
-
-    if (ultimoFrame === null) {
+    if (ultimoFrame === null || (marcaTiempo - ultimoFrame) > GAP_RESET_MS) {
       ultimoFrame = marcaTiempo;
       inicioVentana = marcaTiempo;
       framesEnVentana = 0;
-      rafId = global.requestAnimationFrame(pasoFrame);
       return;
     }
 
@@ -197,18 +191,7 @@
       inicioVentana = marcaTiempo;
       framesEnVentana = 0;
     }
-
-    rafId = global.requestAnimationFrame(pasoFrame);
   }
-
-  function alCambiarVisibilidad() {
-    if (pestanaVisible() && pausadoPorVisibilidad && rafId === null) {
-      pausadoPorVisibilidad = false;
-      rafId = global.requestAnimationFrame(pasoFrame);
-    }
-  }
-
-  var listenerRegistrado = false;
 
   var api = {
     get nivelFidelidad() { return nivelActual; },
@@ -233,30 +216,31 @@
       };
     },
 
+    // Etapa 5: requiere AmbienteScheduler (debe cargar antes en el
+    // ORDEN del bundle — ver scripts/build-ambiente-bundle.js). Si no
+    // está disponible, este módulo se degrada de forma fail-open
+    // (Cap. 1.4: "mejor no tener el módulo que tenerlo roto"): el
+    // nivel de fidelidad queda fijo en su estimación inicial por
+    // capacidad de dispositivo, sin muestreo real de FPS, en vez de
+    // reintentar un rAF propio que reintroduciría el loop duplicado
+    // que esta etapa vino a eliminar.
     iniciar: function () {
-      if (rafId !== null) return; // idempotente
-      if (typeof global.requestAnimationFrame !== 'function') return;
+      if (registradoEnScheduler) return; // idempotente
+      var s = global.AmbienteScheduler;
+      if (!s || typeof s.registrar !== 'function') return;
       var a = assets();
       if (a) aplicarTamanoCache(nivelActual); // aplica el punto de partida ya al arrancar
-      rafId = global.requestAnimationFrame(pasoFrame);
-
-      // Reanudación tras pausa por 2º plano (registrado una sola vez;
-      // una segunda llamada a iniciar() ya vuelve por el guard de
-      // arriba antes de llegar acá).
-      if (!listenerRegistrado && typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
-        listenerRegistrado = true;
-        document.addEventListener('visibilitychange', alCambiarVisibilidad);
-      }
+      registradoEnScheduler = true;
+      desregistrarScheduler = s.registrar('rendimiento', pasoFrame);
     },
 
     // Solo para pruebas / apagado explícito (por ejemplo, la app
     // pasa a segundo plano de forma prolongada y decide liberar el
     // ciclo de muestreo por completo, no solo pausarlo un frame).
     detener: function () {
-      if (rafId !== null && typeof global.cancelAnimationFrame === 'function') {
-        global.cancelAnimationFrame(rafId);
-      }
-      rafId = null;
+      if (desregistrarScheduler) desregistrarScheduler();
+      desregistrarScheduler = null;
+      registradoEnScheduler = false;
       ultimoFrame = null;
       inicioVentana = null;
       framesEnVentana = 0;
