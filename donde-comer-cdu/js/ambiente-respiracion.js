@@ -137,6 +137,43 @@
     return (typeof document !== 'undefined') ? !document.hidden : true;
   }
 
+  // PERF (auditoría performance, 2026-07-30): `aplicar()` hacía DOS
+  // cosas distintas en una sola llamada por rAF — (1) el cómputo (seno
+  // + suavizado exponencial de `multiplicadorActual`), que es barato
+  // (un puñado de operaciones aritméticas), y (2) la escritura al DOM
+  // vía `style.setProperty` sobre `<html>`, que NO es barata: cambiar
+  // una custom property en la raíz del árbol obliga al motor de
+  // estilos a recorrer/invalidar el árbol para saber qué elementos
+  // dependen de ella (Blink no puede aplicar el atajo de "propiedad
+  // independiente" que sí usa para una animación directa de opacity
+  // en un elemento — ver css/ambiente-estilos.css:69, `--amb-respiracion`
+  // participa de un `calc()`, no es ella misma la propiedad animada).
+  // Este ciclo corre para siempre mientras la pestaña está visible —
+  // incluida toda la sesión de "Foco" (lectura de una ficha, donde el
+  // usuario más necesita que el hilo principal esté libre) — así que
+  // el costo de (2) se paga 60 veces por segundo, todo el tiempo que
+  // la app esté abierta, por un efecto de ±4% de opacidad.
+  //
+  // La amplitud máxima del ciclo es 4% (RESPIRACION.amplitudMaxima,
+  // Cap. 3.4) y el período nunca baja de 8000ms — con esos números,
+  // el salto de opacidad entre dos escrituras consecutivas a 60fps es
+  // ≈0.00036 (paso angular × amplitud). Bajar la frecuencia de
+  // ESCRITURA (no de cómputo) a 1 de cada 3 frames (~20fps en una
+  // pantalla de 60Hz) sube ese salto a ≈0.0011 — seguís muy por debajo
+  // del umbral de percepción de cambios de opacidad (∼0.01, "just
+  // noticeable difference") — y corta 2 de cada 3 escrituras al DOM:
+  // de 216.000 a 72.000 por hora de sesión en foreground. El cómputo
+  // (seno + suavizado exponencial de `multiplicadorActual`) se
+  // mantiene sin cambios en CADA frame — separarlo de la escritura es
+  // justamente lo que evita alterar la tasa de convergencia de
+  // `TASA_SUAVIZADO` (calibrada "por frame", no en tiempo real): si se
+  // saltearan también esas llamadas, entrar/salir de Foco o Carga
+  // convergería 3x más lento en reloj real que lo documentado en el
+  // Cap. 8. No se toca esa semántica; solo se difiere CUÁNDO el valor
+  // ya calculado llega al DOM.
+  var INTERVALO_ESCRITURA = 3; // 1 de cada 3 frames ⇒ ~20fps de escritura real en pantallas 60Hz
+  var contadorFrames = 0;
+
   function aplicar() {
     if (typeof document === 'undefined' || !document.documentElement) return;
 
@@ -150,11 +187,16 @@
     var objetivo = objetivoMultiplicador();
     // Cap. 8 "nunca instantáneo": convergencia gradual hacia el
     // objetivo en vez de asignación directa, para que Foco/Carga
-    // entren y salgan como atenuación, no como salto.
+    // entren y salgan como atenuación, no como salto. Se recalcula en
+    // TODOS los frames (ver comentario arriba) — solo la escritura al
+    // DOM, más abajo, se difiere.
     multiplicadorActual += (objetivo - multiplicadorActual) * TASA_SUAVIZADO;
 
     var amplitud = r.amplitudMaxima * multiplicadorActual;
     var valor = onda * amplitud;
+
+    contadorFrames++;
+    if ((contadorFrames % INTERVALO_ESCRITURA) !== 0) return;
 
     document.documentElement.style.setProperty('--amb-respiracion', valor.toFixed(4));
   }
