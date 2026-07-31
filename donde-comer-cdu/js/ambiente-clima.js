@@ -38,6 +38,24 @@
   'use strict';
 
   function movimiento() { return global.AmbienteMovimiento || null; }
+  function rendimiento() { return global.AmbienteRendimiento || null; }
+
+  // Etapa 3 (Roadmap A+B — Contrato común, ver ambiente-contrato.js):
+  // mismo umbral que ya usa AmbienteConfig.NIVELES_FIDELIDAD.clima (0
+  // en 'reducida' y 'minima', 1 en 'completa') — hoy ese umbral solo
+  // apagaba el EFECTO visual vía Motion Controller (climaHabilitado
+  // en ambiente-movimiento.js), nunca el polling real de red de este
+  // módulo. Pura y sin leer AmbienteRendimiento por su cuenta (recibe
+  // el nivel como parámetro), para que se pueda testear aislada sin
+  // mockear el Performance Manager completo.
+  function isActive(fidelidad) {
+    return fidelidad !== 'reducida' && fidelidad !== 'minima';
+  }
+
+  function fidelidadActual() {
+    var r = rendimiento();
+    return r ? r.nivelFidelidad : 'completa';
+  }
 
   var efectosActivos = {}; // { lluvia: boolean, niebla: boolean, viento: boolean }
   var contenedor = null;
@@ -61,6 +79,7 @@
   var climaRealLluviaActiva = false;
   var climaRealNieblaActiva = false;
   var listenerVisibilidad = null;
+  var desuscribirRendimiento = null;
 
   // Variaciones climáticas posibles (Cap. 5.7 Fase 1)
   var EFECTOS_DISPONIBLES = {
