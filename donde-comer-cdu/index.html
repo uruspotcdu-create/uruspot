@@ -214,6 +214,7 @@
 <link rel="stylesheet" href="css/mapa.css">
 <link rel="stylesheet" href="css/descubrimiento.css">
 <link rel="stylesheet" href="css/pwa-instalar.css">
+<link rel="stylesheet" href="css/actualizacion-disponible.css">
 <!-- impresion.css: nueva (auditoría 4ª pasada) — el documento no
      tenía ninguna hoja media="print" pese a que varias secciones
      (Sobre la ciudad, Guía práctica, Glosario) son contenido de
@@ -1667,6 +1668,21 @@ if ('serviceWorker' in navigator) {
      14 días, y (c) el navegador soporta instalación (Chrome/Edge/
      Android vía beforeinstallprompt) o es iOS (instrucciones
      manuales, ya que Safari no tiene API de instalación). -->
+<!-- BANNER "HAY UNA VERSIÓN NUEVA" — ver js/actualizacion-disponible.js.
+     Arranca hidden: solo se revela si sw.js detecta, revalidando en
+     segundo plano, que algún JS/CSS cambió de verdad. Nunca recarga
+     solo — la persona decide cuándo. -->
+<div id="actualizacionBanner" class="actualizacion-banner" hidden role="status" aria-live="polite" aria-label="Actualización disponible">
+  <div class="actualizacion-banner__texto">
+    <span class="actualizacion-banner__titulo">Hay una versión nueva</span>
+    <span class="actualizacion-banner__subtitulo">Actualizá para ver los últimos cambios.</span>
+  </div>
+  <div class="actualizacion-banner__acciones">
+    <button id="actualizacionBtn" type="button" class="btn btn--primario">Actualizar</button>
+    <button id="actualizacionCerrar" type="button" class="btn btn--icono actualizacion-banner__cerrar" aria-label="Cerrar aviso de actualización">×</button>
+  </div>
+</div>
+
 <div id="pwaInstalarBanner" class="pwa-instalar-banner" hidden role="dialog" aria-label="Instalar URU SPOT como app">
   <img src="img/icon-192.png" width="40" height="40" alt="" class="pwa-instalar-banner__icono">
   <div class="pwa-instalar-banner__texto">
@@ -1698,6 +1714,7 @@ if ('serviceWorker' in navigator) {
      la auditoría §I5. -->
 <script src="js/failsafe-reintentar.js" defer></script>
 <script src="js/pwa-instalar.js" defer></script>
+<script src="js/actualizacion-disponible.js" defer></script>
 
 <!-- ESTRATEGIA DE LAZY LOADING PARA IMÁGENES DINÁMICAS — documentación
      de contrato para motor-render.js, no código ejecutable. Vive acá

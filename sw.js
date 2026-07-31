@@ -20,9 +20,16 @@
  *    está realmente offline.
  *
  * 3) Estáticos versionables (css, js, webp/png/jpg/svg, woff):
- *    cache-first — no cambian de contenido sin cambiar de nombre de
- *    archivo en este repo, así que servirlos desde cache es seguro y
- *    es lo que más beneficia performance/offline.
+ *    stale-while-revalidate (perf, 2026-07-31) — se sirve la versión
+ *    cacheada al instante (misma latencia percibida que cache-first)
+ *    y en paralelo se revalida contra la red; si el contenido cambió
+ *    de verdad, se avisa a las pestañas abiertas (ver
+ *    donde-comer-cdu/js/actualizacion-disponible.js). Antes era
+ *    cache-first puro, que asumía que un archivo nunca cambia de
+ *    contenido sin cambiar de nombre — supuesto falso en este repo,
+ *    donde js/app.js y compañía se editan en el mismo nombre commit a
+ *    commit, así que alguien que ya instaló la app nunca recibía un
+ *    fix posterior.
  *
  * 4) Todo lo que no sea del mismo origen (ej. unpkg.com/leaflet) se
  *    ignora por completo: no se intercepta ni se cachea CDN de terceros.
@@ -30,7 +37,7 @@
 
 'use strict';
 
-var VERSION = 'v3';
+var VERSION = 'v4';
 var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
 var CACHE_DATOS = 'uruspot-datos-' + VERSION;
 var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;
@@ -104,7 +111,7 @@ self.addEventListener('fetch', function (event) {
     return;
   }
   if (esEstaticoVersionable(url)) {
-    event.respondWith(cacheFirstEstatico(request));
+    event.respondWith(staleWhileRevalidateEstatico(request, event));
     return;
   }
   // Cualquier otro GET del propio origen (ej. JSON de configuración
@@ -142,14 +149,67 @@ function networkFirstDato(request) {
   });
 }
 
-function cacheFirstEstatico(request) {
+/*
+ * ESTÁTICOS (perf, 2026-07-31 — reemplaza al cache-first anterior):
+ * el cache-first puro asumía que un archivo nunca cambia de contenido
+ * sin cambiar de nombre — pero en este repo js/app.js, css/*.css, etc.
+ * SÍ se editan en el mismo nombre de archivo commit a commit. Con
+ * cache-first a secas, alguien que instaló la app un día nunca vuelve
+ * a recibir un fix posterior: el Service Worker le sigue sirviendo la
+ * versión vieja de esos archivos para siempre.
+ *
+ * stale-while-revalidate resuelve eso sin perder la velocidad de
+ * cache-first: la respuesta cacheada se sirve al instante (misma
+ * latencia percibida de siempre), y en paralelo se pide la red y se
+ * actualiza el cache. Si el contenido efectivamente cambió, se avisa
+ * a las pestañas abiertas — la decisión de cuándo recargar queda del
+ * lado de la persona (ver actualizacion-disponible.js), nunca se
+ * recarga sola una pestaña donde alguien puede estar a mitad de una
+ * búsqueda o llenando algo.
+ */
+function staleWhileRevalidateEstatico(request, event) {
   return caches.open(CACHE_ESTATICOS).then(function (cache) {
     return cache.match(request).then(function (enCache) {
-      if (enCache) return enCache;
+      if (enCache) {
+        // No bloquea la respuesta: se sirve el cache ya mismo. La
+        // revalidación sigue en segundo plano vía waitUntil, para que
+        // el Service Worker no se suspenda a mitad de camino.
+        var revalidacion = revalidarYNotificarSiCambio(cache, request, enCache);
+        if (event && event.waitUntil) event.waitUntil(revalidacion);
+        return enCache;
+      }
+      // Primera vez que se pide este recurso: no hay nada cacheado
+      // que ofrecer ya mismo, así que sí esperamos la red acá.
       return fetch(request).then(function (respuestaRed) {
-        cache.put(request, respuestaRed.clone());
+        if (respuestaRed && respuestaRed.ok) cache.put(request, respuestaRed.clone());
         return respuestaRed;
       });
+    });
+  });
+}
+
+function revalidarYNotificarSiCambio(cache, request, enCache) {
+  return fetch(request)
+    .then(function (respuestaRed) {
+      if (!respuestaRed || !respuestaRed.ok) return;
+      return Promise.all([enCache.clone().text(), respuestaRed.clone().text()])
+        .then(function (textos) {
+          var cambio = textos[0] !== textos[1];
+          return cache.put(request, respuestaRed.clone()).then(function () {
+            if (cambio) avisarActualizacionDisponible(request.url);
+          });
+        });
+    })
+    .catch(function () {
+      // Sin red para revalidar: seguimos sirviendo lo que ya está en
+      // cache sin problema, no es un error que rompa nada.
+    });
+}
+
+function avisarActualizacionDisponible(url) {
+  return self.clients.matchAll({ type: 'window' }).then(function (clientes) {
+    clientes.forEach(function (cliente) {
+      cliente.postMessage({ tipo: 'uru-spot-actualizacion-disponible', url: url });
     });
   });
 }

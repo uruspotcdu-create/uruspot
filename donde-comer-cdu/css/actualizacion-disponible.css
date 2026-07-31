@@ -1,0 +1,88 @@
+/* ═══════════════════════════════════════════════════════════════════
+   donde-comer-cdu/css/actualizacion-disponible.css
+
+   Banner "hay una versión nueva" — ver js/actualizacion-disponible.js.
+   Arriba de la pantalla, no abajo, para no competir nunca con
+   .pwa-instalar-banner (ese vive abajo). Es poco probable que los dos
+   se muestren juntos, pero si pasa, no se tapan entre sí.
+
+   Solo usa tokens ya declarados en tokens.css — cero valores nuevos,
+   mismo criterio que pwa-instalar.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.actualizacion-banner {
+  position: fixed;
+  left: var(--esp-4);
+  right: var(--esp-4);
+  top: var(--esp-4);
+  z-index: 41;
+
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  max-width: 460px;
+  margin: 0 auto;
+  padding: var(--esp-3) var(--esp-3) var(--esp-3) var(--esp-4);
+
+  border-radius: var(--radio-lg);
+  border: 1px solid var(--glass-borde);
+  background: var(--glass-bg-fuerte);
+  backdrop-filter: blur(var(--glass-blur-fuerte));
+  -webkit-backdrop-filter: blur(var(--glass-blur-fuerte));
+  box-shadow: var(--sombra-alta);
+
+  animation: uru-fade-up var(--dur-lenta) var(--easing-estandar) both;
+}
+
+.actualizacion-banner[hidden] {
+  display: none;
+}
+
+.actualizacion-banner__texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.actualizacion-banner__titulo {
+  display: block;
+  font: var(--tipo-cuerpo-sm);
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.actualizacion-banner__subtitulo {
+  display: block;
+  margin-top: 2px;
+  font: var(--tipo-dato-xs);
+  color: var(--color-tinta-60);
+}
+
+.actualizacion-banner__acciones {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.actualizacion-banner__cerrar {
+  font-size: 18px;
+  line-height: 1;
+}
+
+@media (max-width: 480px) {
+  .actualizacion-banner {
+    left: var(--esp-3);
+    right: var(--esp-3);
+    top: var(--esp-3);
+    padding: var(--esp-3);
+  }
+  .actualizacion-banner__subtitulo {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actualizacion-banner {
+    animation: none;
+  }
+}
