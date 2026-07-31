@@ -4,7 +4,7 @@
  * Para modificar el Ambient Engine, editá el módulo ambiente-*.js
  * correspondiente y volvé a correr:
  *   node scripts/build-ambiente-bundle.js
- * Generado: 2026-07-31T19:32:58.198Z
+ * Generado: 2026-07-31T19:59:08.231Z
  */
 
 /* ==== ambiente-config.js ==== */
@@ -3463,21 +3463,15 @@
    Debe cargarse después de ambiente-movimiento.js y antes de
    ambiente-orquestador.js.
 
-   PENDIENTE (no relacionado a este módulo, anotado acá para que no
-   se vuelva a perder): scripts/build-ambiente-bundle.js en la raíz
-   del repo sigue validando contra los <script> de index.html
-   (validarContraIndexHtml), que ya no existen ahí desde que los 27
-   módulos se concatenaron en ambiente.bundle.js — por eso ese script
-   falla siempre con "En index.html: []". Hay que reemplazarlo por la
-   versión que valida contra el directorio (validarContraDirectorio,
-   comparando ORDEN contra los archivos ambiente-*.js en disco) y que
-   ya incluye ambiente-contrato.js + ambiente-metrics.js en ORDEN.
-   También queda un duplicado sobrante en
-   donde-comer-cdu/js/build-ambiente-bundle.js (lugar incorrecto) para
-   borrar. Mientras tanto, ambiente.bundle.js se sigue regenerando a
-   mano con esa versión corregida del script cada vez que se edita
-   este archivo — el bundle no está desactualizado, solo el script que
-   lo genera.
+   RESUELTO (no relacionado a este módulo, se anotó acá para que no
+   se perdiera): scripts/build-ambiente-bundle.js en la raíz del repo
+   ya valida contra el directorio (validarContraDirectorio, comparando
+   ORDEN contra los archivos ambiente-*.js en disco) y ya incluye
+   ambiente-scheduler.js en ORDEN. El duplicado que vivía en
+   donde-comer-cdu/js/scripts/build-ambiente-bundle.js (lugar
+   incorrecto) se eliminó — scripts/build-ambiente-bundle.js en la
+   raíz es la única versión, y es la que hay que correr antes de cada
+   deploy si se toca algún ambiente-*.js.
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';

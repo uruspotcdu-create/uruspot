@@ -45,6 +45,7 @@ const SALIDA = path.join(JS_DIR, 'ambiente.bundle.js');
 const ORDEN = [
   'ambiente-config.js',
   'ambiente-contrato.js',
+  'ambiente-scheduler.js',
   'ambiente-assets.js',
   'ambiente-diagnostico.js',
   'ambiente-metrics.js',
