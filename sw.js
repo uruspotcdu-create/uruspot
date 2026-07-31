@@ -30,7 +30,7 @@
 
 'use strict';
 
-var VERSION = 'v2';
+var VERSION = 'v3';
 var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
 var CACHE_DATOS = 'uruspot-datos-' + VERSION;
 var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;
@@ -48,7 +48,12 @@ var PRECACHE_URLS = [
   '/',
   OFFLINE_URL,
   '/manifest.json',
-  '/img/logof.webp'
+  '/img/logof.webp',
+  // La sección que se promociona como "instalable" — que quede
+  // disponible offline desde la instalación, no recién después de
+  // la primera visita real.
+  '/donde-comer-cdu/',
+  '/donde-comer-cdu/manifest.json'
 ];
 
 self.addEventListener('install', function (event) {
