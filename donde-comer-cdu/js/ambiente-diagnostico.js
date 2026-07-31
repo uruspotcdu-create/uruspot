@@ -43,7 +43,14 @@
     reduccion: 50,      // activaciones del Estado de Reducción
     transicion: 100,    // duraciones reales de transición
     cargaFallida: 50,   // timeouts / errores de Estado de Carga
-    fidelidad: 50        // cambios de nivel de fidelidad
+    fidelidad: 50,        // cambios de nivel de fidelidad
+    // Etapa 1 (Roadmap A+B, Instrumentación): dos tipos nuevos, mismo
+    // patrón que los anteriores. frameTime a 300 (~5s de muestreo
+    // continuo a 60fps) porque es la métrica más frecuente del
+    // sistema; tareaLarga a 50 porque una tarea larga (Long Tasks
+    // API, >50ms) es, por definición, un evento poco frecuente.
+    frameTime: 300,
+    tareaLarga: 50
   };
 
   var registros = {
@@ -51,7 +58,9 @@
     reduccion: [],
     transicion: [],
     cargaFallida: [],
-    fidelidad: []
+    fidelidad: [],
+    frameTime: [],
+    tareaLarga: []
   };
 
   function ahora() {
@@ -70,6 +79,19 @@
     lista.push({ valor: valor, marca: ahora() });
     var limite = LIMITES_RETENCION[tipo];
     if (lista.length > limite) lista.splice(0, lista.length - limite);
+  }
+
+  function maximo(lista) {
+    if (!lista.length) return null;
+    var max = lista[0].valor;
+    for (var i = 1; i < lista.length; i++) if (lista[i].valor > max) max = lista[i].valor;
+    return max;
+  }
+
+  function suma(lista) {
+    var total = 0;
+    for (var i = 0; i < lista.length; i++) total += lista[i].valor;
+    return total;
   }
 
   function promedio(lista) {
