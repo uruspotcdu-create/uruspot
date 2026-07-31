@@ -1,33 +1,121 @@
-﻿(function() {
+/**
+ * ÍNDICE INVERTIDO POR TRIGRAMAS — reduce cuántos lugares hay que
+ * revisar en cada búsqueda de texto, antes de que motor-exposicion.js
+ * aplique el ranking exacto (nombre exacto > empieza-con > contiene >
+ * categoría > dirección).
+ *
+ * Por qué trigramas y no palabra exacta: la búsqueda real de la app
+ * matchea por SUBSTRING ("piz" encuentra "pizzería", no solo "piz" como
+ * palabra completa). Un índice de palabra exacta no puede servir eso —
+ * por eso la versión anterior de este archivo quedaba construida pero
+ * nunca conectada a resultadosPorAccionExplicita(). Un índice de
+ * trigramas sí: si "pizzeria" contiene la consulta "piz" como substring,
+ * entonces "piz" en sí (si la consulta tiene 3+ caracteres) o todos sus
+ * trigramas están garantizados a aparecer en el texto indexado de ese
+ * lugar. Es la misma técnica que usa pg_trgm en Postgres.
+ *
+ * GARANTÍA DE CORRECCIÓN: candidatosPara() es un filtro NECESARIO pero
+ * NO SUFICIENTE — puede devolver falsos positivos (un lugar que
+ * contiene todos los trigramas de la consulta pero no la consulta como
+ * substring contiguo), nunca falsos negativos. motor-exposicion.js
+ * siempre re-verifica con indexOf() exacto sobre cada candidato, así
+ * que un falso positivo de acá simplemente se descarta después sin
+ * afectar el resultado. Si candidatosPara() no puede ayudar (consulta
+ * de 1-2 caracteres, o índice todavía no construido), devuelve `null` y
+ * el llamador cae al barrido completo de siempre — cero riesgo de
+ * regresión.
+ */
+(function (global) {
   'use strict';
-  var indice = {};
-  function normalizarPalabra(word) {
-    return word.toLowerCase().replace(/[áéíóú]/g, function(c) {
-      var m = {á:'a', é:'e', í:'i', ó:'o', ú:'u'};
-      return m[c] || c;
-    });
+
+  // Debe coincidir EXACTAMENTE con normalizarTexto() de
+  // motor-exposicion.js. Si estas dos normalizaciones alguna vez
+  // divergen, el índice puede generar falsos negativos (peor que los
+  // falsos positivos, que el re-chequeo exacto absorbe sin problema).
+  function normalizarTexto(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
-  function construirIndice(lugares) {
-    indice = {};
-    lugares.forEach(function(l, idx) {
-      var campos = [l.nombre, l.categoria, l.grupo, (l.direccion || '')];
-      campos.forEach(function(campo) {
-        if (!campo) return;
-        var palabras = campo.toLowerCase().split(/\s+/);
-        palabras.forEach(function(p) {
-          var norm = normalizarPalabra(p);
-          if (!indice[norm]) indice[norm] = [];
-          if (indice[norm].indexOf(idx) === -1) indice[norm].push(idx);
-        });
+
+  function trigramas(s) {
+    if (s.length < 3) return s ? [s] : [];
+    var out = [];
+    for (var i = 0; i <= s.length - 3; i++) out.push(s.substr(i, 3));
+    return out;
+  }
+
+  var postings = Object.create(null); // trigrama -> [lugares...]
+  var indexado = false;
+
+  /**
+   * Construye (o reconstruye) el índice completo. Se llama una vez al
+   * cargar el catálogo y otra vez cuando lugares-detalles.json termina
+   * de rellenar `direccion` en segundo plano (ver app.js) — direccion
+   * empieza en null y varios lugares solo matchean por dirección, así
+   * que sin ese segundo llamado esos matches quedarían indexados como
+   * si la dirección nunca hubiese llegado.
+   */
+  function construir(registro) {
+    var nuevoPostings = Object.create(null);
+    if (!Array.isArray(registro) || !registro.length) {
+      postings = nuevoPostings;
+      indexado = false;
+      return;
+    }
+
+    registro.forEach(function (lugar) {
+      var texto = normalizarTexto(
+        (lugar.nombre || '') + ' ' + (lugar.categoria || '') + ' ' + (lugar.direccion || '')
+      );
+      var vistos = Object.create(null); // no repetir el mismo lugar en el mismo trigrama
+      trigramas(texto).forEach(function (tri) {
+        if (vistos[tri]) return;
+        vistos[tri] = true;
+        if (!nuevoPostings[tri]) nuevoPostings[tri] = [];
+        nuevoPostings[tri].push(lugar);
       });
     });
+
+    postings = nuevoPostings;
+    indexado = true;
   }
-  function buscarPorIndice(lugares, query) {
-    var q = normalizarPalabra(query.trim());
-    if (!q || q.length < 2) return lugares.slice();
-    var ids = indice[q];
-    if (!ids || !ids.length) return [];
-    return ids.map(function(idx) { return lugares[idx]; });
+
+  /**
+   * Devuelve un superconjunto candidato de lugares (referencias, no
+   * copias) que PODRÍAN matchear `query`, o `null` si el índice no
+   * puede reducir nada de forma confiable. Nunca decide qué es un
+   * match real — eso lo sigue haciendo motor-exposicion.js.
+   */
+  function candidatosPara(query) {
+    if (!indexado) return null;
+    var q = normalizarTexto(String(query || '').trim());
+    if (q.length < 3) return null; // trigramas no aplican a consultas de 1-2 chars
+
+    var tris = trigramas(q);
+    var listas = [];
+    for (var i = 0; i < tris.length; i++) {
+      var lista = postings[tris[i]];
+      if (!lista || !lista.length) return []; // ningún lugar tiene este trigrama -> cero candidatos
+      listas.push(lista);
+    }
+
+    // Intersección empezando por la lista más chica, para tocar el
+    // menor número de lugares posible en cada paso.
+    listas.sort(function (a, b) { return a.length - b.length; });
+
+    var acumulado = listas[0];
+    for (var j = 1; j < listas.length && acumulado.length; j++) {
+      var siguiente = new Set(listas[j]);
+      acumulado = acumulado.filter(function (lugar) { return siguiente.has(lugar); });
+    }
+    return acumulado;
   }
-  window.IndiceInvertido = { construir: construirIndice, buscar: buscarPorIndice };
-})();
+
+  global.IndiceInvertido = {
+    construir: construir,
+    candidatosPara: candidatosPara
+  };
+})(typeof window !== 'undefined' ? window : global);
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = (typeof window !== 'undefined' ? window.IndiceInvertido : global.IndiceInvertido);
+}

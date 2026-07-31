@@ -910,9 +910,7 @@
           throw new Error('Core inválido o vacío');
         }
 
-// Construir �ndice invertido para b�squeda O(1)
-        if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
-                REGISTRO = core.map(function (l) {
+        REGISTRO = core.map(function (l) {
           var reg = {
             id: l.id,
             nombre: l.nombre,
@@ -939,6 +937,15 @@
           porId[l.id] = reg;
           return reg;
         });
+
+        // Índice invertido de búsqueda (perf, 2026-07-31): construido acá,
+        // después de que REGISTRO ya tiene el catálogo real — construirlo
+        // antes (como hacía la versión anterior) indexaba el REGISTRO
+        // vacío/de la carga previa. Se reconstruye una segunda vez en
+        // cargarDetallesEnSegundoPlano cuando `direccion` deja de ser
+        // null, porque hay lugares que solo matchean por dirección
+        // (rango 5 de rangoDeCoincidencia en motor-exposicion.js).
+        if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
 
         transicionarEstado(STATE.READY, 'catalogo_cargado');
         if (window.AmbientEngine) window.AmbientEngine.finalizarCarga(true);
@@ -976,6 +983,10 @@
                 reg.descripcion = d.descripcion || null;
               }
             });
+            // Reconstruir: direccion pasó de null a texto real en varios
+            // lugares, y el índice de trigramas los tenía indexados con
+            // direccion vacía hasta este momento.
+            if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
             render();
           })
           .catch(function (e) {

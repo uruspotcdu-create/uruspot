@@ -598,13 +598,34 @@
     var q = normalizarTexto(consulta.trim());
     if (!q) return registro.slice();
 
+    // PERF (2026-07-31): IndiceInvertido.candidatosPara() es un filtro
+    // necesario-pero-no-suficiente por trigramas — puede traer falsos
+    // positivos (se descartan abajo por rangoDeCoincidencia === null) pero
+    // nunca deja afuera un match real. Si no puede ayudar (consulta de
+    // 1-2 caracteres, índice sin construir todavía), devuelve `null` y acá
+    // se cae al barrido completo de siempre: mismo resultado, mismo orden,
+    // cero riesgo de regresión en ese camino.
+    var universo = registro;
+    if (global.IndiceInvertido && typeof global.IndiceInvertido.candidatosPara === 'function') {
+      var reducido = global.IndiceInvertido.candidatosPara(q);
+      if (reducido !== null) universo = reducido;
+    }
+
+    // Mapa lugar -> posición real en el catálogo, para que el desempate
+    // por "indiceOriginal" de abajo sea idéntico exista o no reducción
+    // por índice (universo puede venir en cualquier orden). Es un loop
+    // trivial de asignación, no de comparación de strings — mucho más
+    // barato que lo que reemplaza.
+    var indiceOriginalPorLugar = new Map();
+    for (var k = 0; k < registro.length; k++) indiceOriginalPorLugar.set(registro[k], k);
+
     var candidatos = [];
-    for (var i = 0; i < registro.length; i++) {
-      var lugar = registro[i];
+    for (var i = 0; i < universo.length; i++) {
+      var lugar = universo[i];
       var norm = normalizadoDe(lugar);
       var rango = rangoDeCoincidencia(norm.nombre, norm.categoria, norm.direccion, q);
       if (rango === null) continue;
-      candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: i });
+      candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: indiceOriginalPorLugar.get(lugar) });
     }
 
     // Desempate explícito por índice original en vez de confiar en que
