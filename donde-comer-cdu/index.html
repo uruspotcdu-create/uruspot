@@ -34,16 +34,16 @@
 
 <!-- SCRIPTS DEFERRED — orden = grafo de dependencias, ver §5 arriba.
      No reordenar sin leer esa sección. -->
-<script src="js/motor-config.js" defer></script>
-<script src="js/rubros-meta.js" defer></script>
-<script src="js/locales-slug.js" defer></script>
-<script src="js/motor-plano.js" defer></script>
-<script src="js/motor-exposicion.js" defer></script>
-<script src="js/motor-mapa.js" defer></script>
-<script src="js/proyeccion.js" defer></script>
-<script src="js/motor-render.js" defer></script>
-<script src="js/motor-indice-busqueda.js" defer></script>
-<script src="js/datos-virtualizador.js" defer></script>
+<!-- Núcleo (motor + metadatos + slugs) — perf, 2026-07-31: los 10
+     módulos de abajo (código fuente, se siguen editando acá
+     individualmente) se concatenan a js/motor.bundle.js con
+     `node scripts/build-motor-bundle.js` antes de cada deploy.
+     js/contract-tests.js sigue verificando el orden real de estos
+     10 módulos leyendo los marcadores dentro del bundle, no solo la
+     posición del <script> del bundle acá. Si tocás el orden de
+     abajo, actualizá también ORDEN en scripts/build-motor-bundle.js
+     — el script valida que coincidan y falla si no. -->
+<script src="js/motor.bundle.js" defer></script>
 <!-- Ambient Engine — Fase 0 + Fase 1 + Fase 2 T0-T3 (ver docs/AMBIENT-ENGINE-FASE0-FASE1.md
      y el documento de Arquitectura técnica). Orden fijo = grafo de
      dependencias real entre grupos funcionales (Cap. 2.1/2.3):

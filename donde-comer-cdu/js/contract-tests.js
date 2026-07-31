@@ -24,6 +24,15 @@
 //   5. ambiente-orquestador.js (si existe como script) carga después
 //      de cualquier otro ambiente-*.js y antes de app.js.
 //
+// Bundles (perf, 2026-07-26/31): motor-*.js y ambiente-*.js pueden
+// vivir sueltos O concatenados en js/motor.bundle.js / js/ambiente.
+// bundle.js (ver scripts/build-motor-bundle.js y
+// scripts/build-ambiente-bundle.js). Los puntos 4 y 5 siguen
+// verificándose igual de estricto en ambos casos: si un módulo está
+// bundleado, este test lee el marcador `/* ==== módulo.js ==== */`
+// dentro del bundle para saber su posición real, en vez de degradarse
+// a "no se pudo verificar".
+//
 // Sale con código 0 si el contrato se cumple, 1 si algo lo rompe.
 
 'use strict';
@@ -90,6 +99,54 @@ function extraerOrdenScripts(html) {
   return orden;
 }
 
+// --- 3b. Bundles (perf, 2026-07-31): un módulo bundleado (ver
+// scripts/build-ambiente-bundle.js / scripts/build-motor-bundle.js) ya
+// no aparece como <script src="js/nombre.js"> individual — pero su
+// posición real de ejecución sigue siendo verificable, porque cada
+// build script escribe un marcador `/* ==== nombre.js ==== */` en el
+// mismo orden en que concatenó los módulos. Sin este paso, cualquier
+// módulo bundleado caía en "no se pudo verificar" (aviso silencioso)
+// en vez de seguir siendo un chequeo real — este bloque evita que
+// bundlear degrade el contrato a "confiar y no verificar".
+function extraerPosicionesEnBundles(orden) {
+  // archivo → { bundle, offset } — offset es la posición del marcador
+  // DENTRO del bundle (no del documento), para poder comparar orden
+  // relativo entre dos módulos que viven en el mismo bundle.
+  const posiciones = {};
+  orden.forEach((nombreScript) => {
+    if (!nombreScript.endsWith('.bundle.js')) return;
+    const rutaBundle = path.join(ROOT, 'js', nombreScript);
+    if (!fs.existsSync(rutaBundle)) return;
+    const contenido = fs.readFileSync(rutaBundle, 'utf8');
+    const re = /\/\* ==== ([\w.-]+\.js) ==== \*\//g;
+    let m;
+    let offset = 0;
+    while ((m = re.exec(contenido)) !== null) {
+      posiciones[m[1]] = { bundle: nombreScript, offset: offset++ };
+    }
+  });
+  return posiciones;
+}
+
+// Posición comparable de un módulo, sea que cargue suelto o adentro de
+// un bundle: [índice del <script> real en el documento, offset dentro
+// del bundle (0 si no aplica)]. Comparación lexicográfica de la tupla
+// da el orden real de ejecución en ambos casos.
+function posicionVirtual(orden, posicionesBundle, nombre) {
+  const iDirecto = orden.indexOf(nombre);
+  if (iDirecto !== -1) return [iDirecto, 0];
+  const enBundle = posicionesBundle[nombre];
+  if (!enBundle) return null;
+  const iBundle = orden.indexOf(enBundle.bundle);
+  if (iBundle === -1) return null;
+  return [iBundle, enBundle.offset];
+}
+
+function comparar(a, b) {
+  if (a[0] !== b[0]) return a[0] - b[0];
+  return a[1] - b[1];
+}
+
 function indiceDe(orden, nombre) {
   return orden.indexOf(nombre);
 }
@@ -142,7 +199,15 @@ function correr() {
 
   // ---- Orden de carga (dependencias documentadas) ----
   const orden = extraerOrdenScripts(html);
+  const posicionesBundle = extraerPosicionesEnBundles(orden);
+  const bundlesDetectados = orden.filter((s) => s.endsWith('.bundle.js'));
   console.log(`\nScripts js/*.js detectados en orden de carga: ${orden.length}`);
+  if (bundlesDetectados.length) {
+    console.log(
+      `  (${bundlesDetectados.length} bundle(s) detectado(s): ${bundlesDetectados.join(', ')} — ` +
+      `el orden interno de sus módulos se verifica vía marcadores, no solo la posición del <script>)`
+    );
+  }
 
   const parejas = [
     ['motor-config.js', 'motor-plano.js'],
@@ -152,52 +217,59 @@ function correr() {
     ['proyeccion.js', 'motor-render.js'],
   ];
   parejas.forEach(([antes, despues]) => {
-    const iAntes = indiceDe(orden, antes);
-    const iDespues = indiceDe(orden, despues);
-    if (iAntes === -1 || iDespues === -1) {
-      console.log(`  ⚠ no se pudo verificar ${antes} < ${despues} (algún script no encontrado)`);
+    const pAntes = posicionVirtual(orden, posicionesBundle, antes);
+    const pDespues = posicionVirtual(orden, posicionesBundle, despues);
+    if (!pAntes || !pDespues) {
+      console.log(`  ⚠ no se pudo verificar ${antes} < ${despues} (algún módulo no encontrado, ni suelto ni en bundle)`);
       avisos++;
       return;
     }
-    const ok = iAntes < iDespues;
+    const ok = comparar(pAntes, pDespues) < 0;
     console.log(`  ${ok ? '✓' : '✗'} ${antes} carga antes de ${despues}`);
     if (!ok) fallos++;
   });
 
   // app.js debe ser el último script "real" de negocio (después de
-  // todos los motor-*.js y de ambiente-orquestador.js, si existe)
-  const iApp = indiceDe(orden, 'app.js');
-  if (iApp === -1) {
+  // todos los motor-*.js — sueltos o dentro de un bundle — y de
+  // ambiente-orquestador.js, si existe)
+  const pApp = posicionVirtual(orden, posicionesBundle, 'app.js');
+  if (!pApp) {
     console.error('  ✗ app.js no aparece como <script src="js/app.js">');
     fallos++;
   } else {
-    const motorScripts = orden.filter((s) => s.startsWith('motor-'));
-    const motorFueraDeLugar = motorScripts.filter(
-      (s) => indiceDe(orden, s) > iApp
-    );
+    const nombresMotor = new Set([
+      ...orden.filter((s) => s.startsWith('motor-')),
+      ...Object.keys(posicionesBundle).filter((s) => s.startsWith('motor-'))
+    ]);
+    const motorFueraDeLugar = [...nombresMotor].filter((s) => {
+      const p = posicionVirtual(orden, posicionesBundle, s);
+      return p && comparar(p, pApp) > 0;
+    });
     if (motorFueraDeLugar.length > 0) {
       fallos++;
       console.error(
         `  ✗ app.js carga ANTES de: ${motorFueraDeLugar.join(', ')} (debería ser al final)`
       );
     } else {
-      console.log('  ✓ app.js carga después de todos los motor-*.js');
+      console.log(`  ✓ app.js carga después de todos los motor-*.js (${nombresMotor.size} módulo(s), sueltos o en bundle)`);
     }
 
-    const iOrquestador = indiceDe(orden, 'ambiente-orquestador.js');
-    if (iOrquestador !== -1) {
-      const ok = iOrquestador < iApp;
+    const pOrquestador = posicionVirtual(orden, posicionesBundle, 'ambiente-orquestador.js');
+    if (pOrquestador) {
+      const ok = comparar(pOrquestador, pApp) < 0;
       console.log(
         `  ${ok ? '✓' : '✗'} ambiente-orquestador.js carga antes de app.js`
       );
       if (!ok) fallos++;
 
-      const ambienteScripts = orden.filter(
-        (s) => s.startsWith('ambiente-') && s !== 'ambiente-orquestador.js'
-      );
-      const fueraDeLugar = ambienteScripts.filter(
-        (s) => indiceDe(orden, s) > iOrquestador
-      );
+      const nombresAmbiente = new Set([
+        ...orden.filter((s) => s.startsWith('ambiente-') && s !== 'ambiente-orquestador.js'),
+        ...Object.keys(posicionesBundle).filter((s) => s.startsWith('ambiente-') && s !== 'ambiente-orquestador.js')
+      ]);
+      const fueraDeLugar = [...nombresAmbiente].filter((s) => {
+        const p = posicionVirtual(orden, posicionesBundle, s);
+        return p && comparar(p, pOrquestador) > 0;
+      });
       if (fueraDeLugar.length > 0) {
         fallos++;
         console.error(
@@ -205,7 +277,7 @@ function correr() {
         );
       } else {
         console.log(
-          `  ✓ ambiente-orquestador.js carga después de los otros ${ambienteScripts.length} módulo(s) ambiente-*.js presentes`
+          `  ✓ ambiente-orquestador.js carga después de los otros ${nombresAmbiente.size} módulo(s) ambiente-*.js presentes (sueltos o en bundle)`
         );
       }
     }
