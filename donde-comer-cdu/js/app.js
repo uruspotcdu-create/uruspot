@@ -222,7 +222,11 @@
     favoritos: null,
     region: null,
     rama: null,
-    html: null
+    html: null,
+    // BUGFIX (auditoría performance, 2026-07-30): ver render() más abajo —
+    // sin este campo, "Cargar más" no repinta nunca (paginaTarjetas nunca
+    // formaba parte de la detección de cambios).
+    paginaTarjetas: null
   };
 
   // DOM references (validadas al init)
@@ -1156,7 +1160,19 @@
       }
 
       // Verificar si hubo cambio real
-      var hayoCambio = ramaDistinta(rama) || hayCambioEnLista(lastRenderCache.lista, lista);
+      // BUGFIX (auditoría performance, 2026-07-30): esta condición solo miraba
+      // la identidad de la RAMA y de la LISTA CANDIDATA COMPLETA (sin paginar).
+      // "Cargar más" (línea ~2499: uiState.paginaTarjetas++; render();) no
+      // cambia ni la rama ni la lista candidata — solo cuántos ítems de esa
+      // misma lista se muestran, un slice que ocurre adentro de
+      // pintarTarjetas(). Resultado: hayoCambio daba `false`, entraba al
+      // `return` de abajo, y pintarTarjetas() JAMÁS se ejecutaba — el botón
+      // "Cargar más" no tenía ningún efecto visible. Reproducido en
+      // aislamiento (misma lógica, ids/orden idénticos, solo cambia
+      // paginaTarjetas): ver hallazgo de auditoría, sección "Cargar más".
+      var hayoCambio = ramaDistinta(rama) ||
+        hayCambioEnLista(lastRenderCache.lista, lista) ||
+        uiState.paginaTarjetas !== lastRenderCache.paginaTarjetas;
 
       if (!hayoCambio && uiState.ultimaRamaRenderizada === rama) {
         debugLog('[Render] Sin cambios, saltando');
@@ -1189,6 +1205,7 @@
       lastRenderCache.rama = rama;
       lastRenderCache.favoritos = favoritos;
       lastRenderCache.region = reg.nombre;
+      lastRenderCache.paginaTarjetas = uiState.paginaTarjetas;
       uiState.ultimaRamaRenderizada = rama;
 
       // Actualizar encabezado, estado visual, tarjetas y mapa
