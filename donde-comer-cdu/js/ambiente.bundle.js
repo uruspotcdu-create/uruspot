@@ -4,7 +4,7 @@
  * Para modificar el Ambient Engine, editá el módulo ambiente-*.js
  * correspondiente y volvé a correr:
  *   node scripts/build-ambiente-bundle.js
- * Generado: 2026-07-31T19:05:43.836Z
+ * Generado: 2026-07-31T19:32:58.198Z
  */
 
 /* ==== ambiente-config.js ==== */
@@ -677,6 +677,134 @@
 
 })(window);
 
+/* ==== ambiente-scheduler.js ==== */
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — Ambient Engine — js/ambiente-scheduler.js
+   Etapa 5 (Roadmap A+B — Writer único / Frame Scheduler)
+
+   Subsistema del Grupo de Infraestructura. Responsabilidad única:
+   ser el ÚNICO lugar del motor con un `requestAnimationFrame`
+   permanente (mientras la pestaña esté visible) — antes de este
+   archivo, ambiente-rendimiento.js y ambiente-respiracion.js corrían
+   CADA UNO su propio rAF para siempre, cada uno con su propia copia
+   casi idéntica de la lógica de pausa/reanudación por
+   `visibilitychange` (Cap. 9.2: "no debe existir ciclo de animación
+   ejecutándose en segundo plano"). Este archivo colapsa ambos loops
+   en uno solo y esa lógica de pausa duplicada en una sola
+   implementación.
+
+   No decide QUÉ hace cada tarea registrada — es agnóstico de
+   contenido (Cap. 3.10 / 3.4: la separación por responsabilidad única
+   ya vigente en el resto del motor). Cada módulo que se registra le
+   entrega una función `paso(timestamp)` ya "pura" en el sentido de
+   que nunca vuelve a pedir su propio frame — el scheduler es quien
+   decide cuándo se vuelve a llamar, no la propia tarea.
+
+   Por qué gap-detection en vez de que cada tarea siga gestionando su
+   propia pausa: con un solo rAF compartido, cuando la pestaña se
+   oculta este archivo dejar de pedir frames por completo — ninguna
+   tarea registrada vuelve a ejecutarse hasta que la pestaña reaparece.
+   Eso significa que la PRÓXIMA vez que una tarea reciba un timestamp,
+   el salto respecto de su última marca puede ser de minutos, no de
+   16ms. Cada tarea es responsable de detectar ese salto anómalo
+   (comparar contra un umbral, p.ej. 500ms — muy por encima de un
+   frame real, muy por debajo de cualquier segundo plano real) y
+   tratarlo como "primer frame tras reanudar" en vez de computar un
+   delta falso — mismo criterio que antes vivía en cada rAF propio
+   (`ultimoFrame = null` al pausar), solo que ahora la tarea lo decide
+   sola, sin necesitar su propio listener de visibilidad.
+
+   Debe cargarse después de ambiente-contrato.js (afinidad temática:
+   ambos son infraestructura de forma, sin estado propio de negocio)
+   y antes de cualquier módulo que vaya a registrarse — hoy
+   ambiente-rendimiento.js (que se autoinicia al cargarse) es el
+   primer consumidor, así que este archivo debe cargar antes que ese.
+   ═══════════════════════════════════════════════════════════════════ */
+(function (global) {
+  'use strict';
+
+  var tareas = Object.create(null);
+  var orden = [];
+  var rafId = null;
+  var pausadoPorVisibilidad = false;
+  var listenerRegistrado = false;
+
+  function pestanaVisible() {
+    return (typeof document !== 'undefined') ? !document.hidden : true;
+  }
+
+  // Un solo rAF, un solo bucle: recorre las tareas registradas en
+  // orden de registro (nunca por prioridad implícita — quien necesite
+  // orden estricto lo declara explícitamente en su propio nombre de
+  // registro). Cap. 3.4 en ambiente-movimiento.js ya documenta este
+  // mismo criterio de aislamiento: "un listener roto no debe tumbar
+  // al resto" — acá aplica igual, una tarea que tira excepción no
+  // debe frenar el frame de las demás.
+  function tick(timestamp) {
+    if (!pestanaVisible()) {
+      pausadoPorVisibilidad = true;
+      rafId = null; // detenido, no reprogramado (Cap. 9.2)
+      return;
+    }
+    rafId = global.requestAnimationFrame(tick);
+    for (var i = 0; i < orden.length; i++) {
+      var fn = tareas[orden[i]];
+      if (fn) {
+        try { fn(timestamp); }
+        catch (e) { /* una tarea rota no debe tumbar al resto del frame */ }
+      }
+    }
+  }
+
+  function alCambiarVisibilidad() {
+    if (pestanaVisible() && pausadoPorVisibilidad && rafId === null) {
+      pausadoPorVisibilidad = false;
+      rafId = global.requestAnimationFrame(tick);
+    }
+  }
+
+  function asegurarLoopActivo() {
+    if (rafId !== null) return;
+    if (typeof global.requestAnimationFrame !== 'function') return;
+    if (orden.length === 0) return; // nada que correr todavía
+    rafId = global.requestAnimationFrame(tick);
+    if (!listenerRegistrado && typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+      listenerRegistrado = true;
+      document.addEventListener('visibilitychange', alCambiarVisibilidad);
+    }
+  }
+
+  var api = {
+    // registrar(id, paso): paso(timestamp) se llama en TODOS los
+    // frames visibles hasta que se llame al desregistrador devuelto.
+    // Arranca el loop compartido si es la primera tarea (idempotente
+    // si el loop ya estaba corriendo). id solo para diagnóstico/orden
+    // estable — dos registros con el mismo id se pisan a propósito
+    // (mismo criterio que listeners.indexOf en el resto del motor: la
+    // última suscripción gana).
+    registrar: function (id, paso) {
+      if (typeof id !== 'string' || !id || typeof paso !== 'function') return function () {};
+      if (!tareas[id]) orden.push(id);
+      tareas[id] = paso;
+      asegurarLoopActivo();
+      return function desregistrar() {
+        if (tareas[id] !== paso) return; // ya reemplazada por otro registro, no tocar
+        delete tareas[id];
+        var idx = orden.indexOf(id);
+        if (idx > -1) orden.splice(idx, 1);
+      };
+    },
+
+    // Diagnóstico de solo lectura — ningún módulo debería necesitar
+    // esto en operación normal.
+    get tareasActivas() { return orden.slice(); },
+    get corriendo() { return rafId !== null; }
+  };
+
+  global.AmbienteScheduler = api;
+
+})(window);
+
 /* ==== ambiente-assets.js ==== */
 /* ═══════════════════════════════════════════════════════════════════
    URU SPOT — Ambient Engine — js/ambiente-assets.js
@@ -1075,7 +1203,10 @@
      frame (registrarFrameTime) y por cada Long Task (registrarTareaLarga),
      igual que ambiente-rendimiento.js alimenta registrarFPS — un
      sumidero más de datos hacia el mismo registro central, nunca una
-     fuente de verdad propia.
+     fuente de verdad propia. PERF (2026-07-31): apagado por defecto —
+     ver continuoHabilitado() más abajo. Se activa explícitamente con
+     ?ambiente_metrics=on en la URL o localStorage.ambienteMetricsContinuo
+     = 'true'; sin eso, iniciar() no arranca nada.
 
    - Modo puntual (medirVentana(ms, cb)): repite exactamente lo que
      hacía diagnostico-rendimiento-temporal.js (una ventana de N ms,
@@ -1084,6 +1215,7 @@
      callback para que quien la invoque decida qué hacer (loggear,
      comparar contra una baseline, etc). Este es el modo pensado para
      el punto 6 del roadmap ("repetir la captura de 10s... y comparar").
+     No depende del flag de arriba — siempre disponible on-demand.
 
    Este módulo nunca decide nivel de fidelidad ni apaga ningún otro
    subsistema — mismo límite que ambiente-diagnostico.js ("nunca debe
@@ -1117,6 +1249,39 @@
 
   function pestanaVisible() {
     return (typeof document !== 'undefined') ? !document.hidden : true;
+  }
+
+  // PERF (auditoría de arquitectura, 2026-07-31): el modo continuo de
+  // este módulo se auto-iniciaba SIEMPRE (ver api.iniciar() al final
+  // del archivo) — un segundo rAF loop + PerformanceObserver de Long
+  // Tasks, para siempre, en el 100% de las visitas, alimentando
+  // AmbienteDiagnostico.registrarFrameTime()/registrarTareaLarga() sin
+  // que ningún código de producción (app.js, index.html) llame jamás
+  // a AmbienteDiagnostico.obtenerResumen() para leerlo — trabajo
+  // puro, incluida una allocation ({valor, marca}) + push/splice en
+  // CADA frame, sin ningún consumidor. medirVentana() (modo puntual,
+  // sin tocar AmbienteDiagnostico) ya cubre el caso de uso real de
+  // este módulo — el mismo que usó diagnostico-rendimiento-temporal.js
+  // para las mediciones de la auditoría de rendimiento.
+  //
+  // Mismo mecanismo y misma precedencia que ya usa ambiente-flags.js
+  // (URL gana sobre localStorage), pero polaridad invertida a
+  // propósito: ahí el default es "todo activo" porque son features
+  // del producto; acá el default es "apagado" porque es
+  // instrumentación de diagnóstico sin consumidor en producción —
+  // activarla es una decisión explícita de quien está midiendo, no
+  // un costo que deba pagar cada visita real.
+  function continuoHabilitado() {
+    try {
+      var params = new URLSearchParams(global.location.search);
+      var deURL = params.get('ambiente_metrics');
+      if (deURL !== null) return deURL === 'on';
+    } catch (e) { /* location/URLSearchParams no disponible: seguir */ }
+    try {
+      return global.localStorage.getItem('ambienteMetricsContinuo') === 'true';
+    } catch (e) {
+      return false;
+    }
   }
 
   // ── Modo continuo ─────────────────────────────────────────────────
@@ -1227,6 +1392,9 @@
     iniciar: function () {
       if (iniciado) return; // idempotente, mismo criterio que ambiente-rendimiento.js
       if (typeof global.requestAnimationFrame !== 'function') return;
+      // PERF: sin opt-in explícito, no arranca nada — ver
+      // continuoHabilitado() arriba para el porqué.
+      if (!continuoHabilitado()) return;
       iniciado = true;
       rafId = global.requestAnimationFrame(pasoFrame);
       iniciarLongTasksContinuo();
@@ -1259,8 +1427,10 @@
 
   // Se autoinicia al cargarse, mismo criterio que ambiente-rendimiento.js:
   // es Gobierno/Infraestructura pasivo, no espera a que el orquestador
-  // dispare nada — y no tiene efecto visible alguno hasta que algo
-  // lea AmbienteDiagnostico.obtenerResumen().
+  // dispare nada. PERF (2026-07-31): esta llamada ahora es un no-op en
+  // producción salvo opt-in explícito (ver continuoHabilitado() arriba)
+  // — antes de este cambio arrancaba incondicionalmente para el 100%
+  // de las visitas, sin ningún consumidor real de su output.
   api.iniciar();
 
 })(window);
@@ -1505,7 +1675,9 @@
 
   // ── Muestreo real de FPS (Cap. 9.6: "un valor único... consultado
   // antes de generar cualquier parámetro") ────────────────────────
-  var rafId = null;
+  var registradoEnScheduler = false;
+  var desregistrarScheduler = null;
+  var GAP_RESET_MS = 500; // ver nota en ambiente-scheduler.js sobre gap-detection
   var ultimoFrame = null;
   var inicioVentana = null;
   var framesEnVentana = 0;
@@ -1553,31 +1725,23 @@
     }
   }
 
-  // Fase 6 (auditoría §1): antes, esta función se reprogramaba a sí
-  // misma aun con la pestaña oculta (descartaba la ventana pero
-  // seguía pidiendo frames). Ahora el rAF se cancela por completo
-  // mientras está oculta y se reanuda desde un listener de
-  // visibilidad — cumple de forma literal el propio Cap. 9.2 citado
-  // en la cabecera del archivo ("no debe existir ciclo de animación
-  // ejecutándose en segundo plano"), sin cambiar el criterio ya
-  // existente de descartar la ventana en curso al ocultarse.
-  var pausadoPorVisibilidad = false;
-
+  // Etapa 5 (perf, 2026-07-31): antes, esta función pedía y
+  // cancelaba su propio rAF, con su propio listener de
+  // visibilitychange casi idéntico al que también tenía
+  // ambiente-respiracion.js (ver nota de cabecera de
+  // ambiente-scheduler.js). Ahora es una tarea "pura" registrada en
+  // el scheduler compartido: nunca vuelve a pedir su propio frame —
+  // eso lo decide el scheduler — y detecta ella misma un salto
+  // anómalo de timestamp (pestaña que estuvo oculta) para descartar
+  // esa ventana en vez de computar un delta falso, en lugar de
+  // depender de un cancelAnimationFrame propio. Mismo criterio de
+  // fondo que antes (Cap. 9.2: nunca contar como jank real un salto
+  // de segundo plano), ahora sin necesitar su propio listener.
   function pasoFrame(marcaTiempo) {
-    if (!pestanaVisible()) {
-      ultimoFrame = null;
-      inicioVentana = null;
-      framesEnVentana = 0;
-      pausadoPorVisibilidad = true;
-      rafId = null; // detenido, no reprogramado
-      return;
-    }
-
-    if (ultimoFrame === null) {
+    if (ultimoFrame === null || (marcaTiempo - ultimoFrame) > GAP_RESET_MS) {
       ultimoFrame = marcaTiempo;
       inicioVentana = marcaTiempo;
       framesEnVentana = 0;
-      rafId = global.requestAnimationFrame(pasoFrame);
       return;
     }
 
@@ -1592,18 +1756,7 @@
       inicioVentana = marcaTiempo;
       framesEnVentana = 0;
     }
-
-    rafId = global.requestAnimationFrame(pasoFrame);
   }
-
-  function alCambiarVisibilidad() {
-    if (pestanaVisible() && pausadoPorVisibilidad && rafId === null) {
-      pausadoPorVisibilidad = false;
-      rafId = global.requestAnimationFrame(pasoFrame);
-    }
-  }
-
-  var listenerRegistrado = false;
 
   var api = {
     get nivelFidelidad() { return nivelActual; },
@@ -1628,30 +1781,31 @@
       };
     },
 
+    // Etapa 5: requiere AmbienteScheduler (debe cargar antes en el
+    // ORDEN del bundle — ver scripts/build-ambiente-bundle.js). Si no
+    // está disponible, este módulo se degrada de forma fail-open
+    // (Cap. 1.4: "mejor no tener el módulo que tenerlo roto"): el
+    // nivel de fidelidad queda fijo en su estimación inicial por
+    // capacidad de dispositivo, sin muestreo real de FPS, en vez de
+    // reintentar un rAF propio que reintroduciría el loop duplicado
+    // que esta etapa vino a eliminar.
     iniciar: function () {
-      if (rafId !== null) return; // idempotente
-      if (typeof global.requestAnimationFrame !== 'function') return;
+      if (registradoEnScheduler) return; // idempotente
+      var s = global.AmbienteScheduler;
+      if (!s || typeof s.registrar !== 'function') return;
       var a = assets();
       if (a) aplicarTamanoCache(nivelActual); // aplica el punto de partida ya al arrancar
-      rafId = global.requestAnimationFrame(pasoFrame);
-
-      // Reanudación tras pausa por 2º plano (registrado una sola vez;
-      // una segunda llamada a iniciar() ya vuelve por el guard de
-      // arriba antes de llegar acá).
-      if (!listenerRegistrado && typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
-        listenerRegistrado = true;
-        document.addEventListener('visibilitychange', alCambiarVisibilidad);
-      }
+      registradoEnScheduler = true;
+      desregistrarScheduler = s.registrar('rendimiento', pasoFrame);
     },
 
     // Solo para pruebas / apagado explícito (por ejemplo, la app
     // pasa a segundo plano de forma prolongada y decide liberar el
     // ciclo de muestreo por completo, no solo pausarlo un frame).
     detener: function () {
-      if (rafId !== null && typeof global.cancelAnimationFrame === 'function') {
-        global.cancelAnimationFrame(rafId);
-      }
-      rafId = null;
+      if (desregistrarScheduler) desregistrarScheduler();
+      desregistrarScheduler = null;
+      registradoEnScheduler = false;
       ultimoFrame = null;
       inicioVentana = null;
       framesEnVentana = 0;
@@ -2362,12 +2516,15 @@
      no es visible, para no "recuperar" de golpe un salto de tiempo
      acumulado al volver a primer plano.
 
-   Debe cargarse después de ambiente-config.js, ambiente-ritmo.js y
+   Debe cargarse después de ambiente-config.js, ambiente-ritmo.js,
    ambiente-accesibilidad.js (de los que lee bandas, período y señal de
-   reducción), y puede cargarse en cualquier punto antes de
-   ambiente-orquestador.js, que es quien lo inicia. No depende de
-   ambiente-movimiento.js: si no está cargado, usa document.hidden
-   directamente como respaldo de visibilidad.
+   reducción) y ambiente-scheduler.js (Etapa 5: quien efectivamente
+   dispara tick() en cada frame — sin él, iniciar() se degrada
+   fail-open y el ciclo de respiración no arranca), y puede cargarse
+   en cualquier punto antes de ambiente-orquestador.js, que es quien lo
+   inicia. Ya no depende de ambiente-movimiento.js en ningún sentido
+   (Etapa 5: la pausa/reanudación por visibilidad se centralizó en
+   ambiente-scheduler.js).
    ═══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -2375,7 +2532,6 @@
   function config() { return global.AmbienteConfig || null; }
   function ritmo() { return global.AmbienteRitmo || null; }
   function accesibilidad() { return global.AmbienteAccesibilidad || null; }
-  function movimiento() { return global.AmbienteMovimiento || null; }
 
   // Cap. 8 "Cómo acompaña" / "Cómo nunca distrae": constantes de este
   // módulo, no del documento fuente (que a propósito no fija números,
@@ -2388,7 +2544,9 @@
   var TECHO_MULTIPLICADOR = 1.6; // ni el boost de Carga empuja la amplitud más allá de esto
   var TASA_SUAVIZADO = 0.02;    // convergencia gradual del multiplicador objetivo (Cap. 8 "nunca instantáneo")
 
-  var rafId = null;
+  var registradoEnScheduler = false;
+  var desregistrarScheduler = null;
+  var GAP_RESET_MS = 500; // ver nota en ambiente-scheduler.js sobre gap-detection
   var periodoMs = 11500; // respaldo razonable si AmbienteConfig no cargó (punto medio 8000-15000)
   var faseAcumuladaMs = 0;
   var ultimoTimestamp = null;
@@ -2437,11 +2595,10 @@
     return Math.max(base, PISO_ABSOLUTO);
   }
 
-  function pestanaVisible() {
-    var m = movimiento();
-    if (m) return m.pestanaVisible;
-    return (typeof document !== 'undefined') ? !document.hidden : true;
-  }
+  // pestanaVisible()/movimiento() se retiraron acá (Etapa 5): la
+  // responsabilidad de pausar/reanudar por visibilidad ahora vive
+  // exclusivamente en ambiente-scheduler.js — este módulo ya no
+  // necesita conocer ni a AmbienteMovimiento ni a document.hidden.
 
   // PERF (auditoría performance, 2026-07-30): `aplicar()` hacía DOS
   // cosas distintas en una sola llamada por rAF — (1) el cómputo (seno
@@ -2513,44 +2670,26 @@
     document.documentElement.style.setProperty('--amb-respiracion', valor.toFixed(4));
   }
 
-  // Fase 6 (auditoría §1): antes, este tick se reprogramaba a sí mismo
-  // incluso con la pestaña oculta (solo saltaba el cálculo) — el rAF
-  // seguía "vivo", apoyado únicamente en que los navegadores lo
-  // regulan a ~1/s en 2º plano. Cap. 9.2 en la cabecera de este
-  // archivo dice explícitamente "no debe existir ciclo de animación
-  // ejecutándose en segundo plano": ahora se cumple de forma literal
-  // — cuando se oculta, este tick NO vuelve a pedir el próximo frame;
-  // el ciclo queda cancelado por completo hasta que un listener de
-  // visibilitychange lo reanuda. No se acumula fase mientras está
-  // pausado (mismo criterio que ya tenía este archivo antes de este
-  // cambio), así que al volver no hay salto visual.
-  var pausadoPorVisibilidad = false;
-
+  // Etapa 5 (perf, 2026-07-31): antes, este tick pedía y cancelaba su
+  // propio rAF, con su propio listener de visibilidad (directo o vía
+  // AmbienteMovimiento) — casi idéntico al que también tenía
+  // ambiente-rendimiento.js (ver nota de cabecera de
+  // ambiente-scheduler.js, que ahora es la única implementación de
+  // ese patrón en todo el motor). Ahora es una tarea "pura" registrada
+  // en el scheduler compartido: nunca vuelve a pedir su propio frame,
+  // y detecta ella misma un salto anómalo de timestamp (gap-detection)
+  // para tratarlo como "primer frame tras reanudar" — sin acumular
+  // fase de golpe — en vez de depender de que alguien la pause y
+  // reanude desde afuera.
   function tick(timestamp) {
-    if (!pestanaVisible()) {
-      ultimoTimestamp = null;
-      pausadoPorVisibilidad = true;
-      rafId = null; // el ciclo queda detenido, no reprogramado
-      return;
+    if (ultimoTimestamp === null || (timestamp - ultimoTimestamp) > GAP_RESET_MS) {
+      ultimoTimestamp = timestamp;
+      return; // no acumula fase en el frame de reanudación
     }
-
-    rafId = global.requestAnimationFrame(tick);
-
-    if (ultimoTimestamp === null) ultimoTimestamp = timestamp;
     faseAcumuladaMs += (timestamp - ultimoTimestamp);
     ultimoTimestamp = timestamp;
-
     aplicar();
   }
-
-  function alCambiarVisibilidad() {
-    if (pestanaVisible() && pausadoPorVisibilidad && rafId === null) {
-      pausadoPorVisibilidad = false;
-      rafId = global.requestAnimationFrame(tick);
-    }
-  }
-
-  var listenerRegistrado = false;
 
   var api = {
     // Etapa 3 (Roadmap A+B — Contrato común, ver ambiente-contrato.js).
@@ -2577,16 +2716,15 @@
     // un solo lugar.
     isActive: function (fidelidad) { return true; },
 
-    // step(dt, sharedState): no-op, igual que en ambiente-clima.js —
-    // misma razón de fondo, distinto motivo puntual. Acá el ciclo real
-    // ya vive en tick()/aplicar() de arriba, corriendo por su propio
-    // rAF con su propio timestamp de alta precisión — no por dt
-    // inyectado por un orquestador que todavía no existe (Etapa 5).
-    // Migrar el cómputo a step(dt,...) hoy exigiría además separar la
-    // escritura ya throttleada (INTERVALO_ESCRITURA) de un mecanismo
-    // que no sabe todavía a qué cadencia lo va a llamar el futuro
-    // writer único — mezclar ambos throttles sin ese writer sería
-    // adivinar. Se documenta como desviación explícita, misma
+    // step(dt, sharedState): no-op — el ciclo real vive en tick()/
+    // aplicar() de arriba, ahora corriendo dentro del rAF compartido
+    // de AmbienteScheduler en vez de uno propio (Etapa 5), pero
+    // todavía con su propio timestamp de alta precisión recibido
+    // directamente del scheduler, no por un dt agregado. Migrar el
+    // cómputo a step(dt,...) exigiría además separar la escritura ya
+    // throttleada (INTERVALO_ESCRITURA) de un mecanismo de batching
+    // que todavía no existe — mezclar ambos throttles sin ese writer
+    // sería adivinar. Se documenta como desviación explícita, misma
     // filosofía que ambiente-contrato.js pide para no aplicar nada en
     // silencio.
     step: function (dt, sharedState) {},
@@ -2605,29 +2743,19 @@
     // la variable CSS.
     get amplitudActual() { return multiplicadorActual; },
 
+    // Etapa 5: requiere AmbienteScheduler (debe cargar antes en el
+    // ORDEN del bundle). Sin él, se degrada fail-open (Cap. 1.4):
+    // el ciclo de respiración simplemente no arranca, en vez de caer
+    // de vuelta a un rAF propio que reintroduciría el loop duplicado
+    // que esta etapa vino a eliminar — mismo criterio que
+    // ambiente-rendimiento.js.
     iniciar: function () {
-      if (rafId !== null) return; // idempotente
+      if (registradoEnScheduler) return; // idempotente
+      var s = global.AmbienteScheduler;
+      if (!s || typeof s.registrar !== 'function') return;
       periodoMs = calcularPeriodoMs();
-      rafId = global.requestAnimationFrame(tick);
-
-      // Reanudación: preferimos el evento propio de AmbienteMovimiento
-      // (Cap. 2.3 — "ningún módulo de Contenido Visual necesita su
-      // propio listener de visibilidad"), y solo si no está cargado
-      // caemos a un listener directo de document (mismo respaldo que
-      // ya usa pestanaVisible() arriba). En ambos casos, registrado
-      // una sola vez — una segunda llamada a iniciar() ya vuelve por
-      // el guard de arriba.
-      if (!listenerRegistrado) {
-        listenerRegistrado = true;
-        var m = movimiento();
-        if (m && typeof m.suscribir === 'function') {
-          m.suscribir(function (evento) {
-            if (evento.motivo === 'visibilidad') alCambiarVisibilidad();
-          });
-        } else if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
-          document.addEventListener('visibilitychange', alCambiarVisibilidad);
-        }
-      }
+      registradoEnScheduler = true;
+      desregistrarScheduler = s.registrar('respiracion', tick);
     }
   };
 
@@ -3396,6 +3524,7 @@
   var climaRealLluviaActiva = false;
   var climaRealNieblaActiva = false;
   var listenerVisibilidad = null;
+  var desuscribirVisibilidadMovimiento = null;
   var desuscribirRendimiento = null;
 
   // Etapa 3: dos razones independientes para pausar el polling, cada
@@ -3690,16 +3819,41 @@
       // real de este módulo. En 'reducida'/'minima' no tiene sentido
       // seguir pidiendo datos que van a alimentar un efecto que ya
       // está desactivado.
-      if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+      //
+      // PERF (auditoría de arquitectura, 2026-07-31): este módulo
+      // tenía su propio listener directo de document.visibilitychange
+      // — la misma señal cruda que Cap. 2.3 le asigna en exclusiva a
+      // AmbienteMovimiento como fuente única para todo el Grupo de
+      // Contenido Visual ("ningún módulo... necesita su propio
+      // listener de visibilidad"), y que ambiente-respiracion.js ya
+      // consume correctamente por esa vía. Ahora clima.js sigue el
+      // mismo patrón: se suscribe al evento motivo:'visibilidad' del
+      // Motion Controller en vez de escuchar document directamente, y
+      // solo cae al listener directo si AmbienteMovimiento no llegó a
+      // cargar (mismo respaldo defensivo que el resto del motor usa
+      // ante una dependencia ausente). Cero cambio de comportamiento
+      // — document.visibilitychange dispara exactamente el mismo
+      // evento en ambos casos — es una corrección puramente
+      // arquitectónica: una fuente de la señal, no dos.
+      if (typeof document !== 'undefined') {
         visibilidadPermitePolling = document.visibilityState !== 'hidden';
         fidelidadPermitePolling = isActive(fidelidadActual());
         actualizarEstadoPolling();
 
-        listenerVisibilidad = function () {
+        var alCambiarVisibilidad = function () {
           visibilidadPermitePolling = document.visibilityState !== 'hidden';
           actualizarEstadoPolling();
         };
-        document.addEventListener('visibilitychange', listenerVisibilidad);
+
+        var m = movimiento();
+        if (m && typeof m.suscribir === 'function') {
+          desuscribirVisibilidadMovimiento = m.suscribir(function (evento) {
+            if (evento.motivo === 'visibilidad') alCambiarVisibilidad();
+          });
+        } else if (typeof document.addEventListener === 'function') {
+          listenerVisibilidad = alCambiarVisibilidad;
+          document.addEventListener('visibilitychange', listenerVisibilidad);
+        }
 
         var r = rendimiento();
         if (r) {
@@ -3718,6 +3872,10 @@
       if (listenerVisibilidad && typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', listenerVisibilidad);
         listenerVisibilidad = null;
+      }
+      if (desuscribirVisibilidadMovimiento) {
+        desuscribirVisibilidadMovimiento();
+        desuscribirVisibilidadMovimiento = null;
       }
       if (desuscribirRendimiento) {
         desuscribirRendimiento();
