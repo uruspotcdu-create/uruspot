@@ -4,7 +4,7 @@
  * Para modificar el Ambient Engine, editá el módulo ambiente-*.js
  * correspondiente y volvé a correr:
  *   node scripts/build-ambiente-bundle.js
- * Generado: 2026-07-31T06:30:08.825Z
+ * Generado: 2026-07-31T18:09:11.819Z
  */
 
 /* ==== ambiente-config.js ==== */
@@ -763,7 +763,14 @@
     reduccion: 50,      // activaciones del Estado de Reducción
     transicion: 100,    // duraciones reales de transición
     cargaFallida: 50,   // timeouts / errores de Estado de Carga
-    fidelidad: 50        // cambios de nivel de fidelidad
+    fidelidad: 50,        // cambios de nivel de fidelidad
+    // Etapa 1 (Roadmap A+B, Instrumentación): dos tipos nuevos, mismo
+    // patrón que los anteriores. frameTime a 300 (~5s de muestreo
+    // continuo a 60fps) porque es la métrica más frecuente del
+    // sistema; tareaLarga a 50 porque una tarea larga (Long Tasks
+    // API, >50ms) es, por definición, un evento poco frecuente.
+    frameTime: 300,
+    tareaLarga: 50
   };
 
   var registros = {
@@ -771,7 +778,9 @@
     reduccion: [],
     transicion: [],
     cargaFallida: [],
-    fidelidad: []
+    fidelidad: [],
+    frameTime: [],
+    tareaLarga: []
   };
 
   function ahora() {
@@ -790,6 +799,19 @@
     lista.push({ valor: valor, marca: ahora() });
     var limite = LIMITES_RETENCION[tipo];
     if (lista.length > limite) lista.splice(0, lista.length - limite);
+  }
+
+  function maximo(lista) {
+    if (!lista.length) return null;
+    var max = lista[0].valor;
+    for (var i = 1; i < lista.length; i++) if (lista[i].valor > max) max = lista[i].valor;
+    return max;
+  }
+
+  function suma(lista) {
+    var total = 0;
+    for (var i = 0; i < lista.length; i++) total += lista[i].valor;
+    return total;
   }
 
   function promedio(lista) {
@@ -822,6 +844,15 @@
         registros.fidelidad.splice(0, registros.fidelidad.length - LIMITES_RETENCION.fidelidad);
       }
     },
+    // Etapa 1 (Roadmap A+B, Instrumentación): consumidores previstos
+    // son ambiente-metrics.js (frame-a-frame) — mismo patrón de
+    // entrada que registrarFPS, un valor numérico por evento.
+    registrarFrameTime: function (ms) {
+      if (typeof ms === 'number' && isFinite(ms)) registrar('frameTime', ms);
+    },
+    registrarTareaLarga: function (ms) {
+      if (typeof ms === 'number' && isFinite(ms)) registrar('tareaLarga', ms);
+    },
 
     // ── Salidas de lectura, exclusivamente para consulta pasiva
     // (equipo de producto / debugging) — nunca deben usarse como
@@ -836,7 +867,17 @@
         cargasFallidas: registros.cargaFallida.length,
         ultimoNivelFidelidad: registros.fidelidad.length
           ? registros.fidelidad[registros.fidelidad.length - 1].valor
-          : null
+          : null,
+        // Etapa 1 (Roadmap A+B, Instrumentación): mismo nivel de
+        // detalle que fps arriba, más el peor caso (maximo) porque
+        // para frame time y long tasks un solo pico ya es la señal
+        // relevante (un jank puntual), no solo el promedio.
+        frameTimePromedioMs: promedio(registros.frameTime),
+        frameTimeMaxMs: maximo(registros.frameTime),
+        frameTimeMuestras: registros.frameTime.length,
+        tareaLargaCantidad: registros.tareaLarga.length,
+        tareaLargaTotalMs: suma(registros.tareaLarga),
+        tareaLargaMaxMs: maximo(registros.tareaLarga)
       };
     },
 
@@ -856,6 +897,215 @@
   };
 
   global.AmbienteDiagnostico = api;
+
+})(window);
+
+/* ==== ambiente-metrics.js ==== */
+/* ═══════════════════════════════════════════════════════════════════
+   URU SPOT — Ambient Engine — js/ambiente-metrics.js
+   Etapa 1 (Roadmap A+B — Instrumentación)
+
+   Subsistema del Grupo de Infraestructura. Responsabilidad única:
+   tomar la misma medición que ya se usó a mano en
+   js/diagnostico-rendimiento-temporal.js (performance.now() frame a
+   frame + Long Tasks API) y convertirla en una utilidad reusable,
+   continua y silenciosa, para que cada etapa siguiente de este
+   roadmap pueda compararse contra la misma vara sin tener que
+   reescribir el harness de medición cada vez.
+
+   Dos modos, mismo método de medición debajo de los dos:
+
+   - Modo continuo (iniciar()): alimenta a AmbienteDiagnostico frame a
+     frame (registrarFrameTime) y por cada Long Task (registrarTareaLarga),
+     igual que ambiente-rendimiento.js alimenta registrarFPS — un
+     sumidero más de datos hacia el mismo registro central, nunca una
+     fuente de verdad propia.
+
+   - Modo puntual (medirVentana(ms, cb)): repite exactamente lo que
+     hacía diagnostico-rendimiento-temporal.js (una ventana de N ms,
+     FPS promedio + long tasks de esa ventana), pero sin tocar el DOM
+     ni auto-redirigir la URL — devuelve el resultado crudo por
+     callback para que quien la invoque decida qué hacer (loggear,
+     comparar contra una baseline, etc). Este es el modo pensado para
+     el punto 6 del roadmap ("repetir la captura de 10s... y comparar").
+
+   Este módulo nunca decide nivel de fidelidad ni apaga ningún otro
+   subsistema — mismo límite que ambiente-diagnostico.js ("nunca debe
+   influir en tiempo real sobre el comportamiento del sistema"): es
+   un observador puro, de un solo sentido (mide → registra), nunca al
+   revés.
+
+   Debe cargarse después de ambiente-diagnostico.js (es su único
+   destino de escritura) y puede cargarse antes del resto del Grupo
+   de Gobierno — no depende de ningún otro subsistema.
+   ═══════════════════════════════════════════════════════════════════ */
+(function (global) {
+  'use strict';
+
+  function diagnostico() { return global.AmbienteDiagnostico || null; }
+
+  function ahora() {
+    return (global.performance && typeof global.performance.now === 'function')
+      ? global.performance.now() : Date.now();
+  }
+
+  function longTasksSoportadas() {
+    try {
+      return typeof PerformanceObserver !== 'undefined' &&
+        !!PerformanceObserver.supportedEntryTypes &&
+        PerformanceObserver.supportedEntryTypes.indexOf('longtask') !== -1;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function pestanaVisible() {
+    return (typeof document !== 'undefined') ? !document.hidden : true;
+  }
+
+  // ── Modo continuo ─────────────────────────────────────────────────
+  var rafId = null;
+  var ultimoFrame = null;
+  var iniciado = false;
+  var pausadoPorVisibilidad = false;
+  var longTaskObserver = null;
+  var listenerVisibilidadRegistrado = false;
+
+  // Mismo criterio de pausa que ambiente-rendimiento.js (Cap. 9.2 en
+  // ese módulo): sin esto, un frame gap enorme al volver de segundo
+  // plano se registraría como un frameTime falso, ensuciando la
+  // métrica sin que haya pasado ningún jank real.
+  function pasoFrame(marcaTiempo) {
+    if (!pestanaVisible()) {
+      ultimoFrame = null;
+      pausadoPorVisibilidad = true;
+      rafId = null;
+      return;
+    }
+    if (ultimoFrame !== null) {
+      var d = diagnostico();
+      if (d) d.registrarFrameTime(marcaTiempo - ultimoFrame);
+    }
+    ultimoFrame = marcaTiempo;
+    rafId = global.requestAnimationFrame(pasoFrame);
+  }
+
+  function alCambiarVisibilidad() {
+    if (pestanaVisible() && pausadoPorVisibilidad && rafId === null) {
+      pausadoPorVisibilidad = false;
+      rafId = global.requestAnimationFrame(pasoFrame);
+    }
+  }
+
+  function iniciarLongTasksContinuo() {
+    if (!longTasksSoportadas()) return;
+    try {
+      longTaskObserver = new PerformanceObserver(function (list) {
+        var d = diagnostico();
+        if (!d) return;
+        list.getEntries().forEach(function (entry) {
+          d.registrarTareaLarga(entry.duration);
+        });
+      });
+      longTaskObserver.observe({ entryTypes: ['longtask'] });
+    } catch (e) {
+      // Long Tasks API no disponible en este navegador: no crítico,
+      // frameTime solo ya aporta señal (mismo criterio fail-open que
+      // el resto del motor).
+      longTaskObserver = null;
+    }
+  }
+
+  // ── Modo puntual (una ventana de N ms, sin tocar AmbienteDiagnostico) ──
+  function medirVentana(duracionMs, callback) {
+    if (typeof callback !== 'function') return;
+    var inicio = ahora();
+    var frames = 0;
+    var maxFrameGap = 0;
+    var ultimo = null;
+    var longTasksVentana = [];
+    var obs = null;
+
+    if (longTasksSoportadas()) {
+      try {
+        obs = new PerformanceObserver(function (list) {
+          list.getEntries().forEach(function (entry) {
+            longTasksVentana.push(entry.duration);
+          });
+        });
+        obs.observe({ entryTypes: ['longtask'] });
+      } catch (e) {
+        obs = null;
+      }
+    }
+
+    function medirFrame(t) {
+      frames++;
+      if (ultimo !== null) {
+        var gap = t - ultimo;
+        if (gap > maxFrameGap) maxFrameGap = gap;
+      }
+      ultimo = t;
+      if (ahora() - inicio < duracionMs) {
+        global.requestAnimationFrame(medirFrame);
+      }
+    }
+    global.requestAnimationFrame(medirFrame);
+
+    global.setTimeout(function () {
+      if (obs) { try { obs.disconnect(); } catch (e) { /* ya desconectado */ } }
+      var duracionReal = ahora() - inicio;
+      var totalLongTaskMs = longTasksVentana.reduce(function (acc, d) { return acc + d; }, 0);
+      callback({
+        fpsPromedio: frames / (duracionReal / 1000),
+        framesCapturados: frames,
+        gapMaxEntreFrames_ms: Math.round(maxFrameGap),
+        longTasksCantidad: longTasksVentana.length,
+        longTasksTotalMs: Math.round(totalLongTaskMs),
+        duracionRealMs: Math.round(duracionReal)
+      });
+    }, duracionMs + 50);
+  }
+
+  var api = {
+    iniciar: function () {
+      if (iniciado) return; // idempotente, mismo criterio que ambiente-rendimiento.js
+      if (typeof global.requestAnimationFrame !== 'function') return;
+      iniciado = true;
+      rafId = global.requestAnimationFrame(pasoFrame);
+      iniciarLongTasksContinuo();
+      if (!listenerVisibilidadRegistrado && typeof document !== 'undefined' &&
+          typeof document.addEventListener === 'function') {
+        listenerVisibilidadRegistrado = true;
+        document.addEventListener('visibilitychange', alCambiarVisibilidad);
+      }
+    },
+
+    // Solo para pruebas / apagado explícito — igual que
+    // ambiente-rendimiento.js.detener().
+    detener: function () {
+      if (rafId !== null && typeof global.cancelAnimationFrame === 'function') {
+        global.cancelAnimationFrame(rafId);
+      }
+      rafId = null;
+      ultimoFrame = null;
+      iniciado = false;
+      if (longTaskObserver) {
+        try { longTaskObserver.disconnect(); } catch (e) { /* ya desconectado */ }
+        longTaskObserver = null;
+      }
+    },
+
+    medirVentana: medirVentana
+  };
+
+  global.AmbienteMetrics = api;
+
+  // Se autoinicia al cargarse, mismo criterio que ambiente-rendimiento.js:
+  // es Gobierno/Infraestructura pasivo, no espera a que el orquestador
+  // dispare nada — y no tiene efecto visible alguno hasta que algo
+  // lea AmbienteDiagnostico.obtenerResumen().
+  api.iniciar();
 
 })(window);
 
@@ -2307,10 +2557,10 @@
   function calcularPresupuestoContraste(presupuesto, densidadParticulas, climaHabilitado, profundidadNavegacion) {
     // Suma bruta de todas las capas que comparten presupuesto
     var demandaBruta = densidadParticulas + (climaHabilitado ? 0.5 : 0) + profundidadNavegacion;
-
+    
     // Si la suma no supera el presupuesto, no hay restricción
     if (demandaBruta <= presupuesto) return { particulas: 1, clima: 1, navegacion: 1 };
-
+    
     // Si supera, cada capa se reduce proporcionalmente
     var factorGlobal = presupuesto / demandaBruta;
     return {
@@ -2337,7 +2587,7 @@
     var densidadParticulas = reducido ? 0 : escena.particulas.densidad * nivel.particulas;
     var climaHabilitado = reducido ? false : (escena.clima.habilitado && nivel.clima > 0);
     var profundidadNavegacion = escena.profundidad.navegacion * nivel.navegacion;
-
+    
     // Aplicar presupuesto de contraste (Cap. 7.4)
     var factoresPresupuesto = calcularPresupuestoContraste(
       escena.presupuestoContraste,
@@ -2345,7 +2595,7 @@
       climaHabilitado,
       profundidadNavegacion
     );
-
+    
     var parametros = {
       escena: escena.nombre,
       // Fondo y Luz nunca se desactivan (Cap. 7.2): sus multiplicadores
@@ -2793,8 +3043,8 @@
   var api = {
     // Obtener la intensidad de luz actual
     obtenerIntensidad: function () {
-      return (parametrosActuales && parametrosActuales.luz)
-        ? parametrosActuales.luz.intensidad
+      return (parametrosActuales && parametrosActuales.luz) 
+        ? parametrosActuales.luz.intensidad 
         : 0.5;
     },
 
@@ -3202,7 +3452,7 @@
   function registrarGesto() {
     ultimoGesto = Date.now();
     emitir({ tipo: 'gesto' });
-
+    
     // Resetear timer de inactividad
     if (timerInactividad) clearTimeout(timerInactividad);
     timerInactividad = setTimeout(function () {
