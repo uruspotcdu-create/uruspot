@@ -44,8 +44,10 @@ const SALIDA = path.join(JS_DIR, 'ambiente.bundle.js');
 // index.html (comentario "Ambient Engine — Fase 0 + Fase 1 + Fase 2").
 const ORDEN = [
   'ambiente-config.js',
+  'ambiente-contrato.js',
   'ambiente-assets.js',
   'ambiente-diagnostico.js',
+  'ambiente-metrics.js',
   'ambiente-accesibilidad.js',
   'ambiente-rendimiento.js',
   'ambiente-estados.js',
@@ -72,26 +74,42 @@ const ORDEN = [
   'ambiente-orquestador.js'
 ];
 
-function ordenEnIndexHtml() {
-  const html = fs.readFileSync(INDEX_HTML, 'utf8');
-  const matches = [...html.matchAll(/<script src="js\/(ambiente-[a-z-]+\.js)" defer><\/script>/g)];
-  return matches.map((m) => m[1]);
+// index.html ya NO tiene un <script> por cada módulo (perf, 2026-07-31:
+// los 27 se concatenaron en un único js/ambiente.bundle.js) — comparar
+// ORDEN contra index.html quedó obsoleto porque ahí ya no queda ningún
+// rastro del orden individual para comparar. El invariante que sigue
+// siendo real y vale la pena proteger es otro: que ORDEN contenga
+// exactamente los archivos ambiente-*.js que existen en disco, ni uno
+// de más ni uno de menos — así un módulo nuevo que se cree y se olvide
+// agregar acá (o uno que se borre y quede colgado en ORDEN) sigue
+// haciendo fallar el build en vez de generar un bundle incompleto o
+// con basura en silencio.
+function archivosAmbienteEnDisco() {
+  return fs.readdirSync(JS_DIR)
+    // ambiente-lifecycle-tests.js (y cualquier futuro *-tests.js) no es
+    // un módulo del motor — es una suite de Node ejecutada por
+    // run-tests.js (ver SUITES ahí), nunca cargada en el navegador ni
+    // parte del bundle.
+    .filter((nombre) => /^ambiente-[a-z-]+\.js$/.test(nombre) && !/-tests\.js$/.test(nombre))
+    .sort();
 }
 
-function validarContraIndexHtml() {
-  const real = ordenEnIndexHtml();
-  const iguales = real.length === ORDEN.length && real.every((f, i) => f === ORDEN[i]);
-  if (!iguales) {
-    console.error('El orden de ORDEN en este script NO coincide con los <script> de index.html.');
-    console.error('En index.html:', real);
-    console.error('En este script:', ORDEN);
+function validarContraDirectorio() {
+  const enDisco = archivosAmbienteEnDisco();
+  const enOrden = ORDEN.slice().sort();
+  const faltanEnOrden = enDisco.filter((f) => !ORDEN.includes(f));
+  const sobranEnOrden = enOrden.filter((f) => !enDisco.includes(f));
+  if (faltanEnOrden.length || sobranEnOrden.length) {
+    console.error('ORDEN en scripts/build-ambiente-bundle.js no coincide con los archivos js/ambiente-*.js en disco.');
+    if (faltanEnOrden.length) console.error('Existen en disco pero faltan en ORDEN:', faltanEnOrden);
+    if (sobranEnOrden.length) console.error('Están en ORDEN pero no existen en disco:', sobranEnOrden);
     console.error('Actualizá ORDEN en scripts/build-ambiente-bundle.js antes de generar el bundle.');
     process.exit(1);
   }
 }
 
 function build() {
-  validarContraIndexHtml();
+  validarContraDirectorio();
 
   const partes = ORDEN.map((archivo) => {
     const contenido = fs.readFileSync(path.join(JS_DIR, archivo), 'utf8');
