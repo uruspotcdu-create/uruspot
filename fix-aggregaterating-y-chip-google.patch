@@ -1,0 +1,1241 @@
+diff --git a/donde-comer-cdu/css/ficha.css b/donde-comer-cdu/css/ficha.css
+index 2764c0e..739997c 100644
+--- a/donde-comer-cdu/css/ficha.css
++++ b/donde-comer-cdu/css/ficha.css
+@@ -37,6 +37,12 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
+ .hero-chips{display:flex;flex-wrap:wrap;gap:10px}
+ .chip{padding:8px 18px;border:1px solid rgba(201,168,76,0.4);border-radius:2px;font-size:12px;letter-spacing:0.12em;color:rgba(255,255,255,0.85);text-transform:uppercase;font-weight:400;background:rgba(201,168,76,0.08)}
+ .chip-gold{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:600}
++/* Chip de rating de Google — deliberadamente distinto del chip-gold (URU SPOT)
++   para que no se confundan las dos fuentes: uno es nuestro puntaje editorial,
++   el otro es la calificación real de Google Maps, con su propio rótulo y link
++   de atribución a la ficha de Google. */
++.chip-google{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.25);text-decoration:none;transition:border-color var(--dur-rapido,0.2s) ease,background var(--dur-rapido,0.2s) ease}
++.chip-google:hover,.chip-google:focus-visible{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.45)}
+ .hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(201,168,76,0.3);padding:28px 32px;background:rgba(13,13,13,0.6);backdrop-filter:blur(12px)}
+ .score-num{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold);line-height:1}
+ .score-label{font-size:10px;letter-spacing:0.3em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:4px}
+diff --git a/donde-comer-cdu/locales/7-colinas/index.html b/donde-comer-cdu/locales/7-colinas/index.html
+index 961ad62..b436cf1 100644
+--- a/donde-comer-cdu/locales/7-colinas/index.html
++++ b/donde-comer-cdu/locales/7-colinas/index.html
+@@ -33,13 +33,7 @@
+     "addressRegion": "Entre Ríos",
+     "addressCountry": "AR"
+   },
+-  "priceRange": "$15.000 – $40.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.35",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$15.000 – $40.000 ARS"
+ }
+ </script>
+ </head>
+@@ -68,7 +62,7 @@
+     <h1 class="hero-title">7 <em>Colinas</em></h1>
+     <p class="hero-subtitle">Donde la ingeniería cervecera se encuentra con el alma de la ciudad.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.7 URU SPOT</span><span class="chip ">Estrada 838</span><span class="chip ">18:00 – 02:00</span><span class="chip ">$15k – $40k ARS</span>
++      <span class="chip chip-gold">⭐ 8.7 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ2xDmZFXar5URtIkGwkySP-o" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 1.930 reseñas. Ver en Google Maps">★ 4.4 Google · 1.930 reseñas</a><span class="chip ">Estrada 838</span><span class="chip ">18:00 – 02:00</span><span class="chip ">$15k – $40k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/antigua-fonda/index.html b/donde-comer-cdu/locales/antigua-fonda/index.html
+index 262d9f0..b602d7d 100644
+--- a/donde-comer-cdu/locales/antigua-fonda/index.html
++++ b/donde-comer-cdu/locales/antigua-fonda/index.html
+@@ -38,12 +38,6 @@
+     "@type": "GeoCoordinates",
+     "latitude": "-32.487357",
+     "longitude": "-58.2357779"
+-  },
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.60",
+-    "bestRating": "5",
+-    "worstRating": "1"
+   }
+ }
+ </script>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">Antigua <em>Fonda</em></h1>
+     <p class="hero-subtitle">Tradición, calidez y hospitalidad en pleno corazón de Concepción del Uruguay.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ URU SPOT Recomendado</span><span class="chip ">Centro Histórico</span><span class="chip ">12 Habitaciones · 4 Dúplex</span><span class="chip ">WiFi · Estacionamiento · 🐾 Pet-Friendly</span>
++      <span class="chip chip-gold">⭐ URU SPOT Recomendado</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ-7-3RADbr5URuQp786VlxfA" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 626 reseñas. Ver en Google Maps">★ 4.4 Google · 626 reseñas</a><span class="chip ">Centro Histórico</span><span class="chip ">12 Habitaciones · 4 Dúplex</span><span class="chip ">WiFi · Estacionamiento · 🐾 Pet-Friendly</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/bartolo-bar/index.html b/donde-comer-cdu/locales/bartolo-bar/index.html
+index 835e3e6..26fa4e6 100644
+--- a/donde-comer-cdu/locales/bartolo-bar/index.html
++++ b/donde-comer-cdu/locales/bartolo-bar/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4856557",
+     "longitude": "-58.2352943"
+   },
+-  "priceRange": "$25.000 – $55.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.40",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$25.000 – $55.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Bartolo <em>Bar</em></h1>
+     <p class="hero-subtitle">Punto neurálgico en el corazón de la ciudad. Frente a la plaza, de la mañana a la noche.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><span class="chip ">🍸 Gastro Bar</span><span class="chip ">San Martín 745</span><span class="chip ">Lun–Sáb 07:00–16:00</span>
++      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJmV3cXQDbr5URAv_w4FnsSN8" target="_blank" rel="noopener noreferrer" aria-label="4.1 de 5 en Google, 3.105 reseñas. Ver en Google Maps">★ 4.1 Google · 3.105 reseñas</a><span class="chip ">🍸 Gastro Bar</span><span class="chip ">San Martín 745</span><span class="chip ">Lun–Sáb 07:00–16:00</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/bella-vista/index.html b/donde-comer-cdu/locales/bella-vista/index.html
+index 53a5f02..545f1fb 100644
+--- a/donde-comer-cdu/locales/bella-vista/index.html
++++ b/donde-comer-cdu/locales/bella-vista/index.html
+@@ -33,13 +33,7 @@
+     "addressRegion": "Entre Ríos",
+     "addressCountry": "AR"
+   },
+-  "priceRange": "$25.000 – $40.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.45",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$25.000 – $40.000 ARS"
+ }
+ </script>
+ </head>
+@@ -68,7 +62,7 @@
+     <h1 class="hero-title">Bella <em>Vista</em></h1>
+     <p class="hero-subtitle">Tradición gastronómica con ambiente familiar y vistas icónicas.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.9 URU SPOT</span><span class="chip ">3 de Febrero 11</span><span class="chip ">Mar–Dom 08:00–00:00</span><span class="chip ">$25k – $40k ARS</span>
++      <span class="chip chip-gold">⭐ 8.9 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJV1WV6QDbr5URBmIxHOLii4U" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 2.827 reseñas. Ver en Google Maps">★ 4.4 Google · 2.827 reseñas</a><span class="chip ">3 de Febrero 11</span><span class="chip ">Mar–Dom 08:00–00:00</span><span class="chip ">$25k – $40k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/bonhomia/index.html b/donde-comer-cdu/locales/bonhomia/index.html
+index 2536bf7..5b5fb0d 100644
+--- a/donde-comer-cdu/locales/bonhomia/index.html
++++ b/donde-comer-cdu/locales/bonhomia/index.html
+@@ -38,12 +38,6 @@
+     "longitude": "-58.2247121"
+   },
+   "priceRange": "$20.000 – $35.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.50",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -95,7 +89,7 @@
+     <h1 class="hero-title"><em>Bon</em>homia</h1>
+     <p class="hero-subtitle">Cocina moderna, cócteles de autor y un ambiente que invita a quedarse.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><span class="chip ">Concepción del Uruguay</span><span class="chip ">Lun–Dom 11:00–14:30 · 19:00–01:00</span><span class="chip ">$20k – $35k ARS</span>
++      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ6bDrQR3br5URGfoQHTmNDBY" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 503 reseñas. Ver en Google Maps">★ 4.4 Google · 503 reseñas</a><span class="chip ">Concepción del Uruguay</span><span class="chip ">Lun–Dom 11:00–14:30 · 19:00–01:00</span><span class="chip ">$20k – $35k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/bungalows-mexico/index.html b/donde-comer-cdu/locales/bungalows-mexico/index.html
+index 1541e45..f55b6e8 100644
+--- a/donde-comer-cdu/locales/bungalows-mexico/index.html
++++ b/donde-comer-cdu/locales/bungalows-mexico/index.html
+@@ -38,12 +38,6 @@
+     "@type": "GeoCoordinates",
+     "latitude": "-32.4900356",
+     "longitude": "-58.2854232"
+-  },
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.70",
+-    "bestRating": "5",
+-    "worstRating": "1"
+   }
+ }
+ </script>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">Bungalows <em>Mexico</em></h1>
+     <p class="hero-subtitle">Naturaleza, confort y ubicación estratégica en Concepción del Uruguay, Entre Ríos.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ URU SPOT Recomendado</span><span class="chip ">Parque 10.000 m²</span><span class="chip ">Piscina · Jacuzzi · Quincho</span><span class="chip ">WiFi · Estacionamiento Cubierto · A/C</span>
++      <span class="chip chip-gold">⭐ URU SPOT Recomendado</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJAxwe04DZr5URRDddggbEVms" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 805 reseñas. Ver en Google Maps">★ 4.4 Google · 805 reseñas</a><span class="chip ">Parque 10.000 m²</span><span class="chip ">Piscina · Jacuzzi · Quincho</span><span class="chip ">WiFi · Estacionamiento Cubierto · A/C</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/casa-del-arbol/index.html b/donde-comer-cdu/locales/casa-del-arbol/index.html
+index 5f1df2e..305fd9f 100644
+--- a/donde-comer-cdu/locales/casa-del-arbol/index.html
++++ b/donde-comer-cdu/locales/casa-del-arbol/index.html
+@@ -38,12 +38,6 @@
+     "@type": "GeoCoordinates",
+     "latitude": "-32.4746805",
+     "longitude": "-58.2462602"
+-  },
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.80",
+-    "bestRating": "5",
+-    "worstRating": "1"
+   }
+ }
+ </script>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">Casa del <em>Árbol</em> Hostel</h1>
+     <p class="hero-subtitle">Calidez humana, ambiente relajado y una atención que hace sentir a cada viajero parte de algo especial en Concepción del Uruguay.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ URU SPOT Recomendado</span><span class="chip ">Casona Colonial</span><span class="chip ">Anfitriones Guada & Charly</span><span class="chip ">WiFi · Ideal Viajeros Solos</span>
++      <span class="chip chip-gold">⭐ URU SPOT Recomendado</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJkymAR6vbr5URo5jltYbOt7U" target="_blank" rel="noopener noreferrer" aria-label="4.5 de 5 en Google, 164 reseñas. Ver en Google Maps">★ 4.5 Google · 164 reseñas</a><span class="chip ">Casona Colonial</span><span class="chip ">Anfitriones Guada & Charly</span><span class="chip ">WiFi · Ideal Viajeros Solos</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/cross-gimnasio/index.html b/donde-comer-cdu/locales/cross-gimnasio/index.html
+index ae83002..072ffb6 100644
+--- a/donde-comer-cdu/locales/cross-gimnasio/index.html
++++ b/donde-comer-cdu/locales/cross-gimnasio/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4882245",
+     "longitude": "-58.2857647"
+   },
+-  "priceRange": "Consultá por precio",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.20",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "Consultá por precio"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">CROSS <em>CDELU</em></h1>
+     <p class="hero-subtitle">Una propuesta de acondicionamiento físico que rompe con el gimnasio tradicional. Entrenamiento funcional al aire libre, comunidad auténtica y coaches que realmente se comprometen con tu progreso.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.4 URU SPOT</span><span class="chip ">Pres. J. C. Gonzalez · CdU</span><span class="chip ">Lun–Vie 24 hs · Sáb–Dom cerrado</span><span class="chip ">Al Aire Libre</span>
++      <span class="chip chip-gold">⭐ 8.4 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJIzuiYAXbr5URpAdmJtLozOE" target="_blank" rel="noopener noreferrer" aria-label="4.7 de 5 en Google, 10 reseñas. Ver en Google Maps">★ 4.7 Google · 10 reseñas</a><span class="chip ">Pres. J. C. Gonzalez · CdU</span><span class="chip ">Lun–Vie 24 hs · Sáb–Dom cerrado</span><span class="chip ">Al Aire Libre</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/cultura-cafe/index.html b/donde-comer-cdu/locales/cultura-cafe/index.html
+index e8f9014..0480892 100644
+--- a/donde-comer-cdu/locales/cultura-cafe/index.html
++++ b/donde-comer-cdu/locales/cultura-cafe/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4759672",
+     "longitude": "-58.2293157"
+   },
+-  "priceRange": "$5.000 – $10.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.40",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$5.000 – $10.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Cultura <em>Café</em></h1>
+     <p class="hero-subtitle">Ambiente sofisticado y la mejor experiencia cafetera de la zona.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><span class="chip ">Bv. Irigoyen Perú 290</span><span class="chip ">Mar–Vie 8:00–12:00 / 16:00–20:00</span><span class="chip ">$5.000 – $10.000 ARS</span>
++      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJywkLFY_br5URL4s6S8OfE5w" target="_blank" rel="noopener noreferrer" aria-label="4.7 de 5 en Google, 39 reseñas. Ver en Google Maps">★ 4.7 Google · 39 reseñas</a><span class="chip ">Bv. Irigoyen Perú 290</span><span class="chip ">Mar–Vie 8:00–12:00 / 16:00–20:00</span><span class="chip ">$5.000 – $10.000 ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/danys/index.html b/donde-comer-cdu/locales/danys/index.html
+index 0f9aba9..f2cb515 100644
+--- a/donde-comer-cdu/locales/danys/index.html
++++ b/donde-comer-cdu/locales/danys/index.html
+@@ -39,12 +39,6 @@
+     "latitude": "-32.4849916",
+     "longitude": "-58.235616"
+   },
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.20",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -87,7 +81,7 @@
+     <h1 class="hero-title">Heladería <em>Danys</em></h1>
+     <p class="hero-subtitle">El sabor de siempre, con el ambiente perfecto para compartir en familia o entre amigos.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.4 URU SPOT</span><span class="chip ">150 reseñas</span><span class="chip ">Delivery disponible</span><span class="chip ">Pago con tarjeta</span>
++      <span class="chip chip-gold">⭐ 8.4 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJmV3cXQDbr5UR0yuI2_az6KA" target="_blank" rel="noopener noreferrer" aria-label="4.2 de 5 en Google, 157 reseñas. Ver en Google Maps">★ 4.2 Google · 157 reseñas</a><span class="chip ">150 reseñas</span><span class="chip ">Delivery disponible</span><span class="chip ">Pago con tarjeta</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/dolores-costa/index.html b/donde-comer-cdu/locales/dolores-costa/index.html
+index c088918..675009d 100644
+--- a/donde-comer-cdu/locales/dolores-costa/index.html
++++ b/donde-comer-cdu/locales/dolores-costa/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4867145",
+     "longitude": "-58.2507116"
+   },
+-  "priceRange": "$15.000 – $45.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.15",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$15.000 – $45.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Dolores <em>Costa</em></h1>
+     <p class="hero-subtitle">Exclusividad y sofisticación culinaria en el corazón de Concepción del Uruguay.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.3 URU SPOT</span><span class="chip ">⚡ EXCLUSIVO</span><span class="chip ">Galarza y Rep. del Líbano</span><span class="chip ">19:30 – 01:00</span><span class="chip ">$15k – $45k ARS</span>
++      <span class="chip chip-gold">⭐ 8.3 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ3xFpjTfbr5URGeHDJ-glJh8" target="_blank" rel="noopener noreferrer" aria-label="4.5 de 5 en Google, 415 reseñas. Ver en Google Maps">★ 4.5 Google · 415 reseñas</a><span class="chip ">⚡ EXCLUSIVO</span><span class="chip ">Galarza y Rep. del Líbano</span><span class="chip ">19:30 – 01:00</span><span class="chip ">$15k – $45k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/drakkar/index.html b/donde-comer-cdu/locales/drakkar/index.html
+index 57aadb6..90c1b18 100644
+--- a/donde-comer-cdu/locales/drakkar/index.html
++++ b/donde-comer-cdu/locales/drakkar/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.480575",
+     "longitude": "-58.2365005"
+   },
+-  "priceRange": "$20.000 – $35.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.10",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$20.000 – $35.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title"><em>Drakkar</em></h1>
+     <p class="hero-subtitle">El Valhalla cervecero en el corazón de Concepción del Uruguay. Ambiente nórdico, cerveza artesanal y cocina de noche.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.2 URU SPOT</span><span class="chip ">🍺 Cervecería Artesanal</span><span class="chip ">Artusi 755</span><span class="chip ">19:00 – 02:00 hs.</span>
++      <span class="chip chip-gold">⭐ 8.2 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJqVnj7v_ar5URC7NdkboiSOs" target="_blank" rel="noopener noreferrer" aria-label="4.5 de 5 en Google, 809 reseñas. Ver en Google Maps">★ 4.5 Google · 809 reseñas</a><span class="chip ">🍺 Cervecería Artesanal</span><span class="chip ">Artusi 755</span><span class="chip ">19:00 – 02:00 hs.</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/el-arca-resto-bar/index.html b/donde-comer-cdu/locales/el-arca-resto-bar/index.html
+index efcc4a2..3fa9245 100644
+--- a/donde-comer-cdu/locales/el-arca-resto-bar/index.html
++++ b/donde-comer-cdu/locales/el-arca-resto-bar/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2368257"
+   },
+   "priceRange": "$15.000 – $60.000 ARS · ~U$D 15–60",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.15",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -116,7 +110,7 @@
+     <h1 class="hero-title">El <em>Arca</em><br/>Resto Bar</h1>
+     <p class="hero-subtitle">Cena, Tragos & Club · Experiencia Nocturna hasta el amanecer</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">📍 Leguizamón 180 · Centro</span><span class="chip ">🕗 20:00 – 07:00</span><span class="chip ">💰 $15k – $60k ARS</span>
++      <span class="chip chip-gold">📍 Leguizamón 180 · Centro</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ82j1DgDbr5URxO0fNHZOYYo" target="_blank" rel="noopener noreferrer" aria-label="4.1 de 5 en Google, 968 reseñas. Ver en Google Maps">★ 4.1 Google · 968 reseñas</a><span class="chip ">🕗 20:00 – 07:00</span><span class="chip ">💰 $15k – $60k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/el-calderon/index.html b/donde-comer-cdu/locales/el-calderon/index.html
+index 7e45edd..9eebade 100644
+--- a/donde-comer-cdu/locales/el-calderon/index.html
++++ b/donde-comer-cdu/locales/el-calderon/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4819334",
+     "longitude": "-58.3029796"
+   },
+-  "priceRange": "$25.000 – $55.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.05",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$25.000 – $55.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">El <em>Calderón</em></h1>
+     <p class="hero-subtitle">Cocina casera que redefine la vianda diaria con calidad y sabor real. El refugio del mediodía de lunes a viernes.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.1 URU SPOT</span><span class="chip ">Cdad de la Paz 315</span><span class="chip ">Lun–Vie 11:30–14:00</span><span class="chip ">$25k – $55k ARS</span>
++      <span class="chip chip-gold">⭐ 8.1 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJS6Td0qzZr5URT0o-AsK7lSA" target="_blank" rel="noopener noreferrer" aria-label="4.7 de 5 en Google, 165 reseñas. Ver en Google Maps">★ 4.7 Google · 165 reseñas</a><span class="chip ">Cdad de la Paz 315</span><span class="chip ">Lun–Vie 11:30–14:00</span><span class="chip ">$25k – $55k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/el-danubio-azul/index.html b/donde-comer-cdu/locales/el-danubio-azul/index.html
+index dd740cc..21464d3 100644
+--- a/donde-comer-cdu/locales/el-danubio-azul/index.html
++++ b/donde-comer-cdu/locales/el-danubio-azul/index.html
+@@ -34,13 +34,7 @@
+     "addressRegion": "Entre Ríos",
+     "addressCountry": "AR"
+   },
+-  "priceRange": "$10.000 – $40.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.05",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$10.000 – $40.000 ARS"
+ }
+ </script>
+ </head>
+@@ -69,7 +63,7 @@
+     <h1 class="hero-title">El Danubio <em>Azul</em></h1>
+     <p class="hero-subtitle">Sabor y cultura en el corazón histórico de Concepción del Uruguay.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.1 URU SPOT</span><span class="chip ">San Martín 763</span><span class="chip ">08:00 – 00:00</span><span class="chip ">$10k – $40k ARS</span>
++      <span class="chip chip-gold">⭐ 8.1 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ-7-3RADbr5URwMuvBaNb4zQ" target="_blank" rel="noopener noreferrer" aria-label="4.2 de 5 en Google, 2.135 reseñas. Ver en Google Maps">★ 4.2 Google · 2.135 reseñas</a><span class="chip ">San Martín 763</span><span class="chip ">08:00 – 00:00</span><span class="chip ">$10k – $40k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/faro-3260/index.html b/donde-comer-cdu/locales/faro-3260/index.html
+index 5f244fa..85dbc53 100644
+--- a/donde-comer-cdu/locales/faro-3260/index.html
++++ b/donde-comer-cdu/locales/faro-3260/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4961239",
+     "longitude": "-58.2289306"
+   },
+-  "priceRange": "$15.000 – $30.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.40",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$15.000 – $30.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Faro <em>3260</em></h1>
+     <p class="hero-subtitle">Cocina internacional con la mejor vista panorámica al río Uruguay. Especialidad en pescados de río y ambiente sofisticado.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><span class="chip ">Jordana y Defensa Sur</span><span class="chip ">Mediodía & Noche</span><span class="chip ">$15k – $30k ARS</span>
++      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJlSb4uUjbr5UROgQmAJK-JH8" target="_blank" rel="noopener noreferrer" aria-label="4.3 de 5 en Google, 286 reseñas. Ver en Google Maps">★ 4.3 Google · 286 reseñas</a><span class="chip ">Jordana y Defensa Sur</span><span class="chip ">Mediodía & Noche</span><span class="chip ">$15k – $30k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/garifo/index.html b/donde-comer-cdu/locales/garifo/index.html
+index 46c7fa0..5f2f2ba 100644
+--- a/donde-comer-cdu/locales/garifo/index.html
++++ b/donde-comer-cdu/locales/garifo/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2359256"
+   },
+   "priceRange": "$10.000 – $35.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.40",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -87,7 +81,7 @@
+     <h1 class="hero-title">Ga<em>rifo</em></h1>
+     <p class="hero-subtitle">Un rincón cálido con historia viva en el corazón de la ciudad.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><span class="chip ">España 193</span><span class="chip ">Mar–Dom 20:00 – 01:00</span><span class="chip ">$10k – $35k ARS</span>
++      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJE1cM-JPbr5URKSZ0-FsFklU" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 916 reseñas. Ver en Google Maps">★ 4.4 Google · 916 reseñas</a><span class="chip ">España 193</span><span class="chip ">Mar–Dom 20:00 – 01:00</span><span class="chip ">$10k – $35k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/helena-cafe/index.html b/donde-comer-cdu/locales/helena-cafe/index.html
+index 1416216..425b2f8 100644
+--- a/donde-comer-cdu/locales/helena-cafe/index.html
++++ b/donde-comer-cdu/locales/helena-cafe/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2357949"
+   },
+   "priceRange": "$20.000 – $55.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.25",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -90,7 +84,7 @@
+     <h1 class="hero-title">Helena <em>Café</em></h1>
+     <p class="hero-subtitle">Un refugio moderno en el corazón de la ciudad diseñado para la calma y el buen café.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.5 URU SPOT</span><span class="chip ">Galarza 752</span><span class="chip ">08:30 – 21:00</span><span class="chip ">$20k – $55k ARS</span>
++      <span class="chip chip-gold">⭐ 8.5 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJU6DFRQDbr5URQla4fF-wnS4" target="_blank" rel="noopener noreferrer" aria-label="4.2 de 5 en Google, 503 reseñas. Ver en Google Maps">★ 4.2 Google · 503 reseñas</a><span class="chip ">Galarza 752</span><span class="chip ">08:30 – 21:00</span><span class="chip ">$20k – $55k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/hoteleria-mitre/index.html b/donde-comer-cdu/locales/hoteleria-mitre/index.html
+index 6c524f7..4a14a7e 100644
+--- a/donde-comer-cdu/locales/hoteleria-mitre/index.html
++++ b/donde-comer-cdu/locales/hoteleria-mitre/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4818824",
+     "longitude": "-58.2395339"
+   },
+-  "priceRange": "Consultar disponibilidad",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.50",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "Consultar disponibilidad"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Hostería <em>Mitre</em></h1>
+     <p class="hero-subtitle">Confort, calidez y ubicación privilegiada en el corazón de Concepción del Uruguay.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><span class="chip ">Mitre 949</span><span class="chip ">8 Habitaciones</span><span class="chip ">WiFi · Cochera</span>
++      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJQ0VNMFXar5URAHK3N6Qvqsk" target="_blank" rel="noopener noreferrer" aria-label="4.1 de 5 en Google, 241 reseñas. Ver en Google Maps">★ 4.1 Google · 241 reseñas</a><span class="chip ">Mitre 949</span><span class="chip ">8 Habitaciones</span><span class="chip ">WiFi · Cochera</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/house-garage/index.html b/donde-comer-cdu/locales/house-garage/index.html
+index 2e26731..d2a7111 100644
+--- a/donde-comer-cdu/locales/house-garage/index.html
++++ b/donde-comer-cdu/locales/house-garage/index.html
+@@ -38,13 +38,7 @@
+     "latitude": "-32.4864141",
+     "longitude": "-58.248351"
+   },
+-  "priceRange": "$15.000 – $40.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.45",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$15.000 – $40.000 ARS"
+ }
+ </script>
+ </head>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">House <em>Garage</em></h1>
+     <p class="hero-subtitle">Gastronomía street style y coctelería experimental en un ambiente industrial único.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.9 URU SPOT</span><span class="chip ">🎸 Cervecería Pub</span><span class="chip ">Galarza 1475</span><span class="chip ">Jue–Sáb 20:00 – 03:00</span>
++      <span class="chip chip-gold">⭐ 8.9 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ2RmAPYjbr5URsCL5nBNqn8U" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 707 reseñas. Ver en Google Maps">★ 4.4 Google · 707 reseñas</a><span class="chip ">🎸 Cervecería Pub</span><span class="chip ">Galarza 1475</span><span class="chip ">Jue–Sáb 20:00 – 03:00</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/italia/index.html b/donde-comer-cdu/locales/italia/index.html
+index 775691e..e2ba4bf 100644
+--- a/donde-comer-cdu/locales/italia/index.html
++++ b/donde-comer-cdu/locales/italia/index.html
+@@ -38,12 +38,6 @@
+     "@type": "GeoCoordinates",
+     "latitude": "-32.487828",
+     "longitude": "-58.2528459"
+-  },
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.50",
+-    "bestRating": "5",
+-    "worstRating": "1"
+   }
+ }
+ </script>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">Heladería <em>Italia</em></h1>
+     <p class="hero-subtitle">Helados artesanales con recetas tradicionales italianas en un ambiente cómodo y familiar.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">🍦 9.0 URU SPOT</span><span class="chip ">Delivery & Take Away</span><span class="chip ">Sin TACC</span><span class="chip ">Sin azúcar</span>
++      <span class="chip chip-gold">🍦 9.0 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJy7h2ErPbr5URL6UKWqQdih8" target="_blank" rel="noopener noreferrer" aria-label="4.7 de 5 en Google, 2.370 reseñas. Ver en Google Maps">★ 4.7 Google · 2.370 reseñas</a><span class="chip ">Delivery & Take Away</span><span class="chip ">Sin TACC</span><span class="chip ">Sin azúcar</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/klug-gebrau/index.html b/donde-comer-cdu/locales/klug-gebrau/index.html
+index 1f491f2..d10dde3 100644
+--- a/donde-comer-cdu/locales/klug-gebrau/index.html
++++ b/donde-comer-cdu/locales/klug-gebrau/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2575949"
+   },
+   "priceRange": "$15.000 – $30.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.25",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -95,7 +89,7 @@
+     <h1 class="hero-title">Klug <em>Gebräu</em></h1>
+     <p class="hero-subtitle">Identidad alemana y maestría industrial en cada pinta.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.5 URU SPOT</span><span class="chip ">Cabo Oscar Labalta 440</span><span class="chip ">Mié–Sáb 20:00 – 01:30</span><span class="chip ">$15k – $30k ARS</span>
++      <span class="chip chip-gold">⭐ 8.5 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJn4W0RU3br5UR8oGxJMJEdKU" target="_blank" rel="noopener noreferrer" aria-label="4.8 de 5 en Google, 308 reseñas. Ver en Google Maps">★ 4.8 Google · 308 reseñas</a><span class="chip ">Cabo Oscar Labalta 440</span><span class="chip ">Mié–Sáb 20:00 – 01:30</span><span class="chip ">$15k – $30k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/la-cuadra/index.html b/donde-comer-cdu/locales/la-cuadra/index.html
+index bce4e3d..8cd4f56 100644
+--- a/donde-comer-cdu/locales/la-cuadra/index.html
++++ b/donde-comer-cdu/locales/la-cuadra/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2462602"
+   },
+   "priceRange": "$10.000 – $20.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.45",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -89,7 +83,7 @@
+     <h1 class="hero-title">La <em>Cuadra</em></h1>
+     <p class="hero-subtitle">Atención y servicio de calidad en un ambiente acogedor y moderno, ideal para familias.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.9 URU SPOT</span><span class="chip ">Gral. Galarza 1052</span><span class="chip ">07:30 – 21:00</span><span class="chip ">$10k – $20k ARS</span>
++      <span class="chip chip-gold">⭐ 8.9 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJC-mloYbbr5URKqf_2UrIPs4" target="_blank" rel="noopener noreferrer" aria-label="4.5 de 5 en Google, 140 reseñas. Ver en Google Maps">★ 4.5 Google · 140 reseñas</a><span class="chip ">Gral. Galarza 1052</span><span class="chip ">07:30 – 21:00</span><span class="chip ">$10k – $20k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/la-delfina/index.html b/donde-comer-cdu/locales/la-delfina/index.html
+index 6640ae1..bcbacf5 100644
+--- a/donde-comer-cdu/locales/la-delfina/index.html
++++ b/donde-comer-cdu/locales/la-delfina/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4826853",
+     "longitude": "-58.2342986"
+   },
+-  "priceRange": "$25.000 – $75.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.55",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$25.000 – $75.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">La <em>Delfina</em></h1>
+     <p class="hero-subtitle">El santuario gastronómico de Concepción del Uruguay. Excelencia y distinción en cada detalle.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 9.1 URU SPOT</span><span class="chip ">Eva Duarte de Perón 125</span><span class="chip ">20:00 – 00:30</span><span class="chip ">$25k – $75k ARS</span>
++      <span class="chip chip-gold">⭐ 9.1 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJmV3cXQDbr5URajuqUY_tBCY" target="_blank" rel="noopener noreferrer" aria-label="4.2 de 5 en Google, 847 reseñas. Ver en Google Maps">★ 4.2 Google · 847 reseñas</a><span class="chip ">Eva Duarte de Perón 125</span><span class="chip ">20:00 – 00:30</span><span class="chip ">$25k – $75k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/la-ris/index.html b/donde-comer-cdu/locales/la-ris/index.html
+index 7fe27fa..de0b609 100644
+--- a/donde-comer-cdu/locales/la-ris/index.html
++++ b/donde-comer-cdu/locales/la-ris/index.html
+@@ -38,13 +38,7 @@
+     "latitude": "-32.4839406",
+     "longitude": "-58.2355636"
+   },
+-  "priceRange": "$10.000 – $20.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.10",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$10.000 – $20.000 ARS"
+ }
+ </script>
+ </head>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title"><em>La Ris</em></h1>
+     <p class="hero-subtitle">Una institución gastronómica de Concepción del Uruguay. Cocina tradicional argentina, porciones generosas y una relación precio-calidad que no falla.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.2 URU SPOT</span><span class="chip ">Gral. Galarza 750</span><span class="chip ">8:00 – 23:30</span><span class="chip ">$10k – $20k ARS</span>
++      <span class="chip chip-gold">⭐ 8.2 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJoZINXQDbr5URhEuBdL3cZ-Q" target="_blank" rel="noopener noreferrer" aria-label="4.0 de 5 en Google, 957 reseñas. Ver en Google Maps">★ 4.0 Google · 957 reseñas</a><span class="chip ">Gral. Galarza 750</span><span class="chip ">8:00 – 23:30</span><span class="chip ">$10k – $20k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/la-segunda/index.html b/donde-comer-cdu/locales/la-segunda/index.html
+index 6343d11..d442db3 100644
+--- a/donde-comer-cdu/locales/la-segunda/index.html
++++ b/donde-comer-cdu/locales/la-segunda/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2620939"
+   },
+   "priceRange": "$25.000 – $75.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.15",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -96,7 +90,7 @@
+     <h1 class="hero-title">La <em>Segunda</em></h1>
+     <p class="hero-subtitle">La esencia del asado entrerriano en su máxima expresión. Una institución de fuego, tradición y abundancia.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.3 URU SPOT</span><span class="chip ">Isaac Stiltman 44</span><span class="chip ">Mar–Sáb 11:30 & 20:00</span><span class="chip ">$25k – $75k ARS</span>
++      <span class="chip chip-gold">⭐ 8.3 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJFRQGy8rbr5URUB0TBod6YoU" target="_blank" rel="noopener noreferrer" aria-label="4.1 de 5 en Google, 897 reseñas. Ver en Google Maps">★ 4.1 Google · 897 reseñas</a><span class="chip ">Isaac Stiltman 44</span><span class="chip ">Mar–Sáb 11:30 & 20:00</span><span class="chip ">$25k – $75k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/lo-de-juan/index.html b/donde-comer-cdu/locales/lo-de-juan/index.html
+index a238c9e..0d8c8a7 100644
+--- a/donde-comer-cdu/locales/lo-de-juan/index.html
++++ b/donde-comer-cdu/locales/lo-de-juan/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4776528",
+     "longitude": "-58.2368218"
+   },
+-  "priceRange": "$1.000 – $10.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.30",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$1.000 – $10.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Lo de <em>Juan</em></h1>
+     <p class="hero-subtitle">Productos frescos, atención cordial y los mejores precios de la zona.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.6 URU SPOT</span><span class="chip ">Blvd. Yrigoyen 749</span><span class="chip ">06:00 – 13:00 · 15:30 – 20:30</span><span class="chip ">$1k – $10k ARS</span>
++      <span class="chip chip-gold">⭐ 8.6 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJRTt0XP_ar5URodXvAXwf-zE" target="_blank" rel="noopener noreferrer" aria-label="4.1 de 5 en Google, 509 reseñas. Ver en Google Maps">★ 4.1 Google · 509 reseñas</a><span class="chip ">Blvd. Yrigoyen 749</span><span class="chip ">06:00 – 13:00 · 15:30 – 20:30</span><span class="chip ">$1k – $10k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/london-cafe/index.html b/donde-comer-cdu/locales/london-cafe/index.html
+index 6573e6a..a238b3b 100644
+--- a/donde-comer-cdu/locales/london-cafe/index.html
++++ b/donde-comer-cdu/locales/london-cafe/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2341756"
+   },
+   "priceRange": "$10.000 – $20.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "3.95",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -84,7 +78,7 @@
+     <h1 class="hero-title">London <em>Café</em></h1>
+     <p class="hero-subtitle">Café de especialidad y sándwiches con la mejor vista al centro histórico.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 7.9 URU SPOT</span><span class="chip ">Gral. Galarza 656</span><span class="chip ">Frente al Museo Andrés García</span><span class="chip ">$10.000 – $20.000 ARS</span>
++      <span class="chip chip-gold">⭐ 7.9 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJP_VSLiPbr5URFgccV6tUMWM" target="_blank" rel="noopener noreferrer" aria-label="4.3 de 5 en Google, 243 reseñas. Ver en Google Maps">★ 4.3 Google · 243 reseñas</a><span class="chip ">Gral. Galarza 656</span><span class="chip ">Frente al Museo Andrés García</span><span class="chip ">$10.000 – $20.000 ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/los-aguaribay/index.html b/donde-comer-cdu/locales/los-aguaribay/index.html
+index 3e66ee6..3a76769 100644
+--- a/donde-comer-cdu/locales/los-aguaribay/index.html
++++ b/donde-comer-cdu/locales/los-aguaribay/index.html
+@@ -38,12 +38,6 @@
+     "@type": "GeoCoordinates",
+     "latitude": "-32.4806908",
+     "longitude": "-58.237102"
+-  },
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.75",
+-    "bestRating": "5",
+-    "worstRating": "1"
+   }
+ }
+ </script>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">Hotel Boutique <em>Los Aguaribay</em></h1>
+     <p class="hero-subtitle">Calidez, intimidad y confort en el corazón de Concepción del Uruguay, Entre Ríos.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ URU SPOT Recomendado</span><span class="chip ">7 Habitaciones · 20 Plazas</span><span class="chip ">Piscina · Hogar · Living</span><span class="chip ">Desayuno · WiFi · A/C · Estacionamiento</span>
++      <span class="chip chip-gold">⭐ URU SPOT Recomendado</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ_z2LUh7br5UR6L8ssSAYDdo" target="_blank" rel="noopener noreferrer" aria-label="4.8 de 5 en Google, 306 reseñas. Ver en Google Maps">★ 4.8 Google · 306 reseñas</a><span class="chip ">7 Habitaciones · 20 Plazas</span><span class="chip ">Piscina · Hogar · Living</span><span class="chip ">Desayuno · WiFi · A/C · Estacionamiento</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/lucianos-gimnasio/index.html b/donde-comer-cdu/locales/lucianos-gimnasio/index.html
+index 94849f8..3b64dfe 100644
+--- a/donde-comer-cdu/locales/lucianos-gimnasio/index.html
++++ b/donde-comer-cdu/locales/lucianos-gimnasio/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4746805",
+     "longitude": "-58.2462602"
+   },
+-  "priceRange": "Consultá por precio",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.30",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "Consultá por precio"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Gym <em>Lucianos</em></h1>
+     <p class="hero-subtitle">Un gimnasio con identidad propia donde el dueño está presente en cada entrenamiento. Equipamiento completo, ambiente familiar y seguimiento real para cada socio.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.6 URU SPOT</span><span class="chip ">Concepción del Uruguay</span><span class="chip ">Todos los días 6:31–22:32</span><span class="chip ">Atención del Dueño</span>
++      <span class="chip chip-gold">⭐ 8.6 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJxQPPjLLbr5UR-WbN4walS4o" target="_blank" rel="noopener noreferrer" aria-label="4.8 de 5 en Google, 49 reseñas. Ver en Google Maps">★ 4.8 Google · 49 reseñas</a><span class="chip ">Concepción del Uruguay</span><span class="chip ">Todos los días 6:31–22:32</span><span class="chip ">Atención del Dueño</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/mamma-mia/index.html b/donde-comer-cdu/locales/mamma-mia/index.html
+index 7449bb0..966e4d4 100644
+--- a/donde-comer-cdu/locales/mamma-mia/index.html
++++ b/donde-comer-cdu/locales/mamma-mia/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4872395",
+     "longitude": "-58.2358781"
+   },
+-  "priceRange": "$25.000 – $40.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.50",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$25.000 – $40.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Mamma <em>Mía</em></h1>
+     <p class="hero-subtitle">El arte de la pasta hecha a mano y el sabor de hogar en la esquina más clásica del puerto.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><span class="chip ">España 160</span><span class="chip ">Lun–Sáb 12:00 – 23:00</span><span class="chip ">$25k – $40k ARS</span>
++      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJV1XIOAfbr5URi6gu8i7_gDg" target="_blank" rel="noopener noreferrer" aria-label="4.8 de 5 en Google, 176 reseñas. Ver en Google Maps">★ 4.8 Google · 176 reseñas</a><span class="chip ">España 160</span><span class="chip ">Lun–Sáb 12:00 – 23:00</span><span class="chip ">$25k – $40k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/mi-viejo/index.html b/donde-comer-cdu/locales/mi-viejo/index.html
+index 933f45e..5ef7c57 100644
+--- a/donde-comer-cdu/locales/mi-viejo/index.html
++++ b/donde-comer-cdu/locales/mi-viejo/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2382364"
+   },
+   "priceRange": "$1.000 – $10.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.30",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -89,7 +83,7 @@
+     <h1 class="hero-title">Mi <em>Viejo</em></h1>
+     <p class="hero-subtitle">Calidad artesanal y variedad de productos a precios accesibles en el corazón de la ciudad.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.6 URU SPOT</span><span class="chip ">8 de Junio 877</span><span class="chip ">08:00 – 21:00</span><span class="chip ">$1k – $10k ARS</span>
++      <span class="chip chip-gold">⭐ 8.6 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJS30heADbr5URZobXuySXhy0" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 17 reseñas. Ver en Google Maps">★ 4.4 Google · 17 reseñas</a><span class="chip ">8 de Junio 877</span><span class="chip ">08:00 – 21:00</span><span class="chip ">$1k – $10k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/muscle-gimnasio/index.html b/donde-comer-cdu/locales/muscle-gimnasio/index.html
+index 0978aa9..1e8487e 100644
+--- a/donde-comer-cdu/locales/muscle-gimnasio/index.html
++++ b/donde-comer-cdu/locales/muscle-gimnasio/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4782772",
+     "longitude": "-58.24004"
+   },
+-  "priceRange": "Consultá por precio",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.35",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "Consultá por precio"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Gimnasio <em>Muscle</em></h1>
+     <p class="hero-subtitle">Instalaciones modernas y equipamiento de primera para alcanzar tus objetivos en salud y rendimiento físico.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.7 URU SPOT</span><span class="chip ">Blvd. Yrigoyen 1086</span><span class="chip ">Lun–Vie 7:00–22:30</span><span class="chip ">Gimnasio completo</span>
++      <span class="chip chip-gold">⭐ 8.7 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJkZyDBFTar5UR7ff0XGiQglo" target="_blank" rel="noopener noreferrer" aria-label="4.6 de 5 en Google, 147 reseñas. Ver en Google Maps">★ 4.6 Google · 147 reseñas</a><span class="chip ">Blvd. Yrigoyen 1086</span><span class="chip ">Lun–Vie 7:00–22:30</span><span class="chip ">Gimnasio completo</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/nero-cafe/index.html b/donde-comer-cdu/locales/nero-cafe/index.html
+index ec33538..6a5b895 100644
+--- a/donde-comer-cdu/locales/nero-cafe/index.html
++++ b/donde-comer-cdu/locales/nero-cafe/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2338928"
+   },
+   "priceRange": "$10.000 – $20.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.70",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -100,7 +94,7 @@
+     <h1 class="hero-title">Nero <em>Café</em></h1>
+     <p class="hero-subtitle">Café premium y ambiente único en el corazón de Concepción del Uruguay.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 9.4 URU SPOT</span><span class="chip ">Eva Perón 36</span><span class="chip ">Lun–Vie 07:30–12:00 / 16:00–20:00</span><span class="chip ">$10k – $20k ARS</span>
++      <span class="chip chip-gold">⭐ 9.4 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJtxHafDHbr5URI1SPK_5XvDs" target="_blank" rel="noopener noreferrer" aria-label="4.8 de 5 en Google, 47 reseñas. Ver en Google Maps">★ 4.8 Google · 47 reseñas</a><span class="chip ">Eva Perón 36</span><span class="chip ">Lun–Vie 07:30–12:00 / 16:00–20:00</span><span class="chip ">$10k – $20k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/panettone/index.html b/donde-comer-cdu/locales/panettone/index.html
+index 588cda9..83141f7 100644
+--- a/donde-comer-cdu/locales/panettone/index.html
++++ b/donde-comer-cdu/locales/panettone/index.html
+@@ -40,12 +40,6 @@
+     "longitude": "-58.2462602"
+   },
+   "priceRange": "$1.000 – $10.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.55",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -102,7 +96,7 @@
+     <h1 class="hero-title">Pan<em>ettone</em></h1>
+     <p class="hero-subtitle">Calidad artesanal y precios accesibles. El mejor pan de papas y medialunas de la zona.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 9.1 URU SPOT</span><span class="chip ">Blvd. H. Yrigoyen</span><span class="chip ">07:00 – 13:00 / 16:00 – 20:30</span><span class="chip ">$1k – $10k ARS</span>
++      <span class="chip chip-gold">⭐ 9.1 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ5TBz5v7ar5URljQNmcvEWlg" target="_blank" rel="noopener noreferrer" aria-label="4.7 de 5 en Google, 481 reseñas. Ver en Google Maps">★ 4.7 Google · 481 reseñas</a><span class="chip ">Blvd. H. Yrigoyen</span><span class="chip ">07:00 – 13:00 / 16:00 – 20:30</span><span class="chip ">$1k – $10k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/panza-verde/index.html b/donde-comer-cdu/locales/panza-verde/index.html
+index ac8aa56..af29ba1 100644
+--- a/donde-comer-cdu/locales/panza-verde/index.html
++++ b/donde-comer-cdu/locales/panza-verde/index.html
+@@ -38,13 +38,7 @@
+     "latitude": "-32.4787525",
+     "longitude": "-58.2179861"
+   },
+-  "priceRange": "$20.000 – $50.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.10",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$20.000 – $50.000 ARS"
+ }
+ </script>
+ </head>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">Panza <em>Verde</em></h1>
+     <p class="hero-subtitle">Desconectarte sin salir de la ciudad. El mejor atardecer frente al río.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.2 URU SPOT</span><span class="chip ">Isla del Puerto</span><span class="chip ">Lun–Vie hasta 01:00</span><span class="chip ">$20k – $50k ARS</span>
++      <span class="chip chip-gold">⭐ 8.2 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ3-e5fl3br5URCbq5DpgnSus" target="_blank" rel="noopener noreferrer" aria-label="4.2 de 5 en Google, 1.351 reseñas. Ver en Google Maps">★ 4.2 Google · 1.351 reseñas</a><span class="chip ">Isla del Puerto</span><span class="chip ">Lun–Vie hasta 01:00</span><span class="chip ">$20k – $50k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/papa-luigi/index.html b/donde-comer-cdu/locales/papa-luigi/index.html
+index 22725e6..331c826 100644
+--- a/donde-comer-cdu/locales/papa-luigi/index.html
++++ b/donde-comer-cdu/locales/papa-luigi/index.html
+@@ -39,12 +39,6 @@
+     "longitude": "-58.235359"
+   },
+   "priceRange": "$15.000 – $40.000 ARS · ~U$D 15–40",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.20",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  },
+   "openingHoursSpecification": [
+     {
+       "@type": "OpeningHoursSpecification",
+@@ -123,7 +117,7 @@
+     <h1 class="hero-title">Papa <em>Luigi</em></h1>
+     <p class="hero-subtitle">Pizzería & Cocina Clásica Italiana · El sabor que nunca falla</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">📍 21 de Noviembre 38 · Centro</span><span class="chip ">🕗 19:00 – 00:00</span><span class="chip ">💰 $15k – $40k ARS</span>
++      <span class="chip chip-gold">📍 21 de Noviembre 38 · Centro</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJTzCzDarbr5UR01zDy2W40F0" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 739 reseñas. Ver en Google Maps">★ 4.4 Google · 739 reseñas</a><span class="chip ">🕗 19:00 – 00:00</span><span class="chip ">💰 $15k – $40k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/parada-33/index.html b/donde-comer-cdu/locales/parada-33/index.html
+index 72f997b..704d48b 100644
+--- a/donde-comer-cdu/locales/parada-33/index.html
++++ b/donde-comer-cdu/locales/parada-33/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4961239",
+     "longitude": "-58.2289306"
+   },
+-  "priceRange": "$25.000 – $65.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.30",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$25.000 – $65.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Parada <em>33</em></h1>
+     <p class="hero-subtitle">Comfort food, cerveza artesanal y el mejor ambiente en la zona puerto. Noches que no terminan a orillas del río.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.6 URU SPOT</span><span class="chip ">J. D. Perón 650</span><span class="chip ">19:00 – 02:00</span><span class="chip ">$25k – $65k ARS</span>
++      <span class="chip chip-gold">⭐ 8.6 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJm0CHJmnbr5URgThzXoUrWFI" target="_blank" rel="noopener noreferrer" aria-label="4.7 de 5 en Google, 163 reseñas. Ver en Google Maps">★ 4.7 Google · 163 reseñas</a><span class="chip ">J. D. Perón 650</span><span class="chip ">19:00 – 02:00</span><span class="chip ">$25k – $65k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/parrilla-la-gruta/index.html b/donde-comer-cdu/locales/parrilla-la-gruta/index.html
+index 01c68ae..2e1f7e1 100644
+--- a/donde-comer-cdu/locales/parrilla-la-gruta/index.html
++++ b/donde-comer-cdu/locales/parrilla-la-gruta/index.html
+@@ -37,13 +37,7 @@
+     "latitude": "-32.4771132",
+     "longitude": "-58.3070934"
+   },
+-  "priceRange": "Consultar precio actualizado",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.40",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "Consultar precio actualizado"
+ }
+ </script>
+ </head>
+@@ -70,7 +64,7 @@
+     <h1 class="hero-title">La <em>Gruta</em></h1>
+     <p class="hero-subtitle">El asado más recomendado de Concepción del Uruguay. Todo-lo-que-puedas-comer, con empanadas de bienvenida.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><span class="chip ">🥩 Tenedor Libre</span><span class="chip ">RN14 Km 126</span><span class="chip ">Lun–Vie al mediodía</span>
++      <span class="chip chip-gold">⭐ 8.8 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ-8M3wMHZr5URUmyy5P8Vsmk" target="_blank" rel="noopener noreferrer" aria-label="4.6 de 5 en Google, 1.744 reseñas. Ver en Google Maps">★ 4.6 Google · 1.744 reseñas</a><span class="chip ">🥩 Tenedor Libre</span><span class="chip ">RN14 Km 126</span><span class="chip ">Lun–Vie al mediodía</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/pimienta-negra/index.html b/donde-comer-cdu/locales/pimienta-negra/index.html
+index a384e8d..5556969 100644
+--- a/donde-comer-cdu/locales/pimienta-negra/index.html
++++ b/donde-comer-cdu/locales/pimienta-negra/index.html
+@@ -38,13 +38,7 @@
+     "latitude": "-32.4858508",
+     "longitude": "-58.2417682"
+   },
+-  "priceRange": "$15.000 – $40.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.20",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$15.000 – $40.000 ARS"
+ }
+ </script>
+ </head>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">Pimienta <em>Negra</em></h1>
+     <p class="hero-subtitle">La máxima expresión culinaria de Concepción del Uruguay en un ambiente refinado e íntimo.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.4 URU SPOT</span><span class="chip ">9 de Julio 1124</span><span class="chip ">20:00 – 00:30</span><span class="chip ">$15k – $40k ARS</span>
++      <span class="chip chip-gold">⭐ 8.4 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ-7-3RADbr5URcKevaykUVV0" target="_blank" rel="noopener noreferrer" aria-label="4.1 de 5 en Google, 1.350 reseñas. Ver en Google Maps">★ 4.1 Google · 1.350 reseñas</a><span class="chip ">9 de Julio 1124</span><span class="chip ">20:00 – 00:30</span><span class="chip ">$15k – $40k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/posta-torreon/index.html b/donde-comer-cdu/locales/posta-torreon/index.html
+index b8523cb..f1d667f 100644
+--- a/donde-comer-cdu/locales/posta-torreon/index.html
++++ b/donde-comer-cdu/locales/posta-torreon/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4877761",
+     "longitude": "-58.2356605"
+   },
+-  "priceRange": "Consultá disponibilidad",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.50",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "Consultá disponibilidad"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Posta <em>Torreón</em></h1>
+     <p class="hero-subtitle">Calidez, buena ubicación y atención personalizada en el corazón de Concepción del Uruguay.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><span class="chip ">A 3 cuadras de Plaza Principal</span><span class="chip ">Bar · WiFi · Desayuno</span><span class="chip ">TV · A/C · Patio</span>
++      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJmV3cXQDbr5URWB7XYy321ho" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 582 reseñas. Ver en Google Maps">★ 4.4 Google · 582 reseñas</a><span class="chip ">A 3 cuadras de Plaza Principal</span><span class="chip ">Bar · WiFi · Desayuno</span><span class="chip ">TV · A/C · Patio</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/power-gimnasio/index.html b/donde-comer-cdu/locales/power-gimnasio/index.html
+index 8d7b259..5333142 100644
+--- a/donde-comer-cdu/locales/power-gimnasio/index.html
++++ b/donde-comer-cdu/locales/power-gimnasio/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4799846",
+     "longitude": "-58.2524673"
+   },
+-  "priceRange": "Consultá por precio",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.35",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "Consultá por precio"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title"><em>Power</em> Gym</h1>
+     <p class="hero-subtitle">Instalaciones modernas y equipamiento de primera en Concepción del Uruguay, con entrenadores altamente capacitados comprometidos con tus objetivos.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.7 URU SPOT</span><span class="chip ">Blvd. H. Yrigoyen 1626</span><span class="chip ">Lun–Vie 8:00 – 22:00</span><span class="chip ">03442 46-1815</span>
++      <span class="chip chip-gold">⭐ 8.7 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJdwMwYqrbr5UREXEEnpFTH1I" target="_blank" rel="noopener noreferrer" aria-label="4.5 de 5 en Google, 71 reseñas. Ver en Google Maps">★ 4.5 Google · 71 reseñas</a><span class="chip ">Blvd. H. Yrigoyen 1626</span><span class="chip ">Lun–Vie 8:00 – 22:00</span><span class="chip ">03442 46-1815</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/san-carlos/index.html b/donde-comer-cdu/locales/san-carlos/index.html
+index 7d4e999..a8a7ee2 100644
+--- a/donde-comer-cdu/locales/san-carlos/index.html
++++ b/donde-comer-cdu/locales/san-carlos/index.html
+@@ -38,13 +38,7 @@
+     "latitude": "-32.4874175",
+     "longitude": "-58.2494857"
+   },
+-  "priceRange": "$5.000 – $20.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.50",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$5.000 – $20.000 ARS"
+ }
+ </script>
+ </head>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">San <em>Carlos</em></h1>
+     <p class="hero-subtitle">La panadería de tu barrio que endulza tus días con productos frescos y elaboración artesanal.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><span class="chip ">9 de Julio 1549</span><span class="chip ">06:00 – 13:00 · 16:00 – 20:30</span><span class="chip ">$5k – $20k ARS</span>
++      <span class="chip chip-gold">⭐ 9.0 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJmV3cXQDbr5URJ6IzTOnebAc" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 402 reseñas. Ver en Google Maps">★ 4.4 Google · 402 reseñas</a><span class="chip ">9 de Julio 1549</span><span class="chip ">06:00 – 13:00 · 16:00 – 20:30</span><span class="chip ">$5k – $20k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/sanduba/index.html b/donde-comer-cdu/locales/sanduba/index.html
+index 4bf22e5..58984ba 100644
+--- a/donde-comer-cdu/locales/sanduba/index.html
++++ b/donde-comer-cdu/locales/sanduba/index.html
+@@ -38,13 +38,7 @@
+     "latitude": "-32.4838979",
+     "longitude": "-58.2354338"
+   },
+-  "priceRange": "$20.000 – $60.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "3.95",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$20.000 – $60.000 ARS"
+ }
+ </script>
+ </head>
+@@ -73,7 +67,7 @@
+     <h1 class="hero-title">San<em>duba</em></h1>
+     <p class="hero-subtitle">Sándwiches con identidad intensa y combinaciones que desafían lo convencional. El sabor al centro de la ciudad.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 7.9 URU SPOT</span><span class="chip ">Galarza 735</span><span class="chip ">Mediodía & Noche</span><span class="chip ">$20k – $60k ARS</span>
++      <span class="chip chip-gold">⭐ 7.9 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJryQj8QDbr5URDdJwuGPk2xY" target="_blank" rel="noopener noreferrer" aria-label="4.4 de 5 en Google, 677 reseñas. Ver en Google Maps">★ 4.4 Google · 677 reseñas</a><span class="chip ">Galarza 735</span><span class="chip ">Mediodía & Noche</span><span class="chip ">$20k – $60k ARS</span>
+     </div>
+   </div>
+   
+diff --git a/donde-comer-cdu/locales/yelatti-artesanal/index.html b/donde-comer-cdu/locales/yelatti-artesanal/index.html
+index c33deff..0b0d6f5 100644
+--- a/donde-comer-cdu/locales/yelatti-artesanal/index.html
++++ b/donde-comer-cdu/locales/yelatti-artesanal/index.html
+@@ -39,13 +39,7 @@
+     "latitude": "-32.4797182",
+     "longitude": "-58.2564586"
+   },
+-  "priceRange": "$5.000 – $30.000 ARS",
+-  "aggregateRating": {
+-    "@type": "AggregateRating",
+-    "ratingValue": "4.00",
+-    "bestRating": "5",
+-    "worstRating": "1"
+-  }
++  "priceRange": "$5.000 – $30.000 ARS"
+ }
+ </script>
+ </head>
+@@ -74,7 +68,7 @@
+     <h1 class="hero-title">Hel. <em>Yelatti</em></h1>
+     <p class="hero-subtitle">Un punto de encuentro fundamental para los amantes del buen helado en la zona.</p>
+     <div class="hero-chips">
+-      <span class="chip chip-gold">⭐ 8.0 URU SPOT</span><span class="chip ">Blvd. Díaz Vélez 551</span><span class="chip ">11:00 – 00:00</span><span class="chip ">$5k – $30k ARS</span>
++      <span class="chip chip-gold">⭐ 8.0 URU SPOT</span><a class="chip chip-google" href="https://www.google.com/maps/place/?q=place_id:ChIJ5wNDZ__br5UR6XPgpnBuS78" target="_blank" rel="noopener noreferrer" aria-label="4.2 de 5 en Google, 36 reseñas. Ver en Google Maps">★ 4.2 Google · 36 reseñas</a><span class="chip ">Blvd. Díaz Vélez 551</span><span class="chip ">11:00 – 00:00</span><span class="chip ">$5k – $30k ARS</span>
+     </div>
+   </div>
+   

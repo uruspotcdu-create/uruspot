@@ -1,0 +1,237 @@
+diff --git a/donde-comer-cdu/js/app.js b/donde-comer-cdu/js/app.js
+index 4560347..17c3b9e 100644
+--- a/donde-comer-cdu/js/app.js
++++ b/donde-comer-cdu/js/app.js
+@@ -910,9 +910,7 @@
+           throw new Error('Core inválido o vacío');
+         }
+ 
+-// Construir �ndice invertido para b�squeda O(1)
+-        if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
+-                REGISTRO = core.map(function (l) {
++        REGISTRO = core.map(function (l) {
+           var reg = {
+             id: l.id,
+             nombre: l.nombre,
+@@ -940,6 +938,15 @@
+           return reg;
+         });
+ 
++        // Índice invertido de búsqueda (perf, 2026-07-31): construido acá,
++        // después de que REGISTRO ya tiene el catálogo real — construirlo
++        // antes (como hacía la versión anterior) indexaba el REGISTRO
++        // vacío/de la carga previa. Se reconstruye una segunda vez en
++        // cargarDetallesEnSegundoPlano cuando `direccion` deja de ser
++        // null, porque hay lugares que solo matchean por dirección
++        // (rango 5 de rangoDeCoincidencia en motor-exposicion.js).
++        if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
++
+         transicionarEstado(STATE.READY, 'catalogo_cargado');
+         if (window.AmbientEngine) window.AmbientEngine.finalizarCarga(true);
+ 
+@@ -976,6 +983,10 @@
+                 reg.descripcion = d.descripcion || null;
+               }
+             });
++            // Reconstruir: direccion pasó de null a texto real en varios
++            // lugares, y el índice de trigramas los tenía indexados con
++            // direccion vacía hasta este momento.
++            if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
+             render();
+           })
+           .catch(function (e) {
+diff --git a/donde-comer-cdu/js/motor-exposicion.js b/donde-comer-cdu/js/motor-exposicion.js
+index 8a9a698..3de3ca2 100644
+--- a/donde-comer-cdu/js/motor-exposicion.js
++++ b/donde-comer-cdu/js/motor-exposicion.js
+@@ -598,13 +598,34 @@
+     var q = normalizarTexto(consulta.trim());
+     if (!q) return registro.slice();
+ 
++    // PERF (2026-07-31): IndiceInvertido.candidatosPara() es un filtro
++    // necesario-pero-no-suficiente por trigramas — puede traer falsos
++    // positivos (se descartan abajo por rangoDeCoincidencia === null) pero
++    // nunca deja afuera un match real. Si no puede ayudar (consulta de
++    // 1-2 caracteres, índice sin construir todavía), devuelve `null` y acá
++    // se cae al barrido completo de siempre: mismo resultado, mismo orden,
++    // cero riesgo de regresión en ese camino.
++    var universo = registro;
++    if (global.IndiceInvertido && typeof global.IndiceInvertido.candidatosPara === 'function') {
++      var reducido = global.IndiceInvertido.candidatosPara(q);
++      if (reducido !== null) universo = reducido;
++    }
++
++    // Mapa lugar -> posición real en el catálogo, para que el desempate
++    // por "indiceOriginal" de abajo sea idéntico exista o no reducción
++    // por índice (universo puede venir en cualquier orden). Es un loop
++    // trivial de asignación, no de comparación de strings — mucho más
++    // barato que lo que reemplaza.
++    var indiceOriginalPorLugar = new Map();
++    for (var k = 0; k < registro.length; k++) indiceOriginalPorLugar.set(registro[k], k);
++
+     var candidatos = [];
+-    for (var i = 0; i < registro.length; i++) {
+-      var lugar = registro[i];
++    for (var i = 0; i < universo.length; i++) {
++      var lugar = universo[i];
+       var norm = normalizadoDe(lugar);
+       var rango = rangoDeCoincidencia(norm.nombre, norm.categoria, norm.direccion, q);
+       if (rango === null) continue;
+-      candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: i });
++      candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: indiceOriginalPorLugar.get(lugar) });
+     }
+ 
+     // Desempate explícito por índice original en vez de confiar en que
+diff --git a/donde-comer-cdu/js/motor-indice-busqueda.js b/donde-comer-cdu/js/motor-indice-busqueda.js
+index c6bd7e9..3bd0401 100644
+--- a/donde-comer-cdu/js/motor-indice-busqueda.js
++++ b/donde-comer-cdu/js/motor-indice-busqueda.js
+@@ -1,33 +1,121 @@
+-﻿(function() {
++/**
++ * ÍNDICE INVERTIDO POR TRIGRAMAS — reduce cuántos lugares hay que
++ * revisar en cada búsqueda de texto, antes de que motor-exposicion.js
++ * aplique el ranking exacto (nombre exacto > empieza-con > contiene >
++ * categoría > dirección).
++ *
++ * Por qué trigramas y no palabra exacta: la búsqueda real de la app
++ * matchea por SUBSTRING ("piz" encuentra "pizzería", no solo "piz" como
++ * palabra completa). Un índice de palabra exacta no puede servir eso —
++ * por eso la versión anterior de este archivo quedaba construida pero
++ * nunca conectada a resultadosPorAccionExplicita(). Un índice de
++ * trigramas sí: si "pizzeria" contiene la consulta "piz" como substring,
++ * entonces "piz" en sí (si la consulta tiene 3+ caracteres) o todos sus
++ * trigramas están garantizados a aparecer en el texto indexado de ese
++ * lugar. Es la misma técnica que usa pg_trgm en Postgres.
++ *
++ * GARANTÍA DE CORRECCIÓN: candidatosPara() es un filtro NECESARIO pero
++ * NO SUFICIENTE — puede devolver falsos positivos (un lugar que
++ * contiene todos los trigramas de la consulta pero no la consulta como
++ * substring contiguo), nunca falsos negativos. motor-exposicion.js
++ * siempre re-verifica con indexOf() exacto sobre cada candidato, así
++ * que un falso positivo de acá simplemente se descarta después sin
++ * afectar el resultado. Si candidatosPara() no puede ayudar (consulta
++ * de 1-2 caracteres, o índice todavía no construido), devuelve `null` y
++ * el llamador cae al barrido completo de siempre — cero riesgo de
++ * regresión.
++ */
++(function (global) {
+   'use strict';
+-  var indice = {};
+-  function normalizarPalabra(word) {
+-    return word.toLowerCase().replace(/[áéíóú]/g, function(c) {
+-      var m = {á:'a', é:'e', í:'i', ó:'o', ú:'u'};
+-      return m[c] || c;
+-    });
++
++  // Debe coincidir EXACTAMENTE con normalizarTexto() de
++  // motor-exposicion.js. Si estas dos normalizaciones alguna vez
++  // divergen, el índice puede generar falsos negativos (peor que los
++  // falsos positivos, que el re-chequeo exacto absorbe sin problema).
++  function normalizarTexto(s) {
++    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
++  }
++
++  function trigramas(s) {
++    if (s.length < 3) return s ? [s] : [];
++    var out = [];
++    for (var i = 0; i <= s.length - 3; i++) out.push(s.substr(i, 3));
++    return out;
+   }
+-  function construirIndice(lugares) {
+-    indice = {};
+-    lugares.forEach(function(l, idx) {
+-      var campos = [l.nombre, l.categoria, l.grupo, (l.direccion || '')];
+-      campos.forEach(function(campo) {
+-        if (!campo) return;
+-        var palabras = campo.toLowerCase().split(/\s+/);
+-        palabras.forEach(function(p) {
+-          var norm = normalizarPalabra(p);
+-          if (!indice[norm]) indice[norm] = [];
+-          if (indice[norm].indexOf(idx) === -1) indice[norm].push(idx);
+-        });
++
++  var postings = Object.create(null); // trigrama -> [lugares...]
++  var indexado = false;
++
++  /**
++   * Construye (o reconstruye) el índice completo. Se llama una vez al
++   * cargar el catálogo y otra vez cuando lugares-detalles.json termina
++   * de rellenar `direccion` en segundo plano (ver app.js) — direccion
++   * empieza en null y varios lugares solo matchean por dirección, así
++   * que sin ese segundo llamado esos matches quedarían indexados como
++   * si la dirección nunca hubiese llegado.
++   */
++  function construir(registro) {
++    var nuevoPostings = Object.create(null);
++    if (!Array.isArray(registro) || !registro.length) {
++      postings = nuevoPostings;
++      indexado = false;
++      return;
++    }
++
++    registro.forEach(function (lugar) {
++      var texto = normalizarTexto(
++        (lugar.nombre || '') + ' ' + (lugar.categoria || '') + ' ' + (lugar.direccion || '')
++      );
++      var vistos = Object.create(null); // no repetir el mismo lugar en el mismo trigrama
++      trigramas(texto).forEach(function (tri) {
++        if (vistos[tri]) return;
++        vistos[tri] = true;
++        if (!nuevoPostings[tri]) nuevoPostings[tri] = [];
++        nuevoPostings[tri].push(lugar);
+       });
+     });
++
++    postings = nuevoPostings;
++    indexado = true;
+   }
+-  function buscarPorIndice(lugares, query) {
+-    var q = normalizarPalabra(query.trim());
+-    if (!q || q.length < 2) return lugares.slice();
+-    var ids = indice[q];
+-    if (!ids || !ids.length) return [];
+-    return ids.map(function(idx) { return lugares[idx]; });
++
++  /**
++   * Devuelve un superconjunto candidato de lugares (referencias, no
++   * copias) que PODRÍAN matchear `query`, o `null` si el índice no
++   * puede reducir nada de forma confiable. Nunca decide qué es un
++   * match real — eso lo sigue haciendo motor-exposicion.js.
++   */
++  function candidatosPara(query) {
++    if (!indexado) return null;
++    var q = normalizarTexto(String(query || '').trim());
++    if (q.length < 3) return null; // trigramas no aplican a consultas de 1-2 chars
++
++    var tris = trigramas(q);
++    var listas = [];
++    for (var i = 0; i < tris.length; i++) {
++      var lista = postings[tris[i]];
++      if (!lista || !lista.length) return []; // ningún lugar tiene este trigrama -> cero candidatos
++      listas.push(lista);
++    }
++
++    // Intersección empezando por la lista más chica, para tocar el
++    // menor número de lugares posible en cada paso.
++    listas.sort(function (a, b) { return a.length - b.length; });
++
++    var acumulado = listas[0];
++    for (var j = 1; j < listas.length && acumulado.length; j++) {
++      var siguiente = new Set(listas[j]);
++      acumulado = acumulado.filter(function (lugar) { return siguiente.has(lugar); });
++    }
++    return acumulado;
+   }
+-  window.IndiceInvertido = { construir: construirIndice, buscar: buscarPorIndice };
+-})();
++
++  global.IndiceInvertido = {
++    construir: construir,
++    candidatosPara: candidatosPara
++  };
++})(typeof window !== 'undefined' ? window : global);
++
++if (typeof module !== 'undefined' && module.exports) {
++  module.exports = (typeof window !== 'undefined' ? window.IndiceInvertido : global.IndiceInvertido);
++}

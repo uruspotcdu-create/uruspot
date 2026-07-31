@@ -1,0 +1,316 @@
+diff --git a/donde-comer-cdu/css/actualizacion-disponible.css b/donde-comer-cdu/css/actualizacion-disponible.css
+new file mode 100644
+index 0000000..d4012a2
+--- /dev/null
++++ b/donde-comer-cdu/css/actualizacion-disponible.css
+@@ -0,0 +1,88 @@
++/* ═══════════════════════════════════════════════════════════════════
++   donde-comer-cdu/css/actualizacion-disponible.css
++
++   Banner "hay una versión nueva" — ver js/actualizacion-disponible.js.
++   Arriba de la pantalla, no abajo, para no competir nunca con
++   .pwa-instalar-banner (ese vive abajo). Es poco probable que los dos
++   se muestren juntos, pero si pasa, no se tapan entre sí.
++
++   Solo usa tokens ya declarados en tokens.css — cero valores nuevos,
++   mismo criterio que pwa-instalar.css.
++   ═══════════════════════════════════════════════════════════════════ */
++
++.actualizacion-banner {
++  position: fixed;
++  left: var(--esp-4);
++  right: var(--esp-4);
++  top: var(--esp-4);
++  z-index: 41;
++
++  display: flex;
++  align-items: center;
++  gap: var(--esp-3);
++  max-width: 460px;
++  margin: 0 auto;
++  padding: var(--esp-3) var(--esp-3) var(--esp-3) var(--esp-4);
++
++  border-radius: var(--radio-lg);
++  border: 1px solid var(--glass-borde);
++  background: var(--glass-bg-fuerte);
++  backdrop-filter: blur(var(--glass-blur-fuerte));
++  -webkit-backdrop-filter: blur(var(--glass-blur-fuerte));
++  box-shadow: var(--sombra-alta);
++
++  animation: uru-fade-up var(--dur-lenta) var(--easing-estandar) both;
++}
++
++.actualizacion-banner[hidden] {
++  display: none;
++}
++
++.actualizacion-banner__texto {
++  flex: 1;
++  min-width: 0;
++}
++
++.actualizacion-banner__titulo {
++  display: block;
++  font: var(--tipo-cuerpo-sm);
++  font-weight: 600;
++  color: var(--color-tinta);
++}
++
++.actualizacion-banner__subtitulo {
++  display: block;
++  margin-top: 2px;
++  font: var(--tipo-dato-xs);
++  color: var(--color-tinta-60);
++}
++
++.actualizacion-banner__acciones {
++  display: flex;
++  flex: none;
++  align-items: center;
++  gap: var(--esp-2);
++}
++
++.actualizacion-banner__cerrar {
++  font-size: 18px;
++  line-height: 1;
++}
++
++@media (max-width: 480px) {
++  .actualizacion-banner {
++    left: var(--esp-3);
++    right: var(--esp-3);
++    top: var(--esp-3);
++    padding: var(--esp-3);
++  }
++  .actualizacion-banner__subtitulo {
++    display: none;
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .actualizacion-banner {
++    animation: none;
++  }
++}
+diff --git a/donde-comer-cdu/index.html b/donde-comer-cdu/index.html
+index b2fd595..22438c0 100644
+--- a/donde-comer-cdu/index.html
++++ b/donde-comer-cdu/index.html
+@@ -214,6 +214,7 @@
+ <link rel="stylesheet" href="css/mapa.css">
+ <link rel="stylesheet" href="css/descubrimiento.css">
+ <link rel="stylesheet" href="css/pwa-instalar.css">
++<link rel="stylesheet" href="css/actualizacion-disponible.css">
+ <!-- impresion.css: nueva (auditoría 4ª pasada) — el documento no
+      tenía ninguna hoja media="print" pese a que varias secciones
+      (Sobre la ciudad, Guía práctica, Glosario) son contenido de
+@@ -1667,6 +1668,21 @@ if ('serviceWorker' in navigator) {
+      14 días, y (c) el navegador soporta instalación (Chrome/Edge/
+      Android vía beforeinstallprompt) o es iOS (instrucciones
+      manuales, ya que Safari no tiene API de instalación). -->
++<!-- BANNER "HAY UNA VERSIÓN NUEVA" — ver js/actualizacion-disponible.js.
++     Arranca hidden: solo se revela si sw.js detecta, revalidando en
++     segundo plano, que algún JS/CSS cambió de verdad. Nunca recarga
++     solo — la persona decide cuándo. -->
++<div id="actualizacionBanner" class="actualizacion-banner" hidden role="status" aria-live="polite" aria-label="Actualización disponible">
++  <div class="actualizacion-banner__texto">
++    <span class="actualizacion-banner__titulo">Hay una versión nueva</span>
++    <span class="actualizacion-banner__subtitulo">Actualizá para ver los últimos cambios.</span>
++  </div>
++  <div class="actualizacion-banner__acciones">
++    <button id="actualizacionBtn" type="button" class="btn btn--primario">Actualizar</button>
++    <button id="actualizacionCerrar" type="button" class="btn btn--icono actualizacion-banner__cerrar" aria-label="Cerrar aviso de actualización">×</button>
++  </div>
++</div>
++
+ <div id="pwaInstalarBanner" class="pwa-instalar-banner" hidden role="dialog" aria-label="Instalar URU SPOT como app">
+   <img src="img/icon-192.png" width="40" height="40" alt="" class="pwa-instalar-banner__icono">
+   <div class="pwa-instalar-banner__texto">
+@@ -1698,6 +1714,7 @@ if ('serviceWorker' in navigator) {
+      la auditoría §I5. -->
+ <script src="js/failsafe-reintentar.js" defer></script>
+ <script src="js/pwa-instalar.js" defer></script>
++<script src="js/actualizacion-disponible.js" defer></script>
+ 
+ <!-- ESTRATEGIA DE LAZY LOADING PARA IMÁGENES DINÁMICAS — documentación
+      de contrato para motor-render.js, no código ejecutable. Vive acá
+diff --git a/donde-comer-cdu/js/actualizacion-disponible.js b/donde-comer-cdu/js/actualizacion-disponible.js
+new file mode 100644
+index 0000000..b230178
+--- /dev/null
++++ b/donde-comer-cdu/js/actualizacion-disponible.js
+@@ -0,0 +1,60 @@
++/*
++ * donde-comer-cdu/js/actualizacion-disponible.js
++ * ---------------------------------------------------------------------
++ * Contraparte cliente de la revalidación en segundo plano de sw.js
++ * (estrategia stale-while-revalidate para JS/CSS, perf 2026-07-31).
++ *
++ * sw.js sirve el JS/CSS cacheado al instante y revisa en segundo plano
++ * si cambió. Si cambió de verdad, postea un mensaje acá. Este script
++ * solo se encarga de avisar — nunca recarga la pestaña por su cuenta:
++ * quien esté navegando puede estar a mitad de una búsqueda o llenando
++ * un formulario, y forzar un reload ahí sería peor que el problema que
++ * resuelve.
++ *
++ * Sin dependencias de app.js — puede fallar en silencio (try/catch)
++ * sin afectar el resto del sitio.
++ */
++
++'use strict';
++
++(function () {
++  if (!('serviceWorker' in navigator)) return;
++
++  var yaAvisado = false; // no duplicar el banner si cambian varios archivos
++
++  function mostrarBanner() {
++    if (yaAvisado) return;
++    yaAvisado = true;
++
++    var banner = document.getElementById('actualizacionBanner');
++    if (!banner) return;
++
++    var btnActualizar = document.getElementById('actualizacionBtn');
++    var btnCerrar = document.getElementById('actualizacionCerrar');
++
++    if (btnActualizar) {
++      btnActualizar.addEventListener('click', function () {
++        location.reload();
++      });
++    }
++    if (btnCerrar) {
++      btnCerrar.addEventListener('click', function () {
++        banner.hidden = true;
++        // Se cierra para esta sesión de pestaña. No hace falta volver
++        // a avisar: la próxima vez que la persona navegue o recargue
++        // por cualquier motivo, ya va a recibir el contenido nuevo
++        // (quedó guardado en cache desde la revalidación).
++      });
++    }
++
++    banner.hidden = false;
++  }
++
++  try {
++    navigator.serviceWorker.addEventListener('message', function (evento) {
++      if (evento && evento.data && evento.data.tipo === 'uru-spot-actualizacion-disponible') {
++        mostrarBanner();
++      }
++    });
++  } catch (e) { /* no rompe el resto del sitio si esto falla */ }
++})();
+diff --git a/sw.js b/sw.js
+index 36decb1..a310d63 100644
+--- a/sw.js
++++ b/sw.js
+@@ -20,9 +20,16 @@
+  *    está realmente offline.
+  *
+  * 3) Estáticos versionables (css, js, webp/png/jpg/svg, woff):
+- *    cache-first — no cambian de contenido sin cambiar de nombre de
+- *    archivo en este repo, así que servirlos desde cache es seguro y
+- *    es lo que más beneficia performance/offline.
++ *    stale-while-revalidate (perf, 2026-07-31) — se sirve la versión
++ *    cacheada al instante (misma latencia percibida que cache-first)
++ *    y en paralelo se revalida contra la red; si el contenido cambió
++ *    de verdad, se avisa a las pestañas abiertas (ver
++ *    donde-comer-cdu/js/actualizacion-disponible.js). Antes era
++ *    cache-first puro, que asumía que un archivo nunca cambia de
++ *    contenido sin cambiar de nombre — supuesto falso en este repo,
++ *    donde js/app.js y compañía se editan en el mismo nombre commit a
++ *    commit, así que alguien que ya instaló la app nunca recibía un
++ *    fix posterior.
+  *
+  * 4) Todo lo que no sea del mismo origen (ej. unpkg.com/leaflet) se
+  *    ignora por completo: no se intercepta ni se cachea CDN de terceros.
+@@ -30,7 +37,7 @@
+ 
+ 'use strict';
+ 
+-var VERSION = 'v3';
++var VERSION = 'v4';
+ var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
+ var CACHE_DATOS = 'uruspot-datos-' + VERSION;
+ var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;
+@@ -104,7 +111,7 @@ self.addEventListener('fetch', function (event) {
+     return;
+   }
+   if (esEstaticoVersionable(url)) {
+-    event.respondWith(cacheFirstEstatico(request));
++    event.respondWith(staleWhileRevalidateEstatico(request, event));
+     return;
+   }
+   // Cualquier otro GET del propio origen (ej. JSON de configuración
+@@ -142,14 +149,68 @@ function networkFirstDato(request) {
+   });
+ }
+ 
+-function cacheFirstEstatico(request) {
++/*
++ * ESTÁTICOS (perf, 2026-07-31 — reemplaza al cache-first anterior):
++ * el cache-first puro asumía que un archivo nunca cambia de contenido
++ * sin cambiar de nombre — pero en este repo js/app.js, css/*.css, etc.
++ * SÍ se editan en el mismo nombre de archivo commit a commit. Con
++ * cache-first a secas, alguien que instaló la app un día nunca vuelve
++ * a recibir un fix posterior: el Service Worker le sigue sirviendo la
++ * versión vieja de esos archivos para siempre.
++ *
++ * stale-while-revalidate resuelve eso sin perder la velocidad de
++ * cache-first: la respuesta cacheada se sirve al instante (misma
++ * latencia percibida de siempre), y en paralelo se pide la red y se
++ * actualiza el cache. Si el contenido efectivamente cambió, se avisa
++ * a las pestañas abiertas — la decisión de cuándo recargar queda del
++ * lado de la persona (ver actualizacion-disponible.js), nunca se
++ * recarga sola una pestaña donde alguien puede estar a mitad de una
++ * búsqueda o llenando algo.
++ */
++function staleWhileRevalidateEstatico(request, event) {
+   return caches.open(CACHE_ESTATICOS).then(function (cache) {
+     return cache.match(request).then(function (enCache) {
+-      if (enCache) return enCache;
++      if (enCache) {
++        // No bloquea la respuesta: se sirve el cache ya mismo. La
++        // revalidación sigue en segundo plano vía waitUntil, para que
++        // el Service Worker no se suspenda a mitad de camino.
++        var revalidacion = revalidarYNotificarSiCambio(cache, request, enCache);
++        if (event && event.waitUntil) event.waitUntil(revalidacion);
++        return enCache;
++      }
++      // Primera vez que se pide este recurso: no hay nada cacheado
++      // que ofrecer ya mismo, así que sí esperamos la red acá.
+       return fetch(request).then(function (respuestaRed) {
+-        cache.put(request, respuestaRed.clone());
++        if (respuestaRed && respuestaRed.ok) cache.put(request, respuestaRed.clone());
+         return respuestaRed;
+       });
+     });
+   });
+ }
++
++function revalidarYNotificarSiCambio(cache, request, enCache) {
++  return fetch(request)
++    .then(function (respuestaRed) {
++      if (!respuestaRed || !respuestaRed.ok) return;
++      return Promise.all([enCache.clone().text(), respuestaRed.clone().text()])
++        .then(function (textos) {
++          var cambio = textos[0] !== textos[1];
++          return cache.put(request, respuestaRed.clone()).then(function () {
++            if (cambio) avisarActualizacionDisponible(request.url);
++          });
++        });
++    })
++    .catch(function () {
++      // Sin red para revalidar: seguimos sirviendo lo que ya está en
++      // cache sin problema, no es un error que rompa nada.
++    });
++}
++
++function avisarActualizacionDisponible(url) {
++  return self.clients.matchAll({ type: 'window' }).then(function (clientes) {
++    clientes.forEach(function (cliente) {
++      cliente.postMessage({ tipo: 'uru-spot-actualizacion-disponible', url: url });
++    });
++  });
++}
++

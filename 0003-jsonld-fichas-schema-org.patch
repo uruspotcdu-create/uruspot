@@ -1,0 +1,2752 @@
+From 50c921367ce8e6a3a7eb9cf886b8ade0b3c70400 Mon Sep 17 00:00:00 2001
+From: URU SPOT <dev@uruspot.local>
+Date: Fri, 31 Jul 2026 06:23:59 +0000
+Subject: [PATCH] feat: JSON-LD (schema.org) en las 51 fichas de locales
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Cada ficha en donde-comer-cdu/locales/ tenía toda la info (nombre,
+horario, telefono, direccion, rating, coords) pero sin structured
+data -- index.html si tenia JSON-LD, las fichas individuales no.
+
+scripts/generar-jsonld-fichas.js extrae los datos ya presentes en
+cada HTML (bloque #ficha-data, og:tags, link de Google Maps, etc.)
+y arma un @type de schema.org (Restaurant/Bakery/CafeOrCoffeeShop/
+ExerciseGym/LodgingBusiness/...) inferido por rubro + palabras clave
+del nombre/categoria.
+
+Corre en modo dry-run por defecto (imprime reporte, no escribe nada)
+y solo escribe con --write. 16/51 fichas quedaron con avisos (sobre
+todo direcciones sin calle y altura, solo zona) -- revisar el reporte
+del script antes de ajustar esos casos a mano.
+---
+ donde-comer-cdu/locales/7-colinas/index.html  |  25 ++
+ .../locales/antigua-fonda/index.html          |  29 ++
+ .../locales/bartolo-bar/index.html            |  30 ++
+ .../locales/bella-vista/index.html            |  25 ++
+ donde-comer-cdu/locales/bonhomia/index.html   |  52 ++++
+ donde-comer-cdu/locales/brode/index.html      |  29 ++
+ .../locales/bungalows-mexico/index.html       |  29 ++
+ .../locales/casa-del-arbol/index.html         |  29 ++
+ donde-comer-cdu/locales/cremolatti/index.html |  30 ++
+ .../locales/cross-gimnasio/index.html         |  30 ++
+ .../locales/cultura-cafe/index.html           |  30 ++
+ donde-comer-cdu/locales/danys/index.html      |  43 +++
+ .../locales/dolores-costa/index.html          |  30 ++
+ donde-comer-cdu/locales/drakkar/index.html    |  30 ++
+ .../locales/el-arca-resto-bar/index.html      |  72 +++++
+ .../locales/el-calderon/index.html            |  30 ++
+ .../locales/el-conventillo-de-baco/index.html |  30 ++
+ .../locales/el-danubio-azul/index.html        |  25 ++
+ donde-comer-cdu/locales/faro-3260/index.html  |  30 ++
+ donde-comer-cdu/locales/garifo/index.html     |  43 +++
+ .../locales/gimnasio-538/index.html           |  28 ++
+ .../locales/helena-cafe/index.html            |  46 +++
+ .../locales/hoteleria-mitre/index.html        |  30 ++
+ .../locales/house-garage/index.html           |  29 ++
+ donde-comer-cdu/locales/italia/index.html     |  29 ++
+ .../locales/justo-jos\303\251/index.html"     |  30 ++
+ .../locales/klug-gebrau/index.html            |  51 ++++
+ donde-comer-cdu/locales/la-cuadra/index.html  |  45 +++
+ donde-comer-cdu/locales/la-delfina/index.html |  30 ++
+ donde-comer-cdu/locales/la-ris/index.html     |  30 ++
+ donde-comer-cdu/locales/la-segunda/index.html |  52 ++++
+ donde-comer-cdu/locales/lo-de-juan/index.html |  30 ++
+ .../locales/london-cafe/index.html            |  40 +++
+ .../locales/los-aguaribay/index.html          |  29 ++
+ donde-comer-cdu/locales/lucero/index.html     |  49 +++
+ .../locales/lucianos-gimnasio/index.html      |  30 ++
+ donde-comer-cdu/locales/mamma-mia/index.html  |  30 ++
+ donde-comer-cdu/locales/mi-viejo/index.html   |  45 +++
+ .../locales/muscle-gimnasio/index.html        |  30 ++
+ donde-comer-cdu/locales/nero-cafe/index.html  |  56 ++++
+ donde-comer-cdu/locales/panettone/index.html  |  58 ++++
+ .../locales/panza-verde/index.html            |  30 ++
+ donde-comer-cdu/locales/papa-luigi/index.html |  80 +++++
+ donde-comer-cdu/locales/parada-33/index.html  |  30 ++
+ .../locales/parrilla-la-gruta/index.html      |  29 ++
+ .../locales/pimienta-negra/index.html         |  30 ++
+ .../locales/posta-torreon/index.html          |  30 ++
+ .../locales/power-gimnasio/index.html         |  30 ++
+ donde-comer-cdu/locales/san-carlos/index.html |  30 ++
+ donde-comer-cdu/locales/sanduba/index.html    |  30 ++
+ .../locales/yelatti-artesanal/index.html      |  30 ++
+ scripts/generar-jsonld-fichas.js              | 287 ++++++++++++++++++
+ 52 files changed, 2104 insertions(+)
+ create mode 100644 scripts/generar-jsonld-fichas.js
+
+diff --git a/donde-comer-cdu/locales/7-colinas/index.html b/donde-comer-cdu/locales/7-colinas/index.html
+index b0360b7..961ad62 100644
+--- a/donde-comer-cdu/locales/7-colinas/index.html
++++ b/donde-comer-cdu/locales/7-colinas/index.html
+@@ -17,6 +17,31 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "BarOrPub",
++  "name": "7 Colinas · URU SPOT — Guía Gastronómica CDU",
++  "description": "Donde la ingeniería cervecera se encuentra con el alma de la ciudad. Estrada 838, Concepción del Uruguay.",
++  "image": "https://uruspot.pages.dev/img/7-colinas-1.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/7-colinas/",
++  "telephone": "+5493442678573",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Estrada 838, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "priceRange": "$15.000 – $40.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.35",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/antigua-fonda/index.html b/donde-comer-cdu/locales/antigua-fonda/index.html
+index a2f47f1..262d9f0 100644
+--- a/donde-comer-cdu/locales/antigua-fonda/index.html
++++ b/donde-comer-cdu/locales/antigua-fonda/index.html
+@@ -18,6 +18,35 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Antigua Fonda · URU SPOT — Guía de Alojamiento CDU",
++  "description": "Tradición, calidez y hospitalidad en el centro histórico de Concepción del Uruguay. Pet-Friendly. URU SPOT Score: 9.2/10.",
++  "image": "https://i.imgur.com/KCg44qD.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/antigua-fonda/",
++  "telephone": "+543442433734",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Centro Histórico, Concepción del Uruguay",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.487357",
++    "longitude": "-58.2357779"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.60",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/bartolo-bar/index.html b/donde-comer-cdu/locales/bartolo-bar/index.html
+index 3cfcf3c..835e3e6 100644
+--- a/donde-comer-cdu/locales/bartolo-bar/index.html
++++ b/donde-comer-cdu/locales/bartolo-bar/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "BarOrPub",
++  "name": "Bartolo Bar · URU SPOT — Guía Gastronómica CDU",
++  "description": "Punto neurálgico en el corazón de la ciudad. San Martín 745, frente a la plaza.",
++  "image": "https://uruspot.pages.dev/img/bartolo-bar-1.jpg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/bartolo-bar/",
++  "telephone": "03442427162",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "San Martín 745, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4856557",
++    "longitude": "-58.2352943"
++  },
++  "priceRange": "$25.000 – $55.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.40",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/bella-vista/index.html b/donde-comer-cdu/locales/bella-vista/index.html
+index 71b203a..53a5f02 100644
+--- a/donde-comer-cdu/locales/bella-vista/index.html
++++ b/donde-comer-cdu/locales/bella-vista/index.html
+@@ -17,6 +17,31 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Bella Vista · URU SPOT — Guía Gastronómica CDU",
++  "description": "Tradición gastronómica con ambiente familiar y vistas icónicas. 3 de Febrero 11, CDU.",
++  "image": "https://i.imgur.com/lXXacFF.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/bella-vista/",
++  "telephone": "03442432788",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "3 de Febrero 11, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "priceRange": "$25.000 – $40.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.45",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/bonhomia/index.html b/donde-comer-cdu/locales/bonhomia/index.html
+index 4d0cb06..2536bf7 100644
+--- a/donde-comer-cdu/locales/bonhomia/index.html
++++ b/donde-comer-cdu/locales/bonhomia/index.html
+@@ -17,6 +17,58 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Bonhomia · URU SPOT — Guía Gastronómica CDU",
++  "description": "Cocina moderna y cócteles en un ambiente cuidado. Concepción del Uruguay.",
++  "image": "https://i.imgur.com/z28LguU.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/bonhomia/",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Concepción del Uruguay",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4791152",
++    "longitude": "-58.2247121"
++  },
++  "priceRange": "$20.000 – $35.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.50",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Monday",
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday",
++        "Saturday"
++      ],
++      "opens": "11:00",
++      "closes": "14:30"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Sunday"
++      ],
++      "opens": "19:00",
++      "closes": "01:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/brode/index.html b/donde-comer-cdu/locales/brode/index.html
+index 12fba3a..d08e74a 100644
+--- a/donde-comer-cdu/locales/brode/index.html
++++ b/donde-comer-cdu/locales/brode/index.html
+@@ -18,6 +18,35 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Bakery",
++  "name": "Brødë Panadería — URU SPOT",
++  "description": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza.",
++  "image": "/img/brodefrente.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/brode/",
++  "telephone": "+5493442306349",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4806862",
++    "longitude": "-58.2545511"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.65",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/bungalows-mexico/index.html b/donde-comer-cdu/locales/bungalows-mexico/index.html
+index 75d91bd..1541e45 100644
+--- a/donde-comer-cdu/locales/bungalows-mexico/index.html
++++ b/donde-comer-cdu/locales/bungalows-mexico/index.html
+@@ -18,6 +18,35 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Bungalows Mexico · URU SPOT — Guía de Alojamiento CDU",
++  "description": "Parque 10.000 m², piscina, jacuzzi, quincho equipado, bungalows con cocina completa. URU SPOT Score: 9.4/10.",
++  "image": "https://i.imgur.com/GtmQkvp.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/bungalows-mexico/",
++  "telephone": "+5493442579977",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4900356",
++    "longitude": "-58.2854232"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.70",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/casa-del-arbol/index.html b/donde-comer-cdu/locales/casa-del-arbol/index.html
+index 441d15b..5f1df2e 100644
+--- a/donde-comer-cdu/locales/casa-del-arbol/index.html
++++ b/donde-comer-cdu/locales/casa-del-arbol/index.html
+@@ -18,6 +18,35 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Casa del Árbol Hostel · URU SPOT — Guía de Alojamiento CDU",
++  "description": "Casona colonial con anfitriones Guada y Charly. WiFi, cocina equipada, atención personalizada. URU SPOT Score: 9.6/10.",
++  "image": "/img/arbolfrente.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/casa-del-arbol/",
++  "telephone": "03442463379",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "8 de Junio 1096, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4746805",
++    "longitude": "-58.2462602"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.80",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/cremolatti/index.html b/donde-comer-cdu/locales/cremolatti/index.html
+index e3502d6..caade3e 100644
+--- a/donde-comer-cdu/locales/cremolatti/index.html
++++ b/donde-comer-cdu/locales/cremolatti/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "LocalBusiness",
++  "name": "Cremolatti · URU SPOT — Guía Gastronómica CDU",
++  "description": "Tres generaciones de tradición heladera italiana en el corazón de Concepción del Uruguay. Gral. Galarza 830, CDU.",
++  "image": "/img/CREMOLATTIFRENTE.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/cremolatti/",
++  "telephone": "+5493442425704",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Gral. Galarza 830, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4841901",
++    "longitude": "-58.236914"
++  },
++  "priceRange": "Local · Para llevar",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "3.90",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/cross-gimnasio/index.html b/donde-comer-cdu/locales/cross-gimnasio/index.html
+index 4bcc1e6..ae83002 100644
+--- a/donde-comer-cdu/locales/cross-gimnasio/index.html
++++ b/donde-comer-cdu/locales/cross-gimnasio/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "ExerciseGym",
++  "name": "CROSS CDELU · URU SPOT · Concepción del Uruguay",
++  "description": "Una propuesta de acondicionamiento físico que rompe con el gimnasio tradicional. Entrenamiento funcional al aire libre, comunidad auténtica y coaches que realmente se comprometen con tu progreso.",
++  "image": "/img/crossfrente.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/cross-gimnasio/",
++  "telephone": "+5493442515067",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Pres. J. C. Gonzalez, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4882245",
++    "longitude": "-58.2857647"
++  },
++  "priceRange": "Consultá por precio",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.20",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/cultura-cafe/index.html b/donde-comer-cdu/locales/cultura-cafe/index.html
+index 1c334fb..e8f9014 100644
+--- a/donde-comer-cdu/locales/cultura-cafe/index.html
++++ b/donde-comer-cdu/locales/cultura-cafe/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "CafeOrCoffeeShop",
++  "name": "Cultura Café",
++  "description": "Ambiente sofisticado y la mejor experiencia cafetera de la zona.",
++  "image": "https://i.imgur.com/wEtg6GT.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/cultura-cafe/",
++  "telephone": "+543442532190",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Bv. Irigoyen Perú 290, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4759672",
++    "longitude": "-58.2293157"
++  },
++  "priceRange": "$5.000 – $10.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.40",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/danys/index.html b/donde-comer-cdu/locales/danys/index.html
+index d20f990..0f9aba9 100644
+--- a/donde-comer-cdu/locales/danys/index.html
++++ b/donde-comer-cdu/locales/danys/index.html
+@@ -18,6 +18,49 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "Heladería Danys · URU SPOT — Guía Gastronómica CDU",
++  "description": "Un clásico familiar del helado artesanal en Concepción del Uruguay. Delivery disponible, pago con tarjeta.",
++  "image": "https://uruspot.pages.dev/img/danys-1.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/danys/",
++  "telephone": "+5493442301424",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4849916",
++    "longitude": "-58.235616"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.20",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Monday",
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday"
++      ],
++      "opens": "15:30",
++      "closes": "00:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/dolores-costa/index.html b/donde-comer-cdu/locales/dolores-costa/index.html
+index 6a16f10..c088918 100644
+--- a/donde-comer-cdu/locales/dolores-costa/index.html
++++ b/donde-comer-cdu/locales/dolores-costa/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Dolores Costa · URU SPOT — Guía Gastronómica CDU",
++  "description": "Exclusividad y sofisticación culinaria en el corazón de Concepción del Uruguay. Galarza y Rep. del Líbano.",
++  "image": "https://uruspot.pages.dev/img/dolores-costa-1.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/dolores-costa/",
++  "telephone": "+543442506970",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Galarza y República del Líbano, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4867145",
++    "longitude": "-58.2507116"
++  },
++  "priceRange": "$15.000 – $45.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.15",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/drakkar/index.html b/donde-comer-cdu/locales/drakkar/index.html
+index 286e848..57aadb6 100644
+--- a/donde-comer-cdu/locales/drakkar/index.html
++++ b/donde-comer-cdu/locales/drakkar/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "BarOrPub",
++  "name": "Drakkar Cervecería · URU SPOT — Guía Gastronómica CDU",
++  "description": "Cervecería artesanal con estética nórdica en Concepción del Uruguay.",
++  "image": "https://uruspot.pages.dev/img/drakkar-1.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/drakkar/",
++  "telephone": "+5493442437805",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Artusi 755, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.480575",
++    "longitude": "-58.2365005"
++  },
++  "priceRange": "$20.000 – $35.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.10",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/el-arca-resto-bar/index.html b/donde-comer-cdu/locales/el-arca-resto-bar/index.html
+index 69c8ea1..efcc4a2 100644
+--- a/donde-comer-cdu/locales/el-arca-resto-bar/index.html
++++ b/donde-comer-cdu/locales/el-arca-resto-bar/index.html
+@@ -18,6 +18,78 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "El Arca Resto Bar · URU SPOT — Guía Gastronómica CDU",
++  "description": "La opción definitiva para cenar y seguir la noche. Leguizamón 180, CDU.",
++  "image": "https://uruspot.pages.dev/img/el-arca-resto-bar-1.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/el-arca-resto-bar/",
++  "telephone": "+543442428000",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Leguizamón 180, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4823139",
++    "longitude": "-58.2368257"
++  },
++  "priceRange": "$15.000 – $60.000 ARS · ~U$D 15–60",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.15",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Wednesday"
++      ],
++      "opens": "20:00",
++      "closes": "07:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Thursday"
++      ],
++      "opens": "20:00",
++      "closes": "07:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Friday"
++      ],
++      "opens": "20:00",
++      "closes": "07:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Saturday"
++      ],
++      "opens": "20:00",
++      "closes": "07:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Sunday"
++      ],
++      "opens": "20:00",
++      "closes": "07:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/el-calderon/index.html b/donde-comer-cdu/locales/el-calderon/index.html
+index 8a47d6b..7e45edd 100644
+--- a/donde-comer-cdu/locales/el-calderon/index.html
++++ b/donde-comer-cdu/locales/el-calderon/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "El Calderón · URU SPOT — Guía Gastronómica CDU",
++  "description": "Cocina casera que redefine la vianda diaria con calidad y sabor real. Ciudad de la Paz 315, Concepción del Uruguay.",
++  "image": "https://i.imgur.com/bgzrp4o.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/el-calderon/",
++  "telephone": "+5493442544466",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Ciudad de la Paz 315, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4819334",
++    "longitude": "-58.3029796"
++  },
++  "priceRange": "$25.000 – $55.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.05",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/el-conventillo-de-baco/index.html b/donde-comer-cdu/locales/el-conventillo-de-baco/index.html
+index 9faa679..5e88dc3 100644
+--- a/donde-comer-cdu/locales/el-conventillo-de-baco/index.html
++++ b/donde-comer-cdu/locales/el-conventillo-de-baco/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "El Conventillo de Baco — URU SPOT",
++  "description": "Una experiencia sensorial entre muros históricos y vinos selectos.",
++  "image": "https://i.imgur.com/1DtSIND.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/el-conventillo-de-baco/",
++  "telephone": "+5493442549695",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Rocamora 129, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4814874",
++    "longitude": "-58.2253823"
++  },
++  "priceRange": "$20.000 – $55.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.00",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/el-danubio-azul/index.html b/donde-comer-cdu/locales/el-danubio-azul/index.html
+index 7404bf1..dd740cc 100644
+--- a/donde-comer-cdu/locales/el-danubio-azul/index.html
++++ b/donde-comer-cdu/locales/el-danubio-azul/index.html
+@@ -18,6 +18,31 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "El Danubio Azul",
++  "description": "Sabor y cultura en el corazón histórico de Concepción del Uruguay.",
++  "image": "https://i.imgur.com/IAFB09X.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/el-danubio-azul/",
++  "telephone": "+5493442423244",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "San Martín 763, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "priceRange": "$10.000 – $40.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.05",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/faro-3260/index.html b/donde-comer-cdu/locales/faro-3260/index.html
+index fe539f5..5f244fa 100644
+--- a/donde-comer-cdu/locales/faro-3260/index.html
++++ b/donde-comer-cdu/locales/faro-3260/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Faro 3260 · URU SPOT — Guía Gastronómica CDU",
++  "description": "Cocina internacional con la mejor vista panorámica al río Uruguay. Jordana y Defensa Sur, Concepción del Uruguay.",
++  "image": "https://i.imgur.com/kecfala.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/faro-3260/",
++  "telephone": "+543442543904",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Jordana y Defensa Sur, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4961239",
++    "longitude": "-58.2289306"
++  },
++  "priceRange": "$15.000 – $30.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.40",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/garifo/index.html b/donde-comer-cdu/locales/garifo/index.html
+index d8a34e4..46c7fa0 100644
+--- a/donde-comer-cdu/locales/garifo/index.html
++++ b/donde-comer-cdu/locales/garifo/index.html
+@@ -18,6 +18,49 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "Garifo — URU SPOT",
++  "description": "Un rincón cálido con historia viva en el corazón de la ciudad.",
++  "image": "https://i.imgur.com/gqlbkM4.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/garifo/",
++  "telephone": "03442622611",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "España 193, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4876591",
++    "longitude": "-58.2359256"
++  },
++  "priceRange": "$10.000 – $35.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.40",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday"
++      ],
++      "opens": "20:00",
++      "closes": "01:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/gimnasio-538/index.html b/donde-comer-cdu/locales/gimnasio-538/index.html
+index e3d4916..fd2327a 100644
+--- a/donde-comer-cdu/locales/gimnasio-538/index.html
++++ b/donde-comer-cdu/locales/gimnasio-538/index.html
+@@ -18,6 +18,34 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "ExerciseGym",
++  "name": "Gimnasio 538 Gym · URU SPOT — Guía Local CDU",
++  "description": "Dos sedes en Concepción del Uruguay con equipamiento de última generación, clases para todos los niveles y profesionales comprometidos con tu bienestar.",
++  "image": "/img/538frente.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/gimnasio-538/",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Blvd. Hipólito Yrigoyen 538, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4766657",
++    "longitude": "-58.2332905"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.55",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/helena-cafe/index.html b/donde-comer-cdu/locales/helena-cafe/index.html
+index 94dda57..1416216 100644
+--- a/donde-comer-cdu/locales/helena-cafe/index.html
++++ b/donde-comer-cdu/locales/helena-cafe/index.html
+@@ -18,6 +18,52 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "CafeOrCoffeeShop",
++  "name": "Helena Café",
++  "description": "Un refugio moderno en el corazón de la ciudad diseñado para la calma y el buen café.",
++  "image": "https://i.imgur.com/QKWMyjg.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/helena-cafe/",
++  "telephone": "+543442310329",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Galarza 752, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4840065",
++    "longitude": "-58.2357949"
++  },
++  "priceRange": "$20.000 – $55.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.25",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Monday",
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday",
++        "Saturday",
++        "Sunday"
++      ],
++      "opens": "08:30",
++      "closes": "21:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/hoteleria-mitre/index.html b/donde-comer-cdu/locales/hoteleria-mitre/index.html
+index 25aa27c..6c524f7 100644
+--- a/donde-comer-cdu/locales/hoteleria-mitre/index.html
++++ b/donde-comer-cdu/locales/hoteleria-mitre/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "LodgingBusiness",
++  "name": "Hostería Mitre · URU SPOT — Guía de Alojamiento CDU",
++  "description": "Confort, calidez y ubicación privilegiada en el corazón de Concepción del Uruguay. Bartolomé Mitre 949.",
++  "image": "https://i.imgur.com/B1ONdB9.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/hoteleria-mitre/",
++  "telephone": "+543442429754",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Bartolomé Mitre 949, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4818824",
++    "longitude": "-58.2395339"
++  },
++  "priceRange": "Consultar disponibilidad",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.50",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/house-garage/index.html b/donde-comer-cdu/locales/house-garage/index.html
+index dc6977f..2e26731 100644
+--- a/donde-comer-cdu/locales/house-garage/index.html
++++ b/donde-comer-cdu/locales/house-garage/index.html
+@@ -18,6 +18,35 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "House Garage · URU SPOT — Guía Gastronómica CDU",
++  "description": "El epicentro de la cultura urbana en Concepción del Uruguay. Galarza 1475.",
++  "image": "https://i.imgur.com/oePylJm.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/house-garage/",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "General Galarza 1475, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4864141",
++    "longitude": "-58.248351"
++  },
++  "priceRange": "$15.000 – $40.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.45",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/italia/index.html b/donde-comer-cdu/locales/italia/index.html
+index 7fe1141..775691e 100644
+--- a/donde-comer-cdu/locales/italia/index.html
++++ b/donde-comer-cdu/locales/italia/index.html
+@@ -18,6 +18,35 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "Heladería Italia · URU SPOT — Guía Gastronómica CDU",
++  "description": "Helados artesanales con recetas tradicionales italianas. Delivery, Take Away, Sin TACC y Sin azúcar.",
++  "image": "/img/italiafrente.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/italia/",
++  "telephone": "+543442571992",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.487828",
++    "longitude": "-58.2528459"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.50",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git "a/donde-comer-cdu/locales/justo-jos\303\251/index.html" "b/donde-comer-cdu/locales/justo-jos\303\251/index.html"
+index 949bde0..93615a4 100644
+--- "a/donde-comer-cdu/locales/justo-jos\303\251/index.html"
++++ "b/donde-comer-cdu/locales/justo-jos\303\251/index.html"
+@@ -17,6 +17,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Justo José · URU SPOT — Guía Gastronómica CDU",
++  "description": "Ambiente moderno y distendido para disfrutar de lo mejor de nuestra cocina. km 129, RN14, CdU.",
++  "image": "https://i.imgur.com/z28LguU.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/justo-josé/",
++  "telephone": "+5493442566016",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "km 129, RN14, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4516835",
++    "longitude": "-58.2934744"
++  },
++  "priceRange": "$20.000 – $30.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.60",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/klug-gebrau/index.html b/donde-comer-cdu/locales/klug-gebrau/index.html
+index 02e1495..1f491f2 100644
+--- a/donde-comer-cdu/locales/klug-gebrau/index.html
++++ b/donde-comer-cdu/locales/klug-gebrau/index.html
+@@ -18,6 +18,57 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "Klug Gebräu",
++  "description": "Identidad alemana y maestría industrial en cada pinta.",
++  "image": "https://i.imgur.com/dO73VFn.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/klug-gebrau/",
++  "telephone": "+543442456232",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Cabo Oscar Labalta 440, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4822216",
++    "longitude": "-58.2575949"
++  },
++  "priceRange": "$15.000 – $30.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.25",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Wednesday",
++        "Thursday",
++        "Friday",
++        "Saturday"
++      ],
++      "opens": "20:00",
++      "closes": "01:30"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Sunday"
++      ],
++      "opens": "20:00",
++      "closes": "01:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/la-cuadra/index.html b/donde-comer-cdu/locales/la-cuadra/index.html
+index 2b5d5ff..bce4e3d 100644
+--- a/donde-comer-cdu/locales/la-cuadra/index.html
++++ b/donde-comer-cdu/locales/la-cuadra/index.html
+@@ -18,6 +18,51 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "CafeOrCoffeeShop",
++  "name": "La Cuadra",
++  "description": "Atención y servicio de calidad en un ambiente acogedor y moderno, ideal para familias.",
++  "image": "https://i.imgur.com/dCe7MA4.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/la-cuadra/",
++  "telephone": "+543442422186",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Gral. Galarza 1052, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4746805",
++    "longitude": "-58.2462602"
++  },
++  "priceRange": "$10.000 – $20.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.45",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday",
++        "Saturday",
++        "Sunday"
++      ],
++      "opens": "07:30",
++      "closes": "21:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/la-delfina/index.html b/donde-comer-cdu/locales/la-delfina/index.html
+index 5659e5b..6640ae1 100644
+--- a/donde-comer-cdu/locales/la-delfina/index.html
++++ b/donde-comer-cdu/locales/la-delfina/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "LodgingBusiness",
++  "name": "La Delfina",
++  "description": "El santuario gastronómico de Concepción del Uruguay. Excelencia y distinción en cada detalle.",
++  "image": "https://i.imgur.com/muzIx1L.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/la-delfina/",
++  "telephone": "+5493442620414",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Eva Duarte de Perón 125, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4826853",
++    "longitude": "-58.2342986"
++  },
++  "priceRange": "$25.000 – $75.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.55",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/la-ris/index.html b/donde-comer-cdu/locales/la-ris/index.html
+index 00f68e6..7fe27fa 100644
+--- a/donde-comer-cdu/locales/la-ris/index.html
++++ b/donde-comer-cdu/locales/la-ris/index.html
+@@ -17,6 +17,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "La Ris · URU SPOT — Guía Gastronómica CDU",
++  "description": "Una institución gastronómica de Concepción del Uruguay. Cocina tradicional, porciones generosas y precio justo.",
++  "image": "https://i.imgur.com/ove200U.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/la-ris/",
++  "telephone": "+5493442437846",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Gral. Galarza 750, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4839406",
++    "longitude": "-58.2355636"
++  },
++  "priceRange": "$10.000 – $20.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.10",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/la-segunda/index.html b/donde-comer-cdu/locales/la-segunda/index.html
+index aeafe33..6343d11 100644
+--- a/donde-comer-cdu/locales/la-segunda/index.html
++++ b/donde-comer-cdu/locales/la-segunda/index.html
+@@ -18,6 +18,58 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Parrilla La Segunda · URU SPOT — Guía Gastronómica CDU",
++  "description": "La esencia del asado entrerriano en su máxima expresión. Isaac Stiltman 44, Concepción del Uruguay.",
++  "image": "https://i.imgur.com/e0ApwVO.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/la-segunda/",
++  "telephone": "+543442441076",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Isaac Stiltman 44, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4888833",
++    "longitude": "-58.2620939"
++  },
++  "priceRange": "$25.000 – $75.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.15",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday",
++        "Saturday"
++      ],
++      "opens": "11:30",
++      "closes": "14:30"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Sunday"
++      ],
++      "opens": "11:30",
++      "closes": "15:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/lo-de-juan/index.html b/donde-comer-cdu/locales/lo-de-juan/index.html
+index 0205bbe..a238c9e 100644
+--- a/donde-comer-cdu/locales/lo-de-juan/index.html
++++ b/donde-comer-cdu/locales/lo-de-juan/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Bakery",
++  "name": "Lo de Juan — URU SPOT",
++  "description": "Productos frescos, atención cordial y los mejores precios de la zona.",
++  "image": "https://i.imgur.com/bR75YlV.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/lo-de-juan/",
++  "telephone": "+543442671868",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Blvd. Hipólito Yrigoyen 749, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4776528",
++    "longitude": "-58.2368218"
++  },
++  "priceRange": "$1.000 – $10.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.30",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/london-cafe/index.html b/donde-comer-cdu/locales/london-cafe/index.html
+index a296c19..6573e6a 100644
+--- a/donde-comer-cdu/locales/london-cafe/index.html
++++ b/donde-comer-cdu/locales/london-cafe/index.html
+@@ -18,6 +18,46 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "CafeOrCoffeeShop",
++  "name": "London Café",
++  "description": "Café de especialidad y sándwiches con la mejor vista al centro histórico.",
++  "image": "https://i.imgur.com/lQ8w04a.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/london-cafe/",
++  "telephone": "+543442480407",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Gral. Galarza 656, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4837589",
++    "longitude": "-58.2341756"
++  },
++  "priceRange": "$10.000 – $20.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "3.95",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Monday"
++      ],
++      "opens": "08:00",
++      "closes": "00:30"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/los-aguaribay/index.html b/donde-comer-cdu/locales/los-aguaribay/index.html
+index f1fb877..3e66ee6 100644
+--- a/donde-comer-cdu/locales/los-aguaribay/index.html
++++ b/donde-comer-cdu/locales/los-aguaribay/index.html
+@@ -18,6 +18,35 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "LodgingBusiness",
++  "name": "Hotel Boutique Los Aguaribay · URU SPOT — Guía de Alojamiento CDU",
++  "description": "7 habitaciones íntimas, piscina, desayuno distinguido, ubicación privilegiada. URU SPOT Score: 9.5/10.",
++  "image": "/img/aguribayfrente.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/los-aguaribay/",
++  "telephone": "03442406543",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4806908",
++    "longitude": "-58.237102"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.75",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/lucero/index.html b/donde-comer-cdu/locales/lucero/index.html
+index 54f5913..e623d37 100644
+--- a/donde-comer-cdu/locales/lucero/index.html
++++ b/donde-comer-cdu/locales/lucero/index.html
+@@ -18,6 +18,55 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "LocalBusiness",
++  "name": "Heladería Lucero · URU SPOT — Guía Gastronómica CDU",
++  "description": "Helados artesanales con sabores únicos, opciones sin TACC y para diabéticos. Delivery disponible.",
++  "image": "/img/LUCEROFRENTE.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/lucero/",
++  "telephone": "+5493442642526",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4746805",
++    "longitude": "-58.2462602"
++  },
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.70",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Tuesday",
++        "Wednesday",
++        "Thursday"
++      ],
++      "opens": "10:00",
++      "closes": "01:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Friday"
++      ],
++      "opens": "10:00",
++      "closes": "02:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/lucianos-gimnasio/index.html b/donde-comer-cdu/locales/lucianos-gimnasio/index.html
+index 564609e..94849f8 100644
+--- a/donde-comer-cdu/locales/lucianos-gimnasio/index.html
++++ b/donde-comer-cdu/locales/lucianos-gimnasio/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "ExerciseGym",
++  "name": "Gym Lucianos · URU SPOT · Concepción del Uruguay",
++  "description": "Un gimnasio con identidad propia donde el dueño está presente en cada entrenamiento. Equipamiento completo, ambiente familiar y seguimiento real para cada socio.",
++  "image": "/img/lucianosf.jpg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/lucianos-gimnasio/",
++  "telephone": "03442549415",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4746805",
++    "longitude": "-58.2462602"
++  },
++  "priceRange": "Consultá por precio",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.30",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/mamma-mia/index.html b/donde-comer-cdu/locales/mamma-mia/index.html
+index 5b2f37b..7449bb0 100644
+--- a/donde-comer-cdu/locales/mamma-mia/index.html
++++ b/donde-comer-cdu/locales/mamma-mia/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Mamma Mía — URU SPOT",
++  "description": "El arte de la pasta hecha a mano y el sabor de hogar en la esquina más clásica del puerto.",
++  "image": "https://i.imgur.com/iNPqmwy.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/mamma-mia/",
++  "telephone": "+543442428753",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "España 160, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4872395",
++    "longitude": "-58.2358781"
++  },
++  "priceRange": "$25.000 – $40.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.50",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/mi-viejo/index.html b/donde-comer-cdu/locales/mi-viejo/index.html
+index 1a1d8f7..933f45e 100644
+--- a/donde-comer-cdu/locales/mi-viejo/index.html
++++ b/donde-comer-cdu/locales/mi-viejo/index.html
+@@ -18,6 +18,51 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Bakery",
++  "name": "Mi Viejo",
++  "description": "Calidad artesanal y variedad de productos a precios accesibles en el corazón de la ciudad.",
++  "image": "https://i.imgur.com/HVrOpB0.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/mi-viejo/",
++  "telephone": "+543442450138",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "8 de Junio 877, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4831629",
++    "longitude": "-58.2382364"
++  },
++  "priceRange": "$1.000 – $10.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.30",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday",
++        "Saturday",
++        "Sunday"
++      ],
++      "opens": "08:00",
++      "closes": "21:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/muscle-gimnasio/index.html b/donde-comer-cdu/locales/muscle-gimnasio/index.html
+index 01de1da..0978aa9 100644
+--- a/donde-comer-cdu/locales/muscle-gimnasio/index.html
++++ b/donde-comer-cdu/locales/muscle-gimnasio/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "ExerciseGym",
++  "name": "Gimnasio Muscle · URU SPOT · Concepción del Uruguay",
++  "description": "Instalaciones modernas y equipamiento de primera para alcanzar tus objetivos en salud y rendimiento físico.",
++  "image": "/img/musclefrente.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/muscle-gimnasio/",
++  "telephone": "+5493442585936",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Blvd. Hipólito Yrigoyen 1086, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4782772",
++    "longitude": "-58.24004"
++  },
++  "priceRange": "Consultá por precio",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.35",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/nero-cafe/index.html b/donde-comer-cdu/locales/nero-cafe/index.html
+index ea38add..ec33538 100644
+--- a/donde-comer-cdu/locales/nero-cafe/index.html
++++ b/donde-comer-cdu/locales/nero-cafe/index.html
+@@ -18,6 +18,62 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "CafeOrCoffeeShop",
++  "name": "Nero Café",
++  "description": "Café premium y ambiente único en el corazón de Concepción del Uruguay.",
++  "image": "https://i.imgur.com/urtQRjA.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/nero-cafe/",
++  "telephone": "+543442484690",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Eva Duarte de Perón 36, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4839469",
++    "longitude": "-58.2338928"
++  },
++  "priceRange": "$10.000 – $20.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.70",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Monday",
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday"
++      ],
++      "opens": "07:30",
++      "closes": "12:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Monday",
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday"
++      ],
++      "opens": "16:00",
++      "closes": "20:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/panettone/index.html b/donde-comer-cdu/locales/panettone/index.html
+index 7aa87d4..588cda9 100644
+--- a/donde-comer-cdu/locales/panettone/index.html
++++ b/donde-comer-cdu/locales/panettone/index.html
+@@ -18,6 +18,64 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Bakery",
++  "name": "Pan ettone",
++  "description": "Calidad artesanal y precios accesibles. El mejor pan de papas y medialunas de la zona.",
++  "image": "https://i.imgur.com/EUmHdcq.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/panettone/",
++  "telephone": "+543442645151",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Blvd. Hipólito Yrigoyen, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4746805",
++    "longitude": "-58.2462602"
++  },
++  "priceRange": "$1.000 – $10.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.55",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday",
++        "Saturday",
++        "Sunday"
++      ],
++      "opens": "07:00",
++      "closes": "13:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Tuesday",
++        "Wednesday",
++        "Thursday",
++        "Friday",
++        "Saturday",
++        "Sunday"
++      ],
++      "opens": "16:00",
++      "closes": "20:30"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/panza-verde/index.html b/donde-comer-cdu/locales/panza-verde/index.html
+index 3669a1e..ac8aa56 100644
+--- a/donde-comer-cdu/locales/panza-verde/index.html
++++ b/donde-comer-cdu/locales/panza-verde/index.html
+@@ -17,6 +17,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "Panza Verde · URU SPOT — Guía Gastronómica CDU",
++  "description": "Gastronomía y atardeceres únicos en el Parador Norte de la Isla del Puerto. CdU.",
++  "image": "https://i.imgur.com/ZhQDuhe.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/panza-verde/",
++  "telephone": "+5493442312626",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Parador Norte, Isla del Puerto, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4787525",
++    "longitude": "-58.2179861"
++  },
++  "priceRange": "$20.000 – $50.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.10",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/papa-luigi/index.html b/donde-comer-cdu/locales/papa-luigi/index.html
+index a9d604c..22725e6 100644
+--- a/donde-comer-cdu/locales/papa-luigi/index.html
++++ b/donde-comer-cdu/locales/papa-luigi/index.html
+@@ -17,6 +17,86 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Papa Luigi · URU SPOT — Guía Gastronómica CDU",
++  "description": "El sabor clásico que nunca falla. 21 de Noviembre 38, CDU.",
++  "image": "https://i.imgur.com/x9AxwMH.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/papa-luigi/",
++  "telephone": "+543442433624",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "21 de Noviembre 38, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4857237",
++    "longitude": "-58.235359"
++  },
++  "priceRange": "$15.000 – $40.000 ARS · ~U$D 15–40",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.20",
++    "bestRating": "5",
++    "worstRating": "1"
++  },
++  "openingHoursSpecification": [
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Tuesday"
++      ],
++      "opens": "19:00",
++      "closes": "00:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Wednesday"
++      ],
++      "opens": "19:00",
++      "closes": "00:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Thursday"
++      ],
++      "opens": "19:00",
++      "closes": "00:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Friday"
++      ],
++      "opens": "19:00",
++      "closes": "00:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Saturday"
++      ],
++      "opens": "19:00",
++      "closes": "00:00"
++    },
++    {
++      "@type": "OpeningHoursSpecification",
++      "dayOfWeek": [
++        "Sunday"
++      ],
++      "opens": "19:00",
++      "closes": "00:00"
++    }
++  ]
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/parada-33/index.html b/donde-comer-cdu/locales/parada-33/index.html
+index d35d1a8..72f997b 100644
+--- a/donde-comer-cdu/locales/parada-33/index.html
++++ b/donde-comer-cdu/locales/parada-33/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Parada 33 · URU SPOT — Guía Gastronómica CDU",
++  "description": "Comfort food, cerveza artesanal y el mejor ambiente en la zona puerto. J. D. Perón 650, Concepción del Uruguay.",
++  "image": "https://i.imgur.com/MkwLBTT.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/parada-33/",
++  "telephone": "+543442473499",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Juan Domingo Perón 650, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4961239",
++    "longitude": "-58.2289306"
++  },
++  "priceRange": "$25.000 – $65.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.30",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/parrilla-la-gruta/index.html b/donde-comer-cdu/locales/parrilla-la-gruta/index.html
+index f43bc79..01c68ae 100644
+--- a/donde-comer-cdu/locales/parrilla-la-gruta/index.html
++++ b/donde-comer-cdu/locales/parrilla-la-gruta/index.html
+@@ -17,6 +17,35 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Restaurant",
++  "name": "Parrilla La Gruta · URU SPOT — Guía Gastronómica CDU",
++  "description": "Tenedor libre de parrilla sobre la RN14. El asado más recomendado de CdU.",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/parrilla-la-gruta/",
++  "telephone": "+5493442620955",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "RN14 Km 126, E3260 Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4771132",
++    "longitude": "-58.3070934"
++  },
++  "priceRange": "Consultar precio actualizado",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.40",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/pimienta-negra/index.html b/donde-comer-cdu/locales/pimienta-negra/index.html
+index cd2eb96..a384e8d 100644
+--- a/donde-comer-cdu/locales/pimienta-negra/index.html
++++ b/donde-comer-cdu/locales/pimienta-negra/index.html
+@@ -17,6 +17,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "Pimienta Negra · URU SPOT — Guía Gastronómica CDU",
++  "description": "La máxima expresión culinaria de Concepción del Uruguay. 9 de Julio 1124.",
++  "image": "https://i.imgur.com/4iwwLhF.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/pimienta-negra/",
++  "telephone": "+543442667093",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "9 de Julio 1124, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4858508",
++    "longitude": "-58.2417682"
++  },
++  "priceRange": "$15.000 – $40.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.20",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/posta-torreon/index.html b/donde-comer-cdu/locales/posta-torreon/index.html
+index 3fedf20..b8523cb 100644
+--- a/donde-comer-cdu/locales/posta-torreon/index.html
++++ b/donde-comer-cdu/locales/posta-torreon/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "LodgingBusiness",
++  "name": "Posta Torreón · URU SPOT — Guía de Alojamiento CDU",
++  "description": "Calidez, buena ubicación y atención personalizada en el corazón de Concepción del Uruguay.",
++  "image": "/img/FRENTEPOSTA.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/posta-torreon/",
++  "telephone": "+5493442581731",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Esquina Almafuerte &amp; España, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4877761",
++    "longitude": "-58.2356605"
++  },
++  "priceRange": "Consultá disponibilidad",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.50",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/power-gimnasio/index.html b/donde-comer-cdu/locales/power-gimnasio/index.html
+index afe0581..8d7b259 100644
+--- a/donde-comer-cdu/locales/power-gimnasio/index.html
++++ b/donde-comer-cdu/locales/power-gimnasio/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "ExerciseGym",
++  "name": "Power Gym · URU SPOT — Guía Local CDU",
++  "description": "Instalaciones modernas, equipamiento de primera, entrenamiento personalizado y clases grupales en Concepción del Uruguay.",
++  "image": "/img/powerfrente.webp",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/power-gimnasio/",
++  "telephone": "03442461815",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Blvd. Hipólito Yrigoyen 1626, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4799846",
++    "longitude": "-58.2524673"
++  },
++  "priceRange": "Consultá por precio",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.35",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/san-carlos/index.html b/donde-comer-cdu/locales/san-carlos/index.html
+index 733c5b7..7d4e999 100644
+--- a/donde-comer-cdu/locales/san-carlos/index.html
++++ b/donde-comer-cdu/locales/san-carlos/index.html
+@@ -17,6 +17,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "Bakery",
++  "name": "Panadería San Carlos · URU SPOT — Guía Gastronómica CDU",
++  "description": "La panadería de tu barrio que endulza tus días con productos frescos y elaboración artesanal. 9 de Julio 1549.",
++  "image": "https://i.imgur.com/WNBQE8b.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/san-carlos/",
++  "telephone": "+543442429050",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "9 de Julio 1549, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4874175",
++    "longitude": "-58.2494857"
++  },
++  "priceRange": "$5.000 – $20.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.50",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/sanduba/index.html b/donde-comer-cdu/locales/sanduba/index.html
+index f3d7b04..4bf22e5 100644
+--- a/donde-comer-cdu/locales/sanduba/index.html
++++ b/donde-comer-cdu/locales/sanduba/index.html
+@@ -17,6 +17,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "Sanduba · URU SPOT — Guía Gastronómica CDU",
++  "description": "Sándwiches con identidad intensa. Galarza 735, Concepción del Uruguay.",
++  "image": "https://i.imgur.com/2slJJaq.jpeg",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/sanduba/",
++  "telephone": "+543442666321",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Gal. Galarza 735, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4838979",
++    "longitude": "-58.2354338"
++  },
++  "priceRange": "$20.000 – $60.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "3.95",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/donde-comer-cdu/locales/yelatti-artesanal/index.html b/donde-comer-cdu/locales/yelatti-artesanal/index.html
+index bde9245..c33deff 100644
+--- a/donde-comer-cdu/locales/yelatti-artesanal/index.html
++++ b/donde-comer-cdu/locales/yelatti-artesanal/index.html
+@@ -18,6 +18,36 @@
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../ficha.css">
++<script type="application/ld+json">
++{
++  "@context": "https://schema.org",
++  "@type": "FoodEstablishment",
++  "name": "Heladería Yelatti · URU SPOT — Guía Gastronómica CDU",
++  "description": "Sabores artesanales excepcionales y un ambiente acogedor para los amantes del helado. Blvd. Díaz Vélez 551, CDU.",
++  "image": "https://i.imgur.com/uj9qE39.png",
++  "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/yelatti-artesanal/",
++  "telephone": "+543442306577",
++  "address": {
++    "@type": "PostalAddress",
++    "streetAddress": "Blvd. Díaz Vélez 551, Concepción del Uruguay, Entre Ríos",
++    "addressLocality": "Concepción del Uruguay",
++    "addressRegion": "Entre Ríos",
++    "addressCountry": "AR"
++  },
++  "geo": {
++    "@type": "GeoCoordinates",
++    "latitude": "-32.4797182",
++    "longitude": "-58.2564586"
++  },
++  "priceRange": "$5.000 – $30.000 ARS",
++  "aggregateRating": {
++    "@type": "AggregateRating",
++    "ratingValue": "4.00",
++    "bestRating": "5",
++    "worstRating": "1"
++  }
++}
++</script>
+ </head>
+ <body>
+ 
+diff --git a/scripts/generar-jsonld-fichas.js b/scripts/generar-jsonld-fichas.js
+new file mode 100644
+index 0000000..f682e63
+--- /dev/null
++++ b/scripts/generar-jsonld-fichas.js
+@@ -0,0 +1,287 @@
++#!/usr/bin/env node
++/*
++ * scripts/generar-jsonld-fichas.js
++ * ---------------------------------------------------------------------
++ * Genera JSON-LD (schema.org) para cada ficha de donde-comer-cdu/locales/*.
++ *
++ * Por qué existe: index.html ya tiene JSON-LD, pero las ~51 fichas
++ * individuales no — y son justamente las páginas que Google podría
++ * mostrar como resultado enriquecido (rating, horario, teléfono) o que
++ * un asistente/Maps podría leer para entender el lugar.
++ *
++ * Cada ficha ya trae todo lo necesario embebido en el propio HTML
++ * (no hace falta cruzar con lugares-core.json, que evita el problema
++ * de matchear por nombre entre archivos que no comparten un id):
++ *   - <script id="ficha-data" type="application/json"> → rubro y horario
++ *     ya estructurado (schedule_rows).
++ *   - og:title / og:image → nombre e imagen principal.
++ *   - "Dirección:</strong> ..." dentro de la sección de mapa.
++ *   - href="tel:+..." → teléfono en formato E.164, listo para usar.
++ *   - .score-big-num → rating sobre 10 (se re-escala a sobre 5 para
++ *     AggregateRating, que es la escala que Google espera).
++ *   - el link "Cómo llegar" a Google Maps → lat/lng (@lat,lng).
++ *   - .schedule-note-val → rango de precio.
++ *
++ * MODO DRY-RUN POR DEFECTO: sin --write, solo imprime un reporte de
++ * qué extrajo de cada ficha y NO toca ningún archivo. Son negocios
++ * reales — un dato mal parseado (dirección, teléfono) publicado como
++ * structured data es peor que no tener structured data. Revisá el
++ * reporte antes de correr con --write.
++ *
++ * Uso:
++ *   node scripts/generar-jsonld-fichas.js            → reporte, no escribe
++ *   node scripts/generar-jsonld-fichas.js --write     → inyecta el <script>
++ *                                                        JSON-LD antes de
++ *                                                        </head> en cada ficha
++ */
++
++'use strict';
++
++const fs = require('fs');
++const path = require('path');
++
++const RAIZ = path.join(__dirname, '..', 'donde-comer-cdu', 'locales');
++const SITIO = 'https://uruspot.pages.dev';
++const ESCRIBIR = process.argv.includes('--write');
++
++// rubro (grupo amplio, ver js/rubros-meta.js) → @type de schema.org más
++// específico disponible. FoodEstablishment es el fallback razonable
++// para gastronomia si no matchea ninguna palabra clave de la categoría.
++const RUBRO_A_TIPO = {
++  gastronomia: 'FoodEstablishment',
++  alojamiento: 'LodgingBusiness',
++  deporte: 'SportsActivityLocation',
++  belleza: 'HealthAndBeautyBusiness',
++  compras: 'Store'
++};
++
++// Afina FoodEstablishment/SportsActivityLocation genérico a un @type
++// más preciso cuando el texto de la ficha lo deja claro.
++const AFINADOS = [
++  [/panader/i, 'Bakery'],
++  [/pizzer/i, 'Restaurant'],
++  [/parrill/i, 'Restaurant'],
++  [/resto.?bar|restaurante|fonda|cocina/i, 'Restaurant'],
++  [/caf[eé]/i, 'CafeOrCoffeeShop'],
++  [/bar\b/i, 'BarOrPub'],
++  [/gimnasio|fitness/i, 'ExerciseGym'],
++  [/hotel|bungalow|hoteler/i, 'LodgingBusiness']
++];
++
++function leer(archivo) {
++  return fs.readFileSync(archivo, 'utf8');
++}
++
++function extraerUno(html, slug) {
++  const problemas = [];
++
++  const titulo = (html.match(/<title>([^<]+)<\/title>/) || [])[1];
++  const nombre = titulo ? titulo.replace(/\s*·\s*URU SPOT\s*$/, '').trim() : null;
++  if (!nombre) problemas.push('sin <title>');
++
++  const imagen = (html.match(/property="og:image" content="([^"]+)"/) || [])[1];
++  if (!imagen) problemas.push('sin og:image');
++
++  const descripcion = (html.match(/property="og:description" content="([^"]+)"/) || [])[1] || '';
++
++  let direccion = (html.match(/Direcci[oó]n:<\/strong>\s*([^<]+?)(?:<strong>|$)/) || [])[1];
++  if (!direccion) {
++    // Fallback: algunas fichas no tienen calle y altura, solo una zona
++    // ("Centro Histórico, Concepción del Uruguay") en el título del
++    // mapa. Sirve para addressLocality pero NO es una dirección postal
++    // real — se marca como aviso para revisar a mano si conviene
++    // conseguir la dirección exacta en vez de publicar la zona.
++    const zona = (html.match(/map-info-title"[^>]*>([^<]+)</) || [])[1];
++    if (zona) {
++      direccion = zona.trim();
++      problemas.push('sin dirección exacta, se usó la zona del mapa como aproximación: "' + zona.trim() + '"');
++    } else {
++      problemas.push('sin dirección (ni "Dirección:</strong>" ni .map-info-title)');
++    }
++  }
++
++  const telHref = (html.match(/href="tel:(\+?[\d]+)"/) || [])[1];
++  if (!telHref) problemas.push('sin teléfono (href="tel:...")');
++
++  const ratingSobre10 = (html.match(/score-big-num">([\d.]+)</) || [])[1];
++  const rating = ratingSobre10 ? (parseFloat(ratingSobre10) / 2).toFixed(2) : null;
++
++  const geo = html.match(/@(-?[\d.]+),(-?[\d.]+),\d/);
++  const lat = geo ? geo[1] : null;
++  const lng = geo ? geo[2] : null;
++  if (!geo) problemas.push('sin lat/lng (patrón "@lat,lng,zoom" en link de Maps)');
++
++  const precio = (html.match(/schedule-note-val">([^<]+)</) || [])[1];
++
++  const fichaDataMatch = html.match(/id="ficha-data" type="application\/json">\s*([\s\S]*?)\s*<\/script>/);
++  let rubro = null;
++  let scheduleRows = [];
++  if (fichaDataMatch) {
++    try {
++      const datos = JSON.parse(fichaDataMatch[1]);
++      rubro = datos.rubro || null;
++      scheduleRows = Array.isArray(datos.schedule_rows) ? datos.schedule_rows : [];
++    } catch (e) {
++      problemas.push('ficha-data presente pero no parsea como JSON: ' + e.message);
++    }
++  } else {
++    problemas.push('sin bloque #ficha-data');
++  }
++
++  let tipo = RUBRO_A_TIPO[rubro] || 'LocalBusiness';
++  for (const [patron, tipoAfinado] of AFINADOS) {
++    if (patron.test(nombre || '') || patron.test(html.slice(0, 2000))) {
++      tipo = tipoAfinado;
++      break;
++    }
++  }
++
++  return {
++    slug, nombre, imagen, descripcion, direccion, telHref,
++    rating, lat, lng, precio, rubro, scheduleRows, tipo, problemas
++  };
++}
++
++// Convierte "Martes a Domingo (mañana)" + "07:00 – 13:00" a
++// openingHoursSpecification. Días en español → códigos schema.org.
++const DIAS = {
++  'lunes': 'Monday', 'martes': 'Tuesday', 'miércoles': 'Wednesday', 'miercoles': 'Wednesday',
++  'jueves': 'Thursday', 'viernes': 'Friday', 'sábado': 'Saturday', 'sabado': 'Saturday', 'domingo': 'Sunday'
++};
++const ORDEN_DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
++
++function expandirRangoDias(texto) {
++  // "Martes a Domingo" → [martes..domingo]; si no matchea el patrón
++  // "X a Y", se asume que texto es un solo día.
++  const m = texto.toLowerCase().match(/([a-záéíóú]+)\s+a\s+([a-záéíóú]+)/);
++  if (!m) {
++    const dia = texto.toLowerCase().trim();
++    return DIAS[dia] ? [DIAS[dia]] : [];
++  }
++  const desde = ORDEN_DIAS.indexOf(m[1]);
++  const hasta = ORDEN_DIAS.indexOf(m[2]);
++  if (desde === -1 || hasta === -1) return [];
++  const dias = [];
++  let i = desde;
++  while (true) {
++    dias.push(DIAS[ORDEN_DIAS[i]]);
++    if (i === hasta) break;
++    i = (i + 1) % 7;
++  }
++  return dias;
++}
++
++function horarioASchema(scheduleRows) {
++  const specs = [];
++  for (const fila of scheduleRows) {
++    if (fila.closed) continue;
++    const dias = expandirRangoDias(fila.day || '');
++    const horas = (fila.time || '').match(/(\d{1,2}:\d{2})\s*[–\-]\s*(\d{1,2}:\d{2})/);
++    if (!dias.length || !horas) continue;
++    specs.push({
++      '@type': 'OpeningHoursSpecification',
++      dayOfWeek: dias,
++      opens: horas[1],
++      closes: horas[2]
++    });
++  }
++  return specs;
++}
++
++function armarJsonLd(datos, slugCarpeta) {
++  const url = `${SITIO}/donde-comer-cdu/locales/${slugCarpeta}/`;
++  const jsonLd = {
++    '@context': 'https://schema.org',
++    '@type': datos.tipo,
++    name: datos.nombre,
++    description: datos.descripcion || undefined,
++    image: datos.imagen || undefined,
++    url,
++    telephone: datos.telHref || undefined,
++    address: datos.direccion ? {
++      '@type': 'PostalAddress',
++      streetAddress: datos.direccion.trim(),
++      addressLocality: 'Concepción del Uruguay',
++      addressRegion: 'Entre Ríos',
++      addressCountry: 'AR'
++    } : undefined,
++    geo: (datos.lat && datos.lng) ? {
++      '@type': 'GeoCoordinates',
++      latitude: datos.lat,
++      longitude: datos.lng
++    } : undefined,
++    priceRange: datos.precio || undefined,
++    aggregateRating: datos.rating ? {
++      '@type': 'AggregateRating',
++      ratingValue: datos.rating,
++      bestRating: '5',
++      worstRating: '1'
++      // Sin reviewCount/ratingCount: no está en la ficha y Google
++      // exige que aggregateRating declare de dónde sale el número si
++      // lo lleva — mejor omitirlo que inventarlo. Se puede sumar
++      // después si se decide exponer lugares-core.json:rating_count
++      // por ficha.
++    } : undefined
++  };
++  const horario = horarioASchema(datos.scheduleRows);
++  if (horario.length) jsonLd.openingHoursSpecification = horario;
++
++  // limpia claves undefined para no ensuciar el JSON-LD
++  Object.keys(jsonLd).forEach((k) => jsonLd[k] === undefined && delete jsonLd[k]);
++  if (jsonLd.address) {
++    Object.keys(jsonLd.address).forEach((k) => jsonLd.address[k] === undefined && delete jsonLd.address[k]);
++  }
++  return jsonLd;
++}
++
++function main() {
++  const carpetas = fs.readdirSync(RAIZ, { withFileTypes: true })
++    .filter((d) => d.isDirectory())
++    .map((d) => d.name)
++    .sort();
++
++  let ok = 0, conAvisos = 0;
++  const resumenProblemas = [];
++
++  for (const slug of carpetas) {
++    const archivo = path.join(RAIZ, slug, 'index.html');
++    if (!fs.existsSync(archivo)) continue;
++    const html = leer(archivo);
++    const datos = extraerUno(html, slug);
++    const jsonLd = armarJsonLd(datos, slug);
++
++    if (datos.problemas.length) {
++      conAvisos++;
++      resumenProblemas.push(`  - ${slug}: ${datos.problemas.join('; ')}`);
++    } else {
++      ok++;
++    }
++
++    if (ESCRIBIR) {
++      if (/application\/ld\+json/.test(html)) {
++        console.log(`[saltado, ya tiene JSON-LD] ${slug}`);
++        continue;
++      }
++      const bloque = `<script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n</script>\n`;
++      const nuevoHtml = html.replace('</head>', bloque + '</head>');
++      fs.writeFileSync(archivo, nuevoHtml, 'utf8');
++      console.log(`[escrito] ${slug} → @type=${datos.tipo}`);
++    } else {
++      console.log(`\n=== ${slug} (@type propuesto: ${datos.tipo}) ===`);
++      console.log(JSON.stringify(jsonLd, null, 2));
++    }
++  }
++
++  console.log('\n--------------------------------------------------');
++  console.log(`Fichas totales: ${carpetas.length} · sin avisos: ${ok} · con avisos: ${conAvisos}`);
++  if (resumenProblemas.length) {
++    console.log('\nFichas con datos faltantes o dudosos (revisar antes de --write):');
++    console.log(resumenProblemas.join('\n'));
++  }
++  if (!ESCRIBIR) {
++    console.log('\nDRY-RUN: no se escribió ningún archivo. Revisá el reporte de arriba y');
++    console.log('corré con --write cuando estés conforme con lo que se extrajo.');
++  }
++}
++
++main();
+-- 
+2.43.0
+

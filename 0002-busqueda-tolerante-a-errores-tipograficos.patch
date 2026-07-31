@@ -1,0 +1,421 @@
+diff --git a/donde-comer-cdu/js/motor-exposicion.js b/donde-comer-cdu/js/motor-exposicion.js
+index 3de3ca2..17f7f0b 100644
+--- a/donde-comer-cdu/js/motor-exposicion.js
++++ b/donde-comer-cdu/js/motor-exposicion.js
+@@ -572,7 +572,9 @@
+   // = no matchea nada. El orden de los checks —nombre exacto > nombre
+   // empieza con > nombre contiene > categoría > dirección— es el
+   // mismo criterio con el que una persona escanearía los resultados:
+-  // lo más parecido a lo que escribiste, primero.
++  // lo más parecido a lo que escribiste, primero. Rango 6 (tolerante a
++  // errores tipográficos) se asigna aparte, más abajo — no es un check
++  // de substring como estos, así que no vive acá.
+   function rangoDeCoincidencia(nombre, categoria, direccion, q) {
+     if (nombre === q) return 0;
+     if (nombre.indexOf(q) === 0) return 1;
+@@ -583,6 +585,40 @@
+     return null;
+   }
+ 
++  // Distancia de edición (Levenshtein) acotada a `maxDistancia`: no hace
++  // falta el valor exacto más allá del umbral de tolerancia, así que
++  // corta apenas puede confirmar que ninguna celda de la fila actual
++  // puede terminar por debajo de ese umbral — evita pagar el costo
++  // O(n·m) completo en el caso común (negativo, dos palabras sin
++  // relación), que es la mayoría de los candidatos difusos reales.
++  function distanciaAcotada(a, b, maxDistancia) {
++    if (Math.abs(a.length - b.length) > maxDistancia) return maxDistancia + 1;
++    var prev = [];
++    for (var j = 0; j <= b.length; j++) prev[j] = j;
++    for (var i = 1; i <= a.length; i++) {
++      var curr = [i];
++      var minFila = curr[0];
++      for (var k = 1; k <= b.length; k++) {
++        var costo = a[i - 1] === b[k - 1] ? 0 : 1;
++        curr[k] = Math.min(prev[k] + 1, curr[k - 1] + 1, prev[k - 1] + costo);
++        if (curr[k] < minFila) minFila = curr[k];
++      }
++      if (minFila > maxDistancia) return maxDistancia + 1; // esta fila ya no puede mejorar
++      prev = curr;
++    }
++    return prev[b.length];
++  }
++
++  // Cuántos errores tipográficos se toleran, en función del largo de la
++  // consulta ya normalizada. Consultas de 1-3 caracteres NO toleran
++  // nada: a esa longitud, "1 error" cambia el significado por completo
++  // (heurística estándar tipo Elasticsearch fuzziness "AUTO").
++  function toleranciaParaLongitud(len) {
++    if (len < 4) return 0;
++    if (len <= 6) return 1;
++    return 2;
++  }
++
+   /**
+    * SIGUE SIN RECORTAR NADA (Blueprint v2, sección 4b): esta función
+    * devuelve el 100% de los lugares que matchean, sin presupuesto ni
+@@ -620,19 +656,60 @@
+     for (var k = 0; k < registro.length; k++) indiceOriginalPorLugar.set(registro[k], k);
+ 
+     var candidatos = [];
++    var yaCoincide = new Set();
+     for (var i = 0; i < universo.length; i++) {
+       var lugar = universo[i];
+       var norm = normalizadoDe(lugar);
+       var rango = rangoDeCoincidencia(norm.nombre, norm.categoria, norm.direccion, q);
+       if (rango === null) continue;
+-      candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: indiceOriginalPorLugar.get(lugar) });
++      candidatos.push({ lugar: lugar, rango: rango, distancia: 0, indiceOriginal: indiceOriginalPorLugar.get(lugar) });
++      yaCoincide.add(lugar);
++    }
++
++    // TOLERANCIA A ERRORES TIPOGRÁFICOS (2026-07-31): tier de menor
++    // prioridad (rango 6) para lugares que NO matchearon por substring
++    // exacto pero cuyo nombre está a 1-2 ediciones de la consulta —
++    // "pizeria" encuentra "pizzería", "eladeria" encuentra "heladería".
++    // Nunca reemplaza ni reordena un match exacto (rangos 0-5): se
++    // agrega al final, y solo corre si IndiceInvertido está disponible
++    // — mismo criterio de "cero riesgo de regresión" que el resto de
++    // este archivo (ver PERF más arriba). Sin índice, este tier
++    // simplemente no se activa: la búsqueda exacta de siempre sigue
++    // funcionando idéntica.
++    var tolerancia = toleranciaParaLongitud(q.length);
++    if (tolerancia > 0 && global.IndiceInvertido && typeof global.IndiceInvertido.candidatosDifusos === 'function') {
++      var candidatosFuzzy = global.IndiceInvertido.candidatosDifusos(q, tolerancia);
++      if (candidatosFuzzy) {
++        for (var f = 0; f < candidatosFuzzy.length; f++) {
++          var lugarF = candidatosFuzzy[f];
++          if (yaCoincide.has(lugarF)) continue; // ya entró por match exacto, no se duplica ni se degrada
++
++          var normF = normalizadoDe(lugarF);
++          var tokens = normF.nombre.split(/\s+/).filter(Boolean);
++          var mejorDistancia = tolerancia + 1;
++          for (var t = 0; t < tokens.length; t++) {
++            var token = tokens[t];
++            if (Math.abs(token.length - q.length) > tolerancia) continue; // no puede estar a <= tolerancia ediciones
++            var d = distanciaAcotada(q, token, tolerancia);
++            if (d < mejorDistancia) mejorDistancia = d;
++            if (mejorDistancia === 1) break; // no hay nada mejor que buscar (0 ya fue match exacto, descartado arriba)
++          }
++
++          if (mejorDistancia <= tolerancia) {
++            candidatos.push({ lugar: lugarF, rango: 6, distancia: mejorDistancia, indiceOriginal: indiceOriginalPorLugar.get(lugarF) });
++            yaCoincide.add(lugarF);
++          }
++        }
++      }
+     }
+ 
+     // Desempate explícito por índice original en vez de confiar en que
+     // Array.prototype.sort sea estable: mantiene el orden del catálogo
+-    // entre lugares con el mismo nivel de relevancia.
++    // entre lugares con el mismo nivel de relevancia. Dentro del rango 6
++    // (tolerante), además se ordena primero por distancia de edición —
++    // 1 error antes que 2 — antes de caer al desempate por catálogo.
+     candidatos.sort(function (a, b) {
+-      return (a.rango - b.rango) || (a.indiceOriginal - b.indiceOriginal);
++      return (a.rango - b.rango) || (a.distancia - b.distancia) || (a.indiceOriginal - b.indiceOriginal);
+     });
+ 
+     return candidatos.map(function (c) { return c.lugar; });
+diff --git a/donde-comer-cdu/js/motor-indice-busqueda.js b/donde-comer-cdu/js/motor-indice-busqueda.js
+index 3bd0401..49c4b13 100644
+--- a/donde-comer-cdu/js/motor-indice-busqueda.js
++++ b/donde-comer-cdu/js/motor-indice-busqueda.js
+@@ -110,9 +110,53 @@
+     return acumulado;
+   }
+ 
++  /**
++   * Variante tolerante a errores tipográficos de candidatosPara(): en vez
++   * de exigir TODOS los trigramas de la consulta (intersección estricta),
++   * cuenta cuántos trigramas de la consulta tiene cada lugar y exige un
++   * mínimo — la misma idea de "similarity threshold" de pg_trgm, calculada
++   * acá en vez de depender de una extensión de base de datos. Sigue
++   * siendo NECESARIO-PERO-NO-SUFICIENTE: motor-exposicion.js decide con
++   * distancia de edición real si el lugar entra y con qué prioridad —
++   * esto solo evita recorrer el catálogo completo para calcularla.
++   *
++   * `maxDistancia` es la cantidad de errores tipográficos tolerados (1 o
++   * 2 en la práctica). Cada carácter distinto entre la consulta y el
++   * texto real puede destruir hasta 3 trigramas (los que lo contienen),
++   * así que el mínimo de trigramas en común exigido es (total de
++   * trigramas de la consulta) - 3 * maxDistancia, con un piso de 1 para
++   * no exigir cero coincidencias.
++   */
++  function candidatosDifusos(query, maxDistancia) {
++    if (!indexado) return null;
++    var q = normalizarTexto(String(query || '').trim());
++    if (q.length < 4) return null; // con 1-3 chars, un typo es indistinguible de otra palabra
++
++    var tris = trigramas(q);
++    if (!tris.length) return null;
++
++    var conteo = new Map();
++    for (var i = 0; i < tris.length; i++) {
++      var lista = postings[tris[i]];
++      if (!lista) continue;
++      for (var j = 0; j < lista.length; j++) {
++        var lugar = lista[j];
++        conteo.set(lugar, (conteo.get(lugar) || 0) + 1);
++      }
++    }
++
++    var umbral = Math.max(1, tris.length - 3 * maxDistancia);
++    var resultado = [];
++    conteo.forEach(function (veces, lugar) {
++      if (veces >= umbral) resultado.push(lugar);
++    });
++    return resultado;
++  }
++
+   global.IndiceInvertido = {
+     construir: construir,
+-    candidatosPara: candidatosPara
++    candidatosPara: candidatosPara,
++    candidatosDifusos: candidatosDifusos
+   };
+ })(typeof window !== 'undefined' ? window : global);
+ 
+diff --git a/donde-comer-cdu/js/motor.bundle.js b/donde-comer-cdu/js/motor.bundle.js
+index 5c53e24..569d9f6 100644
+--- a/donde-comer-cdu/js/motor.bundle.js
++++ b/donde-comer-cdu/js/motor.bundle.js
+@@ -5,7 +5,7 @@
+  *   node scripts/build-motor-bundle.js
+  * js/contract-tests.js lee los marcadores /* ==== archivo.js ==== *\/
+  * de este archivo para seguir verificando el orden real.
+- * Generado: 2026-07-31T06:36:02.955Z
++ * Generado: 2026-07-31T20:07:15.287Z
+  */
+ 
+ /* ==== motor-config.js ==== */
+@@ -2140,7 +2140,9 @@ if (typeof module !== 'undefined' && module.exports) {
+   // = no matchea nada. El orden de los checks —nombre exacto > nombre
+   // empieza con > nombre contiene > categoría > dirección— es el
+   // mismo criterio con el que una persona escanearía los resultados:
+-  // lo más parecido a lo que escribiste, primero.
++  // lo más parecido a lo que escribiste, primero. Rango 6 (tolerante a
++  // errores tipográficos) se asigna aparte, más abajo — no es un check
++  // de substring como estos, así que no vive acá.
+   function rangoDeCoincidencia(nombre, categoria, direccion, q) {
+     if (nombre === q) return 0;
+     if (nombre.indexOf(q) === 0) return 1;
+@@ -2151,6 +2153,40 @@ if (typeof module !== 'undefined' && module.exports) {
+     return null;
+   }
+ 
++  // Distancia de edición (Levenshtein) acotada a `maxDistancia`: no hace
++  // falta el valor exacto más allá del umbral de tolerancia, así que
++  // corta apenas puede confirmar que ninguna celda de la fila actual
++  // puede terminar por debajo de ese umbral — evita pagar el costo
++  // O(n·m) completo en el caso común (negativo, dos palabras sin
++  // relación), que es la mayoría de los candidatos difusos reales.
++  function distanciaAcotada(a, b, maxDistancia) {
++    if (Math.abs(a.length - b.length) > maxDistancia) return maxDistancia + 1;
++    var prev = [];
++    for (var j = 0; j <= b.length; j++) prev[j] = j;
++    for (var i = 1; i <= a.length; i++) {
++      var curr = [i];
++      var minFila = curr[0];
++      for (var k = 1; k <= b.length; k++) {
++        var costo = a[i - 1] === b[k - 1] ? 0 : 1;
++        curr[k] = Math.min(prev[k] + 1, curr[k - 1] + 1, prev[k - 1] + costo);
++        if (curr[k] < minFila) minFila = curr[k];
++      }
++      if (minFila > maxDistancia) return maxDistancia + 1; // esta fila ya no puede mejorar
++      prev = curr;
++    }
++    return prev[b.length];
++  }
++
++  // Cuántos errores tipográficos se toleran, en función del largo de la
++  // consulta ya normalizada. Consultas de 1-3 caracteres NO toleran
++  // nada: a esa longitud, "1 error" cambia el significado por completo
++  // (heurística estándar tipo Elasticsearch fuzziness "AUTO").
++  function toleranciaParaLongitud(len) {
++    if (len < 4) return 0;
++    if (len <= 6) return 1;
++    return 2;
++  }
++
+   /**
+    * SIGUE SIN RECORTAR NADA (Blueprint v2, sección 4b): esta función
+    * devuelve el 100% de los lugares que matchean, sin presupuesto ni
+@@ -2188,19 +2224,60 @@ if (typeof module !== 'undefined' && module.exports) {
+     for (var k = 0; k < registro.length; k++) indiceOriginalPorLugar.set(registro[k], k);
+ 
+     var candidatos = [];
++    var yaCoincide = new Set();
+     for (var i = 0; i < universo.length; i++) {
+       var lugar = universo[i];
+       var norm = normalizadoDe(lugar);
+       var rango = rangoDeCoincidencia(norm.nombre, norm.categoria, norm.direccion, q);
+       if (rango === null) continue;
+-      candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: indiceOriginalPorLugar.get(lugar) });
++      candidatos.push({ lugar: lugar, rango: rango, distancia: 0, indiceOriginal: indiceOriginalPorLugar.get(lugar) });
++      yaCoincide.add(lugar);
++    }
++
++    // TOLERANCIA A ERRORES TIPOGRÁFICOS (2026-07-31): tier de menor
++    // prioridad (rango 6) para lugares que NO matchearon por substring
++    // exacto pero cuyo nombre está a 1-2 ediciones de la consulta —
++    // "pizeria" encuentra "pizzería", "eladeria" encuentra "heladería".
++    // Nunca reemplaza ni reordena un match exacto (rangos 0-5): se
++    // agrega al final, y solo corre si IndiceInvertido está disponible
++    // — mismo criterio de "cero riesgo de regresión" que el resto de
++    // este archivo (ver PERF más arriba). Sin índice, este tier
++    // simplemente no se activa: la búsqueda exacta de siempre sigue
++    // funcionando idéntica.
++    var tolerancia = toleranciaParaLongitud(q.length);
++    if (tolerancia > 0 && global.IndiceInvertido && typeof global.IndiceInvertido.candidatosDifusos === 'function') {
++      var candidatosFuzzy = global.IndiceInvertido.candidatosDifusos(q, tolerancia);
++      if (candidatosFuzzy) {
++        for (var f = 0; f < candidatosFuzzy.length; f++) {
++          var lugarF = candidatosFuzzy[f];
++          if (yaCoincide.has(lugarF)) continue; // ya entró por match exacto, no se duplica ni se degrada
++
++          var normF = normalizadoDe(lugarF);
++          var tokens = normF.nombre.split(/\s+/).filter(Boolean);
++          var mejorDistancia = tolerancia + 1;
++          for (var t = 0; t < tokens.length; t++) {
++            var token = tokens[t];
++            if (Math.abs(token.length - q.length) > tolerancia) continue; // no puede estar a <= tolerancia ediciones
++            var d = distanciaAcotada(q, token, tolerancia);
++            if (d < mejorDistancia) mejorDistancia = d;
++            if (mejorDistancia === 1) break; // no hay nada mejor que buscar (0 ya fue match exacto, descartado arriba)
++          }
++
++          if (mejorDistancia <= tolerancia) {
++            candidatos.push({ lugar: lugarF, rango: 6, distancia: mejorDistancia, indiceOriginal: indiceOriginalPorLugar.get(lugarF) });
++            yaCoincide.add(lugarF);
++          }
++        }
++      }
+     }
+ 
+     // Desempate explícito por índice original en vez de confiar en que
+     // Array.prototype.sort sea estable: mantiene el orden del catálogo
+-    // entre lugares con el mismo nivel de relevancia.
++    // entre lugares con el mismo nivel de relevancia. Dentro del rango 6
++    // (tolerante), además se ordena primero por distancia de edición —
++    // 1 error antes que 2 — antes de caer al desempate por catálogo.
+     candidatos.sort(function (a, b) {
+-      return (a.rango - b.rango) || (a.indiceOriginal - b.indiceOriginal);
++      return (a.rango - b.rango) || (a.distancia - b.distancia) || (a.indiceOriginal - b.indiceOriginal);
+     });
+ 
+     return candidatos.map(function (c) { return c.lugar; });
+@@ -5057,9 +5134,53 @@ if (typeof module !== 'undefined' && module.exports) {
+     return acumulado;
+   }
+ 
++  /**
++   * Variante tolerante a errores tipográficos de candidatosPara(): en vez
++   * de exigir TODOS los trigramas de la consulta (intersección estricta),
++   * cuenta cuántos trigramas de la consulta tiene cada lugar y exige un
++   * mínimo — la misma idea de "similarity threshold" de pg_trgm, calculada
++   * acá en vez de depender de una extensión de base de datos. Sigue
++   * siendo NECESARIO-PERO-NO-SUFICIENTE: motor-exposicion.js decide con
++   * distancia de edición real si el lugar entra y con qué prioridad —
++   * esto solo evita recorrer el catálogo completo para calcularla.
++   *
++   * `maxDistancia` es la cantidad de errores tipográficos tolerados (1 o
++   * 2 en la práctica). Cada carácter distinto entre la consulta y el
++   * texto real puede destruir hasta 3 trigramas (los que lo contienen),
++   * así que el mínimo de trigramas en común exigido es (total de
++   * trigramas de la consulta) - 3 * maxDistancia, con un piso de 1 para
++   * no exigir cero coincidencias.
++   */
++  function candidatosDifusos(query, maxDistancia) {
++    if (!indexado) return null;
++    var q = normalizarTexto(String(query || '').trim());
++    if (q.length < 4) return null; // con 1-3 chars, un typo es indistinguible de otra palabra
++
++    var tris = trigramas(q);
++    if (!tris.length) return null;
++
++    var conteo = new Map();
++    for (var i = 0; i < tris.length; i++) {
++      var lista = postings[tris[i]];
++      if (!lista) continue;
++      for (var j = 0; j < lista.length; j++) {
++        var lugar = lista[j];
++        conteo.set(lugar, (conteo.get(lugar) || 0) + 1);
++      }
++    }
++
++    var umbral = Math.max(1, tris.length - 3 * maxDistancia);
++    var resultado = [];
++    conteo.forEach(function (veces, lugar) {
++      if (veces >= umbral) resultado.push(lugar);
++    });
++    return resultado;
++  }
++
+   global.IndiceInvertido = {
+     construir: construir,
+-    candidatosPara: candidatosPara
++    candidatosPara: candidatosPara,
++    candidatosDifusos: candidatosDifusos
+   };
+ })(typeof window !== 'undefined' ? window : global);
+ 
+diff --git a/scripts/build-motor-bundle.js b/scripts/build-motor-bundle.js
+index 50cee91..689803c 100644
+--- a/scripts/build-motor-bundle.js
++++ b/scripts/build-motor-bundle.js
+@@ -40,7 +40,6 @@ const fs = require('fs');
+ const path = require('path');
+ 
+ const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
+-const INDEX_HTML = path.join(__dirname, '..', 'donde-comer-cdu', 'index.html');
+ const SALIDA = path.join(JS_DIR, 'motor.bundle.js');
+ 
+ const ORDEN = [
+@@ -56,20 +55,22 @@ const ORDEN = [
+   'datos-virtualizador.js'
+ ];
+ 
+-function ordenEnIndexHtml() {
+-  const html = fs.readFileSync(INDEX_HTML, 'utf8');
+-  const matches = [...html.matchAll(/<script src="js\/([\w-]+\.js)" defer><\/script>/g)];
+-  const nombresValidos = new Set(ORDEN);
+-  return matches.map((m) => m[1]).filter((f) => nombresValidos.has(f));
+-}
+-
+-function validarContraIndexHtml() {
+-  const real = ordenEnIndexHtml();
+-  const iguales = real.length === ORDEN.length && real.every((f, i) => f === ORDEN[i]);
+-  if (!iguales) {
+-    console.error('El orden de ORDEN en este script NO coincide con los <script> de index.html.');
+-    console.error('En index.html:', real);
+-    console.error('En este script:', ORDEN);
++// La comparación contra <script> individuales de index.html quedó
++// obsoleta el mismo 2026-07-31 en que estos 10 módulos se concatenaron
++// a motor.bundle.js: desde entonces index.html solo tiene el <script>
++// del bundle, así que esa comparación siempre daba "En index.html: []"
++// y el build fallaba siempre (ver misma clase de bug ya corregida en
++// build-ambiente-bundle.js). El invariante que sigue vivo y vale la
++// pena proteger acá es más simple: que cada archivo de ORDEN exista
++// realmente en JS_DIR — así un nombre mal escrito o un módulo borrado
++// sigue haciendo fallar el build en vez de generar un bundle roto o
++// incompleto en silencio. El orden real dentro del bundle lo sigue
++// verificando js/contract-tests.js leyendo los marcadores.
++function validarQueArchivosExisten() {
++  const faltantes = ORDEN.filter((archivo) => !fs.existsSync(path.join(JS_DIR, archivo)));
++  if (faltantes.length) {
++    console.error('ORDEN en scripts/build-motor-bundle.js incluye archivos que no existen en js/:');
++    console.error(faltantes);
+     process.exit(1);
+   }
+ }
+@@ -79,7 +80,7 @@ function quitarBOM(texto) {
+ }
+ 
+ function build() {
+-  validarContraIndexHtml();
++  validarQueArchivosExisten();
+ 
+   const partes = ORDEN.map((archivo) => {
+     const contenido = quitarBOM(fs.readFileSync(path.join(JS_DIR, archivo), 'utf8'));
