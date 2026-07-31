@@ -16,7 +16,10 @@
      frame (registrarFrameTime) y por cada Long Task (registrarTareaLarga),
      igual que ambiente-rendimiento.js alimenta registrarFPS — un
      sumidero más de datos hacia el mismo registro central, nunca una
-     fuente de verdad propia.
+     fuente de verdad propia. PERF (2026-07-31): apagado por defecto —
+     ver continuoHabilitado() más abajo. Se activa explícitamente con
+     ?ambiente_metrics=on en la URL o localStorage.ambienteMetricsContinuo
+     = 'true'; sin eso, iniciar() no arranca nada.
 
    - Modo puntual (medirVentana(ms, cb)): repite exactamente lo que
      hacía diagnostico-rendimiento-temporal.js (una ventana de N ms,
@@ -25,6 +28,7 @@
      callback para que quien la invoque decida qué hacer (loggear,
      comparar contra una baseline, etc). Este es el modo pensado para
      el punto 6 del roadmap ("repetir la captura de 10s... y comparar").
+     No depende del flag de arriba — siempre disponible on-demand.
 
    Este módulo nunca decide nivel de fidelidad ni apaga ningún otro
    subsistema — mismo límite que ambiente-diagnostico.js ("nunca debe
@@ -58,6 +62,39 @@
 
   function pestanaVisible() {
     return (typeof document !== 'undefined') ? !document.hidden : true;
+  }
+
+  // PERF (auditoría de arquitectura, 2026-07-31): el modo continuo de
+  // este módulo se auto-iniciaba SIEMPRE (ver api.iniciar() al final
+  // del archivo) — un segundo rAF loop + PerformanceObserver de Long
+  // Tasks, para siempre, en el 100% de las visitas, alimentando
+  // AmbienteDiagnostico.registrarFrameTime()/registrarTareaLarga() sin
+  // que ningún código de producción (app.js, index.html) llame jamás
+  // a AmbienteDiagnostico.obtenerResumen() para leerlo — trabajo
+  // puro, incluida una allocation ({valor, marca}) + push/splice en
+  // CADA frame, sin ningún consumidor. medirVentana() (modo puntual,
+  // sin tocar AmbienteDiagnostico) ya cubre el caso de uso real de
+  // este módulo — el mismo que usó diagnostico-rendimiento-temporal.js
+  // para las mediciones de la auditoría de rendimiento.
+  //
+  // Mismo mecanismo y misma precedencia que ya usa ambiente-flags.js
+  // (URL gana sobre localStorage), pero polaridad invertida a
+  // propósito: ahí el default es "todo activo" porque son features
+  // del producto; acá el default es "apagado" porque es
+  // instrumentación de diagnóstico sin consumidor en producción —
+  // activarla es una decisión explícita de quien está midiendo, no
+  // un costo que deba pagar cada visita real.
+  function continuoHabilitado() {
+    try {
+      var params = new URLSearchParams(global.location.search);
+      var deURL = params.get('ambiente_metrics');
+      if (deURL !== null) return deURL === 'on';
+    } catch (e) { /* location/URLSearchParams no disponible: seguir */ }
+    try {
+      return global.localStorage.getItem('ambienteMetricsContinuo') === 'true';
+    } catch (e) {
+      return false;
+    }
   }
 
   // ── Modo continuo ─────────────────────────────────────────────────
@@ -168,6 +205,9 @@
     iniciar: function () {
       if (iniciado) return; // idempotente, mismo criterio que ambiente-rendimiento.js
       if (typeof global.requestAnimationFrame !== 'function') return;
+      // PERF: sin opt-in explícito, no arranca nada — ver
+      // continuoHabilitado() arriba para el porqué.
+      if (!continuoHabilitado()) return;
       iniciado = true;
       rafId = global.requestAnimationFrame(pasoFrame);
       iniciarLongTasksContinuo();
@@ -200,8 +240,10 @@
 
   // Se autoinicia al cargarse, mismo criterio que ambiente-rendimiento.js:
   // es Gobierno/Infraestructura pasivo, no espera a que el orquestador
-  // dispare nada — y no tiene efecto visible alguno hasta que algo
-  // lea AmbienteDiagnostico.obtenerResumen().
+  // dispare nada. PERF (2026-07-31): esta llamada ahora es un no-op en
+  // producción salvo opt-in explícito (ver continuoHabilitado() arriba)
+  // — antes de este cambio arrancaba incondicionalmente para el 100%
+  // de las visitas, sin ningún consumidor real de su output.
   api.iniciar();
 
 })(window);
