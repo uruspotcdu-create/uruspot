@@ -18,6 +18,11 @@
  *      navigator.standalone en iOS), no se muestra nunca.
  *   4) Si la persona cierra el banner, no se le vuelve a mostrar
  *      durante 14 días (localStorage), para no ser invasivo.
+ *   5) El banner nunca aparece apenas carga la página: espera una
+ *      señal real de interés (scroll más allá del hero, o 15s
+ *      navegando) antes de mostrarse. Pedir instalar antes de que
+ *      alguien vea de qué se trata el sitio es la razón #1 por la
+ *      que la gente ignora o cierra estos banners sin mirarlos.
  *
  * Sin dependencias de app.js — puede fallar en silencio (try/catch)
  * sin afectar el resto del sitio.
@@ -62,6 +67,30 @@
       (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
   }
 
+  // Espera a que la persona muestre interés real antes de llamar a
+  // "listo" — evita el banner-apenas-carga que la gente cierra sin
+  // leer. Dispara con lo que pase primero: scroll de más de medio
+  // alto de pantalla, o 15s navegando la página.
+  function esperarSenalDeInteres(listo) {
+    var UMBRAL_SCROLL_PX = Math.round(window.innerHeight * 0.5);
+    var yaDisparo = false;
+
+    function disparar() {
+      if (yaDisparo) return;
+      yaDisparo = true;
+      window.removeEventListener('scroll', alScrollear);
+      clearTimeout(timer);
+      listo();
+    }
+
+    function alScrollear() {
+      if (window.scrollY > UMBRAL_SCROLL_PX) disparar();
+    }
+
+    window.addEventListener('scroll', alScrollear, { passive: true });
+    var timer = setTimeout(disparar, 15000);
+  }
+
   function init() {
     if (yaEstaInstalada() || fueCerradoRecientemente()) return;
 
@@ -93,23 +122,41 @@
 
     if (esIOS()) {
       // No hay beforeinstallprompt en iOS: instrucciones manuales.
-      if (titulo) titulo.textContent = 'Instalá el mapa en tu iPhone';
-      if (subtitulo) subtitulo.textContent = 'Tocá compartir (□↑) y elegí "Agregar a inicio".';
-      if (btnInstalar) btnInstalar.hidden = true; // no hay acción programática posible
-      banner.hidden = false;
+      esperarSenalDeInteres(function () {
+        if (titulo) titulo.textContent = 'Instalá el mapa en tu iPhone';
+        if (subtitulo) subtitulo.textContent = 'Tocá compartir (□↑) y elegí "Agregar a inicio".';
+        if (btnInstalar) btnInstalar.hidden = true; // no hay acción programática posible
+        banner.hidden = false;
+      });
       return;
     }
 
-    // Chrome / Edge / Android: esperamos la señal real del navegador
-    // de que la app cumple los criterios de instalación, en vez de
-    // asumir que siempre se puede.
-    window.addEventListener('beforeinstallprompt', function (evento) {
-      evento.preventDefault();
-      deferredPrompt = evento;
+    // Chrome / Edge / Android: guardamos el evento apenas el navegador
+    // lo dispara (barato, no molesta a nadie), pero el banner recién
+    // se muestra cuando también hay señal de interés real. Si las dos
+    // condiciones ya se cumplieron (el evento llegó tarde, después del
+    // scroll), se muestra al toque.
+    var huboSenalDeInteres = false;
+    var listoParaMostrar = false;
+
+    function mostrarSiCorresponde() {
+      if (!huboSenalDeInteres || !listoParaMostrar) return;
       if (titulo) titulo.textContent = 'Instalá el mapa en tu celular';
       if (subtitulo) subtitulo.textContent = 'Acceso directo, sin ocupar espacio de tienda.';
       if (btnInstalar) btnInstalar.hidden = false;
       banner.hidden = false;
+    }
+
+    esperarSenalDeInteres(function () {
+      huboSenalDeInteres = true;
+      mostrarSiCorresponde();
+    });
+
+    window.addEventListener('beforeinstallprompt', function (evento) {
+      evento.preventDefault();
+      deferredPrompt = evento;
+      listoParaMostrar = true;
+      mostrarSiCorresponde();
     });
 
     if (btnInstalar) {
