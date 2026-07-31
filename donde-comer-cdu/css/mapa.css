@@ -14,7 +14,22 @@
   box-shadow:var(--sombra-vidrio), 0 0 60px -24px var(--glow-marca);
   height:420px; position:relative;
   animation:uru-scale-in var(--dur-lentisima) var(--easing-movimiento) backwards;
-  transition:box-shadow var(--dur-media), height var(--dur-media) var(--easing-movimiento), border-color var(--dur-media);
+  /* PERF (auditoría performance, 2026-07-30): 'height' se saca de esta
+     transición a propósito. #mapaHerramienta contiene un <canvas> con
+     ResizeObserver propio (js/motor-render.js: resizeObs → medir() +
+     redibujar() en cada cambio de tamaño real del box). Una transición
+     CSS de 'height' cambia el tamaño del box en CADA frame durante
+     var(--dur-media) — el ResizeObserver dispara igual de seguido, y
+     cada disparo fuerza un resize completo del backing store del
+     canvas (getBoundingClientRect + reflow) MÁS un redibujado entero
+     (tiles + clustering + marcadores). Resultado: cruzar un breakpoint
+     responsive o rotar el dispositivo (mobile, el caso real) repetía
+     ese trabajo completo varias veces en ~300ms en vez de una sola vez.
+     'height' ahora cambia de golpe en el breakpoint — el
+     ResizeObserver dispara una única vez, como corresponde. box-shadow
+     y border-color sí siguen animados: son solo paint, sin costo de
+     layout ni de canvas. */
+  transition:box-shadow var(--dur-media), border-color var(--dur-media);
 }
 @media (hover:hover) and (pointer:fine){
 #mapaHerramienta:hover{
