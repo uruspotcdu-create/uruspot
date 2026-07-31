@@ -73,49 +73,17 @@
 
      ambiente-senales.js (Fase 0) fue retirado: su rol quedó dividido
      entre ambiente-accesibilidad.js y ambiente-rendimiento.js. -->
-<script src="js/ambiente-config.js" defer></script>
-<script src="js/ambiente-assets.js" defer></script>
-<script src="js/ambiente-diagnostico.js" defer></script>
-<script src="js/ambiente-accesibilidad.js" defer></script>
-<script src="js/ambiente-rendimiento.js" defer></script>
-<script src="js/ambiente-estados.js" defer></script>
-<script src="js/ambiente-profundidad.js" defer></script>
-<script src="js/ambiente-gramatica.js" defer></script>
-<script src="js/ambiente-ritmo.js" defer></script>
-<!-- ambiente-respiracion.js — auditoría de conexiones: módulo completo
-     (Fase 4, Cap. 8) que ya tenía su config en ambiente-config.js
-     (RESPIRACION) y su arranque en ambiente-orquestador.js
-     (`if (global.AmbienteRespiracion) global.AmbienteRespiracion.iniciar();`),
-     pero nunca estaba en esta lista de carga: quedaba huérfano y el
-     ciclo de respiración jamás corría. Depende de ambiente-config.js,
-     ambiente-ritmo.js y ambiente-accesibilidad.js (ya cargados arriba);
-     no depende de ambiente-movimiento.js, así que puede ir antes. -->
-<script src="js/ambiente-respiracion.js" defer></script>
-<script src="js/ambiente-movimiento.js" defer></script>
-<script src="js/ambiente-escenas.js" defer></script>
-<script src="js/ambiente-luz.js" defer></script>
-<!-- js/ambiente-particulas.js (Fase 2, prototipo de partículas azules
-     sin tokenizar) retirado en Fase 8 — ver css/ambiente-estilos.css y
-     js/ambiente-orquestador.js. La Familia 6 "Partículas de deriva"
-     (js/ambiente-particulas-deriva.js, ya cargado más abajo) cubre el
-     mismo rol dentro del sistema visual documentado. El archivo se
-     eliminó físicamente del repo en la Fase 1 del roadmap de mejora
-     (2026-07-26), tras confirmar cero referencias funcionales; su
-     historia queda en este comentario y en el control de versiones. -->
-<script src="js/ambiente-clima.js" defer></script>
-<script src="js/ambiente-interaccion.js" defer></script>
-<script src="js/ambiente-planos.js" defer></script>
-<script src="js/ambiente-reticula.js" defer></script>
-<script src="js/ambiente-topografia.js" defer></script>
-<script src="js/ambiente-corrientes.js" defer></script>
-<script src="js/ambiente-coordenadas.js" defer></script>
-<script src="js/ambiente-brujula.js" defer></script>
-<script src="js/ambiente-particulas-deriva.js" defer></script>
-<script src="js/ambiente-halos.js" defer></script>
-<script src="js/ambiente-horario-tinte.js" defer></script>
-<script src="js/ambiente-capa-fondo.js" defer></script>
-<script src="js/ambiente-flags.js" defer></script>
-<script src="js/ambiente-orquestador.js" defer></script>
+<!-- Ambient Engine — perf, 2026-07-31: los 27 módulos ambiente-*.js
+     (código fuente, se siguen editando acá individualmente) se
+     concatenan a js/ambiente.bundle.js con
+     `node scripts/build-ambiente-bundle.js` antes de cada deploy.
+     Mismo grafo de ejecución (cada módulo es un IIFE autocontenido,
+     concatenar en orden = cargarlos por separado en orden), pero
+     27 requests HTTP se vuelven 1. Si tocás el grafo de dependencias
+     de arriba (orden de carga), actualizá también el arreglo ORDEN
+     en scripts/build-ambiente-bundle.js — el script valida que
+     ambos coincidan y falla si no. -->
+<script src="js/ambiente.bundle.js" defer></script>
 <!-- js/coreografias.js: NO es parte del Ambient Engine (no es ambiente-*,
      Motion Direction Bible v2.0 Parte K.7) — es la capa de aplicación que
      consume AmbienteGramatica/AmbienteRitmo/AmbienteAccesibilidad/
