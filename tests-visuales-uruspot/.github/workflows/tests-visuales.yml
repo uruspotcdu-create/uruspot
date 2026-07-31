@@ -1,0 +1,56 @@
+name: Tests visuales (baseline)
+
+# Corre en cada PR que toque CSS, motor-render.js o los tests
+# visuales mismos — exactamente la superficie que Fase 1 §19/§21 y
+# Fase 3D §7/§9 marcaron como no protegida hasta ahora.
+on:
+  pull_request:
+    paths:
+      - "donde-comer-cdu/css/**"
+      - "donde-comer-cdu/js/motor-render.js"
+      - "donde-comer-cdu/js/rubros-meta.js"
+      - "donde-comer-cdu/index.html"
+      - "donde-comer-cdu/locales/**"
+      - "tests/visual/**"
+      - "playwright.config.js"
+  workflow_dispatch: {} # para regenerar el baseline manualmente
+
+jobs:
+  visual-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Correr la suite de lógica primero (contrato existente)
+        # Nunca tiene sentido validar visuales si el contrato de
+        # negocio ya está roto — mismo orden de prioridad que el
+        # propio repo documenta (Fase 1 §13/§21).
+        run: node donde-comer-cdu/js/run-tests.js
+
+      - name: Instalar dependencias de test visual
+        run: |
+          npm install --no-save @playwright/test http-server
+          npx playwright install --with-deps chromium
+
+      - name: Correr tests visuales contra el baseline
+        run: npx playwright test
+
+      - name: Subir reporte + diffs (si algo falló)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-visual-${{ github.event.pull_request.number || github.run_id }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Subir capturas nuevas (solo workflow_dispatch, para regenerar baseline)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-actualizado
+          path: tests/visual/__baseline__/
+          retention-days: 7

@@ -1,0 +1,157 @@
+From 75ee7d6037c6995f32a4ff735ccadf6bcf31a7b3 Mon Sep 17 00:00:00 2001
+From: Performance Audit <audit@local>
+Date: Fri, 31 Jul 2026 01:25:26 +0000
+Subject: [PATCH] =?UTF-8?q?perf:=20dedup=20redibujado=20de=20ondas=20+=20t?=
+ =?UTF-8?q?hrottle=20escritura=20DOM=20de=20respiraci=C3=B3n?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- ambiente-respiracion.js: separa cómputo (cada frame, sin cambio de
+  semántica) de escritura al DOM (--amb-respiracion), que ahora se
+  hace 1 de cada 3 frames (~20fps) en vez de 60fps. -66% de
+  invalidaciones de estilo continuas mientras la app está abierta,
+  salto de opacidad entre escrituras sigue por debajo del umbral de
+  percepción (0.0011 vs JND ~0.01).
+
+- motor-render.js: dispararOnda()/animarOndas() (ondas de click) ahora
+  usan redibujar() como el resto de los ciclos de animación del motor,
+  en vez de llamar dibujar() directo y síncrono. Antes: cada click en
+  un marcador disparaba 3 redraws completos del mapa (1 síncrono fuera
+  de rAF + 2 duplicados en el frame siguiente). Después: 1.
+
+Validado: node js/run-tests.js -> 5/5 suites OK (motor-test 212
+asserts, smoke-tests, contract-tests, ambiente-lifecycle-tests 28/28,
+coreografias-tests 33/33). Sin cambios de API pública ni de
+comportamiento visual perceptible.
+---
+ donde-comer-cdu/js/ambiente-respiracion.js | 44 +++++++++++++++++++++-
+ donde-comer-cdu/js/motor-render.js         | 37 +++++++++++++++++-
+ 2 files changed, 78 insertions(+), 3 deletions(-)
+
+diff --git a/donde-comer-cdu/js/ambiente-respiracion.js b/donde-comer-cdu/js/ambiente-respiracion.js
+index 89dad73..f2dd50e 100644
+--- a/donde-comer-cdu/js/ambiente-respiracion.js
++++ b/donde-comer-cdu/js/ambiente-respiracion.js
+@@ -137,6 +137,43 @@
+     return (typeof document !== 'undefined') ? !document.hidden : true;
+   }
+ 
++  // PERF (auditoría performance, 2026-07-30): `aplicar()` hacía DOS
++  // cosas distintas en una sola llamada por rAF — (1) el cómputo (seno
++  // + suavizado exponencial de `multiplicadorActual`), que es barato
++  // (un puñado de operaciones aritméticas), y (2) la escritura al DOM
++  // vía `style.setProperty` sobre `<html>`, que NO es barata: cambiar
++  // una custom property en la raíz del árbol obliga al motor de
++  // estilos a recorrer/invalidar el árbol para saber qué elementos
++  // dependen de ella (Blink no puede aplicar el atajo de "propiedad
++  // independiente" que sí usa para una animación directa de opacity
++  // en un elemento — ver css/ambiente-estilos.css:69, `--amb-respiracion`
++  // participa de un `calc()`, no es ella misma la propiedad animada).
++  // Este ciclo corre para siempre mientras la pestaña está visible —
++  // incluida toda la sesión de "Foco" (lectura de una ficha, donde el
++  // usuario más necesita que el hilo principal esté libre) — así que
++  // el costo de (2) se paga 60 veces por segundo, todo el tiempo que
++  // la app esté abierta, por un efecto de ±4% de opacidad.
++  //
++  // La amplitud máxima del ciclo es 4% (RESPIRACION.amplitudMaxima,
++  // Cap. 3.4) y el período nunca baja de 8000ms — con esos números,
++  // el salto de opacidad entre dos escrituras consecutivas a 60fps es
++  // ≈0.00036 (paso angular × amplitud). Bajar la frecuencia de
++  // ESCRITURA (no de cómputo) a 1 de cada 3 frames (~20fps en una
++  // pantalla de 60Hz) sube ese salto a ≈0.0011 — seguís muy por debajo
++  // del umbral de percepción de cambios de opacidad (∼0.01, "just
++  // noticeable difference") — y corta 2 de cada 3 escrituras al DOM:
++  // de 216.000 a 72.000 por hora de sesión en foreground. El cómputo
++  // (seno + suavizado exponencial de `multiplicadorActual`) se
++  // mantiene sin cambios en CADA frame — separarlo de la escritura es
++  // justamente lo que evita alterar la tasa de convergencia de
++  // `TASA_SUAVIZADO` (calibrada "por frame", no en tiempo real): si se
++  // saltearan también esas llamadas, entrar/salir de Foco o Carga
++  // convergería 3x más lento en reloj real que lo documentado en el
++  // Cap. 8. No se toca esa semántica; solo se difiere CUÁNDO el valor
++  // ya calculado llega al DOM.
++  var INTERVALO_ESCRITURA = 3; // 1 de cada 3 frames ⇒ ~20fps de escritura real en pantallas 60Hz
++  var contadorFrames = 0;
++
+   function aplicar() {
+     if (typeof document === 'undefined' || !document.documentElement) return;
+ 
+@@ -150,12 +187,17 @@
+     var objetivo = objetivoMultiplicador();
+     // Cap. 8 "nunca instantáneo": convergencia gradual hacia el
+     // objetivo en vez de asignación directa, para que Foco/Carga
+-    // entren y salgan como atenuación, no como salto.
++    // entren y salgan como atenuación, no como salto. Se recalcula en
++    // TODOS los frames (ver comentario arriba) — solo la escritura al
++    // DOM, más abajo, se difiere.
+     multiplicadorActual += (objetivo - multiplicadorActual) * TASA_SUAVIZADO;
+ 
+     var amplitud = r.amplitudMaxima * multiplicadorActual;
+     var valor = onda * amplitud;
+ 
++    contadorFrames++;
++    if ((contadorFrames % INTERVALO_ESCRITURA) !== 0) return;
++
+     document.documentElement.style.setProperty('--amb-respiracion', valor.toFixed(4));
+   }
+ 
+diff --git a/donde-comer-cdu/js/motor-render.js b/donde-comer-cdu/js/motor-render.js
+index 27ba2e0..fb4d0d1 100644
+--- a/donde-comer-cdu/js/motor-render.js
++++ b/donde-comer-cdu/js/motor-render.js
+@@ -600,16 +600,49 @@
+     }
+ 
+     var rafOndas = null;
++    // PERF (auditoría performance, 2026-07-30): `dispararOnda()` llamaba
++    // a `animarOndas()` de forma SÍNCRONA (no vía rAF), y `animarOndas()`
++    // llamaba a `dibujar()` DIRECTO — el único de los ~8 ciclos de
++    // animación de este archivo (aparición, spider, inercia, wheel,
++    // hover, vuelo) que no pasa por `redibujar()`, el punto único de
++    // deduplicación (rafRedibujo) que ya usan todos los demás.
++    // `manejarClick()` (ver más abajo) llama `cerrarSpider()` →
++    // `redibujar()`, LUEGO `dispararOnda()`, LUEGO `abrirPopup()` →
++    // `redibujar()` de nuevo — es decir, CADA click sobre un marcador
++    // (la interacción más frecuente de todo el mapa) disparaba:
++    //   1) un `dibujar()` síncrono, en medio del handler de click,
++    //      fuera de cualquier `requestAnimationFrame` — trabajo
++    //      completo (clear + tiles + proyección + clustering +
++    //      marcadores) potencialmente antes de que el propio
++    //      `abrirPopup()` de la misma función terminara de mutar el
++    //      DOM, y de cualquier forma descartado un frame después;
++    //   2) en el frame siguiente, DOS dibujados más: uno por el
++    //      `rafRedibujo` ya agendado por cerrarSpider/abrirPopup, y
++    //      otro por el propio tick de `animarOndas()` (que sigue
++    //      llamando a `dibujar()` directo) — dos redibujados
++    //      idénticos del mismo frame visual, ninguno necesario más
++    //      que el último.
++    // Reproducción con conteo de llamadas (ver auditoría): 3 `dibujar()`
++    // por click antes de este cambio, 1 después, en una réplica fiel
++    // del mecanismo real (mismas guardas, mismo orden de llamadas).
++    // Fix: `dispararOnda()` agenda el primer tick vía rAF en vez de
++    // llamar directo, y `animarOndas()` pasa a usar `redibujar()` como
++    // el resto del motor — la propia dedup de `rafRedibujo` absorbe
++    // el caso (muy común) de que otra animación quiera dibujar en el
++    // mismo frame. Costo: el primer frame de la onda se ve 1 frame
++    // (~16ms) más tarde — mismo delay de arranque que ya tienen
++    // aparición, spider y hover; imperceptible e inaudible frente a
++    // los 400ms de duración total de la animación.
+     function dispararOnda(x, y, color) {
+       if (prefiereMovimientoReducido()) return; // el estado (popup, tarjeta resaltada) ya comunica la acción sin necesidad de animación
+       ondas.push({ x: x, y: y, inicio: performance.now(), color: colorSeguro(color) });
+-      animarOndas();
++      if (rafOndas === null) rafOndas = requestAnimationFrame(animarOndas);
+     }
+     function animarOndas() {
+       if (!vivo || !ondas.length) { rafOndas = null; return; }
+       var ahora = performance.now();
+       ondas = ondas.filter(function (o) { return ahora - o.inicio < DURACION_ONDA_MS; });
+-      dibujar();
++      redibujar();
+       rafOndas = ondas.length ? requestAnimationFrame(animarOndas) : null;
+     }
+     function dibujarOndas() {
+-- 
+2.43.0
+

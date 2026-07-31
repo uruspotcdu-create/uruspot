@@ -1,0 +1,26 @@
+diff --git a/inicio/index.html b/inicio/index.html
+index eee1964..ff16acd 100644
+--- a/inicio/index.html
++++ b/inicio/index.html
+@@ -4806,7 +4806,7 @@ if (document.readyState === 'loading'){
+ <script>!function(){"use strict";var e=window.matchMedia("(prefers-reduced-motion:reduce)").matches,t=document.getElementById("mood-cursor");if(!e&&t&&window._usAnim.fine){var n=0,o=0,a=0,s=0,c=1,i=1,r=window._usAnim.rafLoop(function(){n=window._usAnim.lerp(n,a,.14),o=window._usAnim.lerp(o,s,.14),c=window._usAnim.lerp(c,i,.25),t.style.transform="translate("+n+"px,"+o+"px) translate(-50%,-50%) scale("+c+")"});document.addEventListener("mousemove",function(e){a=e.clientX,s=e.clientY,"1"!==t.style.opacity&&(t.style.opacity="1",t.style.transform="translate(-50%,-50%) scale(1)",r.start())}),document.addEventListener("mouseleave",function(){t.style.opacity="0",t.style.transform="translate(-50%,-50%) scale(0)",r.stop()}),document.querySelectorAll(".mood-btn").forEach(function(e){e.addEventListener("mouseenter",function(){i=1.5,t.style.borderColor="rgba(232,160,48,0.8)"}),e.addEventListener("mouseleave",function(){i=1,t.style.borderColor="rgba(10,255,239,0.6)"})})}var l=document.querySelector(".mood-card");l&&(e||document.querySelectorAll(".mood-btn").forEach(function(e){e.addEventListener("click",function(t){var n=e.getBoundingClientRect(),o=document.createElement("span");o.className="mood-ink-drop",o.style.left=t.clientX-n.left+"px",o.style.top=t.clientY-n.top+"px",e.appendChild(o),o.addEventListener("animationend",function(){o.remove()},{once:!0})})}),document.querySelectorAll(".mood-btn").forEach(function(t){t.addEventListener("click",function(){if(l.classList.toggle("has-selection",this.classList.contains("active")),document.querySelectorAll(".mood-match-badge").forEach(function(e){e.remove()}),this.classList.contains("active")){var t=this.dataset.mood,n=document.querySelectorAll('.searchable[data-mood*="'+t+'"]').length;if(n>0&&!e){var o=document.createElement("span");o.className="mood-match-badge",o.textContent=n,o.setAttribute("aria-label",n+" resultados"),this.style.position="relative",this.appendChild(o)}}else l.classList.remove("has-selection")})}))}();</script>
+ <script>!function(){if("IntersectionObserver"in window){var n;n="getAnimations"in document?Array.prototype.map.call(document.getAnimations(),function(n){return n.effect&&n.effect.target}).filter(function(n,t,e){return n&&e.indexOf(n)===t}):Array.prototype.filter.call(document.querySelectorAll("body *"),function(n){var t=getComputedStyle(n);return t.animationName&&"none"!==t.animationName});var t=new IntersectionObserver(function(n){n.forEach(function(n){n.target.style.animationPlayState=n.isIntersecting?"running":"paused"})},{rootMargin:"200px"});n.forEach(function(n){t.observe(n)})}}();</script>
+ <link rel="stylesheet" href="/inicio/css/refactor-utilities.css" />
+-<link rel="stylesheet" href="deferred-styles.min.css" />
++<link rel="stylesheet" href="/inicio/deferred-styles.min.css" />
+ <link rel="stylesheet" href="/inicio/css/zonas-macroambiente.css" />
+ </body>
+ </html>
+diff --git a/sw.js b/sw.js
+index 29cb0df..912b9a2 100644
+--- a/sw.js
++++ b/sw.js
+@@ -30,7 +30,7 @@
+ 
+ 'use strict';
+ 
+-var VERSION = 'v1';
++var VERSION = 'v2';
+ var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
+ var CACHE_DATOS = 'uruspot-datos-' + VERSION;
+ var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;

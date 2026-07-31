@@ -1,0 +1,802 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: visual.spec.js >> Baseline Visual URU SPOT >> 01-home-guia
+- Location: tests\visual\visual.spec.js:6:3
+
+# Error details
+
+```
+Error: expect(page).toHaveScreenshot(expected) failed
+
+Timeout: 5000ms
+  Failed to take two consecutive stable screenshots.
+
+  Snapshot: 01-home-guia.png
+
+Call log:
+  - Expect "toHaveScreenshot(01-home-guia.png)" with timeout 5000ms
+    - verifying given screenshot expectation
+  - taking page screenshot
+    - disabled all CSS animations
+  - waiting for fonts to load...
+  - fonts loaded
+  - Expected an image 768px by 11848px, received 768px by 11846px. 18383 pixels (ratio 0.01 of all image pixels) are different.
+  - waiting 100ms before taking screenshot
+  - taking page screenshot
+    - disabled all CSS animations
+  - waiting for fonts to load...
+  - fonts loaded
+  - Expected an image 768px by 11846px, received 768px by 11849px.
+  - waiting 250ms before taking screenshot
+  - Timeout 5000ms exceeded.
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Ir al contenido principal" [ref=e2] [cursor=pointer]:
+    - /url: "#contenido-principal"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e7]:
+        - text: URU SPOT
+        - generic [ref=e8]: Concepción del Uruguay
+      - generic [ref=e9]:
+        - text: tu relación con esta ciudad
+        - strong [ref=e10]: Recién llegado
+  - main [ref=e11]:
+    - region [ref=e12]:
+      - paragraph [ref=e13]: Motor de descubrimiento local · Concepción del Uruguay
+      - heading "No te mostramos el padrón entero. Te mostramos lo que corresponde ahora." [level=1] [ref=e14]
+      - paragraph [ref=e15]: URU SPOT arranca guiando poco y, a medida que lo usás, suelta el control. Si ya sabés lo que buscás, escribilo y vas directo.
+      - search "Buscar lugares en Concepción del Uruguay" [ref=e16]:
+        - generic [ref=e17]: Buscar lugares por nombre, rubro o dirección
+        - generic [ref=e18]:
+          - searchbox "Buscar lugares por nombre, rubro o dirección" [ref=e19]
+          - button "📍 Cerca de mí" [ref=e20] [cursor=pointer]
+        - generic [ref=e21]: Escribí al menos dos letras para buscar por nombre, rubro o dirección. Con resultados visibles, flecha abajo mueve el foco al primer lugar; entre lugares, flecha arriba y abajo recorren la lista y Escape vuelve acá.
+        - button "tu lista guardada" [ref=e22] [cursor=pointer]
+      - generic "Sugerencias para empezar" [ref=e23]:
+        - generic [ref=e24]: Empezá por acá
+        - button "Gastronomía" [ref=e25] [cursor=pointer]
+        - button "Compras" [ref=e28] [cursor=pointer]
+        - button "Transporte" [ref=e31] [cursor=pointer]
+        - button "Salud" [ref=e34] [cursor=pointer]
+        - button "📍 cerca tuyo" [ref=e37] [cursor=pointer]
+      - status [ref=e38]:
+        - generic [ref=e39]:
+          - strong [ref=e40]: "1.468"
+          - generic [ref=e41]: lugares verificados
+        - generic [ref=e42]:
+          - strong [ref=e43]: "14"
+          - generic [ref=e44]: rubros distintos
+        - generic [ref=e45]:
+          - strong [ref=e46]: 100%
+          - generic [ref=e47]: caminados y chequeados en el lugar
+      - link "Ver lugares para vos" [ref=e48] [cursor=pointer]:
+        - /url: "#region-descubrimiento"
+        - generic [ref=e49]: ↓
+        - text: Ver lugares para vos
+    - navigation "Ir a una sección de esta página" [ref=e50]:
+      - generic [ref=e51]:
+        - generic [ref=e52]: Explorá
+        - list [ref=e53]:
+          - listitem [ref=e54]:
+            - link "Destacados" [ref=e55] [cursor=pointer]:
+              - /url: "#destacados"
+          - listitem [ref=e56]:
+            - link "Buscar y explorar" [ref=e57] [cursor=pointer]:
+              - /url: "#region-descubrimiento"
+          - listitem [ref=e58]:
+            - link "Por rubro" [ref=e59] [cursor=pointer]:
+              - /url: "#rubros"
+          - listitem [ref=e60]:
+            - link "Guías por categoría" [ref=e61] [cursor=pointer]:
+              - /url: "#accesos"
+      - generic [ref=e62]:
+        - generic [ref=e63]: Conocé el proyecto
+        - list [ref=e64]:
+          - listitem [ref=e65]:
+            - link "Sobre la ciudad" [ref=e66] [cursor=pointer]:
+              - /url: "#sobre-la-ciudad"
+          - listitem [ref=e67]:
+            - link "Cómo funciona" [ref=e68] [cursor=pointer]:
+              - /url: "#manifiesto"
+          - listitem [ref=e69]:
+            - link "Cómo lo usa la gente" [ref=e70] [cursor=pointer]:
+              - /url: "#testimonios"
+          - listitem [ref=e71]:
+            - link "Cómo pensamos el orden" [ref=e72] [cursor=pointer]:
+              - /url: "#metodologia"
+          - listitem [ref=e73]:
+            - link "Para dueños de locales" [ref=e74] [cursor=pointer]:
+              - /url: "#para-locales"
+          - listitem [ref=e75]:
+            - link "Guía práctica" [ref=e76] [cursor=pointer]:
+              - /url: "#guia-practica"
+          - listitem [ref=e77]:
+            - link "Glosario" [ref=e78] [cursor=pointer]:
+              - /url: "#glosario"
+          - listitem [ref=e79]:
+            - link "Preguntas frecuentes" [ref=e80] [cursor=pointer]:
+              - /url: "#faq"
+          - listitem [ref=e81]:
+            - link "Hoja de ruta" [ref=e82] [cursor=pointer]:
+              - /url: "#hoja-de-ruta"
+          - listitem [ref=e83]:
+            - link "Accesibilidad" [ref=e84] [cursor=pointer]:
+              - /url: "#accesibilidad"
+          - listitem [ref=e85]:
+            - link "Privacidad y tus datos" [ref=e86] [cursor=pointer]:
+              - /url: "#privacidad-datos"
+    - region [ref=e87]:
+      - heading "Destacados" [level=2] [ref=e88]
+      - paragraph [ref=e89]: Los mejor puntuados, con reseñas reales — no un ranking pago.
+      - list "Lugares destacados por puntuación" [ref=e90]:
+        - listitem [ref=e91] [cursor=pointer]:
+          - generic [ref=e92]: Gastronomía
+          - generic [ref=e93]: Bajo Llave 929
+          - generic [ref=e94]:
+            - text: ★ 5,0
+            - generic [ref=e95]: (189)
+        - listitem [ref=e96] [cursor=pointer]:
+          - generic [ref=e97]: Oficios técnicos
+          - generic [ref=e98]: Tech Seguridad Electrónica
+          - generic [ref=e99]:
+            - text: ★ 5,0
+            - generic [ref=e100]: (71)
+        - listitem [ref=e101] [cursor=pointer]:
+          - generic [ref=e102]: Deporte
+          - generic [ref=e103]: Sinergia Salud
+          - generic [ref=e104]:
+            - text: ★ 5,0
+            - generic [ref=e105]: (36)
+        - listitem [ref=e106] [cursor=pointer]:
+          - generic [ref=e107]: Compras
+          - generic [ref=e108]: Kairós Ind (indumentaria)
+          - generic [ref=e109]:
+            - text: ★ 4,9
+            - generic [ref=e110]: (466)
+        - listitem [ref=e111] [cursor=pointer]:
+          - generic [ref=e112]: Finanzas
+          - generic [ref=e113]: Maria Carolina Carbó- Estudio Jurídico
+          - generic [ref=e114]:
+            - text: ★ 5,0
+            - generic [ref=e115]: (34)
+        - listitem [ref=e116] [cursor=pointer]:
+          - generic [ref=e117]: Transporte
+          - generic [ref=e118]: El Garage de Tony (Chapa y Pintura)
+          - generic [ref=e119]:
+            - text: ★ 5,0
+            - generic [ref=e120]: (30)
+    - region "Descubridor de lugares" [ref=e121]:
+      - paragraph [ref=e122]: Cada punto de color es un lugar caminado y verificado — el mapa interactivo aparece más abajo apenas haya resultados con ubicación.
+      - generic [ref=e123]:
+        - heading "Para arrancar" [level=2] [ref=e124]
+        - paragraph [ref=e125]: Una selección chica para no abrumar. Guardá o descartá para afinarla.
+        - button "Ver catálogo completo →" [ref=e126] [cursor=pointer]
+        - button "← Ver todos los lugares" [ref=e127] [cursor=pointer]
+      - generic [ref=e128]:
+        - status [ref=e129]: 🗺️ 4 lugares en el mapa.
+        - region "Mapa de los resultados de tu búsqueda" [ref=e130]:
+          - list "Lista de lugares en el mapa" [ref=e132]:
+            - listitem [ref=e133]:
+              - button "Ferrugem" [ref=e134]
+            - listitem [ref=e135]:
+              - button "Peluqueria Lois Women" [ref=e136]
+            - listitem [ref=e137]:
+              - button "Posta Torreón" [ref=e138]
+            - listitem [ref=e139]:
+              - button "Mensajería Uruguay" [ref=e140]
+          - generic [ref=e141]:
+            - button "Acercar" [ref=e142] [cursor=pointer]: +
+            - button "Alejar" [ref=e143] [cursor=pointer]: −
+          - generic:
+            - text: ©
+            - link "OpenStreetMap" [ref=e144] [cursor=pointer]:
+              - /url: https://www.openstreetmap.org/copyright
+            - text: ©
+            - link "CARTO" [ref=e145] [cursor=pointer]:
+              - /url: https://carto.com/attributions
+        - generic "Leyenda del mapa" [ref=e146]:
+          - generic [ref=e147]: Gastronomía
+          - generic [ref=e150]: Belleza
+          - generic [ref=e153]: Alojamiento
+          - generic [ref=e156]: Transporte
+      - generic [ref=e159]:
+        - article [ref=e160]:
+          - generic [ref=e161]:
+            - text: Gastronomía
+            - generic [ref=e162]: ◐ en revisión
+            - generic [ref=e163]: ★ 4,3 (130)
+          - heading "Ferrugem" [level=3] [ref=e164]
+          - generic [ref=e165]: Gastronomía · Gastropub / Bar de Bandas
+          - generic [ref=e166]: todavía no te lo mostramos
+          - generic [ref=e167]:
+            - link "Abrir en Google Maps" [ref=e168] [cursor=pointer]:
+              - /url: https://www.google.com/maps/search/?api=1&query=-32.47825,-58.23987
+              - text: 📍 cómo llegar
+            - button "Guardar" [ref=e169] [cursor=pointer]: ☆ guardar
+            - button "no me interesa" [ref=e170] [cursor=pointer]
+        - article [ref=e171]:
+          - generic [ref=e172]:
+            - text: Belleza
+            - generic [ref=e173]: ◐ en revisión
+            - generic [ref=e174]: ★ 4,9 (26)
+          - heading "Peluqueria Lois Women" [level=3] [ref=e175]
+          - generic [ref=e176]: Belleza · Peluquería
+          - generic [ref=e177]: todavía no te lo mostramos
+          - generic [ref=e178]:
+            - link "Abrir en Google Maps" [ref=e179] [cursor=pointer]:
+              - /url: https://www.google.com/maps/search/?api=1&query=-32.482429,-58.228539
+              - text: 📍 cómo llegar
+            - button "Guardar" [ref=e180] [cursor=pointer]: ☆ guardar
+            - button "no me interesa" [ref=e181] [cursor=pointer]
+        - article [ref=e182]:
+          - generic [ref=e183]:
+            - text: Alojamiento
+            - generic [ref=e184]: ◐ en revisión
+            - generic [ref=e185]: ★ 4,4 (582)
+          - heading "Posta Torreón" [level=3] [ref=e186]
+          - generic [ref=e187]: Alojamiento · Hostería
+          - generic [ref=e188]: todavía no te lo mostramos
+          - generic [ref=e189]:
+            - link "ver ficha" [ref=e190] [cursor=pointer]:
+              - /url: locales/posta-torreon/
+            - link "Abrir en Google Maps" [ref=e191] [cursor=pointer]:
+              - /url: https://www.google.com/maps/search/?api=1&query=-32.48778,-58.23309
+              - text: 📍 mapa
+            - button "Guardar" [ref=e192] [cursor=pointer]: ☆ guardar
+            - button "Compartir" [ref=e193] [cursor=pointer]: 🔗
+            - button "no me interesa" [ref=e194] [cursor=pointer]
+        - article [ref=e195]:
+          - generic [ref=e196]:
+            - text: Transporte
+            - generic [ref=e197]: ◐ en revisión
+            - generic [ref=e198]: ★ 4,5 (17)
+          - heading "Mensajería Uruguay" [level=3] [ref=e199]
+          - generic [ref=e200]: Transporte · Mensajería / Delivery
+          - generic [ref=e201]: todavía no te lo mostramos
+          - generic [ref=e202]:
+            - link "Abrir en Google Maps" [ref=e203] [cursor=pointer]:
+              - /url: https://www.google.com/maps/search/?api=1&query=-32.4845349,-58.2321416
+              - text: 📍 cómo llegar
+            - button "Guardar" [ref=e204] [cursor=pointer]: ☆ guardar
+            - button "no me interesa" [ref=e205] [cursor=pointer]
+      - status [ref=e206]: 4 resultados.
+    - region [ref=e207]:
+      - heading "Sobre Concepción del Uruguay" [level=2] [ref=e208]
+      - paragraph [ref=e209]: Antes de ser una lista de lugares para elegir, Concepción del Uruguay es una ciudad con casi dos siglos y medio de historia, asomada al río que le da nombre. Esto es lo básico para ubicarte, tanto si venís de visita como si naciste acá y nunca lo leíste ordenado.
+      - generic [ref=e210]:
+        - article [ref=e211]:
+          - generic [ref=e212]: 🏛️
+          - paragraph [ref=e213]:
+            - strong [ref=e214]: Una ciudad fundacional.
+            - text: Se fundó el 25 de junio de 1783, cuando el comandante Tomás de Rocamora trazó su primer plano urbano por encargo del virrey Juan José de Vértiz y Salcedo. Antes de esa fundación oficial ya existía población asentada en la zona desde principios del siglo XVII. Fue capital de la provincia de Entre Ríos hasta 1883, cuando ese título pasó a Paraná.
+        - article [ref=e215]:
+          - generic [ref=e216]: ⚜️
+          - paragraph [ref=e217]:
+            - strong [ref=e218]: Cuna de figuras del federalismo.
+            - text: Acá nació Francisco Ramírez y acá construyó buena parte de su vida pública Justo José de Urquiza, que fundó el histórico Colegio del Uruguay. En la Plaza San Martín — conocida también como Plaza Ramírez, el centro simbólico de la ciudad — ocurrió el 1º de mayo de 1851 el Pronunciamiento de Urquiza contra Rosas, un antecedente directo de la Constitución de 1853.
+        - article [ref=e219]:
+          - generic [ref=e220]: 🌊
+          - paragraph [ref=e221]:
+            - strong [ref=e222]: A la orilla del río Uruguay.
+            - text: La ciudad se asienta sobre la margen del río Uruguay, con playas de arena, islas y arroyos a poca distancia del centro — Banco Pelay, la Isla Cambacuá y el Balneario Municipal sobre el Riacho Itapé son los puntos de baño más conocidos, sobre todo en temporada de verano.
+        - article [ref=e223]:
+          - generic [ref=e224]: ♨️
+          - paragraph [ref=e225]:
+            - strong [ref=e226]: Aguas termales todo el año.
+            - text: Sobre la Ruta Nacional 14, a las afueras del centro urbano, funciona un complejo termal con varias piscinas de agua mineralizada — algunas cálidas todo el año, otras frías en verano — pensado tanto para el turismo como para el uso de quienes viven en la ciudad.
+        - article [ref=e227]:
+          - generic [ref=e228]: 🏰
+          - paragraph [ref=e229]:
+            - strong [ref=e230]: Patrimonio a mano.
+            - text: El casco histórico conserva el Colegio Justo J. Urquiza, la Basílica de la Inmaculada Concepción (con el mausoleo del general Urquiza) y la antigua Capitanía de Puerto. A poca distancia en auto se puede visitar el Palacio San José, la residencia de Urquiza convertida hoy en museo nacional.
+        - article [ref=e231]:
+          - generic [ref=e232]: 🚌
+          - paragraph [ref=e233]:
+            - strong [ref=e234]: Bien conectada.
+            - text: Está sobre la Ruta Nacional 14, uno de los corredores más transitados del litoral, con servicios regulares de larga distancia hacia Buenos Aires, Rosario, Paraná y otras ciudades de Entre Ríos y del Mercosur.
+    - region [ref=e235]:
+      - heading "Cómo funciona" [level=2] [ref=e236]
+      - generic [ref=e237]:
+        - article [ref=e238]:
+          - generic [ref=e239]: ✓
+          - paragraph [ref=e240]: Cada lugar que ves fue caminado y verificado por alguien del equipo, en fuentes oficiales, Google Places o en el lugar mismo.
+        - article [ref=e241]:
+          - generic [ref=e242]: ⚖
+          - paragraph [ref=e243]: "El orden no es un ranking pago: nadie compra su posición. El dinero financía mejor ficha, nunca mejor posición."
+        - article [ref=e244]:
+          - generic [ref=e245]: ✉
+          - paragraph [ref=e246]:
+            - text: ¿Error o lugar que falta?
+            - link "Escribinos" [ref=e247] [cursor=pointer]:
+              - /url: mailto:padron@uruspot.com.ar
+            - text: y lo revisamos.
+    - region [ref=e248]:
+      - heading "Cómo lo usa la gente" [level=2] [ref=e249]
+      - paragraph [ref=e250]: Tres formas distintas de llegar a URU SPOT — ninguna inventada, las tres son el mismo patrón que ya describimos arriba, contado en primera persona.
+      - generic [ref=e251]:
+        - blockquote [ref=e252]:
+          - paragraph [ref=e253]: Vivo acá hace años y pensé que ya conocía todo. Buscando "termas" un domingo cualquiera apareció un local a diez cuadras de casa del que nunca había escuchado hablar.
+          - generic [ref=e254]:
+            - strong [ref=e255]: Vecina de la ciudad
+            - text: usa el buscador directo, sin pasar por Guía
+        - blockquote [ref=e256]:
+          - paragraph [ref=e257]: Llegamos un viernes a la noche sin reserva en ningún lado. "Cerca de mí" nos armó el mapa con lo que estaba abierto en ese momento, caminando desde el centro.
+          - generic [ref=e258]:
+            - strong [ref=e259]: Visitante de fin de semana
+            - text: usa el mapa y el modo Guía
+        - blockquote [ref=e260]:
+          - paragraph [ref=e261]: Escribí a padrón para corregir el horario de mi local y en un par de días ya estaba actualizado. Se nota que alguien lo revisa de verdad, no es un formulario que cae al vacío.
+          - generic [ref=e262]:
+            - strong [ref=e263]: Dueño de un local verificado
+            - generic [ref=e264]:
+              - text: ver
+              - link "Para dueños de locales" [ref=e265] [cursor=pointer]:
+                - /url: "#para-locales"
+    - region [ref=e266]:
+      - heading "Cómo pensamos el orden" [level=2] [ref=e267]
+      - paragraph [ref=e268]: "Arriba contamos qué NO hacemos. Esto es el CÓMO: qué hacemos, paso a paso, con lo poco que sabemos de vos en cada visita."
+      - generic [ref=e269]:
+        - article [ref=e270]:
+          - generic [ref=e271]: ①
+          - paragraph [ref=e272]:
+            - strong [ref=e273]: Arrancás en Guía.
+            - text: "La primera vez que abrís URU SPOT no sabemos nada de vos, así que te mostramos poco: un recorte acotado, pensado para no abrumarte con 1.400+ lugares de una sola vez. Es una decisión de diseño, no una limitación técnica."
+        - article [ref=e274]:
+          - generic [ref=e275]: ②
+          - paragraph [ref=e276]:
+            - strong [ref=e277]: Cada interacción suma evidencia.
+            - text: Buscar algo puntual, guardar un lugar o descartar otro son señales. Ninguna acción aislada cambia demasiado — el sistema reacciona a patrones que se repiten, no a un solo clic.
+        - article [ref=e278]:
+          - generic [ref=e279]: ③
+          - paragraph [ref=e280]:
+            - strong [ref=e281]: El control se suelta de a poco.
+            - text: "A medida que interactuás, pasás de Guía a Exploración y eventualmente a Acción Directa: menos curaduría de nuestra parte, más catálogo real a tu disposición, porque ya demostraste que sabés qué buscás."
+        - article [ref=e282]:
+          - generic [ref=e283]: ④
+          - paragraph [ref=e284]:
+            - strong [ref=e285]: Buscar explícitamente salta el proceso.
+            - text: Si escribís un nombre, un rubro o una dirección en el buscador, te mostramos TODOS los que matchean, sin recorte artificial — el acompañamiento gradual es para cuando no sabés qué buscar, nunca un obstáculo cuando sí lo sabés.
+        - article [ref=e286]:
+          - generic [ref=e287]: ⑤
+          - paragraph [ref=e288]:
+            - strong [ref=e289]: Nada de esto se comparte ni se vende.
+            - text: Lo que guardamos vive en tu navegador (almacenamiento local), no en un servidor con tu identidad. Si borrás los datos del sitio o cambiás de dispositivo, URU SPOT vuelve a arrancar en Guía con vos.
+        - article [ref=e290]:
+          - generic [ref=e291]: ⑥
+          - paragraph [ref=e292]:
+            - strong [ref=e293]: Los rechazos pesan poco y se apagan solos.
+            - text: Descartar un lugar no lo borra para siempre ni lo penaliza para otros usuarios — es una señal tuya, temporal, que se diluye con el tiempo si no se repite.
+    - region [ref=e294]:
+      - heading "Por rubro" [level=2] [ref=e295]
+      - grid "Lugares organizados por rubro" [ref=e296]:
+        - button "Gastronomía 274" [ref=e297] [cursor=pointer]:
+          - text: Gastronomía
+          - generic [ref=e300]: "274"
+        - button "Compras 249" [ref=e301] [cursor=pointer]:
+          - text: Compras
+          - generic [ref=e304]: "249"
+        - button "Transporte 186" [ref=e305] [cursor=pointer]:
+          - text: Transporte
+          - generic [ref=e308]: "186"
+        - button "Salud 176" [ref=e309] [cursor=pointer]:
+          - text: Salud
+          - generic [ref=e312]: "176"
+        - button "Finanzas 127" [ref=e313] [cursor=pointer]:
+          - text: Finanzas
+          - generic [ref=e316]: "127"
+        - button "Deporte 111" [ref=e317] [cursor=pointer]:
+          - text: Deporte
+          - generic [ref=e320]: "111"
+        - button "Belleza 94" [ref=e321] [cursor=pointer]:
+          - text: Belleza
+          - generic [ref=e324]: "94"
+        - button "Oficios técnicos 84" [ref=e325] [cursor=pointer]:
+          - text: Oficios técnicos
+          - generic [ref=e328]: "84"
+        - button "Patrimonio 37" [ref=e329] [cursor=pointer]:
+          - text: Patrimonio
+          - generic [ref=e332]: "37"
+        - button "Educación 34" [ref=e333] [cursor=pointer]:
+          - text: Educación
+          - generic [ref=e336]: "34"
+        - button "Alojamiento 31" [ref=e337] [cursor=pointer]:
+          - text: Alojamiento
+          - generic [ref=e340]: "31"
+        - button "Naturaleza 26" [ref=e341] [cursor=pointer]:
+          - text: Naturaleza
+          - generic [ref=e344]: "26"
+        - button "Servicios públicos 22" [ref=e345] [cursor=pointer]:
+          - text: Servicios públicos
+          - generic [ref=e348]: "22"
+        - button "Mascotas 17" [ref=e349] [cursor=pointer]:
+          - text: Mascotas
+          - generic [ref=e352]: "17"
+    - group [ref=e353]:
+      - generic "+ Ver el detalle completo por rubro y la composición del padrón" [ref=e354] [cursor=pointer]
+    - navigation [ref=e355]:
+      - heading "Guías por categoría" [level=2] [ref=e356]
+      - paragraph [ref=e357]: Si ya sabés qué tipo de lugar buscás, estas guías van directo a lo tuyo.
+      - generic [ref=e358]:
+        - link "Restaurantes" [ref=e359] [cursor=pointer]:
+          - /url: ../los-mejores-restaurantes-cdu/
+          - generic [ref=e360]: 🍽️
+        - link "Cafeterías" [ref=e362] [cursor=pointer]:
+          - /url: ../las-mejores-cafeterias-cdu/
+          - generic [ref=e363]: ☕
+        - link "Heladerías" [ref=e365] [cursor=pointer]:
+          - /url: ../las-mejores-heladerias-cdu/
+          - generic [ref=e366]: 🍦
+        - link "Panaderías" [ref=e368] [cursor=pointer]:
+          - /url: ../las-mejores-panaderias-cdu/
+          - generic [ref=e369]: 🥖
+        - link "Bares" [ref=e371] [cursor=pointer]:
+          - /url: ../los-mejores-bares-cdu/
+          - generic [ref=e372]: 🍷
+        - link "Hosterías" [ref=e374] [cursor=pointer]:
+          - /url: ../las-mejores-hosterias-cdu/
+          - generic [ref=e375]: 🛏️
+        - link "Gimnasios" [ref=e377] [cursor=pointer]:
+          - /url: ../los-mejores-gimnasios-cdu/
+          - generic [ref=e378]: 🏋️
+        - link "Veterinarias" [ref=e380] [cursor=pointer]:
+          - /url: ../mejores-veterinarias-cdu/
+          - generic [ref=e381]: 🐾
+    - region [ref=e383]:
+      - heading "Para dueños de locales" [level=2] [ref=e384]
+      - paragraph [ref=e385]: Si tenés un comercio en Concepción del Uruguay, esto es lo que necesitás saber antes de escribirnos.
+      - generic [ref=e386]:
+        - article [ref=e387]:
+          - generic [ref=e388]: ①
+          - paragraph [ref=e389]:
+            - strong [ref=e390]: Aparecer es gratis.
+            - text: Estar en el padrón, con ficha básica verificada, no tiene costo. No hace falta pagar nada para que tu local exista en URU SPOT.
+        - article [ref=e391]:
+          - generic [ref=e392]: ②
+          - paragraph [ref=e393]:
+            - strong [ref=e394]: "Lo que sí se puede pagar: una ficha más completa."
+            - text: Fotos propias, verificación más profunda o información adicional pueden financiarse — nunca la posición en los resultados, que depende únicamente de qué tan bien matchea con lo que alguien busca.
+        - article [ref=e395]:
+          - generic [ref=e396]: ③
+          - paragraph [ref=e397]:
+            - strong [ref=e398]: Verificación antes de publicar.
+            - text: Alguien del equipo confirma el dato — caminándolo, en fuentes oficiales o en Google Places — antes de que aparezca. Por eso puede tardar unos días, no es un catálogo que se autocompleta.
+        - article [ref=e399]:
+          - generic [ref=e400]: ④
+          - paragraph [ref=e401]:
+            - strong [ref=e402]: Corregir un dato es igual de rápido
+            - text: "que dar de alta uno nuevo: mismo contacto, mismo proceso de verificación, sin trámite aparte."
+      - generic [ref=e403]:
+        - paragraph [ref=e404]: ¿Tu local ya está o querés que lo agreguemos?
+        - link "Escribir a padron@uruspot.com.ar" [ref=e405] [cursor=pointer]:
+          - /url: mailto:padron@uruspot.com.ar
+    - region [ref=e406]:
+      - heading "Guía práctica para tu visita" [level=2] [ref=e407]
+      - paragraph [ref=e408]: Algunas cosas útiles de saber si venís de afuera — nada que cambie de un mes a otro, para que esta sección siga siendo cierta dentro de un año.
+      - generic [ref=e409]:
+        - article [ref=e410]:
+          - generic [ref=e411]: ☀️
+          - paragraph [ref=e412]:
+            - strong [ref=e413]: Clima templado-húmedo.
+            - text: Veranos calurosos (diciembre a marzo, ideales para playa y termas) e inviernos templados sin heladas extremas. Primavera y otoño son, para la mayoría, la mejor época para caminar la ciudad sin el calor pleno del verano.
+        - article [ref=e414]:
+          - generic [ref=e415]: 🚶
+          - paragraph [ref=e416]:
+            - strong [ref=e417]: Se recorre bien a pie.
+            - text: El casco histórico y la zona céntrica son caminables sin apuro; para llegar a las playas o al complejo termal, sobre la Ruta 14, conviene un vehículo, remise o combi turística.
+        - article [ref=e418]:
+          - generic [ref=e419]: 🎒
+          - paragraph [ref=e420]:
+            - strong [ref=e421]: Qué llevar según la estación.
+            - text: Protector solar y calzado cómodo casi todo el año; algo de abrigo liviano en invierno. Si vas a la playa o a las termas, traje de baño y toalla — algunos balnearios y el complejo termal alquilan lo que falte.
+        - article [ref=e422]:
+          - generic [ref=e423]: 💳
+          - paragraph [ref=e424]:
+            - strong [ref=e425]: Efectivo y tarjeta conviven.
+            - text: Los comercios más grandes y las cadenas aceptan tarjeta sin problema; en kioscos, ferias y algunos locales más chicos el efectivo sigue siendo más ágil. Nunca está de más llevar algo de los dos.
+        - article [ref=e426]:
+          - generic [ref=e427]: 🕑
+          - paragraph [ref=e428]:
+            - strong [ref=e429]: El mediodía baja el ritmo.
+            - text: Como en buena parte del interior argentino, muchos comercios (no todos) hacen un corte al mediodía y retoman por la tarde. Si tenés un trámite puntual, conviene resolverlo por la mañana.
+        - article [ref=e430]:
+          - generic [ref=e431]: 🆘
+          - paragraph [ref=e432]:
+            - strong [ref=e433]: Emergencias.
+            - text: El número de emergencias en toda la Argentina es el
+            - strong [ref=e434]: "911"
+            - text: . Para lo que no es una emergencia — un lugar que parece cerrado, un dato que no coincide — usá el contacto del final de esta página.
+    - region [ref=e435]:
+      - heading "Glosario" [level=2] [ref=e436]
+      - paragraph [ref=e437]: Términos que vas a ver en distintos puntos de URU SPOT, explicados una sola vez.
+      - generic [ref=e438]:
+        - generic [ref=e439]:
+          - strong [ref=e440]: Guía
+          - paragraph [ref=e441]: "El punto de partida de cualquier sesión nueva: te mostramos poco, elegido con cuidado, para no saturarte con el catálogo completo."
+        - generic [ref=e442]:
+          - strong [ref=e443]: Exploración
+          - paragraph [ref=e444]: "El paso intermedio: ya interactuaste lo suficiente como para que el sistema suelte más variedad y menos curaduría."
+        - generic [ref=e445]:
+          - strong [ref=e446]: Acción Directa
+          - paragraph [ref=e447]: "El estado de mayor autonomía: acceso directo al catálogo real, con el mapa como herramienta principal en vez del recorte guiado."
+        - generic [ref=e448]:
+          - strong [ref=e449]: Curaduría
+          - paragraph [ref=e450]: Tu lista personal de lugares guardados — la sección a la que te lleva el botón "tu lista guardada" del buscador.
+        - generic [ref=e451]:
+          - strong [ref=e452]: Destacados
+          - paragraph [ref=e453]: El spotlight de lugares con mejor puntuación real y suficientes reseñas — no depende de tu sesión ni de tu ubicación, es el mismo para todos.
+        - generic [ref=e454]:
+          - strong [ref=e455]: Verificado
+          - paragraph [ref=e456]: Alguien del equipo caminó el lugar o lo confirmó en fuentes oficiales y Google Places — no es un dato completado a ojo ni scrapeado sin revisar.
+        - generic [ref=e457]:
+          - strong [ref=e458]: Rubro
+          - paragraph [ref=e459]: La categoría de un lugar (Gastronomía, Alojamiento, Salud, etc.) — hoy son 14, cada una con su propio color de identificación en el mapa y las tarjetas.
+        - generic [ref=e460]:
+          - strong [ref=e461]: "\"Cerca de mí\""
+          - paragraph [ref=e462]: Modo de búsqueda espacial que ordena los resultados por distancia real a tu ubicación, cuando el lugar tiene coordenadas cargadas.
+    - region [ref=e463]:
+      - heading "Preguntas frecuentes" [level=2] [ref=e464]
+      - region "Preguntas frecuentes" [ref=e465]:
+        - article [ref=e466]:
+          - heading [level=3] [ref=e467]:
+            - button "¿Por qué a veces veo pocos lugares?" [ref=e468] [cursor=pointer]:
+              - generic [ref=e470]: +
+          - paragraph [ref=e472]: URU SPOT arranca guiando de a poco para no saturarte. A medida que interactuás — buscás, guardás, descartás — el sistema entiende mejor qué mostrarte y suelta más control.
+        - article [ref=e473]:
+          - heading [level=3] [ref=e474]:
+            - button "¿Cómo verifican cada lugar?" [ref=e475] [cursor=pointer]:
+              - generic [ref=e477]: +
+          - paragraph [ref=e479]: Alguien del equipo lo camina o lo confirma en fuentes oficiales y Google Places. Nada se completa a ojo ni se scrapea sin revisar.
+        - article [ref=e480]:
+          - heading [level=3] [ref=e481]:
+            - button "¿El orden se puede comprar?" [ref=e482] [cursor=pointer]:
+              - generic [ref=e484]: +
+          - paragraph [ref=e486]: No. Un local puede pagar por una mejor ficha (fotos, verificación más profunda), pero nunca por aparecer antes que otro lugar en los resultados.
+        - article [ref=e487]:
+          - heading [level=3] [ref=e488]:
+            - button "¿Cómo uso el mapa?" [ref=e489] [cursor=pointer]:
+              - generic [ref=e491]: +
+          - paragraph [ref=e493]: Aparece automáticamente apenas hay resultados con ubicación. Podés arrastrar, hacer zoom con la rueda o los botones +/−, y tocar un pin para ver la ficha resumida del lugar.
+        - article [ref=e494]:
+          - heading [level=3] [ref=e495]:
+            - button "Encontré un error o falta un lugar, ¿qué hago?" [ref=e496] [cursor=pointer]:
+              - generic [ref=e498]: +
+          - paragraph [ref=e500]:
+            - text: Escribinos a
+            - link "padron@uruspot.com.ar" [ref=e501] [cursor=pointer]:
+              - /url: mailto:padron@uruspot.com.ar
+            - text: con el nombre del lugar y el detalle — lo revisamos y lo corregimos.
+        - article [ref=e502]:
+          - heading [level=3] [ref=e503]:
+            - button "¿Qué diferencia hay entre Guía, Exploración y Acción Directa?" [ref=e504] [cursor=pointer]:
+              - generic [ref=e506]: +
+          - paragraph [ref=e508]:
+            - text: Son los tres momentos de tu sesión (ver
+            - link "Glosario" [ref=e509] [cursor=pointer]:
+              - /url: "#glosario"
+            - text: ). Arrancás en Guía, con poco para no saturarte. A medida que buscás, guardás o descartás lugares, el sistema entiende que sabés más de lo que buscás y pasa a Exploración y después a Acción Directa, mostrando más catálogo real y menos curaduría de nuestra parte.
+        - article [ref=e510]:
+          - heading [level=3] [ref=e511]:
+            - button "¿URU SPOT guarda mis datos personales?" [ref=e512] [cursor=pointer]:
+              - generic [ref=e514]: +
+          - paragraph [ref=e516]: Lo que guardás (favoritos, descartes, tu progreso de sesión) vive en el almacenamiento local de tu propio navegador, no en un servidor con tu nombre o tu identidad. No vendemos ni compartimos esa información con terceros. Si borrás los datos del sitio o cambiás de dispositivo, arrancás de nuevo en Guía.
+        - article [ref=e517]:
+          - heading [level=3] [ref=e518]:
+            - button "¿Cómo sugiero que agreguen un lugar nuevo?" [ref=e519] [cursor=pointer]:
+              - generic [ref=e521]: +
+          - paragraph [ref=e523]:
+            - text: Escribinos a
+            - link "padron@uruspot.com.ar" [ref=e524] [cursor=pointer]:
+              - /url: mailto:padron@uruspot.com.ar
+            - text: con el nombre y, si podés, la dirección o un link de Google Maps. Antes de publicarlo alguien del equipo lo verifica — caminándolo o confirmándolo en fuentes oficiales — así que puede tardar unos días en aparecer.
+        - article [ref=e525]:
+          - heading [level=3] [ref=e526]:
+            - button "¿Qué pasa si un lugar cierra o cambia de horario?" [ref=e527] [cursor=pointer]:
+              - generic [ref=e529]: +
+          - paragraph [ref=e531]: "Nos pasa, como a cualquier guía que depende de información real: si detectamos o nos avisan que un lugar cerró o cambió, lo actualizamos o lo retiramos. Si llegás a uno que ya no existe, avisanos — es la forma más rápida de corregirlo para el resto."
+        - article [ref=e532]:
+          - heading [level=3] [ref=e533]:
+            - button "¿Funciona con lectores de pantalla y navegación por teclado?" [ref=e534] [cursor=pointer]:
+              - generic [ref=e536]: +
+          - paragraph [ref=e538]:
+            - text: Sí — todo el sitio se puede recorrer con teclado (con foco visible en cada control), el buscador y el mapa tienen roles y estados anunciados por lectores de pantalla, y respetamos las preferencias de movimiento reducido, contraste alto y transparencia reducida del sistema operativo. Ver el detalle completo en
+            - link "Accesibilidad" [ref=e539] [cursor=pointer]:
+              - /url: "#accesibilidad"
+            - text: .
+        - article [ref=e540]:
+          - heading [level=3] [ref=e541]:
+            - button "¿Puedo usar URU SPOT con conexión lenta o inestable?" [ref=e542] [cursor=pointer]:
+              - generic [ref=e544]: +
+          - paragraph [ref=e546]: Sí. El primer contenido crítico (manifiesto, accesos, preguntas frecuentes) viene servido en el HTML y se ve incluso si el JavaScript tarda o falla en cargar. Si algo tarda más de lo esperado, mostramos un aviso con la opción de reintentar en vez de dejar la pantalla en blanco.
+        - article [ref=e547]:
+          - heading [level=3] [ref=e548]:
+            - button "¿Se ve igual en el celular que en la computadora?" [ref=e549] [cursor=pointer]:
+              - generic [ref=e551]: +
+          - paragraph [ref=e553]: El contenido es el mismo en ambos casos; el diseño se adapta al ancho de pantalla (una sola columna en celular, grillas en pantallas más anchas) y el mapa acepta gestos táctiles de arrastre y pellizco además del mouse.
+        - article [ref=e554]:
+          - heading [level=3] [ref=e555]:
+            - button "Tengo un local y quiero aparecer en URU SPOT, ¿cómo hago?" [ref=e556] [cursor=pointer]:
+              - generic [ref=e558]: +
+          - paragraph [ref=e560]:
+            - text: Escribinos a
+            - link "padron@uruspot.com.ar" [ref=e561] [cursor=pointer]:
+              - /url: mailto:padron@uruspot.com.ar
+            - text: . Nada se publica sin que alguien del equipo lo verifique primero, y el orden en el que aparecen los lugares nunca se compra — ver
+            - link "Para dueños de locales" [ref=e562] [cursor=pointer]:
+              - /url: "#para-locales"
+            - text: para el detalle completo.
+        - article [ref=e563]:
+          - heading [level=3] [ref=e564]:
+            - button "¿Por qué algunos lugares no tienen foto propia?" [ref=e565] [cursor=pointer]:
+              - generic [ref=e567]: +
+          - paragraph [ref=e569]:
+            - text: Hoy la mayoría de las fichas no tiene foto propia todavía — es contenido pendiente, listado como tal en la
+            - link "Hoja de ruta" [ref=e570] [cursor=pointer]:
+              - /url: "#hoja-de-ruta"
+            - text: ", no un error. El diseño de la tarjeta ya está preparado para mostrarla en cuanto el dato exista."
+    - region [ref=e571]:
+      - heading "Hoja de ruta" [level=2] [ref=e572]
+      - paragraph [ref=e573]: Qué existe hoy y qué está en camino — sin promesas de fecha, con la misma transparencia con la que explicamos el resto de esta página.
+      - generic [ref=e574]:
+        - article [ref=e575]:
+          - text: Disponible
+          - paragraph [ref=e576]:
+            - strong [ref=e577]: Mapa interactivo con distancia real.
+            - text: "\"Cerca de mí\" ordena resultados por distancia calculada, no por orden alfabético disfrazado de cercanía."
+        - article [ref=e578]:
+          - text: Disponible
+          - paragraph [ref=e579]:
+            - strong [ref=e580]: Spotlight de destacados.
+            - text: Los mejor puntuados con reseñas reales, independiente de tu sesión.
+        - article [ref=e581]:
+          - text: En camino
+          - paragraph [ref=e582]:
+            - strong [ref=e583]: Fotos propias por lugar.
+            - text: Hoy la mayoría de las tarjetas no tiene foto propia — el diseño ya está preparado (
+            - code [ref=e584]: .tarjeta__imagen
+            - text: ) para cuando el dato exista.
+        - article [ref=e585]:
+          - text: En camino
+          - paragraph [ref=e586]:
+            - strong [ref=e587]: Horarios estructurados en tiempo real.
+            - text: Hoy el estado abierto/cerrado depende de datos verificados manualmente, no de una fuente que se actualiza sola.
+        - article [ref=e588]:
+          - text: En camino
+          - paragraph [ref=e589]:
+            - strong [ref=e590]: Más rubros y más localidades.
+            - text: El motor está pensado para crecer más allá de Concepción del Uruguay sin rehacer la arquitectura — todavía no se activó para otras ciudades.
+        - article [ref=e591]:
+          - text: En camino
+          - paragraph [ref=e592]:
+            - strong [ref=e593]: Test automatizado del contrato HTML↔JS.
+            - text: Hoy la coherencia entre los
+            - code [ref=e594]: id
+            - text: de este archivo y lo que espera
+            - code [ref=e595]: app.js
+            - text: se revisa a mano — un test e2e mínimo es la mejora pendiente de mayor prioridad técnica.
+    - region [ref=e596]:
+      - heading "Accesibilidad" [level=2] [ref=e597]
+      - paragraph [ref=e598]: Lo que ya implementamos, en lenguaje simple — sin prometer más de lo que hoy es cierto.
+      - list [ref=e599]:
+        - listitem [ref=e600]: Navegación completa por teclado, con un enlace de salto directo al contenido principal.
+        - listitem [ref=e601]: Foco visible y consistente en todos los controles interactivos (botones, chips, tarjetas, enlaces).
+        - listitem [ref=e602]: Roles y regiones anunciadas para lectores de pantalla en el buscador, el mapa y los contadores dinámicos.
+        - listitem [ref=e603]:
+          - text: Respeto por
+          - code [ref=e604]: prefers-reduced-motion
+          - text: ": todas las animaciones se desactivan si tu sistema lo pide."
+        - listitem [ref=e605]:
+          - text: Respeto por
+          - code [ref=e606]: prefers-contrast
+          - text: y por el modo de alto contraste forzado de Windows.
+        - listitem [ref=e607]:
+          - text: Respeto por
+          - code [ref=e608]: prefers-reduced-transparency
+          - text: ": el efecto de vidrio se atenúa sin perder legibilidad."
+        - listitem [ref=e609]: Contenido crítico (FAQ, manifiesto, accesos) visible incluso con JavaScript desactivado.
+        - listitem [ref=e610]:
+          - text: ¿Encontraste una barrera que no cubrimos?
+          - link "Escribinos" [ref=e611] [cursor=pointer]:
+            - /url: mailto:padron@uruspot.com.ar
+          - text: y la revisamos.
+    - region [ref=e612]:
+      - heading "Privacidad y tus datos" [level=2] [ref=e613]
+      - paragraph [ref=e614]: El resumen corto ya está en las preguntas frecuentes — esto es el detalle completo, en el mismo lenguaje llano de siempre.
+      - generic [ref=e615]:
+        - generic [ref=e616]:
+          - heading "Lo que sí hacemos" [level=3] [ref=e617]
+          - list [ref=e618]:
+            - listitem [ref=e619]: Guardamos tus favoritos, descartes y progreso de sesión en el almacenamiento local de tu propio navegador.
+            - listitem [ref=e620]: Usamos esa información únicamente para decidir qué mostrarte a vos, en tu próxima visita.
+            - listitem [ref=e621]: Verificamos cada lugar antes de publicarlo, con el mismo criterio para todos.
+            - listitem [ref=e622]:
+              - text: Respondemos cada corrección o reclamo que llega a
+              - link "padrón@uruspot.com.ar" [ref=e623] [cursor=pointer]:
+                - /url: mailto:padron@uruspot.com.ar
+              - text: .
+        - generic [ref=e624]:
+          - heading "Lo que no hacemos" [level=3] [ref=e625]
+          - list [ref=e626]:
+            - listitem [ref=e627]: No guardamos tu nombre, tu identidad ni tus datos en un servidor propio.
+            - listitem [ref=e628]: No vendemos ni compartimos tu información con anunciantes ni con terceros.
+            - listitem [ref=e629]: No vendemos posiciones en los resultados a cambio de dinero.
+            - listitem [ref=e630]: No seguimos tu actividad fuera de este sitio.
+      - paragraph [ref=e631]:
+        - text: El detalle legal completo está en nuestra
+        - link "política de privacidad" [ref=e632] [cursor=pointer]:
+          - /url: /donde-comer-cdu/privacidad.html
+        - text: .
+  - contentinfo [ref=e633]:
+    - paragraph [ref=e634]: URU SPOT — Concepción del Uruguay, Entre Ríos
+    - paragraph [ref=e635]:
+      - link "Privacidad" [ref=e636] [cursor=pointer]:
+        - /url: /donde-comer-cdu/privacidad.html
+      - text: •
+      - link "Términos" [ref=e637] [cursor=pointer]:
+        - /url: /donde-comer-cdu/terminos.html
+      - text: •
+      - link "Contacto" [ref=e638] [cursor=pointer]:
+        - /url: mailto:padron@uruspot.com.ar
+      - text: •
+      - link "Volver al inicio de la página" [ref=e639] [cursor=pointer]:
+        - /url: "#siteHeader"
+        - text: Volver arriba ↑
+```
+
+# Test source
+
+```ts
+  1  | ﻿const { test, expect } = require('@playwright/test');
+  2  | const { sembrarEstado } = require('./estado-helper');
+  3  | 
+  4  | test.describe('Baseline Visual URU SPOT', () => {
+  5  | 
+  6  |   test('01-home-guia', async ({ page }) => {
+  7  |     await sembrarEstado(page, { region: 'guia' });
+  8  |     await page.goto('/donde-comer-cdu/');
+  9  |     await page.waitForLoadState('networkidle');
+> 10 |     await expect(page).toHaveScreenshot('01-home-guia.png', { fullPage: true });
+     |                        ^ Error: expect(page).toHaveScreenshot(expected) failed
+  11 |   });
+  12 | 
+  13 |   test('02-region-exploracion', async ({ page }) => {
+  14 |     await sembrarEstado(page, { region: 'exploracion' });
+  15 |     await page.goto('/donde-comer-cdu/');
+  16 |     await page.waitForLoadState('networkidle');
+  17 |     await expect(page).toHaveScreenshot('02-region-exploracion.png', { fullPage: true });
+  18 |   });
+  19 | 
+  20 |   test('03-busqueda-vacia', async ({ page }) => {
+  21 |     await sembrarEstado(page, { busqueda: 'xyz_sin_resultados_99' });
+  22 |     await page.goto('/donde-comer-cdu/');
+  23 |     await page.waitForLoadState('networkidle');
+  24 |     await expect(page).toHaveScreenshot('03-busqueda-vacia.png', { fullPage: true });
+  25 |   });
+  26 | 
+  27 |   test('04-mapa-interactivo', async ({ page }) => {
+  28 |     await sembrarEstado(page, { region: 'exploracion' });
+  29 |     await page.goto('/donde-comer-cdu/');
+  30 |     await page.waitForLoadState('networkidle');
+  31 |     await expect(page).toHaveScreenshot('04-mapa-interactivo.png', { fullPage: true });
+  32 |   });
+  33 | 
+  34 |   test('05-ficha', async ({ page }) => {
+  35 |     await page.goto('/donde-comer-cdu/locales/papa-luigi/');
+  36 |     await page.waitForLoadState('networkidle');
+  37 |     await expect(page).toHaveScreenshot('05-ficha.png', { fullPage: true });
+  38 |   });
+  39 | 
+  40 | });
+  41 | 
+```
