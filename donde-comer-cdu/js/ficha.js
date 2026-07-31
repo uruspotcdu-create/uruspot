@@ -205,13 +205,6 @@
     var bg = estado.abierto === null ? neutralBg : (estado.abierto ? openBg : closedBg);
     var label = estado.abierto === null ? estado.mensaje : (estado.abierto ? "Abierto ahora" : "Cerrado");
 
-    // Fase 4 (Motion Direction Bible v2.0, Parte H.1): dato crítico
-    // durante la transición de apertura de ficha — permanece quieto
-    // por decisión explícita, no por ausencia de estilo.
-    [pill, dot, val].forEach(function (el) {
-      if (el && el.classList) el.classList.add("u-mov-quieto");
-    });
-
     if (pill) { pill.style.background = bg; pill.style.color = color; }
     if (dot) dot.style.background = color;
     if (text) text.textContent = label;
@@ -250,27 +243,6 @@
     }
   }
 
-  /* ───────────────────────── PICTOGRAMA DE RUBRO (5ta superficie) ─────────
-     Fase 4 — URUSPOT-PENDIENTES §6: URU_RUBROS_ICONO_SVG() ya se usaba en
-     el filtro "Por rubro", la leyenda del mapa y la tarjeta de
-     descubrimiento (3 de 5 superficies) — acá se conecta la 5ta: la
-     ficha. Reusa exactamente la misma función compartida (rubros-meta.js,
-     cargado en esta página junto a ficha.js) en vez de rearmar el SVG a
-     mano, para no duplicar la fuente de verdad de los íconos. */
-  function aplicarIconoRubro() {
-    if (!DATA.rubro || typeof window.URU_RUBROS_ICONO_SVG !== "function") return;
-    var eyebrow = document.querySelector(".hero-eyebrow");
-    if (!eyebrow || eyebrow.querySelector(".rubro-icono")) return;
-    var icono = window.URU_RUBROS_ICONO_SVG(DATA.rubro, { tam: 14, clase: "hero-eyebrow-icono" });
-    if (!icono) return;
-    var linea = eyebrow.querySelector(".eyebrow-line");
-    if (linea) {
-      linea.insertAdjacentHTML("afterend", icono);
-    } else {
-      eyebrow.insertAdjacentHTML("afterbegin", icono);
-    }
-  }
-
   /* ───────────────────────── COMPARTIR ───────────────────────── */
 
   function initShare() {
@@ -290,6 +262,124 @@
     });
   }
 
+  /* ───────────────────────── RESEÑAS PROPIAS (URU SPOT) ─────────────────────
+     Reseñas de primera parte, recolectadas en el propio sitio y moderadas
+     antes de publicarse (ver functions/reviews.js). Es la contraparte real
+     del chip "Google" de la hero: acá el promedio SÍ puede volver a vivir en
+     el JSON-LD como aggregateRating el día que haya volumen suficiente,
+     porque a diferencia del dato de Google, este nace en uruspot.pages.dev. */
+
+  function formatearFecha(iso) {
+    try {
+      return new Date(iso).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" });
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function escaparHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str == null ? "" : String(str);
+    return div.innerHTML;
+  }
+
+  function estrellas(n) {
+    var llenas = Math.max(0, Math.min(5, Math.round(n)));
+    return "★★★★★☆☆☆☆☆".slice(5 - llenas, 10 - llenas);
+  }
+
+  function pintarResenas(datos) {
+    var resumen = document.getElementById("reviewsSummary");
+    var lista = document.getElementById("reviewsList");
+    if (!resumen || !lista) return;
+
+    if (!datos || !datos.total) {
+      resumen.innerHTML = '<p class="reviews-empty">Todavía no hay reseñas de URU SPOT para este lugar. ¡Sé la primera persona en dejar la tuya!</p>';
+      lista.innerHTML = "";
+      return;
+    }
+
+    resumen.innerHTML =
+      '<span class="reviews-promedio">' + estrellas(datos.promedio) + " " + datos.promedio.toFixed(1).replace(".", ",") + "</span>" +
+      '<span class="reviews-total">basado en ' + datos.total + (datos.total === 1 ? " reseña" : " reseñas") + " de URU SPOT</span>";
+
+    lista.innerHTML = datos.resenas.map(function (r) {
+      return (
+        '<li class="review-item">' +
+        '<div class="review-item-head">' +
+        '<span class="review-autor">' + escaparHtml(r.autor) + "</span>" +
+        '<span class="review-estrellas" aria-label="' + r.puntuacion + ' de 5">' + estrellas(r.puntuacion) + "</span>" +
+        "</div>" +
+        (r.comentario ? '<p class="review-comentario">' + escaparHtml(r.comentario) + "</p>" : "") +
+        '<span class="review-fecha">' + formatearFecha(r.fecha) + "</span>" +
+        "</li>"
+      );
+    }).join("");
+  }
+
+  function cargarResenas() {
+    var resumen = document.getElementById("reviewsSummary");
+    if (!resumen || !DATA.uru_id) return;
+
+    fetch("/reviews?id=" + encodeURIComponent(DATA.uru_id))
+      .then(function (res) { if (!res.ok) throw new Error("http_" + res.status); return res.json(); })
+      .then(pintarResenas)
+      .catch(function () {
+        resumen.innerHTML = '<p class="reviews-empty">No pudimos cargar las reseñas ahora. Probá de nuevo más tarde.</p>';
+      });
+  }
+
+  function initFormularioResenas() {
+    var form = document.getElementById("reviewForm");
+    var msg = document.getElementById("reviewFormMsg");
+    if (!form || !DATA.uru_id) return;
+
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      msg.textContent = "";
+
+      var autor = form.autor.value.trim();
+      var puntuacion = Number(form.puntuacion.value);
+      var comentario = form.comentario.value.trim();
+      var website = form.website.value; // honeypot
+
+      if (!autor || !puntuacion) {
+        msg.textContent = "Completá tu nombre y una puntuación.";
+        msg.className = "reviews-form-msg reviews-form-msg--error";
+        return;
+      }
+
+      var btn = form.querySelector(".reviews-submit");
+      btn.disabled = true;
+
+      fetch("/reviews", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          id: DATA.uru_id,
+          autor: autor,
+          puntuacion: puntuacion,
+          comentario: comentario,
+          website: website,
+        }),
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error("http_" + res.status);
+          return res.json();
+        })
+        .then(function () {
+          form.reset();
+          msg.textContent = "¡Gracias! Tu reseña queda pendiente de una revisión rápida antes de publicarse.";
+          msg.className = "reviews-form-msg reviews-form-msg--ok";
+        })
+        .catch(function () {
+          msg.textContent = "No pudimos enviar tu reseña. Probá de nuevo en unos minutos.";
+          msg.className = "reviews-form-msg reviews-form-msg--error";
+        })
+        .then(function () { btn.disabled = false; });
+    });
+  }
+
   /* ───────────────────────── INIT ───────────────────────── */
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -297,6 +387,7 @@
     animarScores();
     initShare();
     aplicarNombreDeTransicion();
-    aplicarIconoRubro();
+    cargarResenas();
+    initFormularioResenas();
   });
 })();
