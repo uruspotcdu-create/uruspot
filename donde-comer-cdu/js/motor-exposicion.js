@@ -514,6 +514,60 @@
     return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
+  // PERF (auditoría performance, 2026-07-30): resultadosPorAccionExplicita()
+  // se ejecuta una vez por cada debounce del buscador (cada 160ms mientras
+  // se escribe, ver DEBOUNCE_BUSQUEDA_MS en app.js) y, sin este cache,
+  // volvía a llamar normalizarTexto() — toLowerCase + normalize('NFD') +
+  // regex, Unicode, no gratis — sobre nombre/categoría/dirección de los
+  // ~1468 lugares del catálogo COMPLETO en cada una de esas llamadas,
+  // aunque esos tres campos casi nunca cambian entre una tecla y la
+  // siguiente. Medido sobre el dataset real (lugares-core.json): ~3.8ms
+  // por tecla solo en normalización repetida — no es 60fps, pero si el
+  // usuario escribe rápido en un dispositivo Android de gama baja
+  // (varias veces más lento que el equipo de desarrollo) esto compite en
+  // el mismo hilo con el render que sigue inmediatamente después.
+  //
+  // Se cachea por VALOR, no por identidad del objeto `lugar`: la clave es
+  // el objeto (WeakMap, se libera solo si el lugar deja de referenciarse
+  // en algún momento), pero cada entrada guarda también los tres strings
+  // crudos que la originaron. `lugares-detalles.json` puede llenar
+  // `direccion` (null → string real) después del primer render/búsqueda
+  // (carga en segundo plano, ver cargarDetallesEnSegundoPlano en app.js)
+  // — comparar el valor crudo en cada lookup evita servir una
+  // normalización vieja de "null" una vez que la dirección real llega.
+  // No se muta `lugar` en ningún momento: motor-test.js §67 ("Pureza:
+  // recortePorIniciativaPropia no muta el registro de entrada") exige
+  // exactamente esa propiedad para este archivo, y un cache por WeakMap
+  // externo la respeta por construcción — `JSON.stringify(lugar)` da
+  // igual antes y después de pasar por acá.
+  var cacheNormalizacion = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function normalizadoDe(lugar) {
+    if (!cacheNormalizacion) {
+      return {
+        nombre: normalizarTexto(lugar.nombre),
+        categoria: normalizarTexto(lugar.categoria),
+        direccion: normalizarTexto(lugar.direccion)
+      };
+    }
+    var previo = cacheNormalizacion.get(lugar);
+    if (previo &&
+      previo.srcNombre === lugar.nombre &&
+      previo.srcCategoria === lugar.categoria &&
+      previo.srcDireccion === lugar.direccion) {
+      return previo;
+    }
+    var entrada = {
+      srcNombre: lugar.nombre,
+      srcCategoria: lugar.categoria,
+      srcDireccion: lugar.direccion,
+      nombre: normalizarTexto(lugar.nombre),
+      categoria: normalizarTexto(lugar.categoria),
+      direccion: normalizarTexto(lugar.direccion)
+    };
+    cacheNormalizacion.set(lugar, entrada);
+    return entrada;
+  }
+
   // Rango de relevancia, de más a menos específico (0 = mejor). null
   // = no matchea nada. El orden de los checks —nombre exacto > nombre
   // empieza con > nombre contiene > categoría > dirección— es el
@@ -547,10 +601,8 @@
     var candidatos = [];
     for (var i = 0; i < registro.length; i++) {
       var lugar = registro[i];
-      var nombre = normalizarTexto(lugar.nombre);
-      var categoria = normalizarTexto(lugar.categoria);
-      var direccion = normalizarTexto(lugar.direccion);
-      var rango = rangoDeCoincidencia(nombre, categoria, direccion, q);
+      var norm = normalizadoDe(lugar);
+      var rango = rangoDeCoincidencia(norm.nombre, norm.categoria, norm.direccion, q);
       if (rango === null) continue;
       candidatos.push({ lugar: lugar, rango: rango, indiceOriginal: i });
     }
