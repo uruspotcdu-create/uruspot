@@ -211,6 +211,7 @@
 <link rel="stylesheet" href="css/destacados.css">
 <link rel="stylesheet" href="css/mapa.css">
 <link rel="stylesheet" href="css/descubrimiento.css">
+<link rel="stylesheet" href="css/pwa-instalar.css">
 <!-- impresion.css: nueva (auditoría 4ª pasada) — el documento no
      tenía ninguna hoja media="print" pese a que varias secciones
      (Sobre la ciudad, Guía práctica, Glosario) son contenido de
@@ -1658,6 +1659,24 @@ if ('serviceWorker' in navigator) {
 
 </main>
 
+<!-- BANNER DE INSTALACIÓN PWA — ver js/pwa-instalar.js.
+     Arranca hidden: pwa-instalar.js lo revela solo si detecta que
+     (a) todavía no está instalada, (b) no la cerraste hace menos de
+     14 días, y (c) el navegador soporta instalación (Chrome/Edge/
+     Android vía beforeinstallprompt) o es iOS (instrucciones
+     manuales, ya que Safari no tiene API de instalación). -->
+<div id="pwaInstalarBanner" class="pwa-instalar-banner" hidden role="dialog" aria-label="Instalar URU SPOT como app">
+  <img src="img/icon-192.png" width="40" height="40" alt="" class="pwa-instalar-banner__icono">
+  <div class="pwa-instalar-banner__texto">
+    <span id="pwaInstalarTitulo" class="pwa-instalar-banner__titulo">Instalá el mapa en tu celular</span>
+    <span id="pwaInstalarSubtitulo" class="pwa-instalar-banner__subtitulo">Acceso directo, sin ocupar espacio de tienda.</span>
+  </div>
+  <div class="pwa-instalar-banner__acciones">
+    <button id="pwaInstalarBtn" type="button" class="btn btn--primario pwa-instalar-banner__instalar" hidden>Instalar</button>
+    <button id="pwaInstalarCerrar" type="button" class="btn btn--icono pwa-instalar-banner__cerrar" aria-label="Cerrar aviso de instalación">×</button>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer class="envoltorio" role="contentinfo">
   <p>URU SPOT — Concepción del Uruguay, Entre Ríos</p>
@@ -1676,6 +1695,7 @@ if ('serviceWorker' in navigator) {
      contenía un onclick="..." — doblemente bloqueado. Ver fix de
      la auditoría §I5. -->
 <script src="js/failsafe-reintentar.js" defer></script>
+<script src="js/pwa-instalar.js" defer></script>
 
 <!-- ESTRATEGIA DE LAZY LOADING PARA IMÁGENES DINÁMICAS — documentación
      de contrato para motor-render.js, no código ejecutable. Vive acá

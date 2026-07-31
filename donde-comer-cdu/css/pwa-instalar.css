@@ -1,0 +1,103 @@
+/* ═══════════════════════════════════════════════════════════════════
+   donde-comer-cdu/css/pwa-instalar.css
+
+   Banner propio de "instalar como app". No usa el prompt nativo del
+   navegador (poco fiable, aparece cuando el navegador decide y nunca
+   en iOS) — captura beforeinstallprompt y lo dispara desde un botón
+   visible. En iOS (que no tiene beforeinstallprompt) explica el paso
+   manual de Compartir → Agregar a inicio.
+
+   Solo usa tokens ya declarados en tokens.css — cero valores nuevos.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.pwa-instalar-banner {
+  position: fixed;
+  left: var(--esp-4);
+  right: var(--esp-4);
+  bottom: var(--esp-4);
+  z-index: 40;
+
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  max-width: 460px;
+  margin: 0 auto;
+  padding: var(--esp-3) var(--esp-3) var(--esp-3) var(--esp-4);
+
+  border-radius: var(--radio-lg);
+  border: 1px solid var(--glass-borde);
+  background: var(--glass-bg-fuerte);
+  backdrop-filter: blur(var(--glass-blur-fuerte));
+  -webkit-backdrop-filter: blur(var(--glass-blur-fuerte));
+  box-shadow: var(--sombra-alta);
+
+  animation: uru-fade-up var(--dur-lenta) var(--easing-estandar) both;
+}
+
+.pwa-instalar-banner[hidden] {
+  display: none;
+}
+
+.pwa-instalar-banner__icono {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radio-md);
+  object-fit: cover;
+  box-shadow: var(--sombra-baja);
+}
+
+.pwa-instalar-banner__texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-instalar-banner__titulo {
+  display: block;
+  font: var(--tipo-cuerpo-sm);
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.pwa-instalar-banner__subtitulo {
+  display: block;
+  margin-top: 2px;
+  font: var(--tipo-dato-xs);
+  color: var(--color-tinta-60);
+}
+
+.pwa-instalar-banner__acciones {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.pwa-instalar-banner__instalar {
+  white-space: nowrap;
+}
+
+.pwa-instalar-banner__cerrar {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Mobile: banner ocupa el ancho, mismo criterio que --esp-4 lateral */
+@media (max-width: 480px) {
+  .pwa-instalar-banner {
+    left: var(--esp-3);
+    right: var(--esp-3);
+    bottom: var(--esp-3);
+    padding: var(--esp-3);
+  }
+  .pwa-instalar-banner__subtitulo {
+    display: none; /* en pantallas chicas, solo título + acciones */
+  }
+}
+
+/* Alguien con "reducir movimiento" activado no necesita la entrada animada */
+@media (prefers-reduced-motion: reduce) {
+  .pwa-instalar-banner {
+    animation: none;
+  }
+}
