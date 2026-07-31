@@ -173,6 +173,11 @@
   // ya calculado llega al DOM.
   var INTERVALO_ESCRITURA = 3; // 1 de cada 3 frames ⇒ ~20fps de escritura real en pantallas 60Hz
   var contadorFrames = 0;
+  // Etapa 3 (Roadmap A+B — Contrato común): último valor efectivamente
+  // escrito al DOM, para que read() pueda exponerlo sin tener que
+  // volver a leer la propia custom property de <html> (evitar un
+  // getComputedStyle innecesario) ni recalcular nada.
+  var ultimoValorEscrito = 0;
 
   function aplicar() {
     if (typeof document === 'undefined' || !document.documentElement) return;
@@ -198,6 +203,7 @@
     contadorFrames++;
     if ((contadorFrames % INTERVALO_ESCRITURA) !== 0) return;
 
+    ultimoValorEscrito = valor;
     document.documentElement.style.setProperty('--amb-respiracion', valor.toFixed(4));
   }
 
@@ -241,6 +247,53 @@
   var listenerRegistrado = false;
 
   var api = {
+    // Etapa 3 (Roadmap A+B — Contrato común, ver ambiente-contrato.js).
+    id: 'respiracion',
+    // tier:'core' (nunca 'visual'): Cap. 8 "Cómo nunca desaparece" es
+    // explícito — el ciclo "nunca se detiene por completo mientras el
+    // sitio está abierto", solo se atenúa (PISO_REDUCIDO/PISO_ABSOLUTO
+    // arriba). Ningún nivel de fidelidad lo apaga, a diferencia de
+    // clima — coherente con isActive() de abajo.
+    tier: 'core',
+    // frequency:'full': el cómputo (seno + suavizado exponencial de
+    // multiplicadorActual) debe correr en TODOS los frames — es lo que
+    // ya documenta el bloque PERF más arriba: la fase se acumula con
+    // el timestamp real del rAF y TASA_SUAVIZADO está calibrada "por
+    // frame", saltear cómputos correría la convergencia de Foco/Carga
+    // en tiempo real. Lo que YA está throttleado (INTERVALO_ESCRITURA)
+    // es la escritura al DOM, un eje aparte que el contrato no cubre
+    // todavía — ver nota en step() abajo.
+    frequency: 'full',
+    // Siempre true: coherente con tier:'core' y con el propio Cap. 8
+    // citado arriba. Se declara explícitamente como función (no una
+    // constante) para cumplir la forma del contrato y para que, si el
+    // día de mañana Cap. 8 cambiara de criterio, el cambio quede en
+    // un solo lugar.
+    isActive: function (fidelidad) { return true; },
+
+    // step(dt, sharedState): no-op, igual que en ambiente-clima.js —
+    // misma razón de fondo, distinto motivo puntual. Acá el ciclo real
+    // ya vive en tick()/aplicar() de arriba, corriendo por su propio
+    // rAF con su propio timestamp de alta precisión — no por dt
+    // inyectado por un orquestador que todavía no existe (Etapa 5).
+    // Migrar el cómputo a step(dt,...) hoy exigiría además separar la
+    // escritura ya throttleada (INTERVALO_ESCRITURA) de un mecanismo
+    // que no sabe todavía a qué cadencia lo va a llamar el futuro
+    // writer único — mezclar ambos throttles sin ese writer sería
+    // adivinar. Se documenta como desviación explícita, misma
+    // filosofía que ambiente-contrato.js pide para no aplicar nada en
+    // silencio.
+    step: function (dt, sharedState) {},
+
+    // read(): último estado ya calculado y ya escrito, sin recalcular
+    // ni leer el DOM de vuelta.
+    read: function () {
+      return {
+        multiplicador: multiplicadorActual,
+        valor: ultimoValorEscrito
+      };
+    },
+
     // Diagnóstico de solo lectura — ningún otro módulo debería
     // necesitar esto en operación normal, ya que el contrato real es
     // la variable CSS.
@@ -272,6 +325,12 @@
     }
   };
 
-  global.AmbienteRespiracion = api;
+  // Etapa 3: mismo criterio que ambiente-clima.js — envuelto con
+  // AmbienteContrato.crear() cuando existe, con fallback defensivo al
+  // api crudo si por algún desorden de carga no estuviera disponible
+  // todavía (preferible un módulo sin validar a un módulo ausente).
+  global.AmbienteRespiracion = global.AmbienteContrato
+    ? global.AmbienteContrato.crear(api)
+    : api;
 
 })(window);
