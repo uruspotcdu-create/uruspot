@@ -1703,6 +1703,16 @@
       // sin cortes. Se seguí acá con Touch Events puros (no con
       // Pointer Events: ese dedo nunca se activó como puntero de
       // arrastre, ver touchend) hasta que se suelte del todo.
+      if (e.touches.length === 1 && enPellizco) {
+        // El usuario acaba de levantar un dedo pero sigue presionando otro.
+        // Inicializar pan táctil único SOLO ahora, en el primer movimiento.
+        var t = e.touches[0];
+        if (!panTactilUnico) {
+          muestrasMovimiento = [];
+          panTactilUnico = { id: t.identifier, x: t.clientX, y: t.clientY };
+          registrarMuestra(t.clientX, t.clientY);
+        }
+      }
       if (e.touches.length === 1 && panTactilUnico) {
         var t = e.touches[0];
         var dx = t.clientX - panTactilUnico.x, dy = t.clientY - panTactilUnico.y;
@@ -1718,15 +1728,12 @@
     lienzo.addEventListener('touchmove', alTouchmoveContenedor, { passive: false });
     function alTouchendContenedor(e) {
       e.preventDefault();
-      if (e.touches.length === 1 && enPellizco) {
-        var t = e.touches[0];
-        muestrasMovimiento = [];
-        panTactilUnico = { id: t.identifier, x: t.clientX, y: t.clientY };
-        registrarMuestra(t.clientX, t.clientY);
+      if (e.touches.length < 2) { 
+        pinchDist0 = null;
+        pinchCentro0 = null;
+        if (e.touches.length === 0) enPellizco = false;
       }
-      if (e.touches.length < 2) { pinchDist0 = null; pinchCentro0 = null; }
       if (e.touches.length === 0) {
-        enPellizco = false;
         if (panTactilUnico) { panTactilUnico = null; iniciarInercia(); }
       }
     }
