@@ -33,27 +33,21 @@
 <link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com">
 
 <!-- PRELOAD DEL CATÁLOGO (perf, iteración 3): sin esto, el fetch() real
-     de lugares-core.json no arranca hasta que corre js/app.js — que es
-     el ÚLTIMO de los 5 <script defer> de abajo, así que solo empieza a
-     descargarse después de que los otros 4 (motor.bundle.js +
-     ambiente.bundle.js + coreografias.js + diagnostico-rendimiento-
-     temporal.js, ~196 KB gzip en total) ya bajaron Y se ejecutaron
-     entero. Ese orden es correcto para el JS (dependencias reales,
-     ver §5), pero no hay ninguna razón para que la RED espere lo
-     mismo: el JSON del catálogo (44.6 KB gzip) no depende de que el
-     JS haya terminado de correr, solo de que exista la URL. Con este
-     preload, el navegador arranca la descarga del JSON en paralelo
-     con la del JS desde el primer instante; para cuando app.js llega
-     a pedirlo de verdad (fetchJSON en cargarCatalogo()), la respuesta
-     ya está en tránsito o directamente lista. `as="fetch"` +
-     `crossorigin` son obligatorios para que el navegador reconozca
-     este preload como el mismo recurso que el fetch() posterior de
-     app.js (si no matchean modo/credenciales, el preload no se
-     reutiliza) — mismo-origen, así que "crossorigin" sin valor basta
-     (equivale a "anonymous"). No se precarga lugares-detalles.json ni
-     lugares-estado.json a propósito: esos SÍ deben esperar
-     (requestIdleCallback, ver app.js §11) para no competir por ancho
-     de banda con el catálogo principal. -->
+     de lugares-core.json no arranca hasta que corre js/app.js. Desde
+     Fase 2.1 (perf, 2026-08-01) app.min.js es el SEGUNDO de solo 2
+     <script defer> de negocio (motor.bundle.js + app.min.js — el
+     Ambient Engine ya no cuenta acá, ver comentario junto a
+     app.min.js más abajo), así que esto ya importa menos que antes,
+     pero el preload se mantiene: la red no tiene por qué esperar a
+     que motor.bundle.js termine de ejecutarse para empezar a bajar el
+     JSON. `as="fetch"` + `crossorigin` son obligatorios para que el
+     navegador reconozca este preload como el mismo recurso que el
+     fetch() posterior de app.js (si no matchean modo/credenciales, el
+     preload no se reutiliza) — mismo-origen, así que "crossorigin" sin
+     valor basta (equivale a "anonymous"). No se precarga
+     lugares-detalles.json ni lugares-estado.json a propósito: esos SÍ
+     deben esperar (requestIdleCallback, ver app.js §11) para no
+     competir por ancho de banda con el catálogo principal. -->
 <link rel="preload" href="lugares-core.json" as="fetch" crossorigin>
 
 <!-- SCRIPTS DEFERRED — orden = grafo de dependencias, ver §5 arriba.
@@ -68,60 +62,44 @@
      abajo, actualizá también ORDEN en scripts/build-motor-bundle.js
      — el script valida que coincidan y falla si no. -->
 <script src="js/motor.bundle.js" defer></script>
-<!-- Ambient Engine — Fase 0 + Fase 1 + Fase 2 T0-T3 (ver docs/AMBIENT-ENGINE-FASE0-FASE1.md
-     y el documento de Arquitectura técnica). Orden fijo = grafo de
-     dependencias real entre grupos funcionales (Cap. 2.1/2.3):
-
-       1) Infraestructura (config → assets → diagnóstico): no dependen
-          de nadie más y todo lo demás puede depender de ellos.
-       2) Gobierno (accesibilidad, rendimiento): dependen solo de
-          Infraestructura.
-       3) State Manager: no depende de ningún otro grupo.
-       4) Motion Controller: el único subsistema de Contenido Visual
-          que puede leer Gobierno y Orquestación directamente — por
-          eso carga recién después de ambos.
-       5) Plane Manager (planos, Fase 3 Cap. 4.1): Contenido Visual
-          puro, depende únicamente del Motion Controller ya cargado.
-          Crea los 4 contenedores fijos (P0-P3) donde vivirán las
-          familias de assets; debe cargar antes que cualquier capa
-          que vaya a pedirle un contenedor.
-       5b) Familias P0 (Retícula, Curvas topográficas — Fase 3 Cap.
-           2): cada una pide su SVG al Asset Registry y se inserta en
-           el contenedor P0 del Plane Manager; dependen de éste y de
-           ambiente-assets.js, no entre sí.
-       6) Background Renderer (capa-fondo): Contenido Visual puro,
-          depende únicamente del Motion Controller ya cargado.
-       7) Orquestador: va último porque es el único módulo que conoce
-          a todos los demás (con `defer`, el orden de ejecución es el
-          orden del documento).
-
-     ambiente-senales.js (Fase 0) fue retirado: su rol quedó dividido
-     entre ambiente-accesibilidad.js y ambiente-rendimiento.js. -->
-<!-- Ambient Engine — perf, 2026-07-31: los 27 módulos ambiente-*.js
-     (código fuente, se siguen editando acá individualmente) se
-     concatenan a js/ambiente.bundle.js con
-     `node scripts/build-ambiente-bundle.js` antes de cada deploy.
-     Mismo grafo de ejecución (cada módulo es un IIFE autocontenido,
-     concatenar en orden = cargarlos por separado en orden), pero
-     27 requests HTTP se vuelven 1. Si tocás el grafo de dependencias
-     de arriba (orden de carga), actualizá también el arreglo ORDEN
-     en scripts/build-ambiente-bundle.js — el script valida que
-     ambos coincidan y falla si no. -->
-<script src="js/ambiente.bundle.js" defer></script>
-<!-- js/coreografias.js: NO es parte del Ambient Engine (no es ambiente-*,
-     Motion Direction Bible v2.0 Parte K.7) — es la capa de aplicación que
-     consume AmbienteGramatica/AmbienteRitmo/AmbienteAccesibilidad/
-     AmbientEngine para las coreografías reales de interfaz (tarjetas,
-     filtros, ficha, escenas por rama de navegación). Debe cargar después
-     de todos los ambiente-*.js y antes de app.js, que es quien lo consume. -->
-<script src="js/coreografias.js" defer></script>
 <!-- app.js (133 220 bytes fuente, ~52% comentarios de documentación en
-     español) se sirve minificado. Igual criterio que motor.bundle.js /
-     ambiente.bundle.js: terser en modo conservador (compress:false,
-     mangle:false) — solo strip de comentarios/espacios, cero riesgo de
-     romper referencias globales o ids del DOM. GENERADO — editar
-     js/app.js y correr `node scripts/build-app-min.js`
-     (o `npm run build:bundles`). -->
+     español) se sirve minificado. Igual criterio que motor.bundle.js:
+     terser en modo conservador (compress:false, mangle:false) — solo
+     strip de comentarios/espacios, cero riesgo de romper referencias
+     globales o ids del DOM. GENERADO — editar js/app.js y correr
+     `node scripts/build-app-min.js` (o `npm run build:bundles`).
+
+     PERF — Fase 2.1 (auditoría de rendimiento, 2026-08-01): app.min.js
+     se movió a cargar inmediatamente después de motor.bundle.js, ANTES
+     del Ambient Engine. Antes, con los 4 <script defer> en el orden
+     motor → ambiente → coreografias → app, el navegador tenía que
+     terminar de parsear Y EJECUTAR ~71 KB de ambiente.bundle.js (motor
+     decorativo puro, ninguna interacción real depende de él) antes de
+     que corriera una sola línea de la lógica real de catálogo/render.
+     Eso es tiempo de bloqueo de hilo principal, en el momento más
+     sensible (antes de la primera pintura útil), gastado en algo que
+     el usuario no pidió explícitamente.
+
+     Ahora el Ambient Engine (js/ambiente.bundle.js) y su capa de
+     aplicación (js/coreografias.js) YA NO son <script defer> estáticos
+     acá: se inyectan dinámicamente desde app.js
+     (cargarMotorAmbientalDiferido(), ver §11b) vía
+     requestIdleCallback, después de que arranca la carga del catálogo.
+     Mismo criterio que ya se usaba para lugares-detalles.json /
+     lugares-estado.json (§11): decoración no bloquea negocio.
+
+     Contrato de seguridad de esta migración (por qué no rompe nada):
+     todo llamador de window.AmbientEngine / window.Coreografias en
+     app.js YA estaba gateado con `if (window.AmbientEngine)` /
+     `if (window.Coreografias)` desde antes de este cambio (no-op
+     seguro si el motor todavía no cargó) — verificado línea por línea
+     antes de aplicar esta migración. El único efecto observable es
+     que, en el primer par de segundos tras la carga, esas llamadas
+     son no-op en vez de ejecutar contra el motor real (p. ej. el
+     registro de "fondo ocupado durante la carga" del Cap. 8 puede no
+     alcanzar a activarse si el catálogo responde muy rápido) — trade-
+     off aceptado a cambio de que app.min.js no espere más a algo
+     puramente decorativo. -->
 <script src="js/app.min.js" defer></script>
 
 <!-- TÍTULOS Y METADATOS CORE -->

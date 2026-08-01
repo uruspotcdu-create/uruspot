@@ -778,6 +778,13 @@
       inicializarTecladoNavegacion();
       inicializarGeolocation();
 
+      // Perf, Fase 2.1: el Ambient Engine ya no es <script defer> estático
+      // en el documento — se agenda acá (idle) para no competir con la
+      // carga del catálogo real, ver cargarMotorAmbientalDiferido() más
+      // abajo. No depende de STATE.LOADING_CATALOG ni de cargarCatalogo():
+      // es decorativo, no de negocio.
+      cargarMotorAmbientalDiferido();
+
       transicionarEstado(STATE.LOADING_CATALOG, 'startup');
       cargarCatalogo();
 
@@ -965,6 +972,65 @@
         ErrorRecovery.procesar(err, ERROR_TYPE.CATALOG_FETCH, 'cargarCatalogo');
         mostrarPanelErrorConReintento();
       });
+  }
+
+  /**
+   * Carga diferida del Ambient Engine + Coreografias (perf, Fase 2.1,
+   * 2026-08-01).
+   *
+   * Antes: js/ambiente.bundle.js y js/coreografias.js eran <script defer>
+   * estáticos en index.html, cargados ANTES de app.min.js — el navegador
+   * tenía que ejecutar ~71 KB raw de motor puramente decorativo antes de
+   * correr una sola línea de la lógica real de catálogo/render. Ahora
+   * motor.bundle.js → app.min.js es la única cadena bloqueante real
+   * (ver comentario junto al <script src="js/app.min.js"> en index.html);
+   * el Ambient Engine se inyecta acá, en idle, después de que arranca la
+   * carga del catálogo.
+   *
+   * Por qué es seguro (no exhaustivo, verificado contra el código real
+   * antes de este cambio): CADA llamador de window.AmbientEngine /
+   * window.Coreografias en este archivo ya estaba gateado con
+   * `if (window.AmbientEngine)` / `if (window.Coreografias)` — no-op
+   * seguro si el motor todavía no cargó. El único efecto observable es
+   * que esas llamadas pueden ser no-op durante el primer segundo o dos
+   * tras el arranque (p. ej. el registro visual de "cargando" del Cap. 8
+   * puede no alcanzar a activarse si el catálogo responde muy rápido).
+   *
+   * Orden de ejecución preservado a mano: `async = false` en ambos
+   * <script> creados dinámicamente asegura que, aunque los dos archivos
+   * terminen de descargarse en cualquier orden, se EJECUTEN en el orden
+   * en que se insertaron (spec de HTML: scripts dinámicos con
+   * async=false se ejecutan en orden de inserción, igual que `defer`)
+   * — ambiente.bundle.js antes que coreografias.js, igual que exigía el
+   * contrato viejo de <script defer> en el documento.
+   */
+  var motorAmbientalDiferidoLanzado = false;
+  function cargarMotorAmbientalDiferido() {
+    if (motorAmbientalDiferidoLanzado) return; // idempotente
+    motorAmbientalDiferidoLanzado = true;
+
+    var lanzar = function () {
+      ['js/ambiente.bundle.js', 'js/coreografias.js'].forEach(function (src) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.async = false; // preserva orden de ejecución entre los dos
+        s.onerror = function () {
+          console.warn('[AmbientEngine] no se pudo cargar ' + src + ' (diferido, no bloquea la app)');
+        };
+        document.head.appendChild(s);
+      });
+    };
+
+    // Igual criterio que cargarDetallesEnSegundoPlano: requestIdleCallback
+    // si está disponible, sino setTimeout corto. Timeout más bajo que el
+    // de detalles/estado (2000ms) porque esto sí queremos que aparezca
+    // razonablemente rápido — es decoración, pero no queremos que tarde
+    // segundos enteros en mostrarse tampoco.
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(lanzar, { timeout: 1200 });
+    } else {
+      setTimeout(lanzar, 100);
+    }
   }
 
   /**
