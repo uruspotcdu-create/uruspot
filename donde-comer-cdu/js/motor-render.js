@@ -1668,7 +1668,7 @@
         }
       }
     }
-    contenedor.addEventListener('touchstart', alTouchstartContenedor, { passive: true });
+    lienzo.addEventListener('touchstart', alTouchstartContenedor, { passive: true });
     function alTouchmoveContenedor(e) {
       if (e.touches.length === 2 && pinchDist0) {
         var d = distanciaToques(e.touches);
@@ -1713,7 +1713,7 @@
         redibujar();
       }
     }
-    contenedor.addEventListener('touchmove', alTouchmoveContenedor, { passive: true });
+    lienzo.addEventListener('touchmove', alTouchmoveContenedor, { passive: true });
     function alTouchendContenedor(e) {
       if (e.touches.length === 1 && enPellizco) {
         var t = e.touches[0];
@@ -1727,7 +1727,7 @@
         if (panTactilUnico) { panTactilUnico = null; iniciarInercia(); }
       }
     }
-    contenedor.addEventListener('touchend', alTouchendContenedor);
+    lienzo.addEventListener('touchend', alTouchendContenedor);
     function alTouchcancelContenedor() {
       // El sistema puede interrumpir el gesto (llamada entrante,
       // gesto de sistema del propio OS) sin `touchend` — sin este
@@ -1735,7 +1735,7 @@
       // próximo toque heredaba un estado de pellizco que ya no existe.
       pinchDist0 = null; pinchCentro0 = null; panTactilUnico = null; enPellizco = false;
     }
-    contenedor.addEventListener('touchcancel', alTouchcancelContenedor);
+    lienzo.addEventListener('touchcancel', alTouchcancelContenedor);
     function distanciaToques(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
     function centroToques(t) { return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 }; }
 
