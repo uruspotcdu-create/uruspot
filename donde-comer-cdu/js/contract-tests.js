@@ -231,10 +231,15 @@ function correr() {
 
   // app.js debe ser el último script "real" de negocio (después de
   // todos los motor-*.js — sueltos o dentro de un bundle — y de
-  // ambiente-orquestador.js, si existe)
-  const pApp = posicionVirtual(orden, posicionesBundle, 'app.js');
+  // ambiente-orquestador.js, si existe). Perf (auditoría de rendimiento):
+  // en producción index.html carga js/app.min.js (versión minificada
+  // generada por scripts/build-app-min.js), no js/app.js directo — el
+  // contrato de orden sigue siendo el mismo, solo cambia el nombre de
+  // archivo que se busca en <script src>.
+  const nombreAppEnHtml = orden.includes('app.min.js') ? 'app.min.js' : 'app.js';
+  const pApp = posicionVirtual(orden, posicionesBundle, nombreAppEnHtml);
   if (!pApp) {
-    console.error('  ✗ app.js no aparece como <script src="js/app.js">');
+    console.error(`  ✗ app.js no aparece como <script src="js/${nombreAppEnHtml}">`);
     fallos++;
   } else {
     const nombresMotor = new Set([

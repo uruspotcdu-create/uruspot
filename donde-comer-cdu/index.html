@@ -120,7 +120,14 @@
      filtros, ficha, escenas por rama de navegación). Debe cargar después
      de todos los ambiente-*.js y antes de app.js, que es quien lo consume. -->
 <script src="js/coreografias.js" defer></script>
-<script src="js/app.js" defer></script>
+<!-- app.js (133 220 bytes fuente, ~52% comentarios de documentación en
+     español) se sirve minificado. Igual criterio que motor.bundle.js /
+     ambiente.bundle.js: terser en modo conservador (compress:false,
+     mangle:false) — solo strip de comentarios/espacios, cero riesgo de
+     romper referencias globales o ids del DOM. GENERADO — editar
+     js/app.js y correr `node scripts/build-app-min.js`
+     (o `npm run build:bundles`). -->
+<script src="js/app.min.js" defer></script>
 
 <!-- TÍTULOS Y METADATOS CORE -->
 <title>URU SPOT — descubrí Concepción del Uruguay</title>

@@ -4,7 +4,7 @@
   "description": "URU SPOT — Guía local de Concepción del Uruguay. Sitio estático; sin build step para el HTML/CSS. Los bundles JS (motor.bundle.js, ambiente.bundle.js) sí tienen un paso de build manual — ver scripts/build-motor-bundle.js y scripts/build-ambiente-bundle.js (perf, iteración 4: concatenan + minifican comentarios antes de cada deploy).",
   "scripts": {
     "sitemap": "node scripts/generar-sitemap.js",
-    "build:bundles": "node scripts/build-motor-bundle.js && node scripts/build-ambiente-bundle.js",
+    "build:bundles": "node scripts/build-motor-bundle.js && node scripts/build-ambiente-bundle.js && node scripts/build-app-min.js && node scripts/build-css-bundle.js",
     "test": "node donde-comer-cdu/js/run-tests.js"
   },
   "devDependencies": {
