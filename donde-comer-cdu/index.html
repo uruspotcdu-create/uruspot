@@ -32,6 +32,30 @@
 <link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com">
 <link rel="dns-prefetch" href="https://d.basemaps.cartocdn.com">
 
+<!-- PRELOAD DEL CATÁLOGO (perf, iteración 3): sin esto, el fetch() real
+     de lugares-core.json no arranca hasta que corre js/app.js — que es
+     el ÚLTIMO de los 5 <script defer> de abajo, así que solo empieza a
+     descargarse después de que los otros 4 (motor.bundle.js +
+     ambiente.bundle.js + coreografias.js + diagnostico-rendimiento-
+     temporal.js, ~196 KB gzip en total) ya bajaron Y se ejecutaron
+     entero. Ese orden es correcto para el JS (dependencias reales,
+     ver §5), pero no hay ninguna razón para que la RED espere lo
+     mismo: el JSON del catálogo (44.6 KB gzip) no depende de que el
+     JS haya terminado de correr, solo de que exista la URL. Con este
+     preload, el navegador arranca la descarga del JSON en paralelo
+     con la del JS desde el primer instante; para cuando app.js llega
+     a pedirlo de verdad (fetchJSON en cargarCatalogo()), la respuesta
+     ya está en tránsito o directamente lista. `as="fetch"` +
+     `crossorigin` son obligatorios para que el navegador reconozca
+     este preload como el mismo recurso que el fetch() posterior de
+     app.js (si no matchean modo/credenciales, el preload no se
+     reutiliza) — mismo-origen, así que "crossorigin" sin valor basta
+     (equivale a "anonymous"). No se precarga lugares-detalles.json ni
+     lugares-estado.json a propósito: esos SÍ deben esperar
+     (requestIdleCallback, ver app.js §11) para no competir por ancho
+     de banda con el catálogo principal. -->
+<link rel="preload" href="lugares-core.json" as="fetch" crossorigin>
+
 <!-- SCRIPTS DEFERRED — orden = grafo de dependencias, ver §5 arriba.
      No reordenar sin leer esa sección. -->
 <!-- Núcleo (motor + metadatos + slugs) — perf, 2026-07-31: los 10
