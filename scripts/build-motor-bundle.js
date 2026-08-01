@@ -30,6 +30,18 @@
  * el documento. No borrar ni reformatear esos marcadores sin también
  * actualizar contract-tests.js.
  *
+ * MINIFICACIÓN (perf, iteración 4): el 58% de este bundle eran
+ * comentarios de documentación de los módulos fuente — valiosos para
+ * quien EDITA js/motor-*.js, pero puro peso muerto para quien solo
+ * los descarga y ejecuta en el navegador (jamás los lee). Se
+ * conservan intactos en los módulos fuente (nada se borra ahí); acá
+ * se usa terser en modo conservador — SOLO strip de comentarios y
+ * espacios (`compress:false, mangle:false`), CERO reescritura de
+ * lógica o nombres — para no introducir ningún riesgo funcional. Los
+ * marcadores `/* ==== *\/` y esta cabecera se preservan explícitamente
+ * (ver `comments` en minificar() abajo) porque contract-tests.js los
+ * necesita para seguir verificando el orden real de carga.
+ *
  * Uso:
  *   node scripts/build-motor-bundle.js
  */
@@ -38,9 +50,33 @@
 
 const fs = require('fs');
 const path = require('path');
+const terser = require('terser');
 
 const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
 const SALIDA = path.join(JS_DIR, 'motor.bundle.js');
+
+// Conserva SOLO lo que algo en el repo necesita seguir leyendo del
+// bundle generado: los marcadores de módulo (contract-tests.js) y la
+// cabecera "GENERADO, NO EDITAR A MANO" (para que quien abra el
+// archivo por error sepa dónde está la fuente real). Todo lo demás
+// —la documentación de diseño de cada módulo, ya intacta en su
+// archivo fuente— se descarta acá.
+function conservarComentario(_nodo, comentario) {
+  var v = comentario.value;
+  if (/GENERADO, NO EDITAR A MANO/.test(v)) return true;
+  if (/^\s*====\s*[\w.-]+\.js\s*====\s*$/.test(v)) return true;
+  return false;
+}
+
+async function minificar(codigo) {
+  var resultado = await terser.minify(codigo, {
+    compress: false,
+    mangle: false,
+    format: { comments: conservarComentario }
+  });
+  if (resultado.error) throw resultado.error;
+  return resultado.code;
+}
 
 const ORDEN = [
   'motor-config.js',
@@ -79,7 +115,7 @@ function quitarBOM(texto) {
   return texto.charCodeAt(0) === 0xfeff ? texto.slice(1) : texto;
 }
 
-function build() {
+async function build() {
   validarQueArchivosExisten();
 
   const partes = ORDEN.map((archivo) => {
@@ -95,11 +131,19 @@ function build() {
     ` * de este archivo para seguir verificando el orden real.\n` +
     ` * Generado: ${new Date().toISOString()}\n */\n\n`;
 
-  fs.writeFileSync(SALIDA, cabecera + partes.join('\n'), 'utf8');
+  const sinMinificar = cabecera + partes.join('\n');
+  const bytesSinMinificar = Buffer.byteLength(sinMinificar);
+
+  const minificado = await minificar(sinMinificar);
+  fs.writeFileSync(SALIDA, minificado, 'utf8');
 
   const bytesBundle = fs.statSync(SALIDA).size;
   console.log(`Bundle generado: ${SALIDA}`);
-  console.log(`${ORDEN.length} módulos → 1 archivo (${bytesBundle} bytes, cabecera incluida).`);
+  console.log(`${ORDEN.length} módulos → 1 archivo.`);
+  console.log(`Sin minificar: ${bytesSinMinificar} bytes → minificado: ${bytesBundle} bytes (-${(100 * (1 - bytesBundle / bytesSinMinificar)).toFixed(1)}%).`);
 }
 
-build();
+build().catch((err) => {
+  console.error('Falló el build de motor.bundle.js:', err);
+  process.exit(1);
+});

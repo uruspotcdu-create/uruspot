@@ -26,19 +26,44 @@
  *
  * Hay que correrlo cada vez que se edita algún js/ambiente-*.js, antes
  * de commitear — igual que index.html documenta que hay que tocar el
- * orden a mano si cambia el grafo de dependencias. No corre solo en
- * ningún hook todavía (el repo es "sin build step" por decisión, este
- * es un paso opcional que solo aplica a este bundle puntual).
+ * orden a mano si cambia el grafo de dependencias.
+ *
+ * MINIFICACIÓN (perf, iteración 4): el 61% de este bundle eran
+ * comentarios de documentación de los módulos fuente — valiosos para
+ * quien EDITA js/ambiente-*.js, puro peso muerto para quien solo los
+ * descarga y ejecuta. Se conservan intactos en los módulos fuente;
+ * acá se usa terser en modo conservador — SOLO strip de comentarios
+ * y espacios (`compress:false, mangle:false`), CERO reescritura de
+ * lógica o nombres. La cabecera "GENERADO, NO EDITAR A MANO" se
+ * preserva explícitamente (ver `comments` en minificar() abajo).
  */
 
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
+const terser = require('terser');
 
 const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
 const INDEX_HTML = path.join(__dirname, '..', 'donde-comer-cdu', 'index.html');
 const SALIDA = path.join(JS_DIR, 'ambiente.bundle.js');
+
+function conservarComentario(_nodo, comentario) {
+  var v = comentario.value;
+  if (/GENERADO, NO EDITAR A MANO/.test(v)) return true;
+  if (/^\s*====\s*[\w.-]+\.js\s*====\s*$/.test(v)) return true;
+  return false;
+}
+
+async function minificar(codigo) {
+  var resultado = await terser.minify(codigo, {
+    compress: false,
+    mangle: false,
+    format: { comments: conservarComentario }
+  });
+  if (resultado.error) throw resultado.error;
+  return resultado.code;
+}
 
 // Orden real, copiado del grafo de dependencias documentado en
 // index.html (comentario "Ambient Engine — Fase 0 + Fase 1 + Fase 2").
@@ -109,7 +134,7 @@ function validarContraDirectorio() {
   }
 }
 
-function build() {
+async function build() {
   validarContraDirectorio();
 
   const partes = ORDEN.map((archivo) => {
@@ -124,15 +149,20 @@ function build() {
     ` *   node scripts/build-ambiente-bundle.js\n` +
     ` * Generado: ${new Date().toISOString()}\n */\n\n`;
 
-  fs.writeFileSync(SALIDA, cabecera + partes.join('\n'), 'utf8');
+  const sinMinificar = cabecera + partes.join('\n');
+  const bytesSinMinificar = Buffer.byteLength(sinMinificar);
 
-  const bytesOriginal = ORDEN.reduce(
-    (acc, f) => acc + fs.statSync(path.join(JS_DIR, f)).size, 0
-  );
+  const minificado = await minificar(sinMinificar);
+  fs.writeFileSync(SALIDA, minificado, 'utf8');
+
   const bytesBundle = fs.statSync(SALIDA).size;
   console.log(`Bundle generado: ${SALIDA}`);
-  console.log(`${ORDEN.length} módulos → 1 archivo (${bytesBundle} bytes, cabecera incluida).`);
+  console.log(`${ORDEN.length} módulos → 1 archivo.`);
+  console.log(`Sin minificar: ${bytesSinMinificar} bytes → minificado: ${bytesBundle} bytes (-${(100 * (1 - bytesBundle / bytesSinMinificar)).toFixed(1)}%).`);
   console.log('27 requests HTTP → 1 request para este bloque.');
 }
 
-build();
+build().catch((err) => {
+  console.error('Falló el build de ambiente.bundle.js:', err);
+  process.exit(1);
+});
