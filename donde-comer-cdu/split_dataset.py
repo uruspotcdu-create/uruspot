@@ -41,7 +41,17 @@ import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-SRC = BASE_DIR / "lugares-mapa.json"
+
+# lugares-mapa.json vive en .fuente/ (no en la raíz del módulo) desde
+# 2026-08-01: Cloudflare Pages no deploya directorios que empiezan con
+# ".", así que queda fuera del build servido en producción sin dejar de
+# estar versionado en el repo. Antes vivía en la raíz y se publicaba
+# entero (722 KB / 106 KB gzip) sin que ningún fetch en runtime lo
+# consumiera — todo lo que la app necesita ya sale de lugares-core.json /
+# lugares-detalles.json / lugares-estado.json, generados por este mismo
+# script. Si algún día hace falta que .fuente/ sea legible desde fuera
+# del repo, no lo saques de ahí: copiá el archivo a otro lado explícito.
+SRC = BASE_DIR / ".fuente" / "lugares-mapa.json"
 OUT_CORE = BASE_DIR / "lugares-core.json"
 OUT_DETAILS = BASE_DIR / "lugares-detalles.json"
 OUT_ESTADO = BASE_DIR / "lugares-estado.json"
