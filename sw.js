@@ -37,7 +37,7 @@
 
 'use strict';
 
-var VERSION = 'v4';
+var VERSION = 'v5';
 var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
 var CACHE_DATOS = 'uruspot-datos-' + VERSION;
 var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;
@@ -88,7 +88,16 @@ self.addEventListener('activate', function (event) {
 });
 
 function esDatoDeNegocio(url) {
-  return /\/lugares-(core|detalles|estado|mapa)\.json$/.test(url.pathname);
+  // Tiles del mapa (datos/lugares-mapa-tiles/<tileKey>.json, ver
+  // js/datos-virtualizador.js): antes no matcheaban esta regla ni la
+  // de esEstaticoVersionable (no es ninguna de esas extensiones), así
+  // que salían siempre directo a red sin cache ninguna — ni siquiera
+  // como red de contención si el dispositivo está offline. Mismo
+  // criterio network-first que el resto de los datos de negocio: son
+  // muchos archivos chicos que cambian con cada `split_dataset.py`,
+  // no versionables por nombre como css/js.
+  return /\/lugares-(core|detalles|estado|mapa)\.json$/.test(url.pathname) ||
+    /\/lugares-mapa-tiles\/[^/]+\.json$/.test(url.pathname);
 }
 
 function esEstaticoVersionable(url) {
