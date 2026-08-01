@@ -174,7 +174,7 @@
   var REGISTRO = [];
     var porId = Object.create(null);
 
-  // VIRTUALIZADOR: Carga lazy de lugares por viewport (auditor�a 2026-07-31)
+  // VIRTUALIZADOR: Carga lazy de lugares por viewport (auditor�a 2026-07-31)
   function cargarLugaresDelViewport() {
     if (!window.Virtualizador) return;
     var bounds = { south: -32.5, north: -32.4, west: -58.3, east: -58.2 };
@@ -1145,21 +1145,66 @@
   // 13. SISTEMA DE FAVORITOS CON PERSISTENCIA
   // ───────────────────────────────────────────────────────────────────
 
+  // Perf, Fase 2.3 (auditoría, 2026-08-01): antes, leerFavoritos() hacía
+  // `JSON.parse(localStorage.getItem(...))` — síncrono, hilo principal —
+  // en CADA llamada, y render() (que puede correr en cada tecla de
+  // búsqueda, apertura/cierre de favorito, cambio de filtro) llamaba a
+  // leerFavoritos() una vez por corrida. Barato con pocos favoritos,
+  // pero trabajo repetido e innecesario: el contenido real solo cambia
+  // en las 3 escrituras reales (toggle de guardar, reparación de
+  // huérfanos, API de testing/lifecycle), no en cada render().
+  //
+  // favoritosCache === null es el estado "todavía no se leyó nunca" —
+  // se distingue a propósito de `{}` (leído y vacío), para no releer de
+  // disco de más la primera vez que localStorage esté genuinamente
+  // vacío. Primera lectura real: perezosa, en el primer leerFavoritos()
+  // que se llame (no necesariamente al arrancar la app).
+  //
+  // guardarFavoritos() actualiza el cache con la MISMA referencia que
+  // persiste — en la práctica, todo el código existente ya llama
+  // `var favoritos = leerFavoritos(); favoritos[id] = ...;
+  // guardarFavoritos(favoritos);`, así que `favoritos` YA ES el objeto
+  // cacheado (leerFavoritos() no devuelve copia) y mutarlo ya mantenía
+  // el cache al día incluso sin esta línea — se deja explícita igual
+  // por si en el futuro algún llamador arma un objeto nuevo en vez de
+  // mutar el leído.
+  var favoritosCache = null;
+
   function leerFavoritos() {
+    if (favoritosCache !== null) return favoritosCache;
     try {
-      return JSON.parse(localStorage.getItem('uruspot_favoritos') || '{}');
+      favoritosCache = JSON.parse(localStorage.getItem('uruspot_favoritos') || '{}');
     } catch (e) {
       ErrorRecovery.procesar(e, ERROR_TYPE.STORAGE, 'leerFavoritos');
-      return {};
+      favoritosCache = {};
     }
+    return favoritosCache;
   }
 
   function guardarFavoritos(f) {
+    favoritosCache = f;
     try {
       localStorage.setItem('uruspot_favoritos', JSON.stringify(f));
     } catch (e) {
       ErrorRecovery.procesar(e, ERROR_TYPE.STORAGE, 'guardarFavoritos');
     }
+  }
+
+  // Multi-pestaña (Fase 2.3, nota de la auditoría): si el usuario tiene
+  // la app abierta en dos pestañas y guarda un favorito en una, la otra
+  // seguía sirviendo su cache en memoria desactualizado indefinidamente
+  // — antes del cache esto no pasaba porque cada leerFavoritos() releía
+  // disco. El evento `storage` (nativo, dispara SOLO en las OTRAS
+  // pestañas del mismo origen, nunca en la que escribió) invalida el
+  // cache para forzar una relectura real en el próximo acceso, y
+  // refresca lo que ya depende de favoritos ahora mismo en pantalla.
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('storage', function (e) {
+      if (e.key !== 'uruspot_favoritos') return;
+      favoritosCache = null;
+      actualizarContadorGuardados();
+      render();
+    });
   }
 
   function actualizarContadorGuardados() {
@@ -3558,7 +3603,3 @@
   });
 
 })();
-
-
-
-
