@@ -8,3 +8,54 @@
 
 /*
   Cache-Control: public, max-age=0, must-revalidate
+
+# ---------------------------------------------------------------------
+# EXCEPCIÓN (perf, iteración 2): íconos de PWA, logo y primitivas SVG
+# del Ambient Engine.
+#
+# La regla `/*` de arriba es correcta para HTML/CSS/JS/JSON — todo eso
+# se edita bajo el mismo nombre de archivo commit a commit (ver sw.js),
+# así que necesita revalidar siempre. Pero los archivos de abajo son
+# distintos: son assets de marca/identidad que, en la práctica de este
+# repo, jamás cambian de contenido sin cambiar de nombre — a diferencia
+# de las FOTOS de los lugares (img/*.jpg, img/*.webp de platos/locales),
+# que la DSA sí reemplaza a mano bajo el mismo nombre y por eso quedan
+# deliberadamente FUERA de esta excepción, sujetas a la regla `/*` de
+# siempre.
+#
+# Con `must-revalidate`, cada una de las 51 páginas de locales/ que
+# comparten estos mismos 9-10 archivos (logo, favicons, íconos de
+# manifest.json) obliga a un round-trip de revalidación por archivo,
+# en cada visita, aunque el contenido nunca haya cambiado una sola vez.
+# `immutable` se lo ahorra al navegador por completo durante un año:
+# ni siquiera pregunta. Si algún día estos archivos SÍ necesitan
+# cambiar de contenido, la convención correcta es cambiarles el nombre
+# (ej. logo-v2.webp) y actualizar las referencias — el propio nombre
+# largo de esta sección es la advertencia para quien llegue después.
+/img/favicon*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/apple-touch-icon*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/icon-*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/logo.webp
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/logof.webp
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/logof-small.webp
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/donde-comer-cdu/assets/ambient/*.svg
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
