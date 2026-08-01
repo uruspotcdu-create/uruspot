@@ -185,33 +185,22 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 </noscript>
 
-<!-- HOJAS DE ESTILO — mismo orden de dependencia que documentan sus
-     propios encabezados (tokens.css primero, siempre). -->
-<link rel="stylesheet" href="css/tokens.css">
-<!-- Fase 4 (Motion Direction Bible v1.0): vocabulario de verbos de
-     movimiento (Cap. 4) — depende de los tokens de arriba, se enlaza
-     antes que cualquier componente que lo use (hoy: descubrimiento.css,
-     vía js/app.js en el cambio de filtros). -->
-<link rel="stylesheet" href="css/motion-gramatica.css">
-<!-- Ambient Engine — Fase 1: Capa de Fondo (ver docs/AMBIENT-ENGINE-FASE0-FASE1.md) -->
-<link rel="stylesheet" href="assets/ambient/_tokens/ambiente-tokens-visual.css">
-<link rel="stylesheet" href="assets/ambient/_tokens/ambiente-tokens-movimiento.css">
-<link rel="stylesheet" href="css/ambiente-planos.css">
-<link rel="stylesheet" href="css/ambiente-capa-fondo.css">
-<link rel="stylesheet" href="css/ambiente-estilos.css">
-<link rel="stylesheet" href="css/boton.css">
-<link rel="stylesheet" href="css/tarjeta-lugar.css">
-<link rel="stylesheet" href="css/chip.css">
-<link rel="stylesheet" href="css/badge-estado.css">
-<!-- destacados.css: nueva (auditoría Fase 4) — spotlight de mejor
-     puntuados. Depende de tokens.css y boton.css (reutiliza .btn),
-     independiente de tarjeta-lugar.css: es un componente propio, no
-     una variante de la tarjeta de descubrimiento. -->
-<link rel="stylesheet" href="css/destacados.css">
-<link rel="stylesheet" href="css/mapa.css">
-<link rel="stylesheet" href="css/descubrimiento.css">
-<link rel="stylesheet" href="css/pwa-instalar.css">
-<link rel="stylesheet" href="css/actualizacion-disponible.css">
+<!-- HOJA DE ESTILO CRÍTICA (perf, 2026-07-31): antes eran 16 <link>
+     separados (tokens, motion-gramatica, los 2 tokens del Ambient
+     Engine, ambiente-planos/capa-fondo/estilos, boton, tarjeta-lugar,
+     chip, badge-estado, destacados, mapa, descubrimiento,
+     pwa-instalar, actualizacion-disponible) — 16 requests
+     render-blocking bloqueando First Contentful Paint. Se concatenan
+     en build a css/critical.bundle.css, en el MISMO orden de
+     dependencia que tenían acá (tokens.css primero, siempre — el
+     orden importa porque comparten cascada). GENERADO — no editar
+     este archivo a mano: editá el CSS fuente correspondiente en
+     css/ o assets/ambient/_tokens/ y corré
+     `node scripts/build-css-bundle.js` (o `npm run build:bundles`)
+     antes de cada deploy. Ver scripts/build-css-bundle.js para el
+     detalle completo y por qué cada archivo fuente sigue existiendo
+     por separado (se siguen editando ahí, no acá). -->
+<link rel="stylesheet" href="css/critical.bundle.css">
 <!-- impresion.css: nueva (auditoría 4ª pasada) — el documento no
      tenía ninguna hoja media="print" pese a que varias secciones
      (Sobre la ciudad, Guía práctica, Glosario) son contenido de
