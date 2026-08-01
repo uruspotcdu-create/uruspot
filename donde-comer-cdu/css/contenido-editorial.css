@@ -481,14 +481,102 @@
   .ruta-estado{ border:1px solid CanvasText; }
 }
 
+/* ───────────────────────────────────────────────────────────────────
+   11. RENDERIZADO DIFERIDO FUERA DEL VIEWPORT (perf, 2026-08-01)
+   Las 11 secciones que gobierna este archivo (Sobre la ciudad,
+   Testimonios, Metodología, Guía de rubros, Radiografía, Para
+   locales, Guía práctica, Glosario, Hoja de ruta, Accesibilidad,
+   Privacidad) son por definición todo lo que hay "después del hero y
+   Descubrimiento" (ver cabecera del archivo) — ningún usuario las ve
+   sin scrollear, y ya cargan diferidas a nivel de CSS. `content-
+   visibility:auto` lleva ese mismo criterio al pipeline de render:
+   el navegador se salta layout + paint de estas secciones mientras
+   estén lejos del viewport, y las trata como cualquier otro elemento
+   en cuanto se acercan — reduce el trabajo de estilo/layout inicial
+   sin tocar una sola línea de las reglas de arriba.
+
+   Por qué es seguro:
+   - `content-visibility:auto` (a diferencia de `hidden`) NO saca el
+     contenido del árbol de accesibilidad ni bloquea el salto por
+     ancla (#glosario, #hoja-de-ruta, etc. del índice de página siguen
+     funcionando: el navegador renderiza la sección on-demand cuando
+     hace falta calcular su posición para el scroll).
+   - `contain-intrinsic-size:auto <alto>` usa el alto real ya
+     renderizado una vez que la sección se mostró por primera vez, y
+     solo recurre a la estimación de abajo antes de eso — de ahí que
+     alcance con una estimación aproximada por tipo de sección
+     (según su contenido real: listas cortas vs. grillas de tarjetas)
+     y no haga falta un valor pixel-perfect: el margen de error de la
+     primera vez no genera un salto de layout perceptible en el resto
+     de la sesión.
+   - Es una property nueva (Containment 2): en navegadores que no la
+     soportan (Safari < 18), se ignora sin ningún efecto — no hay
+     fallback que mantener a mano.
+   - Sin relación con `.u-reveal`/IntersectionObserver de
+     inicializarScrollReveal() en app.js: ese sistema gobierna opacidad
+     y aparece en un elemento ya con su caja de layout resuelta; esta
+     regla gobierna si el navegador hace ese trabajo de layout antes o
+     después de que haga falta. Ambos sistemas mirando el viewport de
+     forma independiente no genera conflicto — la sección se vuelve
+     "relevante" (y por lo tanto se renderiza) apenas se acerca a la
+     zona de intersección de cualquiera de los dos.
+   ─────────────────────────────────────────────────────────────────── */
+.ciudad,
+.testimonios{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 640px;
+}
+.metodologia,
+.guia-practica,
+.para-locales{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 560px;
+}
+.rubros-guia,
+.glosario{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 480px;
+}
+.radiografia,
+.hoja-de-ruta,
+.privacidad-datos{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 520px;
+}
+.compromiso-a11y{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 420px;
+}
+
 /* ── Impresión ──
    Esta hoja gobierna la mayoría del contenido de lectura de la
    página (Sobre la ciudad, Glosario, Guía práctica, etc.) — el caso
    de uso real de "imprimir esto para leerlo sin pantalla" (una guía
    de visita) se resuelve acá, en la hoja dueña de estas clases, en
    vez de en css/impresion.css, que solo gobierna qué SECCIONES
-   completas se ocultan al imprimir. */
+   completas se ocultan al imprimir.
+
+   `content-visibility:auto` de la regla 11 de arriba es un problema
+   real acá: al imprimir, todas las secciones deben tener su
+   contenido completo sin importar si alguna vez estuvieron "cerca
+   del viewport" en pantalla. Chrome/Edge modernos ya tratan
+   `@media print` como relevante-para-el-usuario y renderizan estas
+   secciones igual, pero se fuerza explícito acá para no depender de
+   ese comportamiento implícito en navegadores más viejos. */
 @media print{
+  .ciudad,
+  .testimonios,
+  .metodologia,
+  .guia-practica,
+  .para-locales,
+  .rubros-guia,
+  .glosario,
+  .radiografia,
+  .hoja-de-ruta,
+  .privacidad-datos,
+  .compromiso-a11y{
+    content-visibility:visible;
+  }
   .rubro-ficha,
   .testimonio-card,
   .destacado-card{

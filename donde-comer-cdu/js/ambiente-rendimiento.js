@@ -67,12 +67,31 @@
   // FPS: un dispositivo de gama baja arranca ya en 'reducida' en
   // lugar de esperar a que el sistema tropiece varios frames para
   // recién entonces degradar.
-  function nivelInicialSegunDispositivo() {
-    return estimarCapacidadDispositivo() === 'bajo' ? 'reducida' : 'completa';
+  //
+  // Etapa 6 (perf, 2026-08-01): esto antes solo cubría 'bajo' —
+  // 'medio' arrancaba igual que 'alto', en 'completa'. Pero 'medio'
+  // es el rango donde cae gran parte del Android de gama media real
+  // (p. ej. deviceMemory=4, el valor más común que reporta la API en
+  // ese segmento — ver umbral.memoriaMedioGb en
+  // estimarCapacidadDispositivo()), exactamente el terreno que el
+  // propio Cap. 9.6 identifica como el que más necesita el
+  // gobernador. Dejarlo arrancar en 'completa' significaba pagar el
+  // costo de varios frames tropezados (los primeros
+  // ciclosConsecutivosParaDegradar de la ventana de muestreo) antes
+  // de degradar — justo en el momento de mayor sensibilidad
+  // perceptual del usuario, la primera impresión. Ahora solo 'alto'
+  // arranca en 'completa'; 'medio' arranca en 'reducida' igual que
+  // 'bajo' — el muestreo real de FPS sigue siendo quien decide si el
+  // dispositivo puede sostener más, vía la recuperación con
+  // histéresis ya vigente (Cap. 9.6/9.7, sin cambios acá: sigue
+  // siendo un salto de un solo nivel discreto por vez, nunca directo
+  // a 'completa').
+  function nivelInicialSegunDispositivo(capacidad) {
+    return capacidad === 'alto' ? 'completa' : 'reducida';
   }
 
   var capacidadDispositivo = estimarCapacidadDispositivo();
-  var nivelActual = nivelInicialSegunDispositivo();
+  var nivelActual = nivelInicialSegunDispositivo(capacidadDispositivo);
   var listeners = [];
 
   function pestanaVisible() {

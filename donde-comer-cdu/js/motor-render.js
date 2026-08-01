@@ -1516,6 +1516,22 @@
       cerrarPopup();
       redibujar();
     }
+    // Verificado en auditoría de perf (2026-08-01): este listener NO
+    // puede pasar a { passive: true }. `e.preventDefault()` de la
+    // línea de abajo es lo que evita que la rueda/gesto de pellizco
+    // también scrollee o haga zoom la PÁGINA mientras el usuario hace
+    // zoom del MAPA — sin él, cada wheel sobre el canvas dispararía
+    // el zoom del navegador (o el scroll de la página) al mismo
+    // tiempo que el zoom propio del mapa. `passive:true` prohíbe
+    // llamar `preventDefault()` (el navegador lo ignora y tira un
+    // warning en consola), así que la única combinación correcta acá
+    // es la que ya está: `{ passive: false }` explícito. El costo
+    // real de no ser pasivo ya está mitigado por el acumulador +
+    // rAF de arriba: el navegador espera a este handler en cada
+    // evento wheel, pero el handler solo acumula un número y agenda
+    // un frame — no hace layout ni redibuja sincrónicamente — así
+    // que el bloqueo por evento es del orden de microsegundos, no lo
+    // que normalmente hace cara la no-pasividad.
     lienzo.addEventListener('wheel', function (e) {
       e.preventDefault();
       cancelarInercia();
