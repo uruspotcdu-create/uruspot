@@ -465,6 +465,38 @@ a{ color:inherit; }
   }
 }
 
+/* ── Vidrio reducido por capacidad de dispositivo/FPS real (perf,
+   Fase 2.2 auditoría, 2026-08-01) ──
+   Mismos valores EXACTOS que el bloque de arriba (prefers-reduced-
+   transparency) — a propósito: no es un estado visual nuevo que haya
+   que revisar de nuevo, es el mismo estado ya diseñado y en
+   producción, con un segundo gatillo. Antes, "vidrio templado" solo
+   se activaba si el usuario había tocado una preferencia de
+   accesibilidad del sistema operativo — la inmensa mayoría de
+   dispositivos de gama media/baja NO tiene esa preferencia activada
+   y paga backdrop-filter completo igual, aunque AmbienteRendimiento
+   (js/ambiente-rendimiento.js) ya sepa, por hardwareConcurrency/
+   deviceMemory y por FPS real medido, que el dispositivo no lo puede
+   sostener bien — el propio Cap. 9.6 gobierna el motor decorativo con
+   ese dato, pero nunca llegaba al CSS de vidrio de tarjetas/chips/
+   botones/header, que sigue costando compositor GPU en cada frame en
+   que algo detrás cambia (incluido el propio motor ambiental
+   corriendo detrás de tarjetas/chips durante el scroll). Body.
+   u-vidrio-reducido la aplica AmbienteRendimiento cuando su nivel de
+   fidelidad activo es 'reducida' o 'minima' — la MISMA señal que ya
+   gobierna el resto del motor decorativo, con la MISMA histéresis
+   (si el FPS se recupera, la clase se saca y el vidrio vuelve a
+   completo). Fail-safe: si el Ambient Engine nunca carga (usuario con
+   JS parcialmente roto, o timeout), esta clase simplemente nunca se
+   aplica y el sitio se ve exactamente como hoy — no hay ningún nuevo
+   requisito duro. */
+body.u-vidrio-reducido{
+  --glass-blur:        4px;
+  --glass-blur-fuerte:  6px;
+  --glass-bg:          rgba(16,20,28,.92);
+  --glass-bg-fuerte:   rgba(16,20,28,.97);
+}
+
 /* ── Respeto por prefers-contrast ──
    Sube el contraste de líneas y bordes sutiles (--color-linea,
    --glass-borde) que hoy son casi invisibles a propósito (10-16% de

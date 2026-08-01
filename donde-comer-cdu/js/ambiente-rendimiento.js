@@ -117,11 +117,27 @@
     a.establecerTamanoCache(Math.max(4, Math.round(24 * proporcion)));
   }
 
+  // Perf, Fase 2.2 (auditoría, 2026-08-01): la misma señal de nivel de
+  // fidelidad que gobierna el motor decorativo ahora también gobierna
+  // el costo de backdrop-filter de tarjetas/chips/botones/header (ver
+  // css/tokens.css, bloque "Vidrio reducido por capacidad de
+  // dispositivo/FPS real" — mismos valores exactos que el bloque de
+  // prefers-reduced-transparency ya existente, ningún estado visual
+  // nuevo). document.body puede no existir todavía si este módulo
+  // corriera antes de <body> (no pasa hoy, pero es un no-op seguro si
+  // pasara).
+  function aplicarClaseVidrio(nivel) {
+    if (typeof document === 'undefined' || !document.body || !document.body.classList ||
+        typeof document.body.classList.toggle !== 'function') return;
+    document.body.classList.toggle('u-vidrio-reducido', nivel !== 'completa');
+  }
+
   function cambiarNivel(nuevoNivel) {
     if (nuevoNivel === nivelActual) return;
     var anterior = nivelActual;
     nivelActual = nuevoNivel;
     aplicarTamanoCache(nivelActual);
+    aplicarClaseVidrio(nivelActual);
     var d = diagnostico();
     if (d) d.registrarCambioFidelidad(nivelActual);
     emitirCambioNivel(anterior, nivelActual);
@@ -249,6 +265,7 @@
       if (!s || typeof s.registrar !== 'function') return;
       var a = assets();
       if (a) aplicarTamanoCache(nivelActual); // aplica el punto de partida ya al arrancar
+      aplicarClaseVidrio(nivelActual); // idem para el vidrio — no espera al primer cambio de nivel
       registradoEnScheduler = true;
       desregistrarScheduler = s.registrar('rendimiento', pasoFrame);
     },
