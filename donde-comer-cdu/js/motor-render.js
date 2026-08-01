@@ -1639,6 +1639,7 @@
     // pellizcar lejos del centro "arrastraba" el mapa de forma rara.
     var pinchDist0 = null, pinchZoom0 = null, pinchCentro0 = null;
     function alTouchstartContenedor(e) {
+      e.preventDefault();
       if (e.touches.length === 2) {
         enPellizco = true;
         panTactilUnico = null;
@@ -1668,8 +1669,9 @@
         }
       }
     }
-    lienzo.addEventListener('touchstart', alTouchstartContenedor, { passive: true });
+    lienzo.addEventListener('touchstart', alTouchstartContenedor, { passive: false });
     function alTouchmoveContenedor(e) {
+      e.preventDefault();
       if (e.touches.length === 2 && pinchDist0) {
         var d = distanciaToques(e.touches);
         var centroActual = centroToques(e.touches);
@@ -1713,7 +1715,7 @@
         redibujar();
       }
     }
-    lienzo.addEventListener('touchmove', alTouchmoveContenedor, { passive: true });
+    lienzo.addEventListener('touchmove', alTouchmoveContenedor, { passive: false });
     function alTouchendContenedor(e) {
       if (e.touches.length === 1 && enPellizco) {
         var t = e.touches[0];
