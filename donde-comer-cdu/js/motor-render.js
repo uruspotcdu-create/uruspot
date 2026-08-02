@@ -229,8 +229,60 @@
    comportamiento anterior antes de aplicar; test suite completo
    (224/224 + 4 suites más) sigue en verde.
 
-   EVALUADO Y DESCARTADO explícitamente en esta pasada:
-   • Rotación del pellizco (dos dedos girando) — ningún elemento del
+   ───────────────────────────────────────────────────────────────────
+   QUINTA PASADA (2026-08-02, misma fecha, segunda revisión) — pedida
+   explícitamente como auditoría nueva sobre lo recién aplicado: se
+   releyó el repo completo desde cero (no desde memoria de la pasada
+   anterior), se re-clonó y se corrió la suite completa como línea de
+   base antes de tocar nada. Buscó específicamente dos cosas: (a)
+   oportunidades que la CUARTA PASADA haya habilitado sin aprovechar
+   en todos sus casos, y (b) trabajo redundante por frame que no
+   pasaba por `PROY.proyectar` y por lo tanto no se vio en esa pasada.
+
+   GAPS REALES encontrados y resueltos, los cuatro verificados con
+   comparación numérica automatizada (no solo lectura) antes de
+   aplicarse, y con la suite completa (224/224 + 4 suites) en verde
+   después de cada uno:
+   • `proyeccion.js`, `encuadrar()`: el loop que baja el zoom probando
+     encuadres (hasta 16 iteraciones) llamaba `proyectar()` dos veces
+     por iteración con el mismo `zoom`, sin usar el parámetro opcional
+     de escala agregado en la pasada anterior — la propia función que
+     lo habilitó no lo aprovechaba en este segundo call site. Se
+     calcula `escalaDeZoom(zoom)` una vez por iteración. Verificado:
+     mismo zoom resultante en 3 escenarios sintéticos comparando contra
+     una réplica exacta de la versión anterior.
+   • `dispersionMaxima()` (decide si vale la pena animar el zoom hacia
+     un cluster clickeado): mismo patrón, proyectaba cada miembro del
+     cluster con el mismo `zoom` sin escala precalculada. Corregido
+     igual que `proyectarPuntos()`.
+   • `agruparEnClusters()`: NO está protegida por el cache de
+     `claveClusters` frente a sí misma (ES la función que ese cache
+     evita volver a llamar cuando el viewport no cambió) — pero
+     durante cualquier pan/zoom/inercia CONTINUOS el viewport cambia
+     en cada frame, así que esta función corre 1 vez por frame en el
+     caso de uso más común de todo el mapa (arrastrar el mapa). Cada
+     cluster de 2+ miembros pagaba dos `.reduce()` más un `.map()` —
+     tres closures nuevas y tres recorridos del mismo grupo — para
+     calcular centro y extraer miembros. Reemplazado por un único loop
+     plano. Verificado con fuzzing: 500 conjuntos de puntos aleatorios,
+     resultado idéntico byte a byte (`assert.deepStrictEqual`) entre
+     la versión vieja y la nueva.
+   • `dibujarMarcadores()`: sin ningún cache que la salte (a diferencia
+     de `agruparEnClusters`), corre en TODOS los frames sin excepción.
+     Usaba `clusters.forEach(function (c) {...})`, recreando esa
+     closure en cada frame. Reemplazado por un loop `for` plano —
+     mismo comportamiento, sin la asignación de función por frame.
+
+   No se encontró nada más: se revisaron también `dibujarTiles`,
+   `dibujarCluster`, `dibujarSpider`, los handlers de wheel/touch/
+   pointer, `animarA`, y el CSS de compositing (mapa.css) sin
+   encontrar trabajo redundante adicional. Seguir buscando más allá de
+   esto sería agregar cambios sin una razón de rendimiento real
+   detrás — el mismo criterio que el resto de este archivo ya aplica
+   contra la complejidad sin sustento.
+
+   ───────────────────────────────────────────────────────────────────
+   EVALUADO Y DESCARTADO explícitamente en la CUARTA PASADA:
      mapa (pines, tiles) tiene orientación propia; rotar el mapa entero
      es una decisión de producto mayor (reescribir toda la matemática
      de proyección/dibujado para un norte no fijo) sin pedido ni
@@ -980,6 +1032,18 @@
       return { colorDominante: colores[0], esUnRubro: colores.length === 1 };
     }
 
+    // PERF (auditoría performance, 2026-08-02, segunda revisión):
+    // `agruparEnClusters` NO está protegida por el cache de
+    // `claveClusters` frente a sí misma — es justamente lo que ese
+    // cache evita volver a llamar cuando el viewport no cambió, pero
+    // durante cualquier pan/zoom/inercia CONTINUOS el viewport cambia
+    // en cada frame, así que esta función sí corre a razón de 1 vez
+    // por frame en el caso de uso más común de todo el mapa (arrastrar
+    // o pellizcar). Antes, cada cluster de 2+ miembros pagaba DOS
+    // `.reduce()` más un `.map()` — tres closures nuevas y tres
+    // recorridos separados del mismo `grupo` — para calcular centro y
+    // extraer miembros. Se reemplaza por un único loop plano que hace
+    // las tres cosas en un solo recorrido, sin closures por cluster.
     function agruparEnClusters(proyectados) {
       var usados = new Array(proyectados.length);
       var resultado = [];
@@ -996,12 +1060,15 @@
         if (grupo.length === 1) {
           resultado.push({ tipo: 'punto', x: grupo[0].x, y: grupo[0].y, punto: grupo[0].punto });
         } else {
-          var cx = grupo.reduce(function (s, g) { return s + g.x; }, 0) / grupo.length;
-          var cy = grupo.reduce(function (s, g) { return s + g.y; }, 0) / grupo.length;
-          var miembros = grupo.map(function (g) { return g.punto; });
+          var sumX = 0, sumY = 0, miembros = new Array(grupo.length);
+          for (var k = 0; k < grupo.length; k++) {
+            sumX += grupo[k].x;
+            sumY += grupo[k].y;
+            miembros[k] = grupo[k].punto;
+          }
           var colorInfo = calcularColorCluster(miembros);
           resultado.push({
-            tipo: 'cluster', x: cx, y: cy, miembros: miembros,
+            tipo: 'cluster', x: sumX / grupo.length, y: sumY / grupo.length, miembros: miembros,
             colorDominante: colorInfo.colorDominante, esUnRubro: colorInfo.esUnRubro
           });
         }
@@ -1009,12 +1076,20 @@
       return resultado;
     }
 
+    // PERF (auditoría performance, 2026-08-02, segunda revisión):
+    // `forEach` con una función inline recreaba esa closure en CADA
+    // llamada a `dibujarMarcadores` — es decir, en cada frame
+    // dibujado, sin excepción (a diferencia de `agruparEnClusters`,
+    // esta función no tiene ningún cache que la salte). Un loop plano
+    // hace exactamente lo mismo sin asignar una función nueva por
+    // frame.
     function dibujarMarcadores(clusters) {
       var visiblesEsteFrame = Object.create(null);
       var reducido = prefiereMovimientoReducido();
       var hayNuevos = false;
-      clusters.forEach(function (c) {
-        if (c.tipo === 'cluster') { dibujarCluster(c); return; }
+      for (var i = 0; i < clusters.length; i++) {
+        var c = clusters[i];
+        if (c.tipo === 'cluster') { dibujarCluster(c); continue; }
         var id = c.punto.id;
         visiblesEsteFrame[id] = true;
         if (!reducido && visiblesFramePrevio[id] === undefined && apariciones[id] === undefined) {
@@ -1029,7 +1104,7 @@
         var esResaltado = id === idResaltado;
         var esAbierto = id === idAbierto;
         dibujarMarcador(c.x, c.y, c.punto, esResaltado || esAbierto, reducido ? 1 : factorAparicion(id));
-      });
+      }
       visiblesFramePrevio = visiblesEsteFrame;
       huboFramePrevioConPuntos = true;
       if (hayNuevos) seguirApariciones();
@@ -1515,10 +1590,16 @@
     // actual) por una verificación directa de la causa raíz que el
     // comentario de arriba ya describía en prosa pero nunca comprobaba
     // en código.
+    // PERF (auditoría performance, 2026-08-02, segunda revisión): mismo
+    // patrón que `proyectarPuntos()` — todos los miembros de este loop
+    // se proyectan con el MISMO `zoom` (siempre ZOOM_MAX, ver
+    // `manejarClick` más abajo), así que la escala se calcula una sola
+    // vez en vez de una vez por miembro.
     function dispersionMaxima(miembros, zoom) {
+      var escala = PROY.escalaDeZoom(zoom);
       var xs = new Array(miembros.length), ys = new Array(miembros.length);
       for (var i = 0; i < miembros.length; i++) {
-        var p = PROY.proyectar(miembros[i].lat, miembros[i].lng, zoom);
+        var p = PROY.proyectar(miembros[i].lat, miembros[i].lng, zoom, escala);
         xs[i] = p.x; ys[i] = p.y;
       }
       var anchoDisp = Math.max.apply(null, xs) - Math.min.apply(null, xs);
