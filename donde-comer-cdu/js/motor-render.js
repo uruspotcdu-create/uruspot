@@ -660,15 +660,42 @@
     var dpr = 1; // se recalcula en cada medir(), no queda pegado al valor de creación
     var animacionZoom = null;
 
+    // PERF (auditoría performance, 2026-08-02): rectCache — antes,
+    // buscarMarcadorEn(), el handler de `wheel`, el de `dblclick` y el
+    // de `touchmove` (pinch de 2 dedos) llamaban cada uno por su
+    // cuenta a `lienzo.getBoundingClientRect()`, forzando un layout
+    // síncrono en cada evento. En `touchmove` eso significa un
+    // forced reflow por cada evento táctil durante un pinch — que en
+    // hardware táctil real dispara muy por encima de 60 veces por
+    // segundo. El canvas es `width:100%; height:100%` de `contenedor`
+    // (css/mapa.css) y solo cambia de tamaño/posición cuando
+    // `contenedor` cambia — evento que YA dispara `medir()` a través
+    // del ResizeObserver de abajo. Por eso alcanza con cachear acá el
+    // mismo rect que `medir()` ya calcula (no hay que leer el rect de
+    // `lienzo` por separado: al ser 100%/100% de `contenedor` sin
+    // borde/padding entre ambos, coinciden) y exponerlo a través de
+    // `rectLienzo()` para que ningún handler de interacción vuelva a
+    // forzar layout por su cuenta. `rectLienzo()` conserva un fallback
+    // a lectura directa solo por si algún llamador corriera antes de
+    // la primera `medir()` — no debería pasar hoy (medir() se llama
+    // al crear el mapa, antes de registrar ningún listener), pero es
+    // más seguro que devolver `undefined`.
+    var rectCache = null;
+
     function medir() {
       dpr = Math.max(1, global.devicePixelRatio || 1);
       var rect = contenedor.getBoundingClientRect();
+      rectCache = rect;
       viewport.ancho = rect.width;
       viewport.alto = rect.height;
       lienzo.width = Math.round(rect.width * dpr);
       lienzo.height = Math.round(rect.height * dpr);
       lienzo.style.width = rect.width + 'px';
       lienzo.style.height = rect.height + 'px';
+    }
+
+    function rectLienzo() {
+      return rectCache || lienzo.getBoundingClientRect();
     }
 
     var rafRedibujo = null;
@@ -1375,7 +1402,7 @@
     lienzo.addEventListener('blur', function () { focoVisible = false; redibujar(); });
 
     function buscarMarcadorEn(evtPointer, clusters) {
-      var rect = lienzo.getBoundingClientRect();
+      var rect = rectLienzo();
       var mx = evtPointer.clientX - rect.left, my = evtPointer.clientY - rect.top;
       if (spiderActivo) {
         var mejorSpider = null, mejorDistSpider = TOLERANCIA_CLICK_PX;
@@ -1481,17 +1508,34 @@
     // anclaje que ya existía para el pellizco (pantallaAPunto +
     // proyectar/desproyectar), esta vez con el zoom cambiando en un
     // solo paso en vez de continuamente.
+    // PERF (auditoría performance, 2026-08-02): calcularDestinoAnclado
+    // — antes, esta proyección (pantallaAPunto → proyectar → desproyectar
+    // para mantener el mismo punto geográfico bajo xRel/yRel al cambiar
+    // de zoom) estaba escrita dos veces: una vez acá adentro de
+    // zoomAnclado (mutando viewport directamente, para wheel/pinch) y
+    // una segunda vez, matemáticamente idéntica pero copiada a mano,
+    // en el listener de `dblclick` (sin mutar viewport, porque ese caso
+    // necesita el destino para animarlo con animarA() sin tocar el
+    // zoom real hasta que la animación arranca — ver el comentario
+    // "BUG REAL evitado" más abajo). Se extrae la matemática compartida
+    // acá, pura (no toca `viewport.zoom`, ni `viewport.lat/lng`): recibe
+    // el zoom destino y devuelve `{lat, lng}`, dejando que cada
+    // llamador decida qué hacer con el resultado.
+    function calcularDestinoAnclado(zoomDestino, xRel, yRel) {
+      var geoFoco = PROY.pantallaAPunto(xRel, yRel, viewport);
+      var pFoco = PROY.proyectar(geoFoco.lat, geoFoco.lng, zoomDestino);
+      var centroMundoX = pFoco.x + viewport.ancho / 2 - xRel;
+      var centroMundoY = pFoco.y + viewport.alto / 2 - yRel;
+      return PROY.desproyectar(centroMundoX, centroMundoY, zoomDestino);
+    }
+
     function zoomAnclado(nuevoZoom, xRel, yRel) {
       nuevoZoom = PROY.clamp(nuevoZoom, ZOOM_MIN, ZOOM_MAX);
       if (Math.abs(nuevoZoom - viewport.zoom) < 0.0001) return;
-      var geoFoco = PROY.pantallaAPunto(xRel, yRel, viewport);
+      var destino = calcularDestinoAnclado(nuevoZoom, xRel, yRel);
       viewport.zoom = nuevoZoom;
-      var pFoco = PROY.proyectar(geoFoco.lat, geoFoco.lng, viewport.zoom);
-      var centroMundoX = pFoco.x + viewport.ancho / 2 - xRel;
-      var centroMundoY = pFoco.y + viewport.alto / 2 - yRel;
-      var nuevoCentro = PROY.desproyectar(centroMundoX, centroMundoY, viewport.zoom);
-      viewport.lat = nuevoCentro.lat;
-      viewport.lng = nuevoCentro.lng;
+      viewport.lat = destino.lat;
+      viewport.lng = destino.lng;
     }
 
     // Acumulador de rueda: trackpads e input devices "de precisión"
@@ -1536,7 +1580,7 @@
       e.preventDefault();
       cancelarInercia();
       cerrarSpider();
-      var rect = lienzo.getBoundingClientRect();
+      var rect = rectLienzo();
       wheelXRel = e.clientX - rect.left;
       wheelYRel = e.clientY - rect.top;
       // deltaMode 0 = píxeles (trackpad, mouse de alta resolución): se
@@ -1548,9 +1592,8 @@
     }, { passive: false });
 
     lienzo.addEventListener('dblclick', function (e) {
-      var rect = lienzo.getBoundingClientRect();
+      var rect = rectLienzo();
       var xRel = e.clientX - rect.left, yRel = e.clientY - rect.top;
-      var geoFoco = PROY.pantallaAPunto(xRel, yRel, viewport);
       var zoomDestino = Math.min(viewport.zoom + 1, ZOOM_MAX);
       // BUG REAL evitado (no llegó a publicarse, detectado en revisión
       // propia): mutar `viewport.zoom` acá ANTES de llamar a `animarA`
@@ -1566,12 +1609,10 @@
       // resuelve acá con el zoom destino, PERO sin tocar el viewport
       // real — solo animarA(), más abajo, es quien efectivamente
       // mueve lat/lng/zoom, interpolando desde el estado actual real.
-      var pFoco = PROY.proyectar(geoFoco.lat, geoFoco.lng, zoomDestino);
-      var destino = PROY.desproyectar(
-        pFoco.x + viewport.ancho / 2 - xRel,
-        pFoco.y + viewport.alto / 2 - yRel,
-        zoomDestino
-      );
+      // Matemática de anclaje compartida con zoomAnclado() vía
+      // calcularDestinoAnclado() (PERF, 2026-08-02) — antes estaba
+      // copiada a mano acá.
+      var destino = calcularDestinoAnclado(zoomDestino, xRel, yRel);
       animarA(destino.lat, destino.lng, zoomDestino);
     });
 
@@ -1677,7 +1718,7 @@
         var centroActual = centroToques(e.touches);
         var nuevoZoom = PROY.clamp(pinchZoom0 + Math.log2(d / pinchDist0), ZOOM_MIN, ZOOM_MAX);
 
-        var rect = lienzo.getBoundingClientRect();
+        var rect = rectLienzo();
         var focoXInicialRel = pinchCentro0.x - rect.left;
         var focoYInicialRel = pinchCentro0.y - rect.top;
         var geoFoco = PROY.pantallaAPunto(focoXInicialRel, focoYInicialRel, viewport);
