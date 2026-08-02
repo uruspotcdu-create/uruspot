@@ -106,13 +106,40 @@
   // es responsabilidad de quien decide qué puntos llegan hasta acá
   // (motor-mapa.js). Sí protege el único caso que puede reventar la
   // matemática por sí solo: latitudes más allá del límite de Mercator.
-  function proyectar(lat, lng, zoom) {
+  //
+  // PERF (auditoría performance, 2026-08-02): `escalaPrecalculada` es un
+  // cuarto parámetro OPCIONAL — todo llamador existente que pasa solo
+  // (lat, lng, zoom) sigue funcionando idéntico, mismo resultado, mismo
+  // costo. Existe para el único caso caliente real del motor:
+  // `proyectarPuntos()` en motor-render.js llama a esta función una vez
+  // POR PUNTO VISIBLE, EN CADA FRAME (pan, zoom, inercia, cualquier
+  // animación) — y dentro de ese mismo frame, `zoom` es siempre el
+  // mismo valor para los cientos de puntos. Antes de esta pasada,
+  // `Math.pow(2, zoom)` (una potencia con exponente no entero, no una
+  // operación gratis) se recalculaba en CADA una de esas llamadas,
+  // siempre con el mismo resultado. Ahora el llamador puede calcular la
+  // escala una sola vez por frame (`escalaDeZoom`) y pasarla acá,
+  // saltando el `Math.pow` redundante en el resto de los puntos del
+  // mismo frame. Ver `escalaDeZoom` más abajo.
+  function proyectar(lat, lng, zoom, escalaPrecalculada) {
     var latSegura = clamp(lat, -LAT_MAXIMA_MERCATOR, LAT_MAXIMA_MERCATOR);
-    var escala = TAM_TILE * Math.pow(2, zoom);
+    var escala = (typeof escalaPrecalculada === 'number') ? escalaPrecalculada : TAM_TILE * Math.pow(2, zoom);
     var seno = Math.sin(latSegura * Math.PI / 180);
     var x = escala * (0.5 + lng / 360);
     var y = escala * (0.5 - Math.log((1 + seno) / (1 - seno)) / (4 * Math.PI));
     return { x: x, y: y };
+  }
+
+  // Escala de mundo (en píxeles) para un zoom dado — el factor
+  // `TAM_TILE * 2^zoom` que subyace a toda proyección. Extraída como
+  // función propia (antes vivía inline dentro de `proyectar`) para que
+  // un llamador que va a proyectar muchos puntos en el mismo zoom
+  // (el caso real: un frame completo del mapa) pueda calcularlo una
+  // sola vez y reutilizarlo vía el parámetro `escalaPrecalculada` de
+  // `proyectar`/`puntoAPantalla`, en vez de pagar el mismo `Math.pow`
+  // una vez por punto.
+  function escalaDeZoom(zoom) {
+    return TAM_TILE * Math.pow(2, zoom);
   }
 
   // pixeles de mundo → lat/lng en el zoom dado
@@ -125,10 +152,23 @@
   }
 
   // Pixel de PANTALLA (relativo al contenedor) para un punto dado, según
-  // el estado actual del viewport (centro + zoom + tamaño del contenedor)
-  function puntoAPantalla(lat, lng, viewport) {
-    var centro = proyectar(viewport.lat, viewport.lng, viewport.zoom);
-    var p = proyectar(lat, lng, viewport.zoom);
+  // el estado actual del viewport (centro + zoom + tamaño del contenedor).
+  //
+  // PERF (auditoría performance, 2026-08-02): `centroPrecalculado` y
+  // `escalaPrecalculada` son OPCIONALES — sin ellos, el comportamiento
+  // es exactamente el de antes (recalcula ambos por llamada), así que
+  // ningún llamador existente (pantallaAPunto usa la fórmula inversa,
+  // no esta; el resto de motor-render.js que llama con 3 argumentos
+  // sigue igual) se ve afectado. Cuando el llamador va a proyectar
+  // MUCHOS puntos en el mismo frame (mismo `viewport`, por lo tanto
+  // mismo centro y misma escala para todos), puede calcular ambos una
+  // sola vez y pasarlos acá — evita repetir, por cada punto adicional,
+  // el `Math.pow`/`Math.sin`/`Math.log` completo de proyectar el centro
+  // del viewport, que da exactamente el mismo resultado las N veces.
+  function puntoAPantalla(lat, lng, viewport, centroPrecalculado, escalaPrecalculada) {
+    var escala = (typeof escalaPrecalculada === 'number') ? escalaPrecalculada : TAM_TILE * Math.pow(2, viewport.zoom);
+    var centro = centroPrecalculado || proyectar(viewport.lat, viewport.lng, viewport.zoom, escala);
+    var p = proyectar(lat, lng, viewport.zoom, escala);
     return {
       x: p.x - centro.x + viewport.ancho / 2,
       y: p.y - centro.y + viewport.alto / 2
@@ -229,6 +269,7 @@
     esNumeroFinito: esNumeroFinito,
     esCoordenadaValida: esCoordenadaValida,
     proyectar: proyectar,
+    escalaDeZoom: escalaDeZoom,
     desproyectar: desproyectar,
     puntoAPantalla: puntoAPantalla,
     pantallaAPunto: pantallaAPunto,
