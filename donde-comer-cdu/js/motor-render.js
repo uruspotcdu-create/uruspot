@@ -1949,12 +1949,18 @@
     // tocar), y se reutiliza sin volver a desproyectarlo en cada frame
     // — la misma técnica que usan Leaflet/Mapbox GL para pinch-zoom.
     var pinchDist0 = null, pinchZoom0 = null, pinchCentro0 = null, pinchGeoFoco0 = null;
+    // Estado adicional para reconocer un TAP de 2 dedos (gesto corto, sin
+    // separación real entre los dedos) dentro del mismo flujo que ya
+    // trackea el pellizco — ver `detectarDobleTapDosDedos` más abajo.
+    var pinchInicioTiempo = 0, pinchDistUltima = 0;
     function alTouchstartContenedor(e) {
       e.preventDefault();
       if (e.touches.length === 2) {
         enPellizco = true;
         panTactilUnico = null;
         pinchDist0 = distanciaToques(e.touches);
+        pinchDistUltima = pinchDist0;
+        pinchInicioTiempo = performance.now();
         pinchZoom0 = viewport.zoom;
         pinchCentro0 = centroToques(e.touches);
         refrescarRect();
@@ -1994,6 +2000,7 @@
       e.preventDefault();
       if (e.touches.length === 2 && pinchDist0 && pinchGeoFoco0) {
         var d = distanciaToques(e.touches);
+        pinchDistUltima = d;
         var centroActual = centroToques(e.touches);
         var nuevoZoom = PROY.clamp(pinchZoom0 + Math.log2(d / pinchDist0), ZOOM_MIN, ZOOM_MAX);
 
@@ -2047,9 +2054,51 @@
       }
     }
     lienzo.addEventListener('touchmove', alTouchmoveContenedor, { passive: false });
+
+    // CAPACIDAD NUEVA (auditoría navegación, 2026-08-02, ítem #6 del
+    // informe): "doble tap con 2 dedos = alejar un nivel" es el gesto
+    // espejo del doble tap de 1 dedo (#3, ver `detectarDobleTap` más
+    // arriba) — estándar en iOS/Android maps. Se reconoce reusando el
+    // mismo tracking que ya existe para el pellizco: si el gesto de 2
+    // dedos duró poco Y la distancia entre dedos casi no cambió (osea,
+    // fue un TAP con 2 dedos, no un intento real de pellizcar/separar),
+    // se lo trata como "tap de 2 dedos" y se compara contra el anterior
+    // con la misma ventana de tiempo/distancia que el doble tap de 1
+    // dedo. No compite con el pellizco real: un pellizco genuino mueve
+    // la distancia entre dedos bastante más que el umbral, así que
+    // nunca dispara esto por accidente.
+    var UMBRAL_TAP_DOS_DEDOS_MS = 250;
+    var UMBRAL_TAP_DOS_DEDOS_DIST_PX = 14;
+    var ultimoTapDosDedosTiempo = 0, ultimoTapDosDedosX = 0, ultimoTapDosDedosY = 0;
+    function detectarDobleTapDosDedos(centro) {
+      var ahora = performance.now();
+      var dx = centro.x - ultimoTapDosDedosX, dy = centro.y - ultimoTapDosDedosY;
+      var esDobleTap = (ahora - ultimoTapDosDedosTiempo) < DOBLE_TAP_MS &&
+        Math.sqrt(dx * dx + dy * dy) < DOBLE_TAP_DIST_PX;
+      if (esDobleTap) {
+        ultimoTapDosDedosTiempo = 0; // consumido: un tercer tap rápido no encadena otro alejamiento
+        var rect = rectLienzo();
+        var xRel = centro.x - rect.left, yRel = centro.y - rect.top;
+        var zoomDestino = Math.max(viewport.zoom - 1, ZOOM_MIN);
+        var destino = calcularDestinoAnclado(zoomDestino, xRel, yRel);
+        animarA(destino.lat, destino.lng, zoomDestino);
+      } else {
+        ultimoTapDosDedosTiempo = ahora;
+        ultimoTapDosDedosX = centro.x; ultimoTapDosDedosY = centro.y;
+      }
+    }
     function alTouchendContenedor(e) {
       e.preventDefault();
-      if (e.touches.length < 2) { 
+      if (e.touches.length < 2) {
+        // Se evalúa ANTES de limpiar pinchDist0/pinchCentro0: necesita
+        // los valores que dejó el pellizco que recién termina.
+        if (pinchDist0 && pinchCentro0) {
+          var duracionPellizco = performance.now() - pinchInicioTiempo;
+          var deltaDist = Math.abs(pinchDistUltima - pinchDist0);
+          var fueTapDeDosDedos = duracionPellizco < UMBRAL_TAP_DOS_DEDOS_MS &&
+            deltaDist < UMBRAL_TAP_DOS_DEDOS_DIST_PX;
+          if (fueTapDeDosDedos) detectarDobleTapDosDedos(pinchCentro0);
+        }
         pinchDist0 = null;
         pinchCentro0 = null;
         pinchGeoFoco0 = null;
