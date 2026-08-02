@@ -202,6 +202,33 @@
      estados reales que antes se veían igual que un mapa cargando
      normal.
 
+   ───────────────────────────────────────────────────────────────────
+   CUARTA PASADA (2026-08-02) — se releyó el repo completo antes de
+   tocar nada; las tres pasadas anteriores ya cubren prácticamente todo
+   lo que una auditoría de rendimiento de este motor pediría (rAF único
+   deduplicado, rectCache sin forced reflow, pool de objetos en
+   `proyectarPuntos` sin allocations por frame, cache de clustering
+   correctamente atado al render loop, cache de Path2D/RGB, coalescing
+   de wheel/hover, pausa en background). Repetir ese trabajo hubiera
+   sido, en el mejor caso, redundante, y en el peor, arriesgar una
+   regresión sobre decisiones ya fundamentadas — así que esta pasada
+   buscó específicamente lo que las anteriores no cubrieron.
+
+   GAP REAL encontrado: `proyectarPuntos()` corre en cada frame, para
+   cada punto visible (hasta el tope de motor-config.js), y llamaba a
+   `PROY.puntoAPantalla(p.lat, p.lng, viewport)` una vez por punto. Esa
+   función reproyecta el CENTRO del viewport desde cero
+   (`Math.pow`+`Math.sin`+`Math.log`) en cada llamada — pero el centro
+   y la escala de mundo son el mismo valor para los cientos de puntos
+   de un mismo frame; solo el punto en sí cambia. Se agregó un
+   parámetro opcional a `PROY.proyectar`/`PROY.puntoAPantalla`
+   (proyeccion.js) para recibir centro/escala precalculados —
+   retrocompatible: sin ese parámetro, comportamiento y costo
+   idénticos a antes — y `proyectarPuntos()` los calcula una sola vez
+   por llamada. Verificado bit-a-bit idéntico (diff 0) contra el
+   comportamiento anterior antes de aplicar; test suite completo
+   (224/224 + 4 suites más) sigue en verde.
+
    EVALUADO Y DESCARTADO explícitamente en esta pasada:
    • Rotación del pellizco (dos dedos girando) — ningún elemento del
      mapa (pines, tiles) tiene orientación propia; rotar el mapa entero
@@ -902,10 +929,21 @@
 
     var bufferProyectados = [];
     function proyectarPuntos() {
+      // PERF (auditoría performance, 2026-08-02): antes, cada llamada a
+      // `PROY.puntoAPantalla(p.lat, p.lng, viewport)` volvía a proyectar
+      // el CENTRO del viewport desde cero (Math.pow + Math.sin + Math.log)
+      // — pero el centro y la escala son el mismo valor para los cientos
+      // de puntos de esta misma llamada (mismo `viewport`, un solo
+      // frame). Se calculan acá una única vez y se reutilizan para todos
+      // los puntos — ver el parámetro opcional agregado a
+      // `PROY.proyectar`/`PROY.puntoAPantalla` (proyeccion.js) para el
+      // porqué es seguro y no cambia el resultado.
+      var escala = PROY.escalaDeZoom(viewport.zoom);
+      var centro = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom, escala);
       var n = 0;
       for (var i = 0; i < puntos.length; i++) {
         var p = puntos[i];
-        var xy = PROY.puntoAPantalla(p.lat, p.lng, viewport);
+        var xy = PROY.puntoAPantalla(p.lat, p.lng, viewport, centro, escala);
         if (xy.x > -40 && xy.x < viewport.ancho + 40 && xy.y > -40 && xy.y < viewport.alto + 40) {
           var slot = bufferProyectados[n];
           if (!slot) { slot = bufferProyectados[n] = {}; }
