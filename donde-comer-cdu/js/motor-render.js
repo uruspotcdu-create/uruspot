@@ -1501,7 +1501,7 @@
       if (arrastrando) {
         if (e.pointerId !== pointerActivoId) return; // ignorar punteros secundarios mientras se arrastra
         var dx = e.clientX - ultimoX, dy = e.clientY - ultimoY;
-        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { sePanneo = true; cerrarSpider(); }
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { sePanneo = true; ultimoTapTiempo = 0; cerrarSpider(); }
         ultimoX = e.clientX; ultimoY = e.clientY;
         registrarMuestra(e.clientX, e.clientY);
         var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
@@ -1550,6 +1550,47 @@
         idResaltado = null; puntoResaltado = null; clusterResaltadoKey = null; lienzo.style.cursor = 'grab'; emisor.emitir('hoverOut'); redibujar();
       }
     }
+    // GAP REAL corregido (auditoría navegación, 2026-08-02): "doble tap
+    // para acercar" es el gesto universal de cualquier mapa de
+    // referencia (Google/Apple/Mapbox), pero acá dependía exclusivamente
+    // del evento nativo `dblclick` — y `alTouchstartContenedor`/
+    // `alTouchendContenedor` (ver más abajo) llaman `e.preventDefault()`
+    // incondicionalmente en touch, lo que por especificación de Touch
+    // Events le impide al navegador sintetizar click/dblclick de
+    // compatibilidad a partir de los toques. Resultado: en un teléfono
+    // real, doble tap para acercar probablemente nunca se disparaba —
+    // solo funcionaba con doble clic real de mouse en desktop.
+    // Se detecta el gesto acá a mano, sobre los mismos taps de un solo
+    // dedo que YA se procesan vía Pointer Events (no Touch Events —
+    // por eso vive junto a `pointerup`, no junto a `touchstart`),
+    // comparando tiempo y distancia contra el tap anterior, y se reusa
+    // exactamente la misma matemática de anclaje que ya usa el doble
+    // clic de desktop (`calcularDestinoAnclado` + `animarA`), sin
+    // duplicarla. No reemplaza ni suprime el tap individual: el primer
+    // tap de un doble tap sigue abriendo su popup/marcador normalmente,
+    // igual que ya pasa hoy con dos clics reales de mouse en desktop
+    // (cada clic dispara su propio efecto Y el segundo, además, dispara
+    // el zoom vía `dblclick`) — mismo criterio, sin comportamiento nuevo.
+    var DOBLE_TAP_MS = 300;
+    var DOBLE_TAP_DIST_PX = 40; // más generoso que TOLERANCIA_CLICK_PX: acá compara dos toques entre sí, no un toque contra un pin
+    var ultimoTapTiempo = 0, ultimoTapX = 0, ultimoTapY = 0;
+    function detectarDobleTap(e) {
+      var ahora = performance.now();
+      var dx = e.clientX - ultimoTapX, dy = e.clientY - ultimoTapY;
+      var esDobleTap = (ahora - ultimoTapTiempo) < DOBLE_TAP_MS &&
+        Math.sqrt(dx * dx + dy * dy) < DOBLE_TAP_DIST_PX;
+      if (esDobleTap) {
+        ultimoTapTiempo = 0; // consumido: un tercer tap rápido no encadena otro zoom
+        var rect = rectLienzo();
+        var xRel = e.clientX - rect.left, yRel = e.clientY - rect.top;
+        var zoomDestino = Math.min(viewport.zoom + 1, ZOOM_MAX);
+        var destino = calcularDestinoAnclado(zoomDestino, xRel, yRel);
+        animarA(destino.lat, destino.lng, zoomDestino);
+      } else {
+        ultimoTapTiempo = ahora;
+        ultimoTapX = e.clientX; ultimoTapY = e.clientY;
+      }
+    }
     lienzo.addEventListener('pointerup', function (e) {
       if (e.pointerId !== pointerActivoId) return;
       pointerActivoId = null;
@@ -1559,6 +1600,7 @@
         var clusters = clustersActuales();
         var cerca = buscarMarcadorEn(e, clusters);
         if (cerca) manejarClick(cerca); else cerrarSpider();
+        if (e.pointerType === 'touch') detectarDobleTap(e);
       } else {
         iniciarInercia();
       }
