@@ -676,7 +676,7 @@
       var ahora = performance.now();
       ondas.forEach(function (o) {
         var t = Math.min(1, (ahora - o.inicio) / DURACION_ONDA_MS);
-        var e = 1 - Math.pow(1 - t, 2);
+        var e = 1 - (1 - t) * (1 - t);
         ctx.beginPath();
         ctx.arc(o.x, o.y, 6 + e * 34, 0, Math.PI * 2);
         ctx.strokeStyle = hexARgba(o.color, (1 - t) * 0.65);
@@ -957,6 +957,29 @@
 
     // Clustering por grilla en espacio de pantalla: solo agrupa cuando
     // hay verdadero solapamiento visual, no por regla arbitraria de zoom.
+    //
+    // PERF (auditoría performance, 2026-08-02): el color dominante de
+    // cada cluster (`colorDominante`/`esUnRubro`) se calcula ACÁ, una
+    // sola vez por cluster, en el momento en que se arma — no en
+    // `dibujarCluster()`. `agruparEnClusters()` ya está protegida por
+    // `claveClusters`/`ultimosClusters` (ver `clustersActuales()` y
+    // `dibujar()`): mientras el viewport y el conjunto de puntos no
+    // cambien, el MISMO objeto de cluster se reutiliza frame tras
+    // frame durante cualquier animación (onda de clic, aparición,
+    // spider). Antes, `dibujarCluster()` volvía a recorrer los
+    // miembros y reconstruir/ordenar el conteo de colores en CADA uno
+    // de esos frames redibujados, sobre datos que no habían cambiado
+    // un bit desde el frame anterior — trabajo puramente repetido.
+    function calcularColorCluster(miembros) {
+      var conteo = Object.create(null);
+      for (var i = 0; i < miembros.length; i++) {
+        var col = colorSeguro(miembros[i] && miembros[i].color);
+        conteo[col] = (conteo[col] || 0) + 1;
+      }
+      var colores = Object.keys(conteo).sort(function (a, b) { return conteo[b] - conteo[a]; });
+      return { colorDominante: colores[0], esUnRubro: colores.length === 1 };
+    }
+
     function agruparEnClusters(proyectados) {
       var usados = new Array(proyectados.length);
       var resultado = [];
@@ -975,7 +998,12 @@
         } else {
           var cx = grupo.reduce(function (s, g) { return s + g.x; }, 0) / grupo.length;
           var cy = grupo.reduce(function (s, g) { return s + g.y; }, 0) / grupo.length;
-          resultado.push({ tipo: 'cluster', x: cx, y: cy, miembros: grupo.map(function (g) { return g.punto; }) });
+          var miembros = grupo.map(function (g) { return g.punto; });
+          var colorInfo = calcularColorCluster(miembros);
+          resultado.push({
+            tipo: 'cluster', x: cx, y: cy, miembros: miembros,
+            colorDominante: colorInfo.colorDominante, esUnRubro: colorInfo.esUnRubro
+          });
         }
       }
       return resultado;
@@ -1127,14 +1155,8 @@
     // se deja neutro pero con el borde en el color dominante, para que
     // "mixto" también se lea de un vistazo en vez de camuflarse.
     function dibujarCluster(c) {
-      var conteo = Object.create(null);
-      c.miembros.forEach(function (m) {
-        var col = colorSeguro(m && m.color);
-        conteo[col] = (conteo[col] || 0) + 1;
-      });
-      var colores = Object.keys(conteo).sort(function (a, b) { return conteo[b] - conteo[a]; });
-      var colorDominante = colores[0];
-      var esUnRubro = colores.length === 1;
+      var colorDominante = c.colorDominante;
+      var esUnRubro = c.esUnRubro;
 
       var r = RADIO_CLUSTER;
       var esResaltado = clusterResaltadoKey === (Math.round(c.x) + ':' + Math.round(c.y));
@@ -1447,14 +1469,16 @@
         spiderActivo.posiciones.forEach(function (pos) {
           var px = pos._xActual !== undefined ? pos._xActual : pos.x;
           var py = pos._yActual !== undefined ? pos._yActual : pos.y;
-          var d = Math.sqrt(Math.pow(px - mx, 2) + Math.pow(py - my, 2));
+          var ddx = px - mx, ddy = py - my;
+          var d = Math.sqrt(ddx * ddx + ddy * ddy);
           if (d < mejorDistSpider) { mejorDistSpider = d; mejorSpider = { tipo: 'punto', x: px, y: py, punto: pos.punto }; }
         });
         if (mejorSpider) return mejorSpider;
       }
       var mejor = null, mejorDist = TOLERANCIA_CLICK_PX;
       clusters.forEach(function (c) {
-        var d = Math.sqrt(Math.pow(c.x - mx, 2) + Math.pow(c.y - my, 2));
+        var cdx = c.x - mx, cdy = c.y - my;
+        var d = Math.sqrt(cdx * cdx + cdy * cdy);
         if (d < mejorDist) { mejorDist = d; mejor = c; }
       });
       return mejor;
