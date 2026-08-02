@@ -32,6 +32,21 @@
     animation-duration:0.001ms;
   }
 }
+/* PERF (auditoría performance, 2026-08-02): mientras la tarjeta está
+   entrando (fade-up + stagger de hasta 720ms, ver app.js/pintarTarjetas)
+   se suprime su backdrop-filter. Con hasta 8 tarjetas entrando a la
+   vez, cada una con su propio vidrio esmerilado en movimiento, el
+   compositor tenía que recomponer varias capas de blur simultáneas —
+   trabajo de GPU real durante la ventana justo donde más importa la
+   primera impresión de fluidez. app.js quita esta clase apenas termina
+   la animación real de esa tarjeta puntual (evento 'animationend'
+   delegado), con un timeout de respaldo por si esa animación se
+   interrumpe. Nunca se aplica bajo prefers-reduced-motion (movimiento
+   reducido no agrega esta clase en absoluto — no hay animación de la
+   que "recuperarse" en ese caso). */
+.tarjeta.tarjeta--entrando{
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+}
 /* Franja superior con el color del rubro (app.js fija --chip-color
    inline por tarjeta) — mismo idioma visual que el pin del mapa y el
    chip de la leyenda. */
