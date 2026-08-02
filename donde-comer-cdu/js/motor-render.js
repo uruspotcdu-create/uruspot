@@ -387,6 +387,26 @@
   var esPunteroTosco = !!(global.matchMedia && global.matchMedia('(pointer: coarse)').matches);
   var TOLERANCIA_CLICK_PX = esPunteroTosco ? 28 : 20; // el dedo es menos preciso que un cursor
 
+  // GAP REAL corregido (auditoría navegación, 2026-08-02): el umbral que
+  // decide si un gesto es "tap" o "pan" (más abajo, en `pointermove`)
+  // estaba fijo en 2px para CUALQUIER puntero. Tiene sentido para un
+  // mouse preciso, pero un dedo sobre un digitalizador de gama baja/media
+  // (más jitter/ruido que uno de gama alta) supera 2px de movimiento con
+  // bastante frecuencia incluso en un tap bien intencionado — cada uno de
+  // esos falsos positivos convierte un tap limpio en un micro-pan que
+  // cierra popups/spiderfy sin que el usuario lo haya pedido. El propio
+  // archivo ya reconoce esta diferencia para el hit-testing
+  // (TOLERANCIA_CLICK_PX arriba); acá se aplica el mismo criterio al
+  // umbral de detección de drag, distinguiendo por `e.pointerType` en
+  // vez de por `matchMedia` (más preciso en dispositivos híbridos
+  // mouse+touch: importa el puntero real de ESTE gesto, no una
+  // capacidad general del dispositivo).
+  var UMBRAL_DRAG_MOUSE_PX = 2;
+  var UMBRAL_DRAG_TOQUE_PX = 8;
+  function umbralDrag(pointerType) {
+    return pointerType === 'touch' ? UMBRAL_DRAG_TOQUE_PX : UMBRAL_DRAG_MOUSE_PX;
+  }
+
   function prefiereMovimientoReducido() {
     return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
@@ -1501,7 +1521,8 @@
       if (arrastrando) {
         if (e.pointerId !== pointerActivoId) return; // ignorar punteros secundarios mientras se arrastra
         var dx = e.clientX - ultimoX, dy = e.clientY - ultimoY;
-        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { sePanneo = true; ultimoTapTiempo = 0; cerrarSpider(); }
+        var umbral = umbralDrag(e.pointerType);
+        if (Math.abs(dx) > umbral || Math.abs(dy) > umbral) { sePanneo = true; ultimoTapTiempo = 0; cerrarSpider(); }
         ultimoX = e.clientX; ultimoY = e.clientY;
         registrarMuestra(e.clientX, e.clientY);
         var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
