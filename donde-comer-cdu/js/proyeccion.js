@@ -252,10 +252,18 @@
       return { lat: centroLat, lng: centroLng, zoom: Math.min(ZOOM_ACERCAMIENTO_UN_PUNTO, zMax) };
     }
 
+    // PERF (auditoría performance, 2026-08-02, segunda revisión): cada
+    // iteración prueba un `zoom` distinto, así que la escala SÍ cambia
+    // entre iteraciones (a diferencia del caso de `proyectarPuntos`) —
+    // pero dentro de una misma iteración se llama a `proyectar` dos
+    // veces (`pMin`/`pMax`) con ese mismo `zoom`, y antes cada una
+    // recalculaba `Math.pow(2, zoom)` por su cuenta. Se calcula una
+    // vez por iteración y se reutiliza en ambas llamadas.
     var zoom;
     for (zoom = zMax; zoom > 2; zoom--) {
-      var pMin = proyectar(maxLat, minLng, zoom);
-      var pMax = proyectar(minLat, maxLng, zoom);
+      var escalaIter = escalaDeZoom(zoom);
+      var pMin = proyectar(maxLat, minLng, zoom, escalaIter);
+      var pMax = proyectar(minLat, maxLng, zoom, escalaIter);
       var w = Math.abs(pMax.x - pMin.x), h = Math.abs(pMax.y - pMin.y);
       if (w <= anchoOk - pad * 2 && h <= altoOk - pad * 2) break;
     }
