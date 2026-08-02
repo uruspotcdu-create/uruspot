@@ -777,6 +777,32 @@
       return rectCache || lienzo.getBoundingClientRect();
     }
 
+    // BUG REAL corregido (auditoría navegación, 2026-08-02): rectCache
+    // solo se refrescaba desde medir() — disparado por ResizeObserver
+    // (cambios de TAMAÑO del contenedor) o por visibilitychange/
+    // orientationchange. Pero getBoundingClientRect() es relativo al
+    // VIEWPORT del navegador, no al documento: si la página hace scroll
+    // (el mapa vive `position:relative` dentro del flujo normal, ver
+    // css/mapa.css — no es fullscreen/fixed), rect.top/rect.left cambian
+    // aunque el contenedor no cambie de tamaño, y ResizeObserver no
+    // dispara por scroll. Con un rectCache desactualizado, TODO el
+    // cálculo de coordenadas de pantalla→mundo (pellizco, zoom de rueda
+    // anclado al cursor, hit-testing de click/hover) quedaba offseteado
+    // por lo que la página hubiera scrolleado desde el último resize —
+    // el punto que el usuario toca y el punto que el motor cree que
+    // tocó dejan de coincidir. Caso más común de todos: el usuario
+    // scrollea la página hasta el mapa y recién ahí empieza a tocarlo.
+    // Fix: refrescar la posición (no el tamaño, no dpr, no el canvas —
+    // eso sigue siendo trabajo exclusivo de medir()) al EMPEZAR cada
+    // gesto (pointerdown, touchstart de un pellizco, primer wheel de
+    // una ráfaga, pointerenter para hover de mouse), no en cada
+    // move/frame — así se preserva el motivo original de la caché
+    // (evitar forced reflow en CADA evento de un gesto en curso) y se
+    // corrige el caso real que no cubría.
+    function refrescarRect() {
+      rectCache = contenedor.getBoundingClientRect();
+    }
+
     var rafRedibujo = null;
     function redibujar() {
       if (!vivo || rafRedibujo !== null) return;
@@ -1418,6 +1444,7 @@
 
     lienzo.addEventListener('pointerdown', function (e) {
       if (pointerActivoId !== null) return; // ya hay otro dedo/puntero arrastrando — el pellizco se maneja aparte
+      refrescarRect();
       cancelarInercia();
       pointerActivoId = e.pointerId;
       arrastrando = true; sePanneo = false;
@@ -1427,6 +1454,7 @@
       lienzo.setPointerCapture(e.pointerId);
       lienzo.style.cursor = 'grabbing';
     });
+    lienzo.addEventListener('pointerenter', function () { refrescarRect(); });
     lienzo.addEventListener('pointermove', function (e) {
       // Durante la continuación táctil de un pan con un solo dedo tras
       // soltar uno de los dos de un pellizco (ver touchend más abajo),
@@ -1721,6 +1749,7 @@
     // que normalmente hace cara la no-pasividad.
     lienzo.addEventListener('wheel', function (e) {
       e.preventDefault();
+      if (wheelRAF === null) refrescarRect(); // primer evento de una ráfaga nueva: recién ahí vale la pena pagar el reflow
       cancelarInercia();
       cerrarSpider();
       var rect = rectLienzo();
@@ -1821,7 +1850,27 @@
     // mueven — igual que Google/Apple Maps. Antes, el pellizco solo
     // cambiaba el zoom con el centro del viewport fijo, así que
     // pellizcar lejos del centro "arrastraba" el mapa de forma rara.
-    var pinchDist0 = null, pinchZoom0 = null, pinchCentro0 = null;
+    //
+    // BUG REAL corregido (reportado: Moto G14, gama baja-media — "el
+    // zoom se va hacia donde están mis dedos, de forma rara"): el punto
+    // geográfico de anclaje (`geoFoco`) se recalculaba en CADA
+    // `touchmove`, desproyectando la posición de pantalla FIJA inicial
+    // (`pinchCentro0`) contra el `viewport` YA MODIFICADO por el frame
+    // anterior. Pero ese frame anterior movió el viewport justo para que
+    // el punto original quedara bajo el centro ACTUAL de los dedos (que
+    // se desplaza), no bajo la posición fija inicial — así que
+    // recalcular ahí agarra, cada vez, un punto geográfico ligeramente
+    // distinto al original: un drift acumulativo frame a frame. Con
+    // `touchmove` frecuentes (dispositivo potente) el error por frame es
+    // chico y casi no se nota; con eventos táctiles más espaciados
+    // (gama baja/media, frames más grandes entre sí) el mismo drift se
+    // acumula mucho más rápido y se vuelve visible: el mapa "se escapa"
+    // hacia los dedos en vez de quedarse anclado. Corrección: el punto
+    // geográfico de anclaje se calcula UNA SOLA VEZ, al empezar el
+    // pellizco (acá, en touchstart, contra el viewport todavía sin
+    // tocar), y se reutiliza sin volver a desproyectarlo en cada frame
+    // — la misma técnica que usan Leaflet/Mapbox GL para pinch-zoom.
+    var pinchDist0 = null, pinchZoom0 = null, pinchCentro0 = null, pinchGeoFoco0 = null;
     function alTouchstartContenedor(e) {
       e.preventDefault();
       if (e.touches.length === 2) {
@@ -1830,6 +1879,15 @@
         pinchDist0 = distanciaToques(e.touches);
         pinchZoom0 = viewport.zoom;
         pinchCentro0 = centroToques(e.touches);
+        refrescarRect();
+        (function () {
+          var rect = rectLienzo();
+          pinchGeoFoco0 = PROY.pantallaAPunto(
+            pinchCentro0.x - rect.left,
+            pinchCentro0.y - rect.top,
+            viewport
+          );
+        })();
         // El pellizco toma el control: cede cualquier arrastre de un
         // solo puntero (o inercia post-arrastre) que estuviera en
         // curso, para que no compitan.
@@ -1856,18 +1914,19 @@
     lienzo.addEventListener('touchstart', alTouchstartContenedor, { passive: false });
     function alTouchmoveContenedor(e) {
       e.preventDefault();
-      if (e.touches.length === 2 && pinchDist0) {
+      if (e.touches.length === 2 && pinchDist0 && pinchGeoFoco0) {
         var d = distanciaToques(e.touches);
         var centroActual = centroToques(e.touches);
         var nuevoZoom = PROY.clamp(pinchZoom0 + Math.log2(d / pinchDist0), ZOOM_MIN, ZOOM_MAX);
 
         var rect = rectLienzo();
-        var focoXInicialRel = pinchCentro0.x - rect.left;
-        var focoYInicialRel = pinchCentro0.y - rect.top;
-        var geoFoco = PROY.pantallaAPunto(focoXInicialRel, focoYInicialRel, viewport);
-
+        // pinchGeoFoco0: el MISMO punto geográfico calculado una única
+        // vez en touchstart — nunca se vuelve a desproyectar desde la
+        // posición de pantalla, así que no hay drift posible por más
+        // frames que pasen ni por más grande que sea el salto entre
+        // touchmove sucesivos.
         viewport.zoom = nuevoZoom;
-        var pFoco = PROY.proyectar(geoFoco.lat, geoFoco.lng, viewport.zoom);
+        var pFoco = PROY.proyectar(pinchGeoFoco0.lat, pinchGeoFoco0.lng, viewport.zoom);
         var centroActualRelX = centroActual.x - rect.left;
         var centroActualRelY = centroActual.y - rect.top;
         var centroMundoX = pFoco.x + viewport.ancho / 2 - centroActualRelX;
@@ -1915,6 +1974,7 @@
       if (e.touches.length < 2) { 
         pinchDist0 = null;
         pinchCentro0 = null;
+        pinchGeoFoco0 = null;
         if (e.touches.length === 0) enPellizco = false;
       }
       if (e.touches.length === 0) {
@@ -1930,6 +1990,7 @@
       // próximo toque heredaba un estado de pellizco que ya no existe.
       pinchDist0 = null;
       pinchCentro0 = null;
+      pinchGeoFoco0 = null;
       panTactilUnico = null;
       enPellizco = false;
     }
