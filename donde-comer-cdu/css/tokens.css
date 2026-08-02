@@ -187,8 +187,23 @@
   --glass-bg-fuerte:   rgba(16,20,28,.78);
   --glass-borde:       rgba(236,237,239,.10);
   --glass-borde-hover: rgba(201,122,131,.45);
-  --glass-blur:        14px;
-  --glass-blur-fuerte: 24px;
+  /* PERF (auditoría performance, C1.2, 2026-08-02): el costo de
+     backdrop-filter escala con el radio de blur, y hasta ahora 14px/
+     24px se pagaban siempre como DEFAULT, incluso en gama alta —
+     u-vidrio-reducido (más abajo) ya bajaba esto a 4px/6px, pero solo
+     para dispositivos identificados como gama media/baja o con
+     prefers-reduced-transparency. No hacía falta esperar a detectar
+     "dispositivo limitado" para pagar menos: bajar el propio default
+     reduce el costo de compositing en TODOS los dispositivos, gama
+     alta incluida, sin que el vidrio deje de leerse como vidrio.
+     8px/14px se ve visualmente casi idéntico a 14px/24px en la
+     mayoría de paneles (la diferencia perceptual de blur más allá de
+     ~8-10px es marginal) pero cuesta sensiblemente menos GPU por
+     frame. Sigue habiendo margen entre este default y el piso de
+     u-vidrio-reducido (4px/6px): ese modo sigue existiendo para
+     cuando ni esto alcanza. */
+  --glass-blur:        8px;
+  --glass-blur-fuerte: 14px;
 
   --gradiente-marca:   linear-gradient(135deg,#9C3A46 0%,#C97A83 55%,#E0A5AC 100%);
   --gradiente-halo:    radial-gradient(60% 60% at 30% 20%, rgba(201,122,131,.35), transparent 70%),
