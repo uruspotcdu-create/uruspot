@@ -38,6 +38,15 @@
   var FOCUS_TRAP_DELAY_MS = 100;
   var ANIMATION_TIMEOUT_MS = 260;
   var GEOLOCATION_TIMEOUT_MS = 8000;
+  // PERF (auditoría performance, 2026-08-02): red de seguridad para
+  // .tarjeta--entrando (ver pintarTarjetas/inicializarListeners). El
+  // caso normal saca la clase en 'animationend'; este timeout es solo
+  // por si esa animación nunca llega a completarse (interrumpida,
+  // pestaña oculta durante la animación, etc.) — sin él, una tarjeta
+  // podría quedar con el vidrio suprimido para siempre. Cubre el peor
+  // caso real: --dur-lenta (420ms) + el delay escalonado más largo
+  // (Math.min(i,24)*0.03s = 720ms) = 1140ms, con margen.
+  var ENTRADA_VIDRIO_TIMEOUT_MS = 1500;
 
   // Fase 4 — MUST HAVE #4 (Fase 3A §2, Fase 3D §7): encuadre del mapa
   // por región. Antes `encuadrarTodos()` siempre recibía el mismo
@@ -1757,6 +1766,27 @@
 
       if (!movimientoReducido) {
         art.style.animationDelay = (Math.min(i, 24) * 0.03) + 's';
+        // PERF (auditoría performance, 2026-08-02): mientras la
+        // tarjeta está entrando (fade-up + posible stagger de hasta
+        // 720ms) se suprime su backdrop-filter vía .tarjeta--entrando
+        // (css/tarjeta-lugar.css). Con hasta 8 tarjetas entrando a la
+        // vez, cada una con su propio vidrio esmerilado, el
+        // compositor tenía que recomponer varias capas de blur en
+        // movimiento simultáneamente — el blur en sí no se nota
+        // ausente durante ~420ms de movimiento (la atención está en
+        // la posición/opacidad, no en el desenfoque de fondo), así
+        // que se recupera automáticamente en 'animationend' sin
+        // cambio visual perceptible en reposo.
+        art.classList.add('tarjeta--entrando');
+        // Red de seguridad (mismo idioma que programarRenderTrasSalida
+        // más abajo: evento + setTimeout de respaldo): el listener
+        // delegado de 'animationend' en DOM.panelDescubrimiento
+        // (inicializarListeners) saca la clase en el caso normal,
+        // mucho antes de este timeout — esto solo cubre el caso raro
+        // en que la animación nunca dispare 'animationend'. Quitar una
+        // clase que ya no está puesta es un no-op, así que no hay
+        // riesgo de doble efecto.
+        setTimeout(function () { art.classList.remove('tarjeta--entrando'); }, ENTRADA_VIDRIO_TIMEOUT_MS);
       }
 
       var linkMaps = mapsHref(lugar);
@@ -2406,6 +2436,12 @@
       DOM.panelDescubrimiento.addEventListener('mouseover', manejarHoverPanel);
       DOM.panelDescubrimiento.addEventListener('mouseout', manejarHoverOutPanel);
       DOM.panelDescubrimiento.addEventListener('keydown', manejarKeydownPanel);
+      // PERF (auditoría performance, 2026-08-02): un único listener
+      // delegado para todas las tarjetas en vez de uno por tarjeta
+      // (hasta 8 nuevas por render) — saca .tarjeta--entrando (ver
+      // pintarTarjetas) apenas termina la animación real de entrada
+      // de esa tarjeta puntual, devolviéndole su backdrop-filter.
+      DOM.panelDescubrimiento.addEventListener('animationend', manejarFinEntradaTarjeta);
     }
 
     // Chips de rubro
@@ -2717,6 +2753,21 @@
   function manejarHoverOutPanel(e) {
     var carta = e.target.closest('[data-lugar-id]');
     if (carta && motorMapa) motorMapa.quitarResaltado();
+  }
+
+  // PERF (auditoría performance, 2026-08-02): contraparte de la marca
+  // .tarjeta--entrando que pintarTarjetas() agrega en la creación.
+  // Delegado en DOM.panelDescubrimiento en vez de un listener por
+  // tarjeta — 'animationend' burbujea, así que un único listener
+  // alcanza para las hasta 8 tarjetas que puede haber por render.
+  // Filtra por animationName porque el mismo elemento podría, en
+  // teoría, tener más de una animación nombrada en el futuro y este
+  // handler solo debe reaccionar a la de entrada (uru-fade-up).
+  function manejarFinEntradaTarjeta(e) {
+    if (e.animationName !== 'uru-fade-up') return;
+    if (e.target && e.target.classList) {
+      e.target.classList.remove('tarjeta--entrando');
+    }
   }
 
   /**
