@@ -301,16 +301,26 @@
 
     currentState = nuevoEstado;
     lastStateChange = Date.now();
-    stateChangeLog.push({
-      desde: estadoAnterior,
-      hacia: nuevoEstado,
-      timestamp: lastStateChange,
-      razon: razon || 'sin_razon'
-    });
 
-    // Guardar últimos 50 cambios para debugging
-    if (stateChangeLog.length > 50) {
-      stateChangeLog.shift();
+    // PERF (auditoría, hallazgo M2, 2026-08-02): antes esto se ejecutaba
+    // siempre, sin importar si el flag de debug estaba activo, aunque el
+    // resto de la telemetría (debugLog, MetricsCollector, DebugHelper) sí
+    // respeta window.URU_CONFIG.debug. Se gatea acá igual que debugLog para
+    // no pagar este trabajo en cada transición de estado en producción. Si
+    // el debug está apagado, stateChangeLog queda vacío — comportamiento
+    // esperado, no afecta validar()/reparar()/runTests()/healthCheck().
+    if (window.URU_CONFIG && window.URU_CONFIG.debug) {
+      stateChangeLog.push({
+        desde: estadoAnterior,
+        hacia: nuevoEstado,
+        timestamp: lastStateChange,
+        razon: razon || 'sin_razon'
+      });
+
+      // Guardar últimos 50 cambios para debugging
+      if (stateChangeLog.length > 50) {
+        stateChangeLog.shift();
+      }
     }
 
     debugLog('[State] ' + estadoAnterior + ' → ' + nuevoEstado + ' (' + (razon || 'unknown') + ')');
@@ -1055,26 +1065,96 @@
   }
 
   /**
+   * PERF (auditoría, hallazgo I2, 2026-08-02): antes, apenas resolvía el
+   * fetch de lugares-detalles.json / lugares-estado.json, se hacía un
+   * `.forEach()` síncrono sobre hasta ~1468 registros en un solo tirón —
+   * eso bloquea el hilo principal aunque el propio fetch estuviera diferido
+   * con requestIdleCallback (diferir CUÁNDO se pide no evita que aplicar la
+   * respuesta entera de una sola vez bloquee igual).
+   *
+   * Se evaluó conectar `window.Virtualizador` (js/datos-virtualizador.js,
+   * ya bundleado en motor.bundle.js) para pedir datos por tile geográfico
+   * en vez de todo el catálogo. Se descartó: Virtualizador escoge datos por
+   * bounds del MAPA, pero las tarjetas (pintarTarjetas) casi nunca se
+   * scopean por geografía — se scopean por recorte curado
+   * (recortePorIniciativaPropiaExplicado) o por búsqueda/filtro sobre TODO
+   * el catálogo. Restringir la carga al viewport del mapa rompería
+   * direcciones para resultados de búsqueda fuera de ese viewport; y como
+   * la ciudad es chica (11 tiles cubren ~99.8% del catálogo), tampoco
+   * ahorraría bytes reales en el uso típico. Se descarta esa vía y se
+   * ataca en cambio el bloqueo real: en vez de una función `aplicarUno`
+   * por CADA item de una sola pasada, se reparte en tandas de tamaño fijo
+   * a través de requestIdleCallback (o setTimeout si no existe), priorizando
+   * primero los ids que ya están pintados en pantalla (lastRenderCache.lista)
+   * para que lo visible tenga sus datos completos lo antes posible. Se sigue
+   * pidiendo exactamente el mismo JSON completo — nada deja de tener datos,
+   * solo cambia CÓMO se reparte el trabajo de aplicarlo.
+   */
+  function aplicarEnTandas(lista, idsPrioritarios, aplicarUno, alTerminar) {
+    var TANDA_TAMANO = 60;
+    var pendientes = lista.slice();
+
+    if (idsPrioritarios && idsPrioritarios.size) {
+      pendientes.sort(function (a, b) {
+        var pa = idsPrioritarios.has(a.id) ? 0 : 1;
+        var pb = idsPrioritarios.has(b.id) ? 0 : 1;
+        return pa - pb;
+      });
+    }
+
+    var i = 0;
+    function tanda() {
+      var fin = Math.min(i + TANDA_TAMANO, pendientes.length);
+      for (; i < fin; i++) {
+        aplicarUno(pendientes[i]);
+      }
+      if (i < pendientes.length) {
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(tanda, { timeout: 500 });
+        } else {
+          setTimeout(tanda, 0);
+        }
+      } else if (alTerminar) {
+        alTerminar();
+      }
+    }
+    tanda();
+  }
+
+  /**
    * Carga detalles, estado y clima en segundo plano (requestIdleCallback).
    */
   function cargarDetallesEnSegundoPlano() {
     var lanzar = function () {
+      // Ids visibles en este momento (lo que el usuario ve ahora mismo),
+      // para que aplicarEnTandas() los procese primero. Puede ser null en
+      // el primer boot si render() todavía no corrió — aplicarEnTandas
+      // maneja ese caso sin priorizar nada (orden original del JSON).
+      var idsVisibles = null;
+      try {
+        idsVisibles = new Set((lastRenderCache.lista || []).map(function (l) { return l.id; }));
+      } catch (e) {
+        idsVisibles = null;
+      }
+
       Promise.all([
         fetchJSON('lugares-detalles.json')
           .then(function (det) {
-            det.forEach(function (d) {
+            aplicarEnTandas(det, idsVisibles, function (d) {
               var reg = porId[d.id];
               if (reg) {
                 reg.direccion = d.direccion || null;
                 reg.telefono = d.telefono || null;
                 reg.descripcion = d.descripcion || null;
               }
+            }, function () {
+              // Reconstruir: direccion pasó de null a texto real en varios
+              // lugares, y el índice de trigramas los tenía indexados con
+              // direccion vacía hasta este momento. Se reconstruye UNA vez,
+              // al terminar todas las tandas — no en cada tanda individual.
+              if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
+              render();
             });
-            // Reconstruir: direccion pasó de null a texto real en varios
-            // lugares, y el índice de trigramas los tenía indexados con
-            // direccion vacía hasta este momento.
-            if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
-            render();
           })
           .catch(function (e) {
             console.warn('lugares-detalles.json no disponible:', e.message);
@@ -1083,7 +1163,7 @@
         fetchJSON('lugares-estado.json')
           .then(function (mapa) {
             var PENDIENTE = ['pendiente', 'no encontrado', 'requiere confirmacion', 'requiere_confirmacion'];
-            mapa.forEach(function (m) {
+            aplicarEnTandas(mapa, idsVisibles, function (m) {
               var reg = porId[m.id];
               if (!reg || !m.estado_verificacion) return;
               var low = m.estado_verificacion.toLowerCase();
