@@ -369,6 +369,21 @@
   var DEMORA_REINTENTO_TILE_MS = 800;
   var RE_HEX = /^#[0-9a-fA-F]{6}$/;
 
+  // GAP REAL DE PERFORMANCE (auditoría navegación, 2026-08-02):
+  // devicePixelRatio no tenía techo — en un teléfono de gama media con
+  // DPR real de 2.5-3 (frecuente en Android, candidato real para el
+  // hardware donde se reportó "el mapa se siente raro/pesado") el canvas
+  // interno se crea a ancho*dpr × alto*dpr: hasta 9x más píxeles para
+  // limpiar/rellenar en CADA frame que a DPR 1, y 2-4x más que a un DPR
+  // ya de sobra nítido de 2. Esto pega directo en la fluidez de
+  // cualquier gesto continuo (inercia, pellizco, rueda) justo en el
+  // hardware con menos margen. La nitidez extra más allá de DPR 2 es
+  // imperceptible acá: no hay texto fino ni fotografía de alta
+  // frecuencia en el canvas del mapa, solo tiles, pines planos y
+  // clusters — se pierde rendimiento real sin ninguna ganancia visual
+  // real a cambio.
+  var DPR_MAX = 2;
+
   var esPunteroTosco = !!(global.matchMedia && global.matchMedia('(pointer: coarse)').matches);
   var TOLERANCIA_CLICK_PX = esPunteroTosco ? 28 : 20; // el dedo es menos preciso que un cursor
 
@@ -762,7 +777,7 @@
     var rectCache = null;
 
     function medir() {
-      dpr = Math.max(1, global.devicePixelRatio || 1);
+      dpr = Math.min(DPR_MAX, Math.max(1, global.devicePixelRatio || 1));
       var rect = contenedor.getBoundingClientRect();
       rectCache = rect;
       viewport.ancho = rect.width;
