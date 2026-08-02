@@ -183,14 +183,27 @@
   var REGISTRO = [];
     var porId = Object.create(null);
 
-  // VIRTUALIZADOR: Carga lazy de lugares por viewport (auditor�a 2026-07-31)
-  function cargarLugaresDelViewport() {
-    if (!window.Virtualizador) return;
-    var bounds = { south: -32.5, north: -32.4, west: -58.3, east: -58.2 };
-    window.Virtualizador.cargarParaViewport(bounds)
-      .then(function(lugares) { console.log('[Virtualizador] Precargados ' + lugares.length + ' lugares'); })
-      .catch(function(e) { console.warn('[Virtualizador]', e); });
-  }
+  // PERF (auditoría de rendimiento, I2, 2026-08-02): existía acá una
+  // función cargarLugaresDelViewport() que llamaba a
+  // window.Virtualizador.cargarParaViewport() con un bounding box FIJO
+  // que cubre toda la ciudad (no el viewport real del mapa, que en ese
+  // momento del flujo ni siquiera está inicializado todavía). Con
+  // TILE_SIZE=0.05 y FETCH_BUFFER=2 (js/datos-virtualizador.js), ese
+  // bbox fijo dispara 49 fetches de tiles en paralelo en cada carga del
+  // catálogo — la mayoría a archivos que no existen en
+  // datos/lugares-mapa-tiles/ (404) — y el resultado se descartaba por
+  // completo: el único consumidor era un console.log con la cantidad de
+  // lugares devueltos, nada se guardaba en REGISTRO ni se usaba para
+  // pintar nada. Es decir: tráfico de red real (49 requests, la mayoría
+  // fallidas) sin ningún efecto funcional. Se quita la llamada y la
+  // función; window.Virtualizador (motor.bundle.js) sigue existiendo
+  // para quien quiera cablearlo a un uso real en el futuro (p. ej.
+  // cargar detalles por región efectivamente visible en el mapa), pero
+  // eso es un cambio de arquitectura de datos, no un one-liner: la
+  // lista/búsqueda de tarjetas de hoy no está acotada al viewport del
+  // mapa (una búsqueda puede traer resultados de cualquier punto de la
+  // ciudad), así que cargar detalles solo por tile rompería la
+  // descripción/teléfono de tarjetas fuera del viewport visible.
 
   // Estado de sesión (mutante, persistido con PLANO.guardarEstado)
   var estado = null;
@@ -972,7 +985,6 @@
         pintarStatsRapidas();
         pintarDestacados();
         pintarSugerenciasRapidas();
-        cargarLugaresDelViewport(); // Precarga lazy de tiles
         render();
 
       })
