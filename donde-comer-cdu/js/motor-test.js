@@ -1158,6 +1158,34 @@ function lugar(id, grupo, lat, lng) {
   assert('encuadrar([]) sigue devolviendo null', PROY.encuadrar([], 800, 600, 48, 20) === null);
 })();
 
+/* ── 84b. encuadrar (auditoría "red team", 2026-08-02): caso general ahora da zoom
+   fraccionario (fórmula cerrada, no loop entero) y el bbox real cabe en el
+   contenedor a ese zoom — no solo "no lanza" (ver test 81), sino "el resultado
+   es correcto" ── */
+(function () {
+  var puntos = [{ lat: -32.470, lng: -58.250 }, { lat: -32.490, lng: -58.220 }];
+  var enc = PROY.encuadrar(puntos, 800, 600, 48, 18);
+  assert('encuadrar del caso general ya no trunca a entero', enc.zoom % 1 !== 0);
+  var escala = PROY.escalaDeZoom(enc.zoom);
+  var p1 = PROY.proyectar(puntos[0].lat, puntos[0].lng, enc.zoom, escala);
+  var p2 = PROY.proyectar(puntos[1].lat, puntos[1].lng, enc.zoom, escala);
+  var w = Math.abs(p2.x - p1.x), h = Math.abs(p2.y - p1.y);
+  assert('el bbox real cabe en el ancho disponible al zoom devuelto', w <= 800 - 48 * 2 + 0.01);
+  assert('el bbox real cabe en el alto disponible al zoom devuelto', h <= 600 - 48 * 2 + 0.01);
+})();
+
+/* ── 84c. encuadrar: eje sin extensión (misma longitud, distinta latitud) no
+   frena el zoom por ese eje — mismo comportamiento que el loop viejo, ahora
+   explícito vía Infinity en vez de implícito por w=0 nunca superando el límite ── */
+(function () {
+  var enc = PROY.encuadrar(
+    [{ lat: -32.40, lng: -58.24 }, { lat: -32.60, lng: -58.24 }],
+    800, 600, 48, 18
+  );
+  assert('bbox de ancho normalizado 0 no lanza ni da NaN', isFinite(enc.zoom));
+  assert('bbox de ancho normalizado 0 respeta zMax como techo', enc.zoom <= 18);
+})();
+
 /* ── 85. AUDITORÍA: entrarCuraduria activa curaduriaActiva y apaga la sugerencia ── */
 (function () {
   var e = PLANO.estadoInicial('cdu');
