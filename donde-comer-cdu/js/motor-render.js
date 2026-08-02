@@ -2133,14 +2133,37 @@
       return miembros.map(function (p) { return p.id; }).sort().join(',');
     }
 
+    // PERF: reemplazan el patrón `.filter(...)[0]` en los puntos de
+    // este archivo que corren por frame (posicionarPopupAbierto/
+    // posicionarEtiqueta, llamadas desde dibujar() — el único
+    // llamador del loop de rAF) o por cada hover de tarjeta
+    // (enfocar/resaltar). `.filter` no tiene salida temprana: siempre
+    // recorre el array completo (hasta 2000 puntos, ver
+    // motor-config.js) y además aloca un array intermedio solo para
+    // quedarse con el primer resultado. Un `for` con `return` en el
+    // primer match hace el mismo trabajo sin ninguna de las dos cosas.
+    function primeroPorId(lista, id) {
+      for (var i = 0; i < lista.length; i++) {
+        if (lista[i].id === id) return lista[i];
+      }
+      return null;
+    }
+
+    function primeroProyectadoPorId(proyectados, id) {
+      for (var i = 0; i < proyectados.length; i++) {
+        if (proyectados[i].punto.id === id) return proyectados[i];
+      }
+      return null;
+    }
+
     function posicionarPopupAbierto(proyectados, clusters) {
       if (popup.hidden) return;
       if (idAbierto !== null) {
         if (spiderActivo) {
-          var posSpider = spiderActivo.posiciones.filter(function (ps) { return ps.punto.id === idAbierto; })[0];
+          var posSpider = primeroProyectadoPorId(spiderActivo.posiciones, idAbierto);
           if (posSpider) { posicionarPopupEn(posSpider._xActual || posSpider.x, posSpider._yActual || posSpider.y); return; }
         }
-        var p = proyectados.filter(function (pr) { return pr.punto.id === idAbierto; })[0];
+        var p = primeroProyectadoPorId(proyectados, idAbierto);
         if (!p) { cerrarPopup(); return; }
         // Clamp para que el popup nunca quede parcialmente fuera del
         // contenedor cuando el marcador está cerca de un borde.
@@ -2170,7 +2193,7 @@
       // No mostrar la etiqueta liviana sobre el mismo punto que ya
       // tiene el popup completo abierto — sería redundante.
       if (!puntoResaltado || puntoResaltado.id === idAbierto) { etiqueta.hidden = true; return; }
-      var p = proyectados.filter(function (pr) { return pr.punto.id === puntoResaltado.id; })[0];
+      var p = primeroProyectadoPorId(proyectados, puntoResaltado.id);
       if (!p) { etiqueta.hidden = true; return; }
       etiqueta.textContent = puntoResaltado.nombre;
       etiqueta.style.left = p.x + 'px';
@@ -2285,14 +2308,14 @@
     }
 
     function enfocar(id) {
-      var p = puntos.filter(function (x) { return x.id === id; })[0];
+      var p = primeroPorId(puntos, id);
       if (!p) return;
       animarA(p.lat, p.lng, Math.max(viewport.zoom, 15));
     }
 
     function resaltar(id) {
       idResaltado = id;
-      puntoResaltado = puntos.filter(function (p) { return p.id === id; })[0] || null;
+      puntoResaltado = primeroPorId(puntos, id);
       redibujar();
     }
     function quitarResaltado() { idResaltado = null; puntoResaltado = null; redibujar(); }
