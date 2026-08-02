@@ -34,6 +34,12 @@
   var CIUDAD = 'concepcion-del-uruguay';
   var TARJETAS_POR_PAGINA = 8;
   var DEBOUNCE_BUSQUEDA_MS = 160;
+  // TIER 1.3 (Perf, 2026-08-02): más corto que el de búsqueda porque un
+  // click en un chip de rubro ya es una intención completa (a
+  // diferencia de una tecla dentro de una palabra que se sigue
+  // escribiendo) — solo necesita absorber dobles clicks/clicks en
+  // ráfaga entre chips distintos.
+  var DEBOUNCE_FILTRO_MS = 80;
   var PERMANENCIA_TICK_MS = 5000;
   var FOCUS_TRAP_DELAY_MS = 100;
   var ANIMATION_TIMEOUT_MS = 260;
@@ -192,7 +198,14 @@
   // veces por sesión con los mismos datos — caché da hit 90%+ del tiempo.
 
   var DISTANCIA_CACHE = Object.create(null);
-  var SLUG_CACHE = Object.create(null);
+
+  // TIER 1.2 — auditoría de cierre (Perf, 2026-08-02): acá existía un
+  // SLUG_CACHE que nunca se conectaba a nada (variable muerta). Se
+  // retira en vez de cablearla: slug() (más abajo) es un lookup directo
+  // en el objeto estático URU_LOCALES_SLUGS, ya O(1) — no hay parsing
+  // ni cómputo repetido que cachear. Envolver un lookup de objeto en
+  // una capa de caché no ahorra trabajo, solo lo agrega (hash de clave
+  // + escritura en el mapa de caché) sin beneficio medible.
 
   function calcularDistancia(lat1, lng1, lat2, lng2) {
     return Math.sqrt(
@@ -291,6 +304,7 @@
   // Timers y operaciones async activas
   var activeOperations = {
     debounceBuscarId: null,
+    debounceFiltroId: null,
     permanenciaTimer: null,
     focusTrapTimer: null,
     geolocationRequest: null,
@@ -1284,25 +1298,15 @@
   // ═══════════════════════════════════════════════════════════════════
   // TIER 1: DEBOUNCE (Perf, 2026-08-02)
   // ═══════════════════════════════════════════════════════════════════
-  // Agrupa eventos rápidos (clicks en región/filtro) en un solo render
-  // Impacto: +15% fluidez, evita renders redundantes
-
-  function debounce(fn, ms) {
-    var timeoutId = null;
-    return function debounced() {
-      var args = Array.prototype.slice.call(arguments);
-      var context = this;
-
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-      }
-
-      timeoutId = setTimeout(function () {
-        fn.apply(context, args);
-        timeoutId = null;
-      }, ms);
-    };
-  }
+  // Auditoría de cierre: acá había un helper debounce(fn, ms) genérico
+  // que nunca se llegó a conectar a ningún listener — el comentario
+  // decía "agrupa clicks en región/filtro" pero no había ningún sitio
+  // en el archivo que lo invocara. Se retira y se reemplaza por el
+  // cableado real en seleccionarRubro() (más abajo), que sigue el
+  // mismo patrón manual clearTimeout/setTimeout que ya usa
+  // manejarInputBusqueda() para la búsqueda — así los dos debounces de
+  // la app quedan consistentes entre sí en vez de tener dos mecanismos
+  // distintos conviviendo.
 
   /**
    * Determina la rama visual actual (curaduria | buscador | recorte:guia | recorte:exploracion).
@@ -1870,6 +1874,10 @@
     if (cual === 'busqueda') {
       limpiarBusqueda();
     } else if (cual === 'rubro') {
+      // Quitar la faceta es la misma clase de "deshacer instantáneo"
+      // que limpiarBusqueda(): cancela cualquier render de filtro en
+      // cola y aplica ya, no espera el debounce de seleccionarRubro().
+      clearTimeout(activeOperations.debounceFiltroId);
       uiState.filtroRubroActivo = null;
       pintarRubros();
       render();
@@ -3017,8 +3025,23 @@
     uiState.paginaTarjetas = 1;
     estado = PLANO.aplicarAccion(estado, 'salirCuraduria');
     PLANO.guardarEstado(estado);
+
+    // El resaltado del chip es feedback inmediato: no espera al debounce.
     pintarRubros();
-    renderConTransicionDeFiltro();
+
+    // TIER 1.3 — auditoría de rendimiento (Perf, 2026-08-02): antes cada
+    // click en un rubro disparaba renderConTransicionDeFiltro() de
+    // inmediato. En clicks en ráfaga entre chips (o doble click por
+    // error), eso eran 2-3 re-renders completos del panel + mapa antes
+    // de que el usuario terminara de decidir. Se agrupa igual que ya
+    // se hace con la búsqueda: se cancela cualquier render pendiente y
+    // se dispara uno solo, DEBOUNCE_FILTRO_MS después del último click.
+    clearTimeout(activeOperations.debounceFiltroId);
+    activeOperations.debounceFiltroId = setTimeout(
+      renderConTransicionDeFiltro,
+      DEBOUNCE_FILTRO_MS
+    );
+
     if (DOM.tituloRegion) {
       DOM.tituloRegion.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
