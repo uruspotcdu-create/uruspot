@@ -63,7 +63,18 @@
      punto exacto de inicio o fin de estos ciclos". */
   transition: --ambiente-color-1 58s cubic-bezier(.45, 0, .55, 1),
               --ambiente-color-2 58s cubic-bezier(.45, 0, .55, 1);
-  will-change: background;
+  /* PERF (auditoría performance, 2026-08-02): se quita
+     `will-change: background` — `background` no es una propiedad
+     compositor-only (a diferencia de `transform`/`opacity`), así que
+     prometérsela a `will-change` no evita el repintado que la
+     transición de 58s ya iba a producir igual: solo reserva, de
+     forma permanente y durante toda la sesión, una capa de
+     compositor del tamaño completo del viewport en memoria de GPU,
+     sin el beneficio que `will-change` normalmente da a cambio. En
+     una pestaña abierta durante horas (el escenario que más importa
+     acá) eso es presión de memoria sostenida sin contrapartida real,
+     dado que la transición es tan lenta (58s) que un repintado
+     ocasional de esta capa nunca fue perceptible como jank. */
 }
 
 /* Usada por ambiente-capa-fondo.js durante el primer aplicado y al
