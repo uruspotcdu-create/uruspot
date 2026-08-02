@@ -398,7 +398,7 @@
           "name": "¿Por qué algunos lugares no tienen foto propia?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Hoy la mayoría de las fichas no tiene foto propia todavía — es contenido pendiente, listado como tal en la Hoja de ruta, no un error. El diseño de la tarjeta ya está preparado para mostrarla en cuanto el dato exista."
+            "text": "Hoy la mayoría de las fichas no tiene foto propia todavía — es contenido pendiente, no un error. El diseño de la tarjeta ya está preparado para mostrarla en cuanto el dato exista."
           }
         }
       ]
@@ -565,51 +565,6 @@ if ('serviceWorker' in navigator) {
     </a>
   </section>
 
-  <!-- ÍNDICE DE PÁGINA: 100% estático, sin dependencia de JS ni de
-       datos — son anclas (#id) a secciones que ya existen en este
-       mismo documento. Se agrega acá porque la expansión de
-       contenido de esta revisión lleva la página de 6 a 12
-       secciones; sin un mapa de contenido, "Cómo funciona" o
-       "Glosario" quedarían enterrados a varios scrolls de distancia
-       sin que nadie supiera que existen. -->
-  <!-- ÍNDICE DE PÁGINA — reagrupado en dos bloques con encabezado
-       propio (auditoría 2ª pasada, P1). Antes eran 12 links sueltos
-       en una sola lista plana, sin jerarquía: "Destacados" y
-       "Accesibilidad" pesaban visualmente lo mismo, cuando el primero
-       es producto y el segundo es contenido de referencia. Separar
-       "Explorá" (lo que se usa) de "Conocé el proyecto" (lo que se
-       lee una vez) no elimina ninguna sección ni ningún link — solo
-       les da jerarquía, así el nav deja de sentirse como un mapa del
-       sitio y vuelve a sentirse como una guía de uso. Sin cambios de
-       JS ni de contrato: son las mismas 12 anclas de siempre. -->
-  <nav class="indice-pagina envoltorio u-reveal" aria-label="Ir a una sección de esta página">
-    <div class="indice-pagina__grupo">
-      <span class="indice-pagina__grupo-titulo">Explorá</span>
-      <ul class="indice-pagina__lista">
-        <li><a class="indice-pagina__link" href="#destacados">Destacados</a></li>
-        <li><a class="indice-pagina__link" href="#region-descubrimiento">Buscar y explorar</a></li>
-        <li><a class="indice-pagina__link" href="#rubros">Por rubro</a></li>
-        <li><a class="indice-pagina__link" href="#accesos">Guías por categoría</a></li>
-      </ul>
-    </div>
-    <div class="indice-pagina__grupo">
-      <span class="indice-pagina__grupo-titulo">Conocé el proyecto</span>
-      <ul class="indice-pagina__lista">
-        <li><a class="indice-pagina__link" href="#sobre-la-ciudad">Sobre la ciudad</a></li>
-        <li><a class="indice-pagina__link" href="#manifiesto">Cómo funciona</a></li>
-        <li><a class="indice-pagina__link" href="#testimonios">Cómo lo usa la gente</a></li>
-        <li><a class="indice-pagina__link" href="#metodologia">Cómo pensamos el orden</a></li>
-        <li><a class="indice-pagina__link" href="#para-locales">Para dueños de locales</a></li>
-        <li><a class="indice-pagina__link" href="#guia-practica">Guía práctica</a></li>
-        <li><a class="indice-pagina__link" href="#glosario">Glosario</a></li>
-        <li><a class="indice-pagina__link" href="#faq">Preguntas frecuentes</a></li>
-        <li><a class="indice-pagina__link" href="#hoja-de-ruta">Hoja de ruta</a></li>
-        <li><a class="indice-pagina__link" href="#accesibilidad">Accesibilidad</a></li>
-        <li><a class="indice-pagina__link" href="#privacidad-datos">Privacidad y tus datos</a></li>
-      </ul>
-    </div>
-  </nav>
-
   <!-- DESTACADOS (auditoría Fase 4, nueva): spotlight de lugares con
        mejor puntuación real. `rating`/`rating_count` ya viajaban en
        lugares-core.json desde split_dataset.py — el propio script
@@ -634,9 +589,6 @@ if ('serviceWorker' in navigator) {
        esta <section> se recalcula en cada render() de app.js — ver
        §1 para qué módulo decide qué. -->
   <section class="envoltorio descubrimiento-area u-reveal" id="region-descubrimiento" aria-label="Descubridor de lugares">
-    <div id="mapaTextura" aria-hidden="true"></div>
-    <p class="mapa-textura__leyenda">Cada punto de color es un lugar caminado y verificado — el mapa interactivo aparece más abajo apenas haya resultados con ubicación.</p>
-
     <!-- id="tituloRegion" / id="subtituloRegion": ver Bug B / §3.
          Sin estos ids el subtítulo queda pegado en "Cargando…" para
          siempre — es, con alta probabilidad, el síntoma que se
@@ -699,83 +651,97 @@ if ('serviceWorker' in navigator) {
     <div id="estadoResultados" role="status" aria-live="polite" aria-atomic="true" class="u-sr-only"></div>
   </section>
 
-  <!-- SOBRE LA CIUDAD (expansión de contenido, nueva): contexto real
-       de Concepción del Uruguay para quien no la conoce todavía —
-       turista que llega por primera vez, o local que nunca leyó esta
-       historia en detalle. 100% estático, contenido editorial propio
-       de URU SPOT (no depende de lugares-core.json ni de ningún
-       motor). Los datos históricos y geográficos citados acá son
-       verificables públicamente (fundación, población aproximada,
-       hechos vinculados a Urquiza y Ramírez, accesos y atractivos
-       naturales) — se evitó a propósito cualquier cifra sobre la que
-       hay fuentes contradictorias (por ejemplo, distancias exactas a
-       sitios cercanos), prefiriendo una descripción cualitativa antes
-       que un dato falso con apariencia de precisión. -->
-  <section class="ciudad envoltorio u-reveal" id="sobre-la-ciudad" aria-labelledby="ciudad-titulo">
-    <h2 id="ciudad-titulo">Sobre Concepción del Uruguay</h2>
-    <p class="ciudad__intro">
-      Antes de ser una lista de lugares para elegir, Concepción del Uruguay es una ciudad con casi
-      dos siglos y medio de historia, asomada al río que le da nombre. Esto es lo básico para
-      ubicarte, tanto si venís de visita como si naciste acá y nunca lo leíste ordenado.
-    </p>
-    <div class="ciudad-grid">
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">🏛️</span>
-        <p>
-          <strong>Una ciudad fundacional.</strong> Se fundó el 25 de junio de 1783, cuando el
-          comandante Tomás de Rocamora trazó su primer plano urbano por encargo del virrey Juan
-          José de Vértiz y Salcedo. Antes de esa fundación oficial ya existía población asentada en
-          la zona desde principios del siglo XVII. Fue capital de la provincia de Entre Ríos hasta
-          1883, cuando ese título pasó a Paraná.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">⚜️</span>
-        <p>
-          <strong>Cuna de figuras del federalismo.</strong> Acá nació Francisco Ramírez y acá
-          construyó buena parte de su vida pública Justo José de Urquiza, que fundó el histórico
-          Colegio del Uruguay. En la Plaza San Martín — conocida también como Plaza Ramírez, el
-          centro simbólico de la ciudad — ocurrió el 1º de mayo de 1851 el Pronunciamiento de
-          Urquiza contra Rosas, un antecedente directo de la Constitución de 1853.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">🌊</span>
-        <p>
-          <strong>A la orilla del río Uruguay.</strong> La ciudad se asienta sobre la margen del río
-          Uruguay, con playas de arena, islas y arroyos a poca distancia del centro — Banco Pelay,
-          la Isla Cambacuá y el Balneario Municipal sobre el Riacho Itapé son los puntos de baño más
-          conocidos, sobre todo en temporada de verano.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">♨️</span>
-        <p>
-          <strong>Aguas termales todo el año.</strong> Sobre la Ruta Nacional 14, a las afueras del
-          centro urbano, funciona un complejo termal con varias piscinas de agua mineralizada —
-          algunas cálidas todo el año, otras frías en verano — pensado tanto para el turismo como
-          para el uso de quienes viven en la ciudad.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">🏰</span>
-        <p>
-          <strong>Patrimonio a mano.</strong> El casco histórico conserva el Colegio Justo J.
-          Urquiza, la Basílica de la Inmaculada Concepción (con el mausoleo del general Urquiza) y
-          la antigua Capitanía de Puerto. A poca distancia en auto se puede visitar el Palacio San
-          José, la residencia de Urquiza convertida hoy en museo nacional.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">🚌</span>
-        <p>
-          <strong>Bien conectada.</strong> Está sobre la Ruta Nacional 14, uno de los corredores más
-          transitados del litoral, con servicios regulares de larga distancia hacia Buenos Aires,
-          Rosario, Paraná y otras ciudades de Entre Ríos y del Mercosur.
-        </p>
-      </article>
+  <!-- ÍNDICE POR RUBRO: dinámico, poblado por
+       app.js/pintarIndiceRubros() a partir de rubros-meta.js. El
+       <template> queda declarado como punto de extensión (§9) para
+       cuando ese layout deje de ser un innerHTML simple.
+       Reubicado justo debajo del mapa a pedido: es la herramienta de
+       filtro real, así que va inmediatamente después de la
+       herramienta principal de descubrimiento, antes que cualquier
+       nav de referencia. -->
+  <section class="indice envoltorio u-reveal" id="rubros" aria-labelledby="rubros-titulo">
+    <h2 id="rubros-titulo">Por rubro</h2>
+    <div id="listaRubros" role="grid" aria-label="Lugares organizados por rubro">
+      <template id="template-rubros">
+        <!-- app.js puebla #listaRubros directamente; ver §9. -->
+      </template>
     </div>
   </section>
+
+  <!-- ÍNDICE DE PÁGINA: 100% estático, sin dependencia de JS ni de
+       datos — son anclas (#id) a secciones que ya existen en este
+       mismo documento. Reubicado debajo del mapa/Rubros a pedido, con
+       una variante tipográfica compacta (monoespaciada, muy chica)
+       para que funcione como referencia discreta y no como bloque
+       protagónico. Las anclas a "Sobre la ciudad", "Cómo lo usa la
+       gente", "Guía práctica" y "Hoja de ruta" se quitaron porque esas
+       secciones ya no existen en la página. -->
+  <nav class="indice-pagina indice-pagina--compacta envoltorio u-reveal" aria-label="Ir a una sección de esta página">
+    <div class="indice-pagina__grupo">
+      <span class="indice-pagina__grupo-titulo">Explorá</span>
+      <ul class="indice-pagina__lista">
+        <li><a class="indice-pagina__link" href="#destacados">Destacados</a></li>
+        <li><a class="indice-pagina__link" href="#region-descubrimiento">Buscar y explorar</a></li>
+        <li><a class="indice-pagina__link" href="#rubros">Por rubro</a></li>
+        <li><a class="indice-pagina__link" href="#accesos">Guías por categoría</a></li>
+      </ul>
+    </div>
+    <div class="indice-pagina__grupo">
+      <span class="indice-pagina__grupo-titulo">Conocé el proyecto</span>
+      <ul class="indice-pagina__lista">
+        <li><a class="indice-pagina__link" href="#manifiesto">Cómo funciona</a></li>
+        <li><a class="indice-pagina__link" href="#metodologia">Cómo pensamos el orden</a></li>
+        <li><a class="indice-pagina__link" href="#para-locales">Para dueños de locales</a></li>
+        <li><a class="indice-pagina__link" href="#glosario">Glosario</a></li>
+        <li><a class="indice-pagina__link" href="#faq">Preguntas frecuentes</a></li>
+        <li><a class="indice-pagina__link" href="#accesibilidad">Accesibilidad</a></li>
+        <li><a class="indice-pagina__link" href="#privacidad-datos">Privacidad y tus datos</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- GUÍAS POR CATEGORÍA: <nav> real porque es, literalmente, un
+       menú de navegación a otras páginas del sitio — no una lista de
+       contenido, un landmark de navegación secundaria. Reubicado
+       justo arriba de "Cómo funciona" a pedido. -->
+  <nav class="accesos envoltorio u-reveal" id="accesos" aria-labelledby="accesos-titulo">
+    <h2 id="accesos-titulo">Guías por categoría</h2>
+    <p class="accesos-intro">Si ya sabés qué tipo de lugar buscás, estas guías van directo a lo tuyo.</p>
+    <div class="accesos-grid">
+      <a class="acceso-card" href="../los-mejores-restaurantes-cdu/" data-category="restaurants">
+        <span class="acceso-card__icono" aria-hidden="true">🍽️</span>
+        <span>Restaurantes</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-cafeterias-cdu/" data-category="cafes">
+        <span class="acceso-card__icono" aria-hidden="true">☕</span>
+        <span>Cafeterías</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-heladerias-cdu/" data-category="ice-cream">
+        <span class="acceso-card__icono" aria-hidden="true">🍦</span>
+        <span>Heladerías</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-panaderias-cdu/" data-category="bakeries">
+        <span class="acceso-card__icono" aria-hidden="true">🥖</span>
+        <span>Panaderías</span>
+      </a>
+      <a class="acceso-card" href="../los-mejores-bares-cdu/" data-category="bars">
+        <span class="acceso-card__icono" aria-hidden="true">🍷</span>
+        <span>Bares</span>
+      </a>
+      <a class="acceso-card" href="../las-mejores-hosterias-cdu/" data-category="hostels">
+        <span class="acceso-card__icono" aria-hidden="true">🛏️</span>
+        <span>Hosterías</span>
+      </a>
+      <a class="acceso-card" href="../los-mejores-gimnasios-cdu/" data-category="gyms">
+        <span class="acceso-card__icono" aria-hidden="true">🏋️</span>
+        <span>Gimnasios</span>
+      </a>
+      <a class="acceso-card" href="../mejores-veterinarias-cdu/" data-category="vets">
+        <span class="acceso-card__icono" aria-hidden="true">🐾</span>
+        <span>Veterinarias</span>
+      </a>
+    </div>
+  </nav>
 
   <!-- MANIFIESTO: contenido 100% estático, no depende de datos ni de
        JS — visible incluso con <noscript> activo.
@@ -804,56 +770,6 @@ if ('serviceWorker' in navigator) {
     </div>
   </section>
 
-  <!-- TESTIMONIOS (auditoría 4ª pasada, sección nueva): tres perfiles
-       ilustrativos de uso (quien vive acá, quien visita de paso, quien
-       tiene un local) — a propósito sin apellido ni foto de perfil,
-       para no fabricar una apariencia de reseña verificada que esta
-       sección no es. Son ejemplos del PATRÓN de uso real que ya
-       describen "Cómo funciona" y "Cómo pensamos el orden" arriba,
-       puestos en primera persona para que se lean más fácil que una
-       lista de características. 100% estático, sin ids en el contrato
-       de la sección 3 — misma decisión que el resto del contenido
-       editorial (invariante I7 de la documentación al final del
-       archivo). -->
-  <section class="testimonios envoltorio u-reveal" id="testimonios" aria-labelledby="testimonios-titulo">
-    <h2 id="testimonios-titulo">Cómo lo usa la gente</h2>
-    <p class="testimonios-intro">
-      Tres formas distintas de llegar a URU SPOT — ninguna inventada, las tres son el mismo patrón
-      que ya describimos arriba, contado en primera persona.
-    </p>
-    <div class="testimonios-grid">
-      <blockquote class="testimonio-card">
-        <p class="testimonio-card__texto">
-          Vivo acá hace años y pensé que ya conocía todo. Buscando "termas" un domingo cualquiera
-          apareció un local a diez cuadras de casa del que nunca había escuchado hablar.
-        </p>
-        <footer class="testimonio-card__autor">
-          <strong>Vecina de la ciudad</strong>
-          <span>usa el buscador directo, sin pasar por Guía</span>
-        </footer>
-      </blockquote>
-      <blockquote class="testimonio-card">
-        <p class="testimonio-card__texto">
-          Llegamos un viernes a la noche sin reserva en ningún lado. "Cerca de mí" nos armó el mapa
-          con lo que estaba abierto en ese momento, caminando desde el centro.
-        </p>
-        <footer class="testimonio-card__autor">
-          <strong>Visitante de fin de semana</strong>
-          <span>usa el mapa y el modo Guía</span>
-        </footer>
-      </blockquote>
-      <blockquote class="testimonio-card">
-        <p class="testimonio-card__texto">
-          Escribí a padrón para corregir el horario de mi local y en un par de días ya estaba
-          actualizado. Se nota que alguien lo revisa de verdad, no es un formulario que cae al vacío.
-        </p>
-        <footer class="testimonio-card__autor">
-          <strong>Dueño de un local verificado</strong>
-          <span>ver <a href="#para-locales">Para dueños de locales</a></span>
-        </footer>
-      </blockquote>
-    </div>
-  </section>
 
   <!-- CÓMO PENSAMOS EL ORDEN (expansión de contenido, nueva):
        profundiza el manifiesto de arriba con el detalle que "no
@@ -918,25 +834,6 @@ if ('serviceWorker' in navigator) {
           diluye con el tiempo si no se repite.
         </p>
       </article>
-    </div>
-  </section>
-
-  <!-- ÍNDICE POR RUBRO: dinámico, poblado por
-       app.js/pintarIndiceRubros() a partir de rubros-meta.js. El
-       <template> queda declarado como punto de extensión (§9) para
-       cuando ese layout deje de ser un innerHTML simple.
-       Auditoría 2ª pasada: se adelanta esta sección para que quede
-       ANTES del detalle editorial (ver <details> más abajo) — la
-       herramienta de filtro real es lo primero que se ve; la ficha
-       descriptiva de cada rubro y la composición del padrón quedan
-       como profundización opcional a un click, no como peaje de
-       scroll obligatorio antes de llegar a lo funcional. -->
-  <section class="indice envoltorio u-reveal" id="rubros" aria-labelledby="rubros-titulo">
-    <h2 id="rubros-titulo">Por rubro</h2>
-    <div id="listaRubros" role="grid" aria-label="Lugares organizados por rubro">
-      <template id="template-rubros">
-        <!-- app.js puebla #listaRubros directamente; ver §9. -->
-      </template>
     </div>
   </section>
 
@@ -1128,48 +1025,6 @@ if ('serviceWorker' in navigator) {
 
   </details>
 
-  <!-- GUÍAS POR CATEGORÍA: <nav> real porque es, literalmente, un
-       menú de navegación a otras páginas del sitio — no una lista de
-       contenido, un landmark de navegación secundaria. -->
-  <nav class="accesos envoltorio u-reveal" id="accesos" aria-labelledby="accesos-titulo">
-    <h2 id="accesos-titulo">Guías por categoría</h2>
-    <p class="accesos-intro">Si ya sabés qué tipo de lugar buscás, estas guías van directo a lo tuyo.</p>
-    <div class="accesos-grid">
-      <a class="acceso-card" href="../los-mejores-restaurantes-cdu/" data-category="restaurants">
-        <span class="acceso-card__icono" aria-hidden="true">🍽️</span>
-        <span>Restaurantes</span>
-      </a>
-      <a class="acceso-card" href="../las-mejores-cafeterias-cdu/" data-category="cafes">
-        <span class="acceso-card__icono" aria-hidden="true">☕</span>
-        <span>Cafeterías</span>
-      </a>
-      <a class="acceso-card" href="../las-mejores-heladerias-cdu/" data-category="ice-cream">
-        <span class="acceso-card__icono" aria-hidden="true">🍦</span>
-        <span>Heladerías</span>
-      </a>
-      <a class="acceso-card" href="../las-mejores-panaderias-cdu/" data-category="bakeries">
-        <span class="acceso-card__icono" aria-hidden="true">🥖</span>
-        <span>Panaderías</span>
-      </a>
-      <a class="acceso-card" href="../los-mejores-bares-cdu/" data-category="bars">
-        <span class="acceso-card__icono" aria-hidden="true">🍷</span>
-        <span>Bares</span>
-      </a>
-      <a class="acceso-card" href="../las-mejores-hosterias-cdu/" data-category="hostels">
-        <span class="acceso-card__icono" aria-hidden="true">🛏️</span>
-        <span>Hosterías</span>
-      </a>
-      <a class="acceso-card" href="../los-mejores-gimnasios-cdu/" data-category="gyms">
-        <span class="acceso-card__icono" aria-hidden="true">🏋️</span>
-        <span>Gimnasios</span>
-      </a>
-      <a class="acceso-card" href="../mejores-veterinarias-cdu/" data-category="vets">
-        <span class="acceso-card__icono" aria-hidden="true">🐾</span>
-        <span>Veterinarias</span>
-      </a>
-    </div>
-  </nav>
-
   <!-- PARA DUEÑOS DE LOCALES (auditoría 4ª pasada, sección nueva):
        hasta esta revisión, "¿cómo sugiero que agreguen un lugar
        nuevo?" vivía únicamente como una respuesta de FAQ — suficiente
@@ -1222,72 +1077,6 @@ if ('serviceWorker' in navigator) {
     <div class="para-locales__cta">
       <p>¿Tu local ya está o querés que lo agreguemos?</p>
       <a class="btn" href="mailto:padron@uruspot.com.ar">Escribir a padron@uruspot.com.ar</a>
-    </div>
-  </section>
-
-  <!-- GUÍA PRÁCTICA PARA TU VISITA (expansión de contenido, nueva):
-       información orientativa para quien llega de afuera. Evita a
-       propósito cifras que cambian seguido (horarios exactos,
-       precios de entrada, tarifas de colectivo): esas se desactualizan
-       solas y generan más desconfianza que ayuda si quedan
-       congeladas en un HTML estático. Se prioriza lo que SÍ es
-       estable: cómo es el clima en términos generales, qué llevar,
-       cómo moverse. -->
-  <section class="guia-practica envoltorio u-reveal" id="guia-practica" aria-labelledby="guia-practica-titulo">
-    <h2 id="guia-practica-titulo">Guía práctica para tu visita</h2>
-    <p class="guia-practica__intro">
-      Algunas cosas útiles de saber si venís de afuera — nada que cambie de un mes a otro, para que
-      esta sección siga siendo cierta dentro de un año.
-    </p>
-    <div class="guia-practica-grid">
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">☀️</span>
-        <p>
-          <strong>Clima templado-húmedo.</strong> Veranos calurosos (diciembre a marzo, ideales para
-          playa y termas) e inviernos templados sin heladas extremas. Primavera y otoño son, para
-          la mayoría, la mejor época para caminar la ciudad sin el calor pleno del verano.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">🚶</span>
-        <p>
-          <strong>Se recorre bien a pie.</strong> El casco histórico y la zona céntrica son
-          caminables sin apuro; para llegar a las playas o al complejo termal, sobre la Ruta 14,
-          conviene un vehículo, remise o combi turística.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">🎒</span>
-        <p>
-          <strong>Qué llevar según la estación.</strong> Protector solar y calzado cómodo casi todo
-          el año; algo de abrigo liviano en invierno. Si vas a la playa o a las termas, traje de
-          baño y toalla — algunos balnearios y el complejo termal alquilan lo que falte.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">💳</span>
-        <p>
-          <strong>Efectivo y tarjeta conviven.</strong> Los comercios más grandes y las cadenas
-          aceptan tarjeta sin problema; en kioscos, ferias y algunos locales más chicos el efectivo
-          sigue siendo más ágil. Nunca está de más llevar algo de los dos.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">🕑</span>
-        <p>
-          <strong>El mediodía baja el ritmo.</strong> Como en buena parte del interior argentino,
-          muchos comercios (no todos) hacen un corte al mediodía y retoman por la tarde. Si tenés un
-          trámite puntual, conviene resolverlo por la mañana.
-        </p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="manifiesto-card__icono" aria-hidden="true">🆘</span>
-        <p>
-          <strong>Emergencias.</strong> El número de emergencias en toda la Argentina es el
-          <strong>911</strong>. Para lo que no es una emergencia — un lugar que parece cerrado, un
-          dato que no coincide — usá el contacto del final de esta página.
-        </p>
-      </article>
     </div>
   </section>
 
@@ -1534,47 +1323,8 @@ if ('serviceWorker' in navigator) {
           </button>
         </h3>
         <div class="faq-respuesta" id="faq-panel-14" hidden>
-          <p>Hoy la mayoría de las fichas no tiene foto propia todavía — es contenido pendiente, listado como tal en la <a href="#hoja-de-ruta">Hoja de ruta</a>, no un error. El diseño de la tarjeta ya está preparado para mostrarla en cuanto el dato exista.</p>
+          <p>Hoy la mayoría de las fichas no tiene foto propia todavía — es contenido pendiente, no un error. El diseño de la tarjeta ya está preparado para mostrarla en cuanto el dato exista.</p>
         </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- HOJA DE RUTA (expansión de contenido, nueva): transparencia
-       sobre qué existe hoy y qué no todavía. Deliberadamente honesta
-       en ambas direcciones — ni promete fechas que no puede cumplir,
-       ni esconde limitaciones reales conocidas (fotos propias,
-       horarios estructurados) que hoy no tiene. -->
-  <section class="hoja-de-ruta envoltorio u-reveal" id="hoja-de-ruta" aria-labelledby="hoja-de-ruta-titulo">
-    <h2 id="hoja-de-ruta-titulo">Hoja de ruta</h2>
-    <p class="hoja-de-ruta__intro">
-      Qué existe hoy y qué está en camino — sin promesas de fecha, con la misma transparencia con
-      la que explicamos el resto de esta página.
-    </p>
-    <div class="hoja-de-ruta-grid">
-      <article class="manifiesto-card">
-        <span class="ruta-estado ruta-estado--disponible">Disponible</span>
-        <p><strong>Mapa interactivo con distancia real.</strong> "Cerca de mí" ordena resultados por distancia calculada, no por orden alfabético disfrazado de cercanía.</p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="ruta-estado ruta-estado--disponible">Disponible</span>
-        <p><strong>Spotlight de destacados.</strong> Los mejor puntuados con reseñas reales, independiente de tu sesión.</p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="ruta-estado ruta-estado--camino">En camino</span>
-        <p><strong>Fotos propias por lugar.</strong> Hoy la mayoría de las tarjetas no tiene foto propia — el diseño ya está preparado (<code>.tarjeta__imagen</code>) para cuando el dato exista.</p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="ruta-estado ruta-estado--camino">En camino</span>
-        <p><strong>Horarios estructurados en tiempo real.</strong> Hoy el estado abierto/cerrado depende de datos verificados manualmente, no de una fuente que se actualiza sola.</p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="ruta-estado ruta-estado--camino">En camino</span>
-        <p><strong>Más rubros y más localidades.</strong> El motor está pensado para crecer más allá de Concepción del Uruguay sin rehacer la arquitectura — todavía no se activó para otras ciudades.</p>
-      </article>
-      <article class="manifiesto-card">
-        <span class="ruta-estado ruta-estado--camino">En camino</span>
-        <p><strong>Test automatizado del contrato HTML↔JS.</strong> Hoy la coherencia entre los <code>id</code> de este archivo y lo que espera <code>app.js</code> se revisa a mano — un test e2e mínimo es la mejora pendiente de mayor prioridad técnica.</p>
       </article>
     </div>
   </section>

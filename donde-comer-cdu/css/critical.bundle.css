@@ -1096,6 +1096,37 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   color: var(--color-tinta-60);
 }
 
+.indice-pagina--compacta {
+  gap: 10px 28px;
+}
+.indice-pagina--compacta .indice-pagina__grupo-titulo {
+  font-family: var(--f-dato);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.indice-pagina--compacta .indice-pagina__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.indice-pagina--compacta .indice-pagina__link {
+  font-family: var(--f-dato);
+  font-size: 9px;
+  line-height: 1.4;
+  color: var(--color-tinta-60);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.indice-pagina--compacta .indice-pagina__link:hover,
+.indice-pagina--compacta .indice-pagina__link:focus-visible {
+  color: var(--color-tinta);
+  border-bottom-color: currentColor;
+}
+
 .rubros-detalle {
   margin-top: var(--esp-2);
 }
@@ -1953,32 +1984,6 @@ a.uru-mapa-popup-cluster-item:focus-visible{
 .mapa-info[hidden]{ display:none; }
 .mapa-info::before{ content:"🗺️"; font-size:18px; }
 
-#mapaTextura{
-  position:relative; height:130px; margin:var(--esp-6) 0 var(--esp-2); border-radius:var(--radio-lg); overflow:hidden;
-  background:var(--gradiente-halo), var(--gradiente-grid-mapa), linear-gradient(180deg,var(--color-fondo-2),var(--color-fondo));
-  border:1px solid var(--glass-borde); pointer-events:none;
-}
-
-#mapaTextura::before, #mapaTextura::after{
-  content:""; position:absolute; width:14px; height:14px; opacity:.5; z-index:0;
-}
-#mapaTextura::before{ top:8px; left:8px; border-top:1px solid var(--color-tinta-30); border-left:1px solid var(--color-tinta-30); }
-#mapaTextura::after{ bottom:8px; right:8px; border-bottom:1px solid var(--color-tinta-30); border-right:1px solid var(--color-tinta-30); }
-@media (max-width:720px){
-  #mapaTextura{ height:110px; }
-}
-.punto-textura{
-  position:absolute; width:5px; height:5px; border-radius:50%;
-  background:var(--dot-color, var(--color-tinta-30));
-  box-shadow:0 0 6px var(--dot-color, transparent);
-  opacity:.85;
-  animation:uru-flotar 6s ease-in-out infinite;
-  animation-delay:calc(var(--i, 0) * -0.4s);
-}
-@media (prefers-reduced-motion: reduce){
-  .punto-textura{ animation:none; }
-}
-
 /* ==== css/descubrimiento.css ==== */
 header{
   position:sticky; top:0; z-index:20;
@@ -2143,12 +2148,6 @@ header .membrete{
 .stat-item span{
   font:var(--tipo-dato-xs); color:var(--color-tinta-60);
   letter-spacing:var(--ls-amplio);
-}
-
-.mapa-textura__leyenda{
-  font:var(--tipo-dato-xs); color:var(--color-tinta-30);
-  margin:calc(var(--esp-6) * -1 + 6px) 0 var(--esp-6);
-  text-align:center; letter-spacing:.02em;
 }
 
 .region-encabezado{ padding:var(--esp-6) 0 var(--esp-2); }

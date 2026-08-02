@@ -264,7 +264,7 @@
   var DOM = {};
   var REQUIRED_DOM_IDS = [
     'rolActual', 'inputBuscar', 'panelDescubrimiento', 'tituloRegion',
-    'subtituloRegion', 'mapaTextura', 'mapaContainer', 'mapaHerramienta',
+    'subtituloRegion', 'mapaContainer', 'mapaHerramienta',
     'mapaInfo', 'mapaLeyenda', 'contadorCuraduria', 'btnVerGuardados',
     'listaRubros', 'statLugares', 'statRubros', 'faqLista',
     'estadoResultados', 'destacados', 'listaDestacados'
