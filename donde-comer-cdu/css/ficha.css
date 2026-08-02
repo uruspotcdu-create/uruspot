@@ -16,7 +16,18 @@ html{scroll-behavior:smooth}
 body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
 /* NAV */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+/* PERF (auditoría, micro-optimización, 2026-08-02): backdrop-filter acá
+   estaba hardcodeado en 20px, fuera del sistema de --glass-blur de
+   tokens.css (esta página no importa tokens.css, tiene su propia hoja
+   de estilos). Es además un `position:fixed` — recompone en cada frame
+   mientras el hero de 100vh y el resto de la ficha scrollean debajo,
+   sin ningún mecanismo de reducción por capacidad de dispositivo (esta
+   página no carga ambiente-rendimiento.js). Se baja a 8px, el mismo
+   default ya adoptado en el resto del sitio tras el hallazgo C1 (ver
+   css/tokens.css), y se agrega un fallback por
+   prefers-reduced-transparency más abajo para no depender únicamente
+   de heurísticas de JS que esta página no tiene. */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
 .nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.12em;color:var(--gold-dark);text-decoration:none;text-transform:uppercase}
 .nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500}
 .nav-badge{background:var(--gold);color:var(--ink);font-size:10px;font-weight:600;letter-spacing:0.15em;padding:5px 14px;border-radius:2px;text-transform:uppercase}
@@ -43,7 +54,7 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    de atribución a la ficha de Google. */
 .chip-google{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.25);text-decoration:none;transition:border-color var(--dur-rapido,0.2s) ease,background var(--dur-rapido,0.2s) ease}
 .chip-google:hover,.chip-google:focus-visible{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.45)}
-.hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(201,168,76,0.3);padding:28px 32px;background:rgba(13,13,13,0.6);backdrop-filter:blur(12px)}
+.hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(201,168,76,0.3);padding:28px 32px;background:rgba(13,13,13,0.6);backdrop-filter:blur(8px)}
 .score-num{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold);line-height:1}
 .score-label{font-size:10px;letter-spacing:0.3em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:4px}
 .score-stars{color:var(--gold);font-size:14px;margin-top:8px}
@@ -193,6 +204,14 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
   .score-fill{transform:scaleX(1)}
+}
+/* PERF (auditoría, micro-optimización, 2026-08-02): mismo criterio que
+   css/tokens.css para el resto del sitio — el vidrio se atempera en vez
+   de eliminarse, compensando con más opacidad de fondo el contraste que
+   el blur dejaba de aportar. */
+@media(prefers-reduced-transparency:reduce){
+  .nav{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);background:rgba(250,247,242,.97)}
+  .hero-score{backdrop-filter:blur(4px);background:rgba(13,13,13,.75)}
 }
 
 /* HERO SIN FOTO */
