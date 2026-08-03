@@ -262,6 +262,44 @@ a.uru-mapa-popup-cluster-item:focus-visible{
   border:1px solid var(--color-linea-fuerte); z-index:4;
 }
 
+/* PERF (auditoría performance, 2026-08-03, hallazgo 1.1): "acá estás
+   vos" — antes se dibujaba entero en <canvas> (dibujarMarcadorUsuario
+   en js/motor-render.js), con un requestAnimationFrame propio que
+   forzaba un redibujo COMPLETO del mapa (tiles + todos los
+   marcadores) 60 veces por segundo solo para animar este halo. Ahora
+   es un <div> posicionado en JS (mismo patrón que .uru-mapa-popup/
+   .uru-mapa-etiqueta arriba) y animado acá con @keyframes — el
+   navegador lo anima en su compositor sin tocar el canvas para nada.
+   z-index:3, entre el overlay de viñeta (::after, z:2) y
+   popup/etiqueta (z:4-5) — nunca debería quedar tapado por un pin de
+   lugar ni tapar un popup abierto. */
+.uru-mapa-marcador-usuario{
+  position:absolute; top:0; left:0; width:0; height:0; pointer-events:none; z-index:3;
+}
+.uru-mapa-marcador-usuario__halo{
+  /* Mismo rango que el círculo de canvas que reemplaza: radio 8→18px
+     (diámetro base 16px, escala hasta 2.25), opacidad .35→0, en el
+     mismo ciclo de 2s. */
+  position:absolute; top:0; left:0; width:16px; height:16px; margin:-8px 0 0 -8px;
+  border-radius:50%; background:var(--color-ubicacion-usuario);
+  animation:uru-marcador-usuario-pulso 2s ease-out infinite;
+}
+.uru-mapa-marcador-usuario__punto{
+  position:absolute; top:0; left:0; width:14px; height:14px; margin:-7px 0 0 -7px;
+  border-radius:50%; background:var(--color-ubicacion-usuario);
+  border:2.5px solid var(--color-tinta); box-shadow:0 0 6px rgba(0,0,0,.45);
+}
+@keyframes uru-marcador-usuario-pulso{
+  from{ transform:scale(1); opacity:.35; }
+  to{ transform:scale(2.25); opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){
+  /* Mismo criterio que prefiereMovimientoReducido() en JS (la versión
+     canvas directamente no dibujaba el halo si el usuario pedía menos
+     movimiento) — acá se logra con la media query nativa, sin JS. */
+  .uru-mapa-marcador-usuario__halo{ animation:none; opacity:0; }
+}
+
 /* Lista paralela accesible: invisible visualmente, navegable por
    teclado y lectores de pantalla. Es el puente de accesibilidad al
    canvas — no tocar, es de lo mejor resuelto del repo. */
