@@ -267,14 +267,17 @@
   // lugares devueltos, nada se guardaba en REGISTRO ni se usaba para
   // pintar nada. Es decir: tráfico de red real (49 requests, la mayoría
   // fallidas) sin ningún efecto funcional. Se quita la llamada y la
-  // función; window.Virtualizador (motor.bundle.js) sigue existiendo
-  // para quien quiera cablearlo a un uso real en el futuro (p. ej.
-  // cargar detalles por región efectivamente visible en el mapa), pero
-  // eso es un cambio de arquitectura de datos, no un one-liner: la
-  // lista/búsqueda de tarjetas de hoy no está acotada al viewport del
-  // mapa (una búsqueda puede traer resultados de cualquier punto de la
-  // ciudad), así que cargar detalles solo por tile rompería la
-  // descripción/teléfono de tarjetas fuera del viewport visible.
+  // función; window.Virtualizador (js/_archivo/datos-virtualizador.js,
+  // sacado del bundle en el hallazgo 1.4 de la auditoría de
+  // rendimiento del 2026-08-03 — no tenía consumidor activo) queda
+  // archivado para quien quiera cablearlo a un uso real en el futuro
+  // (p. ej. cargar detalles por región efectivamente visible en el
+  // mapa), pero eso es un cambio de arquitectura de datos, no un
+  // one-liner: la lista/búsqueda de tarjetas de hoy no está acotada al
+  // viewport del mapa (una búsqueda puede traer resultados de
+  // cualquier punto de la ciudad), así que cargar detalles solo por
+  // tile rompería la descripción/teléfono de tarjetas fuera del
+  // viewport visible.
 
   // Estado de sesión (mutante, persistido con PLANO.guardarEstado)
   var estado = null;
@@ -1144,9 +1147,10 @@
    * con requestIdleCallback (diferir CUÁNDO se pide no evita que aplicar la
    * respuesta entera de una sola vez bloquee igual).
    *
-   * Se evaluó conectar `window.Virtualizador` (js/datos-virtualizador.js,
-   * ya bundleado en motor.bundle.js) para pedir datos por tile geográfico
-   * en vez de todo el catálogo. Se descartó: Virtualizador escoge datos por
+   * Se evaluó conectar `window.Virtualizador`
+   * (js/_archivo/datos-virtualizador.js — archivado, ya no bundleado
+   * en motor.bundle.js desde el hallazgo 1.4, 2026-08-03) para pedir
+   * datos por tile geográfico en vez de todo el catálogo. Se descartó: Virtualizador escoge datos por
    * bounds del MAPA, pero las tarjetas (pintarTarjetas) casi nunca se
    * scopean por geografía — se scopean por recorte curado
    * (recortePorIniciativaPropiaExplicado) o por búsqueda/filtro sobre TODO
