@@ -86,6 +86,17 @@
   --color-estado-cerrado:        #F04552;
   --color-estado-cerrado-fondo:  rgba(240,69,82,.12);
 
+  /* TIER 3.3 (Perf/UX, 2026-08-02): azul reservado exclusivamente al
+     punto "acá estás vos" del mapa — convención universal de mapas
+     (Google/Apple/Waze) que un usuario ya reconoce de memoria.
+     Deliberadamente NO se reutiliza ningún --color-rubro-* existente
+     (--color-rubro-finanzas y --color-rubro-educacion ya son azules
+     parecidos): la ubicación propia no es una categoría de lugar, y
+     pintarla con el mismo tono que un rubro real generaría la lectura
+     equivocada de "hay un lugar de ese rubro acá". Un primitivo nuevo,
+     no un casi-duplicado de uno existente. */
+  --color-ubicacion-usuario: #4A90D9;
+
   /* ── Tipografía ── */
   --f-display: 'Fraunces', serif;       /* títulos, nombres de lugar */
   --f-ui:      'IBM Plex Sans', sans-serif; /* interfaz, cuerpo */
@@ -401,6 +412,17 @@
   --canvas-color-cluster-fondo:    var(--color-fondo);
   --canvas-color-cluster-borde:    var(--color-tinta-60);
   --canvas-color-sombra-marcador:  rgba(0,0,0,.4);
+
+  /* TIER 3.2/3.3 (Perf/UX, 2026-08-02): mismo criterio del Blueprint
+     que el resto de este bloque — alias, no valores nuevos.
+     --canvas-color-favorito reutiliza el MISMO acento que ya marca
+     "favorito"/"guardado" en .tarjeta-btn--fav.activo (css/
+     tarjeta-lugar.css) — el pin del mapa y el botón de la tarjeta
+     dicen "favorito" con el mismo color, no con dos lenguajes
+     distintos. --canvas-color-marcador-usuario mapea al primitivo
+     --color-ubicacion-usuario definido arriba. */
+  --canvas-color-favorito:         var(--color-granate-clara);
+  --canvas-color-marcador-usuario: var(--color-ubicacion-usuario);
 
   /* Fase 4, paso 5 (rediseño visual del Canvas) — 4 tokens de Canvas
      agregados tras auditar todos los colores/sombras hardcodeados de
