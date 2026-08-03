@@ -1976,6 +1976,27 @@ a.uru-mapa-popup-cluster-item:focus-visible{
   border:1px solid var(--color-linea-fuerte); z-index:4;
 }
 
+.uru-mapa-marcador-usuario{
+  position:absolute; top:0; left:0; width:0; height:0; pointer-events:none; z-index:3;
+}
+.uru-mapa-marcador-usuario__halo{
+  position:absolute; top:0; left:0; width:16px; height:16px; margin:-8px 0 0 -8px;
+  border-radius:50%; background:var(--color-ubicacion-usuario);
+  animation:uru-marcador-usuario-pulso 2s ease-out infinite;
+}
+.uru-mapa-marcador-usuario__punto{
+  position:absolute; top:0; left:0; width:14px; height:14px; margin:-7px 0 0 -7px;
+  border-radius:50%; background:var(--color-ubicacion-usuario);
+  border:2.5px solid var(--color-tinta); box-shadow:0 0 6px rgba(0,0,0,.45);
+}
+@keyframes uru-marcador-usuario-pulso{
+  from{ transform:scale(1); opacity:.35; }
+  to{ transform:scale(2.25); opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .uru-mapa-marcador-usuario__halo{ animation:none; opacity:0; }
+}
+
 .uru-mapa-lista-accesible{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
 .uru-mapa-item-accesible:focus{
   position:fixed; width:auto; height:auto; clip:auto; white-space:normal; z-index:50;
