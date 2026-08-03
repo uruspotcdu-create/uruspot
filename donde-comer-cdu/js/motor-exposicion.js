@@ -287,6 +287,34 @@
     return (typeof v === 'number' && isFinite(v)) ? v : porDefecto;
   }
 
+  // REGLA DE NEGOCIO (2026-08-03, absoluta, sin excepciones salvo la
+  // documentada): todo lugar que se MUESTRA como recomendado o como
+  // resultado de búsqueda debe salir primero si tiene ficha propia
+  // (locales/<slug>/) — hoy 51 lugares, mapeados en
+  // js/locales-slug.js (URU_LOCALES_SLUGS). La ÚNICA excepción es que
+  // la búsqueda del usuario no matchee ningún lugar con ficha: en ese
+  // caso (y solo en ese caso) se muestran resultados sin ficha. Este
+  // helper es la única fuente de verdad sobre "tiene ficha" para todo
+  // este módulo — no duplicar la condición en otro lado.
+  function tieneFicha(lugar) {
+    return !!(global.URU_LOCALES_SLUGS && lugar && global.URU_LOCALES_SLUGS[lugar.id]);
+  }
+
+  // Partición estable: agrupa "con ficha" primero y "sin ficha"
+  // después, preservando el orden relativo DENTRO de cada grupo tal
+  // como venía. Si ningún elemento tiene ficha, el resultado es
+  // idéntico al original — así la excepción de la regla de arriba
+  // ("si no matchea ningún lugar con ficha") queda resuelta sola, sin
+  // caso especial en el código.
+  function ordenarFichaPrimero(lista) {
+    var conFicha = [];
+    var sinFicha = [];
+    for (var i = 0; i < lista.length; i++) {
+      (tieneFicha(lista[i]) ? conFicha : sinFicha).push(lista[i]);
+    }
+    return conFicha.concat(sinFicha);
+  }
+
   /* ─────────────────────────────────────────────────────────────
      3. Ranking + diversidad + exploración
      ───────────────────────────────────────────────────────────── */
@@ -345,13 +373,11 @@
     return elegidos;
   }
 
-  // Pipeline completo: score → diversidad → exploración. Devuelve
-  // objetos {lugar, score, señales} — quien solo necesita los lugares
-  // (recortePorIniciativaPropia) los desenvuelve; quien necesita
-  // explicabilidad (recortePorIniciativaPropiaExplicado) los usa tal
-  // cual. Una sola implementación para ambos, para no duplicar la
-  // lógica de selección entre los dos puntos de entrada públicos.
-  function calcularRecorte(candidatos, estado, tamano, afinesSet, condicion, contexto) {
+  // Pipeline de score → diversidad → exploración, sobre UN pool ya
+  // dado (sin distinguir ficha/no-ficha — eso lo resuelve
+  // calcularRecorte() llamando a esto por partes). Devuelve objetos
+  // {lugar, score, señales}.
+  function calcularRecorteInterno(candidatos, estado, tamano, afinesSet, condicion, contexto) {
     var puntuados = ordenarPorScore(candidatos, estado, afinesSet, condicion, contexto);
 
     if (candidatos.length <= tamano) {
@@ -383,6 +409,41 @@
     });
 
     return elegidosRelevancia.concat(exploracionElegida).slice(0, tamano);
+  }
+
+  // Pipeline completo: partición por ficha → score → diversidad →
+  // exploración. Devuelve objetos {lugar, score, señales} — quien solo
+  // necesita los lugares (recortePorIniciativaPropia) los desenvuelve;
+  // quien necesita explicabilidad (recortePorIniciativaPropiaExplicado)
+  // los usa tal cual. Una sola implementación para ambos.
+  //
+  // REGLA ABSOLUTA (ver tieneFicha() más arriba): la recomendación se
+  // arma PRIMERO con candidatos que tienen ficha propia — corriendo la
+  // MISMA lógica de score/diversidad/exploración de siempre, pero
+  // acotada a ese subconjunto — y solo se completan los cupos que
+  // sobren con candidatos sin ficha. Nunca al revés. Si no hay NINGÚN
+  // candidato con ficha en este pool, se cae íntegro al comportamiento
+  // de siempre sobre todos los candidatos (la única excepción
+  // documentada a la regla).
+  function calcularRecorte(candidatos, estado, tamano, afinesSet, condicion, contexto) {
+    var conFicha = candidatos.filter(tieneFicha);
+
+    if (conFicha.length === 0) {
+      return calcularRecorteInterno(candidatos, estado, tamano, afinesSet, condicion, contexto);
+    }
+
+    var primerTramo = calcularRecorteInterno(
+      conFicha, estado, Math.min(tamano, conFicha.length), afinesSet, condicion, contexto
+    );
+
+    var faltan = tamano - primerTramo.length;
+    if (faltan <= 0) return primerTramo;
+
+    var sinFicha = candidatos.filter(function (l) { return !tieneFicha(l); });
+    if (sinFicha.length === 0) return primerTramo;
+
+    var segundoTramo = calcularRecorteInterno(sinFicha, estado, faltan, afinesSet, condicion, contexto);
+    return primerTramo.concat(segundoTramo);
   }
 
   /* ─────────────────────────────────────────────────────────────
@@ -630,9 +691,9 @@
    * — el conteo total nunca cambia (ver tests §19 y §62).
    */
   function resultadosPorAccionExplicita(registro, consulta) {
-    if (!consulta) return registro.slice();
+    if (!consulta) return ordenarFichaPrimero(registro.slice());
     var q = normalizarTexto(consulta.trim());
-    if (!q) return registro.slice();
+    if (!q) return ordenarFichaPrimero(registro.slice());
 
     // PERF (2026-07-31): IndiceInvertido.candidatosPara() es un filtro
     // necesario-pero-no-suficiente por trigramas — puede traer falsos
@@ -703,13 +764,19 @@
       }
     }
 
-    // Desempate explícito por índice original en vez de confiar en que
-    // Array.prototype.sort sea estable: mantiene el orden del catálogo
-    // entre lugares con el mismo nivel de relevancia. Dentro del rango 6
-    // (tolerante), además se ordena primero por distancia de edición —
-    // 1 error antes que 2 — antes de caer al desempate por catálogo.
+    // REGLA ABSOLUTA (ver tieneFicha() más arriba): entre los que
+    // matchean la búsqueda, los que tienen ficha SIEMPRE van primero —
+    // por delante incluso de un match exacto de nombre sin ficha.
+    // Dentro de "tiene ficha" y dentro de "no tiene ficha" se conserva
+    // el mismo criterio de relevancia de siempre (rango de coincidencia
+    // → distancia de edición → orden del catálogo). Si ningún
+    // candidato tiene ficha, este primer criterio no cambia nada
+    // (0 - 0 = 0 para todos) y el orden queda igual que antes — la
+    // única excepción a la regla ("no matchea ningún lugar con ficha")
+    // se resuelve sola, sin caso especial.
     candidatos.sort(function (a, b) {
-      return (a.rango - b.rango) || (a.distancia - b.distancia) || (a.indiceOriginal - b.indiceOriginal);
+      return (tieneFicha(b.lugar) - tieneFicha(a.lugar)) ||
+        (a.rango - b.rango) || (a.distancia - b.distancia) || (a.indiceOriginal - b.indiceOriginal);
     });
 
     return candidatos.map(function (c) { return c.lugar; });
