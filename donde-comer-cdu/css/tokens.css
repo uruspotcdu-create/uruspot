@@ -215,7 +215,23 @@
      cuando ni esto alcanza. */
   --glass-blur:        8px;
   --glass-blur-fuerte: 14px;
+}
 
+/* PERF (auditoría performance, C1.3): backdrop-filter recompone todo
+   lo que queda detrás del panel en cada frame — en listas largas con
+   scroll o durante el arrastre del mapa, ese costo se paga por
+   cuadro, no una sola vez. .u-suprimir-vidrio (toggled por JS con
+   rAF + debounce en app.js, y por el flag de arrastre en
+   motor-render.js) lleva el blur a 0 mientras el usuario scrollea o
+   arrastra, y lo repone en cuanto se detiene. El ojo no distingue el
+   vidrio durante el movimiento; sí lo nota si falta con la vista
+   quieta, así que la supresión dura solo la ventana de interacción. */
+html.u-suprimir-vidrio{
+  --glass-blur:        0px;
+  --glass-blur-fuerte: 0px;
+}
+
+:root{
   --gradiente-marca:   linear-gradient(135deg,#9C3A46 0%,#C97A83 55%,#E0A5AC 100%);
   --gradiente-halo:    radial-gradient(60% 60% at 30% 20%, rgba(201,122,131,.35), transparent 70%),
                         radial-gradient(50% 50% at 85% 0%, rgba(126,166,224,.20), transparent 65%);

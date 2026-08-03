@@ -2690,6 +2690,30 @@
 
     // Progressive enhancement: scroll reveal
     inicializarScrollReveal();
+
+    // PERF (auditoría performance, C1.3): suprimir backdrop-filter
+    // mientras el usuario scrollea. rAF evita apilar trabajo en cada
+    // evento 'scroll' (que puede disparar decenas de veces por
+    // segundo); el timeout de 150ms detecta "scroll terminado" sin
+    // depender de un evento nativo que no existe de forma confiable
+    // en todos los navegadores.
+    window.addEventListener('scroll', manejarScrollParaSupresionVidrio, { passive: true });
+  }
+
+  var _scrollRafPendiente = false;
+  var _scrollFinTimeout = null;
+
+  function manejarScrollParaSupresionVidrio() {
+    if (_scrollRafPendiente) return;
+    _scrollRafPendiente = true;
+    requestAnimationFrame(function () {
+      _scrollRafPendiente = false;
+      document.documentElement.classList.add('u-suprimir-vidrio');
+      if (_scrollFinTimeout) clearTimeout(_scrollFinTimeout);
+      _scrollFinTimeout = setTimeout(function () {
+        document.documentElement.classList.remove('u-suprimir-vidrio');
+      }, 150);
+    });
   }
 
   function manejarInputBusqueda(e) {

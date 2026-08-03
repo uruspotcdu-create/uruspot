@@ -1507,6 +1507,22 @@
     var arrastrando = false, ultimoX = 0, ultimoY = 0, sePanneo = false;
     var pointerActivoId = null; // solo un puntero controla el pan a la vez
 
+    // PERF (auditoría performance, C1.3): mismo mecanismo de
+    // supresión de backdrop-filter que usa app.js para el scroll de
+    // la lista, aplicado acá al arrastre del mapa — el panel de la
+    // ficha/toolbar con vidrio queda encima del canvas del mapa, así
+    // que cada frame de arrastre repetía el mismo costo de
+    // recomposición. A diferencia del scroll (que usa rAF + timeout
+    // de "fin de inercia"), acá el propio estado `arrastrando` ya
+    // marca inicio/fin de forma exacta, así que alcanza con un
+    // toggle directo de la clase en cada transición.
+    function establecerArrastrando(valor) {
+      arrastrando = valor;
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.classList.toggle('u-suprimir-vidrio', valor);
+      }
+    }
+
     // ── Inercia de arrastre (momentum) ──
     // GAP REAL DE PRODUCTO: al soltar el dedo/mouse en pleno arrastre,
     // el mapa se detenía en seco — funcional, pero se siente "pesado"
@@ -1572,7 +1588,7 @@
       refrescarRect();
       cancelarInercia();
       pointerActivoId = e.pointerId;
-      arrastrando = true; sePanneo = false;
+      establecerArrastrando(true); sePanneo = false;
       ultimoX = e.clientX; ultimoY = e.clientY;
       muestrasMovimiento = [];
       registrarMuestra(e.clientX, e.clientY);
@@ -1705,7 +1721,7 @@
     lienzo.addEventListener('pointerup', function (e) {
       if (e.pointerId !== pointerActivoId) return;
       pointerActivoId = null;
-      arrastrando = false;
+      establecerArrastrando(false);
       lienzo.style.cursor = 'grab';
       if (!sePanneo) {
         var clusters = clustersActuales();
@@ -1723,7 +1739,7 @@
       // hasta recargar la página.
       if (e.pointerId === pointerActivoId) {
         pointerActivoId = null;
-        arrastrando = false;
+        establecerArrastrando(false);
         lienzo.style.cursor = 'grab';
       }
     });
@@ -2065,7 +2081,7 @@
         // El pellizco toma el control: cede cualquier arrastre de un
         // solo puntero (o inercia post-arrastre) que estuviera en
         // curso, para que no compitan.
-        arrastrando = false;
+        establecerArrastrando(false);
         pointerActivoId = null;
         cancelarInercia();
         cerrarPopup();
