@@ -1681,6 +1681,39 @@
       if (typeof document !== 'undefined' && document.documentElement) {
         document.documentElement.classList.toggle('u-suprimir-vidrio', valor);
       }
+      actualizarEstadoGesto();
+    }
+
+    // PERF (auditoría rendimiento, ronda 1, hallazgo 2): el motor
+    // ambiental (ambiente-scheduler.js) corría sus tareas decorativas
+    // en cada frame visible sin ninguna noción de que el mapa está en
+    // medio de un gesto activo — dos loops de rAF competían por el
+    // mismo frame budget de 16ms justo en el peor momento (dedo en la
+    // pantalla arrastrando o pellizcando). Este archivo es el único
+    // que sabe con exactitud cuándo un gesto (arrastre, pellizco,
+    // inercia o vuelo animado) empieza y termina — se agregan esas 4
+    // señales en un solo booleano y, SOLO en cada transición real (no
+    // en cada frame), se avisa al scheduler ambiental para que salte
+    // sus tareas mientras dure. Cero cambio funcional visible: son
+    // animaciones decorativas de fondo, nadie percibe perder 200-400ms
+    // de ellas durante un arrastre activo.
+    var gestoActivo = false;
+    function actualizarEstadoGesto() {
+      var activo = arrastrando || enPellizco || inerciaRAF !== null || animacionZoom !== null;
+      if (activo === gestoActivo) return;
+      gestoActivo = activo;
+      if (global.AmbienteScheduler) {
+        if (activo) global.AmbienteScheduler.pausar(); else global.AmbienteScheduler.reanudar();
+      }
+      emisor.emitir(activo ? 'gestoIniciado' : 'gestoFinalizado');
+    }
+
+    // Mismo patrón que establecerArrastrando (arriba): centraliza la
+    // asignación de `enPellizco` para que ningún punto de asignación
+    // futuro se olvide de avisar el cambio de estado de gesto.
+    function establecerEnPellizco(valor) {
+      enPellizco = valor;
+      actualizarEstadoGesto();
     }
 
     // ── Inercia de arrastre (momentum) ──
@@ -1702,7 +1735,7 @@
       if (muestrasMovimiento.length > MUESTRAS_INERCIA_MAX) muestrasMovimiento.shift();
     }
     function cancelarInercia() {
-      if (inerciaRAF !== null) { cancelAnimationFrame(inerciaRAF); inerciaRAF = null; }
+      if (inerciaRAF !== null) { cancelAnimationFrame(inerciaRAF); inerciaRAF = null; actualizarEstadoGesto(); }
     }
     function iniciarInercia() {
       if (prefiereMovimientoReducido() || muestrasMovimiento.length < 2) return;
@@ -1728,12 +1761,12 @@
       if (velocidad > TECHO_V) { vx = vx / velocidad * TECHO_V; vy = vy / velocidad * TECHO_V; }
       var FRICCION = 0.0022; // px/ms perdidos por ms — calibra distancia y duración del deslizamiento
       function paso(ahora, previo) {
-        if (!vivo) { inerciaRAF = null; return; }
+        if (!vivo) { inerciaRAF = null; actualizarEstadoGesto(); return; }
         var dtPaso = previo ? ahora - previo : 16;
         var factor = Math.max(0, 1 - FRICCION * dtPaso * 12);
         vx *= factor; vy *= factor;
         var v = Math.sqrt(vx * vx + vy * vy);
-        if (v < 0.02) { inerciaRAF = null; return; }
+        if (v < 0.02) { inerciaRAF = null; actualizarEstadoGesto(); return; }
         var c0 = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom);
         var nuevo = PROY.desproyectar(c0.x - vx * dtPaso, c0.y - vy * dtPaso, viewport.zoom);
         viewport.lat = nuevo.lat; viewport.lng = nuevo.lng;
@@ -1741,6 +1774,7 @@
         inerciaRAF = requestAnimationFrame(function (t) { paso(t, ahora); });
       }
       inerciaRAF = requestAnimationFrame(function (t) { paso(t, null); });
+      actualizarEstadoGesto();
     }
 
     lienzo.addEventListener('pointerdown', function (e) {
@@ -2222,7 +2256,7 @@
     function alTouchstartContenedor(e) {
       e.preventDefault();
       if (e.touches.length === 2) {
-        enPellizco = true;
+        establecerEnPellizco(true);
         panTactilUnico = null;
         pinchDist0 = distanciaToques(e.touches);
         pinchDistUltima = pinchDist0;
@@ -2368,7 +2402,7 @@
         pinchDist0 = null;
         pinchCentro0 = null;
         pinchGeoFoco0 = null;
-        if (e.touches.length === 0) enPellizco = false;
+        if (e.touches.length === 0) establecerEnPellizco(false);
       }
       if (e.touches.length === 0) {
         if (panTactilUnico) { panTactilUnico = null; iniciarInercia(); }
@@ -2385,7 +2419,7 @@
       pinchCentro0 = null;
       pinchGeoFoco0 = null;
       panTactilUnico = null;
-      enPellizco = false;
+      establecerEnPellizco(false);
     }
     lienzo.addEventListener('touchcancel', alTouchcancelContenedor, { passive: false });
     function distanciaToques(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
@@ -2393,7 +2427,17 @@
 
     /* ── Animación suave de zoom/pan (usada por focar/encuadrar) ── */
     function animarA(lat, lng, zoom, duracion) {
-      if (animacionZoom) cancelAnimationFrame(animacionZoom);
+      // BUG REAL corregido en esta pasada: se cancelaba el rAF de un
+      // vuelo en curso pero no se limpiaba `animacionZoom` a `null` —
+      // si a continuación se entraba por la rama de movimiento
+      // reducido (return inmediato más abajo, que nunca reasigna la
+      // variable), quedaba apuntando para siempre a un frame ya
+      // cancelado. Sin consecuencia visible hasta ahora (nada más leía
+      // esta variable fuera de esta misma función), pero con el nuevo
+      // acople gesto↔ambiente (hallazgo 2) esa lectura estancada
+      // habría dejado el motor ambiental pausado para siempre tras
+      // cualquier `animarA` interrumpido con movimiento reducido activo.
+      if (animacionZoom) { cancelAnimationFrame(animacionZoom); animacionZoom = null; actualizarEstadoGesto(); }
       cancelarInercia();
       cerrarSpider();
       if (prefiereMovimientoReducido()) {
@@ -2415,9 +2459,10 @@
         viewport.lng = origen.lng + (destino.lng - origen.lng) * e;
         viewport.zoom = origen.zoom + (destino.zoom - origen.zoom) * e;
         redibujar();
-        if (t < 1) { animacionZoom = requestAnimationFrame(paso); } else { animacionZoom = null; vueloDestino = null; }
+        if (t < 1) { animacionZoom = requestAnimationFrame(paso); } else { animacionZoom = null; actualizarEstadoGesto(); vueloDestino = null; }
       }
       animacionZoom = requestAnimationFrame(paso);
+      actualizarEstadoGesto();
     }
 
     /* ── Popup ──
@@ -2838,7 +2883,7 @@
     function alCambiarVisibilidad() {
       if (!vivo) return;
       if (document.hidden) {
-        if (animacionZoom) { cancelAnimationFrame(animacionZoom); animacionZoom = null; }
+        if (animacionZoom) { cancelAnimationFrame(animacionZoom); animacionZoom = null; actualizarEstadoGesto(); }
         cancelarInercia();
         if (rafOndas !== null) { cancelAnimationFrame(rafOndas); rafOndas = null; }
         if (rafApariciones !== null) { cancelAnimationFrame(rafApariciones); rafApariciones = null; }
@@ -2907,6 +2952,17 @@
         // un RAF que ya estaba encolado antes de cancelarlo) se
         // encuentra `vivo === false` y no reprograma nada nuevo.
         vivo = false;
+        // Red de seguridad del acople gesto↔ambiente (hallazgo 2): si
+        // el mapa se destruye a mitad de un gesto (navegación fuera de
+        // la sección, por ejemplo), ningún punto de arriba llega a
+        // notificar el "fin" de ese gesto — sin esto, el motor
+        // ambiental quedaría pausado para siempre. Reset incondicional,
+        // no vía actualizarEstadoGesto() (que recalcularía a partir de
+        // banderas que ya no importan una vez que la instancia muere).
+        if (gestoActivo) {
+          gestoActivo = false;
+          if (global.AmbienteScheduler) global.AmbienteScheduler.reanudar();
+        }
         if (resizeObs) resizeObs.disconnect();
         if (resizeFallback) global.removeEventListener('resize', resizeFallback);
         if (global.document) document.removeEventListener('visibilitychange', alCambiarVisibilidad);
