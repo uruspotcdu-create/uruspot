@@ -1498,6 +1498,30 @@
         return;
       }
 
+      // PERF (auditoría performance, 2026-08-03, hallazgo 1.2 — confirmado
+      // con trace real: long task de 58.8ms causada por reconstruir TODO
+      // el listado en cada "Cargar más", con hasta 33 animationend
+      // disparándose en el mismo frame): si la ÚNICA razón de hayoCambio
+      // es que avanzó la página (misma rama, misma lista candidata —
+      // mismos ids en el mismo orden —, mismos favoritos), pintarTarjetas
+      // puede agregar solo las tarjetas nuevas en vez de tirar y
+      // reconstruir las que ya estaban pintadas. Se compara CONTRA el
+      // estado previo (antes de pisarlo abajo), igual que ramaDistinta()
+      // y hayCambioEnLista() un par de líneas más arriba.
+      //
+      // favoritos por referencia (no por valor): leerFavoritos() cachea
+      // el mismo objeto entre llamadas (favoritosCache) y solo lo
+      // reemplaza cuando algo realmente cambió (guardarFavoritos() o el
+      // evento 'storage' entre pestañas) — comparar por === es
+      // suficiente y evita una segunda pasada de diffing sobre el mapa
+      // de favoritos completo en cada render.
+      var soloAvanzoPagina = !ramaDistinta(rama) &&
+        !hayCambioEnLista(lastRenderCache.lista, lista) &&
+        favoritos === lastRenderCache.favoritos &&
+        lastRenderCache.paginaTarjetas !== null &&
+        uiState.paginaTarjetas > lastRenderCache.paginaTarjetas;
+      opts.soloAgregarNuevas = soloAvanzoPagina;
+
       // Fase 4 — MUST HAVE #3 (Fase 3C §3, Fase 3D §7): lastRenderCache.region
       // ya se guardaba en cada render() pero nada lo comparaba contra
       // el valor anterior — era un dato escrito sin consumidor. Se
@@ -1896,8 +1920,6 @@
     // Guardar scroll actual
     uiState.scrollPosition = window.scrollY || document.documentElement.scrollTop;
 
-    DOM.panelDescubrimiento.innerHTML = '';
-
     // Anunciar cantidad de resultados para screen readers
     if (DOM.estadoResultados) {
       DOM.estadoResultados.textContent = lista.length
@@ -1906,6 +1928,8 @@
     }
 
     if (!lista.length) {
+      DOM.panelDescubrimiento.innerHTML = '';
+
       var tieneBusqueda = uiState.consultaActual.trim().length > 0;
       var tieneFiltroRubro = !!uiState.filtroRubroActivo;
       var acciones = '';
@@ -1934,8 +1958,41 @@
     var restantes = lista.length - visible.length;
     var movimientoReducido = prefiereMovimientoReducido();
 
+    // PERF (auditoría performance, 2026-08-03, hallazgo 1.2 — confirmado
+    // con Chrome DevTools Performance: long task de 58.8ms, con 33
+    // llamadas a manejarFinEntradaTarjeta cayendo en el mismo frame,
+    // producto de reconstruir TODO el listado en cada "Cargar más").
+    // render() ya marca opts.soloAgregarNuevas cuando lo único que
+    // cambió fue la página. Igual se verifica acá contra el DOM real
+    // (no solo contra el número de página en memoria): si por lo que
+    // sea el panel no tiene ya las tarjetas que "deberían" estar
+    // pintadas (nadie más toca panelDescubrimiento hoy, pero no cuesta
+    // nada no asumirlo), se cae al camino de reconstrucción completa de
+    // siempre — nunca se agregan tarjetas de más ni se deja el listado
+    // a medio pintar.
+    var articulosExistentes = 0;
+    var incremental = false;
+    if (opts.soloAgregarNuevas) {
+      articulosExistentes = DOM.panelDescubrimiento.getElementsByClassName('tarjeta').length;
+      incremental = articulosExistentes > 0 && articulosExistentes < visible.length;
+    }
+
+    if (!incremental) {
+      DOM.panelDescubrimiento.innerHTML = '';
+    } else {
+      // Se va a re-crear el pie de paginación al final (o se omite si
+      // ya no quedan restantes) — sacar el anterior primero para no
+      // duplicarlo.
+      var piePaginaExistente = DOM.panelDescubrimiento.querySelector('.paginacion');
+      if (piePaginaExistente) piePaginaExistente.remove();
+    }
+
+    var nuevas = incremental ? visible.slice(articulosExistentes) : visible;
+    var offset = incremental ? articulosExistentes : 0;
+
     var frag = document.createDocumentFragment();
-    visible.forEach(function (lugar, i) {
+    nuevas.forEach(function (lugar, idxRel) {
+      var i = offset + idxRel;
       var art = document.createElement('article');
       art.className = 'tarjeta' + (opts.narrativa ? ' tarjeta--narrativa' : '');
       art.dataset.lugarId = lugar.id;
@@ -3883,7 +3940,24 @@
     }
   }
 
-  window.addEventListener('beforeunload', function () {
+  // PERF (auditoría performance, 2026-08-03): antes escuchaba
+  // 'beforeunload'. Chrome ya no bloquea bfcache solo por tener un
+  // listener de 'beforeunload' que no llama a preventDefault() ni
+  // fija returnValue (este no hace ninguna de las dos), pero Safari y
+  // Firefox sí lo siguen bloqueando — con "apple-mobile-web-app-*"
+  // en el <head>, este sitio le importa especialmente a iOS. 'pagehide'
+  // es la migración estándar recomendada (mismo momento del ciclo de
+  // vida, sin el costo de compatibilidad).
+  //
+  // Guard con event.persisted: si el navegador está metiendo la página
+  // en bfcache (persisted === true), NO hay que correr limpiar() —
+  // cancelaría timers/operaciones y dispararía 'onDestroy' justo antes
+  // de una posible restauración, dejando la página "viva" en memoria
+  // pero con su propio estado interno ya destruido. Si persisted es
+  // false (cierre real, navegación de verdad), el comportamiento es
+  // idéntico al que había antes.
+  window.addEventListener('pagehide', function (e) {
+    if (e.persisted) return;
     limpiar();
     LifecycleHooks.fire('onDestroy', { timestamp: Date.now() });
   });
