@@ -2351,6 +2351,10 @@
     });
 
     var recorte = MAPA.puntosHerramienta(conCoordenadas);
+    // TIER 3.2 (Perf/UX, 2026-08-02): mismo leerFavoritos() cacheado
+    // que ya usa pintarTarjetas() para la misma región — una sola
+    // lectura de localStorage por render, no una por punto.
+    var favoritosActivos = leerFavoritos();
     var puntos = recorte.map(function (l) {
       var meta = window.URU_RUBROS_META && window.URU_RUBROS_META[l.grupo];
       var slugL = slug(l);
@@ -2361,6 +2365,7 @@
         nombre: l.nombre,
         direccion: l.direccion,
         href: slugL ? 'locales/' + slugL + '/' : null,
+        esFavorito: !!favoritosActivos[l.id],
         // Este punto viaja a motorMapa (Canvas): necesita el hex ya
         // resuelto, no el nombre del token (colorSeguro() en
         // motor-render.js valida contra un regex de hex — un
@@ -2378,6 +2383,17 @@
 
     motorMapa.establecerPuntos(puntos);
     motorMapa.encuadrarTodos(nombreRegion === 'exploracion' ? MAPA_PADDING_EXPLORACION_PX : MAPA_PADDING_GUIA_PX);
+    // TIER 3.3 (Perf/UX, 2026-08-02): el marcador de "acá estás vos" no
+    // depende de la región ni del recorte — solo de si el usuario
+    // activó "cerca de mí" y compartió su ubicación. establecerPuntos()
+    // ya no lo confunde con un resultado (ver motor-render.js): se
+    // actualiza acá, en el mismo punto donde ya se actualiza el resto
+    // del mapa en cada render().
+    if (uiState.cercaTuyoActivo && uiState.ubicacionUsuario) {
+      motorMapa.establecerMarcadorUsuario(uiState.ubicacionUsuario);
+    } else {
+      motorMapa.quitarMarcadorUsuario();
+    }
     pintarLeyenda(puntos);
 
     if (DOM.mapaInfo) {
