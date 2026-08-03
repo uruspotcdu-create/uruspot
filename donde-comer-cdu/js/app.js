@@ -1670,8 +1670,14 @@
       var score = l.rating + Math.log(l.ratingCount) / Math.LN10 / 10;
       l._scoreDestacado = score + pseudoRandom(i) * 0.05;
     });
+    // REGLA ABSOLUTA (misma que motor-exposicion.js: tieneFicha()): los
+    // destacados con ficha propia van SIEMPRE primero. Si ninguno de
+    // los candidatos por rating tiene ficha, esta comparación no
+    // cambia nada (0-0=0) y queda el orden por score de siempre.
     candidatos.sort(function (a, b) {
-      return b._scoreDestacado - a._scoreDestacado;
+      var fichaA = slug(a) ? 1 : 0;
+      var fichaB = slug(b) ? 1 : 0;
+      return (fichaB - fichaA) || (b._scoreDestacado - a._scoreDestacado);
     });
 
     var elegidos = [];
