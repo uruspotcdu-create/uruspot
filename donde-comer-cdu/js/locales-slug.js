@@ -64,6 +64,12 @@
     "URU-00191": "lo-de-juan",
     "URU-00193": "san-carlos",
     "URU-00227": "la-cuadra",
-    "URU-00237": "mi-viejo"
+    "URU-00237": "mi-viejo",
+    "URU-00624": "brode",
+    "URU-00156": "cremolatti",
+    "URU-00179": "el-conventillo-de-baco",
+    "URU-00699": "gimnasio-538",
+    "URU-00161": "justo-josé",
+    "URU-00158": "lucero"
   };
 })(typeof window !== 'undefined' ? window : global);
