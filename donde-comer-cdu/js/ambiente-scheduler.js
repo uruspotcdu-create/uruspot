@@ -49,6 +49,20 @@
   var pausadoPorVisibilidad = false;
   var listenerRegistrado = false;
 
+  // PERF (auditoría rendimiento, ronda 1, hallazgo 2): motor-render.js
+  // es quien sabe con exactitud cuándo el mapa está en medio de un
+  // gesto activo (arrastre, pellizco, inercia, vuelo animado) — este
+  // archivo no tiene ninguna noción de eso hoy, así que las ~10 tareas
+  // ambientales corrían a pleno compitiendo por el mismo frame budget
+  // de 16ms justo en el peor momento (dedo en la pantalla). Contador
+  // en vez de booleano: soporta más de un llamador concurrente sin que
+  // coordinen entre sí (si en algún momento hay más de un mapa en la
+  // página, un `reanudar()` de uno no debe reactivar de golpe mientras
+  // el gesto del otro sigue en curso) — cada `pausar()` debe tener su
+  // `reanudar()` simétrico, igual que el resto de pares set/unset de
+  // este motor.
+  var contadorPausasPorGesto = 0;
+
   function pestanaVisible() {
     return (typeof document !== 'undefined') ? !document.hidden : true;
   }
@@ -67,6 +81,12 @@
       return;
     }
     rafId = global.requestAnimationFrame(tick);
+    // Gesto activo en el mapa: se sigue pidiendo el próximo frame (para
+    // reanudar sin latencia en cuanto termine, sin pagar el costo de
+    // rearrancar el loop ni sus listeners) pero se salta la ejecución
+    // de las tareas ambientales de ESTE frame — no se toca el rAF del
+    // mapa, que sigue dibujando normal por su cuenta.
+    if (contadorPausasPorGesto > 0) return;
     for (var i = 0; i < orden.length; i++) {
       var fn = tareas[orden[i]];
       if (fn) {
@@ -115,10 +135,19 @@
       };
     },
 
+    // pausar()/reanudar(): usado por motor-render.js para saltar las
+    // tareas ambientales mientras un gesto de mapa está en curso (ver
+    // hallazgo 2). Simétrico por diseño — cada `pausar()` debe tener
+    // su `reanudar()`; llamar `reanudar()` de más no hace nada (el
+    // contador nunca baja de 0).
+    pausar: function () { contadorPausasPorGesto++; },
+    reanudar: function () { if (contadorPausasPorGesto > 0) contadorPausasPorGesto--; },
+
     // Diagnóstico de solo lectura — ningún módulo debería necesitar
     // esto en operación normal.
     get tareasActivas() { return orden.slice(); },
-    get corriendo() { return rafId !== null; }
+    get corriendo() { return rafId !== null; },
+    get pausadoPorGesto() { return contadorPausasPorGesto > 0; }
   };
 
   global.AmbienteScheduler = api;
