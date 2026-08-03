@@ -639,6 +639,16 @@
     // cuyo origen temporal ya no significa nada.
     var vueloDestino = null;
 
+    // TIER 3.3 — auditoría (Perf/UX, 2026-08-02): marcador de "acá
+    // estás vos", independiente del array `puntos` (que representa
+    // SIEMPRE resultados del catálogo, nunca la posición propia del
+    // usuario — mezclarlos en la misma lista habría significado que
+    // enfocar(id)/resaltar(id) pudieran resolver por error sobre el
+    // usuario, o que deduplicarPorId de motor-mapa.js lo tratara como
+    // un lugar más). Nace en null: sin marcador hasta que app.js llame
+    // a establecerMarcadorUsuario() tras una geolocalización real.
+    var usuarioMarcador = null;
+
     // Caché del último clustering calculado, para no repetir el
     // trabajo O(n²) de agrupar en cada movimiento de mouse — solo se
     // recalcula si el viewport (o el conjunto de puntos) cambió
@@ -850,6 +860,7 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, viewport.ancho, viewport.alto);
         dibujarTiles();
+        dibujarMarcadorUsuario();
         if (puntos.length === 0) {
           dibujarEstadoVacio();
         } else {
@@ -1068,6 +1079,62 @@
       return bufferProyectados;
     }
 
+    // TIER 3.3 — auditoría (Perf/UX, 2026-08-02): "acá estás vos" como
+    // un punto distinto al lenguaje visual de los pines de lugares
+    // (círculo con halo pulsante, no la forma de pin con pictograma de
+    // rubro) — a propósito, para que nunca se confunda con un
+    // resultado del catálogo.
+    //
+    // El pulso necesita seguir animando aunque nada más en el mapa
+    // esté cambiando (usuario quieto, sin pan/zoom en curso). Se
+    // maneja con el MISMO patrón que ya usa dispararOnda()/
+    // animarOndas() más arriba — un rAF propio que se auto-programa
+    // mientras haga falta y se apaga solo (`rafMarcadorUsuario = null`)
+    // en cuanto `usuarioMarcador` se limpia — en vez de llamar
+    // redibujar() desde dentro de dibujar(), que habría dejado un rAF
+    // corriendo para siempre sin una condición de salida propia.
+    var rafMarcadorUsuario = null;
+    function animarMarcadorUsuario() {
+      if (!vivo || !usuarioMarcador) { rafMarcadorUsuario = null; return; }
+      redibujar();
+      rafMarcadorUsuario = requestAnimationFrame(animarMarcadorUsuario);
+    }
+
+    function dibujarMarcadorUsuario() {
+      if (!usuarioMarcador) return;
+      var escala = PROY.escalaDeZoom(viewport.zoom);
+      var centro = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom, escala);
+      var xy = PROY.puntoAPantalla(usuarioMarcador.lat, usuarioMarcador.lng, viewport, centro, escala);
+      if (xy.x < -40 || xy.x > viewport.ancho + 40 || xy.y < -40 || xy.y > viewport.alto + 40) return;
+
+      var colorUsuario = resolverVarCSS('--canvas-color-marcador-usuario', '#4A90D9');
+      var reducido = prefiereMovimientoReducido();
+      ctx.save();
+      if (!reducido) {
+        // Fase del pulso derivada del reloj, no de un contador propio:
+        // no hace falta llevar estado entre frames para saber "dónde
+        // va" la animación.
+        var fasePulso = (Date.now() % 2000) / 2000;
+        var radioHalo = 8 + fasePulso * 10;
+        ctx.beginPath();
+        ctx.arc(xy.x, xy.y, radioHalo, 0, Math.PI * 2);
+        ctx.fillStyle = hexARgba(colorUsuario, 0.35 * (1 - fasePulso));
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(xy.x, xy.y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = colorUsuario;
+      ctx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.45)');
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // Clustering por grilla en espacio de pantalla: solo agrupa cuando
     // hay verdadero solapamiento visual, no por regla arbitraria de zoom.
     //
@@ -1236,6 +1303,29 @@
       // rubros pueden quedar parecidos en un mapa oscuro, y el color
       // solo no es accesible para daltonismo).
       dibujarPictogramaRubro(punto, r, rVentana, color);
+      // TIER 3.2 — auditoría (UX, 2026-08-02): insignia de favorito.
+      // Se dibuja DESPUÉS del pictograma de rubro (encima, no debajo)
+      // y fuera del área de la ventana central — así nunca tapa el
+      // ícono que ya identifica el rubro, que sigue siendo el canal
+      // principal de lectura del pin.
+      if (punto && punto.esFavorito) {
+        var xIns = r * 0.62, yIns = -r * 0.35 - r * 0.62;
+        ctx.beginPath();
+        ctx.arc(xIns, yIns, r * 0.34, 0, Math.PI * 2);
+        ctx.fillStyle = resolverVarCSS('--canvas-color-favorito', '#C97A83');
+        ctx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.45)');
+        ctx.shadowBlur = 3;
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
+        ctx.stroke();
+        ctx.fillStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
+        ctx.font = '700 ' + Math.round(r * 0.42) + 'px "IBM Plex Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('★', xIns, yIns + 0.5);
+      }
       ctx.restore();
     }
 
@@ -2508,6 +2598,29 @@
     }
     function quitarResaltado() { idResaltado = null; puntoResaltado = null; redibujar(); }
 
+    // TIER 3.3 — auditoría (Perf/UX, 2026-08-02): valida coordenadas
+    // con el mismo criterio real que el resto del módulo (finitas, no
+    // solo `typeof === 'number'` — ver el comentario de auditoría al
+    // principio del archivo hermano motor-mapa.js sobre por qué ese
+    // chequeo ingenuo deja pasar NaN). `latlng` puede venir null
+    // (desactivarCercaDeMi en app.js) — equivalente a quitarMarcadorUsuario().
+    function establecerMarcadorUsuario(latlng) {
+      if (!latlng || typeof latlng.lat !== 'number' || typeof latlng.lng !== 'number' ||
+        !isFinite(latlng.lat) || !isFinite(latlng.lng)) {
+        quitarMarcadorUsuario();
+        return;
+      }
+      usuarioMarcador = { lat: latlng.lat, lng: latlng.lng };
+      if (rafMarcadorUsuario === null) rafMarcadorUsuario = requestAnimationFrame(animarMarcadorUsuario);
+      redibujar();
+    }
+
+    function quitarMarcadorUsuario() {
+      if (!usuarioMarcador) return;
+      usuarioMarcador = null;
+      redibujar();
+    }
+
     var resizeObs = null;
     var resizeFallback = null;
     if ('ResizeObserver' in global) {
@@ -2548,6 +2661,7 @@
         if (rafOndas !== null) { cancelAnimationFrame(rafOndas); rafOndas = null; }
         if (rafApariciones !== null) { cancelAnimationFrame(rafApariciones); rafApariciones = null; }
         if (rafSpider !== null) { cancelAnimationFrame(rafSpider); rafSpider = null; }
+        if (rafMarcadorUsuario !== null) { cancelAnimationFrame(rafMarcadorUsuario); rafMarcadorUsuario = null; }
         if (wheelRAF !== null) { cancelAnimationFrame(wheelRAF); wheelRAF = null; wheelAcumulado = 0; }
         if (hoverRAF !== null) { cancelAnimationFrame(hoverRAF); hoverRAF = null; hoverPendiente = null; }
       } else {
@@ -2565,6 +2679,13 @@
         // peor que simplemente descartarlas.
         ondas = [];
         for (var kApar in apariciones) delete apariciones[kApar];
+        // El pulso de "acá estás vos" es la misma clase de animación
+        // por tiempo que se cortó arriba al ocultarse — se retoma acá
+        // si el marcador seguía activo, con la misma reserva contra
+        // doble-agenda que usa establecerMarcadorUsuario().
+        if (usuarioMarcador && rafMarcadorUsuario === null) {
+          rafMarcadorUsuario = requestAnimationFrame(animarMarcadorUsuario);
+        }
         // La pestaña pudo volver en otro monitor (distinto
         // devicePixelRatio) o con el contenedor en otro tamaño —
         // remedir agarra ambos casos, no solo el resize.
@@ -2601,6 +2722,8 @@
       enfocar: enfocar,
       resaltar: resaltar,
       quitarResaltado: quitarResaltado,
+      establecerMarcadorUsuario: establecerMarcadorUsuario,
+      quitarMarcadorUsuario: quitarMarcadorUsuario,
       destruir: function () {
         // Primero el guard: cualquier callback asíncrono que llegue
         // DESPUÉS de esta línea (imagen de tile, promesa de fuentes,
@@ -2628,6 +2751,7 @@
         if (rafOndas !== null) cancelAnimationFrame(rafOndas);
         if (rafApariciones !== null) cancelAnimationFrame(rafApariciones);
         if (rafSpider !== null) cancelAnimationFrame(rafSpider);
+        if (rafMarcadorUsuario !== null) cancelAnimationFrame(rafMarcadorUsuario);
         if (hoverRAF !== null) cancelAnimationFrame(hoverRAF);
         cancelarInercia();
         if (wheelRAF !== null) cancelAnimationFrame(wheelRAF);
