@@ -557,6 +557,29 @@
     etiqueta.hidden = true;
     contenedor.appendChild(etiqueta);
 
+    // PERF (auditoría performance, 2026-08-03, hallazgo 1.1): el halo
+    // pulsante de "acá estás vos" vivía enteramente en <canvas>
+    // (dibujarMarcadorUsuario, más abajo) y necesitaba su propio loop
+    // de requestAnimationFrame que llamaba a redibujar() en CADA frame
+    // mientras el marcador estuviera activo — eso disparaba dibujar()
+    // completo (clearRect + tiles + TODOS los marcadores/clusters +
+    // spider + ondas) 60 veces por segundo solo para animar un punto
+    // decorativo que ni siquiera se movía. Se saca a un <div> propio,
+    // posicionado en JS (mismo patrón exacto que ya usan `popup` y
+    // `etiqueta` arriba: left/top absolutos, recalculados solo cuando
+    // dibujar() corre por una razón real — pan/zoom/datos nuevos) y
+    // animado con @keyframes de CSS (transform/opacity, ver
+    // css/mapa.css), que el navegador anima en su compositor sin
+    // volver a tocar el canvas ni el resto de la página.
+    var marcadorUsuarioEl = document.createElement('div');
+    marcadorUsuarioEl.className = 'uru-mapa-marcador-usuario';
+    marcadorUsuarioEl.setAttribute('aria-hidden', 'true');
+    marcadorUsuarioEl.innerHTML =
+      '<span class="uru-mapa-marcador-usuario__halo"></span>' +
+      '<span class="uru-mapa-marcador-usuario__punto"></span>';
+    marcadorUsuarioEl.hidden = true;
+    contenedor.appendChild(marcadorUsuarioEl);
+
     // resolverVarCSS: puente de lectura hacia la capa "Tokens de
     // Canvas" de css/tokens.css (Blueprint V2 §2 — puente exclusivo
     // hacia este archivo, ningún literal hardcodeado). Generalizada
@@ -860,7 +883,7 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, viewport.ancho, viewport.alto);
         dibujarTiles();
-        dibujarMarcadorUsuario();
+        posicionarMarcadorUsuario();
         if (puntos.length === 0) {
           dibujarEstadoVacio();
         } else {
@@ -1079,60 +1102,38 @@
       return bufferProyectados;
     }
 
-    // TIER 3.3 — auditoría (Perf/UX, 2026-08-02): "acá estás vos" como
-    // un punto distinto al lenguaje visual de los pines de lugares
-    // (círculo con halo pulsante, no la forma de pin con pictograma de
-    // rubro) — a propósito, para que nunca se confunda con un
-    // resultado del catálogo.
-    //
-    // El pulso necesita seguir animando aunque nada más en el mapa
-    // esté cambiando (usuario quieto, sin pan/zoom en curso). Se
-    // maneja con el MISMO patrón que ya usa dispararOnda()/
-    // animarOndas() más arriba — un rAF propio que se auto-programa
-    // mientras haga falta y se apaga solo (`rafMarcadorUsuario = null`)
-    // en cuanto `usuarioMarcador` se limpia — en vez de llamar
-    // redibujar() desde dentro de dibujar(), que habría dejado un rAF
-    // corriendo para siempre sin una condición de salida propia.
-    var rafMarcadorUsuario = null;
-    function animarMarcadorUsuario() {
-      if (!vivo || !usuarioMarcador) { rafMarcadorUsuario = null; return; }
-      redibujar();
-      rafMarcadorUsuario = requestAnimationFrame(animarMarcadorUsuario);
-    }
+    // TIER 3.3 (Perf/UX, 2026-08-02) resolvía el lifecycle de este rAF
+    // (auto-programado, se apagaba solo). PERF (auditoría performance,
+    // 2026-08-03, hallazgo 1.1): ese lifecycle estaba bien, pero el
+    // rAF en sí ya no hace falta — "acá estás vos" es un <div>
+    // animado con @keyframes de CSS (uru-mapa-marcador-usuario__halo,
+    // ver css/mapa.css), que el navegador anima solo en su compositor
+    // sin que JS tenga que pedir un frame nuevo cada 16ms. El halo
+    // sigue pulsando aunque nada más en el mapa cambie, sin volver a
+    // ejecutar dibujar() para lograrlo — que es justo lo que costaba
+    // caro (redibujaba tiles + todos los marcadores 60 veces/segundo
+    // para animar un único punto decorativo).
 
-    function dibujarMarcadorUsuario() {
-      if (!usuarioMarcador) return;
+    // Reemplaza a la vieja dibujarMarcadorUsuario() (canvas) — ver el
+    // comentario de PERF junto a la creación de marcadorUsuarioEl más
+    // arriba. Solo posiciona un <div> ya estilado por CSS; no dibuja
+    // nada. Costo por llamada: dos proyecciones (PROY.proyectar +
+    // PROY.puntoAPantalla), igual que antes — la diferencia real es
+    // que esto ahora corre únicamente dentro de dibujar() cuando
+    // dibujar() ya se estaba ejecutando por otra razón (pan, zoom,
+    // datos nuevos), no en un rAF propio a 60fps.
+    function posicionarMarcadorUsuario() {
+      if (!usuarioMarcador) { marcadorUsuarioEl.hidden = true; return; }
       var escala = PROY.escalaDeZoom(viewport.zoom);
       var centro = PROY.proyectar(viewport.lat, viewport.lng, viewport.zoom, escala);
       var xy = PROY.puntoAPantalla(usuarioMarcador.lat, usuarioMarcador.lng, viewport, centro, escala);
-      if (xy.x < -40 || xy.x > viewport.ancho + 40 || xy.y < -40 || xy.y > viewport.alto + 40) return;
-
-      var colorUsuario = resolverVarCSS('--canvas-color-marcador-usuario', '#4A90D9');
-      var reducido = prefiereMovimientoReducido();
-      ctx.save();
-      if (!reducido) {
-        // Fase del pulso derivada del reloj, no de un contador propio:
-        // no hace falta llevar estado entre frames para saber "dónde
-        // va" la animación.
-        var fasePulso = (Date.now() % 2000) / 2000;
-        var radioHalo = 8 + fasePulso * 10;
-        ctx.beginPath();
-        ctx.arc(xy.x, xy.y, radioHalo, 0, Math.PI * 2);
-        ctx.fillStyle = hexARgba(colorUsuario, 0.35 * (1 - fasePulso));
-        ctx.fill();
+      if (xy.x < -40 || xy.x > viewport.ancho + 40 || xy.y < -40 || xy.y > viewport.alto + 40) {
+        marcadorUsuarioEl.hidden = true;
+        return;
       }
-
-      ctx.beginPath();
-      ctx.arc(xy.x, xy.y, 7, 0, Math.PI * 2);
-      ctx.fillStyle = colorUsuario;
-      ctx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.45)');
-      ctx.shadowBlur = 6;
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
-      ctx.stroke();
-      ctx.restore();
+      marcadorUsuarioEl.style.left = xy.x + 'px';
+      marcadorUsuarioEl.style.top = xy.y + 'px';
+      marcadorUsuarioEl.hidden = false;
     }
 
     // Clustering por grilla en espacio de pantalla: solo agrupa cuando
@@ -2627,13 +2628,19 @@
         return;
       }
       usuarioMarcador = { lat: latlng.lat, lng: latlng.lng };
-      if (rafMarcadorUsuario === null) rafMarcadorUsuario = requestAnimationFrame(animarMarcadorUsuario);
+      // Mismo fix que posicionarPopupEn()/abrirPopup() (ver comentario
+      // ahí): posicionar de forma síncrona en vez de esperar al
+      // rAF diferido de redibujar() evita un frame con el <div>
+      // mostrado en 0,0 (o en la posición vieja) antes de "saltar" al
+      // lugar correcto.
+      posicionarMarcadorUsuario();
       redibujar();
     }
 
     function quitarMarcadorUsuario() {
       if (!usuarioMarcador) return;
       usuarioMarcador = null;
+      marcadorUsuarioEl.hidden = true;
       redibujar();
     }
 
@@ -2677,7 +2684,6 @@
         if (rafOndas !== null) { cancelAnimationFrame(rafOndas); rafOndas = null; }
         if (rafApariciones !== null) { cancelAnimationFrame(rafApariciones); rafApariciones = null; }
         if (rafSpider !== null) { cancelAnimationFrame(rafSpider); rafSpider = null; }
-        if (rafMarcadorUsuario !== null) { cancelAnimationFrame(rafMarcadorUsuario); rafMarcadorUsuario = null; }
         if (wheelRAF !== null) { cancelAnimationFrame(wheelRAF); wheelRAF = null; wheelAcumulado = 0; }
         if (hoverRAF !== null) { cancelAnimationFrame(hoverRAF); hoverRAF = null; hoverPendiente = null; }
       } else {
@@ -2695,13 +2701,9 @@
         // peor que simplemente descartarlas.
         ondas = [];
         for (var kApar in apariciones) delete apariciones[kApar];
-        // El pulso de "acá estás vos" es la misma clase de animación
-        // por tiempo que se cortó arriba al ocultarse — se retoma acá
-        // si el marcador seguía activo, con la misma reserva contra
-        // doble-agenda que usa establecerMarcadorUsuario().
-        if (usuarioMarcador && rafMarcadorUsuario === null) {
-          rafMarcadorUsuario = requestAnimationFrame(animarMarcadorUsuario);
-        }
+        // El pulso de "acá estás vos" ya no depende de un rAF propio
+        // (hallazgo 1.1, 2026-08-03) — es un @keyframes de CSS que
+        // sigue corriendo solo, no hace falta retomar nada acá.
         // La pestaña pudo volver en otro monitor (distinto
         // devicePixelRatio) o con el contenedor en otro tamaño —
         // remedir agarra ambos casos, no solo el resize.
@@ -2767,7 +2769,6 @@
         if (rafOndas !== null) cancelAnimationFrame(rafOndas);
         if (rafApariciones !== null) cancelAnimationFrame(rafApariciones);
         if (rafSpider !== null) cancelAnimationFrame(rafSpider);
-        if (rafMarcadorUsuario !== null) cancelAnimationFrame(rafMarcadorUsuario);
         if (hoverRAF !== null) cancelAnimationFrame(hoverRAF);
         cancelarInercia();
         if (wheelRAF !== null) cancelAnimationFrame(wheelRAF);
