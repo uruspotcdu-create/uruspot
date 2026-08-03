@@ -407,8 +407,16 @@
     return pointerType === 'touch' ? UMBRAL_DRAG_TOQUE_PX : UMBRAL_DRAG_MOUSE_PX;
   }
 
+  // PERF (auditoría rendimiento, ronda 1, hallazgo 4): antes se creaba
+  // un MediaQueryList nuevo en CADA frame dibujado (dibujarMarcadores
+  // corre una vez por frame durante pan/pellizco/inercia/vuelo, hasta
+  // 60 veces por segundo). El valor de esta media query no cambia más
+  // que muy ocasionalmente (el usuario altera una preferencia del SO),
+  // nunca frame a frame — mismo criterio que cacheVarCSS/CACHE_RGB en
+  // este archivo: se crea una sola vez y se lee la propiedad cacheada.
+  var mqMovimientoReducido = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)');
   function prefiereMovimientoReducido() {
-    return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    return !!(mqMovimientoReducido && mqMovimientoReducido.matches);
   }
 
   function colorSeguro(c) {
@@ -471,7 +479,31 @@
     var img = new Image();
     img.crossOrigin = 'anonymous';
     var entrada = { img: img, cargado: false, error: false, intentos: 0 };
-    img.onload = function () { entrada.cargado = true; entrada.error = false; if (entrada.onReady) entrada.onReady(); };
+    // PERF (auditoría rendimiento, ronda 1, hallazgo 3): antes se
+    // marcaba `cargado=true` directo en `onload`, así que el primer
+    // `drawImage` sobre esa imagen (complete=true pero no
+    // necesariamente decodificada) podía forzar una decodificación
+    // síncrona en el hilo principal justo en el momento de pintar el
+    // frame — notorio con tiles @2x, y peor con varios tiles
+    // terminando de cargar casi juntos durante un pan/zoom rápido.
+    // `img.decode()` mueve ese costo fuera del frame de pintado; si no
+    // existe o rechaza, se cae al comportamiento anterior (marcar
+    // cargado igual, sin bloquear la carga por un error de decode).
+    img.onload = function () {
+      entrada.error = false;
+      if (img.decode) {
+        img.decode().then(function () {
+          entrada.cargado = true;
+          if (entrada.onReady) entrada.onReady();
+        }, function () {
+          entrada.cargado = true;
+          if (entrada.onReady) entrada.onReady();
+        });
+      } else {
+        entrada.cargado = true;
+        if (entrada.onReady) entrada.onReady();
+      }
+    };
     img.onerror = function () {
       entrada.cargado = false;
       entrada.error = true;
@@ -1250,6 +1282,121 @@
     // oscuro, y no es accesible para daltonismo) — el ícono es un
     // segundo canal de distinción que no depende del color, y además
     // se reconoce más rápido que una letra sola.
+    // PERF (auditoría rendimiento, ronda 1, hallazgo 1): antes, cada
+    // pin reconstruía su path completo, creaba un createLinearGradient
+    // NUEVO y aplicaba shadowBlur en CADA frame dibujado — con N
+    // marcadores visibles, eso es O(N) creaciones de gradiente + N
+    // blurs de sombra, 60 veces por segundo, durante todo el gesto de
+    // pan/pellizco/inercia. shadowBlur es una de las operaciones más
+    // caras de Canvas 2D (en muchos motores cae a blur por software,
+    // sin aceleración GPU).
+    //
+    // La combinación color × activo × ícono-de-rubro × favorito × dpr
+    // es finita y chica (~14 rubros × 2 × 2 × 2 × 1 dpr efectivo por
+    // sesión): se pre-renderiza cada variante UNA sola vez en un
+    // <canvas> offscreen, con su gradiente y su sombra ya "horneados",
+    // y de ahí en más cada frame hace un único `drawImage` (composición
+    // GPU barata) en vez de reconstruir path+gradiente+shadow. El halo
+    // de "activo" (fill simple sin gradiente/sombra, y cuyo radio ya
+    // varía con r) y la transformación de aparición (fade+scale) siguen
+    // aplicándose en el ctx principal, fuera del sprite cacheado.
+    var SPRITE_MARCADOR_ORIGEN_X = 40;
+    var SPRITE_MARCADOR_ORIGEN_Y = 44;
+    var SPRITE_MARCADOR_ANCHO = 80;
+    var SPRITE_MARCADOR_ALTO = 84;
+    var CACHE_SPRITE_MARCADOR = Object.create(null);
+    var CACHE_SPRITE_MARCADOR_MAX = 300; // tope defensivo: el catálogo real de variantes es ~decenas, no cientos
+
+    function obtenerSpriteMarcador(color, activo, punto, dprActual) {
+      var pathD = punto && punto.rubroIcono;
+      var iconoClave = pathD ? pathD : ((punto && punto.rubroNombre) ? ('L:' + String(punto.rubroNombre).trim().charAt(0).toUpperCase()) : '');
+      var esFavorito = !!(punto && punto.esFavorito);
+      var clave = color + '|' + (activo ? 1 : 0) + '|' + iconoClave + '|' + (esFavorito ? 1 : 0) + '|' + dprActual;
+      var cacheado = CACHE_SPRITE_MARCADOR[clave];
+      if (cacheado) return cacheado;
+
+      var claves = Object.keys(CACHE_SPRITE_MARCADOR);
+      if (claves.length > CACHE_SPRITE_MARCADOR_MAX) {
+        // No debería pasar en operación normal (ver comentario arriba),
+        // pero si el catálogo de rubros/colores creciera mucho, mejor
+        // vaciar la caché que dejarla crecer sin techo.
+        CACHE_SPRITE_MARCADOR = Object.create(null);
+      }
+
+      var r = activo ? RADIO_MARCADOR + 2.5 : RADIO_MARCADOR;
+      var off = document.createElement('canvas');
+      off.width = Math.round(SPRITE_MARCADOR_ANCHO * dprActual);
+      off.height = Math.round(SPRITE_MARCADOR_ALTO * dprActual);
+      var octx = off.getContext('2d');
+      octx.setTransform(dprActual, 0, 0, dprActual, 0, 0);
+      octx.translate(SPRITE_MARCADOR_ORIGEN_X, SPRITE_MARCADOR_ORIGEN_Y);
+      pintarCuerpoMarcador(octx, r, activo, punto, color);
+
+      var entrada = { canvas: off };
+      CACHE_SPRITE_MARCADOR[clave] = entrada;
+      return entrada;
+    }
+
+    // Cuerpo completo del pin (gota + gradiente + sombra + ventana +
+    // pictograma + insignia de favorito), parametrizado por `ctxD` para
+    // poder dibujarse tanto en el canvas principal como en el offscreen
+    // del sprite cacheado. Asume que `ctxD` ya está trasladado al
+    // origen local del marcador (0,0) — no traslada por su cuenta.
+    function pintarCuerpoMarcador(ctxD, r, activo, punto, color) {
+      ctxD.beginPath();
+      // Cabeza circular del pin + punta triangular hacia abajo
+      ctxD.arc(0, -r * 0.35, r, Math.PI * 0.08, Math.PI * 0.92, true);
+      ctxD.lineTo(0, r * 1.55);
+      ctxD.closePath();
+      var grad = ctxD.createLinearGradient(0, -r * 1.3, 0, r * 1.55);
+      grad.addColorStop(0, aclarar(color, 18));
+      grad.addColorStop(1, color);
+      ctxD.fillStyle = grad;
+      ctxD.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.45)');
+      ctxD.shadowBlur = activo ? 10 : 5;
+      ctxD.shadowOffsetY = 2;
+      ctxD.fill();
+      ctxD.shadowColor = 'transparent';
+      ctxD.lineWidth = activo ? 2.5 : 2;
+      ctxD.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
+      ctxD.stroke();
+      // Centro claro: hace de "ventana" del pin, referencia visual de
+      // mapas profesionales (Google/Apple Maps usan el mismo recurso)
+      var rVentana = r * RATIO_VENTANA;
+      ctxD.beginPath();
+      ctxD.arc(0, -r * 0.35, rVentana, 0, Math.PI * 2);
+      ctxD.fillStyle = resolverVarCSS('--canvas-color-cluster-fondo', '#0A0D13');
+      ctxD.fill();
+      // Pictograma del rubro dentro de la ventana — segundo canal de
+      // distinción además del color (dos rubros pueden quedar
+      // parecidos en un mapa oscuro, y el color solo no es accesible
+      // para daltonismo).
+      dibujarPictogramaRubro(ctxD, punto, r, rVentana, color);
+      // TIER 3.2 — auditoría (UX, 2026-08-02): insignia de favorito.
+      // Se dibuja DESPUÉS del pictograma de rubro (encima, no debajo)
+      // y fuera del área de la ventana central — así nunca tapa el
+      // ícono que ya identifica el rubro, que sigue siendo el canal
+      // principal de lectura del pin.
+      if (punto && punto.esFavorito) {
+        var xIns = r * 0.62, yIns = -r * 0.35 - r * 0.62;
+        ctxD.beginPath();
+        ctxD.arc(xIns, yIns, r * 0.34, 0, Math.PI * 2);
+        ctxD.fillStyle = resolverVarCSS('--canvas-color-favorito', '#C97A83');
+        ctxD.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.45)');
+        ctxD.shadowBlur = 3;
+        ctxD.fill();
+        ctxD.shadowColor = 'transparent';
+        ctxD.lineWidth = 1.4;
+        ctxD.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
+        ctxD.stroke();
+        ctxD.fillStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
+        ctxD.font = '700 ' + Math.round(r * 0.42) + 'px "IBM Plex Sans", sans-serif';
+        ctxD.textAlign = 'center';
+        ctxD.textBaseline = 'middle';
+        ctxD.fillText('★', xIns, yIns + 0.5);
+      }
+    }
+
     function dibujarMarcador(x, y, punto, activo, factorEntrada) {
       var color = colorSeguro(punto && punto.color);
       var r = activo ? RADIO_MARCADOR + 2.5 : RADIO_MARCADOR;
@@ -1274,59 +1421,14 @@
         ctx.fillStyle = hexARgba(color, 0.22);
         ctx.fill();
       }
-      ctx.translate(x, y);
-      ctx.beginPath();
-      // Cabeza circular del pin + punta triangular hacia abajo
-      ctx.arc(0, -r * 0.35, r, Math.PI * 0.08, Math.PI * 0.92, true);
-      ctx.lineTo(0, r * 1.55);
-      ctx.closePath();
-      var grad = ctx.createLinearGradient(0, -r * 1.3, 0, r * 1.55);
-      grad.addColorStop(0, aclarar(color, 18));
-      grad.addColorStop(1, color);
-      ctx.fillStyle = grad;
-      ctx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.45)');
-      ctx.shadowBlur = activo ? 10 : 5;
-      ctx.shadowOffsetY = 2;
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.lineWidth = activo ? 2.5 : 2;
-      ctx.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
-      ctx.stroke();
-      // Centro claro: hace de "ventana" del pin, referencia visual de
-      // mapas profesionales (Google/Apple Maps usan el mismo recurso)
-      var rVentana = r * RATIO_VENTANA;
-      ctx.beginPath();
-      ctx.arc(0, -r * 0.35, rVentana, 0, Math.PI * 2);
-      ctx.fillStyle = resolverVarCSS('--canvas-color-cluster-fondo', '#0A0D13');
-      ctx.fill();
-      // Pictograma del rubro dentro de la ventana — segundo canal de
-      // distinción además del color (ver comentario arriba: dos
-      // rubros pueden quedar parecidos en un mapa oscuro, y el color
-      // solo no es accesible para daltonismo).
-      dibujarPictogramaRubro(punto, r, rVentana, color);
-      // TIER 3.2 — auditoría (UX, 2026-08-02): insignia de favorito.
-      // Se dibuja DESPUÉS del pictograma de rubro (encima, no debajo)
-      // y fuera del área de la ventana central — así nunca tapa el
-      // ícono que ya identifica el rubro, que sigue siendo el canal
-      // principal de lectura del pin.
-      if (punto && punto.esFavorito) {
-        var xIns = r * 0.62, yIns = -r * 0.35 - r * 0.62;
-        ctx.beginPath();
-        ctx.arc(xIns, yIns, r * 0.34, 0, Math.PI * 2);
-        ctx.fillStyle = resolverVarCSS('--canvas-color-favorito', '#C97A83');
-        ctx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.45)');
-        ctx.shadowBlur = 3;
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.lineWidth = 1.4;
-        ctx.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
-        ctx.stroke();
-        ctx.fillStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
-        ctx.font = '700 ' + Math.round(r * 0.42) + 'px "IBM Plex Sans", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('★', xIns, yIns + 0.5);
-      }
+      var sprite = obtenerSpriteMarcador(color, activo, punto, dpr);
+      ctx.drawImage(
+        sprite.canvas,
+        x - SPRITE_MARCADOR_ORIGEN_X,
+        y - SPRITE_MARCADOR_ORIGEN_Y,
+        SPRITE_MARCADOR_ANCHO,
+        SPRITE_MARCADOR_ALTO
+      );
       ctx.restore();
     }
 
@@ -1338,29 +1440,31 @@
     // Si el punto no trae `rubroIcono` (rubro nuevo que todavía no
     // tiene pictograma cargado en rubros-meta.js), se cae de nuevo a
     // la inicial de letra: el pin nunca queda con la ventana vacía.
-    function dibujarPictogramaRubro(punto, r, rVentana, color) {
+    // Recibe `ctxD` para poder dibujarse tanto en el canvas principal
+    // como en el offscreen del sprite cacheado (ver hallazgo 1).
+    function dibujarPictogramaRubro(ctxD, punto, r, rVentana, color) {
       var pathD = punto && punto.rubroIcono;
       if (pathD) {
         var escala = (rVentana * 2 * ICONO_MARGEN) / ICONO_VIEWBOX;
-        ctx.save();
-        ctx.translate(0, -r * 0.35);
-        ctx.scale(escala, escala);
-        ctx.translate(-ICONO_VIEWBOX / 2, -ICONO_VIEWBOX / 2);
-        ctx.lineWidth = ICONO_GROSOR;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = color;
-        ctx.stroke(obtenerPath2D(pathD));
-        ctx.restore();
+        ctxD.save();
+        ctxD.translate(0, -r * 0.35);
+        ctxD.scale(escala, escala);
+        ctxD.translate(-ICONO_VIEWBOX / 2, -ICONO_VIEWBOX / 2);
+        ctxD.lineWidth = ICONO_GROSOR;
+        ctxD.lineCap = 'round';
+        ctxD.lineJoin = 'round';
+        ctxD.strokeStyle = color;
+        ctxD.stroke(obtenerPath2D(pathD));
+        ctxD.restore();
         return;
       }
       if (punto && punto.rubroNombre) {
         var inicial = String(punto.rubroNombre).trim().charAt(0).toUpperCase();
-        ctx.fillStyle = color;
-        ctx.font = '700 ' + Math.round(rVentana * 1.05) + 'px "IBM Plex Sans", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(inicial, 0, -r * 0.35 + 0.5);
+        ctxD.fillStyle = color;
+        ctxD.font = '700 ' + Math.round(rVentana * 1.05) + 'px "IBM Plex Sans", sans-serif';
+        ctxD.textAlign = 'center';
+        ctxD.textBaseline = 'middle';
+        ctxD.fillText(inicial, 0, -r * 0.35 + 0.5);
       }
     }
 
@@ -1381,24 +1485,52 @@
     // ese color (mismo código que un pin individual); si mezcla rubros,
     // se deja neutro pero con el borde en el color dominante, para que
     // "mixto" también se lea de un vistazo en vez de camuflarse.
-    function dibujarCluster(c) {
-      var colorDominante = c.colorDominante;
-      var esUnRubro = c.esUnRubro;
+    // PERF (auditoría rendimiento, ronda 1, hallazgo 1): mismo problema
+    // y misma solución que dibujarMarcador — halo + gradiente radial +
+    // shadowBlur se reconstruían enteros en CADA frame por cada cluster
+    // visible. El círculo (halo+gradiente+sombra+borde) depende de un
+    // set finito y chico de variantes (color dominante × esUnRubro ×
+    // esResaltado × dpr), así que se pre-renderiza una vez por variante
+    // en un offscreen y de ahí en más es un solo `drawImage`. El número
+    // de miembros SÍ varía por cluster individual (no tiene sentido
+    // cachearlo, cambiaría la clave en cada recuento distinto), así que
+    // se sigue dibujando aparte encima del sprite con un `fillText`
+    // simple — sin gradiente ni sombra, es barato y no vale la pena
+    // meterlo en el sprite cacheado.
+    var SPRITE_CLUSTER_ORIGEN = 37;
+    var SPRITE_CLUSTER_LADO = 74;
+    var CACHE_SPRITE_CLUSTER = Object.create(null);
+    var CACHE_SPRITE_CLUSTER_MAX = 100; // variantes reales: colores de rubro × 2 (esUnRubro) × 2 (resaltado), un puñado
+
+    function obtenerSpriteCluster(colorDominante, esUnRubro, esResaltado, dprActual) {
+      var clave = colorDominante + '|' + (esUnRubro ? 1 : 0) + '|' + (esResaltado ? 1 : 0) + '|' + dprActual;
+      var cacheado = CACHE_SPRITE_CLUSTER[clave];
+      if (cacheado) return cacheado;
+
+      if (Object.keys(CACHE_SPRITE_CLUSTER).length > CACHE_SPRITE_CLUSTER_MAX) {
+        CACHE_SPRITE_CLUSTER = Object.create(null);
+      }
 
       var r = RADIO_CLUSTER;
-      var esResaltado = clusterResaltadoKey === (Math.round(c.x) + ':' + Math.round(c.y));
       var rGlow = r + (esResaltado ? 11 : 7);
+      var off = document.createElement('canvas');
+      off.width = Math.round(SPRITE_CLUSTER_LADO * dprActual);
+      off.height = Math.round(SPRITE_CLUSTER_LADO * dprActual);
+      var octx = off.getContext('2d');
+      octx.setTransform(dprActual, 0, 0, dprActual, 0, 0);
+      var ox = SPRITE_CLUSTER_ORIGEN, oy = SPRITE_CLUSTER_ORIGEN;
+
       // Halo de luz detrás del cluster — sin esto el círculo quedaba
       // plano contra el tile pálido del basemap y se perdía. Con el
       // halo, el mismo cluster "flota" sobre el mapa.
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, rGlow, 0, Math.PI * 2);
-      ctx.fillStyle = hexARgba(colorDominante, esResaltado ? 0.35 : 0.22);
-      ctx.fill();
+      octx.beginPath();
+      octx.arc(ox, oy, rGlow, 0, Math.PI * 2);
+      octx.fillStyle = hexARgba(colorDominante, esResaltado ? 0.35 : 0.22);
+      octx.fill();
 
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
-      var gradCluster = ctx.createRadialGradient(c.x - r * 0.3, c.y - r * 0.3, 1, c.x, c.y, r);
+      octx.beginPath();
+      octx.arc(ox, oy, r, 0, Math.PI * 2);
+      var gradCluster = octx.createRadialGradient(ox - r * 0.3, oy - r * 0.3, 1, ox, oy, r);
       if (esUnRubro) {
         gradCluster.addColorStop(0, aclarar(colorDominante, 22));
         gradCluster.addColorStop(1, colorDominante);
@@ -1406,15 +1538,42 @@
         gradCluster.addColorStop(0, resolverVarCSS('--canvas-color-cluster-mixto-inicio', 'rgba(32,38,50,.96)'));
         gradCluster.addColorStop(1, resolverVarCSS('--canvas-color-cluster-mixto-fin', 'rgba(14,17,24,.96)'));
       }
-      ctx.fillStyle = gradCluster;
-      ctx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.4)');
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetY = 1;
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = esUnRubro ? resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF') : colorDominante;
-      ctx.stroke();
+      octx.fillStyle = gradCluster;
+      octx.shadowColor = resolverVarCSS('--canvas-color-sombra-marcador', 'rgba(0,0,0,.4)');
+      octx.shadowBlur = 6;
+      octx.shadowOffsetY = 1;
+      octx.fill();
+      octx.shadowColor = 'transparent';
+      octx.lineWidth = 2.5;
+      octx.strokeStyle = esUnRubro ? resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF') : colorDominante;
+      octx.stroke();
+
+      var entrada = { canvas: off };
+      CACHE_SPRITE_CLUSTER[clave] = entrada;
+      return entrada;
+    }
+
+    // Antes: todo cluster era el mismo círculo bordó, sin importar qué
+    // rubros agrupaba — indistinguible de otro cluster, y del resto de
+    // los pines. Ahora el cluster hereda el color de los rubros que
+    // agrupa: si todos sus miembros son del mismo rubro, se rellena con
+    // ese color (mismo código que un pin individual); si mezcla rubros,
+    // se deja neutro pero con el borde en el color dominante, para que
+    // "mixto" también se lea de un vistazo en vez de camuflarse.
+    function dibujarCluster(c) {
+      var colorDominante = c.colorDominante;
+      var esUnRubro = c.esUnRubro;
+      var esResaltado = clusterResaltadoKey === (Math.round(c.x) + ':' + Math.round(c.y));
+
+      var sprite = obtenerSpriteCluster(colorDominante, esUnRubro, esResaltado, dpr);
+      ctx.drawImage(
+        sprite.canvas,
+        c.x - SPRITE_CLUSTER_ORIGEN,
+        c.y - SPRITE_CLUSTER_ORIGEN,
+        SPRITE_CLUSTER_LADO,
+        SPRITE_CLUSTER_LADO
+      );
+
       ctx.fillStyle = esUnRubro ? resolverVarCSS('--canvas-color-cluster-fondo', '#0A0D13') : resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
       ctx.font = '700 12px "IBM Plex Sans", sans-serif';
       ctx.textAlign = 'center';
