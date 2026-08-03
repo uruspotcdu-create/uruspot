@@ -86,7 +86,29 @@
   box-shadow:inset 0 0 46px 6px rgba(6,8,12,.55);
 }
 
-.uru-mapa{ position:relative; width:100%; height:100%; }
+/* PERF (auditoría rendimiento, ronda 1, hallazgo 5): motor-render.js
+   escribe style.left/style.top en cada frame sobre varios elementos
+   DOM dentro de este contenedor (popup, etiqueta, marcador de
+   usuario), y .uru-mapa vive dentro de una página con una lista larga
+   de tarjetas de resultados y la capa ambiental como vecinos en el
+   mismo árbol de layout. Sin containment, el navegador no tiene
+   garantía de que esos cambios de posición queden acotados a este
+   subárbol — en el peor caso (notoriamente en WebViews de Android más
+   viejos) cada escritura de estilo durante un gesto puede disparar una
+   invalidación de layout de alcance mayor al necesario, compitiendo
+   con el resto del DOM de la página. `contain:layout paint style`
+   acota explícitamente el layout y paint de este subárbol. */
+.uru-mapa{ position:relative; width:100%; height:100%; contain:layout paint style; }
+
+/* `will-change` se aplica SOLO mientras dura un gesto activo del mapa
+   (clase agregada/quitada por motor-render.js en actualizarEstadoGesto,
+   mismo booleano que ya usa para pausar el motor ambiental — ver
+   hallazgo 2). Permanente sería contraproducente en memoria de GPU en
+   gama baja; acotado al gesto da el hint de compositing justo cuando
+   más rinde (arrastre/pellizco/inercia/vuelo) sin ese costo el resto
+   del tiempo. */
+.uru-mapa.u-mapa-en-gesto{ will-change:transform; }
+
 .uru-mapa-lienzo{
   display:block; width:100%; height:100%; touch-action:none; outline:none;
 }

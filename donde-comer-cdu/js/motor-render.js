@@ -1702,6 +1702,14 @@
       var activo = arrastrando || enPellizco || inerciaRAF !== null || animacionZoom !== null;
       if (activo === gestoActivo) return;
       gestoActivo = activo;
+      // PERF (auditoría rendimiento, ronda 1, hallazgo 5): will-change
+      // solo debe existir mientras dura el gesto (ver css/mapa.css,
+      // .uru-mapa.u-mapa-en-gesto) — dejarlo permanente es
+      // contraproducente en memoria de GPU en gama baja. Mismo
+      // booleano de transición que ya gobierna la pausa del motor
+      // ambiental, así que no hace falta un segundo mecanismo de
+      // detección de gesto.
+      contenedor.classList.toggle('u-mapa-en-gesto', activo);
       if (global.AmbienteScheduler) {
         if (activo) global.AmbienteScheduler.pausar(); else global.AmbienteScheduler.reanudar();
       }
