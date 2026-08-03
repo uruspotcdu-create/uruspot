@@ -2493,9 +2493,31 @@
        el viewport actual). `redibujar()` se sigue llamando después
        para que el popup siga acompañando al punto si el mapa está en
        medio de una animación de vuelo (ver `enfocar`). */
+    // PERF (auditoría rendimiento, ronda 2, hallazgo 6): posicionarPopupEn
+    // corre en CADA frame de dibujar() mientras el popup está abierto
+    // (arrastrar/pellizcar/animar el mapa con una ficha ya abierta es un
+    // caso de uso real, no un borde). Antes leía popup.offsetWidth/
+    // offsetHeight en cada una de esas llamadas — una lectura de layout
+    // que, si el mismo frame ya escribió otro estilo antes (p.ej.
+    // posicionarMarcadorUsuario() en dibujar(), líneas más arriba),
+    // fuerza un reflow SÍNCRONO ahí mismo en vez de dejar que el
+    // navegador lo resuelva en su propio momento de layout — el clásico
+    // patrón de "layout thrashing" escritura→lectura en el mismo tick,
+    // repetido 60 veces por segundo durante todo el gesto.
+    // El tamaño del popup solo puede cambiar cuando cambia su
+    // `innerHTML` (abrirPopup/abrirPopupCluster) — nunca por el propio
+    // reposicionamiento — así que se cachea y se invalida únicamente en
+    // esos dos puntos (y cuando document.fonts.ready puede haber
+    // cambiado el ancho real del texto tras el primer frame).
+    var medidasPopupCache = null;
+    function invalidarMedidasPopup() { medidasPopupCache = null; }
+
     function posicionarPopupEn(x, y) {
-      var anchoPopup = popup.offsetWidth || 220;
-      var altoPopup = popup.offsetHeight || 90;
+      if (!medidasPopupCache) {
+        medidasPopupCache = { ancho: popup.offsetWidth || 220, alto: popup.offsetHeight || 90 };
+      }
+      var anchoPopup = medidasPopupCache.ancho;
+      var altoPopup = medidasPopupCache.alto;
       // Los márgenes se acotan al propio tamaño del viewport antes de
       // usarlos como límites del clamp. Sin esto, un popup más ancho
       // que el contenedor (pantallas muy angostas, nombre de lugar muy
@@ -2532,6 +2554,7 @@
           '<a class="uru-mapa-popup-link uru-mapa-popup-link--maps" target="_blank" rel="noopener">📍 Cómo llegar →</a>' +
           (punto.href ? '<a class="uru-mapa-popup-link">Ver ficha completa →</a>' : '') +
         '</div>';
+      invalidarMedidasPopup(); // nuevo contenido: el ancho/alto cacheado ya no vale
       popup.querySelector('.uru-mapa-popup-nombre').textContent = punto.nombre;
       popup.querySelector('.uru-mapa-popup-direccion').textContent = punto.direccion || '';
       popup.querySelector('.uru-mapa-popup-link--maps').href = hrefMapsDe(punto);
@@ -2577,6 +2600,7 @@
         '<button type="button" class="uru-mapa-popup-cerrar" aria-label="Cerrar">×</button>' +
         '<strong class="uru-mapa-popup-nombre"></strong>' +
         '<ul class="uru-mapa-popup-cluster-lista"></ul>';
+      invalidarMedidasPopup(); // nuevo contenido: el ancho/alto cacheado ya no vale
       popup.querySelector('.uru-mapa-popup-nombre').textContent =
         c.miembros.length + ' lugares acá';
 
@@ -2875,7 +2899,11 @@
     // fuentes terminan de cargar corrige ese frame inicial sin costo
     // permanente.
     if (global.document && document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(function () { if (vivo) redibujar(); }).catch(function () {});
+      document.fonts.ready.then(function () {
+        if (!vivo) return;
+        invalidarMedidasPopup(); // la fuente de respaldo pudo medir un ancho distinto al de la fuente real
+        redibujar();
+      }).catch(function () {});
     }
 
     // ── Suspensión/reanudación en background (pestaña oculta) ──
