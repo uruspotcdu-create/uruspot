@@ -1,0 +1,68 @@
+﻿name: Regenerar Baselines Visuales
+
+# Disparo manual, no automático. Uso puntual para corregir el desajuste
+# documentado: los baselines actuales de tests/visual/__baseline__ se
+# generaron en Windows (sufijo -win32.png) pero tests-visuales.yml corre
+# en ubuntu-latest (Linux) — Playwright incluye la plataforma en el
+# nombre del snapshot a propósito (el renderizado de fuentes difiere
+# entre SO), así que el CI nunca encontraba el baseline correcto y
+# 'test-visual' fallaba siempre, en cualquier commit, por eso y no por
+# una regresión real de código.
+#
+# Este workflow corre los tests con --update-snapshots en el mismo
+# entorno donde corre el CI normal (ubuntu-latest), y commitea los
+# PNG resultantes (sufijo -linux.png) a la rama desde la que se disparó.
+# No se borran los -win32.png viejos automáticamente: se revisan a mano
+# en el PR resultante antes de mergear.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  regenerar-baselines:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Regenerar snapshots (continua aunque alguna assertion no visual falle)
+        run: npx playwright test --update-snapshots
+        continue-on-error: true
+
+      - name: Commitear baselines regenerados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/visual/__baseline__
+          if git diff --cached --quiet; then
+            echo "No hay cambios en los baselines — nada para commitear."
+          else
+            git commit -m "chore: regenerar baselines visuales en Linux (ubuntu-latest)
+
+Los baselines anteriores tenían sufijo -win32.png (generados en
+Windows). test-visual corre en ubuntu-latest y Playwright nunca
+encontraba el snapshot correspondiente, por lo que el workflow
+fallaba siempre — no era una regresión de código.
+
+Regenerado automáticamente por .github/workflows/regenerar-baselines.yml"
+            git push
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-regenerar-baselines
+          path: playwright-report/
+          retention-days: 30
