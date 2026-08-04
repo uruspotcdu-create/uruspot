@@ -2769,6 +2769,24 @@
 
   var _scrollRafPendiente = false;
   var _scrollFinTimeout = null;
+  // PERF (auditoría scroll, 2026-08-04, hallazgo 1): AmbienteScheduler
+  // (js/ambiente-scheduler.js) solo se pausa hoy durante gestos táctiles
+  // DEL MAPA (ver motor-render.js, establecerArrastrando/actualizarEstadoGesto)
+  // — nunca durante el scroll de la página. Mientras tanto, la tarea
+  // 'respiracion' (js/ambiente-respiracion.js) sigue escribiendo
+  // --amb-respiracion sobre <html> ~20 veces/seg, TODO el tiempo que la
+  // pestaña esté visible. Esa propiedad es heredada y participa de un
+  // calc() (css/ambiente-estilos.css:69) — cada escritura fuerza al motor
+  // de estilos a invalidar/recorrer el árbol completo para resolver quién
+  // depende de ella, aunque el único consumidor real es un solo elemento
+  // fijo (#ambient-resplandor). Ese recorrido es trabajo de hilo principal
+  // que hoy compite, sin necesidad, con el scroll — justo la ventana en la
+  // que menos presupuesto de frame sobra. Se usa el mismo par
+  // rAF+timeout(150ms) que ya gobierna u-suprimir-vidrio (mismo evento,
+  // mismo criterio de "scroll terminado") para no introducir un segundo
+  // temporizador independiente: mientras se suprime el vidrio, también se
+  // pausa el scheduler ambiental; ambos se levantan juntos.
+  var _scrollPausoAmbiente = false;
 
   function manejarScrollParaSupresionVidrio() {
     if (_scrollRafPendiente) return;
@@ -2776,9 +2794,17 @@
     requestAnimationFrame(function () {
       _scrollRafPendiente = false;
       document.documentElement.classList.add('u-suprimir-vidrio');
+      if (window.AmbienteScheduler && !_scrollPausoAmbiente) {
+        _scrollPausoAmbiente = true;
+        window.AmbienteScheduler.pausar();
+      }
       if (_scrollFinTimeout) clearTimeout(_scrollFinTimeout);
       _scrollFinTimeout = setTimeout(function () {
         document.documentElement.classList.remove('u-suprimir-vidrio');
+        if (_scrollPausoAmbiente) {
+          _scrollPausoAmbiente = false;
+          if (window.AmbienteScheduler) window.AmbienteScheduler.reanudar();
+        }
       }, 150);
     });
   }
