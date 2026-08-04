@@ -16,7 +16,15 @@ html{scroll-behavior:smooth}
 body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
 /* NAV */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+/* PERF (auditoría scroll, 2026-08-04): estaba en blur(20px), sin bajar
+   nunca desde el valor original — el resto del sitio (css/tokens.css)
+   ya había bajado su default a 8px tras el hallazgo C1 (por encima de
+   ~8-10px la diferencia perceptual de blur es marginal, pero el costo de
+   compositing por frame no). Esta hoja es la que realmente sirven las 51
+   fichas de negocio (locales/*/index.html → ../ficha.css); la copia de
+   css/ficha.css en la raíz ya tenía este mismo fix pero no la referencia
+   ninguna página real, así que nunca llegaba a producción. */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
 .nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.12em;color:var(--gold-dark);text-decoration:none;text-transform:uppercase}
 .nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500}
 .nav-badge{background:var(--gold);color:var(--ink);font-size:10px;font-weight:600;letter-spacing:0.15em;padding:5px 14px;border-radius:2px;text-transform:uppercase}
@@ -36,10 +44,25 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .hero-chips{display:flex;flex-wrap:wrap;gap:10px}
 .chip{padding:8px 18px;border:1px solid rgba(201,168,76,0.4);border-radius:2px;font-size:12px;letter-spacing:0.12em;color:rgba(255,255,255,0.85);text-transform:uppercase;font-weight:400;background:rgba(201,168,76,0.08)}
 .chip-gold{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:600}
-.hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(201,168,76,0.3);padding:28px 32px;background:rgba(13,13,13,0.6);backdrop-filter:blur(12px)}
+.hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(201,168,76,0.3);padding:28px 32px;background:rgba(13,13,13,0.6);backdrop-filter:blur(8px)}
 .score-num{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold);line-height:1}
 .score-label{font-size:10px;letter-spacing:0.3em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:4px}
 .score-stars{color:var(--gold);font-size:14px;margin-top:8px}
+
+/* PERF (auditoría scroll, 2026-08-04): .nav queda en pantalla durante
+   TODO el scroll de la ficha (es fixed) y hasta ahora pagaba backdrop-filter
+   completo en cada frame, sin ningún mecanismo de alivio — a diferencia
+   de index.html, que ya suprime su vidrio mientras se scrollea (ver
+   css/tokens.css, hallazgo C1.3). u-suprimir-vidrio se togglea acá mismo
+   por JS (ficha.js) con rAF + debounce de 150ms, mismo patrón ya probado
+   en app.js: el ojo no distingue el vidrio durante el movimiento, sí lo
+   nota con la vista quieta, así que el blur se apaga solo durante la
+   ventana real de scroll. */
+html.u-suprimir-vidrio .nav,
+html.u-suprimir-vidrio .hero-score{
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
 
 /* INFO STRIP */
 .info-strip{background:var(--ink-soft);color:#fff;display:grid;grid-template-columns:repeat(3,1fr)}
@@ -186,6 +209,14 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
   .score-fill{transform:scaleX(1)}
+}
+/* PERF (auditoría scroll, 2026-08-04): mismo criterio que css/tokens.css
+   para el resto del sitio — el vidrio se atempera en vez de eliminarse,
+   compensando con más opacidad de fondo el contraste que el blur dejaba
+   de aportar. */
+@media(prefers-reduced-transparency:reduce){
+  .nav{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);background:rgba(250,247,242,.97)}
+  .hero-score{backdrop-filter:blur(4px);background:rgba(13,13,13,.75)}
 }
 
 /* HERO SIN FOTO */
