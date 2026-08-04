@@ -96,6 +96,22 @@
   var MAX_DESTACADOS = 6;
   var MIN_PARA_MOSTRAR_DESTACADOS = 3;
 
+  // Fase 4 — conexión real de contexto.clima al recorte por iniciativa
+  // propia (Fase 3D §4, "el por qué" — descubrimiento; motor-exposicion.js
+  // ya sabía puntuar por clima desde antes, pero nada en app.js le pasaba
+  // datos reales). Fetch propio y liviano a la misma Function
+  // (functions/weather.js) que ya consume js/ambiente-clima.js — no se
+  // reutiliza ese módulo porque es un efecto visual diferido (se carga
+  // recién en requestIdleCallback vía cargarMotorAmbientalDiferido()) y
+  // solo expone booleans (lluvia/niebla/viento), no los valores crudos
+  // que necesita calcularScore(). Mismo endpoint, mismo timeout,
+  // mismo intervalo de refresco (5 min) — dos consumidores distintos,
+  // sin acoplarlos entre sí.
+  var CLIMA_CONTEXTO_URL = '/weather';
+  var CLIMA_CONTEXTO_TIMEOUT_MS = 5000;
+  var CLIMA_CONTEXTO_INTERVALO_MS = 5 * 60 * 1000;
+  var climaContextoCache = null; // { weather_code, temperature_2m, precipitation } | null
+
   // Módulos inyectados globalmente (verificados al init)
   var PLANO = null;
   var EXPO = null;
@@ -884,6 +900,7 @@
       inicializarListeners();
       inicializarTecladoNavegacion();
       inicializarGeolocation();
+      inicializarContextoClima();
 
       // Perf, Fase 2.1: el Ambient Engine ya no es <script defer> estático
       // en el documento — se agenda acá (idle) para no competir con la
@@ -1472,7 +1489,22 @@
         // Una sola llamada al algoritmo de selección: se deriva la lista
         // Y el mapa de razones del mismo resultado, para no invocar
         // calcularRecorte() dos veces con el mismo estado.
-        var explicado = EXPO.recortePorIniciativaPropiaExplicado(REGISTRO, estado, reg.nombre);
+        //
+        // Fase 4 — conexión real de contexto.ubicacion/contexto.clima
+        // (Fase 3D §4): antes se llamaba sin 4° parámetro, así que el
+        // motor nunca recibía señal real de proximidad ni de clima —
+        // aunque ya sabía puntuarlas. ubicacion sale de la geolocalización
+        // que el usuario ya activó explícitamente ("Cerca de mí" —
+        // uiState.ubicacionUsuario es null hasta que la otorga); clima
+        // sale de climaContextoCache (ver actualizarClimaContexto()),
+        // que puede seguir siendo null si el fetch a /weather todavía no
+        // resolvió o falló — el motor ya trata null como "sin señal" en
+        // ambos casos, así que esto es estrictamente aditivo.
+        var contextoRecorte = {
+          ubicacion: uiState.ubicacionUsuario || null,
+          clima: climaContextoCache
+        };
+        var explicado = EXPO.recortePorIniciativaPropiaExplicado(REGISTRO, estado, reg.nombre, contextoRecorte);
         lista = explicado.lugares.map(function (x) { return x.lugar; });
         lista = ordenarPorCercania(lista);
         opts = {
@@ -3317,6 +3349,53 @@
       }
       return;
     }
+  }
+
+  // ───────────────────────────────────────────────────────────────────
+  // 20b. CONTEXTO DE CLIMA PARA EL RECORTE (Fase 4, Fase 3D §4)
+  // ───────────────────────────────────────────────────────────────────
+
+  // Trae { weather_code, temperature_2m, precipitation } y los deja en
+  // climaContextoCache para que render() los pase como contexto.clima
+  // a EXPO.recortePorIniciativaPropiaExplicado(). Si falla o tarda,
+  // climaContextoCache simplemente queda como estaba (null la primera
+  // vez) — condicionClimatica() en el motor ya sabe tratar null como
+  // "sin señal de clima" y el scoring sigue funcionando sin esa señal,
+  // exactamente como antes de esta conexión.
+  function actualizarClimaContexto() {
+    if (typeof fetch !== 'function') return;
+    var controlador = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timeoutId = controlador
+      ? setTimeout(function () { controlador.abort(); }, CLIMA_CONTEXTO_TIMEOUT_MS)
+      : null;
+    fetch(CLIMA_CONTEXTO_URL, { signal: controlador ? controlador.signal : undefined })
+      .then(function (res) {
+        if (timeoutId) clearTimeout(timeoutId);
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then(function (datos) {
+        var actual = datos && datos.current;
+        if (!actual) return;
+        var nuevo = {
+          weather_code: actual.weather_code,
+          temperature_2m: actual.temperature_2m,
+          precipitation: actual.precipitation
+        };
+        climaContextoCache = nuevo;
+        // Re-renderizar: el recorte por iniciativa propia (guia/exploracion)
+        // puede cambiar de selección/razones ahora que hay señal de clima
+        // real donde antes no la había.
+        render();
+      })
+      .catch(function () {
+        if (timeoutId) clearTimeout(timeoutId);
+      });
+  }
+
+  function inicializarContextoClima() {
+    actualizarClimaContexto();
+    setInterval(actualizarClimaContexto, CLIMA_CONTEXTO_INTERVALO_MS);
   }
 
   // ───────────────────────────────────────────────────────────────────
