@@ -262,6 +262,36 @@
     });
   }
 
+  /* ───────────────────────── SUPRESIÓN DE VIDRIO EN SCROLL ────────────
+     PERF (auditoría scroll, 2026-08-04): .nav es position:fixed con
+     backdrop-filter (css/ficha.css → locales/ficha.css) y queda en
+     pantalla durante TODO el scroll de la ficha — sin esto, paga el
+     costo completo de recomponer el fondo en cada frame. Mismo patrón
+     exacto que manejarScrollParaSupresionVidrio() en app.js (índice):
+     un solo listener passive, coalescido a como mucho un toggle de
+     clase por frame vía rAF (nunca trabajo por evento de scroll crudo),
+     y un debounce de 150ms para reponer el vidrio recién cuando el
+     usuario realmente se detuvo. */
+  var scrollRafPendiente = false;
+  var scrollFinTimeout = null;
+
+  function manejarScrollParaSupresionVidrio() {
+    if (scrollRafPendiente) return;
+    scrollRafPendiente = true;
+    requestAnimationFrame(function () {
+      scrollRafPendiente = false;
+      document.documentElement.classList.add("u-suprimir-vidrio");
+      if (scrollFinTimeout) clearTimeout(scrollFinTimeout);
+      scrollFinTimeout = setTimeout(function () {
+        document.documentElement.classList.remove("u-suprimir-vidrio");
+      }, 150);
+    });
+  }
+
+  function inicializarSupresionVidrio() {
+    window.addEventListener("scroll", manejarScrollParaSupresionVidrio, { passive: true });
+  }
+
   /* ───────────────────────── INIT ───────────────────────── */
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -269,5 +299,6 @@
     animarScores();
     initShare();
     aplicarNombreDeTransicion();
+    inicializarSupresionVidrio();
   });
 })();
