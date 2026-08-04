@@ -26,6 +26,12 @@
   animation:uru-fade-up var(--dur-lenta) var(--easing-movimiento) backwards;
   transition:opacity var(--dur-media), transform var(--dur-media) var(--easing-estandar),
              border-color var(--dur-media), box-shadow var(--dur-media) var(--easing-estandar);
+  /* PERF (auditoría performance, 2026-08-04, hallazgo 1.4): acota
+     explícitamente el paint al confín de la tarjeta. Barato y sin riesgo
+     porque .tarjeta ya es su propio contexto de recorte via overflow:hidden
+     + isolation:isolate — esto solo lo hace explícito para el navegador
+     en vez de dejarlo implícito. */
+  contain:paint;
 }
 @media (prefers-reduced-motion: reduce){
   .tarjeta{
@@ -61,9 +67,17 @@
 }
 @media (hover:hover) and (pointer:fine){
 .tarjeta:hover{
+  will-change:transform;
   transform:translateY(-4px); border-color:var(--glass-borde-hover);
   box-shadow:var(--sombra-vidrio), 0 0 28px -10px var(--chip-color, rgba(201,122,131,.5));
 }
+}
+/* Mismo criterio que :hover arriba, pero para foco por teclado (sin
+   mouse no hay :hover) — will-change solo mientras la tarjeta está
+   realmente por moverse, nunca como estado permanente de las 40+
+   tarjetas en pantalla. */
+.tarjeta:focus-within{
+  will-change:transform;
 }
 /* Cap. 6 "Primer clic" (Motion Direction Bible v1.0, paso 11): "el
    elemento tocado responde de inmediato en registro inmediato,

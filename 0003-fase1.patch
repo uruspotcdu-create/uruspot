@@ -1,0 +1,91 @@
+From c8373d7acc0a785004cc6ade1a2482ede564e596 Mon Sep 17 00:00:00 2001
+From: uruspotcdu-create <uruspotcdu@gmail.com>
+Date: Tue, 4 Aug 2026 05:23:06 +0000
+Subject: [PATCH 3/4] perf(css): add contain:paint and scoped will-change to
+ .tarjeta
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+## What
+- .tarjeta now declares contain:paint.
+- will-change:transform is added ONLY on .tarjeta:hover (mouse) and
+  .tarjeta:focus-within (keyboard) — never as a permanent/base rule.
+
+## Why
+Neither existed before. Deliberately NOT following the roadmap's
+literal suggestion of a permanent will-change on the base .tarjeta
+rule: with 40+ cards on screen after a few "cargar mas", a permanent
+will-change promotes every single one to its own compositor layer at
+all times, which is a real GPU-memory cost on low-end Android - the
+exact resource this optimization pass is trying to reduce, not grow.
+Scoping it to :hover/:focus-within gets the compositor-layer benefit
+only while a card is actually about to animate.
+
+.tarjeta:active (the real touch-tap path on mobile) intentionally does
+NOT get will-change: it's a single-frame, --dur-instantaneo transition,
+where the cost of promoting a new layer exceeds any benefit.
+
+contain:paint is close to a no-op in this specific case (.tarjeta
+already has overflow:hidden + isolation:isolate acting as its own clip
+context) but is free, correct, and makes the containment explicit
+instead of implicit.
+
+## Impact
+Small and mobile-safe: compositor layer prep only during actual hover/
+focus interaction, not a standing memory cost across the whole list.
+
+## Risk
+Low. Verified box-shadow glow on hover (negative spread, rendered on
+the element's own box, not a descendant) is unaffected by contain:paint.
+No visual change expected.
+
+## Verification
+node donde-comer-cdu/js/run-tests.js -> 5/5 suites OK (no CSS-specific
+tests exist in this repo; visual check recommended on a real device
+before merging to main).
+
+Ref: auditoria performance 2026-08-04, hallazgos 1.3 y 1.4
+---
+ donde-comer-cdu/css/tarjeta-lugar.css | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/donde-comer-cdu/css/tarjeta-lugar.css b/donde-comer-cdu/css/tarjeta-lugar.css
+index 7b20421..02673cd 100644
+--- a/donde-comer-cdu/css/tarjeta-lugar.css
++++ b/donde-comer-cdu/css/tarjeta-lugar.css
+@@ -26,6 +26,12 @@
+   animation:uru-fade-up var(--dur-lenta) var(--easing-movimiento) backwards;
+   transition:opacity var(--dur-media), transform var(--dur-media) var(--easing-estandar),
+              border-color var(--dur-media), box-shadow var(--dur-media) var(--easing-estandar);
++  /* PERF (auditoría performance, 2026-08-04, hallazgo 1.4): acota
++     explícitamente el paint al confín de la tarjeta. Barato y sin riesgo
++     porque .tarjeta ya es su propio contexto de recorte via overflow:hidden
++     + isolation:isolate — esto solo lo hace explícito para el navegador
++     en vez de dejarlo implícito. */
++  contain:paint;
+ }
+ @media (prefers-reduced-motion: reduce){
+   .tarjeta{
+@@ -61,10 +67,18 @@
+ }
+ @media (hover:hover) and (pointer:fine){
+ .tarjeta:hover{
++  will-change:transform;
+   transform:translateY(-4px); border-color:var(--glass-borde-hover);
+   box-shadow:var(--sombra-vidrio), 0 0 28px -10px var(--chip-color, rgba(201,122,131,.5));
+ }
+ }
++/* Mismo criterio que :hover arriba, pero para foco por teclado (sin
++   mouse no hay :hover) — will-change solo mientras la tarjeta está
++   realmente por moverse, nunca como estado permanente de las 40+
++   tarjetas en pantalla. */
++.tarjeta:focus-within{
++  will-change:transform;
++}
+ /* Cap. 6 "Primer clic" (Motion Direction Bible v1.0, paso 11): "el
+    elemento tocado responde de inmediato en registro inmediato,
+    confirmando la recepción del gesto antes de que ocurra cualquier
+-- 
+2.43.0
+

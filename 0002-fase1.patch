@@ -1,0 +1,84 @@
+From 749b9ad01430f799db800dbae65b772abd8a7b5d Mon Sep 17 00:00:00 2001
+From: uruspotcdu-create <uruspotcdu@gmail.com>
+Date: Tue, 4 Aug 2026 05:22:29 +0000
+Subject: [PATCH 2/4] perf(search): defer localStorage write to the debounced
+ render path
+
+## What
+- manejarInputBusqueda() called PLANO.guardarEstado(estado) - a
+  synchronous localStorage.setItem() - on every keystroke, before the
+  debounce that already protects render().
+- The write now happens alongside the same debounced render() call
+  (or immediately alongside the immediate render() on clear-field,
+  which was already instant).
+
+## Why
+localStorage.setItem() is synchronous and blocks the main thread
+(5-15ms on low-end mobile per the performance audit). Typing
+"pizzeria" (8 keystrokes) meant 8 blocking disk writes in ~400ms,
+compounding with the render() cost on the same frames.
+
+## Impact
+Cuts N synchronous localStorage writes per search down to 1 (fired
+after DEBOUNCE_BUSQUEDA_MS of inactivity), same reduction the existing
+debounce already gives render(). Primary win of Fase 1 for typing jank
+on low-end Android.
+
+## Risk
+Low. Safety net already exists: 'visibilitychange' (hidden) and
+'pagehide' handlers elsewhere in this file unconditionally call
+PLANO.guardarEstado(estado) with whatever is currently in memory -
+aplicarAccion() above already updated the "estado" variable
+synchronously on every keystroke, only the disk write was deferred.
+So there is no real state-loss window if the user navigates away
+mid-typing.
+
+## Verification
+node donde-comer-cdu/js/run-tests.js -> 5/5 suites OK, no regressions.
+
+Ref: auditoria performance 2026-08-04, hallazgo 1.2
+---
+ donde-comer-cdu/js/app.js | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/donde-comer-cdu/js/app.js b/donde-comer-cdu/js/app.js
+index 9d09e7e..04ce84c 100644
+--- a/donde-comer-cdu/js/app.js
++++ b/donde-comer-cdu/js/app.js
+@@ -2825,8 +2825,18 @@
+     } else {
+       estado = PLANO.aplicarAccion(estado, 'despejarBusqueda');
+     }
+-    PLANO.guardarEstado(estado);
+ 
++    // PERF (auditoría performance, 2026-08-04, hallazgo 1.2): guardarEstado()
++    // hace un localStorage.setItem() SÍNCRONO (bloquea el hilo principal,
++    // 5-15ms medido en gama baja) — antes se ejecutaba en CADA tecla, sin
++    // pasar por el debounce que ya protege a render(). Ahora viaja junto
++    // con el mismo render() debounced. Es seguro: si el usuario navega
++    // fuera antes de que venza el debounce, los handlers de
++    // 'visibilitychange'/'pagehide' (más abajo en este archivo) ya llaman
++    // PLANO.guardarEstado(estado) incondicionalmente con el valor de
++    // `estado` más reciente en memoria (aplicarAccion() de arriba ya lo
++    // actualizó de forma síncrona) — no hay ventana real de pérdida de
++    // estado, solo se difiere CUÁNDO se escribe a disco.
+     clearTimeout(activeOperations.debounceBuscarId);
+     if (!uiState.consultaActual) {
+       // Vaciar el campo es, en la cabeza de quien lo hace, un "deshacer":
+@@ -2834,8 +2844,12 @@
+       // en cada tecla mientras se escribe, no para demorar el momento en
+       // que alguien decide arrancar de nuevo.
+       render();
++      PLANO.guardarEstado(estado);
+     } else {
+-      activeOperations.debounceBuscarId = setTimeout(render, DEBOUNCE_BUSQUEDA_MS);
++      activeOperations.debounceBuscarId = setTimeout(function () {
++        render();
++        PLANO.guardarEstado(estado);
++      }, DEBOUNCE_BUSQUEDA_MS);
+     }
+   }
+ 
+-- 
+2.43.0
+

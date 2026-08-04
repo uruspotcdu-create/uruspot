@@ -1493,8 +1493,14 @@
       // "Cargar más" no tenía ningún efecto visible. Reproducido en
       // aislamiento (misma lógica, ids/orden idénticos, solo cambia
       // paginaTarjetas): ver hallazgo de auditoría, sección "Cargar más".
+      // PERF (auditoría performance, 2026-08-04, hallazgo 1.1): hayCambioEnLista()
+      // es O(n) y se llamaba dos veces acá abajo con exactamente los mismos
+      // argumentos (lastRenderCache.lista, lista) — una vez para hayoCambio,
+      // otra para soloAvanzoPagina. Se calcula una sola vez y se reutiliza el
+      // resultado en ambas condiciones.
+      var listaHaCambiado = hayCambioEnLista(lastRenderCache.lista, lista);
       var hayoCambio = ramaDistinta(rama) ||
-        hayCambioEnLista(lastRenderCache.lista, lista) ||
+        listaHaCambiado ||
         uiState.paginaTarjetas !== lastRenderCache.paginaTarjetas;
 
       if (!hayoCambio && uiState.ultimaRamaRenderizada === rama) {
@@ -1520,7 +1526,7 @@
       // suficiente y evita una segunda pasada de diffing sobre el mapa
       // de favoritos completo en cada render.
       var soloAvanzoPagina = !ramaDistinta(rama) &&
-        !hayCambioEnLista(lastRenderCache.lista, lista) &&
+        !listaHaCambiado &&
         favoritos === lastRenderCache.favoritos &&
         lastRenderCache.paginaTarjetas !== null &&
         uiState.paginaTarjetas > lastRenderCache.paginaTarjetas;
@@ -2819,8 +2825,18 @@
     } else {
       estado = PLANO.aplicarAccion(estado, 'despejarBusqueda');
     }
-    PLANO.guardarEstado(estado);
 
+    // PERF (auditoría performance, 2026-08-04, hallazgo 1.2): guardarEstado()
+    // hace un localStorage.setItem() SÍNCRONO (bloquea el hilo principal,
+    // 5-15ms medido en gama baja) — antes se ejecutaba en CADA tecla, sin
+    // pasar por el debounce que ya protege a render(). Ahora viaja junto
+    // con el mismo render() debounced. Es seguro: si el usuario navega
+    // fuera antes de que venza el debounce, los handlers de
+    // 'visibilitychange'/'pagehide' (más abajo en este archivo) ya llaman
+    // PLANO.guardarEstado(estado) incondicionalmente con el valor de
+    // `estado` más reciente en memoria (aplicarAccion() de arriba ya lo
+    // actualizó de forma síncrona) — no hay ventana real de pérdida de
+    // estado, solo se difiere CUÁNDO se escribe a disco.
     clearTimeout(activeOperations.debounceBuscarId);
     if (!uiState.consultaActual) {
       // Vaciar el campo es, en la cabeza de quien lo hace, un "deshacer":
@@ -2828,8 +2844,12 @@
       // en cada tecla mientras se escribe, no para demorar el momento en
       // que alguien decide arrancar de nuevo.
       render();
+      PLANO.guardarEstado(estado);
     } else {
-      activeOperations.debounceBuscarId = setTimeout(render, DEBOUNCE_BUSQUEDA_MS);
+      activeOperations.debounceBuscarId = setTimeout(function () {
+        render();
+        PLANO.guardarEstado(estado);
+      }, DEBOUNCE_BUSQUEDA_MS);
     }
   }
 
