@@ -40,6 +40,23 @@
 
 ---
 
+> **Documentación profunda complementaria (2026-08):** además de este
+> archivo, el repositorio mantiene `docs/project-context/` como fuente
+> de conocimiento profundo, pensada para dar contexto completo a
+> cualquier IA (Claude, Copilot, Cursor, etc.) que trabaje sobre el
+> proyecto: `PROJECT_CONTEXT.md`, `ARCHITECTURE.md`, `MVP.md`,
+> `PERFORMANCE_AUDIT.md`, `DEVELOPMENT_GUIDELINES.md` y `ROADMAP.md`.
+> Este `AGENTS.md` sigue siendo la **constitución** del proyecto —
+> instrucciones operativas, qué está prohibido, cómo trabajar — y no
+> se reemplaza por esos documentos. `docs/project-context/` complementa
+> con contexto de producto, estado del MVP, hallazgos de performance y
+> prioridades de roadmap, cada afirmación marcada con ⚠ según haya sido
+> verificada directamente contra el código en la sesión que la escribió
+> o sea información histórica no revalidada. Ante cualquier duda de
+> proceso o de qué está permitido, este archivo manda; ante cualquier
+> duda de contexto o de qué falta y por qué, empezá por
+> `docs/project-context/`.
+
 ## Índice
 
 1. Visión del Proyecto
@@ -1595,7 +1612,11 @@ exactamente el mismo método que usa `URUSPOT-PENDIENTES-VERIFICADO-287.md`
 para mantenerse honesto con el tiempo. Ese documento nació de la misma
 necesidad que este: que "documentado en una fase anterior" y "cierto hoy"
 no son la misma cosa, y la única forma de saber cuál de las dos es
-verificar.
+verificar. Lo mismo vale para `docs/project-context/`: es una fotografía
+de una auditoría en un momento dado, no una promesa de que seguirá siendo
+cierta para siempre. Si vas a apoyarte en algo que dice, y ese algo
+importa para el cambio que estás por hacer, confirmalo vos de nuevo antes
+de asumirlo.
 
 Por último: no le tengas miedo a decir "esto es grande, necesito
 confirmación antes de aplicarlo completo". El costo de preguntar de más es
