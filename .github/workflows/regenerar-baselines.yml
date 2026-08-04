@@ -17,6 +17,13 @@
 
 on:
   workflow_dispatch:
+  # Trigger temporal solo para forzar el primer registro/corrida del
+  # workflow (GitHub no termina de registrar el trigger workflow_dispatch
+  # de un workflow nuevo hasta que corre al menos una vez). Se saca en
+  # cuanto quede confirmado que el dispatch manual funciona.
+  push:
+    paths:
+      - '.github/workflows/regenerar-baselines.yml'
 
 permissions:
   contents: write
