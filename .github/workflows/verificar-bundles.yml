@@ -1,0 +1,57 @@
+﻿name: Verificar Bundles
+
+# Red de seguridad para el riesgo documentado en PERFORMANCE_AUDIT.md §6:
+# los bundles de producción (motor.bundle.js, ambiente.bundle.js,
+# app.min.js, critical.bundle.css) se commitean a mano y no había forma
+# automática de detectar si quedaban desactualizados respecto al fuente.
+#
+# Este job regenera los bundles desde el fuente y falla si el resultado
+# difiere de lo commiteado (ignorando la línea "Generado: <timestamp>",
+# que cambia en cada corrida por diseño y no representa drift real).
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verificar-bundles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Regenerar bundles desde el fuente
+        run: npm run build:bundles
+
+      - name: Comparar contra lo commiteado
+        shell: bash
+        run: |
+          ARCHIVOS=(
+            "donde-comer-cdu/js/motor.bundle.js"
+            "donde-comer-cdu/js/ambiente.bundle.js"
+            "donde-comer-cdu/js/app.min.js"
+            "donde-comer-cdu/css/critical.bundle.css"
+          )
+          DRIFT=0
+          for f in "${ARCHIVOS[@]}"; do
+            if ! diff -q \
+                <(git show "HEAD:$f" | grep -v "Generado:") \
+                <(grep -v "Generado:" "$f") > /dev/null; then
+              echo "::error file=$f::Este bundle está desactualizado respecto al fuente. Corré 'npm run build:bundles' localmente y commiteá el resultado (o dejá que el pre-commit hook de husky lo haga por vos)."
+              DRIFT=1
+            fi
+          done
+          if [ "$DRIFT" -eq 1 ]; then
+            echo ""
+            echo "Uno o más bundles no coinciden con lo que genera el build actual del fuente."
+            exit 1
+          fi
+          echo "✓ Todos los bundles están al día con el fuente."
