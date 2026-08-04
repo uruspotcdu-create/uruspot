@@ -1,0 +1,18 @@
+echo "🔧 Regenerando bundles antes del commit (npm run build:bundles)..."
+npm run build:bundles
+
+if [ $? -ne 0 ]; then
+  echo "❌ El build de bundles falló. Commit abortado — revisá el error de arriba."
+  exit 1
+fi
+
+# Vuelve a agregar los bundles regenerados al commit, así el commit siempre
+# incluye el resultado del build actual (elimina el riesgo de bundles
+# desactualizados por olvido humano — ver PERFORMANCE_AUDIT.md §6).
+git add \
+  donde-comer-cdu/js/motor.bundle.js \
+  donde-comer-cdu/js/ambiente.bundle.js \
+  donde-comer-cdu/js/app.min.js \
+  donde-comer-cdu/css/critical.bundle.css
+
+echo "✓ Bundles al día y agregados al commit."
