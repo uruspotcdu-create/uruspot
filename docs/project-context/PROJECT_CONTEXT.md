@@ -3,8 +3,10 @@
 > Documento generado por auditoría directa del código real del repositorio
 > `uruspotcdu-create/uruspot`, rama `main`, commit `1953504` (03-ago-2026).
 > Metodología: clon del repo, ejecución de la suite de tests (`node
-> donde-comer-cdu/js/run-tests.js` → **5/5 suites en verde**, 108 tests
-> individuales), reconstrucción de los 4 bundles de build desde el fuente
+> donde-comer-cdu/js/run-tests.js` → **5/5 suites en verde**, 321 tests
+> individuales — recontado en esta pasada; el número anterior, 108, no
+> coincidía con la suma real de las 5 suites (229+50+33+9),
+> reconstrucción de los 4 bundles de build desde el fuente
 > actual y diff contra lo commiteado, lectura directa de archivos clave
 > (no resumen de documentación previa). Se usó `AGENTS.md` (documento
 > previo de 92 KB ya existente en el repo) únicamente como referencia de
@@ -77,10 +79,14 @@ fantasma.
   invertido y fuzzy matching propio (no Algolia/Fuse.js).
 - **"Ambient Engine"**: un sistema de fondo decorativo/no-interactivo
   (partículas, clima, luz, ritmo de movimiento) que reacciona a
-  clima real, hora del día y estado de sesión del usuario — 27 módulos
-  bajo `donde-comer-cdu/js/ambiente-*.js` (contado por `find`, no
-  asumido — el propio `AGENTS.md` señala que una versión previa de esa
-  cifra, "30", ya estaba desactualizada).
+  clima real, hora del día y estado de sesión del usuario — **30
+  módulos** bajo `donde-comer-cdu/js/ambiente-*.js` (recontado en esta
+  pasada con `find` + `wc -l`, sin el bundle ni `ambiente-lifecycle-tests.js`
+  que es un archivo de test, no un módulo). El número "27" de una
+  versión anterior de este documento no coincide con el recuento
+  directo — y da la casualidad de que es el mismo "30" que `AGENTS.md`
+  ya había señalado y que esa pasada anterior descartó como
+  desactualizado; en este commit, 30 es el correcto.
 - **Qué lo diferencia**: la combinación de (a) datos 100% verificados a
   mano en vez de importados de Google/redes, (b) un motor de
   descubrimiento con estado por sesión (roles, "recorte" con
@@ -93,9 +99,13 @@ fantasma.
 
 ### Qué existe y funciona (verificado)
 - **Motor de catálogo `donde-comer-cdu/`**: `index.html` (1.483 líneas,
-  ver ⚠ nota de discrepancia abajo) + 46 archivos JS en `js/` (19.312
-  líneas sumadas, sin contar bundles) + 19 hojas CSS (11.746 líneas
-  sumadas). **5/5 suites de test pasan** (`motor-test.js`,
+  ver ⚠ nota de discrepancia abajo) + 50 archivos JS fuente en `js/`
+  (16.791 líneas sumadas, sin contar bundles ni archivos de test) + 20
+  hojas CSS (5.214 líneas sumadas, incluyendo las 2 de
+  `assets/ambient/_tokens/` y `locales/ficha.css`, sin contar
+  `critical.bundle.css`) — recontado en esta pasada, los números
+  anteriores (46 JS / 19.312 líneas, 19 CSS / 11.746 líneas) no
+  coincidían con `find`+`wc -l` directo. **5/5 suites de test pasan** (`motor-test.js`,
   `smoke-tests.js`, `contract-tests.js`, `ambiente-lifecycle-tests.js`
   50/50, `coreografias-tests.js` 33/33 — corridos por mí en esta
   auditoría, no asumidos).
@@ -106,18 +116,20 @@ fantasma.
 - **51 fichas de locales** (`donde-comer-cdu/locales/<slug>/index.html`,
   contadas por `find`), cada una con reseñas propias vía `fetch("/reviews
   ...")`.
-- **7 landing pages temáticas de SEO** (`los-mejores-restaurantes-cdu`,
+- **8 landing pages temáticas de SEO** (`los-mejores-restaurantes-cdu`,
   `las-mejores-cafeterias-cdu`, `las-mejores-heladerias-cdu`,
   `las-mejores-hosterias-cdu`, `las-mejores-panaderias-cdu`,
   `los-mejores-bares-cdu`, `los-mejores-gimnasios-cdu`,
-  `mejores-veterinarias-cdu`), la primera de ellas (restaurantes) con
-  subpáginas propias por local (62 entradas bajo
-  `los-mejores-restaurantes-cdu/`).
-- **2 Cloudflare Pages Functions activas de verdad**: `functions/weather.js`
-  (proxy a la API de MET Norway, corrige un 525 de Open-Meteo desde la red
-  de Cloudflare — comentario explícito en el propio archivo) y las de
-  reseñas, con la salvedad crítica de ubicación de archivo (ver §4 y
-  ROADMAP P0).
+  `mejores-veterinarias-cdu`) — recontadas por `find` en esta pasada, el
+  número anterior (7) no coincidía con la propia lista de 8 nombres.
+  La primera de ellas (restaurantes) tiene subpáginas propias por local
+  (61 entradas bajo `los-mejores-restaurantes-cdu/`, no 62).
+- **3 Cloudflare Pages Functions activas de verdad**, las tres en la
+  ubicación correcta (`functions/`): `functions/weather.js` (proxy a la
+  API de MET Norway, corrige un 525 de Open-Meteo desde la red de
+  Cloudflare — comentario explícito en el propio archivo),
+  `functions/reviews.js` y `functions/reviews-admin.js` (reseñas
+  propias con moderación — ver §4).
 - **Suite de tests visuales con Playwright** (`tests/visual/`, 5 estados ×
   3 viewports, baseline ya capturado — confirmado por memoria de sesiones
   previas, archivos presentes en el repo) + workflow de GitHub Actions
@@ -153,9 +165,13 @@ Ver **ROADMAP.md** para el detalle completo con prioridades. Resumen:
 1. **Bundles de producción desactualizados respecto al fuente** (P0,
    verificado reconstruyéndolos y diffeando — ver ARCHITECTURE.md §9 y
    PERFORMANCE_AUDIT.md).
-2. **Cloudflare Pages Functions de reseñas mal ubicadas** — muy
-   probablemente no están sirviendo `/reviews` en producción (P0, ver
-   ARCHITECTURE.md §8).
+2. ~~Cloudflare Pages Functions de reseñas mal ubicadas~~ — **corregido
+   en esta pasada**: se reverificó directamente el árbol de archivos y
+   `functions/reviews.js` y `functions/reviews-admin.js` están en la
+   raíz de `functions/`, junto a `weather.js` — la ubicación correcta
+   para que Cloudflare Pages las reconozca como rutas `/reviews` y
+   `/reviews-admin`. El hallazgo P0 de una pasada anterior ya no aplica
+   al commit actual (ver ARCHITECTURE.md §8, también corregido).
 3. Pendientes ya documentados por el propio repo en
    `URUSPOT-PENDIENTES-VERIFICADO-287.md` (287 líneas — ⚠ no leído línea
    por línea en esta pasada, recomendado como insumo directo para
@@ -197,8 +213,14 @@ concatenando y minificando con Terser. **Este build no es automático**:
 no hay un hook de pre-commit ni un paso de CI que lo regenere — depende
 de que quien commitea corra `npm run build:bundles` a mano antes. Esto ya
 causó al menos un bug de producción documentado (pinch-zoom, por
-bundles obsoletos) y **hoy mismo (esta auditoría) hay bundles
-nuevamente desactualizados** — ver ARCHITECTURE.md §9.
+bundles obsoletos). ~~Hoy mismo hay bundles nuevamente
+desactualizados~~ — **re-verificado en esta pasada**: se regeneraron los
+3 bundles JS desde el fuente actual y son byte-idénticos a los
+committeados en `main` (única diferencia: el timestamp cosmético del
+comentario de cabecera en `motor.bundle.js` y `ambiente.bundle.js`).
+El riesgo de proceso sigue siendo real (nada impide que vuelva a
+desincronizarse, ver ROADMAP P0), pero al commit actual **no hay drift**
+— ver ARCHITECTURE.md §9.
 
 **Hosting/deploy:** Cloudflare Pages (`uruspot.pages.dev`), sin
 `wrangler.toml`. Configuración de build vive solo en el dashboard de
@@ -206,11 +228,10 @@ Cloudflare (⚠ no verificable desde este entorno sandboxeado, sin ruta de
 red a `uruspot.pages.dev`).
 
 **Backend/serverless:** Cloudflare Pages Functions (`functions/*.js`,
-convención de ruteo por archivo). Dos funciones reales: `weather.js`
-(proxy a MET Norway) y las de reseñas (`reviews.js`/`reviews-admin.js`,
-con problema de ubicación — ver §8 de ARCHITECTURE.md). Persistencia:
-Cloudflare KV (binding `REVIEWS_KV`, requerido en el dashboard, no en
-código).
+convención de ruteo por archivo). Tres funciones reales, las tres en la
+raíz correcta de `functions/`: `weather.js` (proxy a MET Norway),
+`reviews.js` y `reviews-admin.js`. Persistencia: Cloudflare KV (binding
+`REVIEWS_KV`, requerido en el dashboard, no en código).
 
 **CI:** GitHub Actions (`.github/workflows/tests-visuales.yml`) — corre
 Playwright contra `main` en push/PR.
@@ -252,7 +273,9 @@ mapa de tiles tradicional, así que esto podría ser vestigial).
 ├── los-mejores-*-cdu/, las-mejores-*-cdu/, mejores-veterinarias-cdu/
 │                           → 8 landing pages SEO temáticas independientes
 ├── functions/               → Cloudflare Pages Functions (raíz correcta)
-│   └── weather.js           → único archivo aquí (ver problema en §8 ARCHITECTURE)
+│   ├── weather.js
+│   ├── reviews.js
+│   └── reviews-admin.js     → las 3 en su lugar correcto (ver §8 ARCHITECTURE)
 ├── scripts/                 → build de bundles + generación de sitemap/schema
 ├── tests/visual/            → Playwright (specs + baseline de screenshots)
 ├── img/                     → assets de imagen compartidos
@@ -317,7 +340,7 @@ lugares-core.json (fetch, bloqueante para primer render)
 5. Mapa propio en Canvas (`motor-render.js`, `motor-mapa.js`) recibe los
    puntos ya filtrados/recortados y los dibuja, con clustering/tiles
    (`datos-virtualizador.js` fetchea tiles JSON por viewport).
-6. Ambient Engine (27 módulos `ambiente-*.js`, orquestados por
+6. Ambient Engine (30 módulos `ambiente-*.js`, orquestados por
    `ambiente-orquestador.js`) corre en paralelo, no bloqueante, cargado
    con `requestIdleCallback`.
 
@@ -345,9 +368,9 @@ ARCHITECTURE.md para el detalle técnico de cada una)
 | Compartir ficha (Web Share API + fallback clipboard) | `app.js` (`manejarClickPanel`, acción `compartir`) | ✅ funcional |
 | Mapa propio en Canvas con clustering | `motor-render.js`, `motor-mapa.js` | ✅ funcional |
 | Virtualización de datos del mapa por tiles | `datos-virtualizador.js` + `datos/lugares-mapa-tiles/*.json` | ✅ funcional (solo 10 tiles generados — ⚠ cobertura parcial, no confirmé si faltan tiles para toda la ciudad) |
-| Ambient Engine (clima/hora/partículas/luz de fondo) | 27 módulos `ambiente-*.js` | ✅ funcional, 50/50 + 33/33 tests en verde |
+| Ambient Engine (clima/hora/partículas/luz de fondo) | 30 módulos `ambiente-*.js` | ✅ funcional, 50/50 + 33/33 tests en verde |
 | PWA (instalable, manifest, service worker) | `manifest.json`, `sw.js`, `pwa-instalar.js` | ✅ presente — ⚠ no auditado el contenido de `sw.js` en detalle esta pasada |
-| Reseñas propias por lugar | `ficha.js` (fetch) + `functions/reviews.js` + KV | ⚠ **probablemente rota en producción** — ver ARCHITECTURE.md §8, P0 en ROADMAP |
+| Reseñas propias por lugar | `ficha.js` (fetch) + `functions/reviews.js` + KV | ✅ función en la ubicación correcta — ⚠ no pude probar el endpoint en vivo ni confirmar el binding `REVIEWS_KV` en el dashboard de Cloudflare desde este entorno sandboxeado |
 | Clima en vivo | `functions/weather.js` | ✅ función ubicada correctamente, lógica clara — ⚠ no pude probar el endpoint en vivo (sin red al dominio desde este entorno) |
 | Destacados (ranking por rating con rotación diaria pseudo-random) | `app.js` (`pintarDestacados`) | ✅ funcional, prioriza lugares con ficha propia en el fuente actual — **el bundle en producción no tiene aún este ajuste** |
 
