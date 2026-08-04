@@ -1,4 +1,4 @@
-﻿name: Regenerar Baselines Visuales
+name: Regenerar Baselines Visuales
 
 # Disparo manual, no automático. Uso puntual para corregir el desajuste
 # documentado: los baselines actuales de tests/visual/__baseline__ se
@@ -17,13 +17,6 @@
 
 on:
   workflow_dispatch:
-  # Trigger temporal solo para forzar el primer registro/corrida del
-  # workflow (GitHub no termina de registrar el trigger workflow_dispatch
-  # de un workflow nuevo hasta que corre al menos una vez). Se saca en
-  # cuanto quede confirmado que el dispatch manual funciona.
-  push:
-    paths:
-      - '.github/workflows/regenerar-baselines.yml'
 
 permissions:
   contents: write
@@ -56,14 +49,17 @@ jobs:
           if git diff --cached --quiet; then
             echo "No hay cambios en los baselines — nada para commitear."
           else
-            git commit -m "chore: regenerar baselines visuales en Linux (ubuntu-latest)
-
-Los baselines anteriores tenían sufijo -win32.png (generados en
-Windows). test-visual corre en ubuntu-latest y Playwright nunca
-encontraba el snapshot correspondiente, por lo que el workflow
-fallaba siempre — no era una regresión de código.
-
-Regenerado automáticamente por .github/workflows/regenerar-baselines.yml"
+            {
+              echo "chore: regenerar baselines visuales en Linux (ubuntu-latest)"
+              echo ""
+              echo "Los baselines anteriores tenían sufijo -win32.png (generados en"
+              echo "Windows). test-visual corre en ubuntu-latest y Playwright nunca"
+              echo "encontraba el snapshot correspondiente, por lo que el workflow"
+              echo "fallaba siempre — no era una regresión de código."
+              echo ""
+              echo "Regenerado automáticamente por .github/workflows/regenerar-baselines.yml"
+            } > /tmp/commit-msg.txt
+            git commit -F /tmp/commit-msg.txt
             git push
           fi
 
