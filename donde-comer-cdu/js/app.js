@@ -1521,7 +1521,17 @@
         opts = {
           origen: 'accion_explicita',
           narrativa: false,
-          vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.'
+          vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.',
+          // Comparador inline (Fase 4, evolutivo A→C, ver motor-comparacion.js):
+          // Curaduría es "tu lista" — el lugar natural donde alguien
+          // compara 2-3 cosas que ya eligió guardar, antes de decidir
+          // cuál visitar. Se activa solo dentro de este rango de tamaño
+          // (2-4, ver URU_COMPARACION.MAX_PARA_COMPARAR) — con más
+          // guardados vuelve a ser una lista normal, comparar 8 cosas
+          // a la vez no es comparar, es abrumar.
+          comparacion: (window.URU_COMPARACION && window.URU_COMPARACION.esComparable(lista))
+            ? window.URU_COMPARACION.comparar(lista, { ubicacion: uiState.ubicacionUsuario })
+            : null
         };
       } else if (rama === RAMA_BUSCADOR) {
         lista = listaPorAccionExplicita();
@@ -2199,6 +2209,13 @@
     var restantes = lista.length - visible.length;
     var movimientoReducido = prefiereMovimientoReducido();
 
+    // Comparador inline (Fase 4, evolutivo A→C — ver motor-comparacion.js
+    // para el porqué de la separación de este cálculo en un módulo
+    // propio). `panel--comparando` solo afecta CSS (tarjeta-lugar.css):
+    // separación visual más clara entre tarjetas cuando el usuario está
+    // eligiendo entre pocas opciones, no una reestructuración de layout.
+    DOM.panelDescubrimiento.classList.toggle('panel--comparando', !!opts.comparacion);
+
     // PERF (auditoría performance, 2026-08-03, hallazgo 1.2 — confirmado
     // con Chrome DevTools Performance: long task de 58.8ms, con 33
     // llamadas a manejarFinEntradaTarjeta cayendo en el mismo frame,
@@ -2228,6 +2245,19 @@
       if (piePaginaExistente) piePaginaExistente.remove();
     }
 
+    // Nota de comparación: solo en la reconstrucción completa, no en
+    // "cargar más" incremental (opts.comparacion nunca convive con
+    // paginación real de todos modos — el rango comparable es 2-4 y
+    // TARJETAS_POR_PAGINA es 8 — pero se guarda la misma guarda que ya
+    // usa el resto de esta función por consistencia).
+    if (!incremental && opts.comparacion) {
+      var notaComparacion = document.createElement('p');
+      notaComparacion.className = 'nota-comparacion';
+      notaComparacion.textContent = 'Comparando ' + opts.comparacion.cantidad + ' de tus guardados' +
+        (opts.comparacion.mismoRubro ? '.' : ' (de distinto rubro).');
+      DOM.panelDescubrimiento.appendChild(notaComparacion);
+    }
+
     var nuevas = incremental ? visible.slice(articulosExistentes) : visible;
     var offset = incremental ? articulosExistentes : 0;
 
@@ -2235,7 +2265,9 @@
     nuevas.forEach(function (lugar, idxRel) {
       var i = offset + idxRel;
       var art = document.createElement('article');
-      art.className = 'tarjeta' + (opts.narrativa ? ' tarjeta--narrativa' : '');
+      var comparacionLugar = opts.comparacion ? opts.comparacion.porId[lugar.id] : null;
+      art.className = 'tarjeta' + (opts.narrativa ? ' tarjeta--narrativa' : '') +
+        (comparacionLugar ? ' tarjeta--comparando' : '');
       art.dataset.lugarId = lugar.id;
 
       var metaRubro = window.URU_RUBROS_META && window.URU_RUBROS_META[lugar.grupo];
@@ -2310,10 +2342,20 @@
       // silenciosa si por lo que sea no hay razón para ese id puntual.
       var razonTxt = (opts.razones && opts.razones[lugar.id]) ? opts.razones[lugar.id] : null;
 
+      // Badges del comparador inline: solo marcan un atributo cuando
+      // realmente distingue a este lugar del resto de los comparados
+      // (motor-comparacion.js ya descarta empates — nunca llegan acá
+      // dos badges "mejor rating" en la misma tanda).
+      var badgeMejorRating = (comparacionLugar && comparacionLugar.esMejorRating)
+        ? '<span class="tarjeta-badge-comparacion">★ mejor rating</span>' : '';
+      var badgeMasCercano = (comparacionLugar && comparacionLugar.esMasCercano)
+        ? '<span class="tarjeta-badge-comparacion">📍 más cerca</span>' : '';
+
       art.innerHTML =
         '<div class="tarjeta-rubro">' + iconoRubro + escapeHTML(rubro) + pendienteTxt +
         (ratingTxt ? '<span class="tarjeta-rating">' + escapeHTML(ratingTxt) + '</span>' : '') +
-        (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') + '</div>' +
+        (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + escapeHTML(distanciaTxt) + '</span>' : '') +
+        badgeMejorRating + badgeMasCercano + '</div>' +
         // Fase 4, Cap. 6 "Apertura de ficha": "El elemento de origen (la
         // tarjeta tocada) se convierte visualmente en el encabezado de
         // la ficha — continuidad de forma, no un salto a una pantalla
