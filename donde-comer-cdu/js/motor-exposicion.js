@@ -149,6 +149,36 @@
     return (ahoraMs - reg.ultimaVez) < descansoMs;
   }
 
+  // Fase 4 — "Mostrar más" como nueva tanda (Fase 3D §5, hallazgo
+  // "sigue siendo paginación simple"): excluye del registro, ANTES de
+  // candidatosBase(), los ids que el llamador ya mostró en esta misma
+  // sesión de recorte. Filtrar acá (y no dentro de candidatosBase)
+  // significa que la cascada de relajación de gruposAEvitar sigue
+  // operando sobre el subconjunto ya excluido — nunca puede "recuperar"
+  // un lugar que el usuario ya vio pidiendo una tanda nueva, ni
+  // siquiera en el escalón más laxo de la cascada.
+  function filtrarExcluidos(registro, excluirIds) {
+    if (!excluirIds || !excluirIds.length) return registro;
+    var set = {};
+    excluirIds.forEach(function (id) { set[id] = true; });
+    return registro.filter(function (lugar) { return !set[lugar.id]; });
+  }
+
+  // Fase 4 — filtro de rubro DENTRO de la curaduría (Fase 3B §5/3C §3,
+  // hallazgo "el filtro de rubro abandona el recorte curado"): acota
+  // el universo de candidatos a un solo grupo/rubro antes de aplicar
+  // el mismo motor de score/diversidad/exploración de siempre. A
+  // diferencia de una búsqueda, esto NO es una acción explícita que
+  // deba saltar a Acción Directa (Blueprint v2, sección 4b) — sigue
+  // siendo iniciativa propia del sistema, solo con el universo más
+  // chico. Si el rubro no tiene candidatos, el resultado es un array
+  // vacío (el llamador decide qué mostrar en ese caso, este módulo no
+  // inventa un fallback a "todos los rubros").
+  function filtrarPorRubro(registro, rubro) {
+    if (!rubro) return registro;
+    return registro.filter(function (lugar) { return lugar.grupo === rubro; });
+  }
+
   /* ─────────────────────────────────────────────────────────────
      1. Señales individuales — cada una pura, cada una opcional
      ───────────────────────────────────────────────────────────── */
@@ -385,23 +415,51 @@
     }
 
     var cfgScoring = CFG.exposicion.scoring;
-    var slotsExploracion = candidatos.length >= cfgScoring.exploracion.minCandidatosParaActivarse
-      ? Math.min(Math.round(tamano * cfgScoring.exploracion.ratio), Math.max(tamano - 1, 0))
-      : 0;
+
+    // Fase 4 — "Sorprendeme" (Fase 3D §5, hallazgo "serendipia sin
+    // control explícito"): hasta esta pasada, la fracción de
+    // exploración (candidatos fuera del top-score) era una constante
+    // fija e invisible dentro del recorte normal — nunca se podía
+    // pedir MÁS de esa exploración a propósito. `contexto.sorprendeme`
+    // es un pedido explícito del usuario (botón dedicado en la UI, no
+    // un efecto secundario de otra acción): cuando está activo, el
+    // cupo ENTERO se llena desde el pool de exploración, sin el gate
+    // de `minCandidatosParaActivarse` (que existe para no reservar
+    // cupo de exploración cuando el usuario NO lo pidió — aquí sí lo
+    // pidió). Nunca rompe la partición ficha-primero ni la exclusión
+    // por descanso/exclusión de tanda de más arriba: esas ya filtraron
+    // `candidatos` antes de llegar acá.
+    var modoSorpresa = !!(contexto && contexto.sorprendeme);
+    var slotsExploracion = modoSorpresa
+      ? tamano
+      : (candidatos.length >= cfgScoring.exploracion.minCandidatosParaActivarse
+        ? Math.min(Math.round(tamano * cfgScoring.exploracion.ratio), Math.max(tamano - 1, 0))
+        : 0);
     var slotsRelevancia = tamano - slotsExploracion;
 
     var maxPorGrupo = Math.max(1, Math.ceil(tamano * cfgScoring.diversidad.maxPorGrupoRatio));
-    var elegidosRelevancia = seleccionarConDiversidad(puntuados, slotsRelevancia, maxPorGrupo);
+    var elegidosRelevancia = slotsRelevancia > 0
+      ? seleccionarConDiversidad(puntuados, slotsRelevancia, maxPorGrupo)
+      : [];
 
     var idsElegidos = {};
     elegidosRelevancia.forEach(function (p) { idsElegidos[p.lugar.id] = true; });
     var restantes = puntuados.filter(function (p) { return !idsElegidos[p.lugar.id]; });
     var restantesLugares = restantes.map(function (p) { return p.lugar; });
 
-    // Semilla distinta (+1) a la del desempate de arriba: así el cupo
-    // de exploración no queda correlacionado con el orden de empate
-    // del ranking principal.
-    var barajados = barajarConSemilla(restantesLugares, (estado.ultimaApertura || 0) + 1);
+    // Semilla distinta (+1) a la del desempate de arriba, para que el
+    // cupo de exploración no quede correlacionado con el orden de
+    // empate del ranking principal. `sorpresaSeed` (opcional, entero
+    // que el llamador incrementa en cada click de "Sorprendeme" —
+    // ver app.js) se suma encima: sin él, pedir sorpresa dos veces en
+    // la misma sesión (mismo `estado.ultimaApertura`) devolvería
+    // siempre el mismo barajado, y "sorprendeme otra vez" mostraría
+    // exactamente lo mismo. Con `sorpresaSeed` en 0 (el valor por
+    // defecto cuando no se manda), el comportamiento es IDÉNTICO al de
+    // antes de esta pasada — aditivo, no rompe ningún consumidor ni
+    // test existente.
+    var sorpresaSeed = (contexto && typeof contexto.sorpresaSeed === 'number') ? contexto.sorpresaSeed : 0;
+    var barajados = barajarConSemilla(restantesLugares, (estado.ultimaApertura || 0) + 1 + sorpresaSeed);
     var restantesPorId = {};
     restantes.forEach(function (p) { restantesPorId[p.lugar.id] = p; });
     var exploracionElegida = barajados.slice(0, slotsExploracion).map(function (lugar) {
@@ -500,7 +558,14 @@
       ? CFG.exposicion.recorteGuia
       : CFG.exposicion.recorteExploracion;
 
-    var candidatos = candidatosBase(registro, estado, ahora, evitar, tamano);
+    // Fase 4: universo acotado ANTES del filtro de descanso/rotación —
+    // ver filtrarExcluidos()/filtrarPorRubro() más arriba para el
+    // porqué del orden. Ambos son no-op (devuelven `registro` tal
+    // cual) si el llamador no los usa, así que esto no cambia nada
+    // para quien sigue llamando con la firma de siempre.
+    var universo = filtrarPorRubro(filtrarExcluidos(registro, contexto.excluirIds), contexto.rubro);
+
+    var candidatos = candidatosBase(universo, estado, ahora, evitar, tamano);
     var seleccion = calcularRecorte(candidatos, estado, tamano, afinesSet, condicion, contexto);
     return seleccion.map(function (p) { return p.lugar; });
   }
@@ -530,7 +595,9 @@
       ? CFG.exposicion.recorteGuia
       : CFG.exposicion.recorteExploracion;
 
-    var candidatos = candidatosBase(registro, estado, ahora, evitar, tamano);
+    var universo = filtrarPorRubro(filtrarExcluidos(registro, contexto.excluirIds), contexto.rubro);
+
+    var candidatos = candidatosBase(universo, estado, ahora, evitar, tamano);
     var seleccion = calcularRecorte(candidatos, estado, tamano, afinesSet, condicion, contexto);
 
     return {
