@@ -53,10 +53,6 @@ export async function onRequestGet(context) {
   if (!isValidUruId(id)) {
     return json({ error: "id_invalido" }, 400);
   }
-return json({
-  bindings: Object.keys(env),
-  reviews_kv: !!env.REVIEWS_KV
-});
 
   const raw = await env.REVIEWS_KV.get(`reviews:${id}`);
   const todas = raw ? JSON.parse(raw) : [];
@@ -84,11 +80,6 @@ return json({
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-
-return json({
-  bindings: Object.keys(env),
-  reviews_kv: !!env.REVIEWS_KV
-});
 
   let body;
   try {
