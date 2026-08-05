@@ -15,7 +15,17 @@
 # se bloquea el acceso HTTP directo acá.
 #
 # Formato: origen  destino  código-de-estado
-# Con 404/410, Cloudflare Pages sirve el contenido del destino pero
-# devuelve ese código de estado — no es un redirect real, el navegador
-# nunca ve la URL de destino ni su contenido "de verdad" como un 302.
-/donde-comer-cdu/.fuente/lugares-mapa.json   /   404
+#
+# CORRECCIÓN (05-ago-2026): la versión anterior de esta regla usaba el
+# código 404, asumiendo el comportamiento de "shadowing" de Netlify (servir
+# el contenido del destino pero devolviendo el código indicado). Cloudflare
+# NO soporta eso: su propia documentación lista "Rewrites (other status
+# codes)" como no soportado y solo reconoce 301/302/303/307/308 como
+# códigos de redirect válidos. Con 404 la regla se ignoraba en silencio y
+# el archivo se servía como asset normal (confirmado: 200 con el JSON real
+# en producción). Ahora se usa 301, que sí es un redirect real: el
+# navegador nunca recibe el contenido de lugares-mapa.json, solo termina
+# en "/". Esto es la segunda capa de protección — la primera y más fuerte
+# es que el archivo directamente no se sube al deploy (ver .assetsignore
+# en la raíz del repo).
+/donde-comer-cdu/.fuente/lugares-mapa.json   /   301
