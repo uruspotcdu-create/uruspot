@@ -20,3 +20,4 @@ Cursor) y para cualquier persona que se sume al proyecto:
 Para instrucciones operativas de qué hacer/no hacer al trabajar en este
 repo — la constitución técnica y de producto del proyecto — ver
 [`AGENTS.md`](./AGENTS.md) en la raíz.
+
