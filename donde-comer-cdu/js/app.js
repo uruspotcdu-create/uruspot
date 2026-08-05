@@ -311,13 +311,31 @@
     lastErrorState: null,
     focusedElement: null,
     scrollPosition: 0,
-    cartasActuales: [] // referencia a tarjetas pintadas para reconciliación
+    cartasActuales: [], // referencia a tarjetas pintadas para reconciliación
     // Fase 4 (Motion Direction Bible v2.0, Parte K.10): la fatiga de
     // "Cambio de filtros" (Cap. 5) ya no se cuenta acá — la resuelve
     // AmbienteRitmo por claveAccion 'filtro:rubro' vía
     // Coreografias.cambioFiltro(), único lugar dueño de esa regla en
     // toda la app. Antes había un contador local (vecesTransicionFiltro)
     // que duplicaba esa lógica.
+
+    // Fase 4 — Journey/UX (URUSPOT-PENDIENTES-VERIFICADO-287.md §2/§3):
+    // "Mostrar más" como nueva tanda real. `tandaRecorte` acumula lo
+    // ya mostrado por iniciativa propia (Guía/Exploración) para que
+    // "ver más sugerencias" pida al motor una tanda NUEVA excluyendo
+    // lo ya visto, en vez de solo revelar más de la misma lista — ver
+    // render() y manejarClickPanel(). Se reinicia solo: cuando cambia
+    // la rama de recorte (clave = región + rubro activo), ver render().
+    tandaRecorte: null, // { clave, lista:[], razones:{}, hayMasCandidatos:bool }
+    pedirMasRecorte: false, // true solo durante el render() que sigue al click de "ver más sugerencias"
+
+    // Fase 4 — "Sorprendeme" (hallazgo "serendipia sin control
+    // explícito"): activo/inactivo como cualquier otro filtro de la
+    // sesión (mismo patrón que cercaTuyoActivo). `sorpresaSeed` crece
+    // en cada click para que pedir sorpresa dos veces no muestre la
+    // misma selección (ver motor-exposicion.js: calcularRecorteInterno).
+    sorprendemeActivo: false,
+    sorpresaSeed: 0
   };
 
   // Timers y operaciones async activas
@@ -1294,10 +1312,35 @@
   }
 
   /**
-   * Verifica si hay búsqueda o filtro activo.
+   * Verifica si hay búsqueda o filtro activo. Se mantiene tal cual
+   * para sus consumidores existentes (visibilidad de sugerencias
+   * rápidas, aria-expanded del buscador, copy del subtítulo cuando
+   * se está viendo el catálogo completo) — ninguno de esos necesita
+   * distinguir búsqueda de filtro de rubro. La única excepción es
+   * ramaActual() (ver hayBusquedaTexto() y la nota ahí abajo).
    */
   function hayBusquedaOFiltro() {
-    return uiState.consultaActual.trim().length > 0 || !!uiState.filtroRubroActivo;
+    return hayBusquedaTexto() || !!uiState.filtroRubroActivo;
+  }
+
+  /**
+   * Fase 4 — Journey/UX (hallazgo "el filtro de rubro abandona el
+   * recorte curado", URUSPOT-PENDIENTES-VERIFICADO-287.md §3): antes,
+   * ramaActual() usaba hayBusquedaOFiltro() para decidir si salir del
+   * recorte por iniciativa propia (Guía/Exploración) hacia Acción
+   * Directa — eso trataba "el usuario tocó el chip de un rubro"
+   * exactamente igual que "el usuario escribió una búsqueda", pese a
+   * que el Blueprint v2 (sección 4b) solo reserva Acción Directa para
+   * una construcción EXPLÍCITA del usuario. Elegir un rubro desde los
+   * chips de Guía/Exploración sigue siendo iniciativa propia del
+   * sistema — con el universo acotado a ese rubro (ver render(): el
+   * filtro ahora entra como `contexto.rubro` al motor de recorte, no
+   * como un salto de rama). Solo la búsqueda de texto sigue forzando
+   * el salto a Acción Directa: nombrar algo por escrito SÍ es la
+   * acción explícita que el Vocabulario reserva para esa rama.
+   */
+  function hayBusquedaTexto() {
+    return uiState.consultaActual.trim().length > 0;
   }
 
   /**
@@ -1334,7 +1377,11 @@
    */
   function ramaActual(reg) {
     if (reg.nombre === 'curaduria') return RAMA_CURADURIA;
-    if (reg.nombre === 'accionDirecta' || hayBusquedaOFiltro() || uiState.verCatalogoCompleto) {
+    // Fase 4: hayBusquedaTexto() en vez de hayBusquedaOFiltro() — ver
+    // el comentario largo junto a esa función. El filtro de rubro ya
+    // NO fuerza la salida al buscador; se aplica dentro del recorte
+    // (render(), rama 'recorte:*') vía contexto.rubro.
+    if (reg.nombre === 'accionDirecta' || hayBusquedaTexto() || uiState.verCatalogoCompleto) {
       return RAMA_BUSCADOR;
     }
     return 'recorte:' + reg.nombre;
@@ -1504,13 +1551,79 @@
           ubicacion: uiState.ubicacionUsuario || null,
           clima: climaContextoCache
         };
-        var explicado = EXPO.recortePorIniciativaPropiaExplicado(REGISTRO, estado, reg.nombre, contextoRecorte);
-        lista = explicado.lugares.map(function (x) { return x.lugar; });
-        lista = ordenarPorCercania(lista);
+
+        // Fase 4 — filtro de rubro DENTRO del recorte curado (hallazgo
+        // "el filtro de rubro abandona el recorte curado", ver
+        // hayBusquedaTexto()/ramaActual() más arriba): el chip de rubro
+        // ya no saca al usuario de Guía/Exploración hacia Acción
+        // Directa — acota el universo que el motor evalúa, pero sigue
+        // siendo una selección por iniciativa propia (con su score,
+        // diversidad y razones, no un barrido crudo del catálogo).
+        if (uiState.filtroRubroActivo) {
+          contextoRecorte.rubro = uiState.filtroRubroActivo;
+        }
+
+        // Fase 4 — "Sorprendeme" (hallazgo "serendipia sin control
+        // explícito"): pedido explícito del usuario, independiente de
+        // qué región o rubro esté activo — ver manejarClickSugerencias.
+        if (uiState.sorprendemeActivo) {
+          contextoRecorte.sorprendeme = true;
+          contextoRecorte.sorpresaSeed = uiState.sorpresaSeed;
+        }
+
+        // Fase 4 — "Mostrar más" como nueva tanda real (hallazgo
+        // "sigue siendo paginación simple, no una nueva tanda con
+        // exclusión de lo ya visto"): una tanda queda identificada por
+        // región + rubro + sorpresa — cambiar cualquiera de los tres
+        // invalida lo acumulado (no tiene sentido excluir en
+        // Exploración lo que se mostró en Guía, o excluir lo mostrado
+        // sin rubro una vez que hay un rubro activo). `pedirMasRecorte`
+        // (ver manejarClickPanel) es el único disparador real de un
+        // fetch nuevo con exclusión; cualquier otro render() de la
+        // misma tanda (guardar un favorito, tick de permanencia,
+        // llegada del clima en segundo plano) reutiliza lo ya
+        // calculado tal cual, sin pegarle otra tanda encima.
+        var claveTanda = reg.nombre + '|' + (uiState.filtroRubroActivo || '') +
+          '|' + (uiState.sorprendemeActivo ? 's' : '');
+        var tandaVigente = (uiState.tandaRecorte && uiState.tandaRecorte.clave === claveTanda)
+          ? uiState.tandaRecorte
+          : null;
+        var necesitaTandaNueva = !tandaVigente || uiState.pedirMasRecorte;
+
+        if (necesitaTandaNueva) {
+          if (uiState.pedirMasRecorte && tandaVigente) {
+            contextoRecorte.excluirIds = tandaVigente.lista.map(function (l) { return l.id; });
+          }
+          var explicado = EXPO.recortePorIniciativaPropiaExplicado(REGISTRO, estado, reg.nombre, contextoRecorte);
+          var nuevaTanda = explicado.lugares.map(function (x) { return x.lugar; });
+          var razonesNuevas = razonesPorLugarId(explicado.lugares);
+          var listaBase = tandaVigente ? tandaVigente.lista : [];
+          var razonesAcumuladas = {};
+          if (tandaVigente) {
+            Object.keys(tandaVigente.razones).forEach(function (id) { razonesAcumuladas[id] = tandaVigente.razones[id]; });
+          }
+          Object.keys(razonesNuevas).forEach(function (id) { razonesAcumuladas[id] = razonesNuevas[id]; });
+          uiState.tandaRecorte = {
+            clave: claveTanda,
+            lista: listaBase.concat(nuevaTanda),
+            razones: razonesAcumuladas,
+            // El motor evalúa el universo YA acotado por rubro/exclusión
+            // (candidatosEvaluados, ver motor-exposicion.js); si evaluó
+            // más candidatos que los que entregó en esta tanda, hay
+            // margen real para pedir otra — nunca se ofrece "más" sin
+            // esa confirmación.
+            hayMasCandidatos: explicado.candidatosEvaluados > nuevaTanda.length
+          };
+        }
+        uiState.pedirMasRecorte = false;
+
+        var tandaFinal = uiState.tandaRecorte;
+        lista = ordenarPorCercania(tandaFinal.lista);
         opts = {
           origen: 'iniciativa_propia',
           narrativa: false,
-          razones: razonesPorLugarId(explicado.lugares)
+          razones: tandaFinal.razones,
+          hayMasSugerencias: !!tandaFinal.hayMasCandidatos
         };
       }
 
@@ -1845,6 +1958,20 @@
         '📍 cerca tuyo</button>';
     }
 
+    // Fase 4 — "Sorprendeme" (hallazgo "serendipia sin control
+    // explícito"): mismo patrón que el chip de "cerca tuyo" — un
+    // atajo visible antes de que el usuario toque nada, no un efecto
+    // secundario escondido dentro del recorte normal. Una vez activo,
+    // este chip se oculta junto con el resto de sugerencias rápidas
+    // (ver actualizarVisibilidadSugerencias) y la forma de "pedir otra
+    // sorpresa" o de salir del modo pasa a vivir en la píldora de
+    // filtros activos (ver pintarFiltrosActivos), igual que "cerca
+    // tuyo" pasa a vivir ahí una vez activado.
+    if (!uiState.sorprendemeActivo) {
+      html += '<button type="button" class="sugerencia-chip sugerencia-chip--sorpresa" data-accion="sugerencia-sorprendeme">' +
+        '🎲 sorprendeme</button>';
+    }
+
     DOM.sugerenciasRapidas.innerHTML = html;
     actualizarVisibilidadSugerencias();
   }
@@ -1856,7 +1983,7 @@
    */
   function actualizarVisibilidadSugerencias() {
     if (!DOM.sugerenciasRapidas) return;
-    DOM.sugerenciasRapidas.hidden = hayBusquedaOFiltro() || uiState.cercaTuyoActivo;
+    DOM.sugerenciasRapidas.hidden = hayBusquedaOFiltro() || uiState.cercaTuyoActivo || uiState.sorprendemeActivo;
   }
 
   /**
@@ -1906,6 +2033,23 @@
       );
     }
 
+    if (uiState.sorprendemeActivo) {
+      // Fase 4 — "Sorprendeme": única píldora con DOS botones propios,
+      // no uno. "↻" pide una sorpresa distinta (reroll completo, no
+      // acumula); "×" es la salida de siempre, igual que las otras
+      // píldoras. Ninguno de los dos reusa data-filtro-quitar para el
+      // reroll — sería ambiguo con "quitar" en manejarClickFiltrosActivos.
+      pills.push(
+        '<span class="filtro-pill filtro-pill--sorpresa" data-filtro="sorpresa">' +
+        '<span class="filtro-pill__texto">🎲 sorpresa</span>' +
+        '<button type="button" class="filtro-pill__reroll" data-filtro-reroll="sorpresa" ' +
+        'aria-label="Mostrarme otra sorpresa distinta">↻</button>' +
+        '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="sorpresa" ' +
+        'aria-label="Salir del modo sorpresa">×</button>' +
+        '</span>'
+      );
+    }
+
     if (!pills.length) {
       DOM.filtrosActivos.hidden = true;
       DOM.filtrosActivos.innerHTML = '';
@@ -1932,7 +2076,48 @@
     var chipCerca = e.target.closest('[data-accion="sugerencia-cerca-tuyo"]');
     if (chipCerca && dynamicElements.btnCercaDeMi && !uiState.cercaTuyoActivo) {
       activarCercaDeMi(dynamicElements.btnCercaDeMi);
+      return;
     }
+    var chipSorpresa = e.target.closest('[data-accion="sugerencia-sorprendeme"]');
+    if (chipSorpresa && !uiState.sorprendemeActivo) {
+      activarSorprendeme();
+    }
+  }
+
+  /**
+   * Fase 4 — "Sorprendeme": activa el modo y arranca una tanda nueva
+   * desde cero (uiState.tandaRecorte = null, no un "más" que agregue
+   * sobre lo que ya se estaba viendo — al activarse, TODO lo que se
+   * muestra debería salir del pool de exploración, no solo lo nuevo).
+   */
+  function activarSorprendeme() {
+    uiState.sorprendemeActivo = true;
+    uiState.sorpresaSeed = 0;
+    uiState.tandaRecorte = null;
+    uiState.paginaTarjetas = 1;
+    pintarFiltrosActivos();
+    render();
+  }
+
+  /**
+   * Pide una selección de sorpresa distinta a la actual, descartando
+   * (no acumulando) lo que ya se estaba mostrando — a diferencia de
+   * "ver más sugerencias" (que agrega), "sorprendeme otra vez" es un
+   * reemplazo completo.
+   */
+  function rerollarSorpresa() {
+    uiState.sorpresaSeed++;
+    uiState.tandaRecorte = null;
+    uiState.paginaTarjetas = 1;
+    render();
+  }
+
+  function desactivarSorprendeme() {
+    uiState.sorprendemeActivo = false;
+    uiState.tandaRecorte = null;
+    uiState.paginaTarjetas = 1;
+    pintarFiltrosActivos();
+    render();
   }
 
   /**
@@ -1940,6 +2125,12 @@
    * únicamente su propia faceta.
    */
   function manejarClickFiltrosActivos(e) {
+    var btnReroll = e.target.closest('[data-filtro-reroll]');
+    if (btnReroll && btnReroll.dataset.filtroReroll === 'sorpresa') {
+      rerollarSorpresa();
+      return;
+    }
+
     var btn = e.target.closest('[data-filtro-quitar]');
     if (!btn) return;
     var cual = btn.dataset.filtroQuitar;
@@ -1955,6 +2146,8 @@
       render();
     } else if (cual === 'cerca') {
       desactivarCercaDeMi();
+    } else if (cual === 'sorpresa') {
+      desactivarSorprendeme();
     }
   }
 
@@ -2157,6 +2350,22 @@
         '<button type="button" class="btn" data-accion="cargar-mas">Cargar ' + Math.min(restantes, TARJETAS_POR_PAGINA) + ' más</button>' +
         '<span class="paginacion-conteo">' + visible.length + ' de ' + lista.length + '</span>';
       DOM.panelDescubrimiento.appendChild(piePagina);
+    } else if (opts.origen === 'iniciativa_propia' && opts.hayMasSugerencias) {
+      // Fase 4 — Journey/UX (hallazgo "'Mostrar más' sigue siendo
+      // paginación simple, no una nueva tanda con exclusión de lo ya
+      // visto"): a diferencia del "cargar-mas" de arriba (que solo
+      // revela más de una lista YA calculada), este botón dispara en
+      // render() una llamada nueva al motor con `excluirIds` = todo lo
+      // que esta tanda de recorte ya mostró (ver uiState.tandaRecorte).
+      // Solo aparece cuando ya se ve el cupo completo de la tanda
+      // actual (restantes === 0) Y el motor confirmó que evaluó más
+      // candidatos que los que entregó — nunca se ofrece "más" si no
+      // hay nada distinto para mostrar.
+      var piePaginaTanda = document.createElement('div');
+      piePaginaTanda.className = 'paginacion';
+      piePaginaTanda.innerHTML =
+        '<button type="button" class="btn" data-accion="mas-sugerencias-recorte">Ver más sugerencias</button>';
+      DOM.panelDescubrimiento.appendChild(piePaginaTanda);
     }
   }
 
@@ -2193,8 +2402,13 @@
       ? window.URU_RUBROS_META[uiState.filtroRubroActivo]
       : null;
 
+    // Fase 4: hayBusquedaTexto() en vez de hayBusquedaOFiltro() — un
+    // rubro activo ya NO saca al usuario de la copy de recorte curado
+    // (ver ramaActual()/render()): el filtro de rubro se resuelve
+    // DENTRO de "Para arrancar"/"Para explorar", no reemplazándolas
+    // por "Todos los lugares verificados de este rubro".
     var esRecorteReal = (reg.nombre === 'guia' || reg.nombre === 'exploracion') &&
-      !hayBusquedaOFiltro() && !uiState.verCatalogoCompleto;
+      !hayBusquedaTexto() && !uiState.verCatalogoCompleto;
 
     if (!esRecorteReal) {
       if (uiState.consultaActual.trim()) {
@@ -2226,12 +2440,23 @@
       dynamicElements.btnVerCatalogoCompleto.hidden = false;
     }
 
+    // Fase 4 — copy del filtro de rubro DENTRO del recorte (antes este
+    // caso ni se alcanzaba: con rubro activo, esRecorteReal siempre
+    // daba false y se mostraba "Todos los lugares verificados de este
+    // rubro" en vez de la copy de Guía/Exploración). El sufijo de
+    // rubro se agrega al final del subtítulo de siempre, sin
+    // reemplazarlo — sigue siendo un recorte curado, solo acotado.
+    var sufijoRubro = rubroMeta ? (' Mostrando solo ' + rubroMeta[0].toLowerCase() + '.') : '';
+    var sufijoSorpresa = uiState.sorprendemeActivo ? ' 🎲 Modo sorpresa activo.' : '';
+
     if (reg.nombre === 'guia') {
       DOM.tituloRegion.textContent = 'Para arrancar';
-      DOM.subtituloRegion.textContent = 'Una selección chica para no abrumar. Guardá o descartá para afinarla.' + sufijoCercania();
+      DOM.subtituloRegion.textContent = 'Una selección chica para no abrumar. Guardá o descartá para afinarla.' +
+        sufijoRubro + sufijoSorpresa + sufijoCercania();
     } else {
       DOM.tituloRegion.textContent = 'Para explorar';
-      DOM.subtituloRegion.textContent = 'Más variedad para curiosear. Buscá si ya sabés qué querés.' + sufijoCercania();
+      DOM.subtituloRegion.textContent = 'Más variedad para curiosear. Buscá si ya sabés qué querés.' +
+        sufijoRubro + sufijoSorpresa + sufijoCercania();
     }
   }
 
@@ -3013,6 +3238,7 @@
     var btnGuardar = e.target.closest('[data-accion="guardar"]');
     var btnCompartir = e.target.closest('[data-accion="compartir"]');
     var btnCargarMas = e.target.closest('[data-accion="cargar-mas"]');
+    var btnMasSugerenciasRecorte = e.target.closest('[data-accion="mas-sugerencias-recorte"]');
     var btnLimpiarBusqueda = e.target.closest('[data-accion="limpiar-busqueda"]');
     var btnLimpiarFiltro = e.target.closest('[data-accion="limpiar-filtro-rubro"]');
     var carta = e.target.closest('[data-lugar-id]');
@@ -3049,6 +3275,20 @@
 
     if (btnCargarMas) {
       uiState.paginaTarjetas++;
+      render();
+      return;
+    }
+
+    if (btnMasSugerenciasRecorte) {
+      // Fase 4 — "Mostrar más" como nueva tanda real: a diferencia de
+      // btnCargarMas (que solo avanza paginaTarjetas sobre una lista
+      // que el motor YA calculó), este botón le pide a render() una
+      // tanda NUEVA excluyendo todo lo mostrado hasta ahora — ver el
+      // bloque de uiState.tandaRecorte dentro de render(). Si además
+      // "Sorprendeme" está activo, cada tanda nueva es también una
+      // sorpresa distinta a la anterior (sorpresaSeed avanza).
+      uiState.pedirMasRecorte = true;
+      if (uiState.sorprendemeActivo) uiState.sorpresaSeed++;
       render();
       return;
     }
