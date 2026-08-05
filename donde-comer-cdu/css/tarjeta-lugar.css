@@ -19,7 +19,16 @@
 
 .tarjeta{
   position:relative; isolation:isolate; overflow:hidden;
-  background:var(--glass-bg); border:1px solid var(--glass-borde);
+  /* Isolínea como borde de superficie (URUSPOT-PENDIENTES §6, Blueprint
+     V2 §3): capa extra de fondo, no un pseudo-elemento nuevo — ::before
+     y ::after de esta misma regla ya están ocupados (franja de rubro
+     arriba, gradiente de superficie). background admite varias capas
+     separadas por coma; la ÚLTIMA es la que puede llevar color sólido,
+     así que --patron-isolinea entra primero (posicionado en el borde
+     inferior, repite en X) y var(--glass-bg) sigue siendo el fondo real
+     debajo, sin cambiar nada del resto de la tarjeta. */
+  background:var(--patron-isolinea) bottom / 140px 8px repeat-x, var(--glass-bg);
+  border:1px solid var(--glass-borde);
   border-radius:var(--radio-lg); padding:var(--esp-4);
   backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
   box-shadow:var(--sombra-vidrio);
