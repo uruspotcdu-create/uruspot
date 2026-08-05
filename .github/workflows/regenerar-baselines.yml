@@ -35,7 +35,14 @@ jobs:
         run: npm ci || npm install
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        # FIX (2026-08-05): el proyecto 'mobile' de playwright.config.js usa
+        # devices['iPhone 12'], cuyo defaultBrowserType es 'webkit', no
+        # 'chromium'. Instalar solo chromium acá hacía que los 5 tests de
+        # 'mobile' fallaran instantáneamente (~12ms, browser executable no
+        # encontrado) en TODAS las corridas — nunca fue una diferencia visual
+        # real, era un fallo de arranque de navegador enmascarado por el
+        # continue-on-error de este mismo workflow. Se instalan ambos.
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Regenerar snapshots (continua aunque alguna assertion no visual falle)
         run: npx playwright test --update-snapshots
