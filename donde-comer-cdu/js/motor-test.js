@@ -1235,5 +1235,127 @@ function lugar(id, grupo, lat, lng) {
   assert('acción desconocida devuelve el estado sin cambios, no lanza', r === e);
 })();
 
+/* ═══════════════════════════════════════════════════════════════════
+   Fase 4 — Journey/UX (URUSPOT-PENDIENTES-VERIFICADO-287.md §2/§3):
+   "Mostrar más" como nueva tanda, "Sorprendeme" y filtro de rubro
+   dentro del recorte curado. Tests nuevos ANTES de tocar app.js
+   (ramaActual/render), sobre el motor puro — ver informe.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 90. contexto.excluirIds: los ids excluidos nunca aparecen en el recorte ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 20; i++) registro.push(lugar('M' + i, 'gastronomia'));
+  var e = PLANO.estadoInicial('cdu');
+  var excluirIds = ['M0', 'M1', 'M2', 'M3', 'M4', 'M5'];
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia', { excluirIds: excluirIds });
+  assert('contexto.excluirIds: ningún id excluido aparece en el recorte',
+    recorte.every(function (l) { return excluirIds.indexOf(l.id) === -1; }));
+  assert('contexto.excluirIds: el cupo se sigue llenando con lo que queda disponible',
+    recorte.length === CFG.exposicion.recorteGuia);
+})();
+
+/* ── 91. "Mostrar más" real: dos tandas sucesivas (2da excluye ids de la 1ra) no repiten lugares ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 30; i++) registro.push(lugar('T' + i, 'grupo' + (i % 4)));
+  var e = PLANO.estadoInicial('cdu');
+  var tanda1 = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion');
+  var idsTanda1 = tanda1.map(function (l) { return l.id; });
+  var tanda2 = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion', { excluirIds: idsTanda1 });
+  var idsTanda2 = tanda2.map(function (l) { return l.id; });
+  assert('"mostrar más": la segunda tanda no repite ningún lugar de la primera',
+    idsTanda2.every(function (id) { return idsTanda1.indexOf(id) === -1; }));
+  assert('"mostrar más": la segunda tanda también respeta el cupo de la región',
+    tanda2.length === CFG.exposicion.recorteExploracion);
+})();
+
+/* ── 92. excluirIds + cascada de relajación: la exclusión se respeta incluso si hay que relajar gruposAEvitar ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 8; i++) registro.push(lugar('R' + i, 'unico'));
+  var e = PLANO.estadoInicial('cdu');
+  var n = CFG.acciones.rechazar.repeticionesParaEstable;
+  for (var k = 0; k < n; k++) e = PLANO.aplicarAccion(e, 'rechazar', { grupo: 'unico' }); // marca "unico" como evitado
+  var excluirIds = ['R0', 'R1', 'R2'];
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia', { excluirIds: excluirIds });
+  assert('excluirIds se respeta incluso cuando la cascada de relajación de gruposAEvitar tiene que activarse',
+    recorte.every(function (l) { return excluirIds.indexOf(l.id) === -1; }));
+})();
+
+/* ── 93. contexto.rubro: acota el universo del recorte a un solo grupo, sin salir del motor de score/diversidad ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 15; i++) registro.push(lugar('G' + i, 'gastronomia'));
+  for (var j = 0; j < 15; j++) registro.push(lugar('C' + j, 'cafeterias'));
+  var e = PLANO.estadoInicial('cdu');
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion', { rubro: 'cafeterias' });
+  assert('contexto.rubro: el recorte queda acotado por completo al rubro pedido',
+    recorte.every(function (l) { return l.grupo === 'cafeterias'; }));
+  assert('contexto.rubro: sigue respetando el cupo de la región (no se "escapa" a mostrar todo el rubro)',
+    recorte.length === CFG.exposicion.recorteExploracion);
+})();
+
+/* ── 94. contexto.rubro sin candidatos de ese rubro: devuelve vacío, no cae a otro rubro ── */
+(function () {
+  var registro = [lugar('A', 'gastronomia'), lugar('B', 'gastronomia')];
+  var e = PLANO.estadoInicial('cdu');
+  var recorte = EXPO.recortePorIniciativaPropia(registro, e, 'guia', { rubro: 'inexistente' });
+  assert('contexto.rubro sin candidatos: devuelve vacío en vez de "rellenar" con otro rubro',
+    Array.isArray(recorte) && recorte.length === 0);
+})();
+
+/* ── 95. contexto.sorprendeme: llena TODO el cupo desde el pool fuera del top-score ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 40; i++) registro.push(lugar('S' + i, 'grupo' + (i % 6)));
+  var e = PLANO.estadoInicial('cdu');
+  e.ultimaApertura = 555;
+  var normal = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion');
+  var sorpresa = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion', { sorprendeme: true });
+  assert('contexto.sorprendeme respeta igual el cupo de la región', sorpresa.length === CFG.exposicion.recorteExploracion);
+  var idsNormal = normal.map(function (l) { return l.id; });
+  var idsSorpresa = sorpresa.map(function (l) { return l.id; });
+  assert('contexto.sorprendeme produce una selección distinta al recorte normal (mismo estado/registro/semilla)',
+    JSON.stringify(idsNormal) !== JSON.stringify(idsSorpresa));
+})();
+
+/* ── 96. contexto.sorpresaSeed: pedir sorpresa dos veces con distinta semilla no repite el mismo resultado ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 40; i++) registro.push(lugar('P' + i, 'grupo' + (i % 6)));
+  var e = PLANO.estadoInicial('cdu');
+  e.ultimaApertura = 42;
+  var s1 = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion', { sorprendeme: true, sorpresaSeed: 0 });
+  var s2 = EXPO.recortePorIniciativaPropia(registro, e, 'exploracion', { sorprendeme: true, sorpresaSeed: 1 });
+  assert('sorpresaSeed distinto produce un barajado distinto ("sorprendeme otra vez" no muestra lo mismo)',
+    JSON.stringify(s1.map(function (l) { return l.id; })) !== JSON.stringify(s2.map(function (l) { return l.id; })));
+})();
+
+/* ── 97. Compatibilidad: sorprendeme/excluirIds/rubro son opcionales — omitirlos da el comportamiento de siempre ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 12; i++) registro.push(lugar('Z' + i, 'gastronomia'));
+  var e = PLANO.estadoInicial('cdu');
+  e.ultimaApertura = 9;
+  var sinContexto = EXPO.recortePorIniciativaPropia(registro, e, 'guia');
+  var conContextoVacio = EXPO.recortePorIniciativaPropia(registro, e, 'guia', {});
+  assert('omitir contexto o pasar {} da exactamente el mismo resultado que antes de esta pasada',
+    JSON.stringify(sinContexto.map(function (l) { return l.id; })) ===
+    JSON.stringify(conContextoVacio.map(function (l) { return l.id; })));
+})();
+
+/* ── 98. recortePorIniciativaPropiaExplicado también respeta excluirIds/rubro/sorprendeme ── */
+(function () {
+  var registro = [];
+  for (var i = 0; i < 20; i++) registro.push(lugar('E' + i, i % 2 === 0 ? 'bares' : 'cafeterias'));
+  var e = PLANO.estadoInicial('cdu');
+  var explicado = EXPO.recortePorIniciativaPropiaExplicado(registro, e, 'exploracion', { rubro: 'bares' });
+  assert('recortePorIniciativaPropiaExplicado con contexto.rubro: todas las selecciones son del rubro pedido',
+    explicado.lugares.every(function (x) { return x.lugar.grupo === 'bares'; }));
+  assert('recortePorIniciativaPropiaExplicado con contexto.rubro: candidatosEvaluados refleja el universo YA acotado',
+    explicado.candidatosEvaluados <= 10); // solo hay 10 lugares de "bares" en este registro
+})();
+
 console.log('\n' + (total - fallos) + '/' + total + ' pruebas OK');
 if (fallos > 0) process.exit(1);
