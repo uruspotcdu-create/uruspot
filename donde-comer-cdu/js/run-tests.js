@@ -13,16 +13,18 @@
 //                                    coreografías reales de interfaz, y
 //                                    regresión de slugs de fichas
 //                                    (Motion Direction Bible v2.0, Parte M.2)
+//   6. motor-comparacion-tests.js  — módulo puro del comparador inline
+//                                    (Fase 4, Journey/UX, evolutivo A→C)
 //
 // Uso: `node js/run-tests.js`
-// Sale con código 0 solo si las cinco suites pasan.
+// Sale con código 0 solo si las seis suites pasan.
 
 'use strict';
 
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js'];
+const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js'];
 
 let algunoFallo = false;
 
