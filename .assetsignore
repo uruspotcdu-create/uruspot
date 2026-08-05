@@ -1,0 +1,13 @@
+# Excluye del deploy de Cloudflare Workers/Pages archivos que existen en el
+# repo pero que nunca deben quedar accesibles por HTTP.
+#
+# lugares-mapa.json es la fuente cruda que edita DSA a mano (13 campos,
+# incluye registros sin `estado_verificacion` todavía). split_dataset.py la
+# lee en local con una ruta relativa fija para generar lugares-core.json /
+# lugares-detalles.json, que son los que el sitio sirve en producción. No se
+# puede mover de carpeta sin romper ese script, así que se excluye acá del
+# deploy en vez de moverla.
+#
+# Formato: igual que .gitignore (Wrangler no subirá archivos que matcheen
+# estas líneas como static assets).
+donde-comer-cdu/.fuente/
