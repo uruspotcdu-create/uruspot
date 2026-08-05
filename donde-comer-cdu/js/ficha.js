@@ -159,32 +159,39 @@
     }
   }
 
+  // Factorizado de inicializarCartaDePosicion() (vivía inline ahí antes)
+  // para que inicializarBrujula() lea la MISMA coordenada sin duplicar
+  // el parseo ni arriesgarse a que las dos features un día lean de
+  // fuentes distintas. OJO: no alcanza con el primer link a
+  // google.com/maps del documento — el chip-google del hero ("★ 4.4
+  // Google · 626 reseñas") también apunta a Maps, pero vía place_id
+  // (sin @lat,lng,zoom) y matchea el selector igual. Se recorre TODOS
+  // los links a Maps del documento y se usa el primero cuyo href de
+  // verdad trae la coordenada (el botón/sección "Cómo llegar").
+  function obtenerCoordenadaLugar() {
+    var candidatos = document.querySelectorAll('a[href*="google.com/maps"]');
+    for (var i = 0; i < candidatos.length; i++) {
+      var m = candidatos[i].href.match(/@(-?[\d.]+),(-?[\d.]+),/);
+      if (!m) continue;
+      var lat = parseFloat(m[1]), lon = parseFloat(m[2]);
+      if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
+      return { lat: lat, lon: lon, linkMapa: candidatos[i] };
+    }
+    return null;
+  }
+
   function inicializarCartaDePosicion() {
     var strip = document.querySelector('.info-strip');
     if (!strip) return;
 
-    // OJO: no alcanza con el primer link a google.com/maps del documento.
-    // El chip-google del hero ("★ 4.4 Google · 626 reseñas") también
-    // apunta a Maps, pero vía place_id (sin @lat,lng,zoom) — matchea el
-    // selector igual y, si se toma ese, el regex de abajo nunca matchea
-    // y la celda no se crea. Se recorre TODOS los links a Maps del
-    // documento y se usa el primero cuyo href de verdad trae la
-    // coordenada (el botón/sección "Cómo llegar").
-    var candidatos = document.querySelectorAll('a[href*="google.com/maps"]');
-    var linkMapa = null, m = null;
-    for (var i = 0; i < candidatos.length; i++) {
-      var intento = candidatos[i].href.match(/@(-?[\d.]+),(-?[\d.]+),/);
-      if (intento) { linkMapa = candidatos[i]; m = intento; break; }
-    }
-    if (!linkMapa) return;
+    var coord = obtenerCoordenadaLugar();
+    if (!coord) return;
 
     // Save-Data / conexión lenta: no se pide la cuadrícula de tiles.
     // Degrada a no mostrar la celda nueva en vez de mostrarla rota o en
     // blanco — el botón "Cómo llegar" grande de más abajo sigue ahí.
     if (navigator.connection && navigator.connection.saveData) return;
-    var lat = parseFloat(m[1]);
-    var lon = parseFloat(m[2]);
-    if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
+    var lat = coord.lat, lon = coord.lon, linkMapa = coord.linkMapa;
 
     var celda = document.createElement('div');
     celda.className = 'info-cell info-cell--posicion';
@@ -218,6 +225,227 @@
     // El canvas recién tiene tamaño real (clientWidth/Height) una vez que
     // esta celda ya está en el DOM y el layout se resolvió.
     requestAnimationFrame(function () { cartaRenderizarMinimapa(lienzo, lat, lon); });
+  }
+
+  /* ───────────────────────── BRÚJULA FUNCIONAL (Blueprint V2 Cap. 4.1) ────
+     El asset decorativo del Ambient Engine (assets/ambient/brujula/) es
+     "ancla simbólica" — nunca tuvo la contraparte funcional que pedía el
+     capítulo: bearing REAL hacia el lugar, no una animación ambiental sin
+     dato detrás. Reusa la misma coordenada que obtenerCoordenadaLugar()
+     ya factoriza para Carta de Posición.
+
+     Nunca se activa sola: geolocalización y, en iOS 13+, orientación del
+     dispositivo son permisos sensibles — se piden recién al tocar el
+     botón, nunca en el load de la página.
+
+     Degradación en niveles, nunca "todo o nada":
+       1) Sin geolocalización disponible en el navegador: la celda ni se
+          crea.
+       2) El usuario tocó el botón pero denegó el permiso de ubicación:
+          mensaje de error, sin aguja ni texto de dirección.
+       3) Con ubicación pero SIN orientación del dispositivo (desktop, la
+          mayoría de Android sin sensor de rumbo, o permiso de
+          orientación denegado/no soportado en iOS): se muestra el punto
+          cardinal + distancia como TEXTO, aguja fija apuntando al rumbo
+          absoluto con una nota "verificá con tu propio norte" — nunca
+          se finge que la aguja sigue al teléfono si no hay dato real de
+          orientación detrás.
+       4) Con ambos permisos: aguja en tiempo real, rotando contra el
+          rumbo real del dispositivo. */
+  function calcularBearing(lat1, lon1, lat2, lon2) {
+    var toRad = Math.PI / 180;
+    var y = Math.sin((lon2 - lon1) * toRad) * Math.cos(lat2 * toRad);
+    var x = Math.cos(lat1 * toRad) * Math.sin(lat2 * toRad) -
+      Math.sin(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.cos((lon2 - lon1) * toRad);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+
+  // Mismo cálculo (haversine) que ya vive por separado en app.js,
+  // motor-exposicion.js y proyeccion.js — ficha.js no comparte módulo
+  // con esos archivos (páginas estáticas independientes), así que
+  // duplicarlo acá sigue la misma convención que ya usa el resto del
+  // repo en vez de introducir un import nuevo para una sola función.
+  function distanciaMetrosBrujula(lat1, lon1, lat2, lon2) {
+    var R = 6371e3, toRad = Math.PI / 180;
+    var dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  var BRUJULA_CARDINALES = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+  function cardinalDe(bearing) {
+    return BRUJULA_CARDINALES[Math.round(bearing / 45) % 8];
+  }
+
+  function formatoDistanciaBrujula(m) {
+    if (m < 1000) return Math.round(m / 10) * 10 + ' m';
+    return (m / 1000).toFixed(1).replace('.0', '') + ' km';
+  }
+
+  // SVG de la rosa de rumbos: autocontenido (sin <use> a las primitivas
+  // del Ambient Engine — esas están pensadas para el sistema decorativo
+  // de fondo, con su propia convención de tokens/viewBox; este es un
+  // widget funcional real, mismo criterio que separa URU_RUBROS_ICONO_SVG
+  // de los assets de rubro del mapa). Un solo <path> para la aguja
+  // (triángulo norte + cola sur), rotado vía CSS transform en JS.
+  function svgRosaDeRumbos() {
+    return '<svg class="brujula-rosa" viewBox="0 0 100 100" width="56" height="56" aria-hidden="true" focusable="false">' +
+      '<circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".35"/>' +
+      '<circle cx="50" cy="8" r="2.4" fill="currentColor" opacity=".6"/>' +
+      '<g class="brujula-aguja">' +
+      '<path d="M50 12 L58 50 L50 42 L42 50 Z" fill="var(--gold)"/>' +
+      '<path d="M50 88 L42 50 L50 58 L58 50 Z" fill="currentColor" opacity=".35"/>' +
+      '</g>' +
+      '</svg>';
+  }
+
+  function inicializarBrujula() {
+    if (!navigator.geolocation) return;
+    var coord = obtenerCoordenadaLugar();
+    if (!coord) return;
+    var strip = document.querySelector('.info-strip');
+    if (!strip) return;
+
+    var celda = document.createElement('div');
+    celda.className = 'info-cell info-cell--brujula';
+
+    var etiqueta = document.createElement('span');
+    etiqueta.className = 'info-cell-label';
+    etiqueta.textContent = 'Hacia acá';
+    celda.appendChild(etiqueta);
+
+    var cuerpo = document.createElement('div');
+    cuerpo.className = 'brujula-cuerpo';
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'brujula-activar';
+    btn.textContent = '🧭 Orientarme';
+    btn.setAttribute('aria-label', 'Mostrar hacia dónde queda' + (DATA.nombre ? ' ' + DATA.nombre : ' el lugar') + ' desde donde estás');
+    cuerpo.appendChild(btn);
+    celda.appendChild(cuerpo);
+    strip.appendChild(celda);
+    strip.classList.add('info-strip--con-brujula');
+
+    var desuscribirOrientacion = null;
+
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = 'Ubicándote…';
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        var origenLat = pos.coords.latitude, origenLon = pos.coords.longitude;
+        var bearing = calcularBearing(origenLat, origenLon, coord.lat, coord.lon);
+        var distancia = distanciaMetrosBrujula(origenLat, origenLon, coord.lat, coord.lon);
+        mostrarResultadoBrujula(cuerpo, bearing, distancia);
+      }, function () {
+        btn.disabled = false;
+        btn.textContent = '🧭 Orientarme';
+        var error = document.createElement('span');
+        error.className = 'brujula-error';
+        error.setAttribute('role', 'status');
+        error.textContent = 'No pudimos acceder a tu ubicación.';
+        cuerpo.appendChild(error);
+      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+    });
+
+    function mostrarResultadoBrujula(cuerpo, bearing, distancia) {
+      cuerpo.innerHTML = svgRosaDeRumbos();
+      var agujaEl = cuerpo.querySelector('.brujula-aguja');
+      // En reposo (sin dato de orientación real) la aguja apunta al
+      // rumbo absoluto asumiendo "arriba de la pantalla = norte" — es
+      // una aproximación, por eso el texto de abajo lo aclara.
+      agujaEl.style.transform = 'rotate(' + bearing.toFixed(0) + 'deg)';
+      agujaEl.style.transformOrigin = '50px 50px';
+
+      var texto = document.createElement('span');
+      texto.className = 'brujula-texto';
+      texto.textContent = cardinalDe(bearing) + ' · ' + formatoDistanciaBrujula(distancia);
+      cuerpo.appendChild(texto);
+
+      var nota = document.createElement('span');
+      nota.className = 'brujula-nota';
+      nota.textContent = 'Aproximado — girá tu teléfono para orientarte mejor.';
+      cuerpo.appendChild(nota);
+
+      solicitarPermisoOrientacion(function (concedido) {
+        if (!concedido) return;
+        nota.remove();
+        desuscribirOrientacion = iniciarSeguimientoOrientacion(agujaEl, bearing);
+      });
+    }
+
+    // iOS 13+ exige pedir el permiso con un gesto de usuario real (este
+    // click lo es); en el resto de las plataformas no hay API de
+    // permiso separada — solo hay que intentar escuchar el evento y
+    // ver si trae datos utilizables (ver iniciarSeguimientoOrientacion).
+    function solicitarPermisoOrientacion(callback) {
+      if (typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(function (resp) { callback(resp === 'granted'); })
+          .catch(function () { callback(false); });
+      } else if (typeof DeviceOrientationEvent !== 'undefined') {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    }
+
+    // Se limpia el listener al salir de la ficha (view-transition o
+    // navegación normal) para no dejar un sensor activo de fondo.
+    window.addEventListener('pagehide', function () {
+      if (desuscribirOrientacion) desuscribirOrientacion();
+    }, { once: true });
+  }
+
+  function iniciarSeguimientoOrientacion(agujaEl, bearingHaciaLugar) {
+    var evento = ('ondeviceorientationabsolute' in window) ? 'deviceorientationabsolute' : 'deviceorientation';
+    var recibioDatoReal = false;
+
+    // Si en ~2.5s ningún evento trajo un heading utilizable (sensor
+    // ausente, permiso concedido pero sin hardware real detrás — pasa
+    // en algunos Android/desktop), se deja la aguja fija tal como
+    // quedó en mostrarResultadoBrujula() en vez de rotarla con datos
+    // basura. La nota de "aproximado" ya se sacó al conceder el
+    // permiso, así que se repone si termina sin dato real.
+    var timeoutSinDatos = setTimeout(function () {
+      if (recibioDatoReal) return;
+      var cuerpo = agujaEl.closest('.brujula-cuerpo');
+      if (cuerpo && !cuerpo.querySelector('.brujula-nota')) {
+        var nota = document.createElement('span');
+        nota.className = 'brujula-nota';
+        nota.textContent = 'Tu dispositivo no da datos de orientación en tiempo real — aproximado.';
+        cuerpo.appendChild(nota);
+      }
+    }, 2500);
+
+    function manejador(e) {
+      var heading = null;
+      // Safari/iOS: heading absoluto ya resuelto por el sistema, en el
+      // sentido correcto (0 = norte, crece en sentido horario).
+      if (typeof e.webkitCompassHeading === 'number') {
+        heading = e.webkitCompassHeading;
+      } else if (e.absolute && typeof e.alpha === 'number') {
+        // Spec estándar: alpha crece en sentido antihorario desde el
+        // norte cuando el evento es absoluto — se invierte para tener
+        // el mismo sentido horario que webkitCompassHeading arriba.
+        heading = (360 - e.alpha) % 360;
+      } else {
+        return; // sin dato real utilizable — no rotar con basura
+      }
+      recibioDatoReal = true;
+      clearTimeout(timeoutSinDatos);
+      var anguloAguja = (bearingHaciaLugar - heading + 360) % 360;
+      agujaEl.style.transform = 'rotate(' + anguloAguja.toFixed(1) + 'deg)';
+    }
+
+    window.addEventListener(evento, manejador);
+    return function desuscribir() {
+      clearTimeout(timeoutSinDatos);
+      window.removeEventListener(evento, manejador);
+    };
   }
 
   /* ───────────────────────── ESTADO ABIERTO/CERRADO ───────────────────────── */
@@ -558,5 +786,6 @@
     inicializarSupresionVidrio();
     inicializarCartaDePosicion();
     inicializarCtaSticky();
+    inicializarBrujula();
   });
 })();
