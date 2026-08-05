@@ -238,6 +238,25 @@ html.u-suprimir-vidrio{
   --gradiente-superficie: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%);
   --gradiente-borde-top:  linear-gradient(90deg, var(--chip-color, var(--color-granate-clara)), transparent 85%);
 
+  /* Isolínea como borde de superficie (pendiente verificado, Blueprint V2
+     §3 — "líneas de flujo tipo isolíneas de agua", ver AGENTS.md
+     "Corriente(s)"). Hasta ahora ese motivo de marca solo vivía en el
+     Ambient Engine de fondo (P1, asset animado); nunca en el borde de
+     una superficie real de la UI. Se trae acá como un detalle ESTÁTICO
+     (sin animación propia — el movimiento real ya lo aporta el Ambient
+     Engine; duplicarlo en cada tarjeta competiría por atención y costo
+     de repaint) para el borde inferior de superficies tipo tarjeta.
+     Data-URI en vez de asset .svg aparte: cero requests nuevos con
+     decenas de tarjetas en pantalla a la vez. Color fijo (no
+     var(--chip-color)): es un data-URI externo, no puede leer
+     currentColor del documento que lo referencia — se hardcodea
+     #C97A83, el mismo valor que --color-granate-clara, para que quede
+     coherente si algún día ese token cambia de nombre pero no de valor.
+     Repite cada 140px a 8px de alto, trazo fino y baja opacidad (.4):
+     firma de marca perceptible sin competir con el contenido real de
+     la tarjeta (nombre, rating, razón). */
+  --patron-isolinea: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='8' viewBox='0 0 140 8'%3E%3Cpath d='M0 4 Q17.5 0 35 4 T70 4 T105 4 T140 4' fill='none' stroke='%23C97A83' stroke-width='1.1' stroke-linecap='round' opacity='.4'/%3E%3C/svg%3E");
+
   --sombra-vidrio:  0 1px 1px rgba(255,255,255,.05) inset, 0 20px 40px -16px rgba(0,0,0,.55);
   --sombra-glow:    0 0 0 1px var(--color-granate-clara), 0 0 24px rgba(201,122,131,.35);
 
