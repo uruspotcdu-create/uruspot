@@ -3,7 +3,7 @@
  * Fuente: 16 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-04T18:21:01.171Z
+ * Generado: 2026-08-05T03:21:39.915Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -144,6 +144,9 @@ html.u-suprimir-vidrio{
                         radial-gradient(50% 50% at 85% 0%, rgba(126,166,224,.20), transparent 65%);
   --gradiente-superficie: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%);
   --gradiente-borde-top:  linear-gradient(90deg, var(--chip-color, var(--color-granate-clara)), transparent 85%);
+
+  
+  --patron-isolinea: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='8' viewBox='0 0 140 8'%3E%3Cpath d='M0 4 Q17.5 0 35 4 T70 4 T105 4 T140 4' fill='none' stroke='%23C97A83' stroke-width='1.1' stroke-linecap='round' opacity='.4'/%3E%3C/svg%3E");
 
   --sombra-vidrio:  0 1px 1px rgba(255,255,255,.05) inset, 0 20px 40px -16px rgba(0,0,0,.55);
   --sombra-glow:    0 0 0 1px var(--color-granate-clara), 0 0 24px rgba(201,122,131,.35);
@@ -1222,7 +1225,9 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
 
 .tarjeta{
   position:relative; isolation:isolate; overflow:hidden;
-  background:var(--glass-bg); border:1px solid var(--glass-borde);
+  
+  background:var(--patron-isolinea) bottom / 140px 8px repeat-x, var(--glass-bg);
+  border:1px solid var(--glass-borde);
   border-radius:var(--radio-lg); padding:var(--esp-4);
   backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
   box-shadow:var(--sombra-vidrio);
@@ -1297,6 +1302,18 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
 .tarjeta-rating{
   color:var(--color-rubro-alojamiento); font-weight:var(--peso-semibold);
   font-family:var(--f-dato); text-transform:none; letter-spacing:normal;
+}
+
+.tarjeta-badge-comparacion{
+  color:var(--color-granate-clara); font-weight:var(--peso-semibold);
+  font-family:var(--f-dato); text-transform:none; letter-spacing:normal;
+}
+.tarjeta--comparando{
+  border-color:var(--color-granate-clara);
+}
+.nota-comparacion{
+  grid-column:1 / -1; color:var(--color-tinta-60); font:var(--tipo-cuerpo-xs);
+  margin:0 0 calc(-1 * var(--esp-2)) 0;
 }
 .tarjeta-nombre{
   font:var(--tipo-display-sm); margin-top:var(--esp-1);
@@ -1553,6 +1570,16 @@ button.chip.chip--activo .chip__conteo{
 }
 .sugerencia-chip--cerca:hover{
   background:rgba(111,191,139,.10);
+  border-style:solid;
+}
+
+.sugerencia-chip--sorpresa{
+  border-style:dashed;
+  color:var(--color-granate);
+  border-color:var(--color-granate);
+}
+.sugerencia-chip--sorpresa:hover{
+  background:var(--glass-bg);
   border-style:solid;
 }
 
