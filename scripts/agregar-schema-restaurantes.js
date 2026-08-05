@@ -32,11 +32,24 @@
  * Es idempotente: si una ficha ya tiene `application/ld+json`, se
  * salta (no duplica ni pisa un schema existente).
  *
- * Uso: node scripts/agregar-schema-restaurantes.js
+ * MODO DRY-RUN POR DEFECTO: sin --write, solo imprime un reporte de
+ * qué JSON-LD generaría para cada ficha y NO toca ningún archivo. Son
+ * negocios reales — un dato mal parseado (rating, teléfono, dirección)
+ * publicado como structured data es peor que no tener structured data.
+ * Revisá el reporte antes de correr con --write (mismo criterio que ya
+ * usa scripts/generar-jsonld-fichas.js para donde-comer-cdu/locales/*).
+ *
+ * Uso:
+ *   node scripts/agregar-schema-restaurantes.js            → reporte, no escribe
+ *   node scripts/agregar-schema-restaurantes.js --write     → inyecta el <script>
+ *                                                              JSON-LD antes de
+ *                                                              </head> en cada ficha
  */
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+
+const ESCRIBIR = process.argv.includes('--write');
 
 function resolverRoot() {
   try {
@@ -124,15 +137,26 @@ for (const slug of slugs) {
   }
 
   const script = `<script type="application/ld+json">\n${JSON.stringify(ld, null, 2)}\n</script>\n`;
-  const nuevoHtml = html.replace('</head>', `${script}</head>`);
 
-  fs.writeFileSync(file, nuevoHtml, 'utf8');
+  if (ESCRIBIR) {
+    const nuevoHtml = html.replace('</head>', `${script}</head>`);
+    fs.writeFileSync(file, nuevoHtml, 'utf8');
+    console.log(`[escrito] ${slug}`);
+  } else {
+    console.log(`\n=== ${slug} ===`);
+    console.log(JSON.stringify(ld, null, 2));
+  }
   procesadas++;
 }
 
-console.log(`Procesadas (JSON-LD agregado): ${procesadas}`);
+console.log('\n--------------------------------------------------');
+console.log(`Procesadas (JSON-LD ${ESCRIBIR ? 'agregado' : 'propuesto'}): ${procesadas}`);
 console.log(`Ya tenían JSON-LD (saltadas): ${saltadas}`);
 if (reporte.length) {
   console.log('\nAdvertencias:');
   reporte.forEach(r => console.log('  - ' + r));
+}
+if (!ESCRIBIR) {
+  console.log('\nDRY-RUN: no se escribió ningún archivo. Revisá el reporte de arriba y');
+  console.log('corré con --write cuando estés conforme con lo que se extrajo.');
 }
