@@ -89,6 +89,26 @@ html.u-suprimir-vidrio .hero-score{
   .carta-posicion__lienzo{transition:none}
 }
 
+/* CTA STICKY EN MOBILE (Fase 4) — barra creada por ficha.js
+   (inicializarCtaSticky()), oculta por completo en desktop. */
+.cta-sticky{
+  display:none;position:fixed;left:0;right:0;bottom:0;z-index:90;
+  background:var(--ink-soft);box-shadow:0 -4px 20px rgba(0,0,0,.35);
+  transform:translateY(100%);transition:transform .25s ease;
+  padding-bottom:env(safe-area-inset-bottom,0);
+}
+.cta-sticky.is-visible{transform:translateY(0)}
+.cta-sticky__btn{
+  flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:16px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
+}
+.cta-sticky__btn--principal{background:var(--gold);color:var(--ink)}
+.cta-sticky__btn--secundario{background:transparent;color:#fff;border-left:1px solid rgba(255,255,255,0.12)}
+@media(prefers-reduced-motion:reduce){
+  .cta-sticky{transition:none}
+}
+
 /* STATUS PILL */
 .status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:2px;font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase}
 .status-dot{width:6px;height:6px;border-radius:50%}
@@ -194,6 +214,11 @@ html.u-suprimir-vidrio .hero-score{
   .hero-content{padding:0 20px 44px}
   .hero-score{display:none}
   .page{padding:48px 20px}
+  /* Espacio reservado para que la barra sticky (cuando está visible) no
+     tape el final de la página — mismo alto aprox. que .cta-sticky__btn
+     con su padding vertical de 16px + safe-area del notch. */
+  body{padding-bottom:56px}
+  .cta-sticky{display:flex}
   .about-grid,.scores-grid,.map-grid{grid-template-columns:1fr;gap:32px}
   .gallery{grid-template-columns:1fr;grid-template-rows:auto}
   .gallery-main{grid-row:auto}
