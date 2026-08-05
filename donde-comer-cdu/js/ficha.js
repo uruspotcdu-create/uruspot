@@ -16,6 +16,27 @@
     DATA = {};
   }
 
+  /* ───────────────────────── PICTOGRAMA DE RUBRO EN HERO (Design System) ──
+     URUSPOT-PENDIENTES §6: URU_RUBROS_ICONO_SVG() ya se usaba en el filtro
+     "Por rubro" y en la leyenda del mapa, pero no en hero-eyebrow de la
+     ficha — la última superficie que faltaba. rubros-meta.js (que expone
+     window.URU_RUBROS_ICONO_SVG) ya se carga antes que este script en las
+     51 fichas, y #ficha-data ya trae "rubro" — no hace falta tocar HTML. */
+  function aplicarPictogramaRubro() {
+    var eyebrow = document.querySelector(".hero-eyebrow");
+    var textoEl = eyebrow && eyebrow.querySelector(".eyebrow-text");
+    if (!eyebrow || !textoEl || !DATA.rubro) return;
+    if (typeof window.URU_RUBROS_ICONO_SVG !== "function") return;
+    var svg = window.URU_RUBROS_ICONO_SVG(DATA.rubro, { tam: 15, color: "currentColor" });
+    if (!svg) return;
+    var wrap = document.createElement("span");
+    wrap.className = "eyebrow-icono";
+    wrap.style.color = "var(--gold)";
+    wrap.style.display = "flex";
+    wrap.innerHTML = svg;
+    eyebrow.insertBefore(wrap, textoEl);
+  }
+
   /* ───────────────────────── CONTINUIDAD DE APERTURA (Fase 4, Cap. 6) ─────
      "El elemento de origen (la tarjeta tocada) se convierte visualmente en
      el encabezado de la ficha". Contraparte de la view-transition-name que
@@ -27,6 +48,176 @@
     var m = location.pathname.match(/\/locales\/([^\/]+)\/?$/);
     if (!m) return;
     titulo.style.viewTransitionName = "vt-titulo-" + m[1];
+  }
+
+  /* ───────────────────────── CARTA DE POSICIÓN (Fase 4) ─────────────────────
+     URUSPOT-PENDIENTES §5: la ficha no tenía ninguna celda de "cómo llegar"
+     con mapa — solo el botón grande de más abajo. Esto es PURAMENTE
+     presentacional: agrega una 4ª celda al .info-strip ya existente. NO
+     toca el algoritmo de recorte/scoring (app.js / motor-exposicion.js) —
+     decisión explícita: ese sigue rigiéndose únicamente por tieneFicha(),
+     sin relación con esta celda.
+
+     Fuente de la coordenada: el propio link "Cómo llegar" a Google Maps
+     que cada ficha ya trae en el DOM, con el patrón "@lat,lng,zoom" —
+     el mismo patrón que scripts/generar-jsonld-fichas.js usa para el
+     JSON-LD. Se lee del <a> real (no del JSON-LD) para que esto funcione
+     en las 51 fichas por igual, no solo en las 48 que ya tienen geo en
+     el JSON-LD.
+
+     Mapa estático: mismo proveedor de tiles que ya usa motor-mapa.js
+     (Carto Voyager, basemaps.cartocdn.com) — sin librería nueva. Un
+     <canvas> chico, cuadrícula de tiles alrededor del centro, y la
+     matemática estándar de slippy map (misma fórmula que cualquier
+     mapa basado en OSM/Carto) para ubicar el pin en el pixel exacto. */
+  var CARTA_TILE_SIZE = 256;
+  var CARTA_ZOOM = 16;
+  var CARTA_SERVIDORES = ['a', 'b', 'c', 'd'];
+
+  function cartaLonLatAPixel(lat, lon, zoom) {
+    var n = Math.pow(2, zoom);
+    var latRad = lat * Math.PI / 180;
+    var x = (lon + 180) / 360 * n;
+    var y = (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n;
+    return { x: x * CARTA_TILE_SIZE, y: y * CARTA_TILE_SIZE };
+  }
+
+  function cartaDibujarPin(ctx, cx, cy) {
+    var gold = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#c9a84c';
+    ctx.save();
+    // sombra de contacto en el suelo, para que el pin no "flote"
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 3, 7, 3, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.fill();
+    // gota
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 20);
+    ctx.bezierCurveTo(cx - 11, cy - 20, cx - 11, cy - 4, cx, cy);
+    ctx.bezierCurveTo(cx + 11, cy - 4, cx + 11, cy - 20, cx, cy - 20);
+    ctx.closePath();
+    ctx.fillStyle = gold;
+    ctx.fill();
+    // ojo
+    ctx.beginPath();
+    ctx.arc(cx, cy - 13, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function cartaRenderizarMinimapa(canvas, lat, lon) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var cssW = canvas.clientWidth || 220;
+    var cssH = canvas.clientHeight || 130;
+    if (!cssW || !cssH) return;
+    canvas.width = cssW * dpr;
+    canvas.height = cssH * dpr;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    var centro = cartaLonLatAPixel(lat, lon, CARTA_ZOOM);
+    var origenX = centro.x - cssW / 2;
+    var origenY = centro.y - cssH / 2;
+    var n = Math.pow(2, CARTA_ZOOM);
+
+    var tileMinX = Math.floor(origenX / CARTA_TILE_SIZE);
+    var tileMaxX = Math.floor((origenX + cssW) / CARTA_TILE_SIZE);
+    var tileMinY = Math.floor(origenY / CARTA_TILE_SIZE);
+    var tileMaxY = Math.floor((origenY + cssH) / CARTA_TILE_SIZE);
+
+    var pendientes = 0, total = 0;
+    for (var tx = tileMinX; tx <= tileMaxX; tx++) {
+      for (var ty = tileMinY; ty <= tileMaxY; ty++) total++;
+    }
+    if (total === 0) return;
+
+    function tileListo() {
+      pendientes++;
+      if (pendientes === total) cartaDibujarPin(ctx, cssW / 2, cssH / 2);
+    }
+
+    for (var txx = tileMinX; txx <= tileMaxX; txx++) {
+      for (var tyy = tileMinY; tyy <= tileMaxY; tyy++) {
+        // tiles fuera del rango válido del mundo (no hay wraparound acá:
+        // una ficha real nunca está tan cerca del polo/antimeridiano)
+        if (tyy < 0 || tyy >= n) { tileListo(); continue; }
+        (function (txi, tyi) {
+          var xValida = ((txi % n) + n) % n; // wraparound horizontal real
+          var servidor = CARTA_SERVIDORES[Math.abs(txi + tyi) % CARTA_SERVIDORES.length];
+          var img = new Image();
+          img.onload = function () {
+            ctx.drawImage(img, txi * CARTA_TILE_SIZE - origenX, tyi * CARTA_TILE_SIZE - origenY,
+              CARTA_TILE_SIZE, CARTA_TILE_SIZE);
+            tileListo();
+          };
+          img.onerror = tileListo;
+          img.src = 'https://' + servidor + '.basemaps.cartocdn.com/rastertiles/voyager/' +
+            CARTA_ZOOM + '/' + xValida + '/' + tyi + '.png';
+        })(txx, tyy);
+      }
+    }
+  }
+
+  function inicializarCartaDePosicion() {
+    var strip = document.querySelector('.info-strip');
+    if (!strip) return;
+
+    // OJO: no alcanza con el primer link a google.com/maps del documento.
+    // El chip-google del hero ("★ 4.4 Google · 626 reseñas") también
+    // apunta a Maps, pero vía place_id (sin @lat,lng,zoom) — matchea el
+    // selector igual y, si se toma ese, el regex de abajo nunca matchea
+    // y la celda no se crea. Se recorre TODOS los links a Maps del
+    // documento y se usa el primero cuyo href de verdad trae la
+    // coordenada (el botón/sección "Cómo llegar").
+    var candidatos = document.querySelectorAll('a[href*="google.com/maps"]');
+    var linkMapa = null, m = null;
+    for (var i = 0; i < candidatos.length; i++) {
+      var intento = candidatos[i].href.match(/@(-?[\d.]+),(-?[\d.]+),/);
+      if (intento) { linkMapa = candidatos[i]; m = intento; break; }
+    }
+    if (!linkMapa) return;
+
+    // Save-Data / conexión lenta: no se pide la cuadrícula de tiles.
+    // Degrada a no mostrar la celda nueva en vez de mostrarla rota o en
+    // blanco — el botón "Cómo llegar" grande de más abajo sigue ahí.
+    if (navigator.connection && navigator.connection.saveData) return;
+    var lat = parseFloat(m[1]);
+    var lon = parseFloat(m[2]);
+    if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
+
+    var celda = document.createElement('div');
+    celda.className = 'info-cell info-cell--posicion';
+
+    var etiqueta = document.createElement('span');
+    etiqueta.className = 'info-cell-label';
+    etiqueta.textContent = 'Ubicación exacta';
+    celda.appendChild(etiqueta);
+
+    var enlace = document.createElement('a');
+    enlace.className = 'carta-posicion';
+    enlace.href = linkMapa.href;
+    enlace.target = '_blank';
+    enlace.rel = 'noopener noreferrer';
+    enlace.setAttribute('aria-label', 'Ver mapa y cómo llegar' + (DATA.nombre ? ' a ' + DATA.nombre : ''));
+
+    var lienzo = document.createElement('canvas');
+    lienzo.className = 'carta-posicion__lienzo';
+    enlace.appendChild(lienzo);
+
+    var cta = document.createElement('span');
+    cta.className = 'carta-posicion__etiqueta';
+    cta.setAttribute('aria-hidden', 'true');
+    cta.textContent = '🗺️ Cómo llegar';
+    enlace.appendChild(cta);
+
+    celda.appendChild(enlace);
+    strip.appendChild(celda);
+    strip.classList.add('info-strip--con-mapa');
+
+    // El canvas recién tiene tamaño real (clientWidth/Height) una vez que
+    // esta celda ya está en el DOM y el layout se resolvió.
+    requestAnimationFrame(function () { cartaRenderizarMinimapa(lienzo, lat, lon); });
   }
 
   /* ───────────────────────── ESTADO ABIERTO/CERRADO ───────────────────────── */
@@ -262,122 +453,34 @@
     });
   }
 
-  /* ───────────────────────── RESEÑAS PROPIAS (URU SPOT) ─────────────────────
-     Reseñas de primera parte, recolectadas en el propio sitio y moderadas
-     antes de publicarse (ver functions/reviews.js). Es la contraparte real
-     del chip "Google" de la hero: acá el promedio SÍ puede volver a vivir en
-     el JSON-LD como aggregateRating el día que haya volumen suficiente,
-     porque a diferencia del dato de Google, este nace en uruspot.pages.dev. */
+  /* ───────────────────────── SUPRESIÓN DE VIDRIO EN SCROLL ────────────
+     PERF (auditoría scroll, 2026-08-04): .nav es position:fixed con
+     backdrop-filter (css/ficha.css → locales/ficha.css) y queda en
+     pantalla durante TODO el scroll de la ficha — sin esto, paga el
+     costo completo de recomponer el fondo en cada frame. Mismo patrón
+     exacto que manejarScrollParaSupresionVidrio() en app.js (índice):
+     un solo listener passive, coalescido a como mucho un toggle de
+     clase por frame vía rAF (nunca trabajo por evento de scroll crudo),
+     y un debounce de 150ms para reponer el vidrio recién cuando el
+     usuario realmente se detuvo. */
+  var scrollRafPendiente = false;
+  var scrollFinTimeout = null;
 
-  function formatearFecha(iso) {
-    try {
-      return new Date(iso).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" });
-    } catch (e) {
-      return "";
-    }
-  }
-
-  function escaparHtml(str) {
-    var div = document.createElement("div");
-    div.textContent = str == null ? "" : String(str);
-    return div.innerHTML;
-  }
-
-  function estrellas(n) {
-    var llenas = Math.max(0, Math.min(5, Math.round(n)));
-    return "★★★★★☆☆☆☆☆".slice(5 - llenas, 10 - llenas);
-  }
-
-  function pintarResenas(datos) {
-    var resumen = document.getElementById("reviewsSummary");
-    var lista = document.getElementById("reviewsList");
-    if (!resumen || !lista) return;
-
-    if (!datos || !datos.total) {
-      resumen.innerHTML = '<p class="reviews-empty">Todavía no hay reseñas de URU SPOT para este lugar. ¡Sé la primera persona en dejar la tuya!</p>';
-      lista.innerHTML = "";
-      return;
-    }
-
-    resumen.innerHTML =
-      '<span class="reviews-promedio">' + estrellas(datos.promedio) + " " + datos.promedio.toFixed(1).replace(".", ",") + "</span>" +
-      '<span class="reviews-total">basado en ' + datos.total + (datos.total === 1 ? " reseña" : " reseñas") + " de URU SPOT</span>";
-
-    lista.innerHTML = datos.resenas.map(function (r) {
-      return (
-        '<li class="review-item">' +
-        '<div class="review-item-head">' +
-        '<span class="review-autor">' + escaparHtml(r.autor) + "</span>" +
-        '<span class="review-estrellas" aria-label="' + r.puntuacion + ' de 5">' + estrellas(r.puntuacion) + "</span>" +
-        "</div>" +
-        (r.comentario ? '<p class="review-comentario">' + escaparHtml(r.comentario) + "</p>" : "") +
-        '<span class="review-fecha">' + formatearFecha(r.fecha) + "</span>" +
-        "</li>"
-      );
-    }).join("");
-  }
-
-  function cargarResenas() {
-    var resumen = document.getElementById("reviewsSummary");
-    if (!resumen || !DATA.uru_id) return;
-
-    fetch("/reviews?id=" + encodeURIComponent(DATA.uru_id))
-      .then(function (res) { if (!res.ok) throw new Error("http_" + res.status); return res.json(); })
-      .then(pintarResenas)
-      .catch(function () {
-        resumen.innerHTML = '<p class="reviews-empty">No pudimos cargar las reseñas ahora. Probá de nuevo más tarde.</p>';
-      });
-  }
-
-  function initFormularioResenas() {
-    var form = document.getElementById("reviewForm");
-    var msg = document.getElementById("reviewFormMsg");
-    if (!form || !DATA.uru_id) return;
-
-    form.addEventListener("submit", function (ev) {
-      ev.preventDefault();
-      msg.textContent = "";
-
-      var autor = form.autor.value.trim();
-      var puntuacion = Number(form.puntuacion.value);
-      var comentario = form.comentario.value.trim();
-      var website = form.website.value; // honeypot
-
-      if (!autor || !puntuacion) {
-        msg.textContent = "Completá tu nombre y una puntuación.";
-        msg.className = "reviews-form-msg reviews-form-msg--error";
-        return;
-      }
-
-      var btn = form.querySelector(".reviews-submit");
-      btn.disabled = true;
-
-      fetch("/reviews", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          id: DATA.uru_id,
-          autor: autor,
-          puntuacion: puntuacion,
-          comentario: comentario,
-          website: website,
-        }),
-      })
-        .then(function (res) {
-          if (!res.ok) throw new Error("http_" + res.status);
-          return res.json();
-        })
-        .then(function () {
-          form.reset();
-          msg.textContent = "¡Gracias! Tu reseña queda pendiente de una revisión rápida antes de publicarse.";
-          msg.className = "reviews-form-msg reviews-form-msg--ok";
-        })
-        .catch(function () {
-          msg.textContent = "No pudimos enviar tu reseña. Probá de nuevo en unos minutos.";
-          msg.className = "reviews-form-msg reviews-form-msg--error";
-        })
-        .then(function () { btn.disabled = false; });
+  function manejarScrollParaSupresionVidrio() {
+    if (scrollRafPendiente) return;
+    scrollRafPendiente = true;
+    requestAnimationFrame(function () {
+      scrollRafPendiente = false;
+      document.documentElement.classList.add("u-suprimir-vidrio");
+      if (scrollFinTimeout) clearTimeout(scrollFinTimeout);
+      scrollFinTimeout = setTimeout(function () {
+        document.documentElement.classList.remove("u-suprimir-vidrio");
+      }, 150);
     });
+  }
+
+  function inicializarSupresionVidrio() {
+    window.addEventListener("scroll", manejarScrollParaSupresionVidrio, { passive: true });
   }
 
   /* ───────────────────────── INIT ───────────────────────── */
@@ -387,7 +490,8 @@
     animarScores();
     initShare();
     aplicarNombreDeTransicion();
-    cargarResenas();
-    initFormularioResenas();
+    aplicarPictogramaRubro();
+    inicializarSupresionVidrio();
+    inicializarCartaDePosicion();
   });
 })();
