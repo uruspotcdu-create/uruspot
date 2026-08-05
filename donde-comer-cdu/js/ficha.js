@@ -283,6 +283,20 @@
     return (m / 1000).toFixed(1).replace('.0', '') + ' km';
   }
 
+  // Suavizado de movimiento (EMA circular): el evento deviceorientation
+  // dispara ~60 veces por segundo con ruido real del magnetómetro — sin
+  // esto la aguja tiembla en vez de girar. factor en (0,1]: 1 = sin
+  // suavizar (compatibilidad con el valor crudo), valores más chicos
+  // pesan más el historial. Circular de verdad: no promedia 359° y 1°
+  // como si fueran (359+1)/2=180° — toma el delta más corto (rango
+  // [-180,180)) y lo aplica sobre el ángulo anterior, así 359°→1° gira
+  // 2° hacia adelante en vez de saltar a 180°.
+  function suavizarAngulo(anterior, nuevo, factor) {
+    if (anterior === null || typeof anterior !== 'number' || isNaN(anterior)) return nuevo;
+    var delta = ((nuevo - anterior + 540) % 360) - 180;
+    return (anterior + delta * factor + 360) % 360;
+  }
+
   // SVG de la rosa de rumbos: autocontenido (sin <use> a las primitivas
   // del Ambient Engine — esas están pensadas para el sistema decorativo
   // de fondo, con su propia convención de tokens/viewBox; este es un
@@ -317,6 +331,14 @@
 
     var cuerpo = document.createElement('div');
     cuerpo.className = 'brujula-cuerpo';
+    // Accesibilidad: región viva para que el resultado ("Ubicándote…",
+    // luego "NE · 320 m", luego el aviso de calibración si aparece) se
+    // anuncie solo con lector de pantalla, sin que el usuario tenga que
+    // volver a enfocar nada. Es una sola actualización por acción real
+    // del usuario (click) o por cambio de estado del sensor — nunca por
+    // frame de animación, así que no genera spam de anuncios.
+    cuerpo.setAttribute('role', 'status');
+    cuerpo.setAttribute('aria-live', 'polite');
 
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -372,7 +394,7 @@
       solicitarPermisoOrientacion(function (concedido) {
         if (!concedido) return;
         nota.remove();
-        desuscribirOrientacion = iniciarSeguimientoOrientacion(agujaEl, bearing);
+        desuscribirOrientacion = iniciarSeguimientoOrientacion(agujaEl, bearing, cuerpo, texto);
       });
     }
 
@@ -400,9 +422,24 @@
     }, { once: true });
   }
 
-  function iniciarSeguimientoOrientacion(agujaEl, bearingHaciaLugar) {
+  // Umbral de precisión (grados de incertidumbre que reporta iOS vía
+  // webkitCompassAccuracy) por encima del cual el rumbo ya no es
+  // confiable — mismo orden de magnitud que usan apps de navegación
+  // conocidas para pedir calibración. Android/estándar no expone esta
+  // señal, así que la calibración ahí queda simplemente sin activarse
+  // (no hay dato falso que mostrar, Cap. 8.2: nada de excepciones
+  // silenciosas, pero tampoco se inventa una señal que no existe).
+  var BRUJULA_PRECISION_MIN_ACEPTABLE = 25;
+  var BRUJULA_SUAVIZADO_FACTOR = 0.18;
+  var BRUJULA_CALIBRACION_SOSTEN_MS = 3000;
+
+  function iniciarSeguimientoOrientacion(agujaEl, bearingHaciaLugar, cuerpo, texto) {
     var evento = ('ondeviceorientationabsolute' in window) ? 'deviceorientationabsolute' : 'deviceorientation';
     var recibioDatoReal = false;
+    var headingSuavizado = null;
+    var desdeCuandoImpreciso = null;
+    var elementoCalibracion = null;
+    var avisoTiempoRealMostrado = false;
 
     // Si en ~2.5s ningún evento trajo un heading utilizable (sensor
     // ausente, permiso concedido pero sin hardware real detrás — pasa
@@ -412,7 +449,6 @@
     // permiso, así que se repone si termina sin dato real.
     var timeoutSinDatos = setTimeout(function () {
       if (recibioDatoReal) return;
-      var cuerpo = agujaEl.closest('.brujula-cuerpo');
       if (cuerpo && !cuerpo.querySelector('.brujula-nota')) {
         var nota = document.createElement('span');
         nota.className = 'brujula-nota';
@@ -420,6 +456,32 @@
         cuerpo.appendChild(nota);
       }
     }, 2500);
+
+    // Calibración: aparece solo si el propio sensor reporta precisión
+    // mala DURANTE varios segundos seguidos (no en el primer evento
+    // ruidoso al activar) y desaparece sola en cuanto la precisión
+    // mejora — nunca queda pegada una vez que el usuario ya calibró.
+    function actualizarAvisoCalibracion(accuracyDeg, ahora) {
+      var imprecisoAhora = typeof accuracyDeg === 'number' && (accuracyDeg < 0 || accuracyDeg > BRUJULA_PRECISION_MIN_ACEPTABLE);
+
+      if (!imprecisoAhora) {
+        desdeCuandoImpreciso = null;
+        if (elementoCalibracion) {
+          elementoCalibracion.remove();
+          elementoCalibracion = null;
+        }
+        return;
+      }
+
+      if (desdeCuandoImpreciso === null) desdeCuandoImpreciso = ahora;
+      if (ahora - desdeCuandoImpreciso < BRUJULA_CALIBRACION_SOSTEN_MS) return;
+      if (elementoCalibracion || !cuerpo) return;
+
+      elementoCalibracion = document.createElement('span');
+      elementoCalibracion.className = 'brujula-nota brujula-calibracion';
+      elementoCalibracion.textContent = 'Brújula poco precisa — moví el teléfono en forma de 8 para calibrarla.';
+      cuerpo.appendChild(elementoCalibracion);
+    }
 
     function manejador(e) {
       var heading = null;
@@ -437,8 +499,30 @@
       }
       recibioDatoReal = true;
       clearTimeout(timeoutSinDatos);
-      var anguloAguja = (bearingHaciaLugar - heading + 360) % 360;
+
+      headingSuavizado = suavizarAngulo(headingSuavizado, heading, BRUJULA_SUAVIZADO_FACTOR);
+      var anguloAguja = (bearingHaciaLugar - headingSuavizado + 360) % 360;
       agujaEl.style.transform = 'rotate(' + anguloAguja.toFixed(1) + 'deg)';
+
+      var ahora = (e.timeStamp && typeof e.timeStamp === 'number') ? e.timeStamp : Date.now();
+      actualizarAvisoCalibracion(e.webkitCompassAccuracy, ahora);
+
+      // Un solo anuncio, la primera vez que llega un dato real de
+      // orientación: confirma para lectores de pantalla que la aguja
+      // pasó de "aproximada" a "en tiempo real" (Cap. 6.1, punto 4 de
+      // la cabecera de este archivo). No se repite en cada evento — el
+      // aria-live de `cuerpo` ya cubre calibración y errores por su
+      // cuenta sin que este aviso los duplique.
+      if (!avisoTiempoRealMostrado && cuerpo) {
+        avisoTiempoRealMostrado = true;
+        var avisoVivo = document.createElement('span');
+        avisoVivo.className = 'brujula-nota brujula-en-vivo';
+        avisoVivo.textContent = 'Orientación en tiempo real activada.';
+        cuerpo.appendChild(avisoVivo);
+        setTimeout(function () {
+          if (avisoVivo.parentNode) avisoVivo.remove();
+        }, 4000);
+      }
     }
 
     window.addEventListener(evento, manejador);
