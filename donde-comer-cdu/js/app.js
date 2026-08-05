@@ -343,6 +343,7 @@
     debounceBuscarId: null,
     debounceFiltroId: null,
     permanenciaTimer: null,
+    climaContextoTimer: null,
     focusTrapTimer: null,
     geolocationRequest: null,
     pendingFetches: []
@@ -3723,7 +3724,7 @@
 
   function inicializarContextoClima() {
     actualizarClimaContexto();
-    setInterval(actualizarClimaContexto, CLIMA_CONTEXTO_INTERVALO_MS);
+    activeOperations.climaContextoTimer = setInterval(actualizarClimaContexto, CLIMA_CONTEXTO_INTERVALO_MS);
   }
 
   // ───────────────────────────────────────────────────────────────────
