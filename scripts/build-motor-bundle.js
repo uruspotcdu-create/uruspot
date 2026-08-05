@@ -2,10 +2,20 @@
 /*
  * scripts/build-motor-bundle.js
  * ---------------------------------------------------------------------
- * Concatena los 10 módulos "core" (motor-config, rubros-meta,
- * locales-slug, motor-plano, motor-exposicion, motor-mapa, proyeccion,
- * motor-render, motor-indice-busqueda, datos-virtualizador) en un
- * único js/motor.bundle.js, en el mismo orden que index.html.
+ * Concatena los 11 módulos "core" (motor-config, rubros-meta,
+ * locales-slug, motor-plano, motor-exposicion, motor-comparacion,
+ * motor-mapa, proyeccion, motor-render, motor-indice-busqueda,
+ * datos-virtualizador) en un único js/motor.bundle.js, en el mismo
+ * orden que index.html.
+ *
+ * motor-comparacion.js se agregó el 2026-08-05: existía ya como
+ * consumidor en app.js (window.URU_COMPARACION, rama RAMA_CURADURIA)
+ * desde antes de que el módulo mismo existiera — el bundle nunca lo
+ * incluía porque el archivo fuente no estaba. Sin dependencias hacia
+ * los demás módulos (no lee CFG ni PLANO), así que su posición en
+ * este orden no importa para ninguno de los pares que contract-tests.js
+ * verifica; va junto a motor-exposicion.js por afinidad temática
+ * (ambos deciden qué/cómo mostrar del registro), no por necesidad.
  *
  * Mismo criterio que scripts/build-ambiente-bundle.js: cada módulo es
  * un IIFE autocontenido — (function (global) {...})(window) o
@@ -84,6 +94,7 @@ const ORDEN = [
   'locales-slug.js',
   'motor-plano.js',
   'motor-exposicion.js',
+  'motor-comparacion.js',
   'motor-mapa.js',
   'proyeccion.js',
   'motor-render.js',
