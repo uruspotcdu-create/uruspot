@@ -78,6 +78,8 @@ html.u-suprimir-vidrio .hero-score{
    la celda, así el layout de 3 columnas de siempre no cambia en las
    pocas fichas que todavía no tienen lat/lng. */
 .info-strip--con-mapa{grid-template-columns:repeat(4,1fr)}
+.info-strip--con-brujula{grid-template-columns:repeat(4,1fr)}
+.info-strip--con-mapa.info-strip--con-brujula{grid-template-columns:repeat(5,1fr)}
 .info-cell--posicion{padding:0;position:relative;min-height:120px}
 .carta-posicion{display:block;position:relative;width:100%;height:100%;min-height:120px;text-decoration:none;background:var(--ink)}
 .carta-posicion__lienzo{display:block;width:100%;height:100%;transition:transform .3s ease}
@@ -107,6 +109,27 @@ html.u-suprimir-vidrio .hero-score{
 .cta-sticky__btn--secundario{background:transparent;color:#fff;border-left:1px solid rgba(255,255,255,0.12)}
 @media(prefers-reduced-motion:reduce){
   .cta-sticky{transition:none}
+}
+
+/* BRÚJULA FUNCIONAL (Fase 4, Blueprint V2 Cap. 4.1) — celda creada por
+   ficha.js (inicializarBrujula()) cuando el navegador soporta
+   geolocalización. Arranca como un botón simple (.brujula-activar);
+   al tocarlo se reemplaza por la rosa de rumbos + texto. */
+.brujula-cuerpo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:40px}
+.brujula-activar{
+  background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;
+  font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.05em;
+  padding:8px 14px;border-radius:999px;cursor:pointer;transition:border-color .2s ease,background .2s ease;
+}
+.brujula-activar:hover,.brujula-activar:focus-visible{border-color:var(--gold);background:rgba(255,255,255,.04)}
+.brujula-activar:disabled{opacity:.6;cursor:default}
+.brujula-rosa{color:#fff;flex-shrink:0}
+.brujula-aguja{transition:transform .4s ease;transform-origin:50px 50px}
+.brujula-texto{font-family:'Cormorant Garamond',serif;font-size:18px;color:#fff}
+.brujula-nota{flex-basis:100%;font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.02em}
+.brujula-error{font-size:12px;color:rgba(255,255,255,.55)}
+@media(prefers-reduced-motion:reduce){
+  .brujula-aguja{transition:none}
 }
 
 /* STATUS PILL */
@@ -228,6 +251,8 @@ html.u-suprimir-vidrio .hero-score{
   .schedule-block{grid-template-columns:1fr;padding:44px 20px;gap:32px}
   .info-strip{grid-template-columns:1fr}
   .info-strip--con-mapa{grid-template-columns:1fr}
+  .info-strip--con-brujula{grid-template-columns:1fr}
+  .info-strip--con-mapa.info-strip--con-brujula{grid-template-columns:1fr}
   .info-cell{border-right:none;border-bottom:1px solid rgba(255,255,255,0.08);padding:24px 20px}
   .info-cell--posicion{padding:0;min-height:160px}
   .carta-posicion{min-height:160px}
