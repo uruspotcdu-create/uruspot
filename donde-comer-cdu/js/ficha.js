@@ -434,6 +434,70 @@
     }
   }
 
+  /* ───────────────────────── CTA STICKY EN MOBILE (Fase 4) ─────────────────
+     URUSPOT-PENDIENTES §5: en mobile, una vez que el usuario scrollea más
+     allá del hero, los botones de contacto/"cómo llegar" quedan arriba,
+     lejos, y hay que volver a subir para actuar. Barra fija abajo, solo en
+     mobile, que aparece cuando el hero sale de vista y junta las DOS
+     acciones que más importan: contacto directo (WhatsApp si existe, si no
+     teléfono) y "Cómo llegar" — reutilizando los links reales que ya trae
+     cada ficha, sin datos nuevos ni tocar ningún HTML de locales/*.
+     Igual que Carta de Posición: puramente presentacional, sin ninguna
+     relación con el algoritmo de recorte/scoring. */
+  function ctaStickyBuscarContacto() {
+    return document.querySelector('a[href^="https://wa.me/"]') ||
+      document.querySelector('a[href^="tel:"]');
+  }
+
+  function ctaStickyBuscarComoLlegar() {
+    var links = document.querySelectorAll('a[href*="google.com/maps"], a[href*="maps.google.com"]');
+    for (var i = 0; i < links.length; i++) {
+      if (links[i].textContent.indexOf('Cómo llegar') !== -1) return links[i];
+    }
+    return null;
+  }
+
+  function inicializarCtaSticky() {
+    var contacto = ctaStickyBuscarContacto();
+    var comoLlegar = ctaStickyBuscarComoLlegar();
+    if (!contacto && !comoLlegar) return; // nada real que ofrecer, no se crea la barra
+
+    var hero = document.querySelector('.hero');
+    if (!hero || typeof IntersectionObserver !== 'function') return;
+
+    var barra = document.createElement('div');
+    barra.className = 'cta-sticky';
+    barra.setAttribute('role', 'region');
+    barra.setAttribute('aria-label', 'Acciones rápidas');
+
+    if (contacto) {
+      var esWhatsapp = contacto.href.indexOf('wa.me') !== -1;
+      var btnContacto = document.createElement('a');
+      btnContacto.className = 'cta-sticky__btn cta-sticky__btn--principal';
+      btnContacto.href = contacto.href;
+      btnContacto.target = contacto.target || '_blank';
+      btnContacto.rel = 'noopener noreferrer';
+      btnContacto.textContent = esWhatsapp ? '💬 WhatsApp' : '📞 Llamar';
+      barra.appendChild(btnContacto);
+    }
+    if (comoLlegar) {
+      var btnMapa = document.createElement('a');
+      btnMapa.className = 'cta-sticky__btn cta-sticky__btn--secundario';
+      btnMapa.href = comoLlegar.href;
+      btnMapa.target = '_blank';
+      btnMapa.rel = 'noopener noreferrer';
+      btnMapa.textContent = '🗺️ Cómo llegar';
+      barra.appendChild(btnMapa);
+    }
+
+    document.body.appendChild(barra);
+
+    var io = new IntersectionObserver(function (entries) {
+      barra.classList.toggle('is-visible', !entries[0].isIntersecting);
+    }, { threshold: 0 });
+    io.observe(hero);
+  }
+
   /* ───────────────────────── COMPARTIR ───────────────────────── */
 
   function initShare() {
@@ -493,5 +557,6 @@
     aplicarPictogramaRubro();
     inicializarSupresionVidrio();
     inicializarCartaDePosicion();
+    inicializarCtaSticky();
   });
 })();
