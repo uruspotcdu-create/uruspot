@@ -3010,10 +3010,10 @@
         // explícito, quedaban pegados para siempre si algún consumidor
         // futuro reinicializaba el mapa sobre el mismo contenedor.
         contenedor.removeEventListener('keydown', alKeydownContenedor);
-        contenedor.removeEventListener('touchstart', alTouchstartContenedor);
-        contenedor.removeEventListener('touchmove', alTouchmoveContenedor);
-        contenedor.removeEventListener('touchend', alTouchendContenedor);
-        contenedor.removeEventListener('touchcancel', alTouchcancelContenedor);
+        lienzo.removeEventListener('touchstart', alTouchstartContenedor);
+        lienzo.removeEventListener('touchmove', alTouchmoveContenedor);
+        lienzo.removeEventListener('touchend', alTouchendContenedor);
+        lienzo.removeEventListener('touchcancel', alTouchcancelContenedor);
         if (orientationTimeout !== null) clearTimeout(orientationTimeout);
         if (animacionZoom) cancelAnimationFrame(animacionZoom);
         if (rafRedibujo !== null) cancelAnimationFrame(rafRedibujo);
