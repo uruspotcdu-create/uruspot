@@ -927,6 +927,11 @@
       // es decorativo, no de negocio.
       cargarMotorAmbientalDiferido();
 
+      // FIX Fase 5: promueve css/contenido-editorial.css de preload a
+      // stylesheet activa — ver promoverCssEditorialDiferido() más abajo
+      // para el bug real que esto corrige (afectaba a todo usuario con JS).
+      promoverCssEditorialDiferido();
+
       transicionarEstado(STATE.LOADING_CATALOG, 'startup');
       cargarCatalogo();
 
@@ -1171,6 +1176,47 @@
       requestIdleCallback(lanzar, { timeout: 1200 });
     } else {
       setTimeout(lanzar, 100);
+    }
+  }
+
+  /**
+   * FIX (auditoría, hallazgo Fase 5, 2026-08-05): index.html precarga
+   * css/contenido-editorial.css con `<link rel="preload" as="style">` y
+   * documenta en un comentario que `js/lazy-css-editorial.js` es quien la
+   * promueve a hoja activa. Ese archivo nunca llegó a existir (o se borró
+   * como "código muerto huérfano" en una limpieza anterior sin notar que
+   * era el único consumidor real del preload) — resultado: para CUALQUIER
+   * visitante con JavaScript activado, un preload sin promoción a
+   * stylesheet no aplica ningún estilo. Las 8 secciones editoriales que
+   * dependen de esta hoja (Sobre la ciudad, Metodología, Guía de rubros,
+   * Radiografía del padrón, Guía práctica, Glosario, Hoja de ruta,
+   * Accesibilidad) se venían viendo sin grilla, sin tarjeta y sin color
+   * de rubro para todo el tráfico real — solo el <noscript> (que promueve
+   * la hoja a `rel="stylesheet"` directamente) cubría el caso, y ese caso
+   * es una fracción mínima de las visitas.
+   *
+   * Se repone acá, respetando la CSP (`script-src 'self'`, sin
+   * `unsafe-inline`): nada de `onload="..."` inline en el HTML, todo vive
+   * en este archivo que ya está permitido. Mismo criterio de "decoración
+   * no bloquea negocio" que cargarMotorAmbientalDiferido() de arriba: se
+   * promueve recién en requestIdleCallback, después de que arrancó la
+   * carga del catálogo, para no competir con lo que sí es above-the-fold.
+   */
+  var cssEditorialPromovido = false;
+  function promoverCssEditorialDiferido() {
+    if (cssEditorialPromovido) return; // idempotente
+    cssEditorialPromovido = true;
+
+    var promover = function () {
+      var link = document.querySelector('link[rel="preload"][as="style"][href="css/contenido-editorial.css"]');
+      if (!link) return; // ya promovido por el <noscript>, o el <link> no está — no-op seguro
+      link.rel = 'stylesheet';
+    };
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(promover, { timeout: 1200 });
+    } else {
+      setTimeout(promover, 100);
     }
   }
 
