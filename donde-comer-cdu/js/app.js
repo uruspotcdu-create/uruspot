@@ -72,6 +72,8 @@ import { crearRenderEngine } from './render-engine.js';
 import { crearDomPainter } from './dom-painter.js';
 import { crearListeners } from './listeners.js';
 import { crearNavegacionTeclado } from './keyboard-nav.js';
+import { crearMapaModulo } from './map-module.js';
+import { crearScrollReveal } from './scroll-reveal.js';
 import {
   listaPorAccionExplicita as _listaPorAccionExplicita,
   hayBusquedaTexto as _hayBusquedaTexto,
@@ -205,13 +207,13 @@ import {
     pendingFetches: []
   };
 
-  // Motor de mapa (inicializado perezosamente)
-  var motorMapa = null;
-
-  // FASE 5: getter de `motorMapa` para listeners.js — se reasigna en
-  // tiempo de ejecución (ver inicializarMapa()/limpiarMapa() más
-  // abajo), después de que crearListeners() ya construyó el módulo.
-  function getMotorMapa() { return motorMapa; }
+  // FASE 6 (Plan Maestro de Modularización, 2026-08-06): `motorMapa`
+  // (antes una `var` local con su getter acá) ahora vive dentro de
+  // map-module.js (ver import arriba e instancia MapaModulo más
+  // abajo, junto a DomPainter) — mismo comportamiento, cero cambios
+  // funcionales. listeners.js sigue recibiendo un `getMotorMapa` en
+  // sus deps, solo que ahora es `MapaModulo.getMotorMapa` en vez de
+  // esta función local.
 
   // FASE 2 (Plan Maestro de Modularización, 2026-08-06): currentState,
   // lastStateChange y stateChangeLog, junto con transicionarEstado(),
@@ -1259,6 +1261,29 @@ import {
     VISUAL_STATE: VISUAL_STATE
   });
 
+  // FASE 6 (Plan Maestro de Modularización, 2026-08-06): §16 (Mapa y
+  // Visualización Espacial) — inicializarMotorMapa/
+  // actualizarMapaHerramienta/actualizarMapaTextura/resaltarTarjeta,
+  // antes function declarations locales, ahora viven en
+  // map-module.js (ver import arriba). Mismo motivo que DomPainter
+  // arriba para pasar `getMAPA`/cssEscape/slug por función o directo
+  // de `window.AppFormato` en vez de por alias local: este módulo se
+  // construye ANTES de que `MAPA` se resuelva en validarModulos() y
+  // ANTES del bloque que asigna `var cssEscape`/`var slug` locales
+  // (AppFormato, más abajo en este archivo).
+  var MapaModulo = crearMapaModulo({
+    DOM: DOM,
+    getMAPA: function () { return MAPA; },
+    uiState: uiState,
+    obtenerRegistro: obtenerRegistro,
+    leerFavoritos: leerFavoritos,
+    DomPainter: DomPainter,
+    cssEscape: window.AppFormato && window.AppFormato.cssEscape,
+    slug: window.AppFormato && window.AppFormato.slug,
+    MAPA_PADDING_GUIA_PX: MAPA_PADDING_GUIA_PX,
+    MAPA_PADDING_EXPLORACION_PX: MAPA_PADDING_EXPLORACION_PX
+  });
+
   /**
    * Función render() central: calcula qué mostrar, orquesta diferencias,
    * pinta solo lo necesario.
@@ -1320,16 +1345,17 @@ import {
       // inyectarlos en dom-painter.js, así que tiraban TypeError/
       // ReferenceError en cada render() (atrapado por el try/catch de
       // acá abajo, que mostraba mostrarEstadoError() en su lugar — el
-      // mapa no se actualizaba silenciosamente). Se revierte a las
-      // funciones locales de esta misma sección (§16, más abajo), que
-      // son la versión correcta y siguen intactas: nunca se tocaron,
-      // solo habían quedado huérfanas cuando el call site se cambió a
-      // DomPainter en Fase 4b. Se retiran los dos métodos rotos de
-      // dom-painter.js (ver ese archivo).
-      actualizarMapaTextura();
+      // mapa no se actualizaba silenciosamente). Se revirtió a las
+      // funciones locales de la sección §16 de entonces, que eran la
+      // versión correcta. FASE 6: esas funciones locales ahora son
+      // MapaModulo.actualizarTextura()/actualizarHerramienta() (ver
+      // map-module.js) — mismo comportamiento, cero cambios
+      // funcionales, no se repite el bug de Fase 4b porque este
+      // wiring apunta al módulo real, no a un contrato inventado.
+      MapaModulo.actualizarTextura();
       DomPainter.actualizarBannerCuraduriaSugerida(reg);
       pintarTarjetas(lista, favoritos, opts);
-      actualizarMapaHerramienta(reg.nombre, lista || []);
+      MapaModulo.actualizarHerramienta(reg.nombre, lista || []);
 
       // Fase 4 (Motion Direction Bible v2.0, Parte I / G.5.3): único
       // punto de activación real de la escena ambiental narrativa —
@@ -1512,196 +1538,12 @@ import {
    * Actualiza el encabezado (título, subtítulo) según rama y región.
    */
   // ───────────────────────────────────────────────────────────────────
-  // 16. MAPA Y VISUALIZACIÓN ESPACIAL
+  // 16. MAPA Y VISUALIZACIÓN ESPACIAL — extraído a js/map-module.js
+  // (Plan Maestro de Modularización, Fase 6, 2026-08-06). Cubría
+  // inicializarMotorMapa(), resaltarTarjeta(), actualizarMapaHerramienta()
+  // y actualizarMapaTextura() — ver instancia `MapaModulo` más arriba
+  // (junto a DomPainter) y sus llamadas reales dentro de render().
   // ───────────────────────────────────────────────────────────────────
-
-  /**
-   * Inicializa el motor de mapa (lazy init).
-   */
-  function inicializarMotorMapa() {
-    if (motorMapa || !DOM.mapaHerramienta || !window.URU_MOTOR_MAPA_RENDER) return;
-
-    try {
-      motorMapa = window.URU_MOTOR_MAPA_RENDER.crear(DOM.mapaHerramienta, {
-        lat: -32.4833,
-        lng: -58.2333,
-        zoom: 14,
-        ariaLabel: 'Mapa de los resultados de tu búsqueda'
-      });
-
-      motorMapa.on('hover', function (punto) {
-        resaltarTarjeta(punto.id, true);
-        // Ambient Engine — familia Halos de posición (Cap. 6.1 del
-        // documento de Lenguaje de Assets: reactividad "Sí, directo"
-        // a hover/click). Mismo límite ya documentado para
-        // Coordenadas: sin proyección real de lat/lng expuesta por
-        // motor-mapa.js, se ancla al centro óptico del plano P3.
-        if (window.AmbienteHalos) window.AmbienteHalos.mostrarEn(50, 50);
-      });
-
-      motorMapa.on('hoverOut', function () {
-        resaltarTarjeta(null, false);
-        if (window.AmbienteHalos) window.AmbienteHalos.ocultar();
-      });
-
-      motorMapa.on('click', function (punto) {
-        var el = DOM.panelDescubrimiento.querySelector('[data-lugar-id="' + cssEscape(punto.id) + '"]');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-        // Ambient Engine — familia Coordenadas (Cap. 6.1 del documento
-        // de Lenguaje de Assets: "se activan cerca del punto elegido").
-        // Este es el único evento real de "hay un punto seleccionado"
-        // que el resto de la app expone hoy (motor-mapa.js no publica
-        // lat/lng de pantalla ni un evento de deselección/cierre de
-        // popup), así que se ancla al centro óptico del asset (Cap.
-        // 3.1) en vez de a una posición geográfica real — mostrar el
-        // marcador en el punto exacto de un mapa embebido en otra
-        // sección de la página, sobre una capa de fondo a viewport
-        // completo, no tendría correspondencia espacial real. Cablear
-        // una posición geográfica real, si se decide que vale la pena,
-        // requiere exponer esa proyección desde motor-mapa.js primero
-        // (fuera del alcance del Ambient Engine, Cap. 3.12).
-        if (window.AmbienteCoordenadas) window.AmbienteCoordenadas.mostrarEn(50, 50);
-        if (window.AmbienteHalos) window.AmbienteHalos.mostrarEn(50, 50);
-      });
-    } catch (e) {
-      console.error('Error al inicializar motor de mapa:', e);
-      motorMapa = null;
-    }
-  }
-
-  /**
-   * Resalta una tarjeta visualmente.
-   */
-  function resaltarTarjeta(id, activo) {
-    var previa = DOM.panelDescubrimiento.querySelector('.tarjeta--resaltada');
-    if (previa) previa.classList.remove('tarjeta--resaltada');
-    if (activo && id) {
-      var el = DOM.panelDescubrimiento.querySelector('[data-lugar-id="' + cssEscape(id) + '"]');
-      if (el) el.classList.add('tarjeta--resaltada');
-    }
-  }
-
-  /**
-   * Actualiza la herramienta del mapa según la rama y la lista.
-   */
-  function actualizarMapaHerramienta(nombreRegion, lista) {
-    if (!DOM.mapaHerramienta) return;
-
-    // Fase 4 — MUST HAVE #4 (Fase 3A §2, Fase 3D §7): `nombreRegion`
-    // ya llegaba como parámetro pero solo se usaba para decidir SI el
-    // mapa aparece (MAPA.debeMostrarHerramienta), nunca CÓMO se ve —
-    // Guía y Exploración eran visualmente idénticas salvo por la
-    // cantidad de puntos, tal como documentaba la auditoría. Se
-    // expone como data-attribute para que css/mapa.css decida el
-    // tratamiento visual (protagonismo en Exploración) sin que este
-    // archivo tenga que conocer esos detalles de estilo.
-    if (DOM.mapaContainer) DOM.mapaContainer.dataset.region = nombreRegion || '';
-
-    var debeMostrar = MAPA.debeMostrarHerramienta(nombreRegion, lista);
-
-    if (!debeMostrar) {
-      DOM.mapaHerramienta.hidden = true;
-      if (DOM.mapaInfo) DOM.mapaInfo.hidden = true;
-      if (DOM.mapaLeyenda) DOM.mapaLeyenda.hidden = true;
-      if (DOM.mapaContainer) DOM.mapaContainer.hidden = true;
-      return;
-    }
-
-    if (DOM.mapaContainer) DOM.mapaContainer.hidden = false;
-    DOM.mapaHerramienta.hidden = false;
-    if (DOM.mapaInfo) DOM.mapaInfo.hidden = false;
-
-    inicializarMotorMapa();
-    if (!motorMapa) return;
-
-    var conCoordenadas = lista.filter(function (l) {
-      return typeof l.lat === 'number' && typeof l.lng === 'number';
-    });
-
-    var recorte = MAPA.puntosHerramienta(conCoordenadas);
-    // TIER 3.2 (Perf/UX, 2026-08-02): mismo leerFavoritos() cacheado
-    // que ya usa pintarTarjetas() para la misma región — una sola
-    // lectura de localStorage por render, no una por punto.
-    var favoritosActivos = leerFavoritos();
-    var puntos = recorte.map(function (l) {
-      var meta = window.URU_RUBROS_META && window.URU_RUBROS_META[l.grupo];
-      var slugL = slug(l);
-      return {
-        id: l.id,
-        lat: l.lat,
-        lng: l.lng,
-        nombre: l.nombre,
-        direccion: l.direccion,
-        href: slugL ? 'locales/' + slugL + '/' : null,
-        esFavorito: !!favoritosActivos[l.id],
-        // Este punto viaja a motorMapa (Canvas): necesita el hex ya
-        // resuelto, no el nombre del token (colorSeguro() en
-        // motor-render.js valida contra un regex de hex — un
-        // 'var(...)' ahí adentro cae en silencio al color por
-        // defecto para TODOS los pines). window.URU_RUBROS_COLOR_RESUELTO
-        // (rubros-meta.js) resuelve una sola vez por rubro y cachea.
-        color: l.grupo && window.URU_RUBROS_COLOR_RESUELTO
-          ? window.URU_RUBROS_COLOR_RESUELTO(l.grupo, '#C97A83')
-          : '#C97A83',
-        rubroNombre: meta ? meta[0] : l.categoria,
-        rubroKey: l.grupo,
-        rubroIcono: meta ? meta[3] : null
-      };
-    });
-
-    motorMapa.establecerPuntos(puntos);
-    motorMapa.encuadrarTodos(nombreRegion === 'exploracion' ? MAPA_PADDING_EXPLORACION_PX : MAPA_PADDING_GUIA_PX);
-    // TIER 3.3 (Perf/UX, 2026-08-02): el marcador de "acá estás vos" no
-    // depende de la región ni del recorte — solo de si el usuario
-    // activó "cerca de mí" y compartió su ubicación. establecerPuntos()
-    // ya no lo confunde con un resultado (ver motor-render.js): se
-    // actualiza acá, en el mismo punto donde ya se actualiza el resto
-    // del mapa en cada render().
-    if (uiState.cercaTuyoActivo && uiState.ubicacionUsuario) {
-      motorMapa.establecerMarcadorUsuario(uiState.ubicacionUsuario);
-    } else {
-      motorMapa.quitarMarcadorUsuario();
-    }
-    DomPainter.pintarLeyenda(puntos);
-
-    if (DOM.mapaInfo) {
-      DOM.mapaInfo.textContent = recorte.length < conCoordenadas.length
-        ? 'Mostrando ' + recorte.length + ' de ' + conCoordenadas.length + ' lugares con ubicación en el mapa.'
-        : recorte.length + ' lugar' + (recorte.length === 1 ? '' : 'es') + ' en el mapa.';
-    }
-  }
-
-  /**
-   * Actualiza la textura ambiental del mapa de fondo.
-   */
-  function actualizarMapaTextura() {
-    if (!DOM.mapaTextura || !obtenerRegistro().length) return;
-    if (!window.URU_CONFIG.mapa.texturaSiempreVisible) return;
-    if (DOM.mapaTextura.dataset.pintado === '1') return;
-
-    var puntos = MAPA.puntosTextura(obtenerRegistro());
-    var meta = window.URU_RUBROS_META || {};
-    var frag = document.createDocumentFragment();
-    var i = 0;
-
-    puntos.forEach(function (l) {
-      if (typeof l.lat !== 'number' || typeof l.lng !== 'number') return;
-      var p = document.createElement('div');
-      p.className = 'punto-textura';
-      p.style.left = (Math.random() * 100) + '%';
-      p.style.top = (Math.random() * 100) + '%';
-      p.style.setProperty('--i', i);
-      var colorRubro = meta[l.grupo] && meta[l.grupo][2];
-      if (colorRubro) p.style.setProperty('--dot-color', colorRubro);
-      i++;
-      frag.appendChild(p);
-    });
-
-    DOM.mapaTextura.appendChild(frag);
-    DOM.mapaTextura.dataset.pintado = '1';
-  }
 
   // ───────────────────────────────────────────────────────────────────
   // 17. UTILIDADES VARIAS
@@ -1784,6 +1626,19 @@ import {
     setTimeout(resolver, ANIMATION_TIMEOUT_MS);
   }
 
+  // FASE 6 (Plan Maestro de Modularización, 2026-08-06): §22 (Scroll
+  // Reveal) — antes function declaration local, ahora vive en
+  // scroll-reveal.js (ver import arriba). Se construye ACÁ, junto a
+  // Listeners/NavegacionTeclado y por el mismo motivo (depende de
+  // `prefiereMovimientoReducido`, alias de AppFormato recién asignado
+  // más arriba): listeners.js ya esperaba este exacto momento — recibe
+  // `ScrollReveal.inicializar` bajo el nombre `inicializarScrollReveal`,
+  // mismo contrato que ya tenía con la function declaration local (ver
+  // comentario "Sección 22, Fase 6 pendiente" en listeners.js).
+  var ScrollReveal = crearScrollReveal({
+    prefiereMovimientoReducido: prefiereMovimientoReducido
+  });
+
   // FASE 5 (Plan Maestro de Modularización, 2026-08-06): extraído de
   // app.js §19 (Inicialización de Listeners y Eventos) + §20
   // (Navegación por Teclado Avanzada) a js/listeners.js y
@@ -1817,7 +1672,7 @@ import {
     getEstado: getEstado,
     setEstado: setEstado,
     getPLANO: getPLANO,
-    getMotorMapa: getMotorMapa,
+    getMotorMapa: MapaModulo.getMotorMapa,
     programarRenderTrasSalida: programarRenderTrasSalida,
     RenderEngine: RenderEngine,
     estadoActual: estadoActual,
@@ -1827,7 +1682,7 @@ import {
     DEBOUNCE_FILTRO_MS: DEBOUNCE_FILTRO_MS,
     manejarClickSugerencias: function (e) { return manejarClickSugerencias(e); },
     manejarClickFiltrosActivos: function (e) { return manejarClickFiltrosActivos(e); },
-    inicializarScrollReveal: function () { return inicializarScrollReveal(); },
+    inicializarScrollReveal: ScrollReveal.inicializar,
     prefiereMovimientoReducido: prefiereMovimientoReducido
   });
 
@@ -1995,101 +1850,11 @@ import {
   }
 
   // ───────────────────────────────────────────────────────────────────
-  // 22. SCROLL REVEAL (Progressive Enhancement)
-  // ───────────────────────────────────────────────────────────────────
-
-  /**
-   * Cap. 6 "Primer scroll" (Motion Direction Bible v1.0, pasos 9-10):
-   *
-   * Paso 9 — "los elementos que entran en el viewport se acercan con
-   * microdesfase según su orden de aparición, nunca todos a la vez".
-   * Sin esto, dos o más secciones .u-reveal que cruzan el umbral en el
-   * mismo callback del IntersectionObserver (scroll rápido, o varias
-   * secciones cortas cabiendo juntas en la ventana) se revelan en el
-   * mismo frame — el "bloque sincronizado" que el Cap. 10 reserva
-   * únicamente para elementos que deben leerse como una sola unidad
-   * conceptual, no como secciones independientes de la página.
-   *
-   * Paso 10 — "los elementos que salen del viewport se alejan
-   * levemente antes de desvanecerse, nunca cortan de forma abrupta".
-   * Por eso el observer ya no se desconecta tras la primera revelación
-   * (antes con observador.unobserve): sigue vivo para detectar cuándo
-   * una sección ya vista sale por completo por arriba del viewport
-   * (entrada.boundingClientRect.bottom <= 0) y agregarle .saliendo +
-   * .u-mov-saliendo (css/tokens.css + css/motion-gramatica.css), y
-   * para revertir ese estado si el usuario vuelve a scrollear hacia
-   * arriba y la sección reingresa. La condición de salida (0% visible,
-   * afuera por completo) y la de reingreso (12%, el mismo umbral de la
-   * primera entrada) son deliberadamente distintas: si fueran la misma
-   * marca de scroll, un usuario oscilando cerca del borde podría
-   * activar y desactivar la clase en cada frame — el "temblor" que el
-   * Cap. 14 prohíbe.
-   *
-   * dataset.uReveal marca "ya tuvo su primera entrada", para que la
-   * lógica de salida/reingreso nunca compita con la del paso 9 sobre
-   * el mismo elemento en el mismo callback.
-   *
-   * --motion-desfase (css/tokens.css) ya existía desde el paso de
-   * tokens pero no se consumía en ningún lado todavía; este es su
-   * primer uso real. Se lee una sola vez acá (no en cada callback del
-   * observer) porque es un token global que no cambia en runtime.
-   */
-  function inicializarScrollReveal() {
-    if (prefiereMovimientoReducido()) {
-      document.querySelectorAll('.u-reveal').forEach(function (el) {
-        el.classList.add('visible');
-      });
-    } else if ('IntersectionObserver' in window) {
-      var desfaseMs = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--motion-desfase')
-      ) * 1000;
-      if (!desfaseMs || isNaN(desfaseMs)) desfaseMs = 40; // fallback si el token no resuelve
-
-      var observador = new IntersectionObserver(function (entradas) {
-        // Orden de aparición (Cap. 6, paso 9): no el orden en que el
-        // observer las entrega (que es el de intersección detectada,
-        // no necesariamente el del documento), sino el orden real en
-        // el DOM — así el decalaje siempre sigue la jerarquía visual
-        // de la página, nunca un orden incidental del navegador.
-        var primerasEntradas = entradas
-          .filter(function (entrada) {
-            return entrada.isIntersecting && !entrada.target.dataset.uReveal;
-          })
-          .sort(function (a, b) {
-            return a.target.compareDocumentPosition(b.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
-          });
-
-        primerasEntradas.forEach(function (entrada, indice) {
-          entrada.target.style.transitionDelay = (indice * desfaseMs) + 'ms';
-          entrada.target.classList.add('visible');
-          entrada.target.dataset.uReveal = 'visto';
-          if (window.Coreografias) {
-            window.Coreografias.registrarRevelado(entrada.target.id || entrada.target.className);
-          }
-        });
-
-        // Salida/reingreso (Cap. 6, paso 10) — solo sobre secciones que
-        // ya pasaron por su primera entrada de arriba.
-        entradas.forEach(function (entrada) {
-          if (!entrada.target.dataset.uReveal) return;
-
-          var estaSaliendo = entrada.target.classList.contains('saliendo');
-          if (!entrada.isIntersecting && entrada.boundingClientRect.bottom <= 0 && !estaSaliendo) {
-            entrada.target.classList.add('saliendo', 'u-mov-saliendo');
-          } else if (entrada.isIntersecting && entrada.intersectionRatio >= 0.12 && estaSaliendo) {
-            entrada.target.classList.remove('saliendo', 'u-mov-saliendo');
-            entrada.target.style.transitionDelay = '';
-          }
-        });
-      }, { threshold: [0, 0.12], rootMargin: '0px 0px -40px 0px' });
-
-      document.querySelectorAll('.u-reveal').forEach(function (el) {
-        el.classList.add('u-reveal--armado');
-        observador.observe(el);
-      });
-    }
-  }
-
+  // 22. SCROLL REVEAL (Progressive Enhancement) — extraído a
+  // js/scroll-reveal.js (Plan Maestro de Modularización, Fase 6,
+  // 2026-08-06). Ver instancia `ScrollReveal` más arriba (junto a
+  // Listeners/NavegacionTeclado) y su wiring en las deps de Listeners
+  // (`inicializarScrollReveal: ScrollReveal.inicializar`).
   // ───────────────────────────────────────────────────────────────────
   // 23-25. MÉTRICAS, TESTING Y DEBUG — extraídos a js/app-telemetria.js
   // ───────────────────────────────────────────────────────────────────
