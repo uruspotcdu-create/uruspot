@@ -40,7 +40,7 @@ import {
   UMBRAL_RATING, UMBRAL_RESEÑAS, MAX_DESTACADOS, MIN_PARA_MOSTRAR_DESTACADOS,
   CLIMA_CONTEXTO_URL, CLIMA_CONTEXTO_TIMEOUT_MS, CLIMA_CONTEXTO_INTERVALO_MS,
   ROLES_NOMBRES, RAMA_CURADURIA, RAMA_BUSCADOR, STATE, ERROR_TYPE,
-  ERROR_TYPES_FATALES, VISUAL_STATE, debugLog
+  VISUAL_STATE, debugLog
 } from './constants.js';
 import { calcularDistancia, razonesPorLugarId, hayCambioEnLista } from './pure-utils.js';
 import { appEventBus } from './event-bus.js';
@@ -68,6 +68,7 @@ import { crearUIState } from './ui-state.js';
 import { crearDataLoader } from './data-loader.js';
 import { crearClimateContext } from './climate-context.js';
 import { solicitarUbicacion, geolocationDisponible } from './geolocation.js';
+import { crearErrorRecovery } from './error-recovery.js';
 
 (function () {
   'use strict';
@@ -319,73 +320,21 @@ import { solicitarUbicacion, geolocationDisponible } from './geolocation.js';
   // 6. MANEJO DE ERRORES Y RECUPERACIÓN
   // ───────────────────────────────────────────────────────────────────
 
-  var ErrorRecovery = (function () {
-    return {
-      /**
-       * Procesa un error y lo registra apropiadamente.
-       */
-      procesar: function (error, tipoError, contexto) {
-        var detalles = {
-          tipo: tipoError,
-          mensaje: error && error.message ? error.message : String(error),
-          contexto: contexto,
-          timestamp: Date.now()
-        };
-
-        console.error('[Error] ' + tipoError + ':', detalles);
-        uiState.lastErrorState = detalles;
-
-        // Ver ERROR_TYPES_FATALES (declarado junto a ERROR_TYPE) para
-        // la justificación completa: un error ya recuperado en su
-        // propio origen (p. ej. ERROR_TYPE.STORAGE desde
-        // leerFavoritos/guardarFavoritos) se registra para debug pero
-        // NO detiene el resto de la aplicación.
-        if (ERROR_TYPES_FATALES.indexOf(tipoError) !== -1) {
-          mostrarEstadoError(tipoError, detalles);
-          transicionarEstado(STATE.ERROR, tipoError);
-        }
-
-        return detalles;
-      },
-
-      /**
-       * Intenta recuperar de un error en la carga de catálogo.
-       */
-      recuperarDeCarguaCatalogo: function () {
-        if (uiState.lastErrorState && uiState.lastErrorState.tipo === ERROR_TYPE.CATALOG_FETCH) {
-          // Cap. 6.3 (Estados del Ambient Engine): "Error → Activo
-          // solo vía reintento explícito" — este es exactamente ese
-          // reintento explícito. Sin este paso, iniciarCarga() de
-          // cargarCatalogo() sería un no-op (solo transiciona desde
-          // Activo) y el Ambient Engine quedaría en Error para siempre.
-          if (window.AmbientEngine) window.AmbientEngine.reintentar();
-          transicionarEstado(STATE.RECOVERING, 'reintentando_catalogo');
-          pintarEsqueleto();
-          cargarCatalogo();
-        }
-      },
-
-      /**
-       * Registra estado de error en un lugar seguro para debugging.
-       */
-      registrarParaDebug: function (error, tipo) {
-        try {
-          var debug = JSON.parse(localStorage.getItem('uruspot_debug_errors') || '[]');
-          debug.push({
-            tipo: tipo,
-            mensaje: error && error.message ? error.message : String(error),
-            stack: error && error.stack ? error.stack.substring(0, 200) : '',
-            timestamp: new Date().toISOString()
-          });
-          // Guardar últimos 10 errores
-          if (debug.length > 10) debug.shift();
-          localStorage.setItem('uruspot_debug_errors', JSON.stringify(debug));
-        } catch (e) {
-          // Storage puede estar bloqueado o lleno
-        }
-      }
-    };
-  })();
+  // FASE 3 (paso 3, Plan Maestro de Modularización, 2026-08-06):
+  // ErrorRecovery ahora se arma en error-recovery.js (ver import
+  // arriba) — misma lógica, dependencias inyectadas explícitas.
+  // pintarEsqueleto se pasa como thunk (function(){ pintarEsqueleto();
+  // }) y no por valor: en este punto del archivo todavía es
+  // `undefined` (var declarada más abajo, ver comentario de cabecera
+  // en error-recovery.js) — el thunk preserva el mismo binding tardío
+  // que tenía el closure original, resuelto recién cuando
+  // recuperarDeCarguaCatalogo() se llama de verdad (mucho después).
+  var ErrorRecovery = crearErrorRecovery({
+    uiState: uiState,
+    mostrarEstadoError: mostrarEstadoError,
+    pintarEsqueleto: function () { pintarEsqueleto(); },
+    cargarCatalogo: cargarCatalogo
+  });
 
   // ───────────────────────────────────────────────────────────────────
   // 7. VALIDACIÓN DE INVARIANTES
