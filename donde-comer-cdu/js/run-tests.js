@@ -1,8 +1,8 @@
 // js/run-tests.js — URU SPOT
 // ---------------------------------------------------------------------
 // Punto de entrada único de la red de seguridad (Fases 0-2 y 6 del
-// roadmap de mejora, 2026-07-26; Fase 4a del Plan Maestro de
-// Modularización, 2026-08-06). Corre, en este orden, las siete
+// roadmap de mejora, 2026-07-26; Fases 4a/4b del Plan Maestro de
+// Modularización, 2026-08-06). Corre, en este orden, las ocho
 // suites reales del repo y agrega el resultado:
 //
 //   1. motor-test.js               — lógica de negocio pura (212/212 conocido)
@@ -21,16 +21,21 @@
 //                                    de decisión (curaduría/buscador/recorte),
 //                                    detección de cambios, paginación,
 //                                    cambio de región, cache (Fase 4a)
+//   8. dom-painter-tests.js         — las 7 funciones pintar*/actualizar*
+//                                    migradas a dom-painter.js, incluida
+//                                    pintarDestacados (ficha-first, orden
+//                                    por score, diversidad por rubro,
+//                                    escape de caracteres especiales) (Fase 4b)
 //
 // Uso: `node js/run-tests.js`
-// Sale con código 0 solo si las siete suites pasan.
+// Sale con código 0 solo si las ocho suites pasan.
 
 'use strict';
 
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js', 'render-engine-tests.js'];
+const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js', 'render-engine-tests.js', 'dom-painter-tests.js'];
 
 let algunoFallo = false;
 
