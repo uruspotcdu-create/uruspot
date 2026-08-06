@@ -163,14 +163,11 @@
   var lastStateChange = null;
   var stateChangeLog = [];
 
-  // Cache de renderizado anterior
-  var lastRenderCache = {
-    lista: null,
-    favoritos: null,
-    region: null,
-    rama: null,
-    html: null
-  };
+  // Motor de decisión de render (ui/render-engine.js) — se instancia
+  // en validarModulos() una vez que PLANO/EXPO existen. Reemplaza el
+  // `lastRenderCache` que vivía acá; ver render-engine.js para el
+  // contrato completo.
+  var RenderEngine = null;
 
   // DOM references (validadas al init)
   var DOM = {};
@@ -322,20 +319,6 @@
   // ───────────────────────────────────────────────────────────────────
   // 5. UTILIDADES DE RENDERIZADO DIFERENCIAL
   // ───────────────────────────────────────────────────────────────────
-
-  /**
-   * Determina si el contenido de la lista cambió significativamente.
-   * Usa hash rápido de IDs de lugares para evitar comparación profunda.
-   */
-  function hayCambioEnLista(listaAnterior, listaActual) {
-    if (!listaAnterior || !listaActual) return true;
-    if (listaAnterior.length !== listaActual.length) return true;
-    
-    // Hash rápido: concatenar IDs
-    var hashAnterior = listaAnterior.map(function (l) { return l.id; }).join(',');
-    var hashActual = listaActual.map(function (l) { return l.id; }).join(',');
-    return hashAnterior !== hashActual;
-  }
 
   /**
    * Calcula diferencias incremental entre renders para evitar reflow.
@@ -654,13 +637,23 @@
     EXPO = window.URU_EXPOSICION;
     MAPA = window.URU_MAPA;
 
-    if (!PLANO || !EXPO || !MAPA) {
+    if (!PLANO || !EXPO || !MAPA || !window.URU_RENDER_ENGINE) {
       var faltantes = [];
       if (!PLANO) faltantes.push('URU_PLANO');
       if (!EXPO) faltantes.push('URU_EXPOSICION');
       if (!MAPA) faltantes.push('URU_MAPA');
+      if (!window.URU_RENDER_ENGINE) faltantes.push('URU_RENDER_ENGINE');
       throw new Error('Módulos faltantes: ' + faltantes.join(', '));
     }
+
+    RenderEngine = window.URU_RENDER_ENGINE.crear({
+      RAMA_CURADURIA: RAMA_CURADURIA,
+      RAMA_BUSCADOR: RAMA_BUSCADOR,
+      ramaActual: ramaActual,
+      listaPorAccionExplicita: listaPorAccionExplicita,
+      ordenarPorCercania: ordenarPorCercania,
+      leerFavoritos: leerFavoritos
+    });
   }
 
   /**
@@ -766,13 +759,7 @@
     AccesibilidadManager.limpiar();
     dynamicElements = {};
     stateChangeLog = [];
-    lastRenderCache = {
-      lista: null,
-      favoritos: null,
-      region: null,
-      rama: null,
-      html: null
-    };
+    if (RenderEngine) RenderEngine.reiniciarCache();
 
     debugLog('[Cleanup] Aplicación finalizada correctamente');
   }
@@ -1073,59 +1060,34 @@
         return;
       }
 
-      var favoritos = leerFavoritos();
-      var reg = PLANO.region(estado);
-      var rama = ramaActual(reg);
-      var lista;
-      var opts;
+      // Delegar la decisión (qué rama, qué lista, qué opts, si hubo
+      // cambio real respecto al render anterior) en RenderEngine —
+      // ver ui/render-engine.js. render() se queda solo con la parte
+      // de orquestar el pintado.
+      var resultado = RenderEngine.calcular({
+        estado: estado,
+        PLANO: PLANO,
+        EXPO: EXPO,
+        REGISTRO: REGISTRO,
+        uiState: uiState
+      });
 
-      // Determinar qué lista mostrar según la rama
-      if (rama === RAMA_CURADURIA) {
-        var idsGuardados = Object.keys(favoritos).filter(function (id) {
-          return favoritos[id];
-        });
-        lista = EXPO.coleccionCurada(REGISTRO, idsGuardados);
-        lista = ordenarPorCercania(lista);
-        opts = {
-          origen: 'accion_explicita',
-          narrativa: false,
-          vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.'
-        };
-      } else if (rama === RAMA_BUSCADOR) {
-        lista = listaPorAccionExplicita();
-        lista = ordenarPorCercania(lista);
-        opts = { origen: 'accion_explicita', narrativa: false };
-      } else {
-        // Recorte por iniciativa propia (Guía/Exploración)
-        lista = EXPO.recortePorIniciativaPropia(REGISTRO, estado, reg.nombre);
-        lista = ordenarPorCercania(lista);
-        opts = { origen: 'iniciativa_propia', narrativa: false };
-      }
-
-      // Verificar si hubo cambio real
-      var hayoCambio = ramaDistinta(rama) || hayCambioEnLista(lastRenderCache.lista, lista);
-
-      if (!hayoCambio && uiState.ultimaRamaRenderizada === rama) {
+      if (!resultado) {
         debugLog('[Render] Sin cambios, saltando');
         return;
       }
 
-      // Actualizar cache
-      lastRenderCache.lista = lista;
-      lastRenderCache.rama = rama;
-      lastRenderCache.favoritos = favoritos;
-      lastRenderCache.region = reg.nombre;
-      uiState.ultimaRamaRenderizada = rama;
+      uiState.ultimaRamaRenderizada = resultado.rama;
 
       // Actualizar encabezado, estado visual, tarjetas y mapa
-      actualizarCabecera(reg, rama);
+      actualizarCabecera(resultado.reg, resultado.rama);
       actualizarMapaTextura();
-      actualizarBannerCuraduriaSugerida(reg);
-      pintarTarjetas(lista, favoritos, opts);
-      actualizarMapaHerramienta(reg.nombre, lista || []);
+      actualizarBannerCuraduriaSugerida(resultado.reg);
+      pintarTarjetas(resultado.lista, resultado.favoritos, resultado.opts);
+      actualizarMapaHerramienta(resultado.reg.nombre, resultado.lista || []);
 
       // Restaurar scroll a posición previa si es el mismo listado
-      if (uiState.scrollPosition && rama === uiState.ultimaRamaRenderizada) {
+      if (uiState.scrollPosition && resultado.rama === uiState.ultimaRamaRenderizada) {
         window.scrollTo(0, uiState.scrollPosition);
       }
 
@@ -1133,13 +1095,6 @@
       ErrorRecovery.procesar(e, ERROR_TYPE.UNKNOWN, 'render');
       mostrarEstadoError('error_renderizado', { mensaje: e.message });
     }
-  }
-
-  /**
-   * Verifica si la rama cambió desde el último render.
-   */
-  function ramaDistinta(rama) {
-    return uiState.ultimaRamaRenderizada !== rama;
   }
 
   // ───────────────────────────────────────────────────────────────────
@@ -2926,7 +2881,7 @@
           uiState: uiState,
           estado: estado,
           registroSize: REGISTRO.length,
-          cacheInfo: lastRenderCache,
+          cacheInfo: RenderEngine ? RenderEngine.obtenerCache() : null,
           operacionesActivas: OperationManager.contarActivas()
         };
       },
