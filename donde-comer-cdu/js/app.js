@@ -64,6 +64,7 @@ import {
   obtenerPorId,
   establecerCatalogo
 } from './catalog.js';
+import { crearUIState } from './ui-state.js';
 
 (function () {
   'use strict';
@@ -147,44 +148,13 @@ import {
   var estado = null;
 
   // Estado local de UI (no persistente)
-  var uiState = {
-    consultaActual: '',
-    filtroRubroActivo: null,
-    ubicacionUsuario: null,
-    cercaTuyoActivo: false,
-    verCatalogoCompleto: false,
-    paginaTarjetas: 1,
-    ultimaRamaRenderizada: null,
-    visualState: VISUAL_STATE.LOADING,
-    lastErrorState: null,
-    focusedElement: null,
-    scrollPosition: 0,
-    cartasActuales: [], // referencia a tarjetas pintadas para reconciliación
-    // Fase 4 (Motion Direction Bible v2.0, Parte K.10): la fatiga de
-    // "Cambio de filtros" (Cap. 5) ya no se cuenta acá — la resuelve
-    // AmbienteRitmo por claveAccion 'filtro:rubro' vía
-    // Coreografias.cambioFiltro(), único lugar dueño de esa regla en
-    // toda la app. Antes había un contador local (vecesTransicionFiltro)
-    // que duplicaba esa lógica.
-
-    // Fase 4 — Journey/UX (URUSPOT-PENDIENTES-VERIFICADO-287.md §2/§3):
-    // "Mostrar más" como nueva tanda real. `tandaRecorte` acumula lo
-    // ya mostrado por iniciativa propia (Guía/Exploración) para que
-    // "ver más sugerencias" pida al motor una tanda NUEVA excluyendo
-    // lo ya visto, en vez de solo revelar más de la misma lista — ver
-    // render() y manejarClickPanel(). Se reinicia solo: cuando cambia
-    // la rama de recorte (clave = región + rubro activo), ver render().
-    tandaRecorte: null, // { clave, lista:[], razones:{}, hayMasCandidatos:bool }
-    pedirMasRecorte: false, // true solo durante el render() que sigue al click de "ver más sugerencias"
-
-    // Fase 4 — "Sorprendeme" (hallazgo "serendipia sin control
-    // explícito"): activo/inactivo como cualquier otro filtro de la
-    // sesión (mismo patrón que cercaTuyoActivo). `sorpresaSeed` crece
-    // en cada click para que pedir sorpresa dos veces no muestre la
-    // misma selección (ver motor-exposicion.js: calcularRecorteInterno).
-    sorprendemeActivo: false,
-    sorpresaSeed: 0
-  };
+  // FASE 2 (paso 5, Plan Maestro de Modularización, 2026-08-06):
+  // uiState ahora se construye en ui-state.js (ver import arriba) —
+  // mismas propiedades y valores iniciales, ahora devueltas por un
+  // Proxy que emite 'uiStateChanged' en cada asignación. app.js sigue
+  // leyendo/escribiendo uiState.x exactamente igual que antes (ver
+  // comentario de cabecera en ui-state.js para el detalle).
+  var uiState = crearUIState();
 
   // Timers y operaciones async activas
   var activeOperations = {
