@@ -32,6 +32,13 @@ export function crearDomPainter(deps) {
   var slug = deps.slug;
   var mapsHref = deps.mapsHref;
   var escapeHTML = deps.escapeHTML;
+  var geolocationDisponible = deps.geolocationDisponible;
+  var hayBusquedaOFiltro = deps.hayBusquedaOFiltro;
+
+  function actualizarVisibilidadSugerencias() {
+    if (!DOM.sugerenciasRapidas) return;
+    DOM.sugerenciasRapidas.hidden = hayBusquedaOFiltro() || uiState.cercaTuyoActivo || uiState.sorprendemeActivo;
+  }
 
   return {
     /**
@@ -86,6 +93,51 @@ export function crearDomPainter(deps) {
         window.URU_ChipIndicador.sincronizar(DOM.listaRubros, '.chip--activo');
       }
     },
+
+    /**
+     * Atajos iniciales de rubro, proximidad y sorpresa. El contenido se
+     * construye una sola vez al cargar el catálogo; la visibilidad se
+     * actualiza en cada render con actualizarVisibilidadSugerencias().
+     */
+    pintarSugerenciasRapidas: function () {
+      if (!DOM.sugerenciasRapidas || !obtenerRegistro().length || !window.URU_RUBROS_META) return;
+
+      var conteo = Object.create(null);
+      obtenerRegistro().forEach(function (l) {
+        conteo[l.grupo] = (conteo[l.grupo] || 0) + 1;
+      });
+
+      var topRubros = Object.keys(window.URU_RUBROS_META)
+        .filter(function (k) { return conteo[k]; })
+        .sort(function (a, b) { return conteo[b] - conteo[a]; })
+        .slice(0, 4);
+
+      if (!topRubros.length) return;
+
+      var html = '<span class="sugerencias-rapidas__etiqueta">Empezá por acá</span>' +
+        topRubros.map(function (k) {
+          var meta = window.URU_RUBROS_META[k];
+          var icono = window.URU_RUBROS_ICONO_SVG ? window.URU_RUBROS_ICONO_SVG(k, { tam: 15 }) : '';
+          return '<button type="button" class="sugerencia-chip" data-rubro="' + k +
+            '" style="--chip-color:var(' + meta[2] + ')">' + icono + escapeHTML(meta[0]) + '</button>';
+        }).join('');
+
+      if (geolocationDisponible()) {
+        html += '<button type="button" class="sugerencia-chip sugerencia-chip--cerca" data-accion="sugerencia-cerca-tuyo">' +
+          '📍 cerca tuyo</button>';
+      }
+
+      if (!uiState.sorprendemeActivo) {
+        html += '<button type="button" class="sugerencia-chip sugerencia-chip--sorpresa" data-accion="sugerencia-sorprendeme">' +
+          '🎲 sorprendeme</button>';
+      }
+
+      DOM.sugerenciasRapidas.innerHTML = html;
+      actualizarVisibilidadSugerencias();
+    },
+
+    /** Alterna la visibilidad sin reconstruir los atajos. */
+    actualizarVisibilidadSugerencias: actualizarVisibilidadSugerencias,
 
     /**
      * Spotlight "Destacados" — selector inteligente de lugares top-rated.

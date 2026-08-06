@@ -1215,10 +1215,11 @@ import { crearDomPainter } from './dom-painter.js';
     MIN_PARA_MOSTRAR_DESTACADOS: MIN_PARA_MOSTRAR_DESTACADOS,
     MAX_DESTACADOS: MAX_DESTACADOS,
     uiState: uiState,
-    uiState: uiState,
     slug: window.AppFormato && window.AppFormato.slug,
     mapsHref: window.AppFormato && window.AppFormato.mapsHref,
-    escapeHTML: window.AppFormato && window.AppFormato.escapeHTML
+    escapeHTML: window.AppFormato && window.AppFormato.escapeHTML,
+    geolocationDisponible: geolocationDisponible,
+    hayBusquedaOFiltro: hayBusquedaOFiltro
   });
 
   /**
@@ -1341,71 +1342,11 @@ import { crearDomPainter } from './dom-painter.js';
    */
   var pintarRubros = DomPainter.pintarRubros;
 
-  /**
-   * Sugerencias rápidas: atajos de un toque a los 4 rubros con más
-   * lugares, más "cerca tuyo" si el navegador soporta geolocalización.
-   * Se pinta UNA sola vez al cargar el catálogo (el conteo por rubro
-   * no cambia durante la sesión) — actualizarVisibilidadSugerencias()
-   * es quien decide, en cada render(), si corresponde mostrarlas o
-   * no. Reutiliza exactamente los mismos íconos de rubros-meta.js que
-   * ya usa pintarRubros(), para que un mismo rubro se vea igual acá y
-   * en el índice de abajo.
-   */
-  function pintarSugerenciasRapidas() {
-    if (!DOM.sugerenciasRapidas || !obtenerRegistro().length || !window.URU_RUBROS_META) return;
-
-    var conteo = Object.create(null);
-    obtenerRegistro().forEach(function (l) {
-      conteo[l.grupo] = (conteo[l.grupo] || 0) + 1;
-    });
-
-    var topRubros = Object.keys(window.URU_RUBROS_META)
-      .filter(function (k) { return conteo[k]; })
-      .sort(function (a, b) { return conteo[b] - conteo[a]; })
-      .slice(0, 4);
-
-    if (!topRubros.length) return;
-
-    var html = '<span class="sugerencias-rapidas__etiqueta">Empezá por acá</span>' +
-      topRubros.map(function (k) {
-        var meta = window.URU_RUBROS_META[k];
-        var icono = window.URU_RUBROS_ICONO_SVG ? window.URU_RUBROS_ICONO_SVG(k, { tam: 15 }) : '';
-        return '<button type="button" class="sugerencia-chip" data-rubro="' + k +
-          '" style="--chip-color:var(' + meta[2] + ')">' + icono + escapeHTML(meta[0]) + '</button>';
-      }).join('');
-
-    if (geolocationDisponible()) {
-      html += '<button type="button" class="sugerencia-chip sugerencia-chip--cerca" data-accion="sugerencia-cerca-tuyo">' +
-        '📍 cerca tuyo</button>';
-    }
-
-    // Fase 4 — "Sorprendeme" (hallazgo "serendipia sin control
-    // explícito"): mismo patrón que el chip de "cerca tuyo" — un
-    // atajo visible antes de que el usuario toque nada, no un efecto
-    // secundario escondido dentro del recorte normal. Una vez activo,
-    // este chip se oculta junto con el resto de sugerencias rápidas
-    // (ver actualizarVisibilidadSugerencias) y la forma de "pedir otra
-    // sorpresa" o de salir del modo pasa a vivir en la píldora de
-    // filtros activos (ver pintarFiltrosActivos), igual que "cerca
-    // tuyo" pasa a vivir ahí una vez activado.
-    if (!uiState.sorprendemeActivo) {
-      html += '<button type="button" class="sugerencia-chip sugerencia-chip--sorpresa" data-accion="sugerencia-sorprendeme">' +
-        '🎲 sorprendeme</button>';
-    }
-
-    DOM.sugerenciasRapidas.innerHTML = html;
-    actualizarVisibilidadSugerencias();
-  }
-
-  /**
-   * Alterna la visibilidad de las sugerencias rápidas sin reconstruir
-   * su contenido: en cuanto hay búsqueda, filtro de rubro o "cerca
-   * tuyo" activo, el atajo de arranque ya cumplió su función.
-   */
-  function actualizarVisibilidadSugerencias() {
-    if (!DOM.sugerenciasRapidas) return;
-    DOM.sugerenciasRapidas.hidden = hayBusquedaOFiltro() || uiState.cercaTuyoActivo || uiState.sorprendemeActivo;
-  }
+  // Sugerencias rápidas y su regla de visibilidad — extraídas a
+  // dom-painter.js. Se conservan estos alias para no modificar los
+  // call-sites durante este micro-paso de la Fase 4.
+  var pintarSugerenciasRapidas = DomPainter.pintarSugerenciasRapidas;
+  var actualizarVisibilidadSugerencias = DomPainter.actualizarVisibilidadSugerencias;
 
   /**
    * Resumen de filtros activos: una píldora por faceta (búsqueda,
