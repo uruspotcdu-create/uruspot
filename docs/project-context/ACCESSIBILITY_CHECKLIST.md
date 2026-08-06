@@ -19,8 +19,9 @@ Usar antes de cada deploy grande, y como referencia al abrir un PR
 - [ ] Unidades relativas (`rem`, `em`, `%`) para tipografía, no solo `px`
 
 ## Formularios (buscador, filtros de rubro)
-- [ ] Cada input tiene un `<label>` visible y asociado (no solo `placeholder`)
-- [ ] Los grupos de filtros tienen un label de grupo (`fieldset`/`legend` o `aria-labelledby`)
+- [x] Buscador principal (`#inputBuscar`) tiene `<label>` visible-solo-lector, `aria-describedby` y `aria-controls` ✅
+- [x] Filtro por rubro (`#listaRubros`) tenía `role="grid"` sin estructura de grilla real (fila/celda) — corregido a `role="group"`, coincide con el patrón real de botones toggle con `aria-pressed`
+- [ ] Revisar `role="tablist"`/`role="tab"` en `los-mejores-restaurantes-cdu/index.html` (filtro por tipo de cocina): confirmar que el JS implementa navegación con flechas (patrón tab real) o simplificar a `role="group"` si son solo botones de filtro
 - [ ] Los mensajes de error/estado usan regiones `aria-live` (ya hay 8 usos ✅ — verificar que cubran búsqueda vacía)
 - [ ] Ningún campo tiene `autofocus` forzado al cargar la página
 
