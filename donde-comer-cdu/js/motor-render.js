@@ -2951,7 +2951,26 @@
         redibujar();
       }
     }
-    if (global.document) document.addEventListener('visibilitychange', alCambiarVisibilidad);
+    // FIX (auditoría, hallazgo "procesos periódicos", Oportunidad 1,
+    // 2026-08-05): antes esto era un listener de `visibilitychange`
+    // propio e independiente — uno más de los que el informe identificó
+    // reimplementando la misma lógica que ambiente-scheduler.js/
+    // ambiente-movimiento.js ya centralizan para el Ambient Engine.
+    // js/ciclo-vida.js (cargado antes que este archivo, ver index.html)
+    // generaliza esa misma centralización sin depender de ningún
+    // concepto del Ambient Engine — motor-render.js no es parte de ese
+    // motor, así que no tenía forma de sumarse a esa centralización
+    // hasta ahora. Fallback defensivo a un listener directo si
+    // CicloVida no llegó a cargar, para no perder el comportamiento
+    // anterior en ese caso.
+    var desuscribirVisibilidad = (global.CicloVida && typeof global.CicloVida.suscribirVisibilidad === 'function')
+      ? global.CicloVida.suscribirVisibilidad(alCambiarVisibilidad)
+      : (function () {
+          if (global.document) document.addEventListener('visibilitychange', alCambiarVisibilidad);
+          return function () {
+            if (global.document) document.removeEventListener('visibilitychange', alCambiarVisibilidad);
+          };
+        })();
 
     // Red de seguridad para `orientationchange`: ResizeObserver ya
     // debería reaccionar al nuevo tamaño del contenedor tras rotar,
@@ -3001,7 +3020,7 @@
         }
         if (resizeObs) resizeObs.disconnect();
         if (resizeFallback) global.removeEventListener('resize', resizeFallback);
-        if (global.document) document.removeEventListener('visibilitychange', alCambiarVisibilidad);
+        desuscribirVisibilidad();
         if (orientationFallback) global.removeEventListener('orientationchange', orientationFallback);
         // BUG REAL corregido en esta pasada: estos 5 listeners viven en
         // `contenedor`, el elemento que entrega quien llama a crear(),
