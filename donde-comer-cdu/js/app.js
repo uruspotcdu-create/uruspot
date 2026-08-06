@@ -1219,7 +1219,8 @@ import { crearDomPainter } from './dom-painter.js';
     mapsHref: window.AppFormato && window.AppFormato.mapsHref,
     escapeHTML: window.AppFormato && window.AppFormato.escapeHTML,
     geolocationDisponible: geolocationDisponible,
-    hayBusquedaOFiltro: hayBusquedaOFiltro
+    hayBusquedaOFiltro: hayBusquedaOFiltro,
+    VISUAL_STATE: VISUAL_STATE
   });
 
   /**
@@ -1348,79 +1349,9 @@ import { crearDomPainter } from './dom-painter.js';
   var pintarSugerenciasRapidas = DomPainter.pintarSugerenciasRapidas;
   var actualizarVisibilidadSugerencias = DomPainter.actualizarVisibilidadSugerencias;
 
-  /**
-   * Resumen de filtros activos: una píldora por faceta (búsqueda,
-   * rubro, cerca-tuyo), cada una con su propia × para sacarse esa
-   * faceta de encima sin tocar las otras. Antes la única forma de
-   * quitar UN filtro puntual era vaciar el campo a mano o reabrir el
-   * índice de rubros — acá queda a la vista, en el mismo lugar donde
-   * se está mirando el resultado que esos filtros produjeron.
-   */
-  function pintarFiltrosActivos() {
-    if (!DOM.filtrosActivos) return;
-
-    var pills = [];
-    var consulta = uiState.consultaActual.trim();
-
-    if (consulta) {
-      pills.push(
-        '<span class="filtro-pill" data-filtro="busqueda">' +
-        '<span class="filtro-pill__texto">“' + escapeHTML(consulta) + '”</span>' +
-        '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="busqueda" ' +
-        'aria-label="Quitar búsqueda de ' + escapeHTML(consulta) + '">×</button>' +
-        '</span>'
-      );
-    }
-
-    if (uiState.filtroRubroActivo) {
-      var meta = window.URU_RUBROS_META && window.URU_RUBROS_META[uiState.filtroRubroActivo];
-      var nombreRubro = meta ? meta[0] : uiState.filtroRubroActivo;
-      pills.push(
-        '<span class="filtro-pill" data-filtro="rubro" style="--chip-color:' +
-        (meta ? 'var(' + meta[2] + ')' : 'var(--color-granate-clara)') + '">' +
-        '<span class="filtro-pill__texto">' + escapeHTML(nombreRubro) + '</span>' +
-        '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="rubro" ' +
-        'aria-label="Quitar filtro de rubro ' + escapeHTML(nombreRubro) + '">×</button>' +
-        '</span>'
-      );
-    }
-
-    if (uiState.cercaTuyoActivo) {
-      pills.push(
-        '<span class="filtro-pill filtro-pill--cerca" data-filtro="cerca">' +
-        '<span class="filtro-pill__texto">📍 cerca tuyo</span>' +
-        '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="cerca" ' +
-        'aria-label="Dejar de ordenar por cercanía">×</button>' +
-        '</span>'
-      );
-    }
-
-    if (uiState.sorprendemeActivo) {
-      // Fase 4 — "Sorprendeme": única píldora con DOS botones propios,
-      // no uno. "↻" pide una sorpresa distinta (reroll completo, no
-      // acumula); "×" es la salida de siempre, igual que las otras
-      // píldoras. Ninguno de los dos reusa data-filtro-quitar para el
-      // reroll — sería ambiguo con "quitar" en manejarClickFiltrosActivos.
-      pills.push(
-        '<span class="filtro-pill filtro-pill--sorpresa" data-filtro="sorpresa">' +
-        '<span class="filtro-pill__texto">🎲 sorpresa</span>' +
-        '<button type="button" class="filtro-pill__reroll" data-filtro-reroll="sorpresa" ' +
-        'aria-label="Mostrarme otra sorpresa distinta">↻</button>' +
-        '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="sorpresa" ' +
-        'aria-label="Salir del modo sorpresa">×</button>' +
-        '</span>'
-      );
-    }
-
-    if (!pills.length) {
-      DOM.filtrosActivos.hidden = true;
-      DOM.filtrosActivos.innerHTML = '';
-      return;
-    }
-
-    DOM.filtrosActivos.hidden = false;
-    DOM.filtrosActivos.innerHTML = pills.join('');
-  }
+  // Resumen de filtros activos — extraído a dom-painter.js. Conserva
+  // los mismos data-* que consumen los listeners delegados de app.js.
+  var pintarFiltrosActivos = DomPainter.pintarFiltrosActivos;
 
   /**
    * Click delegado en las sugerencias rápidas: un rubro reusa
@@ -1905,36 +1836,9 @@ import { crearDomPainter } from './dom-painter.js';
     }
   }
 
-  /**
-   * Pinta la leyenda del mapa.
-   */
-  function pintarLeyenda(puntos) {
-    if (!DOM.mapaLeyenda) return;
-
-    var vistos = Object.create(null);
-    var unicos = [];
-    puntos.forEach(function (p) {
-      if (vistos[p.rubroNombre]) return;
-      vistos[p.rubroNombre] = true;
-      unicos.push(p);
-    });
-
-    if (unicos.length < 2) {
-      DOM.mapaLeyenda.hidden = true;
-      return;
-    }
-
-    DOM.mapaLeyenda.innerHTML = unicos.map(function (p) {
-      var icono = (p.rubroKey && window.URU_RUBROS_ICONO_SVG)
-        ? window.URU_RUBROS_ICONO_SVG(p.rubroKey, { tam: 13 })
-        : '';
-      var marca = icono || '<span class="mapa-leyenda-punto" style="background:' + p.color + '"></span>';
-      return '<span class="mapa-leyenda-chip" style="--chip-color:' + p.color + '">' +
-        marca + escapeHTML(p.rubroNombre) + '</span>';
-    }).join('');
-
-    DOM.mapaLeyenda.hidden = false;
-  }
+  // Leyenda del mapa — extraída a dom-painter.js. Los puntos ya llegan
+  // normalizados desde actualizarMapaHerramienta().
+  var pintarLeyenda = DomPainter.pintarLeyenda;
 
   /**
    * Actualiza la textura ambiental del mapa de fondo.
@@ -2372,23 +2276,8 @@ import { crearDomPainter } from './dom-painter.js';
     }
   }
 
-  /**
-   * Estado "seguí escribiendo": 1 carácter, por debajo del umbral de
-   * búsqueda explícita (2). Antes ese carácter ya disparaba un filtro
-   * real —contra casi todo el catálogo, ruido puro— sin avisar que
-   * faltaba una letra más. Ahora hay una respuesta inmediata y honesta
-   * en vez de silencio o resultados que no dicen nada.
-   */
-  function pintarEstadoEscribiendo() {
-    if (!DOM.panelDescubrimiento) return;
-    DOM.panelDescubrimiento.innerHTML =
-      '<p class="escribiendo"><span class="escribiendo__punto" aria-hidden="true"></span>' +
-      'Seguí escribiendo — buscamos a partir de 2 letras.</p>';
-    if (DOM.estadoResultados) {
-      DOM.estadoResultados.textContent = 'Escribiendo. Hacen falta al menos 2 letras para buscar.';
-    }
-    uiState.visualState = VISUAL_STATE.TYPING;
-  }
+  // Estado de escritura — extraído a dom-painter.js.
+  var pintarEstadoEscribiendo = DomPainter.pintarEstadoEscribiendo;
 
   function manejarClickPanel(e) {
     var btnAceptar = e.target.closest('[data-accion="aceptar"]');
