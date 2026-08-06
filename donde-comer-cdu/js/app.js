@@ -70,6 +70,7 @@ import { crearClimateContext } from './climate-context.js';
 import { solicitarUbicacion, geolocationDisponible } from './geolocation.js';
 import { crearErrorRecovery } from './error-recovery.js';
 import { crearRenderEngine } from './render-engine.js';
+import { crearDomPainter } from './dom-painter.js';
 
 (function () {
   'use strict';
@@ -778,7 +779,7 @@ import { crearRenderEngine } from './render-engine.js';
         // Parallelizar carga de detalles (segundo plano)
         cargarDetallesEnSegundoPlano();
         pintarRubros();
-        pintarStatsRapidas();
+        DomPainter.pintarStatsRapidas();
         pintarDestacados();
         pintarSugerenciasRapidas();
         render();
@@ -1194,6 +1195,17 @@ import { crearRenderEngine } from './render-engine.js';
     debugLog: debugLog
   });
 
+  // FASE 4b (Plan Maestro de Modularización, 2026-08-06): mitad de
+  // PINTADO de render() — funciones `pintar*`/`actualizar*` que
+  // escriben directamente en el DOM. Extracción directa, una función
+  // a la vez (ver dom-painter.js para el detalle y el progreso).
+  // DOM y obtenerRegistro viajan por parámetro, no por closure —
+  // mismo criterio que RenderEngine arriba.
+  var DomPainter = crearDomPainter({
+    DOM: DOM,
+    obtenerRegistro: obtenerRegistro
+  });
+
   /**
    * Función render() central: calcula qué mostrar, orquesta diferencias,
    * pinta solo lo necesario.
@@ -1303,23 +1315,6 @@ import { crearRenderEngine } from './render-engine.js';
   } else {
     console.error('[app.js] AppTarjetas no está cargado — revisar que js/app-tarjetas.js esté en index.html, antes de motor.bundle.js/app.min.js.');
     pintarEsqueleto = function () {};
-  }
-
-  /**
-   * Estadísticas rápidas del hero (conteo de lugares y rubros).
-   */
-  function pintarStatsRapidas() {
-    if (!obtenerRegistro().length) return;
-    if (DOM.statLugares) {
-      DOM.statLugares.textContent = obtenerRegistro().length.toLocaleString('es-AR');
-    }
-    if (DOM.statRubros) {
-      var grupos = Object.create(null);
-      obtenerRegistro().forEach(function (l) {
-        grupos[l.grupo] = true;
-      });
-      DOM.statRubros.textContent = Object.keys(grupos).length;
-    }
   }
 
   /**
