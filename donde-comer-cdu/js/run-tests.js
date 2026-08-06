@@ -1,11 +1,13 @@
 // js/run-tests.js — URU SPOT
 // ---------------------------------------------------------------------
 // Punto de entrada único de la red de seguridad (Fases 0-2 y 6 del
-// roadmap de mejora, 2026-07-26). Corre, en este orden, las cuatro
+// roadmap de mejora, 2026-07-26; Fase 4a del Plan Maestro de
+// Modularización, 2026-08-06). Corre, en este orden, las siete
 // suites reales del repo y agrega el resultado:
 //
 //   1. motor-test.js               — lógica de negocio pura (212/212 conocido)
 //   2. smoke-tests.js              — integridad de assets referenciados (Fase 0)
+//                                    + imports ES relativos (Fase 4a)
 //   3. contract-tests.js           — contrato DOM↔JS + orden de carga (Fase 2)
 //   4. ambiente-lifecycle-tests.js — ciclo de vida rAF/timers/listeners del
 //                                    Ambient Engine (Fase 6)
@@ -15,16 +17,20 @@
 //                                    (Motion Direction Bible v2.0, Parte M.2)
 //   6. motor-comparacion-tests.js  — módulo puro del comparador inline
 //                                    (Fase 4, Journey/UX, evolutivo A→C)
+//   7. render-engine-tests.js      — RenderEngine.calcular(): las 3 ramas
+//                                    de decisión (curaduría/buscador/recorte),
+//                                    detección de cambios, paginación,
+//                                    cambio de región, cache (Fase 4a)
 //
 // Uso: `node js/run-tests.js`
-// Sale con código 0 solo si las seis suites pasan.
+// Sale con código 0 solo si las siete suites pasan.
 
 'use strict';
 
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js'];
+const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js', 'render-engine-tests.js'];
 
 let algunoFallo = false;
 
