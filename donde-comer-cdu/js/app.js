@@ -329,7 +329,6 @@ import { crearDomPainter } from './dom-painter.js';
   // que tenía el closure original, resuelto recién cuando
   // recuperarDeCarguaCatalogo() se llama de verdad (mucho después).
   var ErrorRecovery = crearErrorRecovery({
-    uiState: uiState,
     mostrarEstadoError: mostrarEstadoError,
     pintarEsqueleto: function () { pintarEsqueleto(); },
     cargarCatalogo: cargarCatalogo
@@ -1215,6 +1214,8 @@ import { crearDomPainter } from './dom-painter.js';
     UMBRAL_RESEÑAS: UMBRAL_RESEÑAS,
     MIN_PARA_MOSTRAR_DESTACADOS: MIN_PARA_MOSTRAR_DESTACADOS,
     MAX_DESTACADOS: MAX_DESTACADOS,
+    uiState: uiState,
+    uiState: uiState,
     slug: window.AppFormato && window.AppFormato.slug,
     mapsHref: window.AppFormato && window.AppFormato.mapsHref,
     escapeHTML: window.AppFormato && window.AppFormato.escapeHTML
@@ -1338,42 +1339,7 @@ import { crearDomPainter } from './dom-painter.js';
   /**
    * Pinta los chips de "Por rubro" con conteos reales y states.
    */
-  function pintarRubros() {
-    if (!DOM.listaRubros || !obtenerRegistro().length || !window.URU_RUBROS_META) return;
-
-    var conteo = Object.create(null);
-    obtenerRegistro().forEach(function (l) {
-      conteo[l.grupo] = (conteo[l.grupo] || 0) + 1;
-    });
-
-    var claves = Object.keys(window.URU_RUBROS_META)
-      .filter(function (k) {
-        return conteo[k];
-      })
-      .sort(function (a, b) {
-        return conteo[b] - conteo[a];
-      });
-
-    DOM.listaRubros.innerHTML = claves.map(function (k) {
-      var meta = window.URU_RUBROS_META[k];
-      var activo = uiState.filtroRubroActivo === k;
-      var icono = window.URU_RUBROS_ICONO_SVG ? window.URU_RUBROS_ICONO_SVG(k, { tam: 15 }) : '';
-      return '<button type="button" class="chip' + (activo ? ' chip--activo' : '') +
-        '" data-rubro="' + k + '" aria-pressed="' + activo +
-        '" style="--chip-color:var(' + meta[2] + ')">' +
-        icono +
-        escapeHTML(meta[0]) + '<span class="chip__conteo">' + conteo[k] + '</span>' +
-        '</button>';
-    }).join('');
-
-    // Indicador deslizante bajo el chip activo — puramente aditivo,
-    // no toca la selección real del filtro. Fail-open si el módulo
-    // no llegó a cargar (mismo criterio que Coreografias/AmbientEngine
-    // en el resto de este archivo).
-    if (window.URU_ChipIndicador) {
-      window.URU_ChipIndicador.sincronizar(DOM.listaRubros, '.chip--activo');
-    }
-  }
+  var pintarRubros = DomPainter.pintarRubros;
 
   /**
    * Sugerencias rápidas: atajos de un toque a los 4 rubros con más
