@@ -16,6 +16,19 @@
 // negocio): contenido de los archivos, ejecución real en navegador,
 // contrato de ids DOM↔JS.
 //
+// SEGUNDO CHEQUEO (Plan Maestro de Modularización, Fase 4, hallazgo de
+// recuperación en render-engine.js, 2026-08-06): además de las
+// referencias de index.html, este test ahora recorre TODAS las
+// declaraciones ES import relativas de cada módulo bajo js/ y verifica
+// que el archivo importado exista en disco. Esto es exactamente lo que
+// habría atrapado, en el momento del commit y no días después, el
+// import roto de `render-engine.js` que quedó apuntando a un módulo
+// inexistente — invisible en producción solo porque el sitio real
+// corría un bundle viejo (app.min.js) en vez de la fuente. Sin este
+// chequeo, un import roto en cualquier módulo ES (no solo
+// render-engine.js) puede volver a colarse sin que ninguna suite lo
+// note hasta que alguien lo pise manualmente en el navegador.
+//
 // Sale con código 0 si todo existe, 1 si falta algo.
 
 'use strict';
@@ -66,6 +79,70 @@ function extraerReferenciasLocales(html) {
   );
 }
 
+// Recorre js/**/*.js (no node_modules, no locales/) y devuelve, por
+// cada archivo, los imports relativos (`./x.js` o `../x.js`) que
+// declara. Regex simple a propósito (mismo criterio que
+// extraerReferenciasLocales): cubre `import X from '...'`,
+// `import { X } from '...'` y `import { X } from "..."`, que es el
+// único estilo de import usado en este repo (ver render-engine.js,
+// dom-painter.js, app.js).
+function listarArchivosJs(dir, acc) {
+  acc = acc || [];
+  fs.readdirSync(dir, { withFileTypes: true }).forEach((entrada) => {
+    if (entrada.name === 'node_modules' || entrada.name === 'locales') return;
+    const abs = path.join(dir, entrada.name);
+    if (entrada.isDirectory()) {
+      listarArchivosJs(abs, acc);
+    } else if (entrada.isFile() && entrada.name.endsWith('.js')) {
+      acc.push(abs);
+    }
+  });
+  return acc;
+}
+
+function extraerImportsRelativos(archivoAbs) {
+  const crudo = fs.readFileSync(archivoAbs, 'utf8');
+  // Mismo criterio que leerHtml(): despojar comentarios de línea (//)
+  // y de bloque (/* */) antes de escanear, para que este propio
+  // archivo (que documenta el patrón de import en sus comentarios) no
+  // se detecte a sí mismo como un import roto. No toca strings, así
+  // que un `//` o `/*` dentro de una URL string es un riesgo teórico
+  // aceptado (no ocurre en los imports relativos de este repo).
+  const contenido = crudo
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => ' '.repeat(m.length))
+    .replace(/\/\/.*$/gm, (m) => ' '.repeat(m.length));
+  const imports = [];
+  const importRe = /\bimport\s+(?:[^'"]*?\s+from\s+)?["'](\.\.?\/[^"']+)["']/g;
+  let m;
+  while ((m = importRe.exec(contenido)) !== null) {
+    imports.push(m[1]);
+  }
+  return imports;
+}
+
+function verificarImportsDeModulos() {
+  const jsDir = path.join(ROOT, 'js');
+  const archivos = listarArchivosJs(jsDir);
+  const rotos = [];
+  let totalImports = 0;
+
+  archivos.forEach((archivoAbs) => {
+    const imports = extraerImportsRelativos(archivoAbs);
+    imports.forEach((importado) => {
+      totalImports += 1;
+      const destinoAbs = path.resolve(path.dirname(archivoAbs), importado);
+      if (!fs.existsSync(destinoAbs)) {
+        rotos.push({
+          desde: path.relative(ROOT, archivoAbs),
+          hacia: importado
+        });
+      }
+    });
+  });
+
+  return { totalArchivos: archivos.length, totalImports, rotos };
+}
+
 function correr() {
   const html = leerHtml();
   const refs = extraerReferenciasLocales(html);
@@ -97,14 +174,36 @@ function correr() {
   if (faltantes.length > 0) {
     console.error('');
     console.error(
-      `SMOKE TEST FALLÓ: ${faltantes.length} referencia(s) rota(s):`
+      `SMOKE TEST FALLÓ: ${faltantes.length} referencia(s) rota(s) en index.html:`
     );
     faltantes.forEach((f) => console.error(`  - ${f.ruta}`));
     process.exit(1);
   }
 
   console.log('');
-  console.log(`SMOKE TEST OK — ${refs.length}/${refs.length} assets locales existen.`);
+  console.log(`✓ index.html: ${refs.length}/${refs.length} assets locales existen.`);
+  console.log('');
+
+  const resultadoImports = verificarImportsDeModulos();
+  console.log(
+    `Imports ES relativos encontrados en ${resultadoImports.totalArchivos} archivo(s) bajo js/: ` +
+      `${resultadoImports.totalImports}`
+  );
+
+  if (resultadoImports.rotos.length > 0) {
+    console.error('');
+    console.error(
+      `SMOKE TEST FALLÓ: ${resultadoImports.rotos.length} import(s) ES roto(s):`
+    );
+    resultadoImports.rotos.forEach((r) => {
+      console.error(`  - ${r.desde}  →  import "${r.hacia}"  (no existe)`);
+    });
+    process.exit(1);
+  }
+
+  console.log(`✓ imports ES: ${resultadoImports.totalImports}/${resultadoImports.totalImports} resuelven a un archivo real.`);
+  console.log('');
+  console.log('SMOKE TEST OK.');
   process.exit(0);
 }
 
