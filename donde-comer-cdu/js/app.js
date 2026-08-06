@@ -1851,24 +1851,18 @@
   // 15. PINTADO DE ELEMENTOS DE UI
   // ───────────────────────────────────────────────────────────────────
 
-  /**
-   * Esqueleto inicial mientras carga el catálogo.
-   */
-  function pintarEsqueleto() {
-    if (!DOM.panelDescubrimiento) return;
-    var frag = document.createDocumentFragment();
-    for (var i = 0; i < 6; i++) {
-      var art = document.createElement('div');
-      art.className = 'tarjeta tarjeta--esqueleto';
-      art.innerHTML =
-        '<div class="u-skeleton esqueleto-linea esqueleto-linea--rubro"></div>' +
-        '<div class="u-skeleton esqueleto-linea esqueleto-linea--nombre"></div>' +
-        '<div class="u-skeleton esqueleto-linea esqueleto-linea--direccion"></div>' +
-        '<div class="u-skeleton esqueleto-linea esqueleto-linea--acciones"></div>';
-      frag.appendChild(art);
-    }
-    DOM.panelDescubrimiento.innerHTML = '';
-    DOM.panelDescubrimiento.appendChild(frag);
+  // Render de tarjetas — extraído a js/app-tarjetas.js (auditoría de
+  // ingeniería, Oportunidad 3, 2026-08-06). Empieza con
+  // pintarEsqueleto (sin configurar(): recibe DOM.panelDescubrimiento
+  // como parámetro en cada llamada, no lo captura por closure). Fail
+  // hard-visible si el script no cargó, igual criterio que las
+  // extracciones anteriores.
+  var pintarEsqueleto;
+  if (window.AppTarjetas) {
+    pintarEsqueleto = function () { window.AppTarjetas.pintarEsqueleto(DOM.panelDescubrimiento); };
+  } else {
+    console.error('[app.js] AppTarjetas no está cargado — revisar que js/app-tarjetas.js esté en index.html, antes de motor.bundle.js/app.min.js.');
+    pintarEsqueleto = function () {};
   }
 
   /**
