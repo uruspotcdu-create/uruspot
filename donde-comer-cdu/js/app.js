@@ -434,7 +434,7 @@
 
     // PERF (auditoría, hallazgo M2, 2026-08-02): antes esto se ejecutaba
     // siempre, sin importar si el flag de debug estaba activo, aunque el
-    // resto de la telemetría (debugLog, MetricsCollector, DebugHelper) sí
+    // resto de la telemetría (debugLog, AppTelemetria) sí
     // respeta window.URU_CONFIG.debug. Se gatea acá igual que debugLog para
     // no pagar este trabajo en cada transición de estado en producción. Si
     // el debug está apagado, stateChangeLog queda vacío — comportamiento
@@ -4034,279 +4034,73 @@
   }
 
   // ───────────────────────────────────────────────────────────────────
-  // 23. SISTEMA DE MÉTRICAS Y PERFORMANCE MONITORING
+  // 23-25. MÉTRICAS, TESTING Y DEBUG — extraídos a js/app-telemetria.js
   // ───────────────────────────────────────────────────────────────────
+  // Auditoría de ingeniería, Oportunidad 3 (2026-08-06): primer módulo
+  // real de la separación de app.js por responsabilidad, con el mismo
+  // criterio que ya rige el Ambient Engine. Este archivo ya no define
+  // MetricsCollector/TestingSuite/DebugHelper — le entrega su estado
+  // interno a AppTelemetria, UNA sola vez, vía configurar(), con
+  // funciones de acceso (nunca los valores directos, para no capturar
+  // una foto vieja de algo que cambia con el tiempo, como `estado` o
+  // `currentState` tras cada render/transición).
+  //
+  // Fail-open explícito si el script no está cargado (mismo criterio
+  // que el resto del proyecto, p. ej. Cap. 1.4 del Ambient Engine):
+  // window.URU_APP.metrics/testing/debug quedan con no-ops en vez de
+  // tirar un ReferenceError contra `window.AppTelemetria` inexistente.
+  var Telemetria = window.AppTelemetria || null;
 
-  var MetricsCollector = (function () {
-    var metrics = {
-      totalRenders: 0,
-      totalRenderTime: 0,
-      lastRenderTime: 0,
-      slowRenders: 0,
-      networkRequests: 0,
-      networkErrors: 0,
-      networkTime: 0,
-      operationsStarted: 0,
-      operationsCompleted: 0,
-      operationsCanceled: 0,
-      focusChanges: 0,
-      keyboardInteractions: 0,
-      geolocationAttempts: 0,
-      geolocationSuccesses: 0,
-      errorCount: 0,
-      memoryWarnings: 0
-    };
-
-    return {
-      recordRender: function (startTime, endTime) {
-        metrics.totalRenders++;
-        var duration = endTime - startTime;
-        metrics.totalRenderTime += duration;
-        metrics.lastRenderTime = duration;
-        if (duration > 100) {
-          metrics.slowRenders++;
-          console.warn('[Metrics] Render lento: ' + duration.toFixed(1) + 'ms');
-        }
-      },
-
-      recordNetworkRequest: function (duration, success) {
-        metrics.networkRequests++;
-        if (success) {
-          metrics.networkTime += duration;
-        } else {
-          metrics.networkErrors++;
-        }
-      },
-
-      recordError: function (tipo) {
-        metrics.errorCount++;
-      },
-
-      getSummary: function () {
-        return {
-          renders: metrics.totalRenders,
-          avgRenderTime: metrics.totalRenders > 0 ? (metrics.totalRenderTime / metrics.totalRenders).toFixed(1) : 0,
-          slowRenders: metrics.slowRenders,
-          networkRequests: metrics.networkRequests,
-          networkErrors: metrics.networkErrors,
-          totalErrors: metrics.errorCount,
-          uptime: Date.now() - (lastStateChange || Date.now())
-        };
-      },
-
-      export: function () {
-        return JSON.parse(JSON.stringify(metrics));
-      }
-    };
-  })();
-
-  // ───────────────────────────────────────────────────────────────────
-  // 24. SUITE DE TESTING Y VALIDACIÓN
-  // ───────────────────────────────────────────────────────────────────
-
-  var TestingSuite = (function () {
-    return {
-      runSmokeTesting: function () {
-        var resultados = {
-          total: 0,
-          pasadas: 0,
-          fallidas: 0,
-          errores: []
-        };
-
-        resultados.total++;
-        try {
-          if (Object.keys(DOM).length === 0) throw new Error('DOM no inicializado');
-          resultados.pasadas++;
-        } catch (e) {
-          resultados.fallidas++;
-          resultados.errores.push('DOM: ' + e.message);
-        }
-
-        resultados.total++;
-        try {
-          if (!estado) throw new Error('Estado es null');
-          if (!estado.sesion) throw new Error('Estado.sesion es null');
-          resultados.pasadas++;
-        } catch (e) {
-          resultados.fallidas++;
-          resultados.errores.push('Estado: ' + e.message);
-        }
-
-        resultados.total++;
-        try {
-          if (!Array.isArray(REGISTRO)) throw new Error('REGISTRO no es array');
-          if (REGISTRO.length === 0) throw new Error('REGISTRO vacío');
-          resultados.pasadas++;
-        } catch (e) {
-          resultados.fallidas++;
-          resultados.errores.push('Registro: ' + e.message);
-        }
-
-        resultados.total++;
-        try {
-          if (!PLANO || !EXPO || !MAPA) {
-            throw new Error('Módulos no inyectados');
-          }
-          resultados.pasadas++;
-        } catch (e) {
-          resultados.fallidas++;
-          resultados.errores.push('Módulos: ' + e.message);
-        }
-
-        resultados.total++;
-        try {
-          var favs = leerFavoritos();
-          if (typeof favs !== 'object') throw new Error('Favoritos no es objeto');
-          resultados.pasadas++;
-        } catch (e) {
-          resultados.fallidas++;
-          resultados.errores.push('Favoritos: ' + e.message);
-        }
-
-        resultados.total++;
-        try {
-          if (!DOM.inputBuscar) throw new Error('Input de búsqueda no existe');
-          resultados.pasadas++;
-        } catch (e) {
-          resultados.fallidas++;
-          resultados.errores.push('Búsqueda: ' + e.message);
-        }
-
-        resultados.total++;
-        try {
-          if (!ValidacionSuite.validarEstado()) {
-            throw new Error('Validación fallida');
-          }
-          resultados.pasadas++;
-        } catch (e) {
-          resultados.fallidas++;
-          resultados.errores.push('Validación: ' + e.message);
-        }
-
-        resultados.total++;
-        try {
-          if (OperationManager.contarActivas() < 0) {
-            throw new Error('OperationManager roto');
-          }
-          resultados.pasadas++;
-        } catch (e) {
-          resultados.fallidas++;
-          resultados.errores.push('Operations: ' + e.message);
-        }
-
-        console.log('[Testing] Smoke tests: ' + resultados.pasadas + '/' + resultados.total + ' pasadas');
-        if (resultados.errores.length > 0) {
-          console.error('[Testing] Errores encontrados:', resultados.errores);
-        }
-
-        return resultados;
-      },
-
-      validarContratoDOM: function () {
-        var contrato = {
-          requeridos: ['inputBuscar', 'panelDescubrimiento', 'tituloRegion', 'subtituloRegion'],
-          resultados: {}
-        };
-
-        contrato.requeridos.forEach(function (id) {
-          var el = DOM[id];
-          contrato.resultados[id] = !!el;
-        });
-
-        var todoOK = Object.keys(contrato.resultados).every(function (k) {
-          return contrato.resultados[k];
-        });
-
-        console.log('[Testing] Contrato DOM: ' + (todoOK ? 'OK' : 'FALLIDO'));
-        return contrato;
-      },
-
-      validarRegistro: function () {
-        var problemas = [];
-        REGISTRO.forEach(function (l, i) {
-          if (!l.id) problemas.push('Item ' + i + ': sin id');
-          if (!l.nombre) problemas.push('Item ' + i + ': sin nombre');
-          if (!l.grupo) problemas.push('Item ' + i + ': sin grupo');
-        });
-
-        if (problemas.length > 0) {
-          console.error('[Testing] Problemas en registro:', problemas.slice(0, 5));
-        }
-
-        return {
-          total: REGISTRO.length,
-          problemasEncontrados: problemas.length,
-          porcentajeIntegridad: ((REGISTRO.length - problemas.length) / REGISTRO.length * 100).toFixed(1)
-        };
-      }
-    };
-  })();
-
-  // ───────────────────────────────────────────────────────────────────
-  // 25. HELPERS DE DEBUGGING Y DESARROLLO
-  // ───────────────────────────────────────────────────────────────────
-
-  var DebugHelper = (function () {
-    return {
-      inspectarEstado: function () {
-        return {
-          current: currentState,
-          uiState: uiState,
-          estado: estado,
-          registroSize: REGISTRO.length,
-          cacheInfo: lastRenderCache,
-          operacionesActivas: OperationManager.contarActivas()
-        };
-      },
-
-      simularBusqueda: function (consulta) {
+  if (Telemetria) {
+    Telemetria.configurar({
+      obtenerDOM: function () { return DOM; },
+      obtenerEstado: function () { return estado; },
+      obtenerEstadoUI: function () { return uiState; },
+      obtenerEstadoMaquina: function () { return currentState; },
+      obtenerUltimoCambioDeEstado: function () { return lastStateChange; },
+      obtenerRegistro: function () { return REGISTRO; },
+      obtenerCacheRender: function () { return lastRenderCache; },
+      obtenerLogCambiosEstado: function () { return stateChangeLog; },
+      contarOperacionesActivas: function () { return OperationManager.contarActivas(); },
+      validarEstadoInvariantes: function () { return ValidacionSuite.validarEstado(); },
+      modulosDisponibles: function () { return { PLANO: !!PLANO, EXPO: !!EXPO, MAPA: !!MAPA }; },
+      leerFavoritos: leerFavoritos,
+      guardarFavoritos: guardarFavoritos,
+      actualizarContadorGuardados: actualizarContadorGuardados,
+      establecerConsultaBusqueda: function (consulta) {
         uiState.consultaActual = consulta;
         if (DOM.inputBuscar) DOM.inputBuscar.value = consulta;
-        render();
       },
+      establecerFiltroRubro: function (rubro) { uiState.filtroRubroActivo = rubro; },
+      render: render
+    });
+  } else {
+    console.error('[app.js] AppTelemetria no está cargado — revisar que js/app-telemetria.js esté en index.html, antes de motor.bundle.js/app.min.js. window.URU_APP.metrics/testing/debug van a devolver no-ops.');
+  }
 
-      simularFiltroRubro: function (rubro) {
-        uiState.filtroRubroActivo = rubro;
-        render();
-      },
+  var TelemetriaMetrics = Telemetria ? Telemetria.metrics : {
+    recordRender: function () {},
+    recordNetworkRequest: function () {},
+    recordError: function () {},
+    getSummary: function () { return { renders: 0, avgRenderTime: 0, slowRenders: 0, networkRequests: 0, networkErrors: 0, totalErrors: 0, uptime: 0 }; },
+    export: function () { return {}; }
+  };
 
-      simularGuardarFavorito: function (lugarId) {
-        var favoritos = leerFavoritos();
-        favoritos[lugarId] = !favoritos[lugarId];
-        guardarFavoritos(favoritos);
-        actualizarContadorGuardados();
-        render();
-      },
+  var TelemetriaTesting = Telemetria ? Telemetria.testing : {
+    runSmokeTesting: function () { return { total: 0, pasadas: 0, fallidas: 0, errores: ['AppTelemetria no cargado'] }; },
+    validarContratoDOM: function () { return { requeridos: [], resultados: {} }; },
+    validarRegistro: function () { return { total: 0, problemasEncontrados: 0, porcentajeIntegridad: '0.0' }; }
+  };
 
-      healthCheck: function () {
-        var testing = TestingSuite.runSmokeTesting();
-        var metrics = MetricsCollector.getSummary();
-        var registro = TestingSuite.validarRegistro();
-        var contrato = TestingSuite.validarContratoDOM();
+  var TelemetriaDebug = Telemetria ? Telemetria.debug : {
+    inspectarEstado: function () { return null; },
+    simularBusqueda: function () {},
+    simularFiltroRubro: function () {},
+    simularGuardarFavorito: function () {},
+    healthCheck: function () { return null; },
+    exportDebugData: function () { return null; }
+  };
 
-        return {
-          estado: currentState,
-          testing: testing,
-          metrics: metrics,
-          registro: registro,
-          contrato: contrato,
-          timestamp: new Date().toISOString()
-        };
-      },
-
-      exportDebugData: function () {
-        return {
-          version: '2.3.0',
-          timestamp: new Date().toISOString(),
-          health: this.healthCheck(),
-          stateLog: stateChangeLog.slice(-20),
-          metricsExport: MetricsCollector.export(),
-          registroMuestraSize10: REGISTRO.slice(0, 10)
-        };
-      }
-    };
-  })();
 
   // ───────────────────────────────────────────────────────────────────
   // 26. MANAGEMENT DE CICLO DE VIDA EXTENDIDO
@@ -4371,14 +4165,14 @@
     reparar: function () { return ValidacionSuite.reparar(); },
 
     // Testing
-    runTests: function () { return TestingSuite.runSmokeTesting(); },
-    validateContract: function () { return TestingSuite.validarContratoDOM(); },
-    validateRegistry: function () { return TestingSuite.validarRegistro(); },
+    runTests: function () { return TelemetriaTesting.runSmokeTesting(); },
+    validateContract: function () { return TelemetriaTesting.validarContratoDOM(); },
+    validateRegistry: function () { return TelemetriaTesting.validarRegistro(); },
 
     // Debugging
-    debug: DebugHelper,
-    metrics: MetricsCollector,
-    testing: TestingSuite,
+    debug: TelemetriaDebug,
+    metrics: TelemetriaMetrics,
+    testing: TelemetriaTesting,
 
     // Hooks
     on: LifecycleHooks.on,
@@ -4432,8 +4226,8 @@
     desactivarCercaDeMi: desactivarCercaDeMi,
 
     // Health check
-    healthCheck: function () { return DebugHelper.healthCheck(); },
-    exportDebugData: function () { return DebugHelper.exportDebugData(); },
+    healthCheck: function () { return TelemetriaDebug.healthCheck(); },
+    exportDebugData: function () { return TelemetriaDebug.exportDebugData(); },
 
     // Metadata
     // buildDate es una constante fija, no new Date(): este repo no

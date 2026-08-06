@@ -61,6 +61,13 @@
      primer <script> de negocio del documento, no un módulo más
      dentro de ninguno de los dos bundles. -->
 <script src="js/ciclo-vida.js" defer></script>
+<!-- Métricas/testing/debug de app.js (auditoría de ingeniería,
+     Oportunidad 3, 2026-08-06). Sin dependencias — recibe el estado
+     de app.js una única vez, vía AppTelemetria.configurar(), durante
+     la inicialización de este último. Tiene que cargar ANTES que
+     app.min.js llame a configurar() — por eso va acá, junto a
+     ciclo-vida.js, y no dentro de ningún bundle. -->
+<script src="js/app-telemetria.js" defer></script>
 <!-- Núcleo (motor + metadatos + slugs) — perf, 2026-07-31: los 10
      módulos de abajo (código fuente, se siguen editando acá
      individualmente) se concatenan a js/motor.bundle.js con

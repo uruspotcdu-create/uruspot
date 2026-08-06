@@ -32,7 +32,7 @@
        consola antes de interactuar con la página.
        No afecta a console.error/console.warn (esos son señales de
        algo puntual que sí vale la pena ver siempre) ni al
-       TestingSuite de DebugHelper (ese ya es on-demand, se invoca
+       testing/debug de AppTelemetria (ese ya es on-demand, se invoca
        explícitamente vía window.URU_APP.healthCheck()). */
     debug: false,
 
