@@ -24,179 +24,41 @@
    
    ═══════════════════════════════════════════════════════════════════ */
 
+// FASE 1 del Plan Maestro de Modularización (auditoría de ingeniería,
+// 2026-08-06): app.js pasa a cargarse como <script type="module"> (ver
+// index.html) para poder usar `import` acá. Los import deben ir a
+// nivel de módulo, fuera de la IIFE de abajo — por eso están acá
+// arriba y no junto a la Sección 1, donde vivían los valores antes de
+// esta extracción. La IIFE que sigue no es redundante con el scope de
+// módulo (ESM ya aísla el archivo): se mantiene sin cambios para
+// minimizar el diff sobre el resto del archivo, que sigue usando
+// exactamente los mismos nombres de variable que antes.
+import {
+  CIUDAD, TARJETAS_POR_PAGINA, DEBOUNCE_BUSQUEDA_MS, DEBOUNCE_FILTRO_MS,
+  PERMANENCIA_TICK_MS, FOCUS_TRAP_DELAY_MS, ANIMATION_TIMEOUT_MS,
+  GEOLOCATION_TIMEOUT_MS, ENTRADA_VIDRIO_TIMEOUT_MS, MAPA_PADDING_GUIA_PX,
+  MAPA_PADDING_EXPLORACION_PX, GEOLOCATION_MAX_AGE_MS, TOOLTIP_TIMEOUT_MS,
+  CAMBIO_REGION_AVISO_MS, NETWORK_RETRY_ATTEMPTS, NETWORK_RETRY_DELAY_MS,
+  UMBRAL_RATING, UMBRAL_RESEÑAS, MAX_DESTACADOS, MIN_PARA_MOSTRAR_DESTACADOS,
+  CLIMA_CONTEXTO_URL, CLIMA_CONTEXTO_TIMEOUT_MS, CLIMA_CONTEXTO_INTERVALO_MS,
+  ROLES_NOMBRES, RAMA_CURADURIA, RAMA_BUSCADOR, STATE, ERROR_TYPE,
+  ERROR_TYPES_FATALES, VISUAL_STATE, debugLog
+} from './constants.js';
+import { calcularDistancia, razonesPorLugarId, hayCambioEnLista } from './pure-utils.js';
+import { appEventBus } from './event-bus.js';
+
 (function () {
   'use strict';
 
   // ───────────────────────────────────────────────────────────────────
   // 1. CONFIGURACIÓN Y CONSTANTES
   // ───────────────────────────────────────────────────────────────────
-
-  var CIUDAD = 'concepcion-del-uruguay';
-  var TARJETAS_POR_PAGINA = 8;
-  var DEBOUNCE_BUSQUEDA_MS = 160;
-  // TIER 1.3 (Perf, 2026-08-02): más corto que el de búsqueda porque un
-  // click en un chip de rubro ya es una intención completa (a
-  // diferencia de una tecla dentro de una palabra que se sigue
-  // escribiendo) — solo necesita absorber dobles clicks/clicks en
-  // ráfaga entre chips distintos.
-  var DEBOUNCE_FILTRO_MS = 80;
-  var PERMANENCIA_TICK_MS = 5000;
-  var FOCUS_TRAP_DELAY_MS = 100;
-  var ANIMATION_TIMEOUT_MS = 260;
-  var GEOLOCATION_TIMEOUT_MS = 8000;
-  // PERF (auditoría performance, 2026-08-02): red de seguridad para
-  // .tarjeta--entrando (ver pintarTarjetas/inicializarListeners). El
-  // caso normal saca la clase en 'animationend'; este timeout es solo
-  // por si esa animación nunca llega a completarse (interrumpida,
-  // pestaña oculta durante la animación, etc.) — sin él, una tarjeta
-  // podría quedar con el vidrio suprimido para siempre. Cubre el peor
-  // caso real: --dur-lenta (420ms) + el delay escalonado más largo
-  // (Math.min(i,24)*0.03s = 720ms) = 1140ms, con margen.
-  var ENTRADA_VIDRIO_TIMEOUT_MS = 1500;
-
-  // Fase 4 — MUST HAVE #4 (Fase 3A §2, Fase 3D §7): encuadre del mapa
-  // por región. Antes `encuadrarTodos()` siempre recibía el mismo
-  // padding fijo (48px) sin importar la región activa — el mapa
-  // "protagonista" de Exploración no existía ni siquiera en cómo se
-  // encuadraba a sí mismo. Un padding mayor = más margen alrededor
-  // del conjunto de puntos = vista más abierta/alejada, coherente con
-  // "más variedad para curiosear" (mismo subtítulo que ya usa
-  // actualizarCabecera() para esta región). Guía mantiene el valor
-  // original: foco cerrado sobre una selección chica.
-  var MAPA_PADDING_GUIA_PX = 48;
-  var MAPA_PADDING_EXPLORACION_PX = 96;
-
-  // Logging de diagnóstico del flujo normal (cambios de estado,
-  // operaciones async, etc.), detrás de window.URU_CONFIG.debug —
-  // ver motor-config.js §0. No reemplaza console.error/console.warn,
-  // que siguen corriendo siempre porque señalan algo puntual.
-  function debugLog() {
-    if (window.URU_CONFIG && window.URU_CONFIG.debug) {
-      console.log.apply(console, arguments);
-    }
-  }
-  var GEOLOCATION_MAX_AGE_MS = 300000;
-  var TOOLTIP_TIMEOUT_MS = 4000;
-  // Fase 4 — MUST HAVE #3 (Fase 3C §3, Fase 3D §7): duración del
-  // aviso transitorio de cambio de región. Más corto que
-  // TOOLTIP_TIMEOUT_MS a propósito — es un aviso pasivo ("cambió lo
-  // que ves"), no un mensaje de error que requiera acción del
-  // usuario, así que no necesita quedarse tanto tiempo en pantalla.
-  var CAMBIO_REGION_AVISO_MS = 2600;
-  var NETWORK_RETRY_ATTEMPTS = 2;
-  var NETWORK_RETRY_DELAY_MS = 800;
-  // Auditoría producción, 2026-07-30: se eliminan MAX_CONCURRENT_OPERATIONS
-  // y VIRTUAL_SCROLL_THRESHOLD — declaradas pero sin ningún consumidor real
-  // (OperationManager.crear() nunca comparaba contra un límite; el listado
-  // ya se pagina con TARJETAS_POR_PAGINA, así que la virtualización nunca
-  // llegó a evaluarse). Confirmado con análisis estático antes de borrar.
-
-  var UMBRAL_RATING = 4.6;
-  var UMBRAL_RESEÑAS = 15;
-  var MAX_DESTACADOS = 6;
-  var MIN_PARA_MOSTRAR_DESTACADOS = 3;
-
-  // Fase 4 — conexión real de contexto.clima al recorte por iniciativa
-  // propia (Fase 3D §4, "el por qué" — descubrimiento; motor-exposicion.js
-  // ya sabía puntuar por clima desde antes, pero nada en app.js le pasaba
-  // datos reales). Fetch propio y liviano a la misma Function
-  // (functions/weather.js) que ya consume js/ambiente-clima.js — no se
-  // reutiliza ese módulo porque es un efecto visual diferido (se carga
-  // recién en requestIdleCallback vía cargarMotorAmbientalDiferido()) y
-  // solo expone booleans (lluvia/niebla/viento), no los valores crudos
-  // que necesita calcularScore(). Mismo endpoint, mismo timeout,
-  // mismo intervalo de refresco (5 min) — dos consumidores distintos,
-  // sin acoplarlos entre sí.
-  var CLIMA_CONTEXTO_URL = '/weather';
-  var CLIMA_CONTEXTO_TIMEOUT_MS = 5000;
-  var CLIMA_CONTEXTO_INTERVALO_MS = 5 * 60 * 1000;
-  var climaContextoCache = null; // { weather_code, temperature_2m, precipitation } | null
-
-  // Módulos inyectados globalmente (verificados al init)
-  var PLANO = null;
-  var EXPO = null;
-  var MAPA = null;
-
-  // Constantes de rol por aperturas
-  var ROLES_NOMBRES = {
-    anfitrion: 'Recién llegado',
-    conocido: 'Conocido',
-    complice: 'Cómplice',
-    casa: 'Casa'
-  };
-
-  // Ramas visuales posibles
-  var RAMA_CURADURIA = 'curaduria';
-  var RAMA_BUSCADOR = 'buscador';
-  // RAMA_RECORTE = 'recorte:guia' | 'recorte:exploracion'
-
-  // Estados de máquina
-  var STATE = {
-    UNINITIALIZED: 'uninitialized',
-    INITIALIZING: 'initializing',
-    LOADING_CATALOG: 'loading_catalog',
-    READY: 'ready',
-    ERROR: 'error',
-    RECOVERING: 'recovering',
-    INTERACTION: 'interaction',
-    CLEANUP: 'cleanup'
-  };
-
-  // Tipos de error
-  var ERROR_TYPE = {
-    CATALOG_FETCH: 'catalog_fetch',
-    DETAILS_FETCH: 'details_fetch',
-    STATE_INVALID: 'state_invalid',
-    GEOLOCATION: 'geolocation',
-    STORAGE: 'storage',
-    UNKNOWN: 'unknown'
-  };
-
-  // AUDITORÍA — agregado en esta pasada. Tipos de error que sí o sí
-  // deben detener la app (transicionar a STATE.ERROR y reemplazar el
-  // panel de resultados por un mensaje, vía mostrarEstadoError()). El
-  // resto de los tipos en ERROR_TYPE corresponden a fallos que el
-  // propio punto de origen YA maneja con un fallback seguro
-  // (leerFavoritos()/guardarFavoritos() devuelven `{}`/no-op ante un
-  // error de storage) — para esos alcanza con loguear, nunca hace
-  // falta apagar el resto de la aplicación por un subsistema no
-  // crítico que ya se recuperó solo.
-  //
-  // BUG REAL corregido en esta pasada: `ErrorRecovery.procesar()`
-  // trataba TODOS los ERROR_TYPE por igual — cualquier hiccup
-  // transitorio de localStorage al leer/guardar favoritos (cuota
-  // agotada, modo privado estricto, storage bloqueado por política)
-  // tiraba `currentState` a STATE.ERROR y borraba TODO
-  // `DOM.panelDescubrimiento` con el mensaje genérico de error, pese a
-  // que `leerFavoritos()` ya había devuelto `{}` con normalidad un
-  // instante antes. Como no hay ningún camino que regrese
-  // automáticamente de STATE.ERROR a STATE.READY para ERROR_TYPE.STORAGE
-  // (a diferencia de CATALOG_FETCH, que sí tiene
-  // `recuperarDeCarguaCatalogo()`), el sitio quedaba con el panel de
-  // resultados borrado y todo `render()` futuro cortado en su primera
-  // línea (`if (estadoActual() !== STATE.READY ...) return;`) — hasta
-  // recargar la página — por un problema que, de hecho, ya estaba
-  // resuelto. Reproducido extrayendo la lógica real de este archivo
-  // (ver auditoría) antes del fix: `leerFavoritos()` devolvía `{}`
-  // correctamente y aun así `currentState` terminaba en `'error'`.
-  var ERROR_TYPES_FATALES = [
-    ERROR_TYPE.CATALOG_FETCH,
-    ERROR_TYPE.STATE_INVALID,
-    ERROR_TYPE.UNKNOWN
-  ];
-
-  // Flags de visualización
-  var VISUAL_STATE = {
-    LOADING: 'loading',
-    EMPTY: 'empty',
-    ERROR: 'error',
-    SUCCESS: 'success',
-    TRANSITION: 'transition',
-    // Nuevo: 1 carácter en el buscador, por debajo del umbral de
-    // búsqueda explícita (2). Ni "cargando" ni "sin resultados" —
-    // un estado propio para no mentir sobre cuál de los dos es.
-    TYPING: 'typing'
-  };
+  // FASE 1 del Plan Maestro de Modularización — extraído a
+  // js/constants.js (ES module). Import explícito de todo lo que se
+  // usa desde acá; ver ese archivo para el detalle de cada constante
+  // (quedaron los mismos valores y los mismos comentarios de contexto,
+  // no se tocó ninguno en la migración).
+  // ───────────────────────────────────────────────────────────────────
 
   // ───────────────────────────────────────────────────────────────────
   // 2. CACHE Y ESTADO GLOBAL
@@ -223,11 +85,8 @@
   // una capa de caché no ahorra trabajo, solo lo agrega (hash de clave
   // + escritura en el mapa de caché) sin beneficio medible.
 
-  function calcularDistancia(lat1, lng1, lat2, lng2) {
-    return Math.sqrt(
-      Math.pow(lat1 - lat2, 2) + Math.pow(lng1 - lng2, 2)
-    );
-  }
+  // calcularDistancia() — FASE 1: extraída a js/pure-utils.js, importada
+  // arriba. Se usa sin cambios en ordenarPorCercaniaConCache() de acá abajo.
 
   function ordenarPorCercaniaConCache(lista, lat, lng) {
     var cacheKey = lat.toFixed(6) + ',' + lng.toFixed(6);
@@ -454,6 +313,20 @@
     }
 
     debugLog('[State] ' + estadoAnterior + ' → ' + nuevoEstado + ' (' + (razon || 'unknown') + ')');
+
+    // FASE 1 del Plan Maestro de Modularización: primer uso real del
+    // EventBus (js/event-bus.js) dentro de app.js. Aditivo a propósito —
+    // no reemplaza ningún camino de control existente, así que ningún
+    // llamador actual de transicionarEstado() cambia de comportamiento
+    // si no tiene nada suscripto a 'stateChanged'. Sienta la base para
+    // que Fase 2+ (StateManager, UIState) se desacople escuchando este
+    // evento en vez de leer `currentState` por closure directo.
+    appEventBus.emit('stateChanged', {
+      desde: estadoAnterior,
+      hacia: nuevoEstado,
+      razon: razon || 'sin_razon',
+      timestamp: lastStateChange
+    });
   }
 
   /**
@@ -563,25 +436,8 @@
    * un fallback genérico), así que este mapa siempre tiene entrada para
    * cada lugar del recorte, nunca queda vacío para un id presente.
    */
-  function razonesPorLugarId(lugaresConRazones) {
-    var mapa = {};
-    (lugaresConRazones || []).forEach(function (x) {
-      if (x.lugar && x.lugar.id != null && x.razones && x.razones.length) {
-        mapa[x.lugar.id] = x.razones[0];
-      }
-    });
-    return mapa;
-  }
-
-  function hayCambioEnLista(listaAnterior, listaActual) {
-    if (!listaAnterior || !listaActual) return true;
-    if (listaAnterior.length !== listaActual.length) return true;
-    
-    // Hash rápido: concatenar IDs
-    var hashAnterior = listaAnterior.map(function (l) { return l.id; }).join(',');
-    var hashActual = listaActual.map(function (l) { return l.id; }).join(',');
-    return hashAnterior !== hashActual;
-  }
+  // razonesPorLugarId() y hayCambioEnLista() — FASE 1: extraídas a
+  // js/pure-utils.js, importadas arriba. Sin cambios de comportamiento.
 
   // Fase de deuda técnica (auditoría producción, 2026-07-30): se elimina
   // calcularDiferenciasRender() — motor de diff incremental (reconciliación
@@ -3907,6 +3763,13 @@
     getRegistro: function () { return REGISTRO.slice(); },
     getStateLog: function () { return stateChangeLog.slice(); },
     canTransition: puedeTransicionar,
+
+    // FASE 1 del Plan Maestro de Modularización: bus de eventos
+    // compartido (js/event-bus.js). Hoy solo emite 'stateChanged' (ver
+    // transicionarEstado()) — cualquier módulo externo (o código de
+    // consola/debug) puede suscribirse vía
+    // window.URU_APP.eventBus.on('stateChanged', fn) sin tocar app.js.
+    eventBus: appEventBus,
 
     // Validation
     validar: function () { return ValidacionSuite.validarEstado(); },
