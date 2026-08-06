@@ -52,6 +52,15 @@
 
 <!-- SCRIPTS DEFERRED — orden = grafo de dependencias, ver §5 arriba.
      No reordenar sin leer esa sección. -->
+<!-- Infraestructura de ciclo de vida a nivel de proyecto (auditoría de
+     ingeniería, Hallazgo profundizado 2 / Oportunidad 1, 2026-08-05).
+     Sin dependencias — expone window.CicloVida (visibilidad + timers
+     con pausa real en 2º plano). Tiene que cargar ANTES que
+     motor.bundle.js (motor-render.js lo usa) y que app.min.js (los
+     timers de negocio lo usan desde el arranque) — por eso es el
+     primer <script> de negocio del documento, no un módulo más
+     dentro de ninguno de los dos bundles. -->
+<script src="js/ciclo-vida.js" defer></script>
 <!-- Núcleo (motor + metadatos + slugs) — perf, 2026-07-31: los 10
      módulos de abajo (código fuente, se siguen editando acá
      individualmente) se concatenan a js/motor.bundle.js con
