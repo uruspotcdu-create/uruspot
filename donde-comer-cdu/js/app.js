@@ -780,7 +780,7 @@ import { crearDomPainter } from './dom-painter.js';
         cargarDetallesEnSegundoPlano();
         pintarRubros();
         DomPainter.pintarStatsRapidas();
-        pintarDestacados();
+        DomPainter.pintarDestacados();
         pintarSugerenciasRapidas();
         render();
 
@@ -1201,9 +1201,23 @@ import { crearDomPainter } from './dom-painter.js';
   // a la vez (ver dom-painter.js para el detalle y el progreso).
   // DOM y obtenerRegistro viajan por parámetro, no por closure —
   // mismo criterio que RenderEngine arriba.
+  // NOTA (orden de ejecución): slug/mapsHref/escapeHTML NO se pasan acá
+  // como los alias locales `var slug`/`mapsHref`/`escapeHTML` — esos
+  // recién se asignan más abajo (bloque de AppFormato, después de este
+  // punto en el cuerpo de la IIFE), así que en este momento todavía
+  // valen `undefined` por hoisting de `var`. Se pasa `window.AppFormato`
+  // directamente, que sí está garantizado disponible acá (se carga como
+  // <script> propio antes que app.js, ver cabecera de app-formato.js).
   var DomPainter = crearDomPainter({
     DOM: DOM,
-    obtenerRegistro: obtenerRegistro
+    obtenerRegistro: obtenerRegistro,
+    UMBRAL_RATING: UMBRAL_RATING,
+    UMBRAL_RESEÑAS: UMBRAL_RESEÑAS,
+    MIN_PARA_MOSTRAR_DESTACADOS: MIN_PARA_MOSTRAR_DESTACADOS,
+    MAX_DESTACADOS: MAX_DESTACADOS,
+    slug: window.AppFormato && window.AppFormato.slug,
+    mapsHref: window.AppFormato && window.AppFormato.mapsHref,
+    escapeHTML: window.AppFormato && window.AppFormato.escapeHTML
   });
 
   /**
@@ -1317,100 +1331,9 @@ import { crearDomPainter } from './dom-painter.js';
     pintarEsqueleto = function () {};
   }
 
-  /**
-   * Spotlight "Destacados" — selector inteligente de lugares top-rated.
-   */
-  function pintarDestacados() {
-    if (!DOM.destacados || !DOM.listaDestacados) return;
-
-    var candidatos = obtenerRegistro().filter(function (l) {
-      return typeof l.rating === 'number' && l.rating >= UMBRAL_RATING &&
-        typeof l.ratingCount === 'number' && l.ratingCount >= UMBRAL_RESEÑAS;
-    });
-
-    if (candidatos.length < MIN_PARA_MOSTRAR_DESTACADOS) {
-      DOM.destacados.hidden = true;
-      return;
-    }
-
-    var diaDelAnio = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    var seed = diaDelAnio;
-
-    function pseudoRandom(n) {
-      var x = Math.sin(n * 12.9898 + seed * 78.233) * 43758.5453;
-      return x - Math.floor(x);
-    }
-
-    candidatos.forEach(function (l, i) {
-      var score = l.rating + Math.log(l.ratingCount) / Math.LN10 / 10;
-      l._scoreDestacado = score + pseudoRandom(i) * 0.05;
-    });
-    // REGLA ABSOLUTA (misma que motor-exposicion.js: tieneFicha()): los
-    // destacados con ficha propia van SIEMPRE primero. Si ninguno de
-    // los candidatos por rating tiene ficha, esta comparación no
-    // cambia nada (0-0=0) y queda el orden por score de siempre.
-    candidatos.sort(function (a, b) {
-      var fichaA = slug(a) ? 1 : 0;
-      var fichaB = slug(b) ? 1 : 0;
-      return (fichaB - fichaA) || (b._scoreDestacado - a._scoreDestacado);
-    });
-
-    var elegidos = [];
-    var rubrosUsados = Object.create(null);
-    candidatos.forEach(function (l) {
-      if (elegidos.length >= MAX_DESTACADOS) return;
-      if (rubrosUsados[l.grupo]) return;
-      rubrosUsados[l.grupo] = true;
-      elegidos.push(l);
-    });
-
-    if (elegidos.length < Math.min(MAX_DESTACADOS, candidatos.length)) {
-      candidatos.forEach(function (l) {
-        if (elegidos.length >= MAX_DESTACADOS) return;
-        if (elegidos.indexOf(l) !== -1) return;
-        elegidos.push(l);
-      });
-    }
-
-    var frag = document.createDocumentFragment();
-    elegidos.forEach(function (lugar) {
-      var metaRubro = window.URU_RUBROS_META && window.URU_RUBROS_META[lugar.grupo];
-      var rubro = metaRubro ? metaRubro[0] : lugar.categoria;
-      var slugLugar = slug(lugar);
-      var linkMaps = mapsHref(lugar);
-      var href = slugLugar ? ('locales/' + slugLugar + '/') : linkMaps;
-      var card = document.createElement(href ? 'a' : 'div');
-      card.className = 'destacado-card';
-      card.setAttribute('role', 'listitem');
-      if (href) {
-        card.href = href;
-        if (!slugLugar) {
-          card.target = '_blank';
-          card.rel = 'noopener';
-        }
-      }
-      if (metaRubro) card.style.setProperty('--rubro-color', 'var(' + metaRubro[2] + ')');
-
-      // Pictograma de rubro (mismo criterio que en pintarTarjetas): los
-      // destacados son la primera superficie que ve alguien al entrar,
-      // tenía más sentido cerrarla acá que dejarla como única tarjeta
-      // sin ícono del sitio.
-      var iconoDestacado = (metaRubro && window.URU_RUBROS_ICONO_SVG)
-        ? window.URU_RUBROS_ICONO_SVG(lugar.grupo, { tam: 12, clase: 'destacado-card__icono' })
-        : '';
-
-      card.innerHTML =
-        '<div class="destacado-card__rubro">' + iconoDestacado + escapeHTML(rubro) + '</div>' +
-        '<div class="destacado-card__nombre">' + escapeHTML(lugar.nombre) + '</div>' +
-        '<div class="destacado-card__rating">★ ' + lugar.rating.toFixed(1).replace('.', ',') +
-        '<span class="destacado-card__conteo">(' + lugar.ratingCount.toLocaleString('es-AR') + ')</span></div>';
-      frag.appendChild(card);
-    });
-
-    DOM.listaDestacados.innerHTML = '';
-    DOM.listaDestacados.appendChild(frag);
-    DOM.destacados.hidden = false;
-  }
+  // pintarDestacados() — extraída a dom-painter.js (FASE 4b, ver
+  // DomPainter.pintarDestacados() e instanciación de DomPainter más
+  // arriba). Llamada real en cargarCatalogo(), ver más abajo.
 
   /**
    * Pinta los chips de "Por rubro" con conteos reales y states.
