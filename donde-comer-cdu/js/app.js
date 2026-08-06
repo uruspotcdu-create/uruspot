@@ -50,6 +50,15 @@ import {
   guardarFavoritos as _guardarFavoritos,
   invalidarCacheFavoritos
 } from './favorites.js';
+import {
+  puedeTransicionar,
+  transicionarEstado,
+  estadoActual,
+  obtenerUltimoCambioDeEstado,
+  obtenerLogCambiosEstado,
+  vaciarLog as _vaciarLogEstado,
+  forzarEstado
+} from './state-manager.js';
 
 (function () {
   'use strict';
@@ -185,10 +194,11 @@ import {
   // Motor de mapa (inicializado perezosamente)
   var motorMapa = null;
 
-  // Estado de máquina global
-  var currentState = STATE.UNINITIALIZED;
-  var lastStateChange = null;
-  var stateChangeLog = [];
+  // FASE 2 (Plan Maestro de Modularización, 2026-08-06): currentState,
+  // lastStateChange y stateChangeLog, junto con transicionarEstado(),
+  // estadoActual() y puedeTransicionar() (antes sección 3, más abajo),
+  // ahora viven en state-manager.js (ver import arriba) — mismo
+  // comportamiento, cero cambios funcionales.
 
   // Cache de renderizado anterior
   var lastRenderCache = {
@@ -231,101 +241,12 @@ import {
   };
 
   // ───────────────────────────────────────────────────────────────────
-  // 3. MÁQUINA DE ESTADOS Y TRANSICIONES
+  // 3. (vacía) — máquina de estados movida a state-manager.js en
+  //    Fase 2 del Plan Maestro de Modularización (2026-08-06); ver
+  //    import arriba (transicionarEstado, estadoActual,
+  //    puedeTransicionar, obtenerUltimoCambioDeEstado,
+  //    obtenerLogCambiosEstado, vaciarLog, forzarEstado).
   // ───────────────────────────────────────────────────────────────────
-
-  /**
-   * Transiciona la aplicación a un nuevo estado.
-   * Registra la transición para debugging y ejecuta callbacks.
-   */
-  function transicionarEstado(nuevoEstado, razon) {
-    var estadoAnterior = currentState;
-    if (estadoAnterior === nuevoEstado) return; // idempotente
-
-    // FIX (auditoría, hallazgo P1 "máquina de estados decorativa",
-    // 2026-08-05): puedeTransicionar() existía desde antes, con su tabla
-    // de transiciones válidas, pero nada la llamaba — transicionarEstado()
-    // solo comparaba estadoAnterior === nuevoEstado y asignaba, sin
-    // validar contra el mapa. Eso permitía transiciones como
-    // error → loading_catalog (no está en la lista de 'error'), que es
-    // justo lo que enmascaraba el bug de `estado` null en el arranque
-    // (ver fix de inicializar(), más abajo en este archivo: antes de esa
-    // otra corrección, el STATE.ERROR recién seteado por ErrorRecovery se
-    // pisaba sin condición dos líneas después). No la hacemos bloqueante
-    // todavía — cortar una transición en producción es un cambio de
-    // comportamiento más agresivo del que este hallazgo pide — pero al
-    // menos deja de ser silenciosa: cualquier transición fuera del mapa
-    // ahora se loguea como advertencia, con delante y detrás visibles,
-    // en vez de una validación que existe en el código pero no está
-    // conectada a nada que la ejecute.
-    if (!puedeTransicionar(nuevoEstado)) {
-      console.warn('[State] Transición no declarada en el mapa: ' + estadoAnterior + ' → ' + nuevoEstado + ' (' + (razon || 'sin_razon') + '). Revisar la tabla de transiciones en puedeTransicionar() o el call site.');
-    }
-
-    currentState = nuevoEstado;
-    lastStateChange = Date.now();
-
-    // PERF (auditoría, hallazgo M2, 2026-08-02): antes esto se ejecutaba
-    // siempre, sin importar si el flag de debug estaba activo, aunque el
-    // resto de la telemetría (debugLog, AppTelemetria) sí
-    // respeta window.URU_CONFIG.debug. Se gatea acá igual que debugLog para
-    // no pagar este trabajo en cada transición de estado en producción. Si
-    // el debug está apagado, stateChangeLog queda vacío — comportamiento
-    // esperado, no afecta validar()/reparar()/runTests()/healthCheck().
-    if (window.URU_CONFIG && window.URU_CONFIG.debug) {
-      stateChangeLog.push({
-        desde: estadoAnterior,
-        hacia: nuevoEstado,
-        timestamp: lastStateChange,
-        razon: razon || 'sin_razon'
-      });
-
-      // Guardar últimos 50 cambios para debugging
-      if (stateChangeLog.length > 50) {
-        stateChangeLog.shift();
-      }
-    }
-
-    debugLog('[State] ' + estadoAnterior + ' → ' + nuevoEstado + ' (' + (razon || 'unknown') + ')');
-
-    // FASE 1 — cableado de EventBus (aditivo): emitir el cambio de
-    // estado para que futuros módulos (Fase 2+) puedan escuchar sin
-    // acoplarse directamente a esta función. Nada escucha este evento
-    // todavía — es deliberadamente un no-op observable, no cambia
-    // ningún comportamiento existente.
-    appEventBus.emit('stateChanged', {
-      desde: estadoAnterior,
-      hacia: nuevoEstado,
-      razon: razon || 'sin_razon'
-    });
-  }
-
-  /**
-   * Obtiene el estado actual con seguridad.
-   */
-  function estadoActual() {
-    return currentState;
-  }
-
-  /**
-   * Valida si una transición es legal en la máquina de estados.
-   */
-  function puedeTransicionar(nuevoEstado) {
-    var actual = currentState;
-    var transiciones = {
-      'uninitialized': ['initializing'],
-      'initializing': ['loading_catalog', 'error'],
-      'loading_catalog': ['ready', 'error'],
-      'ready': ['interaction', 'error', 'loading_subtask', 'recovery'],
-      'interaction': ['ready', 'error'],
-      'error': ['recovering', 'ready'],
-      'recovering': ['ready', 'error'],
-      'loading_subtask': ['ready', 'error'],
-      'cleanup': []
-    };
-    var permitidas = transiciones[actual] || [];
-    return permitidas.indexOf(nuevoEstado) !== -1;
-  }
 
   // ───────────────────────────────────────────────────────────────────
   // 4. GESTOR DE OPERACIONES (Concurrencia y Cancelación)
@@ -820,7 +741,7 @@ import {
     // Limpiar referencias
     AccesibilidadManager.limpiar();
     dynamicElements = {};
-    stateChangeLog = [];
+    _vaciarLogEstado();
     lastRenderCache = {
       lista: null,
       favoritos: null,
@@ -837,7 +758,7 @@ import {
    */
   function reiniciar() {
     limpiar();
-    currentState = STATE.UNINITIALIZED;
+    forzarEstado(STATE.UNINITIALIZED);
     inicializar();
   }
 
@@ -3595,11 +3516,11 @@ import {
       obtenerDOM: function () { return DOM; },
       obtenerEstado: function () { return estado; },
       obtenerEstadoUI: function () { return uiState; },
-      obtenerEstadoMaquina: function () { return currentState; },
-      obtenerUltimoCambioDeEstado: function () { return lastStateChange; },
+      obtenerEstadoMaquina: function () { return estadoActual(); },
+      obtenerUltimoCambioDeEstado: function () { return obtenerUltimoCambioDeEstado(); },
       obtenerRegistro: function () { return REGISTRO; },
       obtenerCacheRender: function () { return lastRenderCache; },
-      obtenerLogCambiosEstado: function () { return stateChangeLog; },
+      obtenerLogCambiosEstado: function () { return obtenerLogCambiosEstado(); },
       contarOperacionesActivas: function () { return OperationManager.contarActivas(); },
       validarEstadoInvariantes: function () { return ValidacionSuite.validarEstado(); },
       modulosDisponibles: function () { return { PLANO: !!PLANO, EXPO: !!EXPO, MAPA: !!MAPA }; },
@@ -3696,7 +3617,7 @@ import {
     getState: estadoActual,
     getUIState: function () { return JSON.parse(JSON.stringify(uiState)); },
     getRegistro: function () { return REGISTRO.slice(); },
-    getStateLog: function () { return stateChangeLog.slice(); },
+    getStateLog: function () { return obtenerLogCambiosEstado().slice(); },
     canTransition: puedeTransicionar,
 
     // Validation
