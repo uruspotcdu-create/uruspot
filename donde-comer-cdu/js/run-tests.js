@@ -1,8 +1,8 @@
 // js/run-tests.js — URU SPOT
 // ---------------------------------------------------------------------
 // Punto de entrada único de la red de seguridad (Fases 0-2 y 6 del
-// roadmap de mejora, 2026-07-26; Fases 4a/4b del Plan Maestro de
-// Modularización, 2026-08-06). Corre, en este orden, las ocho
+// roadmap de mejora, 2026-07-26; Fases 4a/4b/5/6 del Plan Maestro de
+// Modularización, 2026-08-06). Corre, en este orden, las doce
 // suites reales del repo y agrega el resultado:
 //
 //   1. motor-test.js               — lógica de negocio pura (212/212 conocido)
@@ -26,16 +26,23 @@
 //                                    pintarDestacados (ficha-first, orden
 //                                    por score, diversidad por rubro,
 //                                    escape de caracteres especiales) (Fase 4b)
+//   9. listeners-tests.js           — EventDispatcher: enrutamiento de
+//                                    eventos a AppCoordinator (Fase 5)
+//  10. keyboard-nav-tests.js        — navegación por teclado, foco (Fase 5)
+//  11. map-module-tests.js          — MapaModulo: herramienta de mapa,
+//                                    textura, resaltado, motor lazy (Fase 6)
+//  12. scroll-reveal-tests.js       — ScrollReveal: primera entrada con
+//                                    microdesfase, salida/reingreso (Fase 6)
 //
 // Uso: `node js/run-tests.js`
-// Sale con código 0 solo si las ocho suites pasan.
+// Sale con código 0 solo si las doce suites pasan.
 
 'use strict';
 
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js', 'render-engine-tests.js', 'dom-painter-tests.js', 'listeners-tests.js', 'keyboard-nav-tests.js'];
+const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js', 'render-engine-tests.js', 'dom-painter-tests.js', 'listeners-tests.js', 'keyboard-nav-tests.js', 'map-module-tests.js', 'scroll-reveal-tests.js'];
 
 let algunoFallo = false;
 
