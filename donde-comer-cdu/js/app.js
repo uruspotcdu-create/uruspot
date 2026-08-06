@@ -900,7 +900,25 @@
     try {
       validarModulos();
       validarDOM();
-      inicializarEstado();
+
+      // FIX (auditoría, hallazgo P0-1, 2026-08-05): antes esto no miraba
+      // el retorno de inicializarEstado(). Si fallaba (p. ej. localStorage
+      // no disponible o estado corrupto no cubierto por migrarEstado()),
+      // `estado` quedaba en null, ErrorRecovery.procesar ya había hecho
+      // transicionarEstado(STATE.ERROR, ...) puesto que STATE_INVALID es
+      // fatal — pero el flujo seguía de largo hasta el
+      // transicionarEstado(STATE.LOADING_CATALOG, ...) de más abajo, que
+      // pisaba ese STATE.ERROR sin condición. El catálogo terminaba
+      // cargando igual con `estado` null, y el TypeError real recién
+      // aparecía minutos después, sin capturar, dentro de un listener de
+      // input (ver despejarBusqueda/nombrar en motor-plano.js — su propio
+      // comentario ya admitía esta causa raíz sin resolverla). Frenar acá
+      // evita todo eso: el estado de error fatal que ErrorRecovery ya
+      // mostró queda como la última palabra, no una que el código de abajo
+      // sobreescribe dos líneas después.
+      if (!inicializarEstado()) {
+        return;
+      }
 
       // Inicialización visual
       pintarEsqueleto();
