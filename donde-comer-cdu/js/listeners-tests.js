@@ -71,6 +71,17 @@ global.document = {
 
 var crearListeners = require('./listeners.js').crearListeners;
 
+// Node 22+ define `global.navigator` como propiedad nativa de solo
+// getter (sin setter) — una asignación directa (`global.navigator = x`)
+// lanza TypeError. Es `configurable: true`, así que redefinirla con
+// `Object.defineProperty` funciona igual que la asignación directa
+// funcionaba en versiones de Node donde `navigator` no existía como
+// global. `delete global.navigator` sigue funcionando tal cual (mismo
+// motivo: configurable).
+function definirNavigatorFalso(obj) {
+  Object.defineProperty(global, 'navigator', { value: obj, configurable: true, writable: true });
+}
+
 var fallos = 0, total = 0;
 function assert(desc, cond) {
   total++;
@@ -162,6 +173,20 @@ function crearEventoClickPanel(accion, carta, datasetBoton) {
  */
 function fabricarListeners(overrides) {
   overrides = overrides || {};
+
+  // `_timers` es un mapa a nivel de archivo (mismo criterio que
+  // `_clasesHtml`/`document` falso, arriba): cada bloque de test corre
+  // en su propia IIFE con su propia instancia de Listeners, pero
+  // comparte el mock global de setTimeout. Un timer programado por un
+  // bloque anterior (p.ej. el debounce de filtro en el bloque de
+  // manejarClickRubros, que no se dispara ni se limpia porque ese test
+  // no lo necesita) quedaría contaminando el conteo de
+  // `cantidadTimersPendientes()` de bloques posteriores. Se limpia acá,
+  // al fabricar cada instancia nueva, para que cada bloque arranque con
+  // el mapa en cero — mismo aislamiento que ya tienen `_clasesHtml` (se
+  // reinicia implícitamente porque nadie la lee entre bloques) y el
+  // resto de los mocks por-instancia de abajo.
+  _timers.clear();
 
   var DOM = Object.assign({
     inputBuscar: crearElementoFalso(),
@@ -404,7 +429,7 @@ function fabricarListeners(overrides) {
   } } };
   var compartido = null;
   global.window.location = { origin: 'https://uruspot.com.ar', pathname: '/donde-comer-cdu/' };
-  global.navigator = { share: function (payload) { compartido = payload; return Promise.resolve(); } };
+  definirNavigatorFalso({ share: function (payload) { compartido = payload; return Promise.resolve(); } });
   f.listeners._handlers.manejarClickPanel(e);
   assert('manejarClickPanel: compartir con Web Share API llama navigator.share', compartido !== null);
   assert('manejarClickPanel: compartir arma la URL de la ficha con el slug', compartido.url.indexOf('locales/lugar6/') !== -1);
@@ -423,7 +448,7 @@ function fabricarListeners(overrides) {
   } } };
   var copiado = null;
   global.window.location = { origin: 'https://uruspot.com.ar', pathname: '/donde-comer-cdu/' };
-  global.navigator = { clipboard: { writeText: function (txt) { copiado = txt; return Promise.resolve(); } } };
+  definirNavigatorFalso({ clipboard: { writeText: function (txt) { copiado = txt; return Promise.resolve(); } } });
   f.listeners._handlers.manejarClickPanel(e);
   assert('manejarClickPanel: compartir sin Web Share usa clipboard.writeText', copiado !== null && copiado.indexOf('locales/lugar7/') !== -1);
   delete global.navigator;
