@@ -13,10 +13,11 @@
    una llamada a `DomPainter.pintarX(...)` en el mismo call-site,
    pasando por parámetro lo que antes se leía de closures/globales.
 
-   Progreso: 3 de 8 funciones migradas (pintarStatsRapidas,
-   pintarDestacados, pintarRubros). El resto (pintarSugerenciasRapidas,
-   pintarFiltrosActivos, pintarTarjetas, pintarLeyenda,
-   pintarEstadoEscribiendo) sigue en app.js — se migran una a la vez,
+   Progreso: 7 de 8 funciones migradas (pintarStatsRapidas,
+   pintarDestacados, pintarRubros, pintarSugerenciasRapidas,
+   pintarFiltrosActivos, pintarLeyenda, pintarEstadoEscribiendo).
+   pintarTarjetas ya vive en app-tarjetas.js; se mantiene separado por
+   sus animaciones y listeners propios.
    en ese orden (de menor a mayor riesgo), cada una con su propio
    commit y verificación manual antes de pasar a la siguiente.
    ═══════════════════════════════════════════════════════════════════ */
@@ -34,6 +35,7 @@ export function crearDomPainter(deps) {
   var escapeHTML = deps.escapeHTML;
   var geolocationDisponible = deps.geolocationDisponible;
   var hayBusquedaOFiltro = deps.hayBusquedaOFiltro;
+  var VISUAL_STATE = deps.VISUAL_STATE;
 
   function actualizarVisibilidadSugerencias() {
     if (!DOM.sugerenciasRapidas) return;
@@ -138,6 +140,113 @@ export function crearDomPainter(deps) {
 
     /** Alterna la visibilidad sin reconstruir los atajos. */
     actualizarVisibilidadSugerencias: actualizarVisibilidadSugerencias,
+
+    /**
+     * Resume las facetas activas y conserva los mismos data-* que usan
+     * los listeners delegados de app.js para quitarlas o pedir otra
+     * sorpresa.
+     */
+    pintarFiltrosActivos: function () {
+      if (!DOM.filtrosActivos) return;
+
+      var pills = [];
+      var consulta = uiState.consultaActual.trim();
+
+      if (consulta) {
+        pills.push(
+          '<span class="filtro-pill" data-filtro="busqueda">' +
+          '<span class="filtro-pill__texto">“' + escapeHTML(consulta) + '”</span>' +
+          '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="busqueda" ' +
+          'aria-label="Quitar búsqueda de ' + escapeHTML(consulta) + '">×</button>' +
+          '</span>'
+        );
+      }
+
+      if (uiState.filtroRubroActivo) {
+        var meta = window.URU_RUBROS_META && window.URU_RUBROS_META[uiState.filtroRubroActivo];
+        var nombreRubro = meta ? meta[0] : uiState.filtroRubroActivo;
+        pills.push(
+          '<span class="filtro-pill" data-filtro="rubro" style="--chip-color:' +
+          (meta ? 'var(' + meta[2] + ')' : 'var(--color-granate-clara)') + '">' +
+          '<span class="filtro-pill__texto">' + escapeHTML(nombreRubro) + '</span>' +
+          '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="rubro" ' +
+          'aria-label="Quitar filtro de rubro ' + escapeHTML(nombreRubro) + '">×</button>' +
+          '</span>'
+        );
+      }
+
+      if (uiState.cercaTuyoActivo) {
+        pills.push(
+          '<span class="filtro-pill filtro-pill--cerca" data-filtro="cerca">' +
+          '<span class="filtro-pill__texto">📍 cerca tuyo</span>' +
+          '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="cerca" ' +
+          'aria-label="Dejar de ordenar por cercanía">×</button>' +
+          '</span>'
+        );
+      }
+
+      if (uiState.sorprendemeActivo) {
+        pills.push(
+          '<span class="filtro-pill filtro-pill--sorpresa" data-filtro="sorpresa">' +
+          '<span class="filtro-pill__texto">🎲 sorpresa</span>' +
+          '<button type="button" class="filtro-pill__reroll" data-filtro-reroll="sorpresa" ' +
+          'aria-label="Mostrarme otra sorpresa distinta">↻</button>' +
+          '<button type="button" class="filtro-pill__quitar" data-filtro-quitar="sorpresa" ' +
+          'aria-label="Salir del modo sorpresa">×</button>' +
+          '</span>'
+        );
+      }
+
+      if (!pills.length) {
+        DOM.filtrosActivos.hidden = true;
+        DOM.filtrosActivos.innerHTML = '';
+        return;
+      }
+
+      DOM.filtrosActivos.hidden = false;
+      DOM.filtrosActivos.innerHTML = pills.join('');
+    },
+
+    /** Pinta la leyenda del mapa a partir de los puntos visibles. */
+    pintarLeyenda: function (puntos) {
+      if (!DOM.mapaLeyenda) return;
+
+      var vistos = Object.create(null);
+      var unicos = [];
+      puntos.forEach(function (p) {
+        if (vistos[p.rubroNombre]) return;
+        vistos[p.rubroNombre] = true;
+        unicos.push(p);
+      });
+
+      if (unicos.length < 2) {
+        DOM.mapaLeyenda.hidden = true;
+        return;
+      }
+
+      DOM.mapaLeyenda.innerHTML = unicos.map(function (p) {
+        var icono = (p.rubroKey && window.URU_RUBROS_ICONO_SVG)
+          ? window.URU_RUBROS_ICONO_SVG(p.rubroKey, { tam: 13 })
+          : '';
+        var marca = icono || '<span class="mapa-leyenda-punto" style="background:' + p.color + '"></span>';
+        return '<span class="mapa-leyenda-chip" style="--chip-color:' + p.color + '">' +
+          marca + escapeHTML(p.rubroNombre) + '</span>';
+      }).join('');
+
+      DOM.mapaLeyenda.hidden = false;
+    },
+
+    /** Estado transitorio para una búsqueda de una sola letra. */
+    pintarEstadoEscribiendo: function () {
+      if (!DOM.panelDescubrimiento) return;
+      DOM.panelDescubrimiento.innerHTML =
+        '<p class="escribiendo"><span class="escribiendo__punto" aria-hidden="true"></span>' +
+        'Seguí escribiendo — buscamos a partir de 2 letras.</p>';
+      if (DOM.estadoResultados) {
+        DOM.estadoResultados.textContent = 'Escribiendo. Hacen falta al menos 2 letras para buscar.';
+      }
+      uiState.visualState = VISUAL_STATE.TYPING;
+    },
 
     /**
      * Spotlight "Destacados" — selector inteligente de lugares top-rated.
