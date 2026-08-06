@@ -1082,10 +1082,10 @@ Estás viendo: <span class="section-crumb-current" id="section-crumb-current">Em
 Ver los circuitos en el mapa
 </button>
 <div class="rf-circ-map-panel" id="circ-map-panel" hidden>
-<div class="rf-circ-map-tabs" role="tablist" aria-label="Elegir circuito para ver en el mapa">
-<button type="button" class="rf-circ-map-tab is-active" role="tab" aria-selected="true" data-circuit="4h">4 horas</button>
-<button type="button" class="rf-circ-map-tab" role="tab" aria-selected="false" data-circuit="dia">Un día</button>
-<button type="button" class="rf-circ-map-tab" role="tab" aria-selected="false" data-circuit="finde">Fin de semana</button>
+<div class="rf-circ-map-tabs" role="group" aria-label="Elegir circuito para ver en el mapa">
+<button type="button" class="rf-circ-map-tab is-active" aria-pressed="true" data-circuit="4h">4 horas</button>
+<button type="button" class="rf-circ-map-tab" aria-pressed="false" data-circuit="dia">Un día</button>
+<button type="button" class="rf-circ-map-tab" aria-pressed="false" data-circuit="finde">Fin de semana</button>
 </div>
 <div class="rf-circ-map-canvas" id="circ-map-canvas" aria-label="Mapa con las paradas del circuito seleccionado"></div>
 <div class="rf-circ-map-footer">
@@ -1242,7 +1242,7 @@ Ver los circuitos en el mapa
     tabs.forEach(function (t) {
       var active = t.dataset.circuit === key;
       t.classList.toggle("is-active", active);
-      t.setAttribute("aria-selected", active ? "true" : "false");
+      t.setAttribute("aria-pressed", active ? "true" : "false");
     });
     if (mapInstance && window.L) renderCircuit(window.L, key);
     else updateGmapsLink(key);

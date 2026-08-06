@@ -1421,16 +1421,16 @@ a:focus-visible {
       <div class="section-header-accent" aria-hidden="true"><span></span><span></span><span></span></div>
     </div>
 
-    <div class="filters-bar reveal" role="tablist" aria-label="Filtrar por tipo de cocina">
-      <button class="filter-chip is-active" type="button" data-filter="all" role="tab" aria-selected="true">Todos <span class="filter-count">81</span></button>
-      <button class="filter-chip" type="button" data-filter="restaurante" role="tab" aria-selected="false">Restaurantes</button>
-      <button class="filter-chip" type="button" data-filter="parrilla" role="tab" aria-selected="false">Parrillas</button>
-      <button class="filter-chip" type="button" data-filter="pizzeria" role="tab" aria-selected="false">Pizzerías</button>
-      <button class="filter-chip" type="button" data-filter="resto-bar" role="tab" aria-selected="false">Resto Bar</button>
-      <button class="filter-chip" type="button" data-filter="buffet" role="tab" aria-selected="false">Buffets</button>
-      <button class="filter-chip" type="button" data-filter="asiatica" role="tab" aria-selected="false">Asiática</button>
-      <button class="filter-chip" type="button" data-filter="italiana" role="tab" aria-selected="false">Italiana</button>
-      <button class="filter-chip" type="button" data-filter="cafe" role="tab" aria-selected="false">Café Restó</button>
+    <div class="filters-bar reveal" role="group" aria-label="Filtrar por tipo de cocina">
+      <button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">Todos <span class="filter-count">81</span></button>
+      <button class="filter-chip" type="button" data-filter="restaurante" aria-pressed="false">Restaurantes</button>
+      <button class="filter-chip" type="button" data-filter="parrilla" aria-pressed="false">Parrillas</button>
+      <button class="filter-chip" type="button" data-filter="pizzeria" aria-pressed="false">Pizzerías</button>
+      <button class="filter-chip" type="button" data-filter="resto-bar" aria-pressed="false">Resto Bar</button>
+      <button class="filter-chip" type="button" data-filter="buffet" aria-pressed="false">Buffets</button>
+      <button class="filter-chip" type="button" data-filter="asiatica" aria-pressed="false">Asiática</button>
+      <button class="filter-chip" type="button" data-filter="italiana" aria-pressed="false">Italiana</button>
+      <button class="filter-chip" type="button" data-filter="cafe" aria-pressed="false">Café Restó</button>
     </div>
 
     <!-- #1 Featured -->
@@ -2798,9 +2798,9 @@ a:focus-visible {
 
     chips.forEach(function (chip) {
       chip.addEventListener('click', function () {
-        chips.forEach(function (c) { c.classList.remove('is-active'); c.setAttribute('aria-selected', 'false'); });
+        chips.forEach(function (c) { c.classList.remove('is-active'); c.setAttribute('aria-pressed', 'false'); });
         chip.classList.add('is-active');
-        chip.setAttribute('aria-selected', 'true');
+        chip.setAttribute('aria-pressed', 'true');
         var filter = chip.getAttribute('data-filter');
 
         if (filter === 'all') {
