@@ -128,8 +128,24 @@
      registro de "fondo ocupado durante la carga" del Cap. 8 puede no
      alcanzar a activarse si el catálogo responde muy rápido) — trade-
      off aceptado a cambio de que app.min.js no espere más a algo
-     puramente decorativo. -->
-<script src="js/app.min.js" defer></script>
+     puramente decorativo.
+
+     FASE 1 del Plan Maestro de Modularización (2026-08-06): app.js
+     ahora empieza con `import { ... } from './constants.js'` (y
+     pure-utils.js, event-bus.js) — un ES module. Los `import` de nivel
+     superior solo son válidos dentro de un <script type="module">, no
+     en un script clásico, así que este <script> pasa de
+     `<script src="..." defer>` a `<script type="module" src="...">`.
+     `defer` se retira porque no aporta nada en un module script: los
+     module scripts sin `async` ya son diferidos por definición
+     (ejecutan en orden de documento, justo antes de DOMContentLoaded),
+     el mismo punto en el que ya corría con `defer` explícito — el
+     orden relativo con ciclo-vida.js / app-telemetria.js /
+     app-formato.js / app-tarjetas.js / motor.bundle.js (todos scripts
+     clásicos con defer) no cambia: clásicos-con-defer y
+     módulos-sin-async comparten la misma cola de ejecución, en orden
+     de aparición en el documento. -->
+<script type="module" src="js/app.min.js"></script>
 
 <!-- TÍTULOS Y METADATOS CORE -->
 <title>URU SPOT — descubrí Concepción del Uruguay</title>
