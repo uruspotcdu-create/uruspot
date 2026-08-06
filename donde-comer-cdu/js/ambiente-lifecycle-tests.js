@@ -201,6 +201,95 @@ function cargarModulo(entorno, nombreArchivo) {
   vm.runInContext(codigo, entorno.sandbox, { filename: rutaAbs });
 }
 
+// ── Suite 0: ciclo-vida.js — infraestructura de proyecto (Oportunidad 1) ─
+// Módulo nuevo (auditoría, hallazgo "procesos periódicos", 2026-08-05):
+// sin dependencias del Ambient Engine, así que se prueba aislado, sin
+// cargar ningún otro módulo en el mismo sandbox.
+
+(function suiteCicloVida() {
+  const entorno = crearEntorno();
+  cargarModulo(entorno, 'ciclo-vida.js');
+  const CicloVida = entorno.sandbox.CicloVida;
+
+  afirmar(typeof CicloVida === 'object' && CicloVida !== null, 'ciclo-vida.js expone CicloVida');
+  afirmar(
+    typeof CicloVida.suscribirVisibilidad === 'function' && typeof CicloVida.programarTareaPeriodica === 'function',
+    'ciclo-vida.js expone su API pública (suscribirVisibilidad/programarTareaPeriodica)'
+  );
+
+  // ── suscribirVisibilidad: un único listener real de document ──────
+  afirmar(entorno.cantidadListenersVisibilitychange() === 0, 'antes de suscribir a nadie, no hay ningún listener de visibilitychange');
+
+  const notificaciones1 = [];
+  const desuscribir1 = CicloVida.suscribirVisibilidad((visible) => notificaciones1.push(visible));
+  afirmar(entorno.cantidadListenersVisibilitychange() === 1, 'la primera suscripción registra un único listener real de document');
+
+  const notificaciones2 = [];
+  CicloVida.suscribirVisibilidad((visible) => notificaciones2.push(visible));
+  afirmar(entorno.cantidadListenersVisibilitychange() === 1, 'una segunda suscripción no duplica el listener real de document (comparten el mismo)');
+
+  entorno.ocultar();
+  entorno.dispararVisibilitychange();
+  afirmar(notificaciones1.length === 1 && notificaciones1[0] === false, 'al ocultar, ambos suscriptores reciben visible=false');
+  afirmar(notificaciones2.length === 1 && notificaciones2[0] === false, 'segundo suscriptor también notificado, con el mismo valor');
+
+  entorno.mostrar();
+  entorno.dispararVisibilitychange();
+  afirmar(notificaciones1.length === 2 && notificaciones1[1] === true, 'al volver a mostrar, notifica visible=true');
+
+  desuscribir1();
+  entorno.ocultar();
+  entorno.dispararVisibilitychange();
+  afirmar(notificaciones1.length === 2, 'tras desuscribirse, ese callback deja de recibir notificaciones');
+  afirmar(notificaciones2.length === 3, 'el otro suscriptor, no desuscripto, sigue recibiéndolas');
+  entorno.mostrar();
+  entorno.dispararVisibilitychange();
+
+  const entornoAislado = crearEntorno();
+  cargarModulo(entornoAislado, 'ciclo-vida.js');
+  let explotoAlgunaVez = false;
+  entornoAislado.sandbox.CicloVida.suscribirVisibilidad(() => { throw new Error('suscriptor roto'); });
+  let laOtraCorrio = false;
+  entornoAislado.sandbox.CicloVida.suscribirVisibilidad(() => { laOtraCorrio = true; });
+  try { entornoAislado.dispararVisibilitychange(); } catch (e) { explotoAlgunaVez = true; }
+  afirmar(!explotoAlgunaVez, 'un suscriptor que arroja excepción no se propaga hacia afuera');
+  afirmar(laOtraCorrio === true, 'un suscriptor roto no impide que los demás sean notificados');
+
+  // ── programarTareaPeriodica: pausa/reanudación real (clearInterval) ─
+  const entornoTarea = crearEntorno();
+  cargarModulo(entornoTarea, 'ciclo-vida.js');
+  const llamadasTarea = [];
+  const cancelar = entornoTarea.sandbox.CicloVida.programarTareaPeriodica(() => llamadasTarea.push(1), 5000);
+  afirmar(entornoTarea.cantidadIntervalosActivos() === 1, 'programarTareaPeriodica() con la pestaña visible arranca un único intervalo real');
+
+  entornoTarea.dispararIntervalo();
+  afirmar(llamadasTarea.length === 1, 'el intervalo real dispara la función programada');
+
+  entornoTarea.ocultar();
+  entornoTarea.dispararVisibilitychange();
+  afirmar(entornoTarea.cantidadIntervalosActivos() === 0, 'al ocultar la pestaña, el intervalo se cancela de verdad (clearInterval real, no un no-op)');
+
+  entornoTarea.mostrar();
+  entornoTarea.dispararVisibilitychange();
+  afirmar(entornoTarea.cantidadIntervalosActivos() === 1, 'al volver a mostrar, se arranca un único intervalo nuevo');
+
+  cancelar();
+  afirmar(entornoTarea.cantidadIntervalosActivos() === 0, 'cancelar() detiene el intervalo si estaba activo');
+  entornoTarea.mostrar();
+  entornoTarea.dispararVisibilitychange();
+  afirmar(entornoTarea.cantidadIntervalosActivos() === 0, 'tras cancelar(), un cambio de visibilidad posterior no reinicia la tarea');
+
+  // Arrancar ya oculta: no debe crear un intervalo hasta que aparezca.
+  const entornoOculto = crearEntorno();
+  entornoOculto.ocultar();
+  cargarModulo(entornoOculto, 'ciclo-vida.js');
+  entornoOculto.sandbox.CicloVida.programarTareaPeriodica(() => {}, 1000);
+  afirmar(entornoOculto.cantidadIntervalosActivos() === 0, 'si la pestaña ya está oculta al programar la tarea, no arranca ningún intervalo todavía');
+  entornoOculto.mostrar();
+  entornoOculto.dispararVisibilitychange();
+  afirmar(entornoOculto.cantidadIntervalosActivos() === 1, 'al aparecer la pestaña, recién ahí arranca el intervalo');
+})();
+
 // ── Suite 1: ambiente-clima.js — idempotencia + timers duplicados ──
 
 (function suiteClima() {
