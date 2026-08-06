@@ -676,7 +676,7 @@ media="print" onload="this.media='all'" />
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "9.1",
+        "ratingValue": "4.8",
         "bestRating": "5"
       }
     },
@@ -692,7 +692,7 @@ media="print" onload="this.media='all'" />
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "8.7",
+        "ratingValue": "4.6",
         "bestRating": "5"
       }
     },
@@ -708,7 +708,7 @@ media="print" onload="this.media='all'" />
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "8.6",
+        "ratingValue": "4.8",
         "bestRating": "5"
       }
     },
@@ -724,7 +724,7 @@ media="print" onload="this.media='all'" />
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "8.4",
+        "ratingValue": "4.7",
         "bestRating": "5"
       }
     },
@@ -740,7 +740,7 @@ media="print" onload="this.media='all'" />
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "8.7",
+        "ratingValue": "4.5",
         "bestRating": "5"
       }
     }
@@ -797,6 +797,12 @@ if ('serviceWorker' in navigator) {
 <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-1" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">Concepción</em></span>
 <span class="main-line" style="overflow:hidden;display:block"><em id="hero-word-2" style="display:inline-block;opacity:0;transform:translateY(100%)" class="hero-word-noscript">del Uruguay</em></span>
 </h1>
+<!-- C3 hostile review: si JS no corre, el H1 (copy principal / candidato a LCP)
+     queda invisible para siempre porque arranca con opacity:0 inline. La clase
+     se llama "hero-word-noscript" pero no tenía fallback real de <noscript>. -->
+<noscript>
+<style>.hero-word-noscript{opacity:1!important;transform:none!important;filter:none!important}</style>
+</noscript>
 <div class="hero-rule" aria-hidden="true"><span class="hero-rule-line"></span><span class="hero-rule-dot"></span></div>
 <p class="hero-sub">A 30 minutos de la Plaza Ramírez empieza uno de los ríos más importantes del país.<br /><strong>100+ lugares verificados. Solo Concepción del Uruguay.</strong></p>
 <div class="identity-strip" role="list" aria-label="Estadísticas" style="margin-bottom:40px" id="hero-stats-strip">
