@@ -66,6 +66,8 @@ import {
 } from './catalog.js';
 import { crearUIState } from './ui-state.js';
 import { crearDataLoader } from './data-loader.js';
+import { crearClimateContext } from './climate-context.js';
+import { solicitarUbicacion, geolocationDisponible } from './geolocation.js';
 
 (function () {
   'use strict';
@@ -82,7 +84,15 @@ import { crearDataLoader } from './data-loader.js';
   // locales para no tener dos fuentes de verdad. El resto de los
   // comentarios de auditoría de esta sección se conserva en
   // constants.js, junto a cada constante.
-  var climaContextoCache = null; // { weather_code, temperature_2m, precipitation } | null
+  // FASE 3 (paso 1, Plan Maestro de Modularización, 2026-08-06):
+  // climaContextoCache ahora vive dentro de ClimateContext
+  // (climate-context.js, ver import arriba) — mismo shape cacheado
+  // ({ weather_code, temperature_2m, precipitation } | null), acá solo
+  // queda la instancia con las constantes de config de siempre.
+  var ClimateContext = crearClimateContext({
+    url: CLIMA_CONTEXTO_URL,
+    timeoutMs: CLIMA_CONTEXTO_TIMEOUT_MS
+  });
 
   // Módulos inyectados globalmente (verificados al init)
   var PLANO = null;
@@ -1300,7 +1310,7 @@ import { crearDataLoader } from './data-loader.js';
         // ambos casos, así que esto es estrictamente aditivo.
         var contextoRecorte = {
           ubicacion: uiState.ubicacionUsuario || null,
-          clima: climaContextoCache
+          clima: ClimateContext.obtener()
         };
 
         // Fase 4 — filtro de rubro DENTRO del recorte curado (hallazgo
@@ -1706,7 +1716,7 @@ import { crearDataLoader } from './data-loader.js';
           '" style="--chip-color:var(' + meta[2] + ')">' + icono + escapeHTML(meta[0]) + '</button>';
       }).join('');
 
-    if (navigator.geolocation) {
+    if (geolocationDisponible()) {
       html += '<button type="button" class="sugerencia-chip sugerencia-chip--cerca" data-accion="sugerencia-cerca-tuyo">' +
         '📍 cerca tuyo</button>';
     }
@@ -3164,35 +3174,18 @@ import { crearDataLoader } from './data-loader.js';
   // vez) — condicionClimatica() en el motor ya sabe tratar null como
   // "sin señal de clima" y el scoring sigue funcionando sin esa señal,
   // exactamente como antes de esta conexión.
+  // FASE 3 (paso 1, Plan Maestro de Modularización, 2026-08-06):
+  // el fetch + caché ahora vive en ClimateContext.actualizar()
+  // (climate-context.js) — acá solo queda pedirle que se actualice y
+  // re-renderizar cuando trajo un dato nuevo, mismo comportamiento
+  // observable que el actualizarClimaContexto() original.
   function actualizarClimaContexto() {
-    if (typeof fetch !== 'function') return;
-    var controlador = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    var timeoutId = controlador
-      ? setTimeout(function () { controlador.abort(); }, CLIMA_CONTEXTO_TIMEOUT_MS)
-      : null;
-    fetch(CLIMA_CONTEXTO_URL, { signal: controlador ? controlador.signal : undefined })
-      .then(function (res) {
-        if (timeoutId) clearTimeout(timeoutId);
-        if (!res.ok) return null;
-        return res.json();
-      })
-      .then(function (datos) {
-        var actual = datos && datos.current;
-        if (!actual) return;
-        var nuevo = {
-          weather_code: actual.weather_code,
-          temperature_2m: actual.temperature_2m,
-          precipitation: actual.precipitation
-        };
-        climaContextoCache = nuevo;
-        // Re-renderizar: el recorte por iniciativa propia (guia/exploracion)
-        // puede cambiar de selección/razones ahora que hay señal de clima
-        // real donde antes no la había.
-        render();
-      })
-      .catch(function () {
-        if (timeoutId) clearTimeout(timeoutId);
-      });
+    ClimateContext.actualizar(function () {
+      // Re-renderizar: el recorte por iniciativa propia (guia/exploracion)
+      // puede cambiar de selección/razones ahora que hay señal de clima
+      // real donde antes no la había.
+      render();
+    });
   }
 
   function inicializarContextoClima() {
@@ -3211,7 +3204,7 @@ import { crearDataLoader } from './data-loader.js';
   // ───────────────────────────────────────────────────────────────────
 
   function inicializarGeolocation() {
-    if (!navigator.geolocation || !DOM.inputBuscar || !DOM.inputBuscar.parentNode) return;
+    if (!geolocationDisponible() || !DOM.inputBuscar || !DOM.inputBuscar.parentNode) return;
 
     var TEXTO_DEFECTO = '📍 Cerca de mí';
     var btn = document.createElement('button');
@@ -3235,31 +3228,26 @@ import { crearDataLoader } from './data-loader.js';
     btn.disabled = true;
     btn.textContent = 'Ubicándote…';
 
-    navigator.geolocation.getCurrentPosition(
-      function (pos) {
-        uiState.ubicacionUsuario = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        };
+    // FASE 3 (paso 2, Plan Maestro de Modularización, 2026-08-06):
+    // solicitarUbicacion() (geolocation.js) reemplaza la llamada
+    // directa a navigator.geolocation.getCurrentPosition() — mismas
+    // opciones, mismo shape { lat, lng }, ahora como Promise.
+    solicitarUbicacion(GEOLOCATION_TIMEOUT_MS, GEOLOCATION_MAX_AGE_MS)
+      .then(function (ubicacion) {
+        uiState.ubicacionUsuario = ubicacion;
         uiState.cercaTuyoActivo = true;
         btn.disabled = false;
         btn.textContent = '📍 Cerca de mí ✓';
         btn.setAttribute('aria-pressed', 'true');
         btn.classList.add('activo');
         render();
-      },
-      function (err) {
+      })
+      .catch(function (err) {
         btn.disabled = false;
         btn.textContent = '📍 Cerca de mí';
         console.warn('Geolocation error:', err);
         mostrarTooltipGeolocation('No pudimos acceder a tu ubicación. Revisá los permisos del navegador.');
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: GEOLOCATION_TIMEOUT_MS,
-        maximumAge: GEOLOCATION_MAX_AGE_MS
-      }
-    );
+      });
   }
 
   function desactivarCercaDeMi() {
