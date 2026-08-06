@@ -2933,49 +2933,25 @@
   // Coreografias.reducirMovimiento(), que consulta AmbienteAccesibilidad
   // y solo cae de vuelta a matchMedia si ese módulo no llegó a cargar
   // (fail-open, mismo criterio que el resto del código).
-  function prefiereMovimientoReducido() {
-    if (window.Coreografias) return window.Coreografias.reducirMovimiento();
-    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  }
-
-  function slug(lugar) {
-    var mapa = window.URU_LOCALES_SLUGS;
-    return (mapa && mapa[lugar.id]) || null;
-  }
-
-  function mapsHref(lugar) {
-    if (typeof lugar.lat === 'number' && typeof lugar.lng === 'number') {
-      return 'https://www.google.com/maps/search/?api=1&query=' + lugar.lat + ',' + lugar.lng;
-    }
-    if (lugar.direccion) {
-      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lugar.nombre + ', ' + lugar.direccion);
-    }
-    return null;
-  }
-
-  function distanciaMetros(lat1, lng1, lat2, lng2) {
-    var R = 6371000;
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLng = (lng2 - lng1) * Math.PI / 180;
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
-  function formatoDistancia(m) {
-    if (m < 1000) return Math.round(m / 10) * 10 + ' m';
-    return (m / 1000).toFixed(1).replace('.0', '') + ' km';
-  }
-
-  function escapeHTML(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
-  function cssEscape(s) {
-    return window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+  // ───────────────────────────────────────────────────────────────────
+  // FORMATO/ESCAPE — extraído a js/app-formato.js (auditoría de
+  // ingeniería, Oportunidad 3, 2026-08-06). Estas siete funciones eran
+  // 100% puras (sin acceso a `estado`/`uiState`/`DOM`/`REGISTRO`), así
+  // que no necesitan configurar() ni contexto — solo alias locales
+  // para no tocar los ~38 call sites de estas funciones en el resto
+  // del archivo. Fail hard-visible si el script no cargó, igual
+  // criterio que la extracción de AppTelemetria.
+  var escapeHTML, cssEscape, slug, mapsHref, distanciaMetros, formatoDistancia, prefiereMovimientoReducido;
+  if (window.AppFormato) {
+    escapeHTML = window.AppFormato.escapeHTML;
+    cssEscape = window.AppFormato.cssEscape;
+    slug = window.AppFormato.slug;
+    mapsHref = window.AppFormato.mapsHref;
+    distanciaMetros = window.AppFormato.distanciaMetros;
+    formatoDistancia = window.AppFormato.formatoDistancia;
+    prefiereMovimientoReducido = window.AppFormato.prefiereMovimientoReducido;
+  } else {
+    console.error('[app.js] AppFormato no está cargado — revisar que js/app-formato.js esté en index.html, antes de motor.bundle.js/app.min.js.');
   }
 
   // BUG REAL corregido en esta pasada — race condition entre salidas
