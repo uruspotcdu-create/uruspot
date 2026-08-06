@@ -409,6 +409,26 @@
     var estadoAnterior = currentState;
     if (estadoAnterior === nuevoEstado) return; // idempotente
 
+    // FIX (auditoría, hallazgo P1 "máquina de estados decorativa",
+    // 2026-08-05): puedeTransicionar() existía desde antes, con su tabla
+    // de transiciones válidas, pero nada la llamaba — transicionarEstado()
+    // solo comparaba estadoAnterior === nuevoEstado y asignaba, sin
+    // validar contra el mapa. Eso permitía transiciones como
+    // error → loading_catalog (no está en la lista de 'error'), que es
+    // justo lo que enmascaraba el bug de `estado` null en el arranque
+    // (ver fix de inicializar(), más abajo en este archivo: antes de esa
+    // otra corrección, el STATE.ERROR recién seteado por ErrorRecovery se
+    // pisaba sin condición dos líneas después). No la hacemos bloqueante
+    // todavía — cortar una transición en producción es un cambio de
+    // comportamiento más agresivo del que este hallazgo pide — pero al
+    // menos deja de ser silenciosa: cualquier transición fuera del mapa
+    // ahora se loguea como advertencia, con delante y detrás visibles,
+    // en vez de una validación que existe en el código pero no está
+    // conectada a nada que la ejecute.
+    if (!puedeTransicionar(nuevoEstado)) {
+      console.warn('[State] Transición no declarada en el mapa: ' + estadoAnterior + ' → ' + nuevoEstado + ' (' + (razon || 'sin_razon') + '). Revisar la tabla de transiciones en puedeTransicionar() o el call site.');
+    }
+
     currentState = nuevoEstado;
     lastStateChange = Date.now();
 
@@ -3108,7 +3128,17 @@
     }
 
     // Permanencia y sesión
-    activeOperations.permanenciaTimer = setInterval(tickPermanencia, PERMANENCIA_TICK_MS);
+    // FIX (auditoría, hallazgo "procesos periódicos", Oportunidad 1,
+    // 2026-08-05): antes esto era un setInterval desnudo, sin ninguna
+    // gestión de segundo plano — corría cada 5s aunque la pestaña
+    // estuviera oculta (a diferencia de, por ejemplo,
+    // ambiente-clima.js:temporizadorClima, que sí pausa de verdad).
+    // CicloVida.programarTareaPeriodica() (js/ciclo-vida.js, cargado
+    // antes que este archivo) centraliza esa pausa/reanudación real.
+    // tickPermanencia() ya no necesita cambiar: cada tick sigue siendo
+    // trabajo independiente, no hay ticks "perdidos" que recuperar al
+    // volver a foco.
+    activeOperations.permanenciaTimer = programarPeriodica(tickPermanencia, PERMANENCIA_TICK_MS);
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
@@ -3645,6 +3675,19 @@
   // (`uiState.ultimaRegionRenderizada` y `lastRenderCache.region`)
   // para el mismo hecho, una de las cuales podía (y de hecho, estaba)
   // desincronizada de la otra.
+  // Fallback defensivo (auditoría, Oportunidad 1, 2026-08-05): mismo
+  // criterio que ya usa este archivo para AmbientEngine/Coreografias —
+  // CicloVida (js/ciclo-vida.js) debería cargar siempre antes que este
+  // script (ver index.html), pero si por lo que sea no está disponible,
+  // esto se degrada a un setInterval desnudo (el comportamiento de
+  // antes de esta pasada) en vez de romper la inicialización de la app.
+  function programarPeriodica(fn, ms) {
+    if (typeof CicloVida !== 'undefined' && CicloVida && typeof CicloVida.programarTareaPeriodica === 'function') {
+      return CicloVida.programarTareaPeriodica(fn, ms);
+    }
+    return setInterval(fn, ms);
+  }
+
   function tickPermanencia() {
     if (estadoActual() !== STATE.READY) return;
 
@@ -3742,7 +3785,13 @@
 
   function inicializarContextoClima() {
     actualizarClimaContexto();
-    activeOperations.climaContextoTimer = setInterval(actualizarClimaContexto, CLIMA_CONTEXTO_INTERVALO_MS);
+    // FIX (auditoría, Oportunidad 1, 2026-08-05): antes esto hacía un
+    // fetch() de red real cada 5 minutos SIN IMPORTAR si la pestaña
+    // estaba oculta — el único de los 5 setInterval del proyecto sin
+    // ninguna gestión de segundo plano y, a la vez, el único con costo
+    // de red real por tick (ver inventario completo del hallazgo).
+    // Mismo helper que permanenciaTimer, arriba.
+    activeOperations.climaContextoTimer = programarPeriodica(actualizarClimaContexto, CLIMA_CONTEXTO_INTERVALO_MS);
   }
 
   // ───────────────────────────────────────────────────────────────────
