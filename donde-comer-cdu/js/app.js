@@ -71,6 +71,8 @@ import { solicitarUbicacion, geolocationDisponible } from './geolocation.js';
 import { crearErrorRecovery } from './error-recovery.js';
 import { crearRenderEngine } from './render-engine.js';
 import { crearDomPainter } from './dom-painter.js';
+import { crearListeners } from './listeners.js';
+import { crearNavegacionTeclado } from './keyboard-nav.js';
 
 (function () {
   'use strict';
@@ -100,6 +102,12 @@ import { crearDomPainter } from './dom-painter.js';
   // Módulos inyectados globalmente (verificados al init)
   var PLANO = null;
   var EXPO = null;
+
+  // FASE 5: getter de `PLANO` para listeners.js/keyboard-nav.js — se
+  // resuelve recién en validarModulos() (más abajo), después de que
+  // crearListeners()/crearNavegacionTeclado() ya se construyeron.
+  // Mismo motivo/patrón que getEstado()/getMotorMapa() arriba.
+  function getPLANO() { return PLANO; }
   var MAPA = null;
 
   // ───────────────────────────────────────────────────────────────────
@@ -161,6 +169,15 @@ import { crearDomPainter } from './dom-painter.js';
   // Estado de sesión (mutante, persistido con PLANO.guardarEstado)
   var estado = null;
 
+  // FASE 5 (Plan Maestro de Modularización, §4): getter/setter de
+  // `estado` para listeners.js/keyboard-nav.js — mismo motivo que
+  // obtenerEstado en render-engine.js (Fase 4a): esos módulos se
+  // construyen (crearListeners/crearNavegacionTeclado) al parsear este
+  // archivo, antes de que inicializarEstado() corra dentro de init();
+  // pasar `estado` por valor ahí lo dejaría congelado en null.
+  function getEstado() { return estado; }
+  function setEstado(nuevo) { estado = nuevo; }
+
   // Estado local de UI (no persistente)
   // FASE 2 (paso 5, Plan Maestro de Modularización, 2026-08-06):
   // uiState ahora se construye en ui-state.js (ver import arriba) —
@@ -183,6 +200,11 @@ import { crearDomPainter } from './dom-painter.js';
 
   // Motor de mapa (inicializado perezosamente)
   var motorMapa = null;
+
+  // FASE 5: getter de `motorMapa` para listeners.js — se reasigna en
+  // tiempo de ejecución (ver inicializarMapa()/limpiarMapa() más
+  // abajo), después de que crearListeners() ya construyó el módulo.
+  function getMotorMapa() { return motorMapa; }
 
   // FASE 2 (Plan Maestro de Modularización, 2026-08-06): currentState,
   // lastStateChange y stateChangeLog, junto con transicionarEstado(),
@@ -625,10 +647,22 @@ import { crearDomPainter } from './dom-painter.js';
       }
 
       // Inicialización de listeners
-      inicializarListeners();
-      inicializarTecladoNavegacion();
+      // FASE 5: inicializarListeners()/inicializarTecladoNavegacion()
+      // ahora son Listeners.inicializar()/NavegacionTeclado.inicializar()
+      // (js/listeners.js, js/keyboard-nav.js) — mismos módulos ya
+      // construidos más arriba, junto a DomPainter/RenderEngine.
+      // inicializarContextoClima() ahora es
+      // ClimateContext.inicializarActualizacionPeriodica() (§7 del plan
+      // de Fase 5: esas dos funciones vivían "coladas" en la sección de
+      // teclado sin relación real con ella).
+      Listeners.inicializar();
+      NavegacionTeclado.inicializar();
       inicializarGeolocation();
-      inicializarContextoClima();
+      activeOperations.climaContextoTimer = ClimateContext.inicializarActualizacionPeriodica({
+        render: render,
+        programarPeriodica: Listeners.programarPeriodica,
+        intervaloMs: CLIMA_CONTEXTO_INTERVALO_MS
+      });
 
       // Perf, Fase 2.1: el Ambient Engine ya no es <script defer> estático
       // en el documento — se agenda acá (idle) para no competir con la
@@ -1235,7 +1269,7 @@ import { crearDomPainter } from './dom-painter.js';
     if (!obtenerRegistro().length || !DOM.panelDescubrimiento) return;
 
     try {
-      actualizarBotonLimpiar();
+      Listeners.actualizarBotonLimpiar();
       // Auditoría producción, 2026-07-30: actualizarVisibilidadSugerencias()
       // solo se llamaba una vez al cargar el catálogo (pintarSugerenciasRapidas),
       // pese a que su propio comentario documenta que debe decidirse "en cada
@@ -1349,7 +1383,7 @@ import { crearDomPainter } from './dom-painter.js';
   function manejarClickSugerencias(e) {
     var chipRubro = e.target.closest('[data-rubro]');
     if (chipRubro) {
-      seleccionarRubro(chipRubro.dataset.rubro);
+      Listeners.seleccionarRubro(chipRubro.dataset.rubro);
       return;
     }
     var chipCerca = e.target.closest('[data-accion="sugerencia-cerca-tuyo"]');
@@ -1414,7 +1448,7 @@ import { crearDomPainter } from './dom-painter.js';
     if (!btn) return;
     var cual = btn.dataset.filtroQuitar;
     if (cual === 'busqueda') {
-      limpiarBusqueda();
+      Listeners.limpiarBusqueda();
     } else if (cual === 'rubro') {
       // Quitar la faceta es la misma clase de "deshacer instantáneo"
       // que limpiarBusqueda(): cancela cualquier render de filtro en
@@ -1734,6 +1768,62 @@ import { crearDomPainter } from './dom-painter.js';
     setTimeout(resolver, ANIMATION_TIMEOUT_MS);
   }
 
+  // FASE 5 (Plan Maestro de Modularización, 2026-08-06): extraído de
+  // app.js §19 (Inicialización de Listeners y Eventos) + §20
+  // (Navegación por Teclado Avanzada) a js/listeners.js y
+  // js/keyboard-nav.js respectivamente — ver cabecera de cada módulo
+  // para el detalle de qué se movió y por qué. Mismo criterio de DI
+  // explícita que RenderEngine/DomPainter (arriba): se construyen acá,
+  // no dentro de inicializarListeners()/inicializarTecladoNavegacion()
+  // (que ahora son solo Listeners.inicializar()/NavegacionTeclado
+  // .inicializar(), ver init() más abajo), para que quede un único
+  // punto de armado de dependencias, igual que con DomPainter/RenderEngine.
+  //
+  // Se construyen ACÁ (después de programarRenderTrasSalida, no antes,
+  // junto a DomPainter/RenderEngine) porque dependen de slug/
+  // prefiereMovimientoReducido (alias de AppFormato) y de
+  // programarRenderTrasSalida, los tres recién asignados/definidos más
+  // arriba en este mismo archivo — construir esto antes de esos puntos
+  // capturaría `undefined` por el mismo motivo que ya documenta el
+  // comentario de cabecera de DomPainter.
+  var Listeners = crearListeners({
+    DOM: DOM,
+    uiState: uiState,
+    activeOperations: activeOperations,
+    render: render,
+    obtenerPorId: obtenerPorId,
+    slug: slug,
+    hayBusquedaOFiltro: hayBusquedaOFiltro,
+    leerFavoritos: leerFavoritos,
+    guardarFavoritos: guardarFavoritos,
+    actualizarContadorGuardados: actualizarContadorGuardados,
+    DomPainter: DomPainter,
+    getEstado: getEstado,
+    setEstado: setEstado,
+    getPLANO: getPLANO,
+    getMotorMapa: getMotorMapa,
+    programarRenderTrasSalida: programarRenderTrasSalida,
+    RenderEngine: RenderEngine,
+    estadoActual: estadoActual,
+    STATE: STATE,
+    PERMANENCIA_TICK_MS: PERMANENCIA_TICK_MS,
+    DEBOUNCE_BUSQUEDA_MS: DEBOUNCE_BUSQUEDA_MS,
+    DEBOUNCE_FILTRO_MS: DEBOUNCE_FILTRO_MS,
+    manejarClickSugerencias: function (e) { return manejarClickSugerencias(e); },
+    manejarClickFiltrosActivos: function (e) { return manejarClickFiltrosActivos(e); },
+    inicializarScrollReveal: function () { return inicializarScrollReveal(); },
+    prefiereMovimientoReducido: prefiereMovimientoReducido
+  });
+
+  var NavegacionTeclado = crearNavegacionTeclado({
+    DOM: DOM,
+    uiState: uiState,
+    render: render,
+    getEstado: getEstado,
+    setEstado: setEstado,
+    getPLANO: getPLANO
+  });
+
   // ───────────────────────────────────────────────────────────────────
   // 18. GESTIÓN DE ERRORES VISUAL
   // ───────────────────────────────────────────────────────────────────
@@ -1773,698 +1863,6 @@ import { crearDomPainter } from './dom-painter.js';
         ErrorRecovery.recuperarDeCarguaCatalogo();
       });
     }
-  }
-
-  // ───────────────────────────────────────────────────────────────────
-  // 19. INICIALIZACIÓN DE LISTENERS Y EVENTOS
-  // ───────────────────────────────────────────────────────────────────
-
-  function inicializarListeners() {
-    // Input de búsqueda
-    if (DOM.inputBuscar) {
-      DOM.inputBuscar.addEventListener('input', manejarInputBusqueda);
-      DOM.inputBuscar.addEventListener('keydown', manejarKeydownBuscar);
-    }
-
-    // Botón de limpiar interno del campo
-    if (DOM.btnLimpiarBusqueda) {
-      DOM.btnLimpiarBusqueda.addEventListener('click', limpiarBusqueda);
-    }
-
-    // Acciones en panel de descubrimiento
-    if (DOM.panelDescubrimiento) {
-      DOM.panelDescubrimiento.addEventListener('click', manejarClickPanel);
-      DOM.panelDescubrimiento.addEventListener('mouseover', manejarHoverPanel);
-      DOM.panelDescubrimiento.addEventListener('mouseout', manejarHoverOutPanel);
-      DOM.panelDescubrimiento.addEventListener('keydown', manejarKeydownPanel);
-      // PERF (auditoría performance, 2026-08-02): un único listener
-      // delegado para todas las tarjetas en vez de uno por tarjeta
-      // (hasta 8 nuevas por render) — saca .tarjeta--entrando (ver
-      // pintarTarjetas) apenas termina la animación real de entrada
-      // de esa tarjeta puntual, devolviéndole su backdrop-filter.
-      DOM.panelDescubrimiento.addEventListener('animationend', manejarFinEntradaTarjeta);
-    }
-
-    // Chips de rubro
-    if (DOM.listaRubros) {
-      DOM.listaRubros.addEventListener('click', manejarClickRubros);
-    }
-
-    // Botón "ver guardados"
-    if (DOM.btnVerGuardados) {
-      DOM.btnVerGuardados.addEventListener('click', manejarClickVerGuardados);
-    }
-
-    // FAQ accordion
-    if (DOM.faqLista) {
-      DOM.faqLista.addEventListener('click', manejarClickFAQ);
-    }
-
-    // Sugerencias rápidas ("Empezá por acá" + "cerca tuyo") y resumen de
-    // filtros activos (píldoras con ×): las funciones que reaccionan a
-    // estos clicks (manejarClickSugerencias, manejarClickFiltrosActivos)
-    // existían desde antes pero nunca se enganchaban a un listener real —
-    // los elementos se pintaban (pintarSugerenciasRapidas) o quedaban sin
-    // pintar nunca (pintarFiltrosActivos, ver fix en render() más abajo)
-    // pero ningún click sobre ellos hacía nada. Auditoría producción,
-    // 2026-07-30.
-    if (DOM.sugerenciasRapidas) {
-      DOM.sugerenciasRapidas.addEventListener('click', manejarClickSugerencias);
-    }
-    if (DOM.filtrosActivos) {
-      DOM.filtrosActivos.addEventListener('click', manejarClickFiltrosActivos);
-    }
-
-    // Permanencia y sesión
-    // FIX (auditoría, hallazgo "procesos periódicos", Oportunidad 1,
-    // 2026-08-05): antes esto era un setInterval desnudo, sin ninguna
-    // gestión de segundo plano — corría cada 5s aunque la pestaña
-    // estuviera oculta (a diferencia de, por ejemplo,
-    // ambiente-clima.js:temporizadorClima, que sí pausa de verdad).
-    // CicloVida.programarTareaPeriodica() (js/ciclo-vida.js, cargado
-    // antes que este archivo) centraliza esa pausa/reanudación real.
-    // tickPermanencia() ya no necesita cambiar: cada tick sigue siendo
-    // trabajo independiente, no hay ticks "perdidos" que recuperar al
-    // volver a foco.
-    activeOperations.permanenciaTimer = programarPeriodica(tickPermanencia, PERMANENCIA_TICK_MS);
-
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        estado = PLANO.aplicarAccion(estado, 'abandonar');
-        PLANO.guardarEstado(estado);
-      }
-    });
-
-    window.addEventListener('pagehide', function () {
-      estado = PLANO.aplicarAccion(estado, 'abandonar');
-      PLANO.guardarEstado(estado);
-    });
-
-    // Ripple sutil en botones
-    document.addEventListener('pointerdown', manejarPointerDownParaRipple);
-
-    // Progressive enhancement: scroll reveal
-    inicializarScrollReveal();
-
-    // PERF (auditoría performance, C1.3): suprimir backdrop-filter
-    // mientras el usuario scrollea. rAF evita apilar trabajo en cada
-    // evento 'scroll' (que puede disparar decenas de veces por
-    // segundo); el timeout de 150ms detecta "scroll terminado" sin
-    // depender de un evento nativo que no existe de forma confiable
-    // en todos los navegadores.
-    window.addEventListener('scroll', manejarScrollParaSupresionVidrio, { passive: true });
-  }
-
-  var _scrollRafPendiente = false;
-  var _scrollFinTimeout = null;
-  // PERF (auditoría scroll, 2026-08-04, hallazgo 1): AmbienteScheduler
-  // (js/ambiente-scheduler.js) solo se pausa hoy durante gestos táctiles
-  // DEL MAPA (ver motor-render.js, establecerArrastrando/actualizarEstadoGesto)
-  // — nunca durante el scroll de la página. Mientras tanto, la tarea
-  // 'respiracion' (js/ambiente-respiracion.js) sigue escribiendo
-  // --amb-respiracion sobre <html> ~20 veces/seg, TODO el tiempo que la
-  // pestaña esté visible. Esa propiedad es heredada y participa de un
-  // calc() (css/ambiente-estilos.css:69) — cada escritura fuerza al motor
-  // de estilos a invalidar/recorrer el árbol completo para resolver quién
-  // depende de ella, aunque el único consumidor real es un solo elemento
-  // fijo (#ambient-resplandor). Ese recorrido es trabajo de hilo principal
-  // que hoy compite, sin necesidad, con el scroll — justo la ventana en la
-  // que menos presupuesto de frame sobra. Se usa el mismo par
-  // rAF+timeout(150ms) que ya gobierna u-suprimir-vidrio (mismo evento,
-  // mismo criterio de "scroll terminado") para no introducir un segundo
-  // temporizador independiente: mientras se suprime el vidrio, también se
-  // pausa el scheduler ambiental; ambos se levantan juntos.
-  var _scrollPausoAmbiente = false;
-
-  function manejarScrollParaSupresionVidrio() {
-    if (_scrollRafPendiente) return;
-    _scrollRafPendiente = true;
-    requestAnimationFrame(function () {
-      _scrollRafPendiente = false;
-      document.documentElement.classList.add('u-suprimir-vidrio');
-      if (window.AmbienteScheduler && !_scrollPausoAmbiente) {
-        _scrollPausoAmbiente = true;
-        window.AmbienteScheduler.pausar();
-      }
-      if (_scrollFinTimeout) clearTimeout(_scrollFinTimeout);
-      _scrollFinTimeout = setTimeout(function () {
-        document.documentElement.classList.remove('u-suprimir-vidrio');
-        if (_scrollPausoAmbiente) {
-          _scrollPausoAmbiente = false;
-          if (window.AmbienteScheduler) window.AmbienteScheduler.reanudar();
-        }
-      }, 150);
-    });
-  }
-
-  function manejarInputBusqueda(e) {
-    uiState.consultaActual = e.target.value;
-    uiState.paginaTarjetas = 1;
-    actualizarBotonLimpiar();
-
-    if (uiState.consultaActual.trim().length >= 2) {
-      estado = PLANO.aplicarAccion(estado, 'nombrar', { consulta: uiState.consultaActual });
-    } else {
-      estado = PLANO.aplicarAccion(estado, 'despejarBusqueda');
-    }
-
-    // PERF (auditoría performance, 2026-08-04, hallazgo 1.2): guardarEstado()
-    // hace un localStorage.setItem() SÍNCRONO (bloquea el hilo principal,
-    // 5-15ms medido en gama baja) — antes se ejecutaba en CADA tecla, sin
-    // pasar por el debounce que ya protege a render(). Ahora viaja junto
-    // con el mismo render() debounced. Es seguro: si el usuario navega
-    // fuera antes de que venza el debounce, los handlers de
-    // 'visibilitychange'/'pagehide' (más abajo en este archivo) ya llaman
-    // PLANO.guardarEstado(estado) incondicionalmente con el valor de
-    // `estado` más reciente en memoria (aplicarAccion() de arriba ya lo
-    // actualizó de forma síncrona) — no hay ventana real de pérdida de
-    // estado, solo se difiere CUÁNDO se escribe a disco.
-    clearTimeout(activeOperations.debounceBuscarId);
-    if (!uiState.consultaActual) {
-      // Vaciar el campo es, en la cabeza de quien lo hace, un "deshacer":
-      // debe sentirse instantáneo. El debounce existe para no recalcular
-      // en cada tecla mientras se escribe, no para demorar el momento en
-      // que alguien decide arrancar de nuevo.
-      render();
-      PLANO.guardarEstado(estado);
-    } else {
-      activeOperations.debounceBuscarId = setTimeout(function () {
-        render();
-        PLANO.guardarEstado(estado);
-      }, DEBOUNCE_BUSQUEDA_MS);
-    }
-  }
-
-  /**
-   * Muestra/oculta el botón de limpiar y mantiene aria-expanded del
-   * input sincronizado con si hay una búsqueda/filtro gobernando el
-   * panel de resultados ahora mismo.
-   */
-  function actualizarBotonLimpiar() {
-    if (DOM.btnLimpiarBusqueda) {
-      DOM.btnLimpiarBusqueda.hidden = !uiState.consultaActual;
-    }
-    if (DOM.inputBuscar) {
-      DOM.inputBuscar.setAttribute('aria-expanded', hayBusquedaOFiltro() ? 'true' : 'false');
-    }
-  }
-
-  /**
-   * Limpia la búsqueda actual. Única función para las tres formas de
-   * disparar la misma acción (botón interno del campo, acción del
-   * estado vacío, y en el futuro cualquier otra): antes cada una
-   * repetía su propia versión de estas cinco líneas por separado.
-   */
-  function limpiarBusqueda() {
-    uiState.consultaActual = '';
-    uiState.paginaTarjetas = 1;
-    if (DOM.inputBuscar) {
-      DOM.inputBuscar.value = '';
-      DOM.inputBuscar.focus();
-    }
-    actualizarBotonLimpiar();
-    estado = PLANO.aplicarAccion(estado, 'despejarBusqueda');
-    PLANO.guardarEstado(estado);
-    clearTimeout(activeOperations.debounceBuscarId);
-    render();
-  }
-
-  /**
-   * Todos los controles focuseables "principales" de las tarjetas
-   * visibles, en orden de aparición — para la navegación por teclado
-   * entre resultados (flechas arriba/abajo desde el buscador o entre
-   * tarjetas). Toma el primer link/botón de cada tarjeta en vez de
-   * todos los suyos: moverse "a la tarjeta siguiente" con una sola
-   * tecla, no a su quinto botón interno.
-   */
-  function elementosNavegablesDelPanel() {
-    if (!DOM.panelDescubrimiento) return [];
-    var tarjetas = Array.prototype.slice.call(DOM.panelDescubrimiento.querySelectorAll('.tarjeta'));
-    var focos = [];
-    tarjetas.forEach(function (t) {
-      var primero = t.querySelector('a.tarjeta-btn, button.tarjeta-btn, a, button');
-      if (primero) focos.push(primero);
-    });
-    return focos;
-  }
-
-  /**
-   * Teclado desde el input: flecha abajo salta al primer resultado
-   * (evita tener que Tabular uno por uno para llegar), Escape limpia
-   * si hay texto. El resto (Enter, Tab) queda con su comportamiento
-   * nativo — no hay nada que interceptar ahí.
-   */
-  function manejarKeydownBuscar(e) {
-    if (e.key === 'ArrowDown') {
-      var focos = elementosNavegablesDelPanel();
-      if (focos.length) {
-        e.preventDefault();
-        focos[0].focus();
-      }
-    } else if (e.key === 'Escape' && uiState.consultaActual) {
-      e.preventDefault();
-      limpiarBusqueda();
-    }
-  }
-
-  /**
-   * Teclado dentro del panel de resultados: flechas arriba/abajo
-   * recorren tarjetas (sin tener que Tabular por cada botón interno de
-   * cada una), Escape vuelve al buscador. Delegado en el panel para
-   * no atar un listener por tarjeta — el panel se repinta seguido.
-   */
-  function manejarKeydownPanel(e) {
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Escape') return;
-    if (!e.target.closest('.tarjeta')) return;
-
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      if (DOM.inputBuscar) DOM.inputBuscar.focus();
-      return;
-    }
-
-    var focos = elementosNavegablesDelPanel();
-    var idx = focos.indexOf(e.target);
-    if (idx === -1) return;
-    e.preventDefault();
-
-    if (e.key === 'ArrowDown' && focos[idx + 1]) {
-      focos[idx + 1].focus();
-    } else if (e.key === 'ArrowUp') {
-      if (focos[idx - 1]) {
-        focos[idx - 1].focus();
-      } else if (DOM.inputBuscar) {
-        DOM.inputBuscar.focus();
-      }
-    }
-  }
-
-  function manejarClickPanel(e) {
-    var btnAceptar = e.target.closest('[data-accion="aceptar"]');
-    var btnRechazar = e.target.closest('[data-accion="rechazar"]');
-    var btnGuardar = e.target.closest('[data-accion="guardar"]');
-    var btnCompartir = e.target.closest('[data-accion="compartir"]');
-    var btnCargarMas = e.target.closest('[data-accion="cargar-mas"]');
-    var btnMasSugerenciasRecorte = e.target.closest('[data-accion="mas-sugerencias-recorte"]');
-    var btnLimpiarBusqueda = e.target.closest('[data-accion="limpiar-busqueda"]');
-    var btnLimpiarFiltro = e.target.closest('[data-accion="limpiar-filtro-rubro"]');
-    var carta = e.target.closest('[data-lugar-id]');
-
-    if (btnLimpiarBusqueda) {
-      limpiarBusqueda();
-      return;
-    }
-
-    if (btnLimpiarFiltro) {
-      uiState.filtroRubroActivo = null;
-      DomPainter.pintarRubros();
-      render();
-      return;
-    }
-
-    if (btnCompartir) {
-      var cartaC = btnCompartir.closest('[data-lugar-id]');
-      var lugarC = obtenerPorId(cartaC.dataset.lugarId);
-      var urlFicha = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'locales/' + slug(lugarC) + '/';
-      var payload = { title: lugarC.nombre + ' — URU SPOT', text: lugarC.categoria || '', url: urlFicha };
-
-      if (navigator.share) {
-        navigator.share(payload).catch(function () {});
-      } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(urlFicha).then(function () {
-          var txtOriginal = btnCompartir.innerHTML;
-          btnCompartir.innerHTML = '✓';
-          setTimeout(function () { btnCompartir.innerHTML = txtOriginal; }, 1600);
-        });
-      }
-      return;
-    }
-
-    if (btnCargarMas) {
-      uiState.paginaTarjetas++;
-      render();
-      return;
-    }
-
-    if (btnMasSugerenciasRecorte) {
-      // Fase 4 — "Mostrar más" como nueva tanda real: a diferencia de
-      // btnCargarMas (que solo avanza paginaTarjetas sobre una lista
-      // que el motor YA calculó), este botón le pide a render() una
-      // tanda NUEVA excluyendo todo lo mostrado hasta ahora — ver el
-      // bloque de uiState.tandaRecorte dentro de render(). Si además
-      // "Sorprendeme" está activo, cada tanda nueva es también una
-      // sorpresa distinta a la anterior (sorpresaSeed avanza).
-      uiState.pedirMasRecorte = true;
-      if (uiState.sorprendemeActivo) uiState.sorpresaSeed++;
-      render();
-      return;
-    }
-
-    if (btnAceptar) {
-      var id1 = btnAceptar.closest('[data-lugar-id]').dataset.lugarId;
-      var porIniciativa = btnAceptar.dataset.origen === 'iniciativa_propia';
-      var grupo1 = obtenerPorId(id1) ? obtenerPorId(id1).grupo : undefined;
-      estado = PLANO.aplicarAccion(estado, 'aceptar', {
-        lugarId: id1,
-        porIniciativaPropia: porIniciativa,
-        grupo: grupo1
-      });
-      PLANO.guardarEstado(estado);
-      // Fase 4 (Motion Direction Bible v2.0, G.4.1): nunca bloquea ni
-      // hace preventDefault del <a href> real hacia la ficha — solo
-      // adelanta la escena ambiental y la claveAccion por slug antes
-      // de que el navegador siga la navegación cross-document.
-      if (window.Coreografias && obtenerPorId(id1)) {
-        window.Coreografias.aperturaFicha(slug(obtenerPorId(id1)));
-      }
-      return;
-    }
-
-    if (btnRechazar) {
-      var id2 = btnRechazar.closest('[data-lugar-id]').dataset.lugarId;
-      var grupo = obtenerPorId(id2) ? obtenerPorId(id2).grupo : 'sin_rubro';
-      estado = PLANO.aplicarAccion(estado, 'rechazar', { grupo: grupo });
-      PLANO.guardarEstado(estado);
-      programarRenderTrasSalida(btnRechazar.closest('[data-lugar-id]'));
-      return;
-    }
-
-    if (btnGuardar) {
-      var cartaG = btnGuardar.closest('[data-lugar-id]');
-      var id3 = cartaG.dataset.lugarId;
-      var favoritos = leerFavoritos();
-      favoritos[id3] = !favoritos[id3];
-      guardarFavoritos(favoritos);
-
-      var quedoGuardado = !!favoritos[id3];
-      estado = PLANO.aplicarAccion(estado, 'guardar', { lugarId: id3, guardado: quedoGuardado });
-      PLANO.guardarEstado(estado);
-
-      btnGuardar.classList.toggle('activo', quedoGuardado);
-      btnGuardar.setAttribute('aria-pressed', String(quedoGuardado));
-      btnGuardar.setAttribute('aria-label', quedoGuardado ? 'Quitar de guardados' : 'Guardar');
-      btnGuardar.textContent = quedoGuardado ? '★ guardado' : '☆ guardar';
-      actualizarContadorGuardados();
-
-      if (estado.sesion.curaduriaActiva && !quedoGuardado) {
-        programarRenderTrasSalida(cartaG);
-      }
-      return;
-    }
-
-    if (carta && motorMapa) {
-      motorMapa.enfocar(carta.dataset.lugarId);
-    }
-  }
-
-  function manejarHoverPanel(e) {
-    var carta = e.target.closest('[data-lugar-id]');
-    if (carta && motorMapa) motorMapa.resaltar(carta.dataset.lugarId);
-  }
-
-  function manejarHoverOutPanel(e) {
-    var carta = e.target.closest('[data-lugar-id]');
-    if (carta && motorMapa) motorMapa.quitarResaltado();
-  }
-
-  // PERF (auditoría performance, 2026-08-02): contraparte de la marca
-  // .tarjeta--entrando que pintarTarjetas() agrega en la creación.
-  // Delegado en DOM.panelDescubrimiento en vez de un listener por
-  // tarjeta — 'animationend' burbujea, así que un único listener
-  // alcanza para las hasta 8 tarjetas que puede haber por render.
-  // Filtra por animationName porque el mismo elemento podría, en
-  // teoría, tener más de una animación nombrada en el futuro y este
-  // handler solo debe reaccionar a la de entrada (uru-fade-up).
-  function manejarFinEntradaTarjeta(e) {
-    if (e.animationName !== 'uru-fade-up') return;
-    if (e.target && e.target.classList) {
-      e.target.classList.remove('tarjeta--entrando');
-    }
-  }
-
-  /**
-   * Cap. 6 "Cambio de filtros" (Motion Direction Bible v1.0, pasos
-   * 19-21): "los resultados que ya no cumplen el filtro se desvanecen
-   * ANTES de que los nuevos se acerquen — nunca se superponen en el
-   * mismo instante". Sin esto, pintarTarjetas() vacía y repinta el
-   * panel de forma instantánea (innerHTML=''), el "corte seco" que el
-   * Cap. 14 tipifica como anti-patrón ("Transiciones abruptas").
-   *
-   * Reutiliza el vocabulario de css/motion-gramatica.css (Desvanecerse,
-   * Cap. 4) en vez de declarar una animación propia acá: .u-mov-saliendo
-   * fuerza la duración y curva de salida (asimetría entrada/salida,
-   * Cap. 10) sobre la transition de opacidad que ya trae
-   * .u-mov-desvanecer.
-   *
-   * Espera el fin real de la transición (transitionend) + timeout de
-   * seguridad, el mismo patrón ya probado de programarRenderTrasSalida
-   * (arriba, para "rechazar"/sacar de guardados) — no vuelve a
-   * calcular la duración a mano vía getComputedStyle: eso ya se hizo
-   * acá antes y funcionaba, pero es más frágil (se desincroniza en
-   * silencio si el token cambia) que escuchar el evento real. Solo se
-   * escucha en la primera tarjeta: todas comparten clase y duración,
-   * así que su transitionend es representativo de las demás.
-   *
-   * Deliberadamente solo se usa desde el click de un chip de rubro
-   * (ver manejarClickRubros, abajo) y NO desde los demás llamados a
-   * render() del archivo (búsqueda en vivo, favoritos, paginación,
-   * "cerca tuyo"): agregar esta salida ahí también introduciría una
-   * demora perceptible en interacciones que el Cap. 5 ("Cómo evitar
-   * la fatiga") pide mantener ágiles, no contemplativas.
-   */
-  /**
-   * Fase 4 (Motion Direction Bible v2.0, Parte K.10): la coreografía
-   * de "salida antes que entrada" y su regla de fatiga ("solo la
-   * primera vez en la sesión corre completa") ya no viven acá a mano
-   * — Coreografias.cambioFiltro() delega ambas en AmbienteRitmo vía la
-   * claveAccion 'filtro:rubro', que ya resuelve exactamente el mismo
-   * criterio (registro 'inmediato' desde la 2ª repetición) sin un
-   * contador local duplicado. Antes de esta migración, la última línea
-   * de esta función llamaba setTimeout(render, salidaMs) con salidaMs
-   * nunca definida en el archivo — un ReferenceError real en cada
-   * cambio de filtro, enmascarado en la práctica por el failsafe de
-   * transitionend/timeout que sí corría antes de esa línea.
-   */
-  function renderConTransicionDeFiltro() {
-    var existentes = DOM.panelDescubrimiento
-      ? DOM.panelDescubrimiento.querySelectorAll('.tarjeta')
-      : [];
-
-    if (window.Coreografias) {
-      window.Coreografias.cambioFiltro(existentes, render);
-      return;
-    }
-
-    // Fail-open: si coreografias.js no llegó a cargar por algún
-    // motivo, no bloquear el filtro — reemplazo instantáneo, igual
-    // que ya hace esta misma función bajo reduced-motion.
-    render();
-  }
-
-  /**
-   * Selecciona (o deselecciona si ya estaba activo) un rubro como filtro.
-   * Único punto de esta lógica — compartido entre el índice de rubros
-   * (manejarClickRubros) y los atajos de "Empezá por acá"
-   * (manejarClickSugerencias), que documentaban desde su propio
-   * comentario la intención de no duplicarla pero nunca llegaron a
-   * extraerla de manejarClickRubros: manejarClickSugerencias llamaba a
-   * `seleccionarRubro()` sin que esa función existiera en ningún lado
-   * — ReferenceError real en cuanto ese listener quedó cableado.
-   * Auditoría producción, 2026-07-30.
-   */
-  function seleccionarRubro(rubro) {
-    uiState.filtroRubroActivo = (uiState.filtroRubroActivo === rubro) ? null : rubro;
-    uiState.paginaTarjetas = 1;
-    estado = PLANO.aplicarAccion(estado, 'salirCuraduria');
-    PLANO.guardarEstado(estado);
-
-    // El resaltado del chip es feedback inmediato: no espera al debounce.
-    DomPainter.pintarRubros();
-
-    // TIER 1.3 — auditoría de rendimiento (Perf, 2026-08-02): antes cada
-    // click en un rubro disparaba renderConTransicionDeFiltro() de
-    // inmediato. En clicks en ráfaga entre chips (o doble click por
-    // error), eso eran 2-3 re-renders completos del panel + mapa antes
-    // de que el usuario terminara de decidir. Se agrupa igual que ya
-    // se hace con la búsqueda: se cancela cualquier render pendiente y
-    // se dispara uno solo, DEBOUNCE_FILTRO_MS después del último click.
-    clearTimeout(activeOperations.debounceFiltroId);
-    activeOperations.debounceFiltroId = setTimeout(
-      renderConTransicionDeFiltro,
-      DEBOUNCE_FILTRO_MS
-    );
-
-    if (DOM.tituloRegion) {
-      DOM.tituloRegion.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
-
-  function manejarClickRubros(e) {
-    var chip = e.target.closest('[data-rubro]');
-    if (!chip) return;
-    seleccionarRubro(chip.dataset.rubro);
-  }
-
-  function manejarClickVerGuardados() {
-    estado = PLANO.aplicarAccion(estado, 'entrarCuraduria');
-    PLANO.guardarEstado(estado);
-    uiState.paginaTarjetas = 1;
-    render();
-    if (DOM.tituloRegion) {
-      DOM.tituloRegion.setAttribute('tabindex', '-1');
-      DOM.tituloRegion.focus({ preventScroll: false });
-    }
-  }
-
-  function manejarClickFAQ(e) {
-    var pregunta = e.target.closest('.faq-pregunta');
-    if (!pregunta) return;
-    var item = pregunta.closest('.faq-item');
-    var abierta = pregunta.getAttribute('aria-expanded') === 'true';
-    pregunta.setAttribute('aria-expanded', String(!abierta));
-    item.classList.toggle('faq-item--abierta', !abierta);
-  }
-
-  function manejarPointerDownParaRipple(e) {
-    if (prefiereMovimientoReducido()) return;
-    var btn = e.target.closest('.btn');
-    if (!btn) return;
-    var rect = btn.getBoundingClientRect();
-    var span = document.createElement('span');
-    var lado = Math.max(rect.width, rect.height);
-    span.className = 'btn__ripple';
-    span.style.width = span.style.height = lado + 'px';
-    span.style.left = (e.clientX - rect.left - lado / 2) + 'px';
-    span.style.top = (e.clientY - rect.top - lado / 2) + 'px';
-    btn.appendChild(span);
-    span.addEventListener('animationend', function () { span.remove(); });
-  }
-
-  // BUG REAL corregido en esta pasada: esta función comparaba contra
-  // `uiState.ultimaRegionRenderizada`, un campo que se inicializaba en
-  // '' (línea de arriba, sección "Estado local de UI") y NUNCA se
-  // volvía a escribir en ningún otro lugar del archivo — verificado
-  // por grep de `ultimaRegionRenderizada` en todo `js/`, cero
-  // asignaciones fuera de la inicialización. Como cualquier nombre de
-  // región real ('guia', 'exploracion', 'accionDirecta', 'curaduria')
-  // es distinto de '', la condición de abajo era efectivamente
-  // `if (true)` en todos los ticks: cada 5s (PERMANENCIA_TICK_MS),
-  // para siempre mientras la pestaña siguiera en STATE.READY, se
-  // llamaba a render() sin importar si la región había cambiado o no
-  // — exactamente lo que este `if` existe para evitar. render() sí
-  // corta el pintado real por su propio guard interno de `hayoCambio`,
-  // pero antes de llegar a ese guard ya pagó el costo completo de
-  // EXPO.recortePorIniciativaPropiaExplicado() (filtro + scoring +
-  // orden sobre todo el catálogo candidato) en cada uno de esos ticks
-  // — trabajo duplicado real, medible, indefinidamente mientras la
-  // pestaña esté abierta e inactiva.
-  // Fix: comparar contra `lastRenderCache.region`, que es la variable
-  // que YA existe en este archivo con exactamente esa responsabilidad
-  // (ver Fase 4, más arriba en render()) y que SÍ se actualiza en cada
-  // render real — evita mantener dos fuentes de verdad separadas
-  // (`uiState.ultimaRegionRenderizada` y `lastRenderCache.region`)
-  // para el mismo hecho, una de las cuales podía (y de hecho, estaba)
-  // desincronizada de la otra.
-  // Fallback defensivo (auditoría, Oportunidad 1, 2026-08-05): mismo
-  // criterio que ya usa este archivo para AmbientEngine/Coreografias —
-  // CicloVida (js/ciclo-vida.js) debería cargar siempre antes que este
-  // script (ver index.html), pero si por lo que sea no está disponible,
-  // esto se degrada a un setInterval desnudo (el comportamiento de
-  // antes de esta pasada) en vez de romper la inicialización de la app.
-  function programarPeriodica(fn, ms) {
-    if (typeof CicloVida !== 'undefined' && CicloVida && typeof CicloVida.programarTareaPeriodica === 'function') {
-      return CicloVida.programarTareaPeriodica(fn, ms);
-    }
-    return setInterval(fn, ms);
-  }
-
-  function tickPermanencia() {
-    if (estadoActual() !== STATE.READY) return;
-
-    estado = PLANO.aplicarAccion(estado, 'permanecer', { segundos: 5 });
-    PLANO.guardarEstado(estado);
-
-    var regionNueva = PLANO.region(estado).nombre;
-    if (regionNueva !== RenderEngine.obtenerCache().region) {
-      render();
-    }
-  }
-
-  // ───────────────────────────────────────────────────────────────────
-  // 20. NAVEGACIÓN POR TECLADO AVANZADA
-  // ───────────────────────────────────────────────────────────────────
-
-  function inicializarTecladoNavegacion() {
-    document.addEventListener('keydown', manejarTecladoGlobal);
-  }
-
-  function manejarTecladoGlobal(e) {
-    // Escape: salir de modal/curaduría
-    if (e.key === 'Escape') {
-      if (estado && estado.sesion.curaduriaActiva) {
-        estado = PLANO.aplicarAccion(estado, 'salirCuraduria');
-        PLANO.guardarEstado(estado);
-        uiState.paginaTarjetas = 1;
-        render();
-        e.preventDefault();
-      }
-      return;
-    }
-
-    // Ctrl+K o Cmd+K: enfocar búsqueda
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-      if (DOM.inputBuscar) {
-        DOM.inputBuscar.focus();
-        e.preventDefault();
-      }
-      return;
-    }
-
-    // Alt+L: enfocar lista de rubros
-    if (e.altKey && e.key === 'l') {
-      var primerChip = DOM.listaRubros && DOM.listaRubros.querySelector('[data-rubro]');
-      if (primerChip) {
-        primerChip.focus();
-        e.preventDefault();
-      }
-      return;
-    }
-  }
-
-  // ───────────────────────────────────────────────────────────────────
-  // 20b. CONTEXTO DE CLIMA PARA EL RECORTE (Fase 4, Fase 3D §4)
-  // ───────────────────────────────────────────────────────────────────
-
-  // Trae { weather_code, temperature_2m, precipitation } y los deja en
-  // climaContextoCache para que render() los pase como contexto.clima
-  // a EXPO.recortePorIniciativaPropiaExplicado(). Si falla o tarda,
-  // climaContextoCache simplemente queda como estaba (null la primera
-  // vez) — condicionClimatica() en el motor ya sabe tratar null como
-  // "sin señal de clima" y el scoring sigue funcionando sin esa señal,
-  // exactamente como antes de esta conexión.
-  // FASE 3 (paso 1, Plan Maestro de Modularización, 2026-08-06):
-  // el fetch + caché ahora vive en ClimateContext.actualizar()
-  // (climate-context.js) — acá solo queda pedirle que se actualice y
-  // re-renderizar cuando trajo un dato nuevo, mismo comportamiento
-  // observable que el actualizarClimaContexto() original.
-  function actualizarClimaContexto() {
-    ClimateContext.actualizar(function () {
-      // Re-renderizar: el recorte por iniciativa propia (guia/exploracion)
-      // puede cambiar de selección/razones ahora que hay señal de clima
-      // real donde antes no la había.
-      render();
-    });
-  }
-
-  function inicializarContextoClima() {
-    actualizarClimaContexto();
-    // FIX (auditoría, Oportunidad 1, 2026-08-05): antes esto hacía un
-    // fetch() de red real cada 5 minutos SIN IMPORTAR si la pestaña
-    // estaba oculta — el único de los 5 setInterval del proyecto sin
-    // ninguna gestión de segundo plano y, a la vez, el único con costo
-    // de red real por tick (ver inventario completo del hallazgo).
-    // Mismo helper que permanenciaTimer, arriba.
-    activeOperations.climaContextoTimer = programarPeriodica(actualizarClimaContexto, CLIMA_CONTEXTO_INTERVALO_MS);
   }
 
   // ───────────────────────────────────────────────────────────────────
