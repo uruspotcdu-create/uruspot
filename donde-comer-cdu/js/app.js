@@ -1271,14 +1271,15 @@ import { crearDomPainter } from './dom-painter.js';
       var opts = resultado.opts;
 
       // Actualizar encabezado, estado visual, tarjetas y mapa
-      actualizarCabecera(reg, rama);
+      // FASE 4B: Llamadas a DomPainter (funciones migradas)
+      DomPainter.actualizarCabecera(reg, rama);
       if (resultado.huboCambioDeRegion) {
-        mostrarMicroSenalCambioRegion();
+        DomPainter.mostrarMicroSenalCambioRegion();
       }
-      actualizarMapaTextura();
-      actualizarBannerCuraduriaSugerida(reg);
+      DomPainter.actualizarMapaTextura();
+      DomPainter.actualizarBannerCuraduriaSugerida(reg);
       pintarTarjetas(lista, favoritos, opts);
-      actualizarMapaHerramienta(reg.nombre, lista || []);
+      DomPainter.actualizarMapaHerramienta(reg.nombre, lista || []);
 
       // Fase 4 (Motion Direction Bible v2.0, Parte I / G.5.3): único
       // punto de activación real de la escena ambiental narrativa —
@@ -1460,205 +1461,6 @@ import { crearDomPainter } from './dom-painter.js';
   /**
    * Actualiza el encabezado (título, subtítulo) según rama y región.
    */
-  function actualizarCabecera(reg, rama) {
-    if (DOM.rolActual) {
-      var rol = PLANO.rolPorAperturas(estado.aperturas);
-      DOM.rolActual.textContent = ROLES_NOMBRES[rol] || rol;
-    }
-
-    if (!DOM.tituloRegion || !DOM.subtituloRegion) return;
-
-    if (dynamicElements.btnVerCatalogoCompleto) {
-      dynamicElements.btnVerCatalogoCompleto.hidden = true;
-    }
-    asegurarBotonVolverATodos();
-
-    if (reg.nombre === 'curaduria') {
-      DOM.tituloRegion.textContent = 'Tu lista';
-      DOM.subtituloRegion.textContent = 'Lo que guardaste, sin recorte ni rotación.' + sufijoCercania();
-      if (dynamicElements.btnVolverATodos) {
-        dynamicElements.btnVolverATodos.hidden = false;
-      }
-      return;
-    }
-
-    if (dynamicElements.btnVolverATodos) {
-      dynamicElements.btnVolverATodos.hidden = true;
-    }
-
-    var rubroMeta = uiState.filtroRubroActivo && window.URU_RUBROS_META
-      ? window.URU_RUBROS_META[uiState.filtroRubroActivo]
-      : null;
-
-    // Fase 4: hayBusquedaTexto() en vez de hayBusquedaOFiltro() — un
-    // rubro activo ya NO saca al usuario de la copy de recorte curado
-    // (ver ramaActual()/render()): el filtro de rubro se resuelve
-    // DENTRO de "Para arrancar"/"Para explorar", no reemplazándolas
-    // por "Todos los lugares verificados de este rubro".
-    var esRecorteReal = (reg.nombre === 'guia' || reg.nombre === 'exploracion') &&
-      !hayBusquedaTexto() && !uiState.verCatalogoCompleto;
-
-    if (!esRecorteReal) {
-      if (uiState.consultaActual.trim()) {
-        DOM.tituloRegion.textContent = 'Resultados';
-        DOM.subtituloRegion.textContent = (rubroMeta
-          ? 'Coincidencias con "' + uiState.consultaActual.trim() + '" en ' + rubroMeta[0] + '.'
-          : 'Esto es lo que coincide con lo que escribiste.') + sufijoCercania();
-      } else if (rubroMeta) {
-        DOM.tituloRegion.textContent = rubroMeta[0];
-        DOM.subtituloRegion.textContent = 'Todos los lugares verificados de este rubro.' + sufijoCercania();
-      } else {
-        DOM.tituloRegion.textContent = 'Todos los lugares';
-        DOM.subtituloRegion.textContent = 'El padrón completo (' + obtenerRegistro().length + ' lugares).' + sufijoCercania();
-      }
-
-      if (uiState.verCatalogoCompleto && !hayBusquedaOFiltro() && reg.nombre !== 'accionDirecta') {
-        asegurarBotonVerCatalogoCompleto();
-        if (dynamicElements.btnVerCatalogoCompleto) {
-          dynamicElements.btnVerCatalogoCompleto.textContent = '← Volver a lo sugerido';
-          dynamicElements.btnVerCatalogoCompleto.hidden = false;
-        }
-      }
-      return;
-    }
-
-    asegurarBotonVerCatalogoCompleto();
-    if (dynamicElements.btnVerCatalogoCompleto) {
-      dynamicElements.btnVerCatalogoCompleto.textContent = 'Ver catálogo completo →';
-      dynamicElements.btnVerCatalogoCompleto.hidden = false;
-    }
-
-    // Fase 4 — copy del filtro de rubro DENTRO del recorte (antes este
-    // caso ni se alcanzaba: con rubro activo, esRecorteReal siempre
-    // daba false y se mostraba "Todos los lugares verificados de este
-    // rubro" en vez de la copy de Guía/Exploración). El sufijo de
-    // rubro se agrega al final del subtítulo de siempre, sin
-    // reemplazarlo — sigue siendo un recorte curado, solo acotado.
-    var sufijoRubro = rubroMeta ? (' Mostrando solo ' + rubroMeta[0].toLowerCase() + '.') : '';
-    var sufijoSorpresa = uiState.sorprendemeActivo ? ' 🎲 Modo sorpresa activo.' : '';
-
-    if (reg.nombre === 'guia') {
-      DOM.tituloRegion.textContent = 'Para arrancar';
-      DOM.subtituloRegion.textContent = 'Una selección chica para no abrumar. Guardá o descartá para afinarla.' +
-        sufijoRubro + sufijoSorpresa + sufijoCercania();
-    } else {
-      DOM.tituloRegion.textContent = 'Para explorar';
-      DOM.subtituloRegion.textContent = 'Más variedad para curiosear. Buscá si ya sabés qué querés.' +
-        sufijoRubro + sufijoSorpresa + sufijoCercania();
-    }
-  }
-
-  /**
-   * Asegura que exista el botón "ver catálogo completo" (creado por JS).
-   */
-  function asegurarBotonVerCatalogoCompleto() {
-    if (dynamicElements.btnVerCatalogoCompleto || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn btn--link-volver';
-    btn.addEventListener('click', function () {
-      uiState.verCatalogoCompleto = !uiState.verCatalogoCompleto;
-      uiState.paginaTarjetas = 1;
-      render();
-    });
-    DOM.subtituloRegion.insertAdjacentElement('afterend', btn);
-    dynamicElements.btnVerCatalogoCompleto = btn;
-  }
-
-  /**
-   * Asegura que exista el botón "volver a todos" (desde curaduría).
-   */
-  function asegurarBotonVolverATodos() {
-    if (dynamicElements.btnVolverATodos || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn btn--link-volver';
-    btn.textContent = '← Ver todos los lugares';
-    btn.hidden = true;
-    btn.addEventListener('click', function () {
-      estado = PLANO.aplicarAccion(estado, 'salirCuraduria');
-      PLANO.guardarEstado(estado);
-      uiState.paginaTarjetas = 1;
-      render();
-      if (DOM.tituloRegion) {
-        DOM.tituloRegion.setAttribute('tabindex', '-1');
-        DOM.tituloRegion.focus({ preventScroll: false });
-      }
-    });
-    DOM.subtituloRegion.insertAdjacentElement('afterend', btn);
-    dynamicElements.btnVolverATodos = btn;
-  }
-
-  /**
-   * Banner discreto "armaste una lista" tras 2+ guardados.
-   */
-  function actualizarBannerCuraduriaSugerida(reg) {
-    var debeMostrar = estado.sesion.curaduriaSugerida && reg.nombre !== 'curaduria';
-
-    if (!debeMostrar) {
-      if (dynamicElements.bannerCuraduria) {
-        dynamicElements.bannerCuraduria.hidden = true;
-      }
-      return;
-    }
-
-    if (!dynamicElements.bannerCuraduria) {
-      asegurarBannerCuraduria();
-    }
-
-    if (dynamicElements.bannerCuraduria) {
-      dynamicElements.bannerCuraduria.hidden = false;
-    }
-  }
-
-  /**
-   * Crea el banner "armaste una lista" si no existe.
-   */
-  function asegurarBannerCuraduria() {
-    if (dynamicElements.bannerCuraduria || !DOM.panelDescubrimiento || !DOM.panelDescubrimiento.parentNode) {
-      return;
-    }
-
-    var banner = document.createElement('div');
-    banner.className = 'mapa-info';
-    banner.setAttribute('role', 'status');
-    banner.hidden = true;
-
-    var texto = document.createElement('span');
-    texto.textContent = 'Armaste el comienzo de una lista. ';
-
-    var btnIr = document.createElement('button');
-    btnIr.type = 'button';
-    btnIr.className = 'btn btn--activo';
-    btnIr.textContent = 'Ver tus guardados';
-    btnIr.addEventListener('click', function () {
-      estado = PLANO.aplicarAccion(estado, 'entrarCuraduria');
-      PLANO.guardarEstado(estado);
-      uiState.paginaTarjetas = 1;
-      render();
-    });
-
-    var btnCerrar = document.createElement('button');
-    btnCerrar.type = 'button';
-    btnCerrar.className = 'btn btn--icono';
-    btnCerrar.setAttribute('aria-label', 'Descartar aviso');
-    btnCerrar.textContent = '✕';
-    btnCerrar.addEventListener('click', function () {
-      estado = PLANO.aplicarAccion(estado, 'descartarSugerenciaCuraduria');
-      PLANO.guardarEstado(estado);
-      banner.hidden = true;
-    });
-
-    banner.appendChild(texto);
-    banner.appendChild(btnIr);
-    banner.appendChild(btnCerrar);
-    DOM.panelDescubrimiento.insertAdjacentElement('beforebegin', banner);
-
-    dynamicElements.bannerCuraduria = banner;
-  }
-
   // ───────────────────────────────────────────────────────────────────
   // 16. MAPA Y VISUALIZACIÓN ESPACIAL
   // ───────────────────────────────────────────────────────────────────
@@ -2757,31 +2559,6 @@ import { crearDomPainter } from './dom-painter.js';
    * visual que .aviso-cerca-tuyo (uru-fade-up, css/tokens.css) — cero
    * @keyframes nuevo para un aviso chico más.
    */
-  function mostrarMicroSenalCambioRegion() {
-    if (!DOM.tituloRegion || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
-
-    if (dynamicElements.avisoCambioRegion) {
-      dynamicElements.avisoCambioRegion.remove();
-      dynamicElements.avisoCambioRegion = null;
-    }
-
-    var tituloNuevo = DOM.tituloRegion.textContent || '';
-    var aviso = document.createElement('span');
-    aviso.className = 'aviso-cambio-region';
-    aviso.setAttribute('role', 'status');
-    aviso.textContent = tituloNuevo ? 'Cambió lo que ves: ' + tituloNuevo : 'Cambió lo que ves.';
-
-    DOM.subtituloRegion.insertAdjacentElement('afterend', aviso);
-    dynamicElements.avisoCambioRegion = aviso;
-
-    setTimeout(function () {
-      if (aviso.parentNode) aviso.remove();
-      if (dynamicElements.avisoCambioRegion === aviso) {
-        dynamicElements.avisoCambioRegion = null;
-      }
-    }, CAMBIO_REGION_AVISO_MS);
-  }
-
   function mostrarTooltipGeolocation(texto) {
     if (dynamicElements.tooltipGeolocation) {
       dynamicElements.tooltipGeolocation.remove();
