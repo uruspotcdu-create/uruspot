@@ -1,9 +1,9 @@
 /*
  * css/critical.bundle.css — GENERADO, NO EDITAR A MANO.
- * Fuente: 16 archivos + scripts/build-css-bundle.js
+ * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-06T02:20:31.401Z
+ * Generado: 2026-08-06T07:07:22.154Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -1649,6 +1649,40 @@ button.chip.chip--activo .chip__conteo{
 @media (forced-colors:active){
   .sugerencia-chip, .filtro-pill{ border:1px solid CanvasText; }
   .filtro-pill__quitar{ border:1px solid CanvasText; background:Canvas; color:CanvasText; }
+}
+
+/* ==== css/chip-indicador.css ==== */
+.rubros-wrap{
+  position: relative;
+}
+
+.chip-indicador{
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  height: 2px;
+  border-radius: var(--radio-full);
+  background: var(--chip-color, var(--color-granate-clara));
+  opacity: 0;
+  transform: translateX(0);
+  width: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition:
+    transform var(--dur-media) var(--easing-estandar),
+    width var(--dur-media) var(--easing-estandar),
+    background var(--dur-rapido) var(--easing-estandar),
+    opacity var(--dur-rapido) var(--easing-estandar);
+}
+
+.chip-indicador--sin-animar{
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .chip-indicador{
+    transition: none;
+  }
 }
 
 /* ==== css/badge-estado.css ==== */

@@ -1663,6 +1663,14 @@ import { crearDataLoader } from './data-loader.js';
         escapeHTML(meta[0]) + '<span class="chip__conteo">' + conteo[k] + '</span>' +
         '</button>';
     }).join('');
+
+    // Indicador deslizante bajo el chip activo — puramente aditivo,
+    // no toca la selección real del filtro. Fail-open si el módulo
+    // no llegó a cargar (mismo criterio que Coreografias/AmbientEngine
+    // en el resto de este archivo).
+    if (window.URU_ChipIndicador) {
+      window.URU_ChipIndicador.sincronizar(DOM.listaRubros, '.chip--activo');
+    }
   }
 
   /**

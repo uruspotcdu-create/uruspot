@@ -78,6 +78,7 @@ const ORDEN = [
   'css/boton.css',
   'css/tarjeta-lugar.css',
   'css/chip.css',
+  'css/chip-indicador.css',
   'css/badge-estado.css',
   'css/destacados.css',
   'css/mapa.css',

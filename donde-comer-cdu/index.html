@@ -81,6 +81,7 @@
      en una pasada siguiente. Sin dependencias ni configurar() — recibe
      el nodo DOM que pinta como parámetro en cada llamada. -->
 <script src="js/app-tarjetas.js" defer></script>
+<script src="js/chip-indicador.js" defer></script>
 <!-- Núcleo (motor + metadatos + slugs) — perf, 2026-07-31: los 10
      módulos de abajo (código fuente, se siguen editando acá
      individualmente) se concatenan a js/motor.bundle.js con
@@ -721,10 +722,18 @@ if ('serviceWorker' in navigator) {
        nav de referencia. -->
   <section class="indice envoltorio u-reveal" id="rubros" aria-labelledby="rubros-titulo">
     <h2 id="rubros-titulo">Por rubro</h2>
-    <div id="listaRubros" role="grid" aria-label="Lugares organizados por rubro">
-      <template id="template-rubros">
-        <!-- app.js puebla #listaRubros directamente; ver §9. -->
-      </template>
+    <div class="rubros-wrap">
+      <div id="listaRubros" role="grid" aria-label="Lugares organizados por rubro">
+        <template id="template-rubros">
+          <!-- app.js puebla #listaRubros directamente; ver §9. -->
+        </template>
+      </div>
+      <!-- Indicador deslizante: vive FUERA de #listaRubros a propósito,
+           porque pintarRubros() reemplaza el innerHTML de ese div en
+           cada click — si el indicador estuviera adentro, se
+           destruiría y recrearía en cada filtro, perdiendo el punto
+           de partida de la animación. Ver js/chip-indicador.js. -->
+      <span class="chip-indicador" aria-hidden="true"></span>
     </div>
   </section>
 
