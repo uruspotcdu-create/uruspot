@@ -68,6 +68,14 @@
      app.min.js llame a configurar() — por eso va acá, junto a
      ciclo-vida.js, y no dentro de ningún bundle. -->
 <script src="js/app-telemetria.js" defer></script>
+<!-- Utilidades puras de formato/escape (auditoría de ingeniería,
+     Oportunidad 3, 2026-08-06): escapeHTML, cssEscape, slug, mapsHref,
+     distanciaMetros, formatoDistancia, prefiereMovimientoReducido.
+     Sin dependencias ni configurar() — a diferencia de
+     app-telemetria.js, estas funciones no leen estado privado de
+     app.js, así que solo necesitan estar cargadas antes de que
+     app.min.js arranque (mismo motivo que ciclo-vida.js). -->
+<script src="js/app-formato.js" defer></script>
 <!-- Núcleo (motor + metadatos + slugs) — perf, 2026-07-31: los 10
      módulos de abajo (código fuente, se siguen editando acá
      individualmente) se concatenan a js/motor.bundle.js con
