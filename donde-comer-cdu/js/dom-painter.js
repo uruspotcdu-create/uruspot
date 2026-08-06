@@ -13,8 +13,8 @@
    una llamada a `DomPainter.pintarX(...)` en el mismo call-site,
    pasando por parámetro lo que antes se leía de closures/globales.
 
-   Progreso: 2 de 8 funciones migradas (pintarStatsRapidas,
-   pintarDestacados). El resto (pintarRubros, pintarSugerenciasRapidas,
+   Progreso: 3 de 8 funciones migradas (pintarStatsRapidas,
+   pintarDestacados, pintarRubros). El resto (pintarSugerenciasRapidas,
    pintarFiltrosActivos, pintarTarjetas, pintarLeyenda,
    pintarEstadoEscribiendo) sigue en app.js — se migran una a la vez,
    en ese orden (de menor a mayor riesgo), cada una con su propio
@@ -28,6 +28,7 @@ export function crearDomPainter(deps) {
   var UMBRAL_RESEÑAS = deps.UMBRAL_RESEÑAS;
   var MIN_PARA_MOSTRAR_DESTACADOS = deps.MIN_PARA_MOSTRAR_DESTACADOS;
   var MAX_DESTACADOS = deps.MAX_DESTACADOS;
+  var uiState = deps.uiState;
   var slug = deps.slug;
   var mapsHref = deps.mapsHref;
   var escapeHTML = deps.escapeHTML;
@@ -50,6 +51,39 @@ export function crearDomPainter(deps) {
           grupos[l.grupo] = true;
         });
         DOM.statRubros.textContent = Object.keys(grupos).length;
+      }
+    },
+
+    pintarRubros: function () {
+      if (!DOM.listaRubros || !obtenerRegistro().length || !window.URU_RUBROS_META) return;
+
+      var conteo = Object.create(null);
+      obtenerRegistro().forEach(function (l) {
+        conteo[l.grupo] = (conteo[l.grupo] || 0) + 1;
+      });
+
+      var claves = Object.keys(window.URU_RUBROS_META)
+        .filter(function (k) {
+          return conteo[k];
+        })
+        .sort(function (a, b) {
+          return conteo[b] - conteo[a];
+        });
+
+      DOM.listaRubros.innerHTML = claves.map(function (k) {
+        var meta = window.URU_RUBROS_META[k];
+        var activo = uiState.filtroRubroActivo === k;
+        var icono = window.URU_RUBROS_ICONO_SVG ? window.URU_RUBROS_ICONO_SVG(k, { tam: 15 }) : '';
+        return '<button type="button" class="chip' + (activo ? ' chip--activo' : '') +
+          '" data-rubro="' + k + '" aria-pressed="' + activo +
+          '" style="--chip-color:var(' + meta[2] + ')">' +
+          icono +
+          escapeHTML(meta[0]) + '<span class="chip__conteo">' + conteo[k] + '</span>' +
+          '</button>';
+      }).join('');
+
+      if (window.URU_ChipIndicador) {
+        window.URU_ChipIndicador.sincronizar(DOM.listaRubros, '.chip--activo');
       }
     },
 
