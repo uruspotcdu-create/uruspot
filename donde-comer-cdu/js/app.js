@@ -777,10 +777,10 @@ import { crearDomPainter } from './dom-painter.js';
 
         // Parallelizar carga de detalles (segundo plano)
         cargarDetallesEnSegundoPlano();
-        pintarRubros();
+        DomPainter.pintarRubros();
         DomPainter.pintarStatsRapidas();
         DomPainter.pintarDestacados();
-        pintarSugerenciasRapidas();
+        DomPainter.pintarSugerenciasRapidas();
         render();
 
       })
@@ -1242,15 +1242,15 @@ import { crearDomPainter } from './dom-painter.js';
       // render()" — con eso, los chips de arranque no se ocultaban al buscar
       // o filtrar. pintarFiltrosActivos() directamente nunca se llamaba desde
       // ningún lado: la fila de píldoras de filtro activo estaba muerta.
-      actualizarVisibilidadSugerencias();
-      pintarFiltrosActivos();
+      DomPainter.actualizarVisibilidadSugerencias();
+      DomPainter.pintarFiltrosActivos();
 
       // 1 carácter, sin filtro de rubro: ni "cargando" ni "resultados",
       // un estado propio (ver pintarEstadoEscribiendo). Con 0, 2+
       // caracteres o un rubro activo, el pipeline sigue igual que
       // siempre más abajo.
       if (uiState.consultaActual.trim().length === 1 && !uiState.filtroRubroActivo) {
-        pintarEstadoEscribiendo();
+        DomPainter.pintarEstadoEscribiendo();
         return;
       }
 
@@ -1339,21 +1339,6 @@ import { crearDomPainter } from './dom-painter.js';
   // arriba). Llamada real en cargarCatalogo(), ver más abajo.
 
   /**
-   * Pinta los chips de "Por rubro" con conteos reales y states.
-   */
-  var pintarRubros = DomPainter.pintarRubros;
-
-  // Sugerencias rápidas y su regla de visibilidad — extraídas a
-  // dom-painter.js. Se conservan estos alias para no modificar los
-  // call-sites durante este micro-paso de la Fase 4.
-  var pintarSugerenciasRapidas = DomPainter.pintarSugerenciasRapidas;
-  var actualizarVisibilidadSugerencias = DomPainter.actualizarVisibilidadSugerencias;
-
-  // Resumen de filtros activos — extraído a dom-painter.js. Conserva
-  // los mismos data-* que consumen los listeners delegados de app.js.
-  var pintarFiltrosActivos = DomPainter.pintarFiltrosActivos;
-
-  /**
    * Click delegado en las sugerencias rápidas: un rubro reusa
    * exactamente `seleccionarRubro()` (mismo camino que el índice de
    * rubros de más abajo); "cerca tuyo" reusa `activarCercaDeMi()`
@@ -1388,7 +1373,7 @@ import { crearDomPainter } from './dom-painter.js';
     uiState.sorpresaSeed = 0;
     uiState.tandaRecorte = null;
     uiState.paginaTarjetas = 1;
-    pintarFiltrosActivos();
+    DomPainter.pintarFiltrosActivos();
     render();
   }
 
@@ -1409,7 +1394,7 @@ import { crearDomPainter } from './dom-painter.js';
     uiState.sorprendemeActivo = false;
     uiState.tandaRecorte = null;
     uiState.paginaTarjetas = 1;
-    pintarFiltrosActivos();
+    DomPainter.pintarFiltrosActivos();
     render();
   }
 
@@ -1435,7 +1420,7 @@ import { crearDomPainter } from './dom-painter.js';
       // cola y aplica ya, no espera el debounce de seleccionarRubro().
       clearTimeout(activeOperations.debounceFiltroId);
       uiState.filtroRubroActivo = null;
-      pintarRubros();
+      DomPainter.pintarRubros();
       render();
     } else if (cual === 'cerca') {
       desactivarCercaDeMi();
@@ -1827,7 +1812,7 @@ import { crearDomPainter } from './dom-painter.js';
     } else {
       motorMapa.quitarMarcadorUsuario();
     }
-    pintarLeyenda(puntos);
+    DomPainter.pintarLeyenda(puntos);
 
     if (DOM.mapaInfo) {
       DOM.mapaInfo.textContent = recorte.length < conCoordenadas.length
@@ -1835,10 +1820,6 @@ import { crearDomPainter } from './dom-painter.js';
         : recorte.length + ' lugar' + (recorte.length === 1 ? '' : 'es') + ' en el mapa.';
     }
   }
-
-  // Leyenda del mapa — extraída a dom-painter.js. Los puntos ya llegan
-  // normalizados desde actualizarMapaHerramienta().
-  var pintarLeyenda = DomPainter.pintarLeyenda;
 
   /**
    * Actualiza la textura ambiental del mapa de fondo.
@@ -2276,9 +2257,6 @@ import { crearDomPainter } from './dom-painter.js';
     }
   }
 
-  // Estado de escritura — extraído a dom-painter.js.
-  var pintarEstadoEscribiendo = DomPainter.pintarEstadoEscribiendo;
-
   function manejarClickPanel(e) {
     var btnAceptar = e.target.closest('[data-accion="aceptar"]');
     var btnRechazar = e.target.closest('[data-accion="rechazar"]');
@@ -2297,7 +2275,7 @@ import { crearDomPainter } from './dom-painter.js';
 
     if (btnLimpiarFiltro) {
       uiState.filtroRubroActivo = null;
-      pintarRubros();
+      DomPainter.pintarRubros();
       render();
       return;
     }
@@ -2499,7 +2477,7 @@ import { crearDomPainter } from './dom-painter.js';
     PLANO.guardarEstado(estado);
 
     // El resaltado del chip es feedback inmediato: no espera al debounce.
-    pintarRubros();
+    DomPainter.pintarRubros();
 
     // TIER 1.3 — auditoría de rendimiento (Perf, 2026-08-02): antes cada
     // click en un rubro disparaba renderConTransicionDeFiltro() de
