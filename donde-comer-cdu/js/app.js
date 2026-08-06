@@ -44,7 +44,6 @@ import {
 } from './constants.js';
 import { calcularDistancia, razonesPorLugarId, hayCambioEnLista } from './pure-utils.js';
 import { appEventBus } from './event-bus.js';
-import { ordenarPorCercaniaConCache } from './cache.js';
 import {
   leerFavoritos as _leerFavoritos,
   guardarFavoritos as _guardarFavoritos,
@@ -73,6 +72,14 @@ import { crearRenderEngine } from './render-engine.js';
 import { crearDomPainter } from './dom-painter.js';
 import { crearListeners } from './listeners.js';
 import { crearNavegacionTeclado } from './keyboard-nav.js';
+import {
+  listaPorAccionExplicita as _listaPorAccionExplicita,
+  hayBusquedaTexto as _hayBusquedaTexto,
+  hayBusquedaOFiltro as _hayBusquedaOFiltro,
+  ordenarPorCercania as _ordenarPorCercania,
+  ramaActual as _ramaActual,
+  sufijoCercania as _sufijoCercania
+} from './search.js';
 
 (function () {
   'use strict';
@@ -1054,12 +1061,16 @@ import { crearNavegacionTeclado } from './keyboard-nav.js';
    * Retorna la lista de lugares por acción explícita del usuario
    * (búsqueda y/o filtro de rubro).
    */
+  // FASE 3 (Plan Maestro de Modularización, 2026-08-06, cierre): la
+  // lógica de listaPorAccionExplicita/hayBusquedaTexto/hayBusquedaOFiltro/
+  // ordenarPorCercania/ramaActual/sufijoCercania ahora vive en
+  // search.js (ver import arriba) como funciones puras (reciben el
+  // estado que necesitan por parámetro, en vez de leer uiState/EXPO
+  // como globales cerrados). Estos wrappers preservan la misma firma
+  // de llamada (cero args, salvo reg/lista) para no tocar los call
+  // sites existentes en render-engine.js/listeners.js/dom-painter.js.
   function listaPorAccionExplicita() {
-    var lista = EXPO.resultadosPorAccionExplicita(obtenerRegistro(), uiState.consultaActual);
-    if (uiState.filtroRubroActivo) {
-      lista = lista.filter(function (l) { return l.grupo === uiState.filtroRubroActivo; });
-    }
-    return lista;
+    return _listaPorAccionExplicita(EXPO, obtenerRegistro(), uiState.consultaActual, uiState.filtroRubroActivo);
   }
 
   /**
@@ -1071,7 +1082,7 @@ import { crearNavegacionTeclado } from './keyboard-nav.js';
    * ramaActual() (ver hayBusquedaTexto() y la nota ahí abajo).
    */
   function hayBusquedaOFiltro() {
-    return hayBusquedaTexto() || !!uiState.filtroRubroActivo;
+    return _hayBusquedaOFiltro(uiState.consultaActual, uiState.filtroRubroActivo);
   }
 
   /**
@@ -1091,23 +1102,18 @@ import { crearNavegacionTeclado } from './keyboard-nav.js';
    * acción explícita que el Vocabulario reserva para esa rama.
    */
   function hayBusquedaTexto() {
-    return uiState.consultaActual.trim().length > 0;
+    return _hayBusquedaTexto(uiState.consultaActual);
   }
 
   /**
    * Ordena una lista por cercanía si está activo "cerca de mí".
    */
   function ordenarPorCercania(lista) {
-    if (!uiState.cercaTuyoActivo || !uiState.ubicacionUsuario) return lista;
-
     // TIER 1 OPTIMIZACIÓN: Usar caché de distancias (Perf, 2026-08-02)
     // Reutiliza cálculos si usuario está en misma posición
     // Impacto: +25% fluidez en búsquedas repetidas de proximidad
-    return ordenarPorCercaniaConCache(
-      lista,
-      uiState.ubicacionUsuario.lat,
-      uiState.ubicacionUsuario.lng
-    );
+    // (cache.js, cableado a través de search.js — mismo criterio)
+    return _ordenarPorCercania(lista, uiState.cercaTuyoActivo, uiState.ubicacionUsuario);
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -1127,22 +1133,18 @@ import { crearNavegacionTeclado } from './keyboard-nav.js';
    * Determina la rama visual actual (curaduria | buscador | recorte:guia | recorte:exploracion).
    */
   function ramaActual(reg) {
-    if (reg.nombre === 'curaduria') return RAMA_CURADURIA;
     // Fase 4: hayBusquedaTexto() en vez de hayBusquedaOFiltro() — ver
-    // el comentario largo junto a esa función. El filtro de rubro ya
-    // NO fuerza la salida al buscador; se aplica dentro del recorte
-    // (render(), rama 'recorte:*') vía contexto.rubro.
-    if (reg.nombre === 'accionDirecta' || hayBusquedaTexto() || uiState.verCatalogoCompleto) {
-      return RAMA_BUSCADOR;
-    }
-    return 'recorte:' + reg.nombre;
+    // el comentario largo junto a esa función en search.js. El filtro
+    // de rubro ya NO fuerza la salida al buscador; se aplica dentro
+    // del recorte (render(), rama 'recorte:*') vía contexto.rubro.
+    return _ramaActual(reg, uiState.consultaActual, uiState.verCatalogoCompleto);
   }
 
   /**
    * Suffix para anuncios de accesibilidad cuando está activo "cerca de mí".
    */
   function sufijoCercania() {
-    return (uiState.cercaTuyoActivo && uiState.ubicacionUsuario) ? ' Ordenado por cercanía.' : '';
+    return _sufijoCercania(uiState.cercaTuyoActivo, uiState.ubicacionUsuario);
   }
 
   // ───────────────────────────────────────────────────────────────────
