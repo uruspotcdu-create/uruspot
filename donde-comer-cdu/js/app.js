@@ -82,6 +82,12 @@ import {
   ramaActual as _ramaActual,
   sufijoCercania as _sufijoCercania
 } from './search.js';
+// FASE 7 — orquestador central (app-coordinator.js): validación de
+// módulos/DOM, ciclo de vida (init/destroy/restart), invariantes,
+// accesibilidad, LifecycleHooks, wiring de AppTelemetria y la API
+// pública (window.URU_APP) + punto de entrada. Se instancia al final
+// de este archivo — ver comentario junto a esa instanciación.
+import { crearAppCoordinator } from './app-coordinator.js';
 
 (function () {
   'use strict';
@@ -118,6 +124,18 @@ import {
   // Mismo motivo/patrón que getEstado()/getMotorMapa() arriba.
   function getPLANO() { return PLANO; }
   var MAPA = null;
+
+  // FASE 7: validarModulos() (antes acá mismo, ahora en
+  // app-coordinator.js) necesita ESCRIBIR PLANO/EXPO/MAPA — como esas
+  // tres variables ya no viven en el mismo archivo que la función que
+  // las resuelve, se exponen estos setters. getEXPO/getMAPA acompañan
+  // a getPLANO por el mismo motivo (modulosDisponibles() en el wiring
+  // de AppTelemetria necesita leer las tres).
+  function getEXPO() { return EXPO; }
+  function getMAPA() { return MAPA; }
+  function setPLANO(v) { PLANO = v; }
+  function setEXPO(v) { EXPO = v; }
+  function setMAPA(v) { MAPA = v; }
 
   // ───────────────────────────────────────────────────────────────────
   // 2. CACHE Y ESTADO GLOBAL
@@ -258,6 +276,15 @@ import {
     avisoCambioRegion: null
   };
 
+  // FASE 7: limpiar() (ahora en app-coordinator.js) reasigna
+  // `dynamicElements = {}` por completo en cada cleanup — no alcanza
+  // con pasar el objeto por valor (quedaría apuntando a la instancia
+  // vieja después del primer reset), así que se expone un getter
+  // (lectura siempre fresca) y un thunk que hace la reasignación acá,
+  // en el único archivo donde `dynamicElements` es una `var` real.
+  function obtenerDynamicElements() { return dynamicElements; }
+  function resetDynamicElements() { dynamicElements = {}; }
+
   // ───────────────────────────────────────────────────────────────────
   // 3. (vacía) — máquina de estados movida a state-manager.js en
   //    Fase 2 del Plan Maestro de Modularización (2026-08-06); ver
@@ -366,373 +393,17 @@ import {
   });
 
   // ───────────────────────────────────────────────────────────────────
-  // 7. VALIDACIÓN DE INVARIANTES
+  // 7-8, 10. VALIDACIÓN DE INVARIANTES / ACCESIBILIDAD / CICLO DE VIDA
   // ───────────────────────────────────────────────────────────────────
-
-  var ValidacionSuite = (function () {
-    return {
-      /**
-       * Verifica que el estado sea válido y consistente.
-       */
-      validarEstado: function () {
-        var errores = [];
-
-        // El estado de sesión nunca debe ser null si REGISTRO tiene contenido
-        if (obtenerRegistro().length > 0 && !estado) {
-          errores.push('estado es null pero REGISTRO tiene ' + obtenerRegistro().length + ' items');
-        }
-
-        // Conteo de favoritos debe ser consistente.
-        //
-        // BUG REAL corregido en esta pasada: esta rama comparaba contra
-        // `estado.sesion.guardados`, un campo que NUNCA existió en el
-        // shape de `estado.sesion` que define motor-plano.js (ver
-        // `estadoInicial()` ahí: curaduriaActiva, curaduriaSugerida,
-        // accionDirectaForzada, inicioPermanenciaMs,
-        // empujeFriccionSesion — nada de `guardados`). Confirmado en
-        // runtime, no solo por lectura: `'guardados' in
-        // PLANO.estadoInicial(ciudad).sesion` da `false`. El
-        // almacenamiento real de favoritos es `leerFavoritos()`, sobre
-        // la clave `uruspot_favoritos` de localStorage — un store
-        // aparte que nunca pasó por PLANO. Resultado: esta condición
-        // era `if (falsy)` siempre, así que el chequeo de consistencia
-        // nunca corrió ni una sola vez en producción.
-        var favoritosActuales = leerFavoritos();
-        var conteo = Object.keys(favoritosActuales).filter(function (id) {
-          return favoritosActuales[id];
-        }).length;
-        var contador = DOM.contadorCuraduria ? parseInt(DOM.contadorCuraduria.textContent, 10) : 0;
-        if (conteo !== contador && !isNaN(contador)) {
-          console.warn('[Validación] Inconsistencia en conteo de guardados: favoritos=' + conteo + ', DOM=' + contador);
-        }
-
-        // El filtro de rubro debe existir en REGISTRO si está activo
-        if (uiState.filtroRubroActivo && obtenerRegistro().length > 0) {
-          var existe = obtenerRegistro().some(function (l) { return l.grupo === uiState.filtroRubroActivo; });
-          if (!existe) {
-            errores.push('filtroRubroActivo "' + uiState.filtroRubroActivo + '" no existe en REGISTRO');
-          }
-        }
-
-        if (errores.length > 0) {
-          console.error('[Validación] Errores encontrados:', errores);
-          return false;
-        }
-        return true;
-      },
-
-      /**
-       * Repara inconsistencias menores cuando es posible.
-       */
-      reparar: function () {
-        if (!estado) return;
-
-        // Reparar guardados huérfanos.
-        //
-        // BUG REAL corregido en esta pasada: apuntaba a
-        // `estado.sesion.guardados` (inexistente — ver fix de
-        // `validarEstado()` arriba), así que nunca borraba nada. Un
-        // favorito guardado para un lugar que después se retira de
-        // `lugares-core.json` (negocio delistado) quedaba huérfano en
-        // `uruspot_favoritos` para siempre: no rompe el render (
-        // `EXPO.coleccionCurada()` ya filtra contra `registro`), pero
-        // sí infla `DOM.contadorCuraduria` de forma permanente y
-        // silenciosa (ver `actualizarContadorGuardados()`, que cuenta
-        // sobre el store crudo sin filtrar contra `porId`). Ahora
-        // opera sobre el store real y persiste el resultado.
-        var favoritosActuales = leerFavoritos();
-        var cambio = false;
-        Object.keys(favoritosActuales).forEach(function (id) {
-          if (favoritosActuales[id] && !obtenerPorId(id)) {
-            delete favoritosActuales[id];
-            cambio = true;
-          }
-        });
-        if (cambio) {
-          guardarFavoritos(favoritosActuales);
-        }
-
-        // Reiniciar contador si está desincronizado
-        actualizarContadorGuardados();
-      }
-    };
-  })();
-
-  // ───────────────────────────────────────────────────────────────────
-  // 8. UTILIDADES DE ACCESIBILIDAD AVANZADA
-  // ───────────────────────────────────────────────────────────────────
-
-  var AccesibilidadManager = (function () {
-    var focusStack = [];
-
-    return {
-      /**
-       * Guarda el foco actual para recuperarlo después.
-       */
-      guardarFoco: function (el) {
-        focusStack.push(el || document.activeElement);
-        return focusStack.length - 1;
-      },
-
-      /**
-       * Restaura el foco a un elemento previamente guardado.
-       */
-      restaurarFoco: function (id) {
-        if (id === undefined) id = focusStack.length - 1;
-        var el = focusStack[id];
-        if (el && el.focus) {
-          el.focus({ preventScroll: false });
-          focusStack[id] = null; // invalidar para no reusar
-        }
-      },
-
-      /**
-       * Mueve el foco a un elemento con feedback audible.
-       */
-      enfocar: function (el, anuncio) {
-        if (!el) return;
-        if (el.getAttribute('tabindex') !== '0') {
-          el.setAttribute('tabindex', '-1');
-        }
-        el.focus({ preventScroll: false });
-        if (anuncio) {
-          this.anunciar(anuncio);
-        }
-      },
-
-      /**
-       * Anuncia un mensaje a tecnologías de asistencia sin alterar visualmente.
-       */
-      anunciar: function (mensaje) {
-        if (DOM.estadoResultados) {
-          DOM.estadoResultados.textContent = mensaje;
-        }
-      },
-
-      /**
-       * Ejecuta una acción con captura de foco: guarda, ejecuta, restaura.
-       */
-      conCapturaDeFoco: function (accion) {
-        var id = this.guardarFoco();
-        try {
-          accion();
-        } finally {
-          var self = this;
-          setTimeout(function () {
-            self.restaurarFoco(id);
-          }, FOCUS_TRAP_DELAY_MS);
-        }
-      },
-
-      /**
-       * Limpia el stack de foco (útil en cleanup).
-       */
-      limpiar: function () {
-        focusStack = [];
-      }
-    };
-  })();
-
-  // ───────────────────────────────────────────────────────────────────
-  // 9. (vacía) — PerformanceManager eliminado en auditoría producción
-  // 2026-07-30: módulo de batching/medición (programarEnFrame, medir)
-  // escrito pero nunca invocado ni exportado (0 referencias fuera de su
-  // propia definición, confirmado con análisis estático). Se numeran las
-  // secciones deliberadamente sin renumerar el resto del archivo para no
-  // invalidar los comentarios de fase que referencian números de sección
-  // en otros módulos ambiente-*.js/tests.
-  // ───────────────────────────────────────────────────────────────────
-
-  // ───────────────────────────────────────────────────────────────────
-  // 10. INICIALIZACIÓN Y CICLO DE VIDA
-  // ───────────────────────────────────────────────────────────────────
-
-  /**
-   * Valida que todos los módulos inyectados existan.
-   */
-  function validarModulos() {
-    PLANO = window.URU_PLANO;
-    EXPO = window.URU_EXPOSICION;
-    MAPA = window.URU_MAPA;
-
-    if (!PLANO || !EXPO || !MAPA) {
-      var faltantes = [];
-      if (!PLANO) faltantes.push('URU_PLANO');
-      if (!EXPO) faltantes.push('URU_EXPOSICION');
-      if (!MAPA) faltantes.push('URU_MAPA');
-      throw new Error('Módulos faltantes: ' + faltantes.join(', '));
-    }
-  }
-
-  /**
-   * Valida que el DOM tenga todos los elementos requeridos.
-   */
-  function validarDOM() {
-    var faltantes = [];
-    REQUIRED_DOM_IDS.forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) {
-        DOM[id] = el;
-      } else {
-        faltantes.push(id);
-      }
-    });
-
-    if (faltantes.length > 0) {
-      throw new Error('Elementos DOM faltantes: ' + faltantes.join(', '));
-    }
-
-    // Opcionales: se resuelven si existen, pero su ausencia nunca
-    // frena el arranque (por eso no entran en `faltantes`).
-    OPTIONAL_DOM_IDS.forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) DOM[id] = el;
-    });
-
-    return true;
-  }
-
-  /**
-   * Inicializa el estado de la sesión desde el motor de plano.
-   */
-  function inicializarEstado() {
-    try {
-      estado = PLANO.leerEstado(CIUDAD);
-      estado = PLANO.registrarApertura(estado);
-      PLANO.guardarEstado(estado);
-      actualizarContadorGuardados();
-      return true;
-    } catch (e) {
-      ErrorRecovery.procesar(e, ERROR_TYPE.STATE_INVALID, 'inicializarEstado');
-      return false;
-    }
-  }
-
-  /**
-   * Punto de entrada principal de la aplicación.
-   */
-  function inicializar() {
-    if (estadoActual() !== STATE.UNINITIALIZED) {
-      console.warn('[Init] Ya se intentó inicializar');
-      return;
-    }
-
-    transicionarEstado(STATE.INITIALIZING, 'startup');
-
-    try {
-      validarModulos();
-      validarDOM();
-
-      // FIX (auditoría, hallazgo P0-1, 2026-08-05): antes esto no miraba
-      // el retorno de inicializarEstado(). Si fallaba (p. ej. localStorage
-      // no disponible o estado corrupto no cubierto por migrarEstado()),
-      // `estado` quedaba en null, ErrorRecovery.procesar ya había hecho
-      // transicionarEstado(STATE.ERROR, ...) puesto que STATE_INVALID es
-      // fatal — pero el flujo seguía de largo hasta el
-      // transicionarEstado(STATE.LOADING_CATALOG, ...) de más abajo, que
-      // pisaba ese STATE.ERROR sin condición. El catálogo terminaba
-      // cargando igual con `estado` null, y el TypeError real recién
-      // aparecía minutos después, sin capturar, dentro de un listener de
-      // input (ver despejarBusqueda/nombrar en motor-plano.js — su propio
-      // comentario ya admitía esta causa raíz sin resolverla). Frenar acá
-      // evita todo eso: el estado de error fatal que ErrorRecovery ya
-      // mostró queda como la última palabra, no una que el código de abajo
-      // sobreescribe dos líneas después.
-      if (!inicializarEstado()) {
-        return;
-      }
-
-      // Inicialización visual
-      pintarEsqueleto();
-      actualizarContadorGuardados();
-
-      // Fase 4 (Motion Direction Bible v2.0, G.4.2): si el navegador
-      // llegó acá de vuelta desde una ficha, deja registro de sesión
-      // del regreso (fatiga/contraste) antes de que el primer render()
-      // real active la escena ambiental que corresponda al estado
-      // restaurado (Coreografias.activarEscenaPorRama, dentro de render()).
-      if (window.Coreografias && window.Coreografias.vieneDeFicha()) {
-        window.Coreografias.cierreFicha();
-      }
-
-      // Inicialización de listeners
-      // FASE 5: inicializarListeners()/inicializarTecladoNavegacion()
-      // ahora son Listeners.inicializar()/NavegacionTeclado.inicializar()
-      // (js/listeners.js, js/keyboard-nav.js) — mismos módulos ya
-      // construidos más arriba, junto a DomPainter/RenderEngine.
-      // inicializarContextoClima() ahora es
-      // ClimateContext.inicializarActualizacionPeriodica() (§7 del plan
-      // de Fase 5: esas dos funciones vivían "coladas" en la sección de
-      // teclado sin relación real con ella).
-      Listeners.inicializar();
-      NavegacionTeclado.inicializar();
-      inicializarGeolocation();
-      activeOperations.climaContextoTimer = ClimateContext.inicializarActualizacionPeriodica({
-        render: render,
-        programarPeriodica: Listeners.programarPeriodica,
-        intervaloMs: CLIMA_CONTEXTO_INTERVALO_MS
-      });
-
-      // Perf, Fase 2.1: el Ambient Engine ya no es <script defer> estático
-      // en el documento — se agenda acá (idle) para no competir con la
-      // carga del catálogo real, ver cargarMotorAmbientalDiferido() más
-      // abajo. No depende de STATE.LOADING_CATALOG ni de cargarCatalogo():
-      // es decorativo, no de negocio.
-      cargarMotorAmbientalDiferido();
-
-      // FIX Fase 5: promueve css/contenido-editorial.css de preload a
-      // stylesheet activa — ver promoverCssEditorialDiferido() más abajo
-      // para el bug real que esto corrige (afectaba a todo usuario con JS).
-      promoverCssEditorialDiferido();
-
-      transicionarEstado(STATE.LOADING_CATALOG, 'startup');
-      cargarCatalogo();
-
-    } catch (e) {
-      ErrorRecovery.procesar(e, ERROR_TYPE.UNKNOWN, 'inicializar');
-      mostrarEstadoError(ERROR_TYPE.UNKNOWN, {
-        mensaje: 'Error al inicializar la aplicación',
-        detalles: e.message
-      });
-      throw e;
-    }
-  }
-
-  /**
-   * Limpia todos los listeners, timers y operaciones activas.
-   */
-  function limpiar() {
-    transicionarEstado(STATE.CLEANUP, 'cleanup');
-
-    // Cancelar todas las operaciones activas
-    OperationManager.cancelarTodas();
-
-    // Limpiar timers
-    Object.keys(activeOperations).forEach(function (key) {
-      if (activeOperations[key]) {
-        clearTimeout(activeOperations[key]);
-        activeOperations[key] = null;
-      }
-    });
-
-    // Limpiar referencias
-    AccesibilidadManager.limpiar();
-    dynamicElements = {};
-    _vaciarLogEstado();
-    RenderEngine.reiniciarCache();
-
-    debugLog('[Cleanup] Aplicación finalizada correctamente');
-  }
-
-  /**
-   * Reinicia la aplicación completamente.
-   */
-  function reiniciar() {
-    limpiar();
-    forzarEstado(STATE.UNINITIALIZED);
-    inicializar();
-  }
-
+  // FASE 7 del Plan Maestro de Modularización (2026-08-06): ValidacionSuite,
+  // AccesibilidadManager, validarModulos(), validarDOM(), inicializarEstado(),
+  // inicializar(), limpiar() y reiniciar() ahora viven en
+  // app-coordinator.js (ver import arriba e instancia AppCoordinator al
+  // final de este archivo) — mismo comportamiento, cero cambios
+  // funcionales. `estado`/PLANO/EXPO/MAPA siguen siendo variables
+  // locales de ESTE archivo (ver getEstado/setEstado/getPLANO/setPLANO/
+  // getEXPO/setEXPO/getMAPA/setMAPA más arriba): app-coordinator.js
+  // las lee/escribe a través de esos getters/setters, nunca las posee.
   // ───────────────────────────────────────────────────────────────────
   // 11. CARGA DE DATOS CON RESILIENCIA
   // ───────────────────────────────────────────────────────────────────
@@ -1856,257 +1527,86 @@ import {
   // Listeners/NavegacionTeclado) y su wiring en las deps de Listeners
   // (`inicializarScrollReveal: ScrollReveal.inicializar`).
   // ───────────────────────────────────────────────────────────────────
-  // 23-25. MÉTRICAS, TESTING Y DEBUG — extraídos a js/app-telemetria.js
   // ───────────────────────────────────────────────────────────────────
-  // Auditoría de ingeniería, Oportunidad 3 (2026-08-06): primer módulo
-  // real de la separación de app.js por responsabilidad, con el mismo
-  // criterio que ya rige el Ambient Engine. Este archivo ya no define
-  // MetricsCollector/TestingSuite/DebugHelper — le entrega su estado
-  // interno a AppTelemetria, UNA sola vez, vía configurar(), con
-  // funciones de acceso (nunca los valores directos, para no capturar
-  // una foto vieja de algo que cambia con el tiempo, como `estado` o
-  // `currentState` tras cada render/transición).
-  //
-  // Fail-open explícito si el script no está cargado (mismo criterio
-  // que el resto del proyecto, p. ej. Cap. 1.4 del Ambient Engine):
-  // window.URU_APP.metrics/testing/debug quedan con no-ops en vez de
-  // tirar un ReferenceError contra `window.AppTelemetria` inexistente.
-  var Telemetria = window.AppTelemetria || null;
-
-  if (Telemetria) {
-    Telemetria.configurar({
-      obtenerDOM: function () { return DOM; },
-      obtenerEstado: function () { return estado; },
-      obtenerEstadoUI: function () { return uiState; },
-      obtenerEstadoMaquina: function () { return estadoActual(); },
-      obtenerUltimoCambioDeEstado: function () { return obtenerUltimoCambioDeEstado(); },
-      obtenerRegistro: function () { return obtenerRegistro(); },
-      obtenerCacheRender: function () { return RenderEngine.obtenerCache(); },
-      obtenerLogCambiosEstado: function () { return obtenerLogCambiosEstado(); },
-      contarOperacionesActivas: function () { return OperationManager.contarActivas(); },
-      validarEstadoInvariantes: function () { return ValidacionSuite.validarEstado(); },
-      modulosDisponibles: function () { return { PLANO: !!PLANO, EXPO: !!EXPO, MAPA: !!MAPA }; },
-      leerFavoritos: leerFavoritos,
-      guardarFavoritos: guardarFavoritos,
-      actualizarContadorGuardados: actualizarContadorGuardados,
-      establecerConsultaBusqueda: function (consulta) {
-        uiState.consultaActual = consulta;
-        if (DOM.inputBuscar) DOM.inputBuscar.value = consulta;
-      },
-      establecerFiltroRubro: function (rubro) { uiState.filtroRubroActivo = rubro; },
-      render: render
-    });
-  } else {
-    console.error('[app.js] AppTelemetria no está cargado — revisar que js/app-telemetria.js esté en index.html, antes de motor.bundle.js/app.min.js. window.URU_APP.metrics/testing/debug van a devolver no-ops.');
-  }
-
-  var TelemetriaMetrics = Telemetria ? Telemetria.metrics : {
-    recordRender: function () {},
-    recordNetworkRequest: function () {},
-    recordError: function () {},
-    getSummary: function () { return { renders: 0, avgRenderTime: 0, slowRenders: 0, networkRequests: 0, networkErrors: 0, totalErrors: 0, uptime: 0 }; },
-    export: function () { return {}; }
-  };
-
-  var TelemetriaTesting = Telemetria ? Telemetria.testing : {
-    runSmokeTesting: function () { return { total: 0, pasadas: 0, fallidas: 0, errores: ['AppTelemetria no cargado'] }; },
-    validarContratoDOM: function () { return { requeridos: [], resultados: {} }; },
-    validarRegistro: function () { return { total: 0, problemasEncontrados: 0, porcentajeIntegridad: '0.0' }; }
-  };
-
-  var TelemetriaDebug = Telemetria ? Telemetria.debug : {
-    inspectarEstado: function () { return null; },
-    simularBusqueda: function () {},
-    simularFiltroRubro: function () {},
-    simularGuardarFavorito: function () {},
-    healthCheck: function () { return null; },
-    exportDebugData: function () { return null; }
-  };
-
-
+  // 23-28. TELEMETRÍA, CICLO DE VIDA EXTENDIDO, API PÚBLICA Y ENTRADA
   // ───────────────────────────────────────────────────────────────────
-  // 26. MANAGEMENT DE CICLO DE VIDA EXTENDIDO
-  // ───────────────────────────────────────────────────────────────────
+  // FASE 7 del Plan Maestro de Modularización (2026-08-06): el wiring
+  // de AppTelemetria (antes §23-25), LifecycleHooks (antes §26), la
+  // API pública window.URU_APP (antes §27) y el punto de entrada
+  // (antes §28) ahora viven en app-coordinator.js. Se instancia acá,
+  // al final de la IIFE — para este punto TODO lo que app-coordinator.js
+  // necesita (render, leerFavoritos, cargarCatalogo, Listeners,
+  // RenderEngine, ErrorRecovery, etc.) ya es un valor resuelto, así
+  // que viaja por valor; las únicas excepciones (`estado`/PLANO/EXPO/
+  // MAPA/dynamicElements, que siguen mutando después de esta línea)
+  // viajan como getter/setter — ver cabecera de app-coordinator.js
+  // para el detalle completo.
+  var AppCoordinator = crearAppCoordinator({
+    CIUDAD: CIUDAD,
+    STATE: STATE,
+    ERROR_TYPE: ERROR_TYPE,
+    FOCUS_TRAP_DELAY_MS: FOCUS_TRAP_DELAY_MS,
+    CLIMA_CONTEXTO_INTERVALO_MS: CLIMA_CONTEXTO_INTERVALO_MS,
+    debugLog: debugLog,
 
-  var LifecycleHooks = (function () {
-    var hooks = {
-      onReady: [],
-      onError: [],
-      onRender: [],
-      onStateChange: [],
-      onDestroy: []
-    };
+    obtenerRegistro: obtenerRegistro,
+    obtenerPorId: obtenerPorId,
 
-    return {
-      on: function (evento, callback) {
-        if (hooks[evento]) {
-          hooks[evento].push(callback);
-        }
-      },
+    estadoActual: estadoActual,
+    transicionarEstado: transicionarEstado,
+    forzarEstado: forzarEstado,
+    puedeTransicionar: puedeTransicionar,
+    obtenerUltimoCambioDeEstado: obtenerUltimoCambioDeEstado,
+    obtenerLogCambiosEstado: obtenerLogCambiosEstado,
+    vaciarLogEstado: _vaciarLogEstado,
 
-      off: function (evento, callback) {
-        if (hooks[evento]) {
-          var idx = hooks[evento].indexOf(callback);
-          if (idx > -1) hooks[evento].splice(idx, 1);
-        }
-      },
+    DOM: DOM,
+    REQUIRED_DOM_IDS: REQUIRED_DOM_IDS,
+    OPTIONAL_DOM_IDS: OPTIONAL_DOM_IDS,
 
-      fire: function (evento, data) {
-        if (hooks[evento]) {
-          hooks[evento].forEach(function (cb) {
-            try {
-              cb(data);
-            } catch (e) {
-              console.error('Error en hook ' + evento + ':', e);
-            }
-          });
-        }
-      }
-    };
-  })();
+    uiState: uiState,
+    activeOperations: activeOperations,
 
-  // ───────────────────────────────────────────────────────────────────
-  // 27. API PÚBLICA EXTENDIDA Y PUNTO DE ENTRADA
-  // ───────────────────────────────────────────────────────────────────
+    getEstado: getEstado,
+    setEstado: setEstado,
+    setPLANO: setPLANO,
+    setEXPO: setEXPO,
+    setMAPA: setMAPA,
+    getPLANO: getPLANO,
+    getEXPO: getEXPO,
+    getMAPA: getMAPA,
 
-  window.URU_APP = {
-    // Lifecycle
-    init: inicializar,
-    destroy: limpiar,
-    restart: reiniciar,
+    obtenerDynamicElements: obtenerDynamicElements,
+    resetDynamicElements: resetDynamicElements,
 
-    // State management
-    getState: estadoActual,
-    getUIState: function () { return JSON.parse(JSON.stringify(uiState)); },
-    getRegistro: function () { return obtenerRegistro().slice(); },
-    getStateLog: function () { return obtenerLogCambiosEstado().slice(); },
-    canTransition: puedeTransicionar,
+    ErrorRecovery: ErrorRecovery,
 
-    // Validation
-    validar: function () { return ValidacionSuite.validarEstado(); },
-    reparar: function () { return ValidacionSuite.reparar(); },
+    leerFavoritos: leerFavoritos,
+    guardarFavoritos: guardarFavoritos,
+    actualizarContadorGuardados: actualizarContadorGuardados,
+    pintarEsqueleto: pintarEsqueleto,
 
-    // Testing
-    runTests: function () { return TelemetriaTesting.runSmokeTesting(); },
-    validateContract: function () { return TelemetriaTesting.validarContratoDOM(); },
-    validateRegistry: function () { return TelemetriaTesting.validarRegistro(); },
+    Listeners: Listeners,
+    NavegacionTeclado: NavegacionTeclado,
 
-    // Debugging
-    debug: TelemetriaDebug,
-    metrics: TelemetriaMetrics,
-    testing: TelemetriaTesting,
-
-    // Hooks
-    on: LifecycleHooks.on,
-    off: LifecycleHooks.off,
-
-    // Operations
-    getActiveOperations: function () { return OperationManager.contarActivas(); },
-
-    // Render y estado visual
-    render: render,
-    getVisualState: function () { return uiState.visualState; },
-
-    // Favoritos
-    getFavorites: leerFavoritos,
-    toggleFavorite: function (id) {
-      var favs = leerFavoritos();
-      favs[id] = !favs[id];
-      guardarFavoritos(favs);
-      actualizarContadorGuardados();
-      return favs[id];
-    },
-
-    // Búsqueda
-    buscar: function (consulta) {
-      uiState.consultaActual = consulta;
-      if (DOM.inputBuscar) DOM.inputBuscar.value = consulta;
-      render();
-    },
-    limpiarBusqueda: function () {
-      uiState.consultaActual = '';
-      if (DOM.inputBuscar) DOM.inputBuscar.value = '';
-      render();
-    },
-
-    // Filtros
-    filtrarPorRubro: function (rubro) {
-      uiState.filtroRubroActivo = rubro;
-      render();
-    },
-    limpiarFiltroRubro: function () {
-      uiState.filtroRubroActivo = null;
-      render();
-    },
-
-    // Geolocalización
-    activarCercaDeMi: function () {
-      if (dynamicElements.btnCercaDeMi) {
-        activarCercaDeMi(dynamicElements.btnCercaDeMi);
-      }
-    },
+    inicializarGeolocation: inicializarGeolocation,
+    activarCercaDeMi: activarCercaDeMi,
     desactivarCercaDeMi: desactivarCercaDeMi,
 
-    // Health check
-    healthCheck: function () { return TelemetriaDebug.healthCheck(); },
-    exportDebugData: function () { return TelemetriaDebug.exportDebugData(); },
+    ClimateContext: ClimateContext,
+    cargarMotorAmbientalDiferido: cargarMotorAmbientalDiferido,
+    promoverCssEditorialDiferido: promoverCssEditorialDiferido,
+    cargarCatalogo: cargarCatalogo,
 
-    // Metadata
-    // buildDate es una constante fija, no new Date(): este repo no
-    // tiene build step/CI, así que new Date() se evaluaría en el
-    // navegador de cada visitante (fecha de visita, no de deploy),
-    // quedando inútil para diagnóstico. Actualizar a mano en cada
-    // release junto con `version`.
-    version: '2.3.0',
-    buildDate: '2026-07-25'
-  };
+    mostrarEstadoError: mostrarEstadoError,
 
-  window.URU_APP.LifecycleHooks = LifecycleHooks;
-
-  // ───────────────────────────────────────────────────────────────────
-  // 28. PUNTO DE ENTRADA FINAL
-  // ───────────────────────────────────────────────────────────────────
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      try {
-        inicializar();
-        LifecycleHooks.fire('onReady', { timestamp: Date.now() });
-      } catch (e) {
-        console.error('Error fatal en inicialización:', e);
-        LifecycleHooks.fire('onError', { error: e, timestamp: Date.now() });
-      }
-    });
-  } else {
-    try {
-      inicializar();
-      LifecycleHooks.fire('onReady', { timestamp: Date.now() });
-    } catch (e) {
-      console.error('Error fatal en inicialización:', e);
-      LifecycleHooks.fire('onError', { error: e, timestamp: Date.now() });
-    }
-  }
-
-  // PERF (auditoría performance, 2026-08-03): antes escuchaba
-  // 'beforeunload'. Chrome ya no bloquea bfcache solo por tener un
-  // listener de 'beforeunload' que no llama a preventDefault() ni
-  // fija returnValue (este no hace ninguna de las dos), pero Safari y
-  // Firefox sí lo siguen bloqueando — con "apple-mobile-web-app-*"
-  // en el <head>, este sitio le importa especialmente a iOS. 'pagehide'
-  // es la migración estándar recomendada (mismo momento del ciclo de
-  // vida, sin el costo de compatibilidad).
-  //
-  // Guard con event.persisted: si el navegador está metiendo la página
-  // en bfcache (persisted === true), NO hay que correr limpiar() —
-  // cancelaría timers/operaciones y dispararía 'onDestroy' justo antes
-  // de una posible restauración, dejando la página "viva" en memoria
-  // pero con su propio estado interno ya destruido. Si persisted es
-  // false (cierre real, navegación de verdad), el comportamiento es
-  // idéntico al que había antes.
-  window.addEventListener('pagehide', function (e) {
-    if (e.persisted) return;
-    limpiar();
-    LifecycleHooks.fire('onDestroy', { timestamp: Date.now() });
+    render: render,
+    RenderEngine: RenderEngine,
+    OperationManager: OperationManager
   });
+
+  window.URU_APP = AppCoordinator.api;
+
+  AppCoordinator.arrancar();
 
 })();
