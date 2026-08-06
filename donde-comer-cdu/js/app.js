@@ -59,6 +59,11 @@ import {
   vaciarLog as _vaciarLogEstado,
   forzarEstado
 } from './state-manager.js';
+import {
+  obtenerRegistro,
+  obtenerPorId,
+  establecerCatalogo
+} from './catalog.js';
 
 (function () {
   'use strict';
@@ -86,8 +91,9 @@ import {
   // 2. CACHE Y ESTADO GLOBAL
   // ───────────────────────────────────────────────────────────────────
 
-  var REGISTRO = [];
-    var porId = Object.create(null);
+  // FASE 2 (Plan Maestro de Modularización, 2026-08-06): REGISTRO y
+  // porId ahora viven en catalog.js (ver import arriba) — mismo
+  // comportamiento, cero cambios funcionales.
 
   // ═══════════════════════════════════════════════════════════════════
   // TIER 1: CACHÉ DE DISTANCIAS Y SLUG (Perf, 2026-08-02)
@@ -413,8 +419,8 @@ import {
         var errores = [];
 
         // El estado de sesión nunca debe ser null si REGISTRO tiene contenido
-        if (REGISTRO.length > 0 && !estado) {
-          errores.push('estado es null pero REGISTRO tiene ' + REGISTRO.length + ' items');
+        if (obtenerRegistro().length > 0 && !estado) {
+          errores.push('estado es null pero REGISTRO tiene ' + obtenerRegistro().length + ' items');
         }
 
         // Conteo de favoritos debe ser consistente.
@@ -442,8 +448,8 @@ import {
         }
 
         // El filtro de rubro debe existir en REGISTRO si está activo
-        if (uiState.filtroRubroActivo && REGISTRO.length > 0) {
-          var existe = REGISTRO.some(function (l) { return l.grupo === uiState.filtroRubroActivo; });
+        if (uiState.filtroRubroActivo && obtenerRegistro().length > 0) {
+          var existe = obtenerRegistro().some(function (l) { return l.grupo === uiState.filtroRubroActivo; });
           if (!existe) {
             errores.push('filtroRubroActivo "' + uiState.filtroRubroActivo + '" no existe en REGISTRO');
           }
@@ -478,7 +484,7 @@ import {
         var favoritosActuales = leerFavoritos();
         var cambio = false;
         Object.keys(favoritosActuales).forEach(function (id) {
-          if (favoritosActuales[id] && !porId[id]) {
+          if (favoritosActuales[id] && !obtenerPorId(id)) {
             delete favoritosActuales[id];
             cambio = true;
           }
@@ -840,7 +846,7 @@ import {
           throw new Error('Core inválido o vacío');
         }
 
-        REGISTRO = core.map(function (l) {
+        var nuevoRegistro = core.map(function (l) {
           var reg = {
             id: l.id,
             nombre: l.nombre,
@@ -864,9 +870,15 @@ import {
             rating: (typeof l.rating === 'number') ? l.rating : null,
             ratingCount: (typeof l.rating_count === 'number') ? l.rating_count : null
           };
-          porId[l.id] = reg;
           return reg;
         });
+        // FASE 2 (Plan Maestro de Modularización, 2026-08-06):
+        // establecerCatalogo() (catalog.js) reemplaza la asignación
+        // directa a REGISTRO y el llenado de porId dentro del .map() de
+        // arriba — mismo resultado final (REGISTRO con la lista,
+        // porId[id] apuntando a cada registro), ahora en dos pasos en
+        // vez de uno.
+        establecerCatalogo(nuevoRegistro);
 
         // Índice invertido de búsqueda (perf, 2026-07-31): construido acá,
         // después de que REGISTRO ya tiene el catálogo real — construirlo
@@ -875,7 +887,7 @@ import {
         // cargarDetallesEnSegundoPlano cuando `direccion` deja de ser
         // null, porque hay lugares que solo matchean por dirección
         // (rango 5 de rangoDeCoincidencia en motor-exposicion.js).
-        if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
+        if (window.IndiceInvertido) { window.IndiceInvertido.construir(obtenerRegistro()); }
 
         transicionarEstado(STATE.READY, 'catalogo_cargado');
         if (window.AmbientEngine) window.AmbientEngine.finalizarCarga(true);
@@ -1074,7 +1086,7 @@ import {
         fetchJSON('lugares-detalles.json')
           .then(function (det) {
             aplicarEnTandas(det, idsVisibles, function (d) {
-              var reg = porId[d.id];
+              var reg = obtenerPorId(d.id);
               if (reg) {
                 reg.direccion = d.direccion || null;
                 reg.telefono = d.telefono || null;
@@ -1085,7 +1097,7 @@ import {
               // lugares, y el índice de trigramas los tenía indexados con
               // direccion vacía hasta este momento. Se reconstruye UNA vez,
               // al terminar todas las tandas — no en cada tanda individual.
-              if (window.IndiceInvertido) { window.IndiceInvertido.construir(REGISTRO); }
+              if (window.IndiceInvertido) { window.IndiceInvertido.construir(obtenerRegistro()); }
               render();
             });
           })
@@ -1097,7 +1109,7 @@ import {
           .then(function (mapa) {
             var PENDIENTE = ['pendiente', 'no encontrado', 'requiere confirmacion', 'requiere_confirmacion'];
             aplicarEnTandas(mapa, idsVisibles, function (m) {
-              var reg = porId[m.id];
+              var reg = obtenerPorId(m.id);
               if (!reg || !m.estado_verificacion) return;
               var low = m.estado_verificacion.toLowerCase();
               reg.estado = PENDIENTE.some(function (p) { return low.indexOf(p) !== -1; }) ? 'pendiente' : 'verificado';
@@ -1126,7 +1138,7 @@ import {
    * (búsqueda y/o filtro de rubro).
    */
   function listaPorAccionExplicita() {
-    var lista = EXPO.resultadosPorAccionExplicita(REGISTRO, uiState.consultaActual);
+    var lista = EXPO.resultadosPorAccionExplicita(obtenerRegistro(), uiState.consultaActual);
     if (uiState.filtroRubroActivo) {
       lista = lista.filter(function (l) { return l.grupo === uiState.filtroRubroActivo; });
     }
@@ -1280,7 +1292,7 @@ import {
       return; // No renderizar en estados de error o cleanup
     }
 
-    if (!REGISTRO.length || !DOM.panelDescubrimiento) return;
+    if (!obtenerRegistro().length || !DOM.panelDescubrimiento) return;
 
     try {
       actualizarBotonLimpiar();
@@ -1313,7 +1325,7 @@ import {
         var idsGuardados = Object.keys(favoritos).filter(function (id) {
           return favoritos[id];
         });
-        lista = EXPO.coleccionCurada(REGISTRO, idsGuardados);
+        lista = EXPO.coleccionCurada(obtenerRegistro(), idsGuardados);
         lista = ordenarPorCercania(lista);
         opts = {
           origen: 'accion_explicita',
@@ -1401,7 +1413,7 @@ import {
           if (uiState.pedirMasRecorte && tandaVigente) {
             contextoRecorte.excluirIds = tandaVigente.lista.map(function (l) { return l.id; });
           }
-          var explicado = EXPO.recortePorIniciativaPropiaExplicado(REGISTRO, estado, reg.nombre, contextoRecorte);
+          var explicado = EXPO.recortePorIniciativaPropiaExplicado(obtenerRegistro(), estado, reg.nombre, contextoRecorte);
           var nuevaTanda = explicado.lugares.map(function (x) { return x.lugar; });
           var razonesNuevas = razonesPorLugarId(explicado.lugares);
           var listaBase = tandaVigente ? tandaVigente.lista : [];
@@ -1581,13 +1593,13 @@ import {
    * Estadísticas rápidas del hero (conteo de lugares y rubros).
    */
   function pintarStatsRapidas() {
-    if (!REGISTRO.length) return;
+    if (!obtenerRegistro().length) return;
     if (DOM.statLugares) {
-      DOM.statLugares.textContent = REGISTRO.length.toLocaleString('es-AR');
+      DOM.statLugares.textContent = obtenerRegistro().length.toLocaleString('es-AR');
     }
     if (DOM.statRubros) {
       var grupos = Object.create(null);
-      REGISTRO.forEach(function (l) {
+      obtenerRegistro().forEach(function (l) {
         grupos[l.grupo] = true;
       });
       DOM.statRubros.textContent = Object.keys(grupos).length;
@@ -1600,7 +1612,7 @@ import {
   function pintarDestacados() {
     if (!DOM.destacados || !DOM.listaDestacados) return;
 
-    var candidatos = REGISTRO.filter(function (l) {
+    var candidatos = obtenerRegistro().filter(function (l) {
       return typeof l.rating === 'number' && l.rating >= UMBRAL_RATING &&
         typeof l.ratingCount === 'number' && l.ratingCount >= UMBRAL_RESEÑAS;
     });
@@ -1693,10 +1705,10 @@ import {
    * Pinta los chips de "Por rubro" con conteos reales y states.
    */
   function pintarRubros() {
-    if (!DOM.listaRubros || !REGISTRO.length || !window.URU_RUBROS_META) return;
+    if (!DOM.listaRubros || !obtenerRegistro().length || !window.URU_RUBROS_META) return;
 
     var conteo = Object.create(null);
-    REGISTRO.forEach(function (l) {
+    obtenerRegistro().forEach(function (l) {
       conteo[l.grupo] = (conteo[l.grupo] || 0) + 1;
     });
 
@@ -1732,10 +1744,10 @@ import {
    * en el índice de abajo.
    */
   function pintarSugerenciasRapidas() {
-    if (!DOM.sugerenciasRapidas || !REGISTRO.length || !window.URU_RUBROS_META) return;
+    if (!DOM.sugerenciasRapidas || !obtenerRegistro().length || !window.URU_RUBROS_META) return;
 
     var conteo = Object.create(null);
-    REGISTRO.forEach(function (l) {
+    obtenerRegistro().forEach(function (l) {
       conteo[l.grupo] = (conteo[l.grupo] || 0) + 1;
     });
 
@@ -2032,7 +2044,7 @@ import {
         DOM.subtituloRegion.textContent = 'Todos los lugares verificados de este rubro.' + sufijoCercania();
       } else {
         DOM.tituloRegion.textContent = 'Todos los lugares';
-        DOM.subtituloRegion.textContent = 'El padrón completo (' + REGISTRO.length + ' lugares).' + sufijoCercania();
+        DOM.subtituloRegion.textContent = 'El padrón completo (' + obtenerRegistro().length + ' lugares).' + sufijoCercania();
       }
 
       if (uiState.verCatalogoCompleto && !hayBusquedaOFiltro() && reg.nombre !== 'accionDirecta') {
@@ -2379,11 +2391,11 @@ import {
    * Actualiza la textura ambiental del mapa de fondo.
    */
   function actualizarMapaTextura() {
-    if (!DOM.mapaTextura || !REGISTRO.length) return;
+    if (!DOM.mapaTextura || !obtenerRegistro().length) return;
     if (!window.URU_CONFIG.mapa.texturaSiempreVisible) return;
     if (DOM.mapaTextura.dataset.pintado === '1') return;
 
-    var puntos = MAPA.puntosTextura(REGISTRO);
+    var puntos = MAPA.puntosTextura(obtenerRegistro());
     var meta = window.URU_RUBROS_META || {};
     var frag = document.createDocumentFragment();
     var i = 0;
@@ -2854,7 +2866,7 @@ import {
 
     if (btnCompartir) {
       var cartaC = btnCompartir.closest('[data-lugar-id]');
-      var lugarC = porId[cartaC.dataset.lugarId];
+      var lugarC = obtenerPorId(cartaC.dataset.lugarId);
       var urlFicha = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'locales/' + slug(lugarC) + '/';
       var payload = { title: lugarC.nombre + ' — URU SPOT', text: lugarC.categoria || '', url: urlFicha };
 
@@ -2893,7 +2905,7 @@ import {
     if (btnAceptar) {
       var id1 = btnAceptar.closest('[data-lugar-id]').dataset.lugarId;
       var porIniciativa = btnAceptar.dataset.origen === 'iniciativa_propia';
-      var grupo1 = porId[id1] ? porId[id1].grupo : undefined;
+      var grupo1 = obtenerPorId(id1) ? obtenerPorId(id1).grupo : undefined;
       estado = PLANO.aplicarAccion(estado, 'aceptar', {
         lugarId: id1,
         porIniciativaPropia: porIniciativa,
@@ -2904,15 +2916,15 @@ import {
       // hace preventDefault del <a href> real hacia la ficha — solo
       // adelanta la escena ambiental y la claveAccion por slug antes
       // de que el navegador siga la navegación cross-document.
-      if (window.Coreografias && porId[id1]) {
-        window.Coreografias.aperturaFicha(slug(porId[id1]));
+      if (window.Coreografias && obtenerPorId(id1)) {
+        window.Coreografias.aperturaFicha(slug(obtenerPorId(id1)));
       }
       return;
     }
 
     if (btnRechazar) {
       var id2 = btnRechazar.closest('[data-lugar-id]').dataset.lugarId;
-      var grupo = porId[id2] ? porId[id2].grupo : 'sin_rubro';
+      var grupo = obtenerPorId(id2) ? obtenerPorId(id2).grupo : 'sin_rubro';
       estado = PLANO.aplicarAccion(estado, 'rechazar', { grupo: grupo });
       PLANO.guardarEstado(estado);
       programarRenderTrasSalida(btnRechazar.closest('[data-lugar-id]'));
@@ -3518,7 +3530,7 @@ import {
       obtenerEstadoUI: function () { return uiState; },
       obtenerEstadoMaquina: function () { return estadoActual(); },
       obtenerUltimoCambioDeEstado: function () { return obtenerUltimoCambioDeEstado(); },
-      obtenerRegistro: function () { return REGISTRO; },
+      obtenerRegistro: function () { return obtenerRegistro(); },
       obtenerCacheRender: function () { return lastRenderCache; },
       obtenerLogCambiosEstado: function () { return obtenerLogCambiosEstado(); },
       contarOperacionesActivas: function () { return OperationManager.contarActivas(); },
@@ -3616,7 +3628,7 @@ import {
     // State management
     getState: estadoActual,
     getUIState: function () { return JSON.parse(JSON.stringify(uiState)); },
-    getRegistro: function () { return REGISTRO.slice(); },
+    getRegistro: function () { return obtenerRegistro().slice(); },
     getStateLog: function () { return obtenerLogCambiosEstado().slice(); },
     canTransition: puedeTransicionar,
 
