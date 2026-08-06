@@ -128,8 +128,23 @@
      registro de "fondo ocupado durante la carga" del Cap. 8 puede no
      alcanzar a activarse si el catálogo responde muy rápido) — trade-
      off aceptado a cambio de que app.min.js no espere más a algo
-     puramente decorativo. -->
-<script src="js/app.min.js" defer></script>
+     puramente decorativo.
+
+     FASE 1 del Plan Maestro de Modularización (auditoría de
+     ingeniería, 2026-08-06): app.js ahora usa `import` (js/constants.js,
+     js/pure-utils.js, js/event-bus.js — ver esos archivos), así que
+     este <script> pasa de `defer` a `type="module"`. No hace falta
+     el atributo `defer` además de `type="module"`: los módulos son
+     deferred por spec (se ejecutan después de parsear el documento) y
+     mantienen su posición relativa en el orden de ejecución junto con
+     el resto de los <script defer> de este documento — así que el
+     orden real (ciclo-vida → telemetria → formato → tarjetas → motor
+     → app) NO cambia. CSP: script-src 'self' ya cubre esto (mismo
+     origen, no hace falta 'unsafe-inline' ni nonce para módulos por
+     <script src>). js/constants.js, js/pure-utils.js y js/event-bus.js
+     NO necesitan <script> propio acá — el navegador los pide solo,
+     como parte de la resolución de imports de este módulo. -->
+<script type="module" src="js/app.min.js"></script>
 
 <!-- TÍTULOS Y METADATOS CORE -->
 <title>URU SPOT — descubrí Concepción del Uruguay</title>
