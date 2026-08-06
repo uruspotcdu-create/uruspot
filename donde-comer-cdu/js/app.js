@@ -69,6 +69,7 @@ import { crearDataLoader } from './data-loader.js';
 import { crearClimateContext } from './climate-context.js';
 import { solicitarUbicacion, geolocationDisponible } from './geolocation.js';
 import { crearErrorRecovery } from './error-recovery.js';
+import { crearRenderEngine } from './render-engine.js';
 
 (function () {
   'use strict';
@@ -188,18 +189,15 @@ import { crearErrorRecovery } from './error-recovery.js';
   // ahora viven en state-manager.js (ver import arriba) — mismo
   // comportamiento, cero cambios funcionales.
 
-  // Cache de renderizado anterior
-  var lastRenderCache = {
-    lista: null,
-    favoritos: null,
-    region: null,
-    rama: null,
-    html: null,
-    // BUGFIX (auditoría performance, 2026-07-30): ver render() más abajo —
-    // sin este campo, "Cargar más" no repinta nunca (paginaTarjetas nunca
-    // formaba parte de la detección de cambios).
-    paginaTarjetas: null
-  };
+  // FASE 4a (Plan Maestro de Modularización, 2026-08-06): la cache de
+  // renderizado anterior (antes `lastRenderCache`, con reasignación
+  // completa en limpiar()) ahora es estado privado de RenderEngine
+  // (render-engine.js, ver import arriba e instancia RenderEngine más
+  // abajo, junto a render()) — se expone vía RenderEngine.obtenerCache()
+  // para los mismos tres consumidores que ya la leían directo
+  // (cargarDetallesEnSegundoPlano, tickPermanencia, AppTelemetria), y
+  // se resetea vía RenderEngine.reiniciarCache() en vez de la
+  // reasignación directa que hacía limpiar().
 
   // DOM references (validadas al init)
   var DOM = {};
@@ -678,13 +676,7 @@ import { crearErrorRecovery } from './error-recovery.js';
     AccesibilidadManager.limpiar();
     dynamicElements = {};
     _vaciarLogEstado();
-    lastRenderCache = {
-      lista: null,
-      favoritos: null,
-      region: null,
-      rama: null,
-      html: null
-    };
+    RenderEngine.reiniciarCache();
 
     debugLog('[Cleanup] Aplicación finalizada correctamente');
   }
@@ -968,7 +960,7 @@ import { crearErrorRecovery } from './error-recovery.js';
       // maneja ese caso sin priorizar nada (orden original del JSON).
       var idsVisibles = null;
       try {
-        idsVisibles = new Set((lastRenderCache.lista || []).map(function (l) { return l.id; }));
+        idsVisibles = new Set((RenderEngine.obtenerCache().lista || []).map(function (l) { return l.id; }));
       } catch (e) {
         idsVisibles = null;
       }
@@ -1174,6 +1166,34 @@ import { crearErrorRecovery } from './error-recovery.js';
   // 14. RENDERIZADO PRINCIPAL (Corazón de la aplicación)
   // ───────────────────────────────────────────────────────────────────
 
+  // FASE 4a (Plan Maestro de Modularización, 2026-08-06): la mitad
+  // DECISORIA de render() (qué rama, qué lista, qué opts, si hubo
+  // cambio real) vive ahora en render-engine.js — ver import arriba y
+  // el comentario de cabecera de ese archivo para el contrato
+  // completo y el porqué de cada getter. `estado`, PLANO y EXPO viajan
+  // como funciones (no por valor): las tres cambian de contenido
+  // durante la vida de la app (`estado` se reasigna en cada acción del
+  // usuario; PLANO/EXPO se resuelven recién en validarModulos(),
+  // después de que este RenderEngine ya fue construido) — un valor
+  // capturado acá quedaría congelado en `null` o en la primera sesión.
+  var RenderEngine = crearRenderEngine({
+    obtenerRegistro: obtenerRegistro,
+    razonesPorLugarId: razonesPorLugarId,
+    hayCambioEnLista: hayCambioEnLista,
+    RAMA_CURADURIA: RAMA_CURADURIA,
+    RAMA_BUSCADOR: RAMA_BUSCADOR,
+    obtenerEstado: function () { return estado; },
+    obtenerPLANO: function () { return PLANO; },
+    obtenerEXPO: function () { return EXPO; },
+    uiState: uiState,
+    ClimateContext: ClimateContext,
+    ramaActual: function (reg) { return ramaActual(reg); },
+    listaPorAccionExplicita: function () { return listaPorAccionExplicita(); },
+    ordenarPorCercania: function (lista) { return ordenarPorCercania(lista); },
+    ramaDistinta: function (rama) { return ramaDistinta(rama); },
+    debugLog: debugLog
+  });
+
   /**
    * Función render() central: calcula qué mostrar, orquesta diferencias,
    * pinta solo lo necesario.
@@ -1206,219 +1226,24 @@ import { crearErrorRecovery } from './error-recovery.js';
       }
 
       var favoritos = leerFavoritos();
-      var reg = PLANO.region(estado);
-      var rama = ramaActual(reg);
-      var lista;
-      var opts;
 
-      // Determinar qué lista mostrar según la rama
-      if (rama === RAMA_CURADURIA) {
-        var idsGuardados = Object.keys(favoritos).filter(function (id) {
-          return favoritos[id];
-        });
-        lista = EXPO.coleccionCurada(obtenerRegistro(), idsGuardados);
-        lista = ordenarPorCercania(lista);
-        opts = {
-          origen: 'accion_explicita',
-          narrativa: false,
-          vacioTexto: 'Todavía no guardaste nada. Guardá un lugar y aparece acá.',
-          // Comparador inline (Fase 4, evolutivo A→C, ver motor-comparacion.js):
-          // Curaduría es "tu lista" — el lugar natural donde alguien
-          // compara 2-3 cosas que ya eligió guardar, antes de decidir
-          // cuál visitar. Se activa solo dentro de este rango de tamaño
-          // (2-4, ver URU_COMPARACION.MAX_PARA_COMPARAR) — con más
-          // guardados vuelve a ser una lista normal, comparar 8 cosas
-          // a la vez no es comparar, es abrumar.
-          comparacion: (window.URU_COMPARACION && window.URU_COMPARACION.esComparable(lista))
-            ? window.URU_COMPARACION.comparar(lista, { ubicacion: uiState.ubicacionUsuario })
-            : null
-        };
-      } else if (rama === RAMA_BUSCADOR) {
-        lista = listaPorAccionExplicita();
-        lista = ordenarPorCercania(lista);
-        opts = { origen: 'accion_explicita', narrativa: false };
-      } else {
-        // Recorte por iniciativa propia (Guía/Exploración).
-        // Fase 4 — MUST HAVE (Fase 3A §4/§10, Fase 3B §2, Fase 3D §7):
-        // se usa la versión "explicada" en vez de recortePorIniciativaPropia()
-        // — misma selección (mismo motor, mismos candidatos/score), pero
-        // trae además la razón legible por lugar (razonesDesdeSeñales).
-        // Una sola llamada al algoritmo de selección: se deriva la lista
-        // Y el mapa de razones del mismo resultado, para no invocar
-        // calcularRecorte() dos veces con el mismo estado.
-        //
-        // Fase 4 — conexión real de contexto.ubicacion/contexto.clima
-        // (Fase 3D §4): antes se llamaba sin 4° parámetro, así que el
-        // motor nunca recibía señal real de proximidad ni de clima —
-        // aunque ya sabía puntuarlas. ubicacion sale de la geolocalización
-        // que el usuario ya activó explícitamente ("Cerca de mí" —
-        // uiState.ubicacionUsuario es null hasta que la otorga); clima
-        // sale de climaContextoCache (ver actualizarClimaContexto()),
-        // que puede seguir siendo null si el fetch a /weather todavía no
-        // resolvió o falló — el motor ya trata null como "sin señal" en
-        // ambos casos, así que esto es estrictamente aditivo.
-        var contextoRecorte = {
-          ubicacion: uiState.ubicacionUsuario || null,
-          clima: ClimateContext.obtener()
-        };
-
-        // Fase 4 — filtro de rubro DENTRO del recorte curado (hallazgo
-        // "el filtro de rubro abandona el recorte curado", ver
-        // hayBusquedaTexto()/ramaActual() más arriba): el chip de rubro
-        // ya no saca al usuario de Guía/Exploración hacia Acción
-        // Directa — acota el universo que el motor evalúa, pero sigue
-        // siendo una selección por iniciativa propia (con su score,
-        // diversidad y razones, no un barrido crudo del catálogo).
-        if (uiState.filtroRubroActivo) {
-          contextoRecorte.rubro = uiState.filtroRubroActivo;
-        }
-
-        // Fase 4 — "Sorprendeme" (hallazgo "serendipia sin control
-        // explícito"): pedido explícito del usuario, independiente de
-        // qué región o rubro esté activo — ver manejarClickSugerencias.
-        if (uiState.sorprendemeActivo) {
-          contextoRecorte.sorprendeme = true;
-          contextoRecorte.sorpresaSeed = uiState.sorpresaSeed;
-        }
-
-        // Fase 4 — "Mostrar más" como nueva tanda real (hallazgo
-        // "sigue siendo paginación simple, no una nueva tanda con
-        // exclusión de lo ya visto"): una tanda queda identificada por
-        // región + rubro + sorpresa — cambiar cualquiera de los tres
-        // invalida lo acumulado (no tiene sentido excluir en
-        // Exploración lo que se mostró en Guía, o excluir lo mostrado
-        // sin rubro una vez que hay un rubro activo). `pedirMasRecorte`
-        // (ver manejarClickPanel) es el único disparador real de un
-        // fetch nuevo con exclusión; cualquier otro render() de la
-        // misma tanda (guardar un favorito, tick de permanencia,
-        // llegada del clima en segundo plano) reutiliza lo ya
-        // calculado tal cual, sin pegarle otra tanda encima.
-        var claveTanda = reg.nombre + '|' + (uiState.filtroRubroActivo || '') +
-          '|' + (uiState.sorprendemeActivo ? 's' : '');
-        var tandaVigente = (uiState.tandaRecorte && uiState.tandaRecorte.clave === claveTanda)
-          ? uiState.tandaRecorte
-          : null;
-        var necesitaTandaNueva = !tandaVigente || uiState.pedirMasRecorte;
-
-        if (necesitaTandaNueva) {
-          if (uiState.pedirMasRecorte && tandaVigente) {
-            contextoRecorte.excluirIds = tandaVigente.lista.map(function (l) { return l.id; });
-          }
-          var explicado = EXPO.recortePorIniciativaPropiaExplicado(obtenerRegistro(), estado, reg.nombre, contextoRecorte);
-          var nuevaTanda = explicado.lugares.map(function (x) { return x.lugar; });
-          var razonesNuevas = razonesPorLugarId(explicado.lugares);
-          var listaBase = tandaVigente ? tandaVigente.lista : [];
-          var razonesAcumuladas = {};
-          if (tandaVigente) {
-            Object.keys(tandaVigente.razones).forEach(function (id) { razonesAcumuladas[id] = tandaVigente.razones[id]; });
-          }
-          Object.keys(razonesNuevas).forEach(function (id) { razonesAcumuladas[id] = razonesNuevas[id]; });
-          uiState.tandaRecorte = {
-            clave: claveTanda,
-            lista: listaBase.concat(nuevaTanda),
-            razones: razonesAcumuladas,
-            // El motor evalúa el universo YA acotado por rubro/exclusión
-            // (candidatosEvaluados, ver motor-exposicion.js); si evaluó
-            // más candidatos que los que entregó en esta tanda, hay
-            // margen real para pedir otra — nunca se ofrece "más" sin
-            // esa confirmación.
-            hayMasCandidatos: explicado.candidatosEvaluados > nuevaTanda.length
-          };
-        }
-        uiState.pedirMasRecorte = false;
-
-        var tandaFinal = uiState.tandaRecorte;
-        lista = ordenarPorCercania(tandaFinal.lista);
-        opts = {
-          origen: 'iniciativa_propia',
-          narrativa: false,
-          razones: tandaFinal.razones,
-          hayMasSugerencias: !!tandaFinal.hayMasCandidatos
-        };
-      }
-
-      // Verificar si hubo cambio real
-      // BUGFIX (auditoría performance, 2026-07-30): esta condición solo miraba
-      // la identidad de la RAMA y de la LISTA CANDIDATA COMPLETA (sin paginar).
-      // "Cargar más" (línea ~2499: uiState.paginaTarjetas++; render();) no
-      // cambia ni la rama ni la lista candidata — solo cuántos ítems de esa
-      // misma lista se muestran, un slice que ocurre adentro de
-      // pintarTarjetas(). Resultado: hayoCambio daba `false`, entraba al
-      // `return` de abajo, y pintarTarjetas() JAMÁS se ejecutaba — el botón
-      // "Cargar más" no tenía ningún efecto visible. Reproducido en
-      // aislamiento (misma lógica, ids/orden idénticos, solo cambia
-      // paginaTarjetas): ver hallazgo de auditoría, sección "Cargar más".
-      // PERF (auditoría performance, 2026-08-04, hallazgo 1.1): hayCambioEnLista()
-      // es O(n) y se llamaba dos veces acá abajo con exactamente los mismos
-      // argumentos (lastRenderCache.lista, lista) — una vez para hayoCambio,
-      // otra para soloAvanzoPagina. Se calcula una sola vez y se reutiliza el
-      // resultado en ambas condiciones.
-      var listaHaCambiado = hayCambioEnLista(lastRenderCache.lista, lista);
-      var hayoCambio = ramaDistinta(rama) ||
-        listaHaCambiado ||
-        uiState.paginaTarjetas !== lastRenderCache.paginaTarjetas;
-
-      if (!hayoCambio && uiState.ultimaRamaRenderizada === rama) {
-        debugLog('[Render] Sin cambios, saltando');
+      // FASE 4a: rama/lista/opts/detección-de-cambio ahora las calcula
+      // RenderEngine.calcular() (ver render-engine.js) — devuelve null
+      // exactamente en el mismo caso en que el render() original hacía
+      // `return` temprano por "sin cambios" (mismo criterio: rama
+      // distinta, lista distinta, o avance de página).
+      var resultado = RenderEngine.calcular(favoritos);
+      if (!resultado) {
         return;
       }
-
-      // PERF (auditoría performance, 2026-08-03, hallazgo 1.2 — confirmado
-      // con trace real: long task de 58.8ms causada por reconstruir TODO
-      // el listado en cada "Cargar más", con hasta 33 animationend
-      // disparándose en el mismo frame): si la ÚNICA razón de hayoCambio
-      // es que avanzó la página (misma rama, misma lista candidata —
-      // mismos ids en el mismo orden —, mismos favoritos), pintarTarjetas
-      // puede agregar solo las tarjetas nuevas en vez de tirar y
-      // reconstruir las que ya estaban pintadas. Se compara CONTRA el
-      // estado previo (antes de pisarlo abajo), igual que ramaDistinta()
-      // y hayCambioEnLista() un par de líneas más arriba.
-      //
-      // favoritos por referencia (no por valor): leerFavoritos() cachea
-      // el mismo objeto entre llamadas (favoritosCache) y solo lo
-      // reemplaza cuando algo realmente cambió (guardarFavoritos() o el
-      // evento 'storage' entre pestañas) — comparar por === es
-      // suficiente y evita una segunda pasada de diffing sobre el mapa
-      // de favoritos completo en cada render.
-      var soloAvanzoPagina = !ramaDistinta(rama) &&
-        !listaHaCambiado &&
-        favoritos === lastRenderCache.favoritos &&
-        lastRenderCache.paginaTarjetas !== null &&
-        uiState.paginaTarjetas > lastRenderCache.paginaTarjetas;
-      opts.soloAgregarNuevas = soloAvanzoPagina;
-
-      // Fase 4 — MUST HAVE #3 (Fase 3C §3, Fase 3D §7): lastRenderCache.region
-      // ya se guardaba en cada render() pero nada lo comparaba contra
-      // el valor anterior — era un dato escrito sin consumidor. Se
-      // captura acá, ANTES de pisarlo un par de líneas más abajo, para
-      // poder detectar un cambio real de región (guia ⇄ exploracion ⇄
-      // accionDirecta ⇄ curaduria) y disparar una microseñal perceptible.
-      // 'curaduria'/'buscador' no son nombres de región (son ramas
-      // derivadas — ver ramaActual()), así que la comparación es
-      // siempre región-contra-región, nunca región-contra-rama.
-      var regionAnterior = lastRenderCache.region;
-      var huboCambioDeRegion = !!regionAnterior && regionAnterior !== reg.nombre;
-
-      // BUGFIX (auditoría): capturar la rama del render ANTERIOR antes de
-      // pisarla. `uiState.ultimaRamaRenderizada` se sobreescribe dos líneas
-      // más abajo con el valor de `rama` del render ACTUAL — cualquier
-      // comparación `rama === uiState.ultimaRamaRenderizada` hecha después de
-      // esa asignación es una tautología (siempre true), sin importar si la
-      // rama realmente cambió. `ramaAnterior` es el único consumidor real de
-      // este valor previo, usado más abajo para la restauración de scroll.
-      var ramaAnterior = uiState.ultimaRamaRenderizada;
-
-      // Actualizar cache
-      lastRenderCache.lista = lista;
-      lastRenderCache.rama = rama;
-      lastRenderCache.favoritos = favoritos;
-      lastRenderCache.region = reg.nombre;
-      lastRenderCache.paginaTarjetas = uiState.paginaTarjetas;
-      uiState.ultimaRamaRenderizada = rama;
+      var reg = resultado.reg;
+      var rama = resultado.rama;
+      var lista = resultado.lista;
+      var opts = resultado.opts;
 
       // Actualizar encabezado, estado visual, tarjetas y mapa
       actualizarCabecera(reg, rama);
-      if (huboCambioDeRegion) {
+      if (resultado.huboCambioDeRegion) {
         mostrarMicroSenalCambioRegion();
       }
       actualizarMapaTextura();
@@ -1440,12 +1265,12 @@ import { crearErrorRecovery } from './error-recovery.js';
       // Restaurar scroll a posición previa si es el mismo listado.
       // BUGFIX (auditoría): antes comparaba `rama` contra
       // `uiState.ultimaRamaRenderizada`, pero ese campo ya había sido
-      // reasignado a `rama` unas líneas más arriba (línea "Actualizar
-      // cache") — la condición era siempre true y esta rama de scroll se
-      // ejecutaba en TODOS los renders con hayoCambio, incluidos los que
-      // cambiaban de rama/región. Ahora compara contra `ramaAnterior`,
-      // capturada antes de esa reasignación.
-      if (uiState.scrollPosition && rama === ramaAnterior) {
+      // reasignado a `rama` dentro de RenderEngine.calcular() — la
+      // condición era siempre true y esta rama de scroll se ejecutaba
+      // en TODOS los renders con cambio, incluidos los que cambiaban
+      // de rama/región. Compara contra `resultado.ramaAnterior`,
+      // capturada por RenderEngine antes de esa reasignación.
+      if (uiState.scrollPosition && rama === resultado.ramaAnterior) {
         window.scrollTo(0, uiState.scrollPosition);
       }
 
@@ -3066,7 +2891,7 @@ import { crearErrorRecovery } from './error-recovery.js';
     PLANO.guardarEstado(estado);
 
     var regionNueva = PLANO.region(estado).nombre;
-    if (regionNueva !== lastRenderCache.region) {
+    if (regionNueva !== RenderEngine.obtenerCache().region) {
       render();
     }
   }
@@ -3408,7 +3233,7 @@ import { crearErrorRecovery } from './error-recovery.js';
       obtenerEstadoMaquina: function () { return estadoActual(); },
       obtenerUltimoCambioDeEstado: function () { return obtenerUltimoCambioDeEstado(); },
       obtenerRegistro: function () { return obtenerRegistro(); },
-      obtenerCacheRender: function () { return lastRenderCache; },
+      obtenerCacheRender: function () { return RenderEngine.obtenerCache(); },
       obtenerLogCambiosEstado: function () { return obtenerLogCambiosEstado(); },
       contarOperacionesActivas: function () { return OperationManager.contarActivas(); },
       validarEstadoInvariantes: function () { return ValidacionSuite.validarEstado(); },
