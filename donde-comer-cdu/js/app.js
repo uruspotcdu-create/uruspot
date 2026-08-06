@@ -44,6 +44,12 @@ import {
 } from './constants.js';
 import { calcularDistancia, razonesPorLugarId, hayCambioEnLista } from './pure-utils.js';
 import { appEventBus } from './event-bus.js';
+import { ordenarPorCercaniaConCache } from './cache.js';
+import {
+  leerFavoritos as _leerFavoritos,
+  guardarFavoritos as _guardarFavoritos,
+  invalidarCacheFavoritos
+} from './favorites.js';
 
 (function () {
   'use strict';
@@ -82,8 +88,6 @@ import { appEventBus } from './event-bus.js';
   // Auditoría: confirmado que ordenarPorCercania() y slug() se llaman N
   // veces por sesión con los mismos datos — caché da hit 90%+ del tiempo.
 
-  var DISTANCIA_CACHE = Object.create(null);
-
   // TIER 1.2 — auditoría de cierre (Perf, 2026-08-02): acá existía un
   // SLUG_CACHE que nunca se conectaba a nada (variable muerta). Se
   // retira en vez de cablearla: slug() (más abajo) es un lookup directo
@@ -95,46 +99,9 @@ import { appEventBus } from './event-bus.js';
   // FASE 1: calcularDistancia() ahora viene del import de pure-utils.js
   // (ver arriba, fuera de la IIFE).
 
-  function ordenarPorCercaniaConCache(lista, lat, lng) {
-    var cacheKey = lat.toFixed(6) + ',' + lng.toFixed(6);
-
-    if (DISTANCIA_CACHE[cacheKey]) {
-      var mapeoDistancias = DISTANCIA_CACHE[cacheKey];
-      var listaCopia = lista.slice();
-      listaCopia.sort(function (a, b) {
-        var distA = mapeoDistancias[a.id] !== undefined
-          ? mapeoDistancias[a.id]
-          : 999999;
-        var distB = mapeoDistancias[b.id] !== undefined
-          ? mapeoDistancias[b.id]
-          : 999999;
-        return distA - distB;
-      });
-      return listaCopia;
-    }
-
-    var distancias = Object.create(null);
-    lista.forEach(function (l) {
-      if (l.lat !== undefined && l.lng !== undefined) {
-        distancias[l.id] = calcularDistancia(l.lat, l.lng, lat, lng);
-      }
-    });
-
-    DISTANCIA_CACHE[cacheKey] = distancias;
-
-    var cacheKeys = Object.keys(DISTANCIA_CACHE);
-    if (cacheKeys.length > 10) {
-      var keyAntigua = cacheKeys[0];
-      delete DISTANCIA_CACHE[keyAntigua];
-    }
-
-    var listaCopia = lista.slice();
-    listaCopia.sort(function (a, b) {
-      return (distancias[a.id] || 999999) - (distancias[b.id] || 999999);
-    });
-
-    return listaCopia;
-  }
+  // FASE 2 (Plan Maestro de Modularización, 2026-08-06): DISTANCIA_CACHE
+  // y ordenarPorCercaniaConCache() ahora viven en cache.js (ver import
+  // arriba) — mismo comportamiento, cero cambios funcionales.
 
   // PERF (auditoría de rendimiento, I2, 2026-08-02): existía acá una
   // función cargarLugaresDelViewport() que llamaba a
@@ -1332,49 +1299,24 @@ import { appEventBus } from './event-bus.js';
   // 13. SISTEMA DE FAVORITOS CON PERSISTENCIA
   // ───────────────────────────────────────────────────────────────────
 
-  // Perf, Fase 2.3 (auditoría, 2026-08-01): antes, leerFavoritos() hacía
-  // `JSON.parse(localStorage.getItem(...))` — síncrono, hilo principal —
-  // en CADA llamada, y render() (que puede correr en cada tecla de
-  // búsqueda, apertura/cierre de favorito, cambio de filtro) llamaba a
-  // leerFavoritos() una vez por corrida. Barato con pocos favoritos,
-  // pero trabajo repetido e innecesario: el contenido real solo cambia
-  // en las 3 escrituras reales (toggle de guardar, reparación de
-  // huérfanos, API de testing/lifecycle), no en cada render().
-  //
-  // favoritosCache === null es el estado "todavía no se leyó nunca" —
-  // se distingue a propósito de `{}` (leído y vacío), para no releer de
-  // disco de más la primera vez que localStorage esté genuinamente
-  // vacío. Primera lectura real: perezosa, en el primer leerFavoritos()
-  // que se llame (no necesariamente al arrancar la app).
-  //
-  // guardarFavoritos() actualiza el cache con la MISMA referencia que
-  // persiste — en la práctica, todo el código existente ya llama
-  // `var favoritos = leerFavoritos(); favoritos[id] = ...;
-  // guardarFavoritos(favoritos);`, así que `favoritos` YA ES el objeto
-  // cacheado (leerFavoritos() no devuelve copia) y mutarlo ya mantenía
-  // el cache al día incluso sin esta línea — se deja explícita igual
-  // por si en el futuro algún llamador arma un objeto nuevo en vez de
-  // mutar el leído.
-  var favoritosCache = null;
-
+  // FASE 2 (Plan Maestro de Modularización, 2026-08-06): favoritosCache,
+  // leerFavoritos() y guardarFavoritos() ahora viven en favorites.js
+  // (ver import arriba) — mismo comportamiento y misma firma de
+  // llamada (leerFavoritos(), guardarFavoritos(f)) para no tocar
+  // ninguno de los call sites existentes. Único cambio real: en vez de
+  // llamar a ErrorRecovery.procesar() inline (ErrorRecovery vive acá
+  // en app.js y todavía no está modularizado), favorites.js recibe un
+  // callback onError — este wrapper es ese callback.
   function leerFavoritos() {
-    if (favoritosCache !== null) return favoritosCache;
-    try {
-      favoritosCache = JSON.parse(localStorage.getItem('uruspot_favoritos') || '{}');
-    } catch (e) {
-      ErrorRecovery.procesar(e, ERROR_TYPE.STORAGE, 'leerFavoritos');
-      favoritosCache = {};
-    }
-    return favoritosCache;
+    return _leerFavoritos(function (e, contexto) {
+      ErrorRecovery.procesar(e, ERROR_TYPE.STORAGE, contexto);
+    });
   }
 
   function guardarFavoritos(f) {
-    favoritosCache = f;
-    try {
-      localStorage.setItem('uruspot_favoritos', JSON.stringify(f));
-    } catch (e) {
-      ErrorRecovery.procesar(e, ERROR_TYPE.STORAGE, 'guardarFavoritos');
-    }
+    _guardarFavoritos(f, function (e, contexto) {
+      ErrorRecovery.procesar(e, ERROR_TYPE.STORAGE, contexto);
+    });
   }
 
   // Multi-pestaña (Fase 2.3, nota de la auditoría): si el usuario tiene
@@ -1388,7 +1330,7 @@ import { appEventBus } from './event-bus.js';
   if (typeof window !== 'undefined' && window.addEventListener) {
     window.addEventListener('storage', function (e) {
       if (e.key !== 'uruspot_favoritos') return;
-      favoritosCache = null;
+      invalidarCacheFavoritos();
       actualizarContadorGuardados();
       render();
     });
