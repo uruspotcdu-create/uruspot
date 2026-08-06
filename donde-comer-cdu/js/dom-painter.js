@@ -18,6 +18,17 @@
    pintarFiltrosActivos, pintarLeyenda, pintarEstadoEscribiendo).
    pintarTarjetas ya vive en app-tarjetas.js; se mantiene separado por
    sus animaciones y listeners propios.
+
+   FIX (2026-08-06): actualizarMapaHerramienta()/actualizarMapaTextura()
+   habían sido migradas acá en algún momento posterior con una
+   implementación que no coincide con el resto de la app (API de mapa
+   distinta — window.L/Leaflet en vez de window.URU_MOTOR_MAPA_RENDER —
+   y `motorMapa`/`ClimateContext` referenciados sin declararlos ni
+   inyectarlos como dependencia) — tiraban TypeError/ReferenceError en
+   cada render(), atrapado en silencio por el try/catch de render() en
+   app.js. Se retiraron de acá; la versión correcta sigue viviendo en
+   app.js §16 (nunca se había tocado, solo había quedado huérfana). Ver
+   nota en el lugar donde estaban, más abajo.
    en ese orden (de menor a mayor riesgo), cada una con su propio
    commit y verificación manual antes de pasar a la siguiente.
    ═══════════════════════════════════════════════════════════════════ */
@@ -570,78 +581,19 @@ export function crearDomPainter(deps) {
     },
 
     /**
-     * Actualiza los marcadores del mapa según la región y lista.
-     * Línea 1737 de app.js.
+     * actualizarMapaHerramienta / actualizarMapaTextura: NO viven acá.
+     * Fase 4b las había migrado a este archivo con una implementación
+     * que no coincidía con el resto de la app (API de mapa distinta,
+     * `motorMapa`/`ClimateContext` sin declarar) y rompía en cada
+     * render() — ver el FIX del 2026-08-06 en app.js §14 (render()).
+     * Se revirtió el call site a las funciones locales correctas de
+     * app.js §16, que nunca se habían tocado. Si en el futuro se
+     * quiere volver a migrar estas dos funciones acá, hay que
+     * inyectar `motorMapa` (getter, se reasigna en runtime — mismo
+     * patrón que motorMapa/estado en listeners.js) y `MAPA` como
+     * dependencias explícitas, y portar la implementación real de
+     * app.js §16 — NO la que estaba acá.
      */
-    actualizarMapaHerramienta: function(nombreRegion, lista) {
-      if (!DOM.mapaHerramienta) return;
 
-      if (DOM.mapaContainer) DOM.mapaContainer.dataset.region = nombreRegion || '';
-
-      var debeMostrar = MAPA.debeMostrarHerramienta(nombreRegion, lista);
-      if (DOM.mapaHerramienta) DOM.mapaHerramienta.hidden = !debeMostrar;
-      if (DOM.mapaLeyenda) DOM.mapaLeyenda.hidden = !debeMostrar;
-
-      if (!debeMostrar || !window.L || !motorMapa) return;
-
-      var puntos = lista.map(function (l) {
-        var meta = window.URU_RUBROS_META && window.URU_RUBROS_META[l.grupo];
-        return {
-          id: l.id,
-          lat: parseFloat(l.lat),
-          lng: parseFloat(l.lng),
-          nombre: l.nombre,
-          rubroKey: l.grupo,
-          rubroNombre: meta ? meta[0] : l.categoria,
-          color: meta ? 'var(' + meta[2] + ')' : '#888',
-          linkMaps: mapsHref(l)
-        };
-      });
-
-      motorMapa.actualizarPuntos(puntos);
-      this.pintarLeyenda(puntos);
-
-      if (puntos.length > 0) {
-        motorMapa.ajustarZoomAMarcadores();
-      } else {
-        motorMapa.volverAlCentroDefecto();
-      }
-    },
-
-    /**
-     * Actualiza estilos visuales del mapa (tiles, interactividad, etc).
-     * Línea 1827 de app.js.
-     */
-    actualizarMapaTextura: function() {
-      if (!motorMapa || !window.L) return;
-
-      var clima = ClimateContext.get();
-      var esOscuro = clima.luminosidad < 0.5;
-
-      if (motorMapa.establecerEstilo) {
-        motorMapa.establecerEstilo(esOscuro ? 'dark' : 'light');
-      }
-
-      var mapaEl = DOM.mapaHerramienta;
-      if (!mapaEl) return;
-
-      mapaEl.classList.toggle('mapa--oscuro', esOscuro);
-      mapaEl.classList.toggle('mapa--claro', !esOscuro);
-
-      if (ClimateContext.enTransicion()) {
-        mapaEl.classList.add('mapa--en-transicion');
-        setTimeout(function () {
-          if (mapaEl) mapaEl.classList.remove('mapa--en-transicion');
-        }, 500);
-      }
-
-      mapaEl.addEventListener('mousedown', function manejarMouseDown() {
-        requestAnimationFrame(function () {
-          if (mapaEl && motorMapa.agregarClaseInteraccion) {
-            motorMapa.agregarClaseInteraccion('user-interacting');
-          }
-        });
-      }, { once: true });
-    }
   };
 }
