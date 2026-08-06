@@ -41,6 +41,17 @@ async function main() {
   }
   const src = fs.readFileSync(ENTRADA, 'utf8');
   const resultado = await terser.minify(src, {
+    // FASE 1 del Plan Maestro de Modularización (2026-08-06): app.js
+    // ahora empieza con `import { ... } from './constants.js'` (y
+    // pure-utils.js, event-bus.js) — module:true le dice a terser que
+    // parsee/emita el archivo como ES module (sourceType), no como
+    // script clásico. index.html carga el resultado con
+    // <script type="module">, así que el import queda intacto en la
+    // salida (terser no resuelve ni empaqueta imports, solo los
+    // preserva). Mismo criterio conservador de siempre:
+    // compress:false, mangle:false — cero riesgo de romper referencias
+    // globales o ids del DOM, esto es strip de comentarios/espacios.
+    module: true,
     compress: false,
     mangle: false,
     format: { comments: false },
