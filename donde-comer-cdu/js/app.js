@@ -1312,10 +1312,24 @@ import {
       if (resultado.huboCambioDeRegion) {
         DomPainter.mostrarMicroSenalCambioRegion();
       }
-      DomPainter.actualizarMapaTextura();
+      // FIX (2026-08-06): las llamadas a DomPainter.actualizarMapaTextura()
+      // / DomPainter.actualizarMapaHerramienta() apuntaban a una versión
+      // de Fase 4b que quedó rota — usaba una API de mapa distinta
+      // (window.L/Leaflet) a la real (window.URU_MOTOR_MAPA_RENDER) y
+      // referenciaba `motorMapa`/`ClimateContext` sin declararlos ni
+      // inyectarlos en dom-painter.js, así que tiraban TypeError/
+      // ReferenceError en cada render() (atrapado por el try/catch de
+      // acá abajo, que mostraba mostrarEstadoError() en su lugar — el
+      // mapa no se actualizaba silenciosamente). Se revierte a las
+      // funciones locales de esta misma sección (§16, más abajo), que
+      // son la versión correcta y siguen intactas: nunca se tocaron,
+      // solo habían quedado huérfanas cuando el call site se cambió a
+      // DomPainter en Fase 4b. Se retiran los dos métodos rotos de
+      // dom-painter.js (ver ese archivo).
+      actualizarMapaTextura();
       DomPainter.actualizarBannerCuraduriaSugerida(reg);
       pintarTarjetas(lista, favoritos, opts);
-      DomPainter.actualizarMapaHerramienta(reg.nombre, lista || []);
+      actualizarMapaHerramienta(reg.nombre, lista || []);
 
       // Fase 4 (Motion Direction Bible v2.0, Parte I / G.5.3): único
       // punto de activación real de la escena ambiental narrativa —
