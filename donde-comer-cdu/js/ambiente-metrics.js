@@ -211,10 +211,22 @@
       iniciado = true;
       rafId = global.requestAnimationFrame(pasoFrame);
       iniciarLongTasksContinuo();
-      if (!listenerVisibilidadRegistrado && typeof document !== 'undefined' &&
-          typeof document.addEventListener === 'function') {
-        listenerVisibilidadRegistrado = true;
-        document.addEventListener('visibilitychange', alCambiarVisibilidad);
+      // FIX (auditoría, hallazgo "procesos periódicos", Oportunidad 1,
+      // 2026-08-05): antes esto era otro listener de `visibilitychange`
+      // propio e independiente (uno de los dos que el informe identificó
+      // fuera del "Grupo de Contenido Visual" del Ambient Engine, que sí
+      // centraliza esto vía ambiente-movimiento.js). js/ciclo-vida.js
+      // generaliza esa centralización sin depender de ningún concepto
+      // del Ambient Engine. Fallback defensivo a un listener directo si
+      // CicloVida no llegó a cargar.
+      if (!listenerVisibilidadRegistrado) {
+        if (global.CicloVida && typeof global.CicloVida.suscribirVisibilidad === 'function') {
+          listenerVisibilidadRegistrado = true;
+          global.CicloVida.suscribirVisibilidad(alCambiarVisibilidad);
+        } else if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+          listenerVisibilidadRegistrado = true;
+          document.addEventListener('visibilitychange', alCambiarVisibilidad);
+        }
       }
     },
 
