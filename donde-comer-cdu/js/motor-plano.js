@@ -619,7 +619,25 @@
      (con los 9 call sites) en `app.js`.
      ───────────────────────────────────────────────────────────── */
 
+  // PERF (auditoría, hallazgo P0-1 nivel 2, 2026-08-05): antes esto era
+  // JSON.parse(JSON.stringify(estado)) — dos pasadas completas de
+  // serialización más una alocación de string intermedia, pagadas en
+  // CADA una de las 10 acciones de este módulo (aceptar, rechazar,
+  // guardar, permanecer, etc.), en el hilo principal. `estado` es 100%
+  // serializable de forma estructurada (números, strings, arrays,
+  // objetos planos, sin Date/Map/Set/funciones — ver estadoInicial()),
+  // así que structuredClone() es semánticamente idéntico y evita el
+  // paso por texto. Fallback defensivo a JSON para el caso (hoy
+  // improbable dado que el proyecto ya usa AbortController/
+  // IntersectionObserver sin polyfill) de un navegador sin
+  // structuredClone. NO corrige por sí solo el caso `estado === null`
+  // documentado en despejarBusqueda más abajo — structuredClone(null)
+  // también da null; ese caso ya se ataca en app.js: inicializar() deja
+  // de continuar si inicializarEstado() falla.
   function copiarEstado(estado) {
+    if (typeof structuredClone === 'function') {
+      return structuredClone(estado);
+    }
     return JSON.parse(JSON.stringify(estado));
   }
 
