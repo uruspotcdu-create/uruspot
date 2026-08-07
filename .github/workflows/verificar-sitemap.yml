@@ -1,0 +1,43 @@
+name: Verificar Sitemap
+
+# Red de seguridad para el drift encontrado en la auditoría del
+# 2026-08-06: sitemap.xml se genera desde el contenido real del repo
+# (scripts/generar-sitemap.js) pero se commitea a mano, y no había forma
+# automática de detectar si quedaba desactualizado respecto al fuente.
+# En la práctica, esto hizo que 73 páginas reales (más de la mitad del
+# catálogo, incluida toda la sección los-mejores-restaurantes-cdu/)
+# quedaran fuera del sitemap sin que nadie lo notara.
+#
+# Este job regenera el sitemap desde el fuente y falla si el resultado
+# difiere de lo commiteado. Calcado del patrón de verificar-bundles.yml.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verificar-sitemap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Regenerar sitemap desde el fuente
+        run: npm run sitemap
+
+      - name: Comparar contra lo commiteado
+        shell: bash
+        run: |
+          if ! diff -q <(git show "HEAD:sitemap.xml") "sitemap.xml" > /dev/null; then
+            echo "::error file=sitemap.xml::sitemap.xml está desactualizado respecto al fuente. Corré 'npm run sitemap' localmente y commiteá el resultado (o dejá que el pre-commit hook de husky lo haga por vos)."
+            exit 1
+          fi
+          echo "✓ sitemap.xml está al día con el fuente."
