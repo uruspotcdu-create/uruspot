@@ -69,7 +69,7 @@
     "URU-00156": "cremolatti",
     "URU-00179": "el-conventillo-de-baco",
     "URU-00699": "gimnasio-538",
-    "URU-00161": "justo-josé",
+    "URU-00161": "justo-jose",
     "URU-00158": "lucero"
   };
 })(typeof window !== 'undefined' ? window : global);
