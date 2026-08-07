@@ -21,8 +21,8 @@
      No es una lista aspiracional: cada entrada corresponde a un
      recurso que efectivamente se pide (ver sección 8 para el detalle
      de por qué cada uno está permitido en la CSP). -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Fase 4.1 (2026-08-07): fuentes ahora self-hosted (css/fuentes-local.css),
+     se quitan los preconnect a fonts.googleapis.com/fonts.gstatic.com. -->
 <!-- Tiles del mapa: CARTO Voyager sobre <canvas> propio (no Mapbox —
      ver sección 2, Bug E, y js/motor-render.js). El motor reparte
      pedidos entre 4 subdominios (a/b/c/d) para paralelizar descargas
@@ -166,7 +166,7 @@
 <!-- META TAGS DE SEGURIDAD -->
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https:;">
 
 <!-- META TAGS DE ACCESIBILIDAD Y PREFERENCIAS -->
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -215,25 +215,17 @@
 <meta name="apple-mobile-web-app-title" content="URU SPOT">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- GOOGLE FONTS — preload + stylesheet + fallback sin JS.
-     Pesos (perf, 2026-08-01): antes se pedían 8 variantes
-     (Fraunces 380/500/600 + IBM Plex Sans 400/500/600 + IBM Plex
-     Mono 400/500). Verificado con grep contra TODO css/*.css: el
-     sitio nunca usa Fraunces 380 ni 600 (los tokens --tipo-display-*
-     de css/tokens.css son 500 en las tres variantes: lg/md/sm — es
-     el único peso de esa familia en toda la cascada, ver también
-     css/critical.bundle.css que lo genera) ni IBM Plex Mono 500 (los
-     tokens --tipo-dato* son todos 400 — la variante mono no tiene
-     ningún uso de 500 en ningún archivo). Bajan a 4 variantes reales:
-     Fraunces 500, IBM Plex Sans 400/500/600 (las tres sí están en
-     uso — cuerpo, chips, headers), IBM Plex Mono 400. Si en el futuro
-     se agrega un uso real de algún peso removido, hay que sumarlo acá
-     Y confirmar que el token/selector que lo use exista de verdad
-     (mismo criterio: grep antes de pedir el peso). Las páginas de
-     ficha de local (locales/*/index.html) usan una familia tipográfica
-     distinta (Cormorant Garamond + DM Sans) y no se tocan acá. -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<!-- FUENTES SELF-HOSTED (Fase 4.1, 2026-08-07) — antes CDN de Google Fonts.
+     Mismos 4 pesos reales que ya estaban en uso tras la auditoría de
+     perf (Fraunces 500, IBM Plex Sans 400/500/600, IBM Plex Mono 400),
+     ahora servidos desde donde-comer-cdu/fonts/ vía css/fuentes-local.css
+     (@font-face, subset latin — cubre acentos/ñ del español). Sin
+     preconnect/preload externo: es same-origin. Las páginas de ficha
+     de local (locales/*/index.html) usan otra familia tipográfica
+     (Cormorant Garamond + DM Sans, servida vía CDN) y no se tocan acá
+     — quedan fuera del alcance definido para esta tarea. -->
+<link rel="preload" as="style" href="css/fuentes-local.css">
+<link rel="stylesheet" href="css/fuentes-local.css">
 <!-- 1.4 (auditoría de rendimiento, 2026-08-01): el <link> que antes iba
      acá dentro de <noscript> era código muerto — el de la línea de
      arriba ya cubre el caso sin JS (no depende de JS para aplicarse),
