@@ -3047,5 +3047,30 @@
     };
   }
 
-  global.URU_MOTOR_MAPA_RENDER = { crear: crear };
+  global.URU_MOTOR_MAPA_RENDER = {
+    crear: crear,
+    // _internas: puente de solo-lectura para motor-render-tests.js
+    // (Fase 3.1, roadmap 2026-08). Ninguna de estas funciones tiene
+    // estado propio ni toca DOM/canvas — son exactamente las mismas
+    // que usa `crear()` puertas adentro, no una reimplementación
+    // paralela que pudiera desincronizarse. Mismo criterio que
+    // `obtenerCache()` en render-engine.js: exponer un accesor
+    // deliberado para testear en vez de reconstruir la lógica en el
+    // archivo de test. No es superficie pública para consumidores
+    // reales (app.js no la usa ni debería usarla) — solo para Node/tests.
+    _internas: {
+      colorSeguro: colorSeguro,
+      rgbDe: rgbDe,
+      easeOutCubic: easeOutCubic,
+      umbralDrag: umbralDrag,
+      hrefMapsDe: hrefMapsDe,
+      construirUrlTile: construirUrlTile
+    }
+  };
 })(typeof window !== 'undefined' ? window : global);
+
+// Export para el runner de tests en Node (no afecta el navegador).
+// Mismo patrón que motor-plano.js / motor-mapa.js.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = (typeof window !== 'undefined' ? window.URU_MOTOR_MAPA_RENDER : global.URU_MOTOR_MAPA_RENDER);
+}
