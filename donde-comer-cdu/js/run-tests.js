@@ -48,7 +48,7 @@
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js', 'render-engine-tests.js', 'dom-painter-tests.js', 'listeners-tests.js', 'keyboard-nav-tests.js', 'map-module-tests.js', 'scroll-reveal-tests.js', 'app-coordinator-tests.js'];
+const SUITES = ['motor-test.js', 'smoke-tests.js', 'contract-tests.js', 'ambiente-lifecycle-tests.js', 'coreografias-tests.js', 'motor-comparacion-tests.js', 'render-engine-tests.js', 'dom-painter-tests.js', 'listeners-tests.js', 'keyboard-nav-tests.js', 'map-module-tests.js', 'scroll-reveal-tests.js', 'app-coordinator-tests.js', 'motor-render-tests.js'];
 
 let algunoFallo = false;
 
