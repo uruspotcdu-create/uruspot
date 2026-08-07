@@ -16,3 +16,19 @@ git add \
   donde-comer-cdu/css/critical.bundle.css
 
 echo "✓ Bundles al día y agregados al commit."
+
+echo "🔧 Regenerando sitemap.xml antes del commit (npm run sitemap)..."
+npm run sitemap
+
+if [ $? -ne 0 ]; then
+  echo "❌ La generación del sitemap falló. Commit abortado — revisá el error de arriba."
+  exit 1
+fi
+
+# Mismo motivo que con los bundles: sitemap.xml se genera a partir del
+# contenido real del repo (páginas con canonical autoreferenciado +
+# js/locales-slug.js) y no debe quedar desactualizado por olvido humano
+# — ver auditoría 2026-08-06, hallazgo "sitemap.xml desactualizado".
+git add sitemap.xml
+
+echo "✓ Sitemap al día y agregado al commit."
