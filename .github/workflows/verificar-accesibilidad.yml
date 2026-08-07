@@ -25,8 +25,13 @@ jobs:
       - name: Install dependencies
         run: npm ci || npm install
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright Browsers
+        # El proyecto 'a11y-mobile' usa devices['iPhone 12'], cuyo
+        # defaultBrowserType es 'webkit', no 'chromium'. Instalar solo
+        # chromium hace que todos los tests 'a11y-mobile' fallen al
+        # arrancar (mismo problema ya documentado en
+        # regenerar-baselines.yml). Se instalan ambos.
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Correr axe-core sobre páginas representativas
         run: npx playwright test --config=playwright.a11y.config.js
