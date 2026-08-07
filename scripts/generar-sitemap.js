@@ -201,7 +201,21 @@ function validarXml(xmlPath) {
     resultado.xmlValido = true;
     resultado.metodo = 'xmllint --noout';
   } catch (e) {
-    if (e.status === undefined && /ENOENT/.test(String(e))) {
+    // execSync corre el comando a través de una shell por defecto, así que
+    // cuando el binario no existe el error NO llega como ENOENT de Node
+    // (eso solo pasa con shell:false): llega como "comando fallido" con
+    // status 127 y un mensaje de la shell tipo "/bin/sh: 1: xmllint: not
+    // found" (o "'xmllint' is not recognized..." en cmd.exe). Cubrimos
+    // ambas formas para no confundir "no está instalado" con "el XML es
+    // inválido de verdad".
+    const mensajeError = String(e.stderr || e.message || e);
+    const xmllintNoInstalado =
+      e.status === 127 ||
+      /ENOENT/.test(mensajeError) ||
+      /not found/i.test(mensajeError) ||
+      /no se reconoce como un comando/i.test(mensajeError) ||
+      /is not recognized/i.test(mensajeError);
+    if (xmllintNoInstalado) {
       // xmllint no está instalado: validación manual mínima de buena forma.
       const xml = fs.readFileSync(xmlPath, 'utf8');
       const abiertos = (xml.match(/<url>/g) || []).length;
