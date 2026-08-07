@@ -1,0 +1,39 @@
+name: Verificar Accesibilidad (axe-core)
+
+# Fase 5.2 del plan de lanzamiento: accesibilidad con herramienta real
+# (no simulada), corrida en un navegador real (Chromium en ubuntu-latest).
+# Esto es la parte automatizable de 5.2; la prueba manual con lector de
+# pantalla y navegación por teclado exploratoria queda fuera de CI.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  verificar-accesibilidad:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Correr axe-core sobre páginas representativas
+        run: npx playwright test --config=playwright.a11y.config.js
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reporte-accesibilidad
+          path: playwright-report-a11y/
+          retention-days: 30

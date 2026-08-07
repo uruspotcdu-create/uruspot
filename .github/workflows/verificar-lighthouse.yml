@@ -1,0 +1,42 @@
+name: Verificar Lighthouse Mobile
+
+# Fase 5.1 del plan de lanzamiento: Core Web Vitals / Lighthouse con
+# herramienta real, en navegador real (Chrome, disponible por defecto
+# en runners ubuntu-latest). Reusa lighthouse-mobile-uruspot.js, que ya
+# corre carga en frío + carga repetida (Service Worker) y sirve el repo
+# localmente con http-server.
+#
+# No bloquea el merge automáticamente (los umbrales de "Good" se
+# revisan a mano según el criterio de aceptación de 5.1: decidir y
+# documentar si algo por debajo de "Good" va antes o después del
+# lanzamiento). El reporte HTML queda como artifact para revisión.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  verificar-lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Correr Lighthouse mobile (frío + repetida con Service Worker)
+        run: npm run perf:mobile
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reporte-lighthouse
+          path: lighthouse-reports/
+          retention-days: 30
