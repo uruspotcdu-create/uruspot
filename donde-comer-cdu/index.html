@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
      posición del <script> del bundle acá. Si tocás el orden de
      abajo, actualizá también ORDEN en scripts/build-motor-bundle.js
      — el script valida que coincidan y falla si no. -->
-<script src="js/motor.bundle.js?v=95aef68314" defer></script>
+<script src="js/motor.bundle.js?v=6a79b9b2b1" defer></script>
 <!-- app.min.js es un cargador generado que importa la única fuente de
      verdad: js/app.js. Esto evita que un bundle duplicado quede atrasado
      respecto del código que se revisa y se modifica.
@@ -199,12 +199,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- FAVICON — múltiples formatos, cada uno con su consumidor real:
      SVG para navegadores modernos, PNG para los que no soportan SVG
-     en favicon, ICO como último recurso universal, apple-touch-icon
-     para iOS al agregar a inicio, mask-icon para el pin de Safari. -->
+     en favicon, apple-touch-icon para iOS al agregar a inicio,
+     mask-icon para el pin de Safari.
+     (Auditoría CSP/404, 2026-08-08: se sacó de acá el <link rel="icon"
+     type="image/x-icon" href="/favicon.ico"> — no existe ningún
+     favicon.ico en el repo, solo .svg/.png, así que ese link tiraba un
+     404 en cada visita. Si algún día hace falta el fallback ICO
+     universal para navegadores muy viejos, hay que generar el archivo
+     real en /favicon.ico antes de reponer la línea.) -->
 <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
 <link rel="mask-icon" href="/img/favicon-mask.svg" color="#0A0D13">
 
@@ -258,7 +263,14 @@ document.addEventListener('DOMContentLoaded', function() {
      archivo de cero. -->
 <link rel="preload" as="font" type="font/woff2" href="fonts/fraunces-latin-500-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="fonts/ibm-plex-sans-latin-400-normal.woff2" crossorigin>
-<link rel="preload" as="style" href="css/fuentes-local.css">
+<!-- (Auditoría perf, 2026-08-08: se sacó el <link rel="preload" as="style">
+     que iba justo acá. Con el <link rel="stylesheet"> real en la línea
+     siguiente, el preload solo duplicaba el descubrimiento del recurso
+     un instante antes — el parser ya lo encuentra al toque igual — y
+     Chrome lo marcaba con el warning "preloaded but not used within a
+     few seconds" porque la promoción preload→stylesheet no llegaba a
+     tiempo para que la heurística lo contara como "usado". Sacarlo no
+     cambia cuándo se pide el archivo, solo saca el warning. -->
 <link rel="stylesheet" href="css/fuentes-local.css">
 <!-- 1.4 (auditoría de rendimiento, 2026-08-01): el <link> que antes iba
      acá dentro de <noscript> era código muerto — el de la línea de
@@ -290,8 +302,8 @@ document.addEventListener('DOMContentLoaded', function() {
      el impacto medible de este hint es marginal -- se deja
      documentado por si el <head> crece en el futuro y algo empieza a
      demorar el parser antes de llegar hasta acá. -->
-<link rel="preload" href="css/critical.bundle.css?v=2330a039b6" as="style">
-<link rel="stylesheet" href="css/critical.bundle.css?v=2330a039b6">
+<link rel="preload" href="css/critical.bundle.css?v=ed09453197" as="style">
+<link rel="stylesheet" href="css/critical.bundle.css?v=ed09453197">
 <!-- impresion.css: nueva (auditoría 4ª pasada) — el documento no
      tenía ninguna hoja media="print" pese a que varias secciones
      (Sobre la ciudad, Guía práctica, Glosario) son contenido de
@@ -499,19 +511,11 @@ document.addEventListener('DOMContentLoaded', function() {
   ]
 }
 </script>
-<script>
-/* Fase 4 — registro de Service Worker (URUSPOT-PENDIENTES §7: "no existe
-   Service Worker", PWA "solo de nombre"). Scope '/' cubre todo el sitio;
-   basta con registrarlo desde una página para que controle las demás en
-   visitas siguientes. */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('/sw.js').catch(function (err) {
-      console.warn('URU SPOT: no se pudo registrar el service worker.', err);
-    });
-  });
-}
-</script>
+<!-- Fase 4 — registro de Service Worker. Externalizado a
+     js/registrar-service-worker.js (auditoría CSP, 2026-08-08): era un
+     <script> inline, bloqueado por completo por `script-src 'self'`
+     sin nonce/hash/unsafe-inline — ver el archivo para el detalle. -->
+<script src="js/registrar-service-worker.js" defer></script>
 <style>
 .hero__scroll-cue { color: #ffffff !important; }
 footer, footer p, footer > p { color: #ffffff !important; }
@@ -1525,7 +1529,7 @@ a { color: #ffffff !important; }
 </div>
 
 <div id="pwaInstalarBanner" class="pwa-instalar-banner" hidden role="dialog" aria-label="Instalar URU SPOT como app">
-  <img src="img/icon-192.png" width="40" height="40" alt="" class="pwa-instalar-banner__icono">
+  <img src="/img/icon-192.png" width="40" height="40" alt="" class="pwa-instalar-banner__icono">
   <div class="pwa-instalar-banner__texto">
     <span id="pwaInstalarTitulo" class="pwa-instalar-banner__titulo">Instalá el mapa en tu celular</span>
     <span id="pwaInstalarSubtitulo" class="pwa-instalar-banner__subtitulo">Acceso directo, sin ocupar espacio de tienda.</span>
@@ -1563,47 +1567,37 @@ a { color: #ffffff !important; }
      respetar cualquier código que cree <img> dentro de este documento;
      mantenerla junto al HTML que gobierna reduce la chance de que se
      desactualice sin que nadie la note. -->
-<script>
-/**
- * Todo <img> creado dinámicamente para tarjetas de lugares debe
- * seguir este patrón:
- *
- *   var img = document.createElement('img');
- *   img.loading = 'lazy';        // Intersection Observer nativo
- *   img.decoding = 'async';      // no bloquea el render principal
- *   img.fetchPriority = 'low';   // no compite con el contenido crítico
- *   img.src = lugar.imagenSrc;
- *   img.srcset = url + '-small.webp 300w, ' + url + '-medium.webp 600w, ' + url + '-large.webp 1200w';
- *   img.sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw';
- *
- * Resultado esperado: las imágenes se cargan solo cuando entran en
- * viewport, responden al tamaño real de pantalla, usan WebP nativo,
- * y no compiten por ancho de banda con el JSON de datos que sí es
- * crítico para el primer render.
- */
-</script>
+<!--
+  Todo <img> creado dinámicamente para tarjetas de lugares debe
+  seguir este patrón:
+
+    var img = document.createElement('img');
+    img.loading = 'lazy';        // Intersection Observer nativo
+    img.decoding = 'async';      // no bloquea el render principal
+    img.fetchPriority = 'low';   // no compite con el contenido crítico
+    img.src = lugar.imagenSrc;
+    img.srcset = url + '-small.webp 300w, ' + url + '-medium.webp 600w, ' + url + '-large.webp 1200w';
+    img.sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw';
+
+  Resultado esperado: las imágenes se cargan solo cuando entran en
+  viewport, responden al tamaño real de pantalla, usan WebP nativo,
+  y no compiten por ancho de banda con el JSON de datos que sí es
+  crítico para el primer render.
+
+  (Auditoría CSP, 2026-08-08: este bloque no tenía código ejecutable —
+  era pura documentación dentro de un <script>, así que un navegador
+  con CSP `script-src 'self'` lo bloqueaba igual que a cualquier otro
+  inline, sin razón: pasarlo a comentario HTML elimina la violación de
+  raíz en vez de solo relocalizarla.) -->
+
 
 
 <!-- Documentación completa del contrato HTML↔JS (contrato de hooks id/data-*, diagnóstico histórico de bugs, checklist de mantenimiento, notas de contraste WCAG): ver docs/CONTRATO-INDEX-HTML.md. Movida fuera del critical path de red en la 3ª auditoría (2026) para no shippear ~66 KB de comentarios a cada visitante; contenido intacto, solo relocalizado. -->
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Arreglar TODOS los colores problemáticos
-  const elements = document.querySelectorAll('[style*="color"]');
-  elements.forEach(el => {
-    el.style.color = '#ffffff';
-  });
-  
-  // Arreglar elementos específicos
-  document.querySelectorAll('.hero__scroll-cue, #schedStatusText, .btn-primary, a, footer p').forEach(el => {
-    el.style.color = '#ffffff !important';
-  });
-  
-  // Arreglar variables CSS
-  document.documentElement.style.setProperty('--color-tinta-60', '#ffffff', 'important');
-  document.documentElement.style.setProperty('--color-tinta', '#ffffff', 'important');
-});
-</script>
+<!-- Externalizado a js/forzar-colores-blancos.js (auditoría CSP,
+     2026-08-08): era un <script> inline, bloqueado por completo por
+     `script-src 'self'` sin nonce/hash/unsafe-inline. -->
+<script src="js/forzar-colores-blancos.js" defer></script>
 </body>
 </html>
 
