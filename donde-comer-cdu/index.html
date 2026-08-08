@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
      posición del <script> del bundle acá. Si tocás el orden de
      abajo, actualizá también ORDEN en scripts/build-motor-bundle.js
      — el script valida que coincidan y falla si no. -->
-<script src="js/motor.bundle.js?v=28a446f9a5" defer></script>
+<script src="js/motor.bundle.js?v=314c8e5951" defer></script>
 <!-- app.min.js es un cargador generado que importa la única fuente de
      verdad: js/app.js. Esto evita que un bundle duplicado quede atrasado
      respecto del código que se revisa y se modifica.
@@ -242,6 +242,22 @@ document.addEventListener('DOMContentLoaded', function() {
      de local (locales/*/index.html) usan otra familia tipográfica
      (Cormorant Garamond + DM Sans, servida vía CDN) y no se tocan acá
      — quedan fuera del alcance definido para esta tarea. -->
+<!-- PRELOAD DE FUENTES CRITICAS (perf, iteracion 6): sin esto, el
+     navegador no descubre estos 2 archivos .woff2 hasta que parsea y
+     aplica css/fuentes-local.css mas abajo -- un round-trip completo
+     de mas antes de poder empezar a descargarlos. Solo los 2 pesos
+     que efectivamente pintan el primer viewport (Fraunces 500 para
+     el <h1> del hero -- el elemento LCP de este documento -- e IBM
+     Plex Sans 400 para el cuerpo de texto): los otros 3 pesos
+     declarados en fuentes-local.css (IBM Plex Sans 500/600, IBM Plex
+     Mono 400) se usan mas abajo del fold o en menor volumen,
+     precargarlos tambien competiria por ancho de banda con estos 2
+     sin necesidad. Same-origin, pero `crossorigin` es obligatorio
+     igual para fuentes por spec (fetch en modo anonimo) -- sin este
+     atributo el navegador descarta el preload y vuelve a pedir el
+     archivo de cero. -->
+<link rel="preload" as="font" type="font/woff2" href="fonts/fraunces-latin-500-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/ibm-plex-sans-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="style" href="css/fuentes-local.css">
 <link rel="stylesheet" href="css/fuentes-local.css">
 <!-- 1.4 (auditoría de rendimiento, 2026-08-01): el <link> que antes iba
@@ -265,7 +281,17 @@ document.addEventListener('DOMContentLoaded', function() {
      antes de cada deploy. Ver scripts/build-css-bundle.js para el
      detalle completo y por qué cada archivo fuente sigue existiendo
      por separado (se siguen editando ahí, no acá). -->
-<link rel="stylesheet" href="css/critical.bundle.css?v=b2a4c5e3ab">
+<!-- PRELOAD DEL BUNDLE (perf, iteracion 6): NO es el patron preload+swap
+     -- eso rompería el proposito de este archivo (ver discusion de la
+     sesion: diferir esto causa FOUC/CLS en el hero, que es el
+     elemento LCP). Este preload no cambia CUANDO bloquea el render:
+     sigue siendo render-blocking, a proposito. Con el <head> actual
+     el <link> normal ya se descubre de inmediato al parsear, asi que
+     el impacto medible de este hint es marginal -- se deja
+     documentado por si el <head> crece en el futuro y algo empieza a
+     demorar el parser antes de llegar hasta acá. -->
+<link rel="preload" href="css/critical.bundle.css?v=f5d70e7278" as="style">
+<link rel="stylesheet" href="css/critical.bundle.css?v=f5d70e7278">
 <!-- impresion.css: nueva (auditoría 4ª pasada) — el documento no
      tenía ninguna hoja media="print" pese a que varias secciones
      (Sobre la ciudad, Guía práctica, Glosario) son contenido de
