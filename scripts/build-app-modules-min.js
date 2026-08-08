@@ -44,48 +44,9 @@
 const fs = require('fs');
 const path = require('path');
 const terser = require('terser');
+const { MODULOS, reescribirImportsAMin } = require('./lib/modulos-app');
 
 const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
-
-// Los 19 módulos que importa app.js directamente + cache.js, que NO
-// aparece en los imports de app.js pero sí lo importa search.js
-// (dependencia transitiva) — confirmado con grep antes de escribir
-// este script, no es una suposición.
-const MODULOS = [
-  'app-coordinator.js',
-  'cache.js',
-  'catalog.js',
-  'climate-context.js',
-  'constants.js',
-  'data-loader.js',
-  'dom-painter.js',
-  'error-recovery.js',
-  'event-bus.js',
-  'favorites.js',
-  'geolocation.js',
-  'keyboard-nav.js',
-  'listeners.js',
-  'map-module.js',
-  'pure-utils.js',
-  'render-engine.js',
-  'scroll-reveal.js',
-  'search.js',
-  'state-manager.js',
-  'ui-state.js',
-];
-
-function reescribirImportsAMin(codigo) {
-  let salida = codigo;
-  for (const modulo of MODULOS) {
-    const nombreSinExt = modulo.replace(/\.js$/, '');
-    // Reemplaza './modulo.js' por './modulo.min.js' SOLO si es exactamente
-    // ese módulo (evita falsos positivos tipo 'render-engine.js' matcheando
-    // 'render-engine-tests.js').
-    const patron = new RegExp(`(['"\`]\\./${nombreSinExt})\\.js(['"\`])`, 'g');
-    salida = salida.replace(patron, `$1.min.js$2`);
-  }
-  return salida;
-}
 
 async function minificarModulo(nombreArchivo) {
   const entrada = path.join(JS_DIR, nombreArchivo);

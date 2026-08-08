@@ -8,6 +8,13 @@
 # Este job regenera los bundles desde el fuente y falla si el resultado
 # difiere de lo commiteado (ignorando la línea "Generado: <timestamp>",
 # que cambia en cada corrida por diseño y no representa drift real).
+#
+# FASE 5.1 (2026-08-08): la lista de archivos a comparar ya NO está
+# hardcodeada acá — sale de `node scripts/listar-bundles-verificables.js`,
+# la misma fuente única que usa .husky/pre-commit. Antes de esto, agregar
+# un bundle nuevo (como los 20 js/*.min.js de build-app-modules-min.js)
+# requería acordarse de tocar este workflow a mano por separado, y un
+# olvido dejaba ese bundle sin red de seguridad.
 
 on:
   push:
@@ -34,12 +41,7 @@ jobs:
       - name: Comparar contra lo commiteado
         shell: bash
         run: |
-          ARCHIVOS=(
-            "donde-comer-cdu/js/motor.bundle.js"
-            "donde-comer-cdu/js/ambiente.bundle.js"
-            "donde-comer-cdu/js/app.min.js"
-            "donde-comer-cdu/css/critical.bundle.css"
-          )
+          mapfile -t ARCHIVOS < <(node scripts/listar-bundles-verificables.js)
           DRIFT=0
           for f in "${ARCHIVOS[@]}"; do
             if ! diff -q \

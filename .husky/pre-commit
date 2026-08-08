@@ -9,11 +9,13 @@ fi
 # Vuelve a agregar los bundles regenerados al commit, así el commit siempre
 # incluye el resultado del build actual (elimina el riesgo de bundles
 # desactualizados por olvido humano — ver PERFORMANCE_AUDIT.md §6).
-git add \
-  donde-comer-cdu/js/motor.bundle.js \
-  donde-comer-cdu/js/ambiente.bundle.js \
-  donde-comer-cdu/js/app.min.js \
-  donde-comer-cdu/css/critical.bundle.css
+#
+# FASE 5.1 (2026-08-08): la lista sale de
+# scripts/listar-bundles-verificables.js (misma fuente que usa
+# verificar-bundles.yml en CI) en vez de estar hardcodeada acá también
+# — así un bundle nuevo (ej. los js/*.min.js de módulos) queda
+# protegido en los dos lugares con un solo cambio.
+git add $(node scripts/listar-bundles-verificables.js)
 
 echo "✓ Bundles al día y agregados al commit."
 

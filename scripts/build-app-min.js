@@ -22,23 +22,51 @@
  * cargar app.min.js en producción; app.js sigue siendo el único
  * archivo que se edita a mano.
  *
+ * FASE 5.1 (LCP, 2026-08-08): además de minificar comentarios/espacios
+ * de app.js, este script ahora reescribe sus 20 imports internos
+ * ('./modulo.js' -> './modulo.min.js') para que apunten a las
+ * versiones que genera build-app-modules-min.js — ver ese script para
+ * el hallazgo completo de Lighthouse que motiva esto. Antes de este
+ * cambio, app.min.js quedaba minificado pero sus imports seguían
+ * apuntando a los 20 módulos SIN minificar (~200KB combinados con
+ * comentarios completos), así que la cadena real que carga el
+ * navegador no se beneficiaba del nuevo script. Por eso build:bundles
+ * corre build-app-modules-min.js ANTES que este (ver package.json):
+ * este script verifica que cada .min.js de destino ya exista y aborta
+ * si falta, para no dejar un import roto en producción por un orden
+ * de build incorrecto.
+ *
  * Uso: node scripts/build-app-min.js
+ *   (requiere haber corrido antes: node scripts/build-app-modules-min.js)
  */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 const terser = require('terser');
+const { MODULOS, reescribirImportsAMin } = require('./lib/modulos-app');
 
 const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
 const ENTRADA = path.join(JS_DIR, 'app.js');
 const SALIDA = path.join(JS_DIR, 'app.min.js');
+
+function verificarModulosMinExisten() {
+  const faltantes = MODULOS
+    .map((m) => m.replace(/\.js$/, '.min.js'))
+    .filter((m) => !fs.existsSync(path.join(JS_DIR, m)));
+  if (faltantes.length > 0) {
+    console.error('✗ faltan estos módulos minificados (corré primero: node scripts/build-app-modules-min.js):');
+    faltantes.forEach((m) => console.error(`    - js/${m}`));
+    process.exit(1);
+  }
+}
 
 async function main() {
   if (!fs.existsSync(ENTRADA)) {
     console.error('✗ falta js/app.js — abortando');
     process.exit(1);
   }
+  verificarModulosMinExisten();
   const src = fs.readFileSync(ENTRADA, 'utf8');
   const resultado = await terser.minify(src, {
     // FASE 1 del Plan Maestro de Modularización (2026-08-06): app.js
@@ -60,10 +88,11 @@ async function main() {
     console.error('✗ terser falló:', resultado.error);
     process.exit(1);
   }
+  const conImportsReescritos = reescribirImportsAMin(resultado.code, MODULOS);
   const header = `/* GENERADO por scripts/build-app-min.js a partir de js/app.js — no editar a mano. */\n`;
-  const out = header + resultado.code;
+  const out = header + conImportsReescritos;
   fs.writeFileSync(SALIDA, out, 'utf8');
-  console.log(`✓ js/app.min.js generado`);
+  console.log(`✓ js/app.min.js generado (imports apuntando a las ${MODULOS.length} versiones .min.js)`);
   console.log(`  entrada: ${src.length} bytes  →  salida: ${out.length} bytes  (${(100 - out.length / src.length * 100).toFixed(1)}% menos)`);
 }
 
