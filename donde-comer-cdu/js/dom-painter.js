@@ -33,6 +33,8 @@
    commit y verificación manual antes de pasar a la siguiente.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { ROLES_NOMBRES } from './constants.js';
+
 export function crearDomPainter(deps) {
   var DOM = deps.DOM;
   var obtenerRegistro = deps.obtenerRegistro;
