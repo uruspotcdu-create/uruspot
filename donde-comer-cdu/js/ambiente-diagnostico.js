@@ -179,3 +179,4 @@
   global.AmbienteDiagnostico = api;
 
 })(window);
+

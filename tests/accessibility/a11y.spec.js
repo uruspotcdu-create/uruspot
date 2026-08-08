@@ -1,17 +1,17 @@
-Ôªøconst { test, expect } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
 /*
- * Fase 5.2 ‚Äî Accesibilidad con herramienta real (axe-core).
+ * Fase 5.2 ó Accesibilidad con herramienta real (axe-core).
  *
  * Cubre:
- *  - WCAG 2.2 AA (contraste real, no simulado) v√≠a tags de axe.
- *  - Un set representativo de p√°ginas: home/mapa + una ficha de cada
+ *  - WCAG 2.2 AA (contraste real, no simulado) vÌa tags de axe.
+ *  - Un set representativo de p·ginas: home/mapa + una ficha de cada
  *    familia de generador (donde-comer-cdu y los-mejores-restaurantes-cdu,
  *    que son los dos generadores independientes) + las familias "las-mejores-*"
  *    y "los-mejores-*" de un solo nivel.
- *  - Navegaci√≥n por teclado en el mapa interactivo (motor-render.js):
- *    Tab debe mover el foco de forma visible y en orden l√≥gico.
+ *  - NavegaciÛn por teclado en el mapa interactivo (motor-render.js):
+ *    Tab debe mover el foco de forma visible y en orden lÛgico.
  *
  * Lo que este archivo NO reemplaza: la prueba manual en navegador real
  * pedida en 5.2 (lector de pantalla, zoom, etc.). Esto es la base
@@ -89,7 +89,8 @@ test('teclado: el mapa interactivo (motor-render.js) es navegable con Tab', asyn
     }
   }
 
-  // El foco debe haberse movido a m√°s de un elemento distinto (si el mapa
+  // El foco debe haberse movido a m·s de un elemento distinto (si el mapa
   // atrapa el foco en un solo elemento, esto falla).
   expect(focosVistos.size).toBeGreaterThan(1);
 });
+

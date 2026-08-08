@@ -122,3 +122,4 @@
   global.AmbienteCoordenadas = api;
 
 })(window);
+

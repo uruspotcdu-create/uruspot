@@ -94,3 +94,4 @@ export function ramaActual(reg, consultaActual, verCatalogoCompleto) {
 export function sufijoCercania(cercaTuyoActivo, ubicacionUsuario) {
   return (cercaTuyoActivo && ubicacionUsuario) ? ' Ordenado por cercanía.' : '';
 }
+

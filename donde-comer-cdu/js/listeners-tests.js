@@ -660,3 +660,4 @@ console.log(total - fallos + '/' + total + ' pruebas de listeners OK');
 if (fallos > 0) {
   process.exit(1);
 }
+

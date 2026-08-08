@@ -74,3 +74,4 @@ if (algunoFallo) {
 }
 console.log(`RESULTADO FINAL: las ${SUITES.length} suites pasaron.`);
 process.exit(0);
+

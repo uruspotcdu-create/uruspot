@@ -278,3 +278,4 @@
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = (typeof window !== 'undefined' ? window.URU_CONFIG : global.URU_CONFIG);
 }
+

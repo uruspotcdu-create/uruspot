@@ -66,3 +66,4 @@ export function guardarFavoritos(f, onError) {
 export function invalidarCacheFavoritos() {
   favoritosCache = null;
 }
+

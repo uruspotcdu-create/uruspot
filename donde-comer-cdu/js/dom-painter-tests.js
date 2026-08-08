@@ -436,3 +436,4 @@ console.log(total - fallos + '/' + total + ' pruebas de dom-painter OK');
 if (fallos > 0) {
   process.exit(1);
 }
+

@@ -40,3 +40,4 @@ export function establecerCatalogo(nuevaLista) {
     porId[reg.id] = reg;
   });
 }
+

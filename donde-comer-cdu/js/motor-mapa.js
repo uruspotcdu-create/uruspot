@@ -252,3 +252,4 @@
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = (typeof window !== 'undefined' ? window.URU_MAPA : global.URU_MAPA);
 }
+

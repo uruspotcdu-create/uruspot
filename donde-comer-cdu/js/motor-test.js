@@ -1359,3 +1359,4 @@ function lugar(id, grupo, lat, lng) {
 
 console.log('\n' + (total - fallos) + '/' + total + ' pruebas OK');
 if (fallos > 0) process.exit(1);
+

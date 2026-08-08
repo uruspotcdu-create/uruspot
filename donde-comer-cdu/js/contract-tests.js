@@ -309,3 +309,4 @@ correr();
 // reemplaza una suite e2e real con Playwright/Puppeteer si en algún
 // momento se dispone de navegador headless en el pipeline de CI.
 // ---------------------------------------------------------------------
+

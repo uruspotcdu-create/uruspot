@@ -357,3 +357,4 @@ console.log(total - fallos + '/' + total + ' pruebas de render-engine OK');
 if (fallos > 0) {
   process.exit(1);
 }
+

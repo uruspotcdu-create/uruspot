@@ -144,3 +144,4 @@
        detalle fino: tiene que leerse nítido incluso escalado a los
        ~13-15px que ocupa dentro de un pin de mapa. */
 })(typeof window !== 'undefined' ? window : global);
+

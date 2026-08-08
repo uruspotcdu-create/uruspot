@@ -110,3 +110,4 @@ export function vaciarLog() {
 export function forzarEstado(nuevoEstado) {
   currentState = nuevoEstado;
 }
+

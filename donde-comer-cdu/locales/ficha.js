@@ -218,7 +218,7 @@
     // Este archivo no puede leer variables CSS desde JS, así que los
     // valores quedan duplicados a mano — si tokens.css vuelve a
     // cambiar estos dos colores, hay que actualizar acá también.
-    var openColor = "#44996f", openBg = "rgba(68,153,111,0.15)";
+    var openColor = "#ffffff", openBg = "rgba(68,153,111,0.15)";
     var closedColor = "#f04552", closedBg = "rgba(240,69,82,0.12)";
     var neutralColor = "#a0a0a0", neutralBg = "rgba(160,160,160,0.15)";
 
@@ -324,3 +324,4 @@
     inicializarSupresionVidrio();
   });
 })();
+

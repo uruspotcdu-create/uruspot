@@ -109,3 +109,4 @@ console.log('\n=== Código CORREGIDO ===');
   reloj.dispararTimeoutsVencidos(260); // no deberían quedar timeouts activos
   console.log('Renders tras vencer timeouts (no debería haber ninguno pendiente):', renders);
 })();
+

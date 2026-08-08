@@ -24,3 +24,4 @@ var PLANO = require('./motor-plano.js');
 var EXPOSICION = require('./motor-exposicion.js');
 
 module.exports = { CFG: CFG, PLANO: PLANO, EXPOSICION: EXPOSICION, mockLocalStorage: mockLocalStorage };
+

@@ -163,3 +163,4 @@
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = (typeof window !== 'undefined' ? window.IndiceInvertido : global.IndiceInvertido);
 }
+

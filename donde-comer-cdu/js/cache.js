@@ -67,3 +67,4 @@ export function ordenarPorCercaniaConCache(lista, lat, lng) {
 export function _limpiarCacheDistancias() {
   DISTANCIA_CACHE = Object.create(null);
 }
+

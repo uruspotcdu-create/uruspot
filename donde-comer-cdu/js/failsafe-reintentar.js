@@ -73,3 +73,4 @@
   // restaura desde bfcache).
   window.addEventListener('pagehide', function () { clearTimeout(failsafeTimer); });
 })();
+

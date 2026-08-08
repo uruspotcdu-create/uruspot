@@ -160,3 +160,4 @@ if (!ESCRIBIR) {
   console.log('\nDRY-RUN: no se escribió ningún archivo. Revisá el reporte de arriba y');
   console.log('corré con --write cuando estés conforme con lo que se extrajo.');
 }
+

@@ -1,8 +1,8 @@
-﻿const { defineConfig, devices } = require('@playwright/test');
+const { defineConfig, devices } = require('@playwright/test');
 
 // Config separado de playwright.config.js (que es solo para tests/visual).
 // Corre los tests de accesibilidad (axe-core) contra un set representativo
-// de páginas: home/mapa + una ficha de cada familia de generador.
+// de p�ginas: home/mapa + una ficha de cada familia de generador.
 module.exports = defineConfig({
   testDir: './tests/accessibility',
   fullyParallel: true,
@@ -30,3 +30,4 @@ module.exports = defineConfig({
     reuseExistingServer: !process.env.CI,
   },
 });
+

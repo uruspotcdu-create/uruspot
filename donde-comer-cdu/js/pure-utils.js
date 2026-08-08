@@ -77,3 +77,4 @@ export function hayCambioEnLista(listaAnterior, listaActual) {
   var hashActual = listaActual.map(function (l) { return l.id; }).join(',');
   return hashAnterior !== hashActual;
 }
+

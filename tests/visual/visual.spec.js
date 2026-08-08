@@ -1,4 +1,4 @@
-﻿const { test, expect } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
 const { sembrarEstado } = require('./estado-helper');
 
 test.describe('Baseline Visual URU SPOT', () => {
@@ -38,3 +38,4 @@ test.describe('Baseline Visual URU SPOT', () => {
   });
 
 });
+

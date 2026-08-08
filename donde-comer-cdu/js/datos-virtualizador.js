@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
   'use strict';
   var TILE_SIZE = 0.05;
   var CACHE_TILES = new Map();
@@ -54,3 +54,4 @@
     limpiarCache() { CACHE_TILES.clear(); lugaresEnCache.clear(); }
   };
 })();
+

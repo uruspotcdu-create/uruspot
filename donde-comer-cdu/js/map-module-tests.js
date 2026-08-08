@@ -383,3 +383,4 @@ console.log(total - fallos + '/' + total + ' pruebas de map-module OK');
 if (fallos > 0) {
   process.exit(1);
 }
+

@@ -109,3 +109,4 @@
   global.AmbienteHorarioTinte = api;
 
 })(window);
+

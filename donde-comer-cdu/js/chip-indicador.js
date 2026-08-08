@@ -73,3 +73,4 @@
 
   window.URU_ChipIndicador = { sincronizar: sincronizar };
 })();
+

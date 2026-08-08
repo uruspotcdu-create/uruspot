@@ -1,4 +1,4 @@
-﻿async function sembrarEstado(page, estadoModificado = {}) {
+async function sembrarEstado(page, estadoModificado = {}) {
   const KEY = 'uru_plano::concepcion-del-uruguay::v1';
   const estadoBase = {
     version: 1,
@@ -16,3 +16,4 @@
 }
 
 module.exports = { sembrarEstado };
+

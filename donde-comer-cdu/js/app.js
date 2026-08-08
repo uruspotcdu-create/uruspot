@@ -1610,3 +1610,4 @@ import { crearAppCoordinator } from './app-coordinator.js';
   AppCoordinator.arrancar();
 
 })();
+

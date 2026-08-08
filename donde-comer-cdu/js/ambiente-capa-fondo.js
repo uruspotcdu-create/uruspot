@@ -156,3 +156,4 @@
   global.AmbienteCapaFondo = { iniciar: iniciar };
 
 })(window);
+

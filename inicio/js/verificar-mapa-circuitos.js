@@ -81,3 +81,4 @@ if (dataMatch) {
 
 console.log('\n' + (fallos === 0 ? 'TODO OK' : fallos + ' fallo(s)'));
 process.exit(fallos === 0 ? 0 : 1);
+

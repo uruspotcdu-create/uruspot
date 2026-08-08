@@ -674,3 +674,4 @@ export function crearAppCoordinator(deps) {
     arrancar: arrancar
   };
 }
+

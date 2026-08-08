@@ -58,3 +58,4 @@
     });
   } catch (e) { /* no rompe el resto del sitio si esto falla */ }
 })();
+

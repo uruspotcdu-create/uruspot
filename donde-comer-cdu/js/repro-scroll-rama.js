@@ -36,3 +36,4 @@ console.log('Render 1, misma rama "explorando":', simularRenderCorregido(uiState
 var uiState4 = { ultimaRamaRenderizada: 'explorando', scrollPosition: 0 };
 console.log('Render 2, rama CAMBIA a "buscador":', simularRenderCorregido(uiState4, 'buscador', 400));
 // -> false (correcto: no se fuerza scroll cuando la rama cambió)
+

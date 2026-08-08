@@ -178,3 +178,4 @@ main().catch((err) => {
   console.error('o seteá la variable CHROME_PATH apuntando a tu ejecutable.');
   process.exit(1);
 });
+

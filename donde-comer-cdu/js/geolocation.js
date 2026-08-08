@@ -61,3 +61,4 @@ export function solicitarUbicacion(timeoutMs, maxAgeMs) {
 export function geolocationDisponible() {
   return !!navigator.geolocation;
 }
+
