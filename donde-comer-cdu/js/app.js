@@ -387,6 +387,14 @@ import { crearAppCoordinator } from './app-coordinator.js';
   // que tenía el closure original, resuelto recién cuando
   // recuperarDeCarguaCatalogo() se llama de verdad (mucho después).
   var ErrorRecovery = crearErrorRecovery({
+    // FIX (2026-08-08): uiState nunca se pasó acá pese a que el propio
+    // docblock de error-recovery.js lo documenta como dependencia
+    // requerida ("procesar() escribe uiState.lastErrorState; se pasa
+    // la instancia real"). Sin esto, CUALQUIER error real que pasara
+    // por ErrorRecovery.procesar() tiraba su propio TypeError
+    // (`Cannot set properties of undefined`) en vez de registrarse —
+    // enmascarando la causa original detrás de un error distinto.
+    uiState: uiState,
     mostrarEstadoError: mostrarEstadoError,
     pintarEsqueleto: function () { pintarEsqueleto(); },
     cargarCatalogo: cargarCatalogo
@@ -929,7 +937,18 @@ import { crearAppCoordinator } from './app-coordinator.js';
     escapeHTML: window.AppFormato && window.AppFormato.escapeHTML,
     geolocationDisponible: geolocationDisponible,
     hayBusquedaOFiltro: hayBusquedaOFiltro,
-    VISUAL_STATE: VISUAL_STATE
+    VISUAL_STATE: VISUAL_STATE,
+    // FIX (2026-08-08): dom-painter.js usaba PLANO/estado/render() como
+    // si fueran variables locales de closure, heredado de cuando este
+    // código vivía en app.js — nunca se convirtieron a dependencias
+    // inyectadas durante la extracción (Fase 4B). getPLANO en vez de
+    // PLANO directo por el mismo motivo que MapaModulo/getMAPA más
+    // abajo: este módulo se construye antes de que PLANO se resuelva
+    // en validarModulos().
+    getPLANO: getPLANO,
+    getEstado: getEstado,
+    setEstado: setEstado,
+    render: render
   });
 
   // FASE 6 (Plan Maestro de Modularización, 2026-08-06): §16 (Mapa y

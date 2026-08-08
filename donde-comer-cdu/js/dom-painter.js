@@ -47,6 +47,18 @@ export function crearDomPainter(deps) {
   var geolocationDisponible = deps.geolocationDisponible;
   var hayBusquedaOFiltro = deps.hayBusquedaOFiltro;
   var VISUAL_STATE = deps.VISUAL_STATE;
+  // FIX (2026-08-08): getPLANO/getEstado/setEstado/render nunca se
+  // inyectaron acá durante la extracción de este módulo — quedaron 8
+  // usos de PLANO/estado/render() como si fueran variables locales de
+  // closure (herencia directa de cuando este código vivía en app.js).
+  // Mismo patrón/motivo que listeners.js y keyboard-nav.js ya usan
+  // (deps.getPLANO, ver comentario de Fase 5 en app.js) — se sigue acá
+  // en vez de pasar `PLANO`/`estado` directo porque este módulo se
+  // construye ANTES de que PLANO se resuelva en validarModulos().
+  var getPLANO = deps.getPLANO;
+  var getEstado = deps.getEstado;
+  var setEstado = deps.setEstado;
+  var render = deps.render;
 
   function actualizarVisibilidadSugerencias() {
     if (!DOM.sugerenciasRapidas) return;
@@ -398,7 +410,7 @@ export function crearDomPainter(deps) {
      * Línea 1597 de app.js. Incluye helper asegurarBannerCuraduria.
      */
     actualizarBannerCuraduriaSugerida: function(reg) {
-      var debeMostrar = estado.sesion.curaduriaSugerida && reg.nombre !== 'curaduria';
+      var debeMostrar = getEstado().sesion.curaduriaSugerida && reg.nombre !== 'curaduria';
 
       if (!debeMostrar) {
         if (dynamicElements.bannerCuraduria) {
@@ -435,8 +447,8 @@ export function crearDomPainter(deps) {
       btnIr.className = 'btn btn--activo';
       btnIr.textContent = 'Ver tus guardados';
       btnIr.addEventListener('click', function () {
-        estado = PLANO.aplicarAccion(estado, 'entrarCuraduria');
-        PLANO.guardarEstado(estado);
+        setEstado(getPLANO().aplicarAccion(getEstado(), 'entrarCuraduria'));
+        getPLANO().guardarEstado(getEstado());
         uiState.paginaTarjetas = 1;
         render();
       });
@@ -447,8 +459,8 @@ export function crearDomPainter(deps) {
       btnCerrar.setAttribute('aria-label', 'Descartar aviso');
       btnCerrar.textContent = '✕';
       btnCerrar.addEventListener('click', function () {
-        estado = PLANO.aplicarAccion(estado, 'descartarSugerenciaCuraduria');
-        PLANO.guardarEstado(estado);
+        setEstado(getPLANO().aplicarAccion(getEstado(), 'descartarSugerenciaCuraduria'));
+        getPLANO().guardarEstado(getEstado());
         banner.hidden = true;
       });
 
@@ -466,7 +478,7 @@ export function crearDomPainter(deps) {
      */
     actualizarCabecera: function(reg, rama) {
       if (DOM.rolActual) {
-        var rol = PLANO.rolPorAperturas(estado.aperturas);
+        var rol = getPLANO().rolPorAperturas(getEstado().aperturas);
         DOM.rolActual.textContent = ROLES_NOMBRES[rol] || rol;
       }
 
@@ -567,8 +579,8 @@ export function crearDomPainter(deps) {
       btn.textContent = '← Ver todos los lugares';
       btn.hidden = true;
       btn.addEventListener('click', function () {
-        estado = PLANO.aplicarAccion(estado, 'salirCuraduria');
-        PLANO.guardarEstado(estado);
+        setEstado(getPLANO().aplicarAccion(getEstado(), 'salirCuraduria'));
+        getPLANO().guardarEstado(getEstado());
         uiState.paginaTarjetas = 1;
         render();
         if (DOM.tituloRegion) {
