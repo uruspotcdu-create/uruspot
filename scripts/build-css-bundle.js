@@ -61,9 +61,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const { actualizarVersionEnHtml } = require('./lib/cache-bust');
 
 const ROOT = path.join(__dirname, '..', 'donde-comer-cdu');
 const SALIDA = path.join(ROOT, 'css', 'critical.bundle.css');
+const INDEX_HTML = path.join(ROOT, 'index.html');
 
 // Mismo orden que tenían los <link rel="stylesheet"> en index.html.
 // Rutas relativas a donde-comer-cdu/.
@@ -131,6 +133,8 @@ function build() {
   console.log(`Bundle generado: ${SALIDA}`);
   console.log(`${ORDEN.length} archivos → 1 archivo.`);
   console.log(`Fuentes: ${bytesOriginal} bytes → bundle: ${bytesBundle} bytes (-${(100 * (1 - bytesBundle / bytesOriginal)).toFixed(1)}%).`);
+
+  actualizarVersionEnHtml(INDEX_HTML, SALIDA, 'css/critical.bundle.css');
 }
 
 build();

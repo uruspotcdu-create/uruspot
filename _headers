@@ -61,3 +61,69 @@
 /donde-comer-cdu/assets/ambient/*.svg
   ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable
+
+# ---------------------------------------------------------------------
+# EXCEPCIÓN (perf, iteración 5 — 2026-08-08): los 3 bundles más pesados
+# del documento (motor.bundle.js, critical.bundle.css, app.min.js).
+#
+# A diferencia de la excepción de logos/íconos de arriba, estos SÍ se
+# editan bajo el mismo nombre de archivo en cada build (ver
+# scripts/build-motor-bundle.js, build-css-bundle.js, build-app-min.js)
+# — así que `immutable` acá sería peligroso si no fuera por un cambio
+# que acompaña a este mismo patch: los 3 scripts de build ahora calculan
+# un hash del contenido y lo escriben como `?v=HASH` en el
+# <script src=...>/<link href=...> de index.html (ver
+# scripts/lib/cache-bust.js). Cloudflare Pages matchea estas reglas por
+# path, ignorando el query string — pero el browser SÍ trata
+# `?v=HASH` como parte de la URL para su propio cache, así que un
+# cambio de contenido real siempre resulta en una URL nueva y un fetch
+# nuevo, aunque el archivo en el servidor se siga llamando igual.
+#
+# Si algún día alguno de estos 3 se sirve SIN pasar por el build
+# correspondiente (por ejemplo, editado a mano y subido directo), el
+# ?v=HASH de index.html queda desactualizado y el browser sigue
+# sirviendo la versión vieja durante hasta un año — por eso `npm run
+# build:bundles` (que corre los 3 scripts) sigue siendo obligatorio
+# antes de cada deploy que toque motor-*.js, css/*.css (los 17 fuente
+# de critical.bundle.css) o js/app.js.
+/donde-comer-cdu/js/motor.bundle.js
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/donde-comer-cdu/css/critical.bundle.css
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/donde-comer-cdu/js/app.min.js
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+# ---------------------------------------------------------------------
+# EXCEPCIÓN (perf, iteración 5): fuentes self-hosted (fraunces-*,
+# ibm-plex-*.woff2 en donde-comer-cdu/fonts/). Mismo criterio que
+# logos/íconos arriba: SIN paso de build, contenido 100% estático desde
+# que se subieron (paquetes @fontsource/*, ver css/fuentes-local.css) —
+# la convención de este repo para estos archivos es cambiar de nombre
+# si algún día cambia el peso/familia servida (ej. agregar
+# ibm-plex-sans-latin-700-normal.woff2 como archivo nuevo), no
+# sobrescribir un .woff2 existente con contenido distinto. No llevan
+# ?v=HASH porque no pasan por ningún script de build: cache-bust.js
+# solo se aplica a los 3 archivos de arriba que SÍ se regeneran en cada
+# deploy.
+/donde-comer-cdu/fonts/*.woff2
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+# ---------------------------------------------------------------------
+# DELIBERADAMENTE NO incluido en esta iteración: js/app-tarjetas.js,
+# js/chip-indicador.js, js/app-telemetria.js, js/app-formato.js,
+# js/ciclo-vida.js. Son ~17KB de ahorro estimado cada uno (bajo,
+# comparado con los 3 de arriba), y a diferencia de motor.bundle.js/
+# critical.bundle.css/app.min.js, NO pasan por ningún script de
+# scripts/build:bundles — se editan a mano y se referencian directo en
+# index.html. Cachearlos `immutable` hoy exigiría que cada editor se
+# acuerde de bumpear un `?v=` a mano en cada commit que los toque, sin
+# ningún build automatizado que lo garantice — mismo riesgo de
+# staleness silenciosa que ya se documentó arriba para motor.bundle.js
+# antes de este patch. Quedan con la regla `/*` (must-revalidate) hasta
+# que se sumen al pipeline de build o se decida versionarlos aparte.

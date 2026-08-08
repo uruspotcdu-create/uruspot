@@ -45,10 +45,12 @@ const fs = require('fs');
 const path = require('path');
 const terser = require('terser');
 const { MODULOS, reescribirImportsAMin } = require('./lib/modulos-app');
+const { actualizarVersionEnHtml } = require('./lib/cache-bust');
 
 const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
 const ENTRADA = path.join(JS_DIR, 'app.js');
 const SALIDA = path.join(JS_DIR, 'app.min.js');
+const INDEX_HTML = path.join(__dirname, '..', 'donde-comer-cdu', 'index.html');
 
 function verificarModulosMinExisten() {
   const faltantes = MODULOS
@@ -94,6 +96,8 @@ async function main() {
   fs.writeFileSync(SALIDA, out, 'utf8');
   console.log(`✓ js/app.min.js generado (imports apuntando a las ${MODULOS.length} versiones .min.js)`);
   console.log(`  entrada: ${src.length} bytes  →  salida: ${out.length} bytes  (${(100 - out.length / src.length * 100).toFixed(1)}% menos)`);
+
+  actualizarVersionEnHtml(INDEX_HTML, SALIDA, 'js/app.min.js');
 }
 
 main();

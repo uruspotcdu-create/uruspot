@@ -91,7 +91,7 @@ function extraerIdsHtml(html) {
 // --- 3. Extraer orden real de <script defer src="js/...">
 function extraerOrdenScripts(html) {
   const orden = [];
-  const re = /<script[^>]*\ssrc=["']js\/([\w.-]+\.js)["'][^>]*>/g;
+  const re = /<script[^>]*\ssrc=["']js\/([\w.-]+\.js)(?:\?[^"']*)?["'][^>]*>/g;
   let m;
   while ((m = re.exec(html)) !== null) {
     orden.push(m[1]);

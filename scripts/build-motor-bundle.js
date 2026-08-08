@@ -61,9 +61,11 @@
 const fs = require('fs');
 const path = require('path');
 const terser = require('terser');
+const { actualizarVersionEnHtml } = require('./lib/cache-bust');
 
 const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
 const SALIDA = path.join(JS_DIR, 'motor.bundle.js');
+const INDEX_HTML = path.join(__dirname, '..', 'donde-comer-cdu', 'index.html');
 
 // Conserva SOLO lo que algo en el repo necesita seguir leyendo del
 // bundle generado: los marcadores de módulo (contract-tests.js) y la
@@ -152,6 +154,8 @@ async function build() {
   console.log(`Bundle generado: ${SALIDA}`);
   console.log(`${ORDEN.length} módulos → 1 archivo.`);
   console.log(`Sin minificar: ${bytesSinMinificar} bytes → minificado: ${bytesBundle} bytes (-${(100 * (1 - bytesBundle / bytesSinMinificar)).toFixed(1)}%).`);
+
+  actualizarVersionEnHtml(INDEX_HTML, SALIDA, 'js/motor.bundle.js');
 }
 
 build().catch((err) => {
