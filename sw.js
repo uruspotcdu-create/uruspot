@@ -37,7 +37,23 @@
 
 'use strict';
 
-var VERSION = 'v6';
+// v7 (2026-08-08): bump manual de versión. js/ambiente.bundle.js y
+// js/coreografias.js se cargan dinámicamente (ver
+// cargarMotorAmbientalDiferido() en js/app.js) SIN query de cache-bust
+// (a diferencia de css/critical.bundle.css y js/motor.bundle.js, que
+// sí lo tienen), así que la regla 3 de más abajo (stale-while-
+// revalidate) le sigue sirviendo a cualquiera que ya haya visitado el
+// sitio la versión vieja cacheada de esos dos archivos — incluso
+// después de un fix real en el repo, incluso con Ctrl+Shift+R (el SW
+// intercepta el fetch antes de que la caché del navegador entre en
+// juego). Subir VERSION fuerza a borrar TODOS los caches viejos
+// (evento 'activate' de más abajo) en cuanto el nuevo SW toma control,
+// así que la próxima carga trae todo fresco de red una vez más. No
+// reemplaza el problema de fondo (ambiente.bundle.js/coreografias.js
+// deberían tener su propio ?v=hash como el resto de los bundles) —
+// que queda pendiente como mejora aparte — pero resuelve el síntoma
+// inmediato para quien ya tenía el sitio cacheado.
+var VERSION = 'v7';
 var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
 var CACHE_DATOS = 'uruspot-datos-' + VERSION;
 var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;
