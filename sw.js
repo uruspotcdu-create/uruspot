@@ -37,7 +37,7 @@
 
 'use strict';
 
-var VERSION = 'v5';
+var VERSION = 'v6';
 var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
 var CACHE_DATOS = 'uruspot-datos-' + VERSION;
 var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;
