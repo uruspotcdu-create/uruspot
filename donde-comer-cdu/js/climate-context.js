@@ -81,6 +81,40 @@ export function crearClimateContext(deps) {
     return cache;
   }
 
-  return { actualizar: actualizar, obtener: obtener };
+  /**
+   * Dispara una primera actualización inmediata y luego programa
+   * actualizaciones periódicas cada `opts.intervaloMs`, delegando el
+   * scheduling a `opts.programarPeriodica` (mismo mecanismo que usa
+   * app-coordinator.js para el resto de sus timers — pausa/reanuda con
+   * CicloVida si está disponible, ver listeners.js). Cada actualización
+   * exitosa llama a `opts.render()` para que la UI refleje el clima
+   * nuevo, igual que hacía el `.then()` original en app.js antes de
+   * esta extracción.
+   *
+   * @param {Object} opts
+   * @param {function():void} opts.render
+   * @param {function(function, number):*} opts.programarPeriodica
+   * @param {number} opts.intervaloMs
+   * @returns {*} el handle que devuelva programarPeriodica (timer id),
+   *   para que el llamador lo guarde en activeOperations y lo pueda
+   *   limpiar en limpiar()/cleanup.
+   */
+  function inicializarActualizacionPeriodica(opts) {
+    var render = opts.render;
+    var programarPeriodica = opts.programarPeriodica;
+    var intervaloMs = opts.intervaloMs;
+
+    actualizar(render);
+
+    return programarPeriodica(function () {
+      actualizar(render);
+    }, intervaloMs);
+  }
+
+  return {
+    actualizar: actualizar,
+    obtener: obtener,
+    inicializarActualizacionPeriodica: inicializarActualizacionPeriodica
+  };
 }
 
