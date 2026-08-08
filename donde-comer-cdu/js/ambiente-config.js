@@ -408,7 +408,20 @@
       // existía en el catálogo de Fase 1/2, a diferencia de
       // 'profundidad' que ya reutilizaban Retícula/Corrientes): no
       // había ningún asset previo de este tipo antes de la Fase 3.
-      archivo: 'assets/ambient/brujula/brujula--default--regular.svg'
+      // 2026-08-08: nombre de archivo con sufijo -v2. El repo cachea
+      // assets/ambient/*.svg como immutable/1 año en el borde de
+      // Cloudflare (ver _headers: "estos archivos jamás cambian de
+      // contenido sin cambiar de nombre... la convención correcta es
+      // cambiarles el nombre"). El primer fix de este SVG (geometría
+      // de aro/marcas inline en vez de <use> a archivo externo) editó
+      // el contenido bajo el mismo nombre, así que cualquier navegador
+      // que ya lo había pedido una vez seguía sirviendo la versión
+      // vieja desde su propia caché HTTP — sin que ningún bump de
+      // versión del Service Worker pudiera hacer nada al respecto,
+      // porque esa caché vive un nivel por debajo del SW. Renombrar a
+      // -v2 es la forma correcta, documentada en este mismo repo, de
+      // invalidar eso: URL nueva, nadie tiene nada cacheado para ella.
+      archivo: 'assets/ambient/brujula/brujula--default--regular-v2.svg'
     },
     'particulas-deriva': {
       tipo: 'particula-deriva', capa: 'particulas', carga: 'anticipada',
@@ -510,4 +523,3 @@
   };
 
 })(window);
-
