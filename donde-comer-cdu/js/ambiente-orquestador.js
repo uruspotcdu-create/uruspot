@@ -178,9 +178,19 @@
     // contenedores huérfanos sin sentido arquitectónico propio.
     if (!global.AmbienteFlags || global.AmbienteFlags.activo('sustratoVisual')) {
       if (global.AmbientePlanos) global.AmbientePlanos.iniciar();
-      if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
-      if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
-      if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
+      // 2026-08-08: Retícula, Topográficas y Corrientes quedan sin
+      // iniciar a propósito. Las tres pintan líneas/curvas en P0/P1,
+      // superpuestas entre sí y con la Brújula (P2) en la misma zona
+      // de pantalla — el resultado combinado se leía como ruido de
+      // líneas onduladas, no como los símbolos individuales que son.
+      // La Brújula (Cap. 2.1: "ancla simbólica única del producto")
+      // es la única familia de fondo que debe leerse con claridad;
+      // se la deja sola en pantalla en vez de compitiendo contra las
+      // otras tres. Los módulos siguen existiendo en el repo — basta
+      // con volver a llamar a su .iniciar() acá para reactivarlos.
+      // if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
+      // if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
+      // if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
       if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
       if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
       // Fase 3 (Paso 8/9, roadmap Cap. 12 orden 7/8): mismo patrón que

@@ -104,5 +104,25 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   pointer-events: none;
 }
 
+/* 2026-08-08: la Brújula (assets/ambient/brujula) es, desde este
+   cambio, la única familia de fondo que corre (ver nota en
+   js/ambiente-orquestador.js: Retícula/Topográficas/Corrientes
+   quedan sin iniciar a propósito). Su propio SVG no trae width/height
+   — solo viewBox 100x100 (Cap. 3.4 del documento de assets: los
+   assets nunca fijan su propio tamaño en pantalla) — así que sin esta
+   regla el navegador la dibuja con el tamaño de reemplazo por
+   defecto (chico, arriba a la izquierda del plano P2), invisible en
+   la práctica. Acá se la agranda y centra para que se lea sin dudas
+   como "hay una brújula de fondo", que es el pedido explícito: un
+   círculo grande, fijo, centrado en el viewport. */
+.amb-asset--brujula {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(64vmin, 720px);
+  height: min(64vmin, 720px);
+  transform: translate(-50%, -50%);
+}
+
 
 

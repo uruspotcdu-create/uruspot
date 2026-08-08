@@ -72,21 +72,54 @@
 
   <!-- Aro — círculo concéntrico sin escalar (radio 30, el mismo que
        trae la primitiva). Rotación mínima (Cap. 5: "el aro casi no
-       rota"): la clase de movimiento se aplica sobre este grupo. -->
+       rota"): la clase de movimiento se aplica sobre este grupo.
+
+       2026-08-08: geometría copiada inline desde prim-circulo-
+       concentrico (assets/ambient/_primitivas/primitivas-
+       compartidas.svg) en vez de referenciarla con <use
+       href="archivo-externo.svg#id">. Motivo (feedback visual
+       directo, mismo criterio que las dos revisiones de más arriba):
+       Chrome no resuelve de forma confiable un <use> que apunta a un
+       <symbol> de OTRO documento SVG — en la práctica, la mitad de
+       las veces el aro y las marcas quedaban invisibles (bbox
+       0x0x0x0) mientras el resto del sitio ya había "calentado" el
+       recurso externo por otra vía. Es exactamente el problema que
+       reportó el feedback: "debería verse una brújula y no se ve".
+       Se prioriza que el símbolo SIEMPRE se pinte por sobre la
+       reutilización de primitivas vía archivo compartido — el mismo
+       criterio de legibilidad inmediata que ya justificó las dos
+       revisiones anteriores de este archivo. -->
   <g class="brujula-aro">
-    <use href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-circulo-concentrico"/>
+    <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" vector-effect="non-scaling-stroke"/>
   </g>
 
   <!-- Marcas cardinales — 4 marcas de coordenada sobre el propio aro
        (radio 30, mismo radio que el aro para que queden exactamente
        sobre el trazo, no flotando adentro/afuera). Grupo fijo: nunca
        rota ni oscila, es la referencia estática contra la que se
-       lee el movimiento del aro y de la aguja. -->
+       lee el movimiento del aro y de la aguja. Geometría inline por
+       el mismo motivo que brujula-aro (ver nota arriba). -->
   <g class="brujula-marcas" fill="currentColor">
-    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 -30)"/>
-    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(30 0)"/>
-    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 30)"/>
-    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(-30 0)"/>
+    <g transform="translate(0 -30)">
+      <line x1="50" y1="44" x2="50" y2="56" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <line x1="44" y1="50" x2="56" y2="50" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <circle cx="50" cy="50" r="1.4" fill="currentColor" stroke="none"/>
+    </g>
+    <g transform="translate(30 0)">
+      <line x1="50" y1="44" x2="50" y2="56" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <line x1="44" y1="50" x2="56" y2="50" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <circle cx="50" cy="50" r="1.4" fill="currentColor" stroke="none"/>
+    </g>
+    <g transform="translate(0 30)">
+      <line x1="50" y1="44" x2="50" y2="56" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <line x1="44" y1="50" x2="56" y2="50" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <circle cx="50" cy="50" r="1.4" fill="currentColor" stroke="none"/>
+    </g>
+    <g transform="translate(-30 0)">
+      <line x1="50" y1="44" x2="50" y2="56" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <line x1="44" y1="50" x2="56" y2="50" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <circle cx="50" cy="50" r="1.4" fill="currentColor" stroke="none"/>
+    </g>
   </g>
 
   <!-- Aguja — línea recta (prim-linea, Cap. 3.3) rotada a vertical y
@@ -99,10 +132,19 @@
        1.2 pide ("geometría construida" legible, no ambigua). Todo el
        grupo es lo que anima la oscilación (Cap. 5: "la aguja oscila
        buscando norte"); en reposo (0°) la punta norte queda alineada
-       con la marca cardinal N de brujula-marcas. -->
+       con la marca cardinal N de brujula-marcas. Geometría inline por
+       el mismo motivo que brujula-aro (ver nota arriba) — la línea sí
+       llegaba a resolver por <use> externo en las pruebas, pero de
+       forma inconsistente según qué otro asset la haya "precalentado"
+       antes; se inlinea igual para que este archivo no dependa de
+       ningún otro para pintarse completo. -->
   <g class="brujula-aguja" fill="currentColor">
-    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(50 50) scale(0.7) translate(-50 -50) rotate(90 50 50)"/>
-    <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 -28)" style="color:var(--color-granate-clara, #C97A83); stroke:currentColor;"/>
+    <line x1="10" y1="50" x2="90" y2="50" stroke="currentColor" vector-effect="non-scaling-stroke" transform="translate(50 50) scale(0.7) translate(-50 -50) rotate(90 50 50)"/>
+    <g transform="translate(0 -28)" style="color:var(--color-granate-clara, #C97A83);">
+      <line x1="50" y1="44" x2="50" y2="56" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <line x1="44" y1="50" x2="56" y2="50" stroke="currentColor" vector-effect="non-scaling-stroke"/>
+      <circle cx="50" cy="50" r="1.4" fill="currentColor" stroke="none"/>
+    </g>
   </g>
 
 </svg>
