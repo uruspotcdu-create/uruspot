@@ -361,8 +361,27 @@
 </script>
 <script src="../js/rubros-meta.js" defer></script>
 <script src="../ficha.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Arreglar TODOS los colores problemáticos
+  const elements = document.querySelectorAll('[style*="color"]');
+  elements.forEach(el => {
+    el.style.color = '#ffffff';
+  });
+  
+  // Arreglar elementos específicos
+  document.querySelectorAll('.hero__scroll-cue, #schedStatusText, .btn-primary, a, footer p').forEach(el => {
+    el.style.color = '#ffffff !important';
+  });
+  
+  // Arreglar variables CSS
+  document.documentElement.style.setProperty('--color-tinta-60', '#ffffff', 'important');
+  document.documentElement.style.setProperty('--color-tinta', '#ffffff', 'important');
+});
+</script>
 </body>
 </html>
+
 
 
 
