@@ -219,8 +219,8 @@
     // valores quedan duplicados a mano — si tokens.css vuelve a
     // cambiar estos dos colores, hay que actualizar acá también.
     var openColor = "#ffffff", openBg = "rgba(255,255,255,0.15)";
-    var closedColor = "#f04552", closedBg = "rgba(240,69,82,0.12)";
-    var neutralColor = "#a0a0a0", neutralBg = "rgba(160,160,160,0.15)";
+    var closedColor = "#ffffff", closedBg = "rgba(240,69,82,0.12)";
+    var neutralColor = "#ffffff", neutralBg = "rgba(160,160,160,0.15)";
 
     var color = estado.abierto === null ? neutralColor : (estado.abierto ? openColor : closedColor);
     var bg = estado.abierto === null ? neutralBg : (estado.abierto ? openBg : closedBg);
@@ -324,5 +324,6 @@
     inicializarSupresionVidrio();
   });
 })();
+
 
 
