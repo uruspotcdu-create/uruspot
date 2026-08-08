@@ -48,6 +48,8 @@ export function crearDomPainter(deps) {
   var escapeHTML = deps.escapeHTML;
   var geolocationDisponible = deps.geolocationDisponible;
   var hayBusquedaOFiltro = deps.hayBusquedaOFiltro;
+  var hayBusquedaTexto = deps.hayBusquedaTexto;
+  var sufijoCercania = deps.sufijoCercania;
   var VISUAL_STATE = deps.VISUAL_STATE;
   // FIX (2026-08-08): getPLANO/getEstado/setEstado/render nunca se
   // inyectaron acá durante la extracción de este módulo — quedaron 8

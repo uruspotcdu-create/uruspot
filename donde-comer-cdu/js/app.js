@@ -937,6 +937,8 @@ import { crearAppCoordinator } from './app-coordinator.js';
     escapeHTML: window.AppFormato && window.AppFormato.escapeHTML,
     geolocationDisponible: geolocationDisponible,
     hayBusquedaOFiltro: hayBusquedaOFiltro,
+    hayBusquedaTexto: hayBusquedaTexto,
+    sufijoCercania: sufijoCercania,
     VISUAL_STATE: VISUAL_STATE,
     // FIX (2026-08-08): dom-painter.js usaba PLANO/estado/render() como
     // si fueran variables locales de closure, heredado de cuando este
