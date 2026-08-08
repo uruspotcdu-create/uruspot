@@ -20,14 +20,19 @@
 
   Construido con 3 de las 5 primitivas compartidas: círculo
   concéntrico (aro), marca de coordenada (marcas cardinales + punta
-  norte de la aguja) y sinusoide (cuerpo de la aguja) — el propio
-  archivo de primitivas ya documenta esta última asociación
-  ("base geométrica de Corrientes y de la oscilación de aguja de
-  Brújula"). La aguja es, a propósito, una curva suave (sinusoide
-  rotada) y no una línea recta: un trazo puramente recto se leería
-  como marca de retícula, no como instrumento (Cap. 1.2: "geometría
-  construida", no dos familias compitiendo por el mismo vocabulario
-  de formas).
+  norte de la aguja) y línea recta (cuerpo de la aguja).
+
+  Revisión (post-lanzamiento, feedback visual directo): la aguja
+  usaba antes la primitiva sinusoide (curva ondulada) por la
+  hipótesis de que un trazo recto se leería como marca de retícula
+  en vez de instrumento. En la práctica pasó lo contrario: la curva
+  ondulada, sumada a la opacidad baja del plano P2 (Cap. 4.1,
+  0.18–0.30) y al resto de capas ambientales superpuestas, hacía que
+  el asset entero no se leyera como brújula — solo como líneas
+  sueltas. Se volvió a prim-linea (mismo transform, misma longitud)
+  porque, en este contexto concreto, prima la legibilidad inmediata
+  del símbolo por sobre la distinción teórica de vocabulario de
+  formas entre familias.
 
   Color/opacidad: currentColor + la variable de color y de opacidad
   del plano P2 (ver assets/ambient/_tokens/), nunca fijos (Cap. 3.4,
@@ -64,15 +69,19 @@
     <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(-30 0)"/>
   </g>
 
-  <!-- Aguja — sinusoide (Cap. 3.3, ver comentario de cabecera)
-       rotada a vertical y escalada a 0.7 (semi-longitud 28, apenas
-       adentro del radio del aro) + una marca de coordenada en la
-       punta norte, para que se distinga de la punta sur al oscilar.
-       Todo el grupo es lo que anima la oscilación (Cap. 5: "la
-       aguja oscila buscando norte"); en reposo (0°) la punta norte
-       queda alineada con la marca cardinal N de brujula-marcas. -->
+  <!-- Aguja — línea recta (prim-linea, Cap. 3.3) rotada a vertical y
+       escalada a 0.7 (semi-longitud 28, apenas adentro del radio del
+       aro) + una marca de coordenada en la punta norte, para que se
+       distinga de la punta sur al oscilar. Se reemplazó la sinusoide
+       original por esta primitiva (mismo transform, misma longitud)
+       porque una curva ondulada no se lee como aguja de instrumento a
+       primer vistazo — un trazo recto sí, y es justamente lo que Cap.
+       1.2 pide ("geometría construida" legible, no ambigua). Todo el
+       grupo es lo que anima la oscilación (Cap. 5: "la aguja oscila
+       buscando norte"); en reposo (0°) la punta norte queda alineada
+       con la marca cardinal N de brujula-marcas. -->
   <g class="brujula-aguja" fill="currentColor">
-    <use href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-sinusoide" transform="translate(50 50) scale(0.7) translate(-50 -50) rotate(90 50 50)"/>
+    <use href="../_primitivas/primitivas-compartidas.svg#prim-linea" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-linea" transform="translate(50 50) scale(0.7) translate(-50 -50) rotate(90 50 50)"/>
     <use href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" xlink:href="../_primitivas/primitivas-compartidas.svg#prim-marca-coordenada" transform="translate(0 -28)"/>
   </g>
 
