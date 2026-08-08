@@ -60,6 +60,7 @@ export function crearDomPainter(deps) {
   var getPLANO = deps.getPLANO;
   var getEstado = deps.getEstado;
   var setEstado = deps.setEstado;
+  var obtenerDynamicElements = deps.obtenerDynamicElements;
   var render = deps.render;
 
   function actualizarVisibilidadSugerencias() {
@@ -385,9 +386,9 @@ export function crearDomPainter(deps) {
     mostrarMicroSenalCambioRegion: function() {
       if (!DOM.tituloRegion || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
 
-      if (dynamicElements.avisoCambioRegion) {
-        dynamicElements.avisoCambioRegion.remove();
-        dynamicElements.avisoCambioRegion = null;
+      if (obtenerDynamicElements().avisoCambioRegion) {
+        obtenerDynamicElements().avisoCambioRegion.remove();
+        obtenerDynamicElements().avisoCambioRegion = null;
       }
 
       var tituloNuevo = DOM.tituloRegion.textContent || '';
@@ -397,12 +398,12 @@ export function crearDomPainter(deps) {
       aviso.textContent = tituloNuevo ? 'Cambió lo que ves: ' + tituloNuevo : 'Cambió lo que ves.';
 
       DOM.subtituloRegion.insertAdjacentElement('afterend', aviso);
-      dynamicElements.avisoCambioRegion = aviso;
+      obtenerDynamicElements().avisoCambioRegion = aviso;
 
       setTimeout(function () {
         if (aviso.parentNode) aviso.remove();
-        if (dynamicElements.avisoCambioRegion === aviso) {
-          dynamicElements.avisoCambioRegion = null;
+        if (obtenerDynamicElements().avisoCambioRegion === aviso) {
+          obtenerDynamicElements().avisoCambioRegion = null;
         }
       }, CAMBIO_REGION_AVISO_MS);
     },
@@ -415,24 +416,24 @@ export function crearDomPainter(deps) {
       var debeMostrar = getEstado().sesion.curaduriaSugerida && reg.nombre !== 'curaduria';
 
       if (!debeMostrar) {
-        if (dynamicElements.bannerCuraduria) {
-          dynamicElements.bannerCuraduria.hidden = true;
+        if (obtenerDynamicElements().bannerCuraduria) {
+          obtenerDynamicElements().bannerCuraduria.hidden = true;
         }
         return;
       }
 
-      if (!dynamicElements.bannerCuraduria) {
+      if (!obtenerDynamicElements().bannerCuraduria) {
         this.asegurarBannerCuraduria();
       }
 
-      if (dynamicElements.bannerCuraduria) {
-        dynamicElements.bannerCuraduria.hidden = false;
+      if (obtenerDynamicElements().bannerCuraduria) {
+        obtenerDynamicElements().bannerCuraduria.hidden = false;
       }
     },
 
     /** Helper: Crea el banner si no existe. */
     asegurarBannerCuraduria: function() {
-      if (dynamicElements.bannerCuraduria || !DOM.panelDescubrimiento || !DOM.panelDescubrimiento.parentNode) {
+      if (obtenerDynamicElements().bannerCuraduria || !DOM.panelDescubrimiento || !DOM.panelDescubrimiento.parentNode) {
         return;
       }
 
@@ -471,7 +472,7 @@ export function crearDomPainter(deps) {
       banner.appendChild(btnCerrar);
       DOM.panelDescubrimiento.insertAdjacentElement('beforebegin', banner);
 
-      dynamicElements.bannerCuraduria = banner;
+      obtenerDynamicElements().bannerCuraduria = banner;
     },
 
     /**
@@ -486,22 +487,22 @@ export function crearDomPainter(deps) {
 
       if (!DOM.tituloRegion || !DOM.subtituloRegion) return;
 
-      if (dynamicElements.btnVerCatalogoCompleto) {
-        dynamicElements.btnVerCatalogoCompleto.hidden = true;
+      if (obtenerDynamicElements().btnVerCatalogoCompleto) {
+        obtenerDynamicElements().btnVerCatalogoCompleto.hidden = true;
       }
       this.asegurarBotonVolverATodos();
 
       if (reg.nombre === 'curaduria') {
         DOM.tituloRegion.textContent = 'Tu lista';
         DOM.subtituloRegion.textContent = 'Lo que guardaste, sin recorte ni rotación.' + sufijoCercania();
-        if (dynamicElements.btnVolverATodos) {
-          dynamicElements.btnVolverATodos.hidden = false;
+        if (obtenerDynamicElements().btnVolverATodos) {
+          obtenerDynamicElements().btnVolverATodos.hidden = false;
         }
         return;
       }
 
-      if (dynamicElements.btnVolverATodos) {
-        dynamicElements.btnVolverATodos.hidden = true;
+      if (obtenerDynamicElements().btnVolverATodos) {
+        obtenerDynamicElements().btnVolverATodos.hidden = true;
       }
 
       var rubroMeta = uiState.filtroRubroActivo && window.URU_RUBROS_META
@@ -527,18 +528,18 @@ export function crearDomPainter(deps) {
 
         if (uiState.verCatalogoCompleto && !hayBusquedaOFiltro() && reg.nombre !== 'accionDirecta') {
           this.asegurarBotonVerCatalogoCompleto();
-          if (dynamicElements.btnVerCatalogoCompleto) {
-            dynamicElements.btnVerCatalogoCompleto.textContent = '← Volver a lo sugerido';
-            dynamicElements.btnVerCatalogoCompleto.hidden = false;
+          if (obtenerDynamicElements().btnVerCatalogoCompleto) {
+            obtenerDynamicElements().btnVerCatalogoCompleto.textContent = '← Volver a lo sugerido';
+            obtenerDynamicElements().btnVerCatalogoCompleto.hidden = false;
           }
         }
         return;
       }
 
       this.asegurarBotonVerCatalogoCompleto();
-      if (dynamicElements.btnVerCatalogoCompleto) {
-        dynamicElements.btnVerCatalogoCompleto.textContent = 'Ver catálogo completo →';
-        dynamicElements.btnVerCatalogoCompleto.hidden = false;
+      if (obtenerDynamicElements().btnVerCatalogoCompleto) {
+        obtenerDynamicElements().btnVerCatalogoCompleto.textContent = 'Ver catálogo completo →';
+        obtenerDynamicElements().btnVerCatalogoCompleto.hidden = false;
       }
 
       var sufijoRubro = rubroMeta ? (' Mostrando solo ' + rubroMeta[0].toLowerCase() + '.') : '';
@@ -557,7 +558,7 @@ export function crearDomPainter(deps) {
 
     /** Helper: Asegura que existe el botón "ver catálogo completo". */
     asegurarBotonVerCatalogoCompleto: function() {
-      if (dynamicElements.btnVerCatalogoCompleto || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
+      if (obtenerDynamicElements().btnVerCatalogoCompleto || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
 
       var btn = document.createElement('button');
       btn.type = 'button';
@@ -568,12 +569,12 @@ export function crearDomPainter(deps) {
         render();
       });
       DOM.subtituloRegion.insertAdjacentElement('afterend', btn);
-      dynamicElements.btnVerCatalogoCompleto = btn;
+      obtenerDynamicElements().btnVerCatalogoCompleto = btn;
     },
 
     /** Helper: Asegura que existe el botón "volver a todos" (desde curaduría). */
     asegurarBotonVolverATodos: function() {
-      if (dynamicElements.btnVolverATodos || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
+      if (obtenerDynamicElements().btnVolverATodos || !DOM.subtituloRegion || !DOM.subtituloRegion.parentNode) return;
 
       var btn = document.createElement('button');
       btn.type = 'button';
@@ -591,7 +592,7 @@ export function crearDomPainter(deps) {
         }
       });
       DOM.subtituloRegion.insertAdjacentElement('afterend', btn);
-      dynamicElements.btnVolverATodos = btn;
+      obtenerDynamicElements().btnVolverATodos = btn;
     },
 
     /**

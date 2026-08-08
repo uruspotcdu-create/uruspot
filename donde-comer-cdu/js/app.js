@@ -948,6 +948,7 @@ import { crearAppCoordinator } from './app-coordinator.js';
     getPLANO: getPLANO,
     getEstado: getEstado,
     setEstado: setEstado,
+    obtenerDynamicElements: obtenerDynamicElements,
     render: render
   });
 
