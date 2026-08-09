@@ -58,27 +58,29 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .pullquote p{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;font-weight:300;color:var(--ink);line-height:1.5}
 
 /* GALLERY (restaurado) */
-.gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:240px 240px;gap:6px;border-radius:4px;overflow:hidden}
-.gallery-main{grid-row:1/3}
+.gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:repeat(2,1fr);gap:6px;border-radius:4px;overflow:hidden;height:100%;min-height:484px}
+.gallery:has(.gallery-item:nth-child(4)){grid-template-rows:repeat(3,1fr)}
+.gallery-main{grid-row:1/-1}
 .gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;filter:brightness(0.9) saturate(0.95)}
 .gallery-item{overflow:hidden}
 .gallery-item:hover img{transform:scale(1.04)}
 
-/* GALLERY — hueco vacío bajo la foto (auditoría BRODE, 2026-08): con
-   .about-grid en align-items:start, la columna de la galería (altura
-   fija ~484px) termina mucho antes que la columna de texto cuando el
-   texto es largo, dejando un bloque en blanco debajo de las fotos en
-   cualquier viewport ≥769px. Mismo problema que .side-box ya resolvía
-   para columnas de solo-texto (ver comentario más abajo), pero acá la
-   columna corta es la de fotos, no la de texto.
-   Fix: la columna que envuelve .gallery se estira a la altura completa
-   de la fila (align-self:stretch) y la galería queda sticky dentro de
-   ese alto — así acompaña el scroll del texto en vez de quedar fija
-   arriba con vacío debajo. :has() es progresivo: sin soporte, la
-   columna vuelve a su alto natural (comportamiento previo), sin romper
-   nada. */
+/* GALLERY — hueco vacío bajo la foto (auditoría BRODE, 2026-08; fix
+   revisado 2026-08). El intento anterior (position:sticky) dejaba la
+   galería con una altura fija (~484px) y la columna que la envuelve
+   estirada al alto del texto (align-self:stretch): como la galería no
+   llenaba ese alto, quedaba un bloque en blanco debajo de las fotos en
+   cualquier viewport ≥769px con texto largo — exactamente el bug que
+   se quería resolver, solo que reubicado (sticky no agrega alto, solo
+   fija la posición).
+   Fix real: la galería ahora tiene height:100% del contenedor ya
+   estirado, con filas explícitas a 1fr (2 por defecto, 3 si hay una
+   4ª foto) para que se repartan todo el alto disponible sin dejar
+   espacio vacío. La foto principal usa grid-row:1/-1 para ocupar todas
+   esas filas — importante usar filas EXPLÍCITAS (no grid-auto-rows):
+   la línea "-1" de CSS Grid sólo cuenta filas explícitas, así que con
+   filas implícitas la foto principal no llegaba a estirarse. */
 .about-grid > div:has(> .gallery){align-self:stretch}
-.gallery{position:sticky;top:88px;align-self:start}
 
 /* TAGS (restaurado) */
 .tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
