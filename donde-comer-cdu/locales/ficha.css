@@ -59,7 +59,8 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    css/ficha.css en la raíz ya tenía este mismo fix pero no la referencia
    ninguna página real, así que nunca llegaba a producción. */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.12em;color:var(--gold-dark);text-decoration:none;text-transform:uppercase}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.12em;color:var(--gold-dark);text-decoration:none;text-transform:uppercase;transition:color .2s}
+.nav-logo:hover{color:var(--gold)}
 .nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500}
 .nav-badge{background:var(--gold);color:var(--ink);font-size:10px;font-weight:600;letter-spacing:0.15em;padding:5px 14px;border-radius:2px;text-transform:uppercase}
 
@@ -100,6 +101,14 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .about-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,52px);font-weight:300;line-height:1.1;color:var(--ink);margin-bottom:28px}
 .about-title strong{font-weight:600}
 .about-body{font-size:15px;line-height:1.85;color:var(--muted);font-weight:300;margin-bottom:20px}
+/* ACENTO EN NÚMEROS (identidad naranja, 2026-08-2) — el naranja tenía
+   presencia en títulos/bordes/botones pero no en los números que
+   realmente cuentan la historia del lugar dentro del cuerpo de texto
+   (ej. "72 horas", precios). .stat es un <strong> con un tinte de
+   marca en vez de negro puro, para usar en 1-2 cifras clave por
+   párrafo -- nunca en oraciones completas. gold-dark ya está
+   verificado en AA (5.54:1) sobre --cream/--cream-deep. */
+.about-body strong.stat{color:var(--gold-dark)}
 .pullquote{border-left:3px solid var(--gold);padding:20px 28px;margin:32px 0;background:var(--cream-deep)}
 .pullquote p{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;font-weight:300;color:var(--ink);line-height:1.5}
 
@@ -144,7 +153,7 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .highlight-card:hover{background:var(--ink-soft)}
 .highlight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0;transition:opacity .3s}
 .highlight-card:hover::before{opacity:1}
-.highlight-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:#ffffff;line-height:1;margin-bottom:12px}
+.highlight-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--gold);line-height:1;margin-bottom:12px}
 .highlight-title{font-size:13px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#fff;margin-bottom:8px}
 .highlight-text{font-size:13px;color:#ffffff;line-height:1.6}
 
