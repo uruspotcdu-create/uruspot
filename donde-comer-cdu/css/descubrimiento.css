@@ -45,6 +45,18 @@ header .membrete{
 
 /* ── Hero / buscador ── */
 .hero{ position:relative; padding:var(--esp-12) 0 var(--esp-8); overflow:hidden; }
+/* Viñeta cinematográfica (2026-08-08, pase "más capas"): estática,
+   sin animation ni transform — un oscurecimiento muy sutil de los
+   bordes del hero respecto del centro, el mismo recurso que ya usa
+   cualquier fondo fotográfico/cinematográfico para dar sensación de
+   profundidad de borde a centro. z-index:-2, un escalón detrás del
+   halo (-1), para no competir con sus dos capas de luz — solo
+   enmarca. Ningún color nuevo: negro puro a opacidad mínima, el
+   mismo recurso que --sombra-* ya usa en el resto del sistema. */
+.hero::before{
+  content:""; position:absolute; inset:0; z-index:-2; pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 30%, transparent 55%, rgba(0,0,0,.28) 100%);
+}
 .hero__halo{
   position:absolute; inset:-20% -10% auto -10%; height:420px; z-index:-1;
   background:var(--gradiente-halo); filter:blur(6px); pointer-events:none;

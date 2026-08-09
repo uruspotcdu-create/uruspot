@@ -55,6 +55,29 @@
   color: var(--amb-p1-color);
 }
 
+/* 2026-08-08 (Revisión 8, pase "más capas"): una capa atmosférica
+   extra, completamente estática (sin animation ni transform que
+   varíen), detrás de todo P1. Cap. 4.2 solo prohíbe que P0/P1
+   *cambien* de opacidad por interacción — un valor fijo, que nunca
+   se mueve ni se recalcula, no infringe esa regla. Cero color nuevo
+   (var(--amb-p1-color), el mismo tono neutro que ya tiñe P1) y
+   cero costo de layout (position:fixed + inset, ya en el propio
+   plano). El objetivo es que el fondo entero tenga una gradación de
+   profundidad de borde a centro incluso antes de que cualquier
+   asset (Brújula, Halo) se dibuje encima — hoy esa gradación no
+   existía en ningún plano. */
+.ambiente-plano--p1::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 50% 38%,
+    transparent 55%,
+    color-mix(in srgb, var(--amb-p1-color) 5%, transparent) 100%
+  );
+  pointer-events: none;
+}
+
 .ambiente-plano--p2 {
   z-index: 2;
   color: var(--amb-p2-color);
@@ -235,5 +258,18 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
     transparent 74%
   );
   pointer-events: none;
-  animation: amb-brujula-glow-respiracion 12s ease-in-out -6s infinite;
+  /* Segundo eje sobre esta misma familia de capa (glow exterior):
+     transform ya lo usa para parallax de puntero/scroll; se suma acá
+     una escala respirando muy sutil (Cap. 5 permite hasta 2 ejes por
+     familia — igual que Brújula usa rotación+oscilación en dos
+     grupos distintos, esta familia usa traslación+escala en el
+     mismo elemento). Amplitud mínima (1 → 1.03) para que se lea como
+     aire, no como pulso. */
+  animation: amb-brujula-glow-respiracion 12s ease-in-out -6s infinite,
+             amb-glow-exterior-escala 18s ease-in-out infinite;
+}
+
+@keyframes amb-glow-exterior-escala {
+  0%, 100% { scale: 1; }
+  50%      { scale: 1.03; }
 }
