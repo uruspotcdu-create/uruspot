@@ -3,7 +3,7 @@
  * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-09T00:09:02.343Z
+ * Generado: 2026-08-09T00:14:38.135Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -698,6 +698,23 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   transform: translate(-50%, -50%);
 }
 
+.ambiente-plano--p2::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(95vmin, 1000px);
+  height: min(95vmin, 1000px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-granate-clara, #C97A83) 16%, transparent) 0%,
+    color-mix(in srgb, var(--color-granate-clara, #C97A83) 6%, transparent) 45%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
 /* ==== css/ambiente-capa-fondo.css ==== */
 @property --ambiente-color-1 {
   syntax: '<color>';
@@ -718,7 +735,8 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
 
   
   background:
-    radial-gradient(120% 55% at 50% -8%, rgba(255,255,255,.035), transparent 62%),
+    radial-gradient(120% 55% at 50% -8%, rgba(255,255,255,.06), transparent 62%),
+    radial-gradient(90% 60% at 50% 45%, rgba(255,255,255,.025), transparent 70%),
     linear-gradient(180deg, var(--ambiente-color-1) 0%, var(--ambiente-color-2) 100%);
 
   

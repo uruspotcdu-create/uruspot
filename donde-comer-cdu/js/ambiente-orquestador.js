@@ -178,35 +178,36 @@
     // contenedores huérfanos sin sentido arquitectónico propio.
     if (!global.AmbienteFlags || global.AmbienteFlags.activo('sustratoVisual')) {
       if (global.AmbientePlanos) global.AmbientePlanos.iniciar();
-      // 2026-08-08: Retícula, Topográficas y Corrientes quedan sin
-      // iniciar a propósito. Las tres pintan líneas/curvas en P0/P1,
-      // superpuestas entre sí y con la Brújula (P2) en la misma zona
-      // de pantalla — el resultado combinado se leía como ruido de
-      // líneas onduladas, no como los símbolos individuales que son.
-      // La Brújula (Cap. 2.1: "ancla simbólica única del producto")
-      // es la única familia de fondo que debe leerse con claridad;
-      // se la deja sola en pantalla en vez de compitiendo contra las
-      // otras tres. Los módulos siguen existiendo en el repo — basta
-      // con volver a llamar a su .iniciar() acá para reactivarlos.
-      // if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
-      // if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
+      // 2026-08-08 (Revisión 2, tras el rediseño de la Brújula a
+      // ícono sólido bicolor — ver brujula--default--regular-v3.svg):
+      // Retícula y Topográficas se reactivan. El motivo original para
+      // apagarlas (más abajo, nota sin tocar) era que la Brújula, con
+      // su geometría anterior de línea fina, se confundía con estas
+      // líneas de fondo. Ya no aplica: la Brújula ahora es una forma
+      // sólida con relleno de color, visualmente muy distinta de una
+      // grilla o de arcos hairline — pueden convivir sin que el ojo
+      // las confunda. Se reactivan para dar textura cartográfica al
+      // fondo (Cap. 2.1: "sin ella todo lo demás flota sin
+      // contexto") en vez de dejar un vacío liso.
+      // Corrientes queda apagada a propósito, sin cambios: es la
+      // única de las tres que usa la primitiva prim-sinusoide (ver
+      // corrientes--diagonal-lenta--hairline.svg) — exactamente el
+      // patrón de curvas onduladas que el feedback original pidió
+      // sacar de encima. Sigue existiendo en el repo por si alguna
+      // vez se rediseña con otra primitiva.
+      if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
+      if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
       // if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
       if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
       if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
-      // 2026-08-08 (feedback visual directo, mismo motivo que la nota
-      // de más arriba sobre Retícula/Topográficas/Corrientes): las
-      // Partículas de deriva son 5 círculos sueltos (misma primitiva
-      // circulo-concéntrico que usa el aro de la Brújula, Cap. 3.3)
-      // esparcidos por TODO el viewport, no solo cerca del centro —
-      // el resultado, en la práctica, era el mismo problema que ya
-      // se había resuelto para las otras tres familias: demasiados
-      // círculos del mismo estilo compitiendo contra la Brújula por
-      // atención, ninguno leyéndose como "esto es la Brújula" en
-      // particular. Queda sin iniciar por el mismo criterio: la
-      // Brújula es el "ancla simbólica única del producto" (Cap. 2.1)
-      // y debe quedar sola en pantalla. El módulo sigue existiendo en
-      // el repo — basta con descomentar esta línea para reactivarlo.
-      // if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
+      // 2026-08-08 (Revisión 2, mismo motivo que Retícula/Topográficas
+      // arriba): Partículas de deriva se reactiva. El problema
+      // original (círculos hairline compitiendo contra la Brújula)
+      // ya no aplica con el ícono sólido bicolor actual — el
+      // contraste de forma y color entre ambas familias es alto,
+      // así que las motas ahora se leen como vida ambiental suelta,
+      // no como ruido confundible con el instrumento.
+      if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
       if (global.AmbienteHalos) global.AmbienteHalos.iniciar();
       if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
       // Fase 8 (Visual & Design Master Pass): AmbienteParticulas (Fase 2,

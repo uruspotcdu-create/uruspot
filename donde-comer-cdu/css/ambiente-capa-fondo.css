@@ -46,14 +46,26 @@
      (sin animación, sin blur, sin @keyframes), que sugiere una fuente
      de luz alta y difusa — el mismo lenguaje que ya usa
      #ambient-vigneta (oscurece hacia los bordes) pero en sentido
-     inverso y mucho más tenue (3.5% vs su 100%). No introduce color
-     nuevo: es blanco a opacidad mínima sobre el propio degradé, así
-     que se lee como luz ambiental del cielo, nunca como una marca de
-     producto superpuesta. Costo: un solo gradiente estático adicional
-     en la misma capa fixed que ya existe — sin nuevo elemento en el
-     DOM, sin nuevo listener, sin nuevo ciclo de animación. */
+     inverso y mucho más tenue (originalmente 3.5% vs su 100%; ver
+     nota de Revisión 2 más abajo). No introduce color nuevo: es
+     blanco a opacidad mínima sobre el propio degradé, así que se lee
+     como luz ambiental del cielo, nunca como una marca de producto
+     superpuesta. Costo: un solo gradiente estático adicional en la
+     misma capa fixed que ya existe — sin nuevo elemento en el DOM,
+     sin nuevo listener, sin nuevo ciclo de animación.
+
+     Revisión 2 (mejora de fondo, feedback directo: "que no quede tan
+     oscuro"): 3.5% → 6% en el resplandor superior, y se agrega un
+     segundo radial-gradient mucho más tenue (2.5%) centrado más abajo
+     en el documento (a 45% del alto) para que la luz no se sienta
+     como una sola fuente puntual arriba del todo, sino como un
+     degradé de dos focos suaves — sigue siendo blanco a opacidad
+     mínima sobre el mismo degradé de fondo, mismo criterio que la
+     nota original: nunca introduce color nuevo ni compite con el
+     glow ya agregado detrás de la Brújula en ambiente-planos.css. */
   background:
-    radial-gradient(120% 55% at 50% -8%, rgba(255,255,255,.035), transparent 62%),
+    radial-gradient(120% 55% at 50% -8%, rgba(255,255,255,.06), transparent 62%),
+    radial-gradient(90% 60% at 50% 45%, rgba(255,255,255,.025), transparent 70%),
     linear-gradient(180deg, var(--ambiente-color-1) 0%, var(--ambiente-color-2) 100%);
 
   /* Banda ambiental (Cap. 3.1): la transición dura menos que el

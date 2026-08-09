@@ -124,5 +124,38 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   transform: translate(-50%, -50%);
 }
 
+/* 2026-08-08 (Revisión 2, mejora de fondo tras el rediseño a ícono
+   sólido): resplandor suave detrás de la Brújula. Antes del rediseño
+   el asset era pura línea sin relleno, así que un glow detrás no
+   tenía sobre qué apoyarse visualmente; con el ícono sólido bicolor
+   actual, un halo de luz centrado en el mismo punto lee como que la
+   Brújula ilumina el fondo que la rodea — reduce la sensación de
+   "vacío oscuro" alrededor sin agregar ningún elemento nuevo al DOM
+   (pseudo-elemento sobre el propio contenedor del plano P2, pintado
+   antes que sus hijos en el orden normal de stacking, por eso queda
+   detrás sin necesitar z-index explícito).
+   radial-gradient, no filter:blur (Cap. 9.1: "jamás filter como
+   recurso de estilo") — el desenfoque lo da el propio degradé de
+   opacidad decreciente, mismo criterio que ya usa la familia Halos
+   para su anillo de foco. Color: --color-granate-clara vía
+   color-mix, el mismo acento que ya tiñe la punta norte de la aguja
+   — nunca un color nuevo (Cap. 3.4, 11.2). */
+.ambiente-plano--p2::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(95vmin, 1000px);
+  height: min(95vmin, 1000px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-granate-clara, #C97A83) 16%, transparent) 0%,
+    color-mix(in srgb, var(--color-granate-clara, #C97A83) 6%, transparent) 45%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
 
 
