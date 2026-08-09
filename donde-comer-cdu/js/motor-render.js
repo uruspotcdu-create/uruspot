@@ -1415,12 +1415,15 @@
         ctx.scale(0.5 + e * 0.5, 0.5 + e * 0.5);
         ctx.translate(-x, -y);
       }
+      // Círculo de fondo eliminado a pedido (2026-08-08)
+      /*
       if (activo) {
         ctx.beginPath();
         ctx.arc(x, y, r + 9, 0, Math.PI * 2);
         ctx.fillStyle = hexARgba(color, 0.22);
         ctx.fill();
       }
+      */
       var sprite = obtenerSpriteMarcador(color, activo, punto, dpr);
       ctx.drawImage(
         sprite.canvas,
@@ -1520,13 +1523,13 @@
       octx.setTransform(dprActual, 0, 0, dprActual, 0, 0);
       var ox = SPRITE_CLUSTER_ORIGEN, oy = SPRITE_CLUSTER_ORIGEN;
 
-      // Halo de luz detrás del cluster — sin esto el círculo quedaba
-      // plano contra el tile pálido del basemap y se perdía. Con el
-      // halo, el mismo cluster "flota" sobre el mapa.
+      // Halo de luz eliminado a pedido (2026-08-08)
+      /*
       octx.beginPath();
       octx.arc(ox, oy, rGlow, 0, Math.PI * 2);
       octx.fillStyle = hexARgba(colorDominante, esResaltado ? 0.35 : 0.22);
       octx.fill();
+      */
 
       octx.beginPath();
       octx.arc(ox, oy, r, 0, Math.PI * 2);
