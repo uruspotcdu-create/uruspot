@@ -305,8 +305,6 @@
   // (triángulo norte + cola sur), rotado vía CSS transform en JS.
   function svgRosaDeRumbos() {
     return '<svg class="brujula-rosa" viewBox="0 0 100 100" width="56" height="56" aria-hidden="true" focusable="false">' +
-      '<circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".35"/>' +
-      '<circle cx="50" cy="8" r="2.4" fill="currentColor" opacity=".6"/>' +
       '<g class="brujula-aguja">' +
       '<path d="M50 12 L58 50 L50 42 L42 50 Z" fill="var(--gold)"/>' +
       '<path d="M50 88 L42 50 L50 58 L58 50 Z" fill="currentColor" opacity=".35"/>' +
