@@ -280,8 +280,17 @@
   background:color-mix(in srgb, var(--color-granate-clara) 14%, transparent);
   padding:1px 7px; border-radius:var(--radio-full);
 }
+/* 2026-08-09 (pasada #6): suma un anillo de 1px al borde ya coloreado
+   — antes .tarjeta--comparando solo cambiaba border-color, señal débil
+   ahora que TODAS las tarjetas ya tienen su propio halo ambiental por
+   --chip-color (pasada #2). No reutiliza --sombra-glow (reservado
+   para .tarjeta--resaltada, la sincronización con el mapa — un estado
+   distinto que puede coexistir con "en comparación" sobre la misma
+   tarjeta) — un anillo nítido de 1px es una señal de selección
+   propia, sin el halo difuso que ya usa el estado del mapa. */
 .tarjeta--comparando{
   border-color:var(--color-granate-clara);
+  box-shadow:var(--sombra-vidrio), 0 0 0 1px var(--color-granate-clara);
 }
 .nota-comparacion{
   grid-column:1 / -1; color:var(--color-tinta-60); font:var(--tipo-cuerpo-xs);
