@@ -148,14 +148,31 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   width: min(95vmin, 1000px);
   height: min(95vmin, 1000px);
   transform: translate(-50%, -50%);
+  /* 2026-08-08 (Revisión 3): antes usaba --color-granate-clara fijo,
+     desincronizado del tinte de amanecer/atardecer que ya aplica
+     js/ambiente-horario-tinte.js sobre --amb-p3-color (Cap. 7.3). Se
+     referencia esa misma variable acá — cuando la aguja se entibia
+     con el ámbar del amanecer/atardecer, el glow que la rodea lo
+     hace junto con ella, en vez de quedar como dos fuentes de color
+     independientes. Ningún token nuevo: el mismo --amb-p3-color que
+     ya existía, solo que hasta ahora nadie fuera del propio asset lo
+     consumía. */
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--color-granate-clara, #C97A83) 16%, transparent) 0%,
-    color-mix(in srgb, var(--color-granate-clara, #C97A83) 6%, transparent) 45%,
+    color-mix(in srgb, var(--amb-p3-color) 16%, transparent) 0%,
+    color-mix(in srgb, var(--amb-p3-color) 6%, transparent) 45%,
     transparent 72%
   );
   pointer-events: none;
+  /* Respiración muy lenta y de baja amplitud, exclusiva del glow (no
+     toca la brújula en sí). Mismo criterio que amb-carga-presencia
+     más arriba: opacidad, nunca transform/tamaño, y automáticamente
+     neutralizada por la regla global de prefers-reduced-motion en
+     css/tokens.css (animation-duration: .001ms !important). */
+  animation: amb-brujula-glow-respiracion 12s ease-in-out infinite;
 }
 
-
-
+@keyframes amb-brujula-glow-respiracion {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .88; }
+}
