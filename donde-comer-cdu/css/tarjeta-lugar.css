@@ -21,6 +21,26 @@
    sigue resolviendo solo cuántas columnas entran en cada ancho — no
    hace falta un breakpoint nuevo acá. */
 #panelDescubrimiento{
+  /* 2026-08-09 (pasada #8): BUG REAL en tokens.css, confirmado —
+     --color-tinta-60 está declarado como #ffffff (blanco sólido,
+     igual que --color-tinta), rompiendo la escala de opacidad que su
+     propio nombre promete (tinta-30 en .26, tinta-60 en "algo cerca
+     de .6", tinta-80 en .82 — los otros dos escalones sí siguen el
+     patrón). Efecto real dentro de la tarjeta: .tarjeta-direccion,
+     .tarjeta-razon, .nota-comparacion y .vacio (todos pensados como
+     texto secundario, más apagado que el nombre) se ven exactamente
+     igual de brillantes que el texto principal; y .tarjeta-btn en
+     reposo/:hover usan --color-tinta-60/--color-tinta respectivamente
+     esperando un cambio de color visible al pasar el mouse — con
+     ambos tokens iguales a #ffffff, ese hover no cambia de color en
+     absoluto (solo mueve el borde/fondo, el texto se queda igual).
+     tokens.css es compartido por todo el sitio, así que corregir el
+     token ahí queda fuera de esta pasada ("solo tarjetas"). Se
+     redeclara acá, en el ancestro real de todos esos elementos —
+     custom properties son heredables, así que este único valor
+     corrige los seis usos de --color-tinta-60 que hay en este archivo
+     sin tocar tokens.css ni duplicar el valor seis veces. */
+  --color-tinta-60: rgba(236,237,239,.6);
   display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
   gap:var(--esp-6); padding:var(--esp-6) 0 var(--esp-12); position:relative; z-index:1;
 }
