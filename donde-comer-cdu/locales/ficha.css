@@ -29,6 +29,18 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500}
 .nav-badge{background:var(--gold);color:var(--ink);font-size:10px;font-weight:600;letter-spacing:0.15em;padding:5px 14px;border-radius:2px;text-transform:uppercase}
 
+/* BUGFIX (auditoria Brode, 2026-08): .badge-verificado se agrego al nav
+   de brode/index.html sin ninguna regla de CSS en todo el repo. El <svg>
+   interno no trae width/height propios (solo viewBox), asi que sin este
+   bloque el navegador lo pintaba a su tamaño intrinseco por defecto y
+   tapaba la pagina entera (visible en produccion como un blob gris con
+   un swoosh negro encima). El icono ahora queda acotado a 14px, en linea
+   con el resto de los badges del nav (.nav-tag/.nav-badge), mismo
+   tratamiento responsive: se oculta en mobile por espacio, igual que
+   ellos, en vez de forzar overflow horizontal en el nav. */
+.badge-verificado{display:inline-flex;align-items:center;gap:6px;background:rgba(45,106,79,0.1);color:var(--green-accent);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:2px;white-space:nowrap;flex-shrink:0}
+.badge-verificado svg{width:14px;height:14px;flex-shrink:0;display:block}
+
 /* MAIN LAYOUT (restaurado — borrado por error en commit 96b7b08) */
 .page{max-width:1200px;margin:0 auto;padding:80px 48px}
 
@@ -280,7 +292,7 @@ html.u-suprimir-vidrio .hero-score{
   .review-summary-body{grid-template-columns:1fr;text-align:center;gap:20px}
   .amenities-section,.reviews-section{padding:52px 20px}
   .nav{padding:16px 20px}
-  .nav-tag,.nav-badge{display:none}
+  .nav-tag,.nav-badge,.badge-verificado{display:none}
   .hero-content{padding:0 20px 44px}
   .hero-score{display:none}
   .page{padding:48px 20px}
