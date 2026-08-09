@@ -69,17 +69,23 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    quedan agrupados a la derecha, con el aire real concentrado en el
    medio en vez de repartido mecánicamente en 3 huecos iguales. */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:18px;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-/* IDENTIDAD (auditoría Brode, 2026-08-3): --gold-dark (#b83505) tiene
-   H≈16° -- un naranja corrido hacia el rojo que sobre --cream se
-   percibe más "ladrillo/óxido" que "naranja de marca". Se sube el
-   matiz a H≈20° manteniendo saturación y luminosidad casi intactas
-   (#b84105) para que se lea más cerca del naranja del logo real sin
-   tocar el margen de contraste ya verificado: 5.17:1 sobre --cream
-   (baja de 5.54:1, sigue sobrando para AA normal-text 4.5:1). */
-.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.12em;color:#b84105;text-decoration:none;text-transform:uppercase;transition:color .2s}
+/* IDENTIDAD, TOMA 2 (auditoría Brode, 2026-08-4) — el ajuste anterior
+   (H16→H20, manteniendo casi la misma luminosidad) era matemáticamente
+   correcto pero visualmente imperceptible a simple vista: seguía siendo
+   el mismo tono oscuro "óxido". Esta vez el cambio es real: color
+   #e6460a (bastante más vívido y saturado, mucho más cerca del naranja
+   real del logo/isotipo) + peso 700 (antes 600, ya no es semibold, es
+   bold de verdad) + tamaño 24px (antes 22px). Ese combo no es
+   cosmético nada más: al subir a 24px Y volverse bold, el texto entra
+   de lleno en la categoría "texto grande" de WCAG (≥24px, o ≥18.66px
+   en bold), que exige 3:1 en vez de 4.5:1 -- y #e6460a da 3.75:1 sobre
+   --cream, con margen real, no al límite como daba --gold puro (~3:1
+   justo). O sea: más vívido Y sigue siendo accesible, no una cosa a
+   costa de la otra. */
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;letter-spacing:0.1em;color:#e6460a;text-decoration:none;text-transform:uppercase;transition:color .2s}
 .nav-logo:hover{color:var(--gold)}
 .nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500;margin-right:auto}
-.nav-badge{background:var(--gold);color:var(--ink);font-size:10px;font-weight:600;letter-spacing:0.15em;padding:5px 14px;border-radius:2px;text-transform:uppercase}
+.nav-badge{background:var(--gold);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:0.13em;padding:7px 16px;border-radius:3px;text-transform:uppercase}
 
 /* BUGFIX (auditoria Brode, 2026-08): .badge-verificado se agrego al nav
    de brode/index.html sin ninguna regla de CSS en todo el repo. El <svg>
@@ -90,15 +96,15 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    con el resto de los badges del nav (.nav-tag/.nav-badge), mismo
    tratamiento responsive: se oculta en mobile por espacio, igual que
    ellos, en vez de forzar overflow horizontal en el nav. */
-/* LEGIBILIDAD (auditoría Brode, 2026-08-3) — el chip tenía relleno al
-   10% de opacidad y sin borde: sobre el fondo casi-blanco del nav
-   (rgba(250,247,242,0.92)) el relleno prácticamente no se distinguía
-   del fondo, así que dejaba de leerse como "badge" y quedaba como
-   texto verde flotando sin contenedor. El texto en sí siempre tuvo
-   buen contraste (5.98:1, sin cambios acá) -- el problema era la forma
-   del chip, no el color del texto. Relleno al 16% + borde propio le
-   dan la misma "masa" visual que ya tiene .nav-badge al lado. */
-.badge-verificado{display:inline-flex;align-items:center;gap:6px;background:rgba(45,106,79,0.16);border:1px solid rgba(45,106,79,0.3);color:var(--green-accent);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:2px;white-space:nowrap;flex-shrink:0}
+/* LEGIBILIDAD, TOMA 2 (auditoría Brode, 2026-08-4) — el intento anterior
+   (relleno al 16% + borde) seguía siendo un tinte pálido, casi el mismo
+   problema con otro número. Se abandona la idea de "tinte sutil" -- ahora
+   es un badge de relleno SÓLIDO (--green-accent) con texto blanco, el
+   mismo tratamiento visual que ya usa .nav-badge (relleno sólido + texto
+   claro), para que ambos badges se lean como el mismo tipo de elemento
+   con el mismo peso. Contraste texto blanco sobre --green-accent: 6.39:1,
+   de sobra para AA normal-text (4.5:1). */
+.badge-verificado{display:inline-flex;align-items:center;gap:6px;background:var(--green-accent);border:none;color:#fff;font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;padding:7px 14px;border-radius:3px;white-space:nowrap;flex-shrink:0}
 .badge-verificado svg{width:14px;height:14px;flex-shrink:0;display:block}
 
 /* MAIN LAYOUT (restaurado — borrado por error en commit 96b7b08) */
