@@ -53,12 +53,38 @@
   var FACTOR_GLOW = 0.007;
   var TOPE_GLOW = 22;
 
+  // 2026-08-08 (Revisión 6): segunda señal de profundidad, además del
+  // scroll — posición del puntero. Deliberadamente restringida a
+  // dispositivos con puntero fino y hover real (mouse de escritorio):
+  // `matchMedia('(hover: hover) and (pointer: fine)')` es el mismo
+  // criterio que ya usa el resto de la industria para distinguir
+  // "puede acompañar al cursor sin estorbar" de touch, donde un
+  // `pointermove` no es una señal de atención del usuario sino ruido
+  // del propio gesto de scroll/tap — nunca se agrega el listener en
+  // touch, ni siquiera detrás de un chequeo posterior. Igual criterio
+  // de "el glow queda más atrás" que ya rige el parallax de scroll de
+  // más arriba: dos variables nuevas, misma jerarquía de profundidad,
+  // ahora sumada en vez de reemplazando a la variable de scroll (ver
+  // el `calc()` combinado en css/ambiente-planos.css).
+  var FACTOR_PUNTERO_BRUJULA = 0.05;
+  var TOPE_PUNTERO_BRUJULA = 18;
+  var FACTOR_PUNTERO_GLOW = 0.022;
+  var TOPE_PUNTERO_GLOW = 9;
+
   var contenedorPlano = null;
   var ultimoScrollY = null;
   var frameSolicitado = false;
   var listenerActivo = false;
+  var frameSolicitadoPuntero = false;
+  var listenerPunteroActivo = false;
+  var ultimoPunteroX = 0;
+  var ultimoPunteroY = 0;
 
   function accesibilidad() { return global.AmbienteAccesibilidad || null; }
+  function soportaPuntero() {
+    return typeof global.matchMedia === 'function' &&
+      global.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  }
 
   function clamp(valor, tope) {
     return Math.max(-tope, Math.min(tope, valor));
@@ -82,17 +108,68 @@
     global.requestAnimationFrame(aplicarScroll);
   }
 
+  function aplicarPuntero() {
+    frameSolicitadoPuntero = false;
+    if (!contenedorPlano) return;
+    // Offset relativo al centro del viewport, no a la posición
+    // absoluta del puntero — así el efecto es "hacia dónde mirás
+    // dentro de la pantalla", no una coordenada cruda sin sentido
+    // visual (mismo espíritu que el ancla óptica (50,50) que ya usan
+    // Coordenadas/Halos).
+    var dx = ultimoPunteroX - global.innerWidth / 2;
+    var dy = ultimoPunteroY - global.innerHeight / 2;
+    contenedorPlano.style.setProperty('--amb-brujula-puntero-x', clamp(dx * FACTOR_PUNTERO_BRUJULA, TOPE_PUNTERO_BRUJULA));
+    contenedorPlano.style.setProperty('--amb-brujula-puntero-y', clamp(dy * FACTOR_PUNTERO_BRUJULA, TOPE_PUNTERO_BRUJULA));
+    contenedorPlano.style.setProperty('--amb-brujula-glow-puntero-x', clamp(dx * FACTOR_PUNTERO_GLOW, TOPE_PUNTERO_GLOW));
+    contenedorPlano.style.setProperty('--amb-brujula-glow-puntero-y', clamp(dy * FACTOR_PUNTERO_GLOW, TOPE_PUNTERO_GLOW));
+  }
+
+  function alMoverPuntero(evento) {
+    ultimoPunteroX = evento.clientX;
+    ultimoPunteroY = evento.clientY;
+    if (frameSolicitadoPuntero) return;
+    frameSolicitadoPuntero = true;
+    global.requestAnimationFrame(aplicarPuntero);
+  }
+
+  function activarParallaxPunteroSiCorresponde() {
+    var a = accesibilidad();
+    var reducido = !!(a && a.reducirMovimiento);
+    if (reducido || !soportaPuntero()) {
+      desactivarParallaxPuntero();
+      return;
+    }
+    if (listenerPunteroActivo || !contenedorPlano) return;
+    global.addEventListener('pointermove', alMoverPuntero, { passive: true });
+    listenerPunteroActivo = true;
+  }
+
+  function desactivarParallaxPuntero() {
+    if (!listenerPunteroActivo) return;
+    global.removeEventListener('pointermove', alMoverPuntero);
+    listenerPunteroActivo = false;
+    if (contenedorPlano) {
+      contenedorPlano.style.removeProperty('--amb-brujula-puntero-x');
+      contenedorPlano.style.removeProperty('--amb-brujula-puntero-y');
+      contenedorPlano.style.removeProperty('--amb-brujula-glow-puntero-x');
+      contenedorPlano.style.removeProperty('--amb-brujula-glow-puntero-y');
+    }
+  }
+
   function activarParallaxSiCorresponde() {
     var a = accesibilidad();
     var reducido = !!(a && a.reducirMovimiento);
     if (reducido) {
       desactivarParallax();
+      desactivarParallaxPuntero();
       return;
     }
-    if (listenerActivo || !contenedorPlano) return;
-    global.addEventListener('scroll', alScroll, { passive: true });
-    listenerActivo = true;
-    aplicarScroll();
+    if (!listenerActivo && contenedorPlano) {
+      global.addEventListener('scroll', alScroll, { passive: true });
+      listenerActivo = true;
+      aplicarScroll();
+    }
+    activarParallaxPunteroSiCorresponde();
   }
 
   function desactivarParallax() {
