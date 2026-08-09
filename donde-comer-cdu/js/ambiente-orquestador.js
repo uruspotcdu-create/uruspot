@@ -201,14 +201,7 @@
       if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
       if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
       if (global.AmbienteBrujulitas) global.AmbienteBrujulitas.iniciar();
-      // 2026-08-08 (Revisión 2, mismo motivo que Retícula/Topográficas
-      // arriba): Partículas de deriva se reactiva. El problema
-      // original (círculos hairline compitiendo contra la Brújula)
-      // ya no aplica con el ícono sólido bicolor actual — el
-      // contraste de forma y color entre ambas familias es alto,
-      // así que las motas ahora se leen como vida ambiental suelta,
-      // no como ruido confundible con el instrumento.
-      if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
+      // if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar(); — 2026-08-09: sacado de nuevo, esta vez por la causa raíz real. La Revisión 2 (comentario de arriba, ahora incorrecto) asumió que el problema era de contraste de color/forma contra la Brújula; el problema real es de escala: a diferencia de .amb-asset--brujula, la familia particulas-deriva.svg NUNCA tuvo su propia regla CSS de width/height/position (ver css/ambiente-planos.css). Sin esa regla, el navegador estira el <svg> (viewBox 100x100) a pantalla completa, y sus 5 "motas" — dibujadas como aros de hasta el 20% del ancho de esa grilla de 100 unidades, pensadas como puntos minúsculos — se estiran con él: dejan de ser puntitos y pasan a ser círculos grandes, algunos de decenas de % del ancho de pantalla, superpuestos al contenido real. Es exactamente el mismo síntoma que ya motivó sacar Topográficas y Corrientes: círculos de fondo que no aportan nada. Si en el futuro se quiere esta familia de vuelta, primero hay que sumarle una regla `.amb-asset--particulas { position: fixed; inset: 0; width: 100vw; height: 100vh; }` explícita (como tiene la Brújula) y volver a calibrar la escala de cada mota para que sea realmente chica en píxeles, no proporcional a un viewBox que ahora cubre toda la pantalla.
       if (global.AmbienteHalos) global.AmbienteHalos.iniciar();
       if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
       // Fase 8 (Visual & Design Master Pass): AmbienteParticulas (Fase 2,
