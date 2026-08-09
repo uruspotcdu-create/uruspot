@@ -200,6 +200,7 @@
       // if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
       if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
       if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
+      if (global.AmbienteBrujulitas) global.AmbienteBrujulitas.iniciar();
       // 2026-08-08 (Revisión 2, mismo motivo que Retícula/Topográficas
       // arriba): Partículas de deriva se reactiva. El problema
       // original (círculos hairline compitiendo contra la Brújula)

@@ -92,6 +92,7 @@ const ORDEN = [
   'ambiente-corrientes.js',
   'ambiente-coordenadas.js',
   'ambiente-brujula.js',
+  'ambiente-brujulitas.js',
   'ambiente-particulas-deriva.js',
   'ambiente-halos.js',
   'ambiente-horario-tinte.js',

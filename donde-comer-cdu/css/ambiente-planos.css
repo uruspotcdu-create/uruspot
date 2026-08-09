@@ -195,124 +195,15 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   );
 }
 
-/* 2026-08-08 (Revisión 2, mejora de fondo tras el rediseño a ícono
-   sólido): resplandor suave detrás de la Brújula. Antes del rediseño
-   el asset era pura línea sin relleno, así que un glow detrás no
-   tenía sobre qué apoyarse visualmente; con el ícono sólido bicolor
-   actual, un halo de luz centrado en el mismo punto lee como que la
-   Brújula ilumina el fondo que la rodea — reduce la sensación de
-   "vacío oscuro" alrededor sin agregar ningún elemento nuevo al DOM
-   (pseudo-elemento sobre el propio contenedor del plano P2, pintado
-   antes que sus hijos en el orden normal de stacking, por eso queda
-   detrás sin necesitar z-index explícito).
-   radial-gradient, no filter:blur (Cap. 9.1: "jamás filter como
-   recurso de estilo") — el desenfoque lo da el propio degradé de
-   opacidad decreciente, mismo criterio que ya usa la familia Halos
-   para su anillo de foco. Color: --color-granate-clara vía
-   color-mix, el mismo acento que ya tiñe la punta norte de la aguja
-   — nunca un color nuevo (Cap. 3.4, 11.2). */
-.ambiente-plano--p2::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(95vmin, 1000px);
-  height: min(95vmin, 1000px);
-  /* 2026-08-08 (Revisión 4): mismo mecanismo que .amb-asset--brujula
-     de más arriba, pero leyendo --amb-brujula-glow-scroll — una
-     variable distinta, a propósito, escrita por el mismo módulo con
-     una velocidad y sentido distintos (ver nota extensa en
-     js/ambiente-brujula.js). El glow queda relativamente atrás de la
-     Brújula al scrollear: esa diferencia de velocidad entre las dos
-     variables es lo que se lee como profundidad de dos capas, no
-     como un solo elemento plano. */
-  transform: translate(
-    calc(-50% + (var(--amb-brujula-glow-puntero-x, 0) * 1px)),
-    calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px) + (var(--amb-brujula-glow-puntero-y, 0) * 1px))
-  );
-  /* 2026-08-08 (Revisión 3): antes usaba --color-granate-clara fijo,
-     desincronizado del tinte de amanecer/atardecer que ya aplica
-     js/ambiente-horario-tinte.js sobre --amb-p3-color (Cap. 7.3). Se
-     referencia esa misma variable acá — cuando la aguja se entibia
-     con el ámbar del amanecer/atardecer, el glow que la rodea lo
-     hace junto con ella, en vez de quedar como dos fuentes de color
-     independientes. Ningún token nuevo: el mismo --amb-p3-color que
-     ya existía, solo que hasta ahora nadie fuera del propio asset lo
-     consumía. */
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--amb-p3-color) 16%, transparent) 0%,
-    color-mix(in srgb, var(--amb-p3-color) 6%, transparent) 45%,
-    transparent 72%
-  );
-  pointer-events: none;
-  /* Respiración muy lenta y de baja amplitud, exclusiva del glow (no
-     toca la brújula en sí). Mismo criterio que amb-carga-presencia
-     más arriba: opacidad, nunca transform/tamaño, y automáticamente
-     neutralizada por la regla global de prefers-reduced-motion en
-     css/tokens.css (animation-duration: .001ms !important). */
-  animation: amb-brujula-glow-respiracion 12s ease-in-out infinite;
-}
-
-@keyframes amb-brujula-glow-respiracion {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .88; }
-}
-
-/* 2026-08-08 (Revisión 7): un segundo anillo de resplandor, más
-   grande y mucho más tenue que el de ::before, para que el fondo
-   lea "capas de profundidad" en vez de una sola mancha de luz.
-   Mismo mecanismo (radial-gradient, no filter:blur — Cap. 9.1),
-   mismo color de origen (--amb-p3-color, cero tokens nuevos — Cap.
-   3.4/11.2) y misma variable de scroll/puntero que ::before para no
-   introducir una tercera señal de movimiento (Cap. 8.1: "no se
-   define movimiento a medida por asset"). Se desfasa la respiración
-   6s respecto de ::before (mitad del ciclo de 12s) para que las dos
-   capas nunca "respiren" exactamente juntas — la diferencia de fase,
-   no de velocidad, es lo que se lee como aire entre ambas. */
-.ambiente-plano--p2::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(130vmin, 1360px);
-  height: min(130vmin, 1360px);
-  transform: translate(
-    calc(-50% + (var(--amb-brujula-glow-puntero-x, 0) * 1px)),
-    calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px) + (var(--amb-brujula-glow-puntero-y, 0) * 1px))
-  );
-  /* Revisión 9 (2026-08-08, pase "hasta el límite"): se suma un
-     tercer anillo "sonar" como una tercera capa DENTRO del mismo
-     background — no un pseudo-elemento ni un <div> nuevo (eso
-     obligaría a una familia a crear su propio elemento, en contra
-     de Cap. 4.1: "ninguna familia crea su propio plano"). Mismo
-     elemento, mismo transform, cero costo extra de layout/paint más
-     allá de un stop de gradiente adicional. */
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--amb-p3-color) 7%, transparent) 0%,
-    color-mix(in srgb, var(--amb-p3-color) 2.5%, transparent) 50%,
-    transparent 74%
-  ),
-  radial-gradient(
-    circle,
-    transparent 60%,
-    color-mix(in srgb, var(--amb-p3-color) 1.2%, transparent) 78%,
-    transparent 92%
-  );
-  pointer-events: none;
-  /* Segundo eje sobre esta misma familia de capa (glow exterior):
-     transform ya lo usa para parallax de puntero/scroll; se suma acá
-     una escala respirando muy sutil (Cap. 5 permite hasta 2 ejes por
-     familia — igual que Brújula usa rotación+oscilación en dos
-     grupos distintos, esta familia usa traslación+escala en el
-     mismo elemento). Amplitud mínima (1 → 1.03) para que se lea como
-     aire, no como pulso. */
-  animation: amb-brujula-glow-respiracion 12s ease-in-out -6s infinite,
-             amb-glow-exterior-escala 18s ease-in-out infinite;
-}
-
-@keyframes amb-glow-exterior-escala {
-  0%, 100% { scale: 1; }
-  50%      { scale: 1.03; }
-}
+/* 2026-08-08: los dos anillos de resplandor que vivían acá
+   (.ambiente-plano--p2::before/::after — radial-gradient centrado en
+   la Brújula, con un tercer "anillo sonar" adentro del ::after) se
+   sacaron a pedido explícito. Eran puramente decorativos — glow de
+   profundidad sin ninguna función de orientación ni de interfaz — y
+   se reemplazan por la familia "Brujulitas" (js/ambiente-brujulitas.js):
+   varias copias chicas del mismo asset 'brujula', girando y
+   rebotando por todo el viewport. Las variables
+   --amb-brujula-glow-scroll/-puntero-x/-y quedan sin ningún
+   consumidor tras este cambio; js/ambiente-brujula.js sigue
+   escribiéndolas por si alguna otra capa las retoma más adelante,
+   pero ya no gobiernan nada visible acá. */
