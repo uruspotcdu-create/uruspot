@@ -363,4 +363,22 @@ html.u-suprimir-vidrio .hero-score{
 .footer{background:var(--ink);color:#ffffff;padding:40px 48px;display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:0.08em}
 .footer-logo{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--gold);letter-spacing:0.1em;text-decoration:none;text-transform:uppercase}
 
+/* SIDE BOX (2026-08, ficha Brode) — panel complementario para la 2ª
+   columna de .about-grid en secciones que solo tienen texto en la 1ª
+   columna. Sin esto, .about-grid (grid-template-columns:1fr 1fr) deja
+   la mitad derecha de la sección completamente en blanco en cualquier
+   viewport ≥769px (el breakpoint mobile es el único que colapsa a 1fr).
+   Reutilizable por cualquier otra ficha con el mismo problema. */
+.side-box{border:1px solid var(--border);background:var(--cream-deep);padding:36px 32px;align-self:start}
+.side-box-title{font-size:10px;letter-spacing:0.3em;color:#83621e;text-transform:uppercase;font-weight:600;margin-bottom:24px}
+.side-box ul{list-style:none;padding:0;margin:0}
+.side-box li{padding:14px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);line-height:1.6}
+.side-box li:last-child{border-bottom:none;padding-bottom:0}
+.side-box li:first-child{padding-top:0}
+.side-box li strong{color:var(--ink);font-weight:500;display:block;margin-bottom:3px;font-size:13px;letter-spacing:0.02em}
+.side-box-val{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold-dark);font-weight:400}
+@media(max-width:768px){
+  .side-box{padding:28px 24px;margin-top:8px}
+}
+
 
