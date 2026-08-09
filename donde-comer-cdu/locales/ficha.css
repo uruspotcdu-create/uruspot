@@ -122,6 +122,14 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:2px;font-size:12px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;text-decoration:none;transition:opacity .2s,transform .15s;cursor:pointer;border:none;font-family:'DM Sans',sans-serif}
 .btn:hover{opacity:.85;transform:translateY(-1px)}
 .btn:active{transform:translateY(0)}
+/* A11y (auditoria Brode, 2026-08): los CTA (.btn) aparecen tanto sobre
+   fondo oscuro (.info-strip, .schedule-block) como sobre fondo claro
+   (.map-section) -- ningun color unico de outline pasa 3:1 minimo en
+   ambos casos. Anillo doble blanco+sombra oscura: se ve por contraste
+   en cualquiera de los dos fondos sin necesitar reglas separadas por
+   seccion. Solo aplica en :focus-visible (navegacion por teclado), no
+   cambia el estado por click/touch. */
+.btn:focus-visible{outline:2px solid #fff;outline-offset:2px;box-shadow:0 0 0 4px rgba(13,13,13,.35)}
 .btn-primary{background:var(--gold);color:var(--ink)}
 .btn-ghost{background:transparent;color:#fff;border:1px solid rgb(255,255,255)}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
