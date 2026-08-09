@@ -151,6 +151,16 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .btn-primary{background:var(--gold);color:var(--ink)}
 .btn-ghost{background:transparent;color:#fff;border:1px solid rgb(255,255,255)}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+/* FIX (legibilidad Brode, 2026-08): .btn-ghost-onlight se usa en
+   locales/brode/index.html (3 CTAs: "Confirmar precios vigentes",
+   "Menú oficial en vivo", "Catálogo fotográfico") pero nunca tuvo
+   regla propia -- heredaba de .btn-ghost texto y borde blancos
+   sobre las secciones de fondo claro (.page/.about-grid, fondo
+   var(--cream)), quedando casi invisible. Mismo tratamiento visual
+   que .btn-ghost pero con la paleta oscura del sitio para que pase
+   contraste sobre fondo claro. */
+.btn-ghost-onlight{color:var(--ink);border-color:rgba(13,13,13,0.35)}
+.btn-ghost-onlight:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
 
 /* HERO */
 .hero{position:relative;height:100vh;min-height:600px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
