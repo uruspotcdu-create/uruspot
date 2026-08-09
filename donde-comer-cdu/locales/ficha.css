@@ -58,11 +58,27 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .pullquote p{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;font-weight:300;color:var(--ink);line-height:1.5}
 
 /* GALLERY (restaurado) */
-.gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:240px 240px;gap:4px;border-radius:4px;overflow:hidden}
+.gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:240px 240px;gap:6px;border-radius:4px;overflow:hidden}
 .gallery-main{grid-row:1/3}
 .gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;filter:brightness(0.9) saturate(0.95)}
 .gallery-item{overflow:hidden}
 .gallery-item:hover img{transform:scale(1.04)}
+
+/* GALLERY — hueco vacío bajo la foto (auditoría BRODE, 2026-08): con
+   .about-grid en align-items:start, la columna de la galería (altura
+   fija ~484px) termina mucho antes que la columna de texto cuando el
+   texto es largo, dejando un bloque en blanco debajo de las fotos en
+   cualquier viewport ≥769px. Mismo problema que .side-box ya resolvía
+   para columnas de solo-texto (ver comentario más abajo), pero acá la
+   columna corta es la de fotos, no la de texto.
+   Fix: la columna que envuelve .gallery se estira a la altura completa
+   de la fila (align-self:stretch) y la galería queda sticky dentro de
+   ese alto — así acompaña el scroll del texto en vez de quedar fija
+   arriba con vacío debajo. :has() es progresivo: sin soporte, la
+   columna vuelve a su alto natural (comportamiento previo), sin romper
+   nada. */
+.about-grid > div:has(> .gallery){align-self:stretch}
+.gallery{position:sticky;top:88px;align-self:start}
 
 /* TAGS (restaurado) */
 .tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
@@ -233,7 +249,7 @@ html.u-suprimir-vidrio .hero-score{
 .brujula-texto{margin-left:8px;font-size:12px;color:#fff;letter-spacing:0.05em}
 
 /* HORARIOS */
-.schedule-block{background:var(--ink-soft);padding:80px 48px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.schedule-block{background:var(--ink-soft);padding:80px 48px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
 .schedule-title{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:#fff;margin-bottom:40px;line-height:1.2}
 .schedule-subtitle{font-size:14px;color:#fff;letter-spacing:0.05em;margin-bottom:20px;text-transform:uppercase}
 .schedule-day-name{font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#fff;width:60px}
@@ -307,9 +323,9 @@ html.u-suprimir-vidrio .hero-score{
   body{padding-bottom:56px}
   .cta-sticky{display:flex}
   .about-grid,.scores-grid,.map-grid{grid-template-columns:1fr;gap:32px}
-  .gallery{grid-template-columns:1fr;grid-template-rows:auto}
+  .gallery{grid-template-columns:1fr;grid-template-rows:auto;gap:12px;position:static}
   .gallery-main{grid-row:auto}
-  .gallery img{height:220px}
+  .gallery img{height:220px;border-radius:4px}
   .highlights-grid{grid-template-columns:1fr}
   .highlight-card{padding:28px 20px}
   .schedule-block{grid-template-columns:1fr;padding:44px 20px;gap:32px}
