@@ -238,14 +238,34 @@
   font-weight: 600;
 }
 
+/* Fila label + precio: flex en vez de float, para que el precio
+   nunca se desprenda visualmente de su propio ítem (bug detectado en
+   auditoría: el float escapaba del <li> cuando había una leyenda
+   extra debajo, como "caja de 10 unidades", y el precio terminaba
+   pareciendo pertenecer al ítem siguiente). */
+.side-box-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+}
+
 /* Valor destacado (precio) */
 .side-box-val {
-  display: inline-block;
-  float: right;
+  flex-shrink: 0;
   font-family: 'Cormorant Garamond', serif;
   font-size: 18px;
   font-weight: 300;
   color: var(--gold-dark);
+  white-space: nowrap;
+}
+
+/* Leyenda secundaria bajo el precio (ej. "caja de 10 unidades") */
+.side-box-caption {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
 }
 
 /* CTA dentro del side-box (enlace a menú en vivo) */
@@ -414,12 +434,6 @@
   .side-box {
     padding: 24px;
     border-top-width: 6px;
-  }
-  
-  .side-box-val {
-    float: none;
-    display: block;
-    margin-top: 8px;
   }
   
   .side-box-cta {
