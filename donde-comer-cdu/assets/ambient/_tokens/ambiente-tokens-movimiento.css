@@ -108,6 +108,16 @@
     animation: none !important;
     transform: none !important;
   }
+  /* 2026-08-08 (Revisión 4): red de seguridad para el parallax de
+     profundidad de la Brújula (js/ambiente-brujula.js ya no agrega
+     el listener de scroll bajo reducirMovimiento, pero esta regla
+     documenta la intención acá mismo y cubre cualquier valor que
+     hubiera quedado escrito antes de que la preferencia cambiara en
+     caliente — mismo criterio que la regla de Partículas de arriba). */
+  .amb-asset--brujula,
+  .ambiente-plano--p2::before {
+    transform: translate(-50%, -50%) !important;
+  }
   /* El halo NO se apaga entero: sigue siendo el único feedback
      directo de "qué está seleccionado" (Cap. 6.2), así que debe
      seguir apareciendo — solo se le quita la transición de escala/
@@ -335,6 +345,3 @@
   opacity: var(--amb-p3-opacidad);
   transform: scale(1);
 }
-
-
-
