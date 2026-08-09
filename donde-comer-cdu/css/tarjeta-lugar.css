@@ -27,6 +27,18 @@
 
 .tarjeta{
   position:relative; isolation:isolate; overflow:hidden;
+  /* 2026-08-09 (pasada #3): la tarjeta pasa a columna flex. Antes,
+     con nombres/mini-descripciones de largo muy dispar (de "Bar" a
+     "Restaurante y Parrilla El Fortín de la Costanera"), la fila de
+     acciones quedaba a una altura distinta en cada tarjeta de la
+     misma fila de la grilla — la más corta con las acciones pegadas
+     al texto, la más larga con más aire. .tarjeta-acciones (más
+     abajo) usa margin-top:auto para ir siempre al fondo, así el pie
+     de las 3-5 tarjetas de una misma fila queda a la misma altura sin
+     tocar el grid en sí (auto-fill/minmax siguen intactos). Los
+     pseudo-elementos ::before/::after y .tarjeta-marca-agua son
+     position:absolute, así que no participan del flujo flex — cero
+     cambio visual en ellos.
   /* Isolínea como borde de superficie (URUSPOT-PENDIENTES §6, Blueprint
      V2 §3): capa extra de fondo, no un pseudo-elemento nuevo — ::before
      y ::after de esta misma regla ya están ocupados (franja de rubro
@@ -51,6 +63,7 @@
      pero con hasta 40 tarjetas en pantalla eso es exactamente el tipo
      de costo de compositor que la auditoría de performance de
      2026-08-02/04 ya identificó y mitigó — no se reintroduce). */
+  display:flex; flex-direction:column;
   box-shadow:var(--sombra-vidrio), 0 14px 28px -22px var(--chip-color, transparent);
   animation:uru-fade-up var(--dur-lenta) var(--easing-movimiento) backwards;
   transition:opacity var(--dur-media), transform var(--dur-media) var(--easing-estandar),
@@ -271,11 +284,20 @@
    piezas de dato en una sola línea con flex-wrap, 4px de aire antes
    del nombre se sentía apretado, sobre todo cuando esa fila envuelve
    a dos líneas en tarjetas angostas. */
+/* 2026-08-09 (pasada #3): clamp a 2 líneas — mismo patrón exacto que
+   .destacado-card__nombre (destacados.css). Sin esto, un nombre largo
+   ("Restaurante y Parrilla El Fortín de la Costanera" vs. "Bar") no
+   solo desalineaba el pie de acciones (ya resuelto arriba con
+   margin-top:auto) sino que además dejaba a esa tarjeta puntual mucho
+   más alta que el resto de su fila — el clamp acota el peor caso sin
+   truncar los nombres cortos, que son la mayoría. */
 .tarjeta-nombre{
   font:var(--tipo-display-sm); margin-top:var(--esp-2); letter-spacing:-.01em;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 .tarjeta-direccion{
   color:var(--color-tinta-60); font:var(--tipo-cuerpo-sm); margin-top:var(--esp-1);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 /* Fase 4 — MUST HAVE (Fase 3A §4/§10, Fase 3B §2, Fase 3D §7): la razón
    de recomendación (recortePorIniciativaPropiaExplicado, ya calculada
@@ -285,6 +307,7 @@
 .tarjeta-razon{
   color:var(--color-tinta-60); font:var(--tipo-cuerpo-xs); font-style:italic;
   margin-top:var(--esp-1);
+  display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
 }
 
 /* Mini-descripción específica del lugar (lugares-detalles.json →
@@ -295,6 +318,7 @@
 .tarjeta-mini{
   color:var(--color-tinta-80, var(--color-tinta-60)); font-size:13.5px;
   margin-top:var(--esp-1); font-style:italic;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 /* Genérica (grupo · categoría, sin descripción propia todavía):
    sin cursiva y algo más apagada — para que quede claro, con solo
@@ -302,7 +326,15 @@
    ese lugar puntual. */
 .tarjeta-mini--generica{ font-style:normal; opacity:.75; }
 
-.tarjeta-acciones{ display:flex; gap:var(--esp-2); margin-top:var(--esp-4); flex-wrap:wrap; }
+/* 2026-08-09 (pasada #3): margin-top:auto (en vez de un valor fijo)
+   empuja las acciones al fondo de la columna flex — así el pie de
+   todas las tarjetas de una misma fila de la grilla queda a la misma
+   altura sin importar cuánto texto tenga cada una arriba (ver nota en
+   .tarjeta). padding-top se mantiene fijo: cuando la tarjeta ya está
+   exactamente a la altura de su contenido (la más alta de su fila,
+   sin espacio libre que "auto" pueda tomar), sigue habiendo el mismo
+   aire de --esp-4 entre el texto y los botones que había antes. */
+.tarjeta-acciones{ display:flex; gap:var(--esp-2); margin-top:auto; padding-top:var(--esp-4); flex-wrap:wrap; }
 
 /* Acciones de un solo toque con datos reales (mapa exacto por
    coordenada, teléfono real, compartir el link de ficha). Mismo

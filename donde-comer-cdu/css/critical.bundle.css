@@ -3,7 +3,7 @@
  * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-09T06:04:57.431Z
+ * Generado: 2026-08-09T06:11:36.714Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -1293,6 +1293,7 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   border-radius:var(--radio-lg); padding:20px var(--esp-4) var(--esp-4); 
   backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
   
+  display:flex; flex-direction:column;
   box-shadow:var(--sombra-vidrio), 0 14px 28px -22px var(--chip-color, transparent);
   animation:uru-fade-up var(--dur-lenta) var(--easing-movimiento) backwards;
   transition:opacity var(--dur-media), transform var(--dur-media) var(--easing-estandar),
@@ -1418,24 +1419,28 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
 
 .tarjeta-nombre{
   font:var(--tipo-display-sm); margin-top:var(--esp-2); letter-spacing:-.01em;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 .tarjeta-direccion{
   color:var(--color-tinta-60); font:var(--tipo-cuerpo-sm); margin-top:var(--esp-1);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 
 .tarjeta-razon{
   color:var(--color-tinta-60); font:var(--tipo-cuerpo-xs); font-style:italic;
   margin-top:var(--esp-1);
+  display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
 }
 
 .tarjeta-mini{
   color:var(--color-tinta-80, var(--color-tinta-60)); font-size:13.5px;
   margin-top:var(--esp-1); font-style:italic;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 
 .tarjeta-mini--generica{ font-style:normal; opacity:.75; }
 
-.tarjeta-acciones{ display:flex; gap:var(--esp-2); margin-top:var(--esp-4); flex-wrap:wrap; }
+.tarjeta-acciones{ display:flex; gap:var(--esp-2); margin-top:auto; padding-top:var(--esp-4); flex-wrap:wrap; }
 
 @media (hover:hover) and (pointer:fine){
 .tarjeta-btn--maps:hover{ color:#7fb8e0; border-color:#7fb8e0; background:rgba(127,184,224,.12); }
