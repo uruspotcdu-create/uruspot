@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
      posición del <script> del bundle acá. Si tocás el orden de
      abajo, actualizá también ORDEN en scripts/build-motor-bundle.js
      — el script valida que coincidan y falla si no. -->
-<script src="js/motor.bundle.js?v=1c7a7fb22b" defer></script>
+<script src="js/motor.bundle.js?v=8f302814fb" defer></script>
 <!-- app.min.js es un cargador generado que importa la única fuente de
      verdad: js/app.js. Esto evita que un bundle duplicado quede atrasado
      respecto del código que se revisa y se modifica.
@@ -238,10 +238,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <meta name="apple-mobile-web-app-title" content="URU SPOT">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- FUENTES SELF-HOSTED (Fase 4.1, 2026-08-07) — antes CDN de Google Fonts.
-     Mismos 4 pesos reales que ya estaban en uso tras la auditoría de
-     perf (Fraunces 500, IBM Plex Sans 400/500/600, IBM Plex Mono 400),
-     ahora servidos desde donde-comer-cdu/fonts/ vía css/fuentes-local.css
+<!-- FUENTES SELF-HOSTED — sin CDN de Google Fonts.
+     2026-08-09 (repaso de tipografía): Bricolage Grotesque (display,
+     peso 500/700) + Plus Jakarta Sans (UI, pesos 400/500/600/700 +
+     itálicas 400/500) + IBM Plex Mono (dato, 400, sin cambios),
+     servidas desde donde-comer-cdu/fonts/ vía css/fuentes-local.css
      (@font-face, subset latin — cubre acentos/ñ del español). Sin
      preconnect/preload externo: es same-origin. Las páginas de ficha
      de local (locales/*/index.html) usan otra familia tipográfica
@@ -251,18 +252,18 @@ document.addEventListener('DOMContentLoaded', function() {
      navegador no descubre estos 2 archivos .woff2 hasta que parsea y
      aplica css/fuentes-local.css mas abajo -- un round-trip completo
      de mas antes de poder empezar a descargarlos. Solo los 2 pesos
-     que efectivamente pintan el primer viewport (Fraunces 500 para
-     el <h1> del hero -- el elemento LCP de este documento -- e IBM
-     Plex Sans 400 para el cuerpo de texto): los otros 3 pesos
-     declarados en fuentes-local.css (IBM Plex Sans 500/600, IBM Plex
-     Mono 400) se usan mas abajo del fold o en menor volumen,
-     precargarlos tambien competiria por ancho de banda con estos 2
-     sin necesidad. Same-origin, pero `crossorigin` es obligatorio
-     igual para fuentes por spec (fetch en modo anonimo) -- sin este
-     atributo el navegador descarta el preload y vuelve a pedir el
-     archivo de cero. -->
-<link rel="preload" as="font" type="font/woff2" href="fonts/fraunces-latin-500-normal.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="fonts/ibm-plex-sans-latin-400-normal.woff2" crossorigin>
+     que efectivamente pintan el primer viewport (Bricolage Grotesque
+     500 para el <h1> del hero -- el elemento LCP de este documento --
+     y Plus Jakarta Sans 400 para el cuerpo de texto): los otros pesos
+     declarados en fuentes-local.css (Plus Jakarta Sans 500/600/700 +
+     itálicas, IBM Plex Mono 400) se usan mas abajo del fold o en
+     menor volumen, precargarlos tambien competiria por ancho de banda
+     con estos 2 sin necesidad. Same-origin, pero `crossorigin` es
+     obligatorio igual para fuentes por spec (fetch en modo anonimo)
+     -- sin este atributo el navegador descarta el preload y vuelve a
+     pedir el archivo de cero. -->
+<link rel="preload" as="font" type="font/woff2" href="fonts/bricolage-grotesque-latin-500-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/plus-jakarta-sans-latin-400-normal.woff2" crossorigin>
 <!-- (Auditoría perf, 2026-08-08: se sacó el <link rel="preload" as="style">
      que iba justo acá. Con el <link rel="stylesheet"> real en la línea
      siguiente, el preload solo duplicaba el descubrimiento del recurso
@@ -302,8 +303,8 @@ document.addEventListener('DOMContentLoaded', function() {
      el impacto medible de este hint es marginal -- se deja
      documentado por si el <head> crece en el futuro y algo empieza a
      demorar el parser antes de llegar hasta acá. -->
-<link rel="preload" href="css/critical.bundle.css?v=963929ffc4" as="style" crossorigin="anonymous">
-<link rel="stylesheet" href="css/critical.bundle.css?v=963929ffc4">
+<link rel="preload" href="css/critical.bundle.css?v=2e431c314b" as="style" crossorigin="anonymous">
+<link rel="stylesheet" href="css/critical.bundle.css?v=2e431c314b">
 <!-- impresion.css: nueva (auditoría 4ª pasada) — el documento no
      tenía ninguna hoja media="print" pese a que varias secciones
      (Sobre la ciudad, Guía práctica, Glosario) son contenido de

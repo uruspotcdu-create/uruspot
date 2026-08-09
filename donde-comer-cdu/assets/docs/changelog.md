@@ -501,3 +501,51 @@ documento externo coincide con la razón ya registrada):**
   (geometría construida, máx. 2 ejes de movimiento, sin blur/sombra
   como atajo de profundidad, sin iconografía figurativa en el Ambient
   Engine). Coincide con el criterio ya vigente — no se incorporan.
+
+## v1.5 — Viewport a ancho completo + repaso de tipografía (pedido directo, 2026-08-09)
+
+Dos pedidos sin relación con el Ambient Engine, sobre `css/tokens.css`
+(fuente de verdad compartida por toda la plataforma, no solo el
+motor decorativo):
+
+**1. Rebote horizontal en mobile (reportado en Moto G14).** `html`/
+`body` no tenían ningún freno de ancho — cualquier elemento que se
+pasara por poco del viewport permitía a Chrome/Android el "juego"
+hacia los costados al arrastrar con el dedo. Se agrega la red de
+seguridad estándar: `overflow-x:hidden` + `width:100%` en `html` Y en
+`body` (hace falta en los dos, no alcanza con uno solo en todos los
+navegadores móviles), más `img/svg/video/canvas{max-width:100%}` y
+`overflow-wrap:break-word` en texto de bloque, para que ninguna
+imagen suelta o palabra/URL sin cortes pueda volver a empujar el
+ancho del documento. No reemplaza encontrar el elemento puntual si
+en algún momento algo se pasa de nuevo — es el freno a nivel
+documento para que, pase lo que pase en un componente, la página
+nunca pueda scrollear de lado a lado.
+
+**2. Tipografía.** `--f-display` (Fraunces) y `--f-ui` (IBM Plex Sans)
+se reemplazan por **Bricolage Grotesque** (títulos, nombres de lugar)
+y **Plus Jakarta Sans** (interfaz, cuerpo) — mismo mecanismo de
+siempre, un solo token por familia en `css/tokens.css`, ningún CSS de
+componente nombra una tipografía por su cuenta. `--f-dato` (IBM Plex
+Mono, metadatos) no cambia. Archivos self-hosted vía `@fontsource/*`
+(npm), mismo método que ya usaba el proyecto — ver
+`css/fuentes-local.css` para el detalle de pesos/itálicas y el
+porqué de la elección. Los 9 archivos `.woff2` de Fraunces/IBM Plex
+Sans se sacan de `fonts/` (ya no los referencia nada); se agregan los
+9 de Bricolage Grotesque/Plus Jakarta Sans. `js/motor-render.js`
+también tenía `"IBM Plex Sans"` escrito a mano en 5 `ctx.font` (texto
+dibujado en `<canvas>` para el mapa — no lee CSS, así que el token no
+le llega) — actualizado para que el mapa no quede con una familia
+distinta al resto del sitio.
+
+**No tocado, a propósito:** las páginas de ficha de local
+(`locales/*/index.html`) usan su propio sistema tipográfico
+(Cormorant Garamond + DM Sans) desde antes, documentado como fuera de
+alcance en la nota de `index.html` sobre fuentes self-hosted — no se
+tocan acá para no mezclar dos pedidos distintos sin que quien lo pidió
+lo haya confirmado.
+
+Se corrieron `node scripts/build-css-bundle.js` y
+`node scripts/build-motor-bundle.js` (ambos con paso de build manual,
+hace falta correrlos después de tocar sus fuentes) y `node
+js/run-tests.js`: las 14 suites pasan sin regresiones.

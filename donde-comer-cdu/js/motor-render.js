@@ -1054,7 +1054,7 @@
       if (!degradacionTiles || viewport.ancho < 140) return;
       var texto = 'Conexión limitada al mapa';
       ctx.save();
-      ctx.font = '600 11px "IBM Plex Sans", sans-serif';
+      ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
       var anchoTexto = ctx.measureText(texto).width;
       var w = Math.min(viewport.ancho - 16, anchoTexto + 24);
       var h = 24;
@@ -1099,7 +1099,7 @@
       ctx.save();
       ctx.globalAlpha = 0.85;
       ctx.fillStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
-      ctx.font = '600 13px "IBM Plex Sans", sans-serif';
+      ctx.font = '600 13px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('Sin lugares para mostrar en esta vista', viewport.ancho / 2, viewport.alto / 2);
@@ -1390,7 +1390,7 @@
         ctxD.strokeStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
         ctxD.stroke();
         ctxD.fillStyle = resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
-        ctxD.font = '700 ' + Math.round(r * 0.42) + 'px "IBM Plex Sans", sans-serif';
+        ctxD.font = '700 ' + Math.round(r * 0.42) + 'px "Plus Jakarta Sans", sans-serif';
         ctxD.textAlign = 'center';
         ctxD.textBaseline = 'middle';
         ctxD.fillText('★', xIns, yIns + 0.5);
@@ -1464,7 +1464,7 @@
       if (punto && punto.rubroNombre) {
         var inicial = String(punto.rubroNombre).trim().charAt(0).toUpperCase();
         ctxD.fillStyle = color;
-        ctxD.font = '700 ' + Math.round(rVentana * 1.05) + 'px "IBM Plex Sans", sans-serif';
+        ctxD.font = '700 ' + Math.round(rVentana * 1.05) + 'px "Plus Jakarta Sans", sans-serif';
         ctxD.textAlign = 'center';
         ctxD.textBaseline = 'middle';
         ctxD.fillText(inicial, 0, -r * 0.35 + 0.5);
@@ -1578,7 +1578,7 @@
       );
 
       ctx.fillStyle = esUnRubro ? resolverVarCSS('--canvas-color-cluster-fondo', '#0A0D13') : resolverVarCSS('--canvas-color-texto-pin', '#ECEDEF');
-      ctx.font = '700 12px "IBM Plex Sans", sans-serif';
+      ctx.font = '700 12px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(String(c.miembros.length), c.x, c.y + 1);
