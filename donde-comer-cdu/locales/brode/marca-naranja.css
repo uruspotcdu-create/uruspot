@@ -1,18 +1,21 @@
-/* MARCA NARANJA — piloto Brode (2026-08), TOMA 2
-   Feedback directo tras la toma 1: "sigo viendo el sitio casi
-   idéntico". La toma 1 tocó las variables correctas pero con
-   incrementos demasiado conservadores (25%→45% de opacidad de borde,
-   un tinte de crema apenas más cálido) — correcto en la lógica,
-   insuficiente en la magnitud. Esta toma sube la magnitud real de
-   cada valor, no solo la dirección, y además agrega naranja en un par
-   de lugares que en la toma 1 seguían con opacidades hardcodeadas
-   bajas que ninguna variable tocaba (.schedule-note, .tag,
-   .btn-ghost-onlight, grosor de líneas de acento).
+/* MARCA NARANJA — piloto Brode (2026-08), TOMA 3
+   Auditoría visual con captura real (Playwright, viewport desktop y
+   mobile): la toma 2 se pasó de rosca. Subió --surface-warm a un
+   naranja sólido (#eba849, ~lo mismo que --gold sin diluir) y ese
+   tono cubre TRES secciones completas de ancho completo (Catálogo,
+   Puntajes, Mapa) — en pantalla se ven como bloques de pintura
+   naranja/mostaza, no como "papel cálido". Viola directamente el
+   pedido explícito: "no quiero que todo sea naranja" y "que no
+   parezca amarilla". El resto de la toma 2 (bordes, tags, botón
+   fantasma, barra del nav, línea de sección) SÍ funciona -- lo que
+   fallaba era específicamente la superficie de fondo grande, así que
+   esta toma solo recalibra --surface-warm/--surface-warm-soft y dejar
+   el resto de la toma 2 intacto.
 
    Sigue siendo SOLO Brode (no toca ficha.css compartido) — mismo
    mecanismo: redefine las custom properties que ficha.css ya consume
    por variable en sus ~90 reglas, así que el sistema entero hereda el
-   salto de intensidad sin reescribir cada regla. */
+   ajuste sin reescribir cada regla. */
 
 :root{
   /* BASE — de "insinuación de crema" a un papel naranja pálido que se
@@ -21,17 +24,29 @@
   --cream:#f9dcbb;
   --cream-deep:#f3c489;
 
-  /* SUPERFICIES "CAPÍTULO" — antes un tinte sutil, ahora un naranja de
-     verdad: --surface-warm ya no es "papel cálido", es una franja
-     claramente naranja (Catálogo, Puntajes, Mapa, Presencia digital,
-     Veredicto pasan a leerse como bloques de color, no como variación
-     tonal). --ink sobre --surface-warm: 9.37:1. */
-  --surface-warm:#eba849;
-  --surface-warm-soft:#f6cf9d;
+  /* SUPERFICIES "CAPÍTULO" — recalibrado en esta toma. La toma 2 usaba
+     #eba849 (naranja sólido, prácticamente --gold sin diluir) como
+     fondo de sección completa; a pantalla completa se lee como un
+     bloque de color, no como una superficie de papel. Este tono baja
+     la saturación y sube la luminosidad mientras mantiene el mismo
+     matiz, para que Catálogo/Puntajes/Mapa se sientan como "un
+     capítulo distinto" sin dejar de ser --cream con más cuerpo.
+     Contraste verificado (ver contrast.py, fórmula WCAG relativa):
+       --muted (#4a3218)     8.15:1
+       --ink (#170e07)      13.01:1
+       --gold-dark (#732503) 7.19:1
+     todos muy por encima del mínimo AA de texto normal (4.5:1),
+     incluso el chico en negrita de .section-label. */
+  --surface-warm:#f3d0a0;
+  --surface-warm-soft:#f7dcb6;
 
-  /* BORDES / DIVISORES — de 45% a 60% de opacidad: ya no son una línea
-     sutil, son una línea naranja que se ve sin tener que buscarla. */
-  --border:rgba(var(--gold-rgb),0.6);
+  /* BORDES / DIVISORES — la toma 2 llevó esto a 60% cuando el fondo
+     detrás era naranja sólido y la línea necesitaba pelear por
+     visibilidad. Con --surface-warm ya recalibrado más claro, 60%
+     empieza a leerse duro/quemado sobre el nuevo tono más pálido; se
+     baja a 45% -- sigue siendo una línea naranja que se nota (vs. el
+     25% original, casi invisible) pero ya no compite con el texto. */
+  --border:rgba(var(--gold-rgb),0.45);
 
   /* TEXTO SECUNDARIO Y ACENTO OSCURO — recalculados para seguir
      pasando AA incluso en texto chico (10px, .section-label) sobre el
