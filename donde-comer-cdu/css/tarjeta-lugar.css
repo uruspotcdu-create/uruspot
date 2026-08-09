@@ -37,9 +37,21 @@
      debajo, sin cambiar nada del resto de la tarjeta. */
   background:var(--patron-isolinea) bottom / 140px 8px repeat-x, var(--glass-bg);
   border:1px solid var(--glass-borde);
-  border-radius:var(--radio-lg); padding:var(--esp-4);
+  border-radius:var(--radio-lg); padding:20px var(--esp-4) var(--esp-4); /* --esp-5 no existe en la escala (--esp-4=16, --esp-6=24): 20px es el punto medio real que le hacía falta al padding superior */
   backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
-  box-shadow:var(--sombra-vidrio);
+  /* 2026-08-09 (pasada #2): se suma un tercer valor al box-shadow —
+     un halo MUY tenue (28px de blur, -22px de spread, o sea casi
+     imperceptible salvo como "temperatura" ambiental) con el propio
+     --chip-color de la tarjeta, incluso en reposo. Antes el color de
+     rubro solo vivía en la franja de 4px de arriba; ahora tiñe
+     levemente el aire alrededor de la tarjeta, mismo principio que ya
+     usa :hover (el glow ahí es la versión "a todo volumen" de este
+     mismo halo). A propósito NO se toca --glass-blur acá (quedaría
+     tentador subirlo a --glass-blur-fuerte para un vidrio más denso,
+     pero con hasta 40 tarjetas en pantalla eso es exactamente el tipo
+     de costo de compositor que la auditoría de performance de
+     2026-08-02/04 ya identificó y mitigó — no se reintroduce). */
+  box-shadow:var(--sombra-vidrio), 0 14px 28px -22px var(--chip-color, transparent);
   animation:uru-fade-up var(--dur-lenta) var(--easing-movimiento) backwards;
   transition:opacity var(--dur-media), transform var(--dur-media) var(--easing-estandar),
              border-color var(--dur-media), box-shadow var(--dur-media) var(--easing-estandar);
@@ -89,11 +101,42 @@
   content:""; position:absolute; inset:0; pointer-events:none; z-index:-1;
   background:var(--gradiente-superficie);
 }
+/* 2026-08-09 (pasada #2): marca de agua grande y muy tenue del propio
+   pictograma de rubro (mismo SVG que ya usa el badge circular de
+   .tarjeta-rubro-icono, reescalado a 108px vía el parámetro `tam` de
+   URU_RUBROS_ICONO_SVG — no es un asset nuevo, es el mismo trazo).
+   Le da identidad visual real a cada tarjeta sin depender de fotos
+   (el dataset todavía no las tiene, ver .tarjeta__imagen más abajo).
+   z-index:-1, mismo nivel que .tarjeta::after — el degradé de
+   superficie de arriba queda pintado por encima, así el ícono nunca
+   compite con el texto ni le resta contraste. overflow:hidden en
+   .tarjeta ya recorta lo que sobresale del borde. */
+.tarjeta-marca-agua{
+  position:absolute; z-index:-1; pointer-events:none;
+  right:-16px; bottom:-16px;
+  color:var(--chip-color, var(--color-granate-clara));
+  opacity:.08;
+  transform:rotate(-8deg);
+}
+@media (max-width:360px){ .tarjeta-marca-agua{ display:none; } }
+/* Badge circular del ícono de rubro: antes era un trazo de 13px
+   flotando suelto junto al texto ("Gastronomía", con un garabato al
+   lado); ahora vive dentro de un círculo tintado con el propio
+   --chip-color (color-mix, mismo mecanismo que ya usa el Ambient
+   Engine en ambiente-planos.css) — mismo lenguaje que ya usan los
+   íconos circulares de .manifiesto-card__icono (descubrimiento.css),
+   pero tintado por rubro en vez de con el gradiente de marca fijo. */
+.tarjeta-rubro-icono{
+  display:inline-flex; align-items:center; justify-content:center; flex:none;
+  width:22px; height:22px; border-radius:50%;
+  background:color-mix(in srgb, var(--chip-color, var(--color-granate-clara)) 20%, transparent);
+  color:var(--chip-color, var(--color-granate-clara));
+}
 .tarjeta:hover::before, .tarjeta:focus-within::before, .tarjeta--resaltada::before{ opacity:1; }
 @media (hover:hover) and (pointer:fine){
 .tarjeta:hover{
   will-change:transform;
-  transform:translateY(-6px); border-color:var(--glass-borde-hover);
+  transform:translateY(-6px) scale(1.012); border-color:var(--glass-borde-hover);
   box-shadow:var(--sombra-vidrio), 0 0 32px -8px var(--chip-color, rgba(201,122,131,.5));
 }
 }
@@ -139,9 +182,15 @@
     radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--chip-color, var(--color-granate-clara)) 10%, transparent), transparent 60%),
     var(--gradiente-superficie);
 }
+/* La marca de agua a 108px (tamaño pensado para una tarjeta angosta)
+   se veía chica y perdida en una tarjeta de 2 columnas — sube a 168px
+   y se corre un poco más lejos del borde para que siga sintiéndose
+   "de fondo" y no como un ícono más de la fila de acciones. */
+.tarjeta--narrativa .tarjeta-marca-agua{ right:-28px; bottom:-28px; width:168px; height:168px; }
 @media (max-width:720px){
   .tarjeta--narrativa{ grid-column:span 1; }
   .tarjeta--narrativa .tarjeta-nombre{ font:var(--tipo-display-sm); }
+  .tarjeta--narrativa .tarjeta-marca-agua{ right:-16px; bottom:-16px; width:108px; height:108px; }
 }
 .tarjeta.descartada{ opacity:0; transform:scale(.92); pointer-events:none; }
 
@@ -167,6 +216,13 @@
 .tarjeta-distancia{
   color:var(--color-tinta-30); text-transform:none; letter-spacing:normal;
   font-family:var(--f-dato); display:inline-flex; align-items:center;
+  /* 2026-08-09 (pasada #2): pasa de texto suelto a badge — mismo
+     tratamiento que .tarjeta-rating de abajo, con un fondo neutro
+     (no compite con --chip-color, que ya identifica al rubro) para
+     que "180 m" se lea como un dato aparte, no como continuación del
+     texto del rubro. */
+  background:var(--glass-bg); border:1px solid var(--glass-borde);
+  padding:1px 7px; border-radius:var(--radio-full);
 }
 /* BUG REAL (auditoría Fase 3): lugar.estado ('verificado'/'pendiente')
    se calculaba desde lugares-estado.json hace tiempo pero ninguna
@@ -186,6 +242,11 @@
 .tarjeta-rating{
   color:var(--color-rubro-alojamiento); font-weight:var(--peso-semibold);
   font-family:var(--f-dato); text-transform:none; letter-spacing:normal;
+  /* 2026-08-09 (pasada #2): mismo criterio que .tarjeta-distancia —
+     badge tintado en vez de texto suelto, para que el rating destaque
+     de un vistazo entre rubro/distancia/estado en la misma fila. */
+  background:color-mix(in srgb, var(--color-rubro-alojamiento) 14%, transparent);
+  padding:1px 7px; border-radius:var(--radio-full);
 }
 /* Comparador inline (Fase 4, Journey/UX — motor-comparacion.js, evolutivo
    A→C: hoy vive acá, como badge sobre la tarjeta; el día que exista una

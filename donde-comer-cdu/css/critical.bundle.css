@@ -3,7 +3,7 @@
  * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-09T05:52:26.028Z
+ * Generado: 2026-08-09T06:04:57.431Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -1290,9 +1290,10 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   
   background:var(--patron-isolinea) bottom / 140px 8px repeat-x, var(--glass-bg);
   border:1px solid var(--glass-borde);
-  border-radius:var(--radio-lg); padding:var(--esp-4);
+  border-radius:var(--radio-lg); padding:20px var(--esp-4) var(--esp-4); 
   backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
-  box-shadow:var(--sombra-vidrio);
+  
+  box-shadow:var(--sombra-vidrio), 0 14px 28px -22px var(--chip-color, transparent);
   animation:uru-fade-up var(--dur-lenta) var(--easing-movimiento) backwards;
   transition:opacity var(--dur-media), transform var(--dur-media) var(--easing-estandar),
              border-color var(--dur-media), box-shadow var(--dur-media) var(--easing-estandar);
@@ -1319,11 +1320,27 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   content:""; position:absolute; inset:0; pointer-events:none; z-index:-1;
   background:var(--gradiente-superficie);
 }
+
+.tarjeta-marca-agua{
+  position:absolute; z-index:-1; pointer-events:none;
+  right:-16px; bottom:-16px;
+  color:var(--chip-color, var(--color-granate-clara));
+  opacity:.08;
+  transform:rotate(-8deg);
+}
+@media (max-width:360px){ .tarjeta-marca-agua{ display:none; } }
+
+.tarjeta-rubro-icono{
+  display:inline-flex; align-items:center; justify-content:center; flex:none;
+  width:22px; height:22px; border-radius:50%;
+  background:color-mix(in srgb, var(--chip-color, var(--color-granate-clara)) 20%, transparent);
+  color:var(--chip-color, var(--color-granate-clara));
+}
 .tarjeta:hover::before, .tarjeta:focus-within::before, .tarjeta--resaltada::before{ opacity:1; }
 @media (hover:hover) and (pointer:fine){
 .tarjeta:hover{
   will-change:transform;
-  transform:translateY(-6px); border-color:var(--glass-borde-hover);
+  transform:translateY(-6px) scale(1.012); border-color:var(--glass-borde-hover);
   box-shadow:var(--sombra-vidrio), 0 0 32px -8px var(--chip-color, rgba(201,122,131,.5));
 }
 }
@@ -1344,9 +1361,12 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
     radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--chip-color, var(--color-granate-clara)) 10%, transparent), transparent 60%),
     var(--gradiente-superficie);
 }
+
+.tarjeta--narrativa .tarjeta-marca-agua{ right:-28px; bottom:-28px; width:168px; height:168px; }
 @media (max-width:720px){
   .tarjeta--narrativa{ grid-column:span 1; }
   .tarjeta--narrativa .tarjeta-nombre{ font:var(--tipo-display-sm); }
+  .tarjeta--narrativa .tarjeta-marca-agua{ right:-16px; bottom:-16px; width:108px; height:108px; }
 }
 .tarjeta.descartada{ opacity:0; transform:scale(.92); pointer-events:none; }
 
@@ -1365,6 +1385,9 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
 .tarjeta-distancia{
   color:var(--color-tinta-30); text-transform:none; letter-spacing:normal;
   font-family:var(--f-dato); display:inline-flex; align-items:center;
+  
+  background:var(--glass-bg); border:1px solid var(--glass-borde);
+  padding:1px 7px; border-radius:var(--radio-full);
 }
 
 .tarjeta-pendiente{
@@ -1376,6 +1399,9 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
 .tarjeta-rating{
   color:var(--color-rubro-alojamiento); font-weight:var(--peso-semibold);
   font-family:var(--f-dato); text-transform:none; letter-spacing:normal;
+  
+  background:color-mix(in srgb, var(--color-rubro-alojamiento) 14%, transparent);
+  padding:1px 7px; border-radius:var(--radio-full);
 }
 
 .tarjeta-badge-comparacion{

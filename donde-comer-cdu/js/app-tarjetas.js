@@ -260,8 +260,26 @@
       // de mayor tráfico y la que faltaba. Reusa exactamente la misma
       // función/clase (.rubro-icono, chip.css) para no introducir una
       // segunda convención visual del mismo dato.
+      // 2026-08-09 (pasada #2, "mejoralas mucho más"): el ícono sube de
+      // 13 a 15px y se envuelve en .tarjeta-rubro-icono (badge circular
+      // con el propio --chip-color de fondo, tarjeta-lugar.css) — antes
+      // era un trazo suelto flotando junto al texto, ahora es una marca
+      // de identidad real por rubro, mismo lenguaje que ya usan los
+      // íconos circulares de .manifiesto-card__icono (descubrimiento.css)
+      // pero tintados por rubro en vez de con el gradiente de marca.
       var iconoRubro = (metaRubro && window.URU_RUBROS_ICONO_SVG)
-        ? window.URU_RUBROS_ICONO_SVG(lugar.grupo, { tam: 13 })
+        ? '<span class="tarjeta-rubro-icono">' + window.URU_RUBROS_ICONO_SVG(lugar.grupo, { tam: 15 }) + '</span>'
+        : '';
+
+      // Marca de agua grande y muy tenue del mismo pictograma, de fondo
+      // en la esquina de la tarjeta (mismo SVG, mismo --chip-color,
+      // solo que a 108px y 8% de opacidad vía CSS) — le da identidad
+      // visual real a cada rubro sin depender de fotos que el dataset
+      // todavía no tiene (ver nota de .tarjeta--con-imagen más abajo en
+      // este archivo, preparado para Fase 1.5). z-index:-1 (mismo nivel
+      // que .tarjeta::after) para quedar siempre detrás del texto.
+      var marcaAguaRubro = (metaRubro && window.URU_RUBROS_ICONO_SVG)
+        ? window.URU_RUBROS_ICONO_SVG(lugar.grupo, { tam: 108, clase: 'tarjeta-marca-agua' })
         : '';
 
       // Fase 4 — MUST HAVE (Fase 3A §7/§10, Fase 3D §7): el rating ya
@@ -291,6 +309,7 @@
         ? '<span class="tarjeta-badge-comparacion">📍 más cerca</span>' : '';
 
       art.innerHTML =
+        marcaAguaRubro +
         '<div class="tarjeta-rubro">' + iconoRubro + Formato.escapeHTML(rubro) + pendienteTxt +
         (ratingTxt ? '<span class="tarjeta-rating">' + Formato.escapeHTML(ratingTxt) + '</span>' : '') +
         (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + Formato.escapeHTML(distanciaTxt) + '</span>' : '') +
