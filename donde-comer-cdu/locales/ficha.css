@@ -31,10 +31,20 @@
                   nuevo para que hasta los separadores mas sutiles
                   queden dentro de la misma familia de color. */
 :root{
-  --gold:#ff5511;--gold-light:#ff8514;--gold-dark:#b83505;
+  --gold:#ff5511;--gold-light:#ff8514;--gold-dark:#b83505;--gold-rgb:255,85,17;
   --ink:#0d0d0d;--ink-soft:#1a1a1a;--cream:#faf7f2;--cream-deep:#f0ebe0;
   --muted:#6b6459;--green-accent:#2d6a4f;--green-bright:#ffffff;
-  --red-accent:#f04552;--border:rgba(255,85,17,0.25);
+  --red-accent:#f04552;--border:rgba(var(--gold-rgb),0.25);
+  /* SISTEMA DE COLOR (auditoría ritmo visual, 2026-08): --surface-warm/
+     --surface-warm-soft tokenizan los dos tintes que antes vivían como
+     hex sueltos (#f1e4d6, #faefe7) repetidos en .scores-section/
+     .map-section/.verdict-section. Misma receta que ya estaba documentada
+     ahí (--cream-deep/--cream + ~5% de --gold mezclado a mano), ahora con
+     nombre y reutilizable: cualquier sección de cualquier ficha puede
+     sumar ritmo editorial con .section-warm/.section-warm-soft sin
+     inventar un hex nuevo cada vez. Contraste ya verificado en los
+     comentarios de cada sección de abajo (todos >4.5:1 para texto normal). */
+  --surface-warm:#f1e4d6;--surface-warm-soft:#faefe7;
 }
 html{scroll-behavior:smooth}
 body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -67,6 +77,18 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 
 /* MAIN LAYOUT (restaurado — borrado por error en commit 96b7b08) */
 .page{max-width:1200px;margin:0 auto;padding:80px 48px}
+
+/* RITMO EDITORIAL (auditoría Brode, 2026-08) — utilidad reutilizable para
+   romper tramos largos de secciones .page consecutivas (todas comparten
+   fondo --cream, así que 3-4 seguidas se leen como una sola pared blanca
+   sin fin). Se agrega como clase EXTRA sobre <section class="page">, no
+   reemplaza la clase: .page sigue aportando max-width/padding, esta capa
+   solo pinta el fondo de la franja completa por fuera de ese padding.
+   Mismos tokens ya usados en Puntajes/Mapa/Veredicto (contraste >4.5:1
+   para --muted/--ink/--gold-dark ya verificado ahí), pensado para que
+   cualquier ficha marque "capítulos" sin definir un color nuevo cada vez. */
+.section-warm{background:var(--surface-warm)}
+.section-warm-soft{background:var(--surface-warm-soft)}
 
 /* SECTION HEADER (restaurado) */
 .section-header{display:flex;align-items:center;gap:20px;margin-bottom:48px}
@@ -137,7 +159,7 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    verificado sin cambios relevantes: --muted 4.68:1, --ink 15.56:1,
    --gold-dark 4.74:1 sobre este tono (todos por encima del minimo
    AA de 4.5:1 para texto normal). */
-.scores-section{background:#f1e4d6;padding:80px 48px}
+.scores-section{background:var(--surface-warm);padding:80px 48px}
 .scores-inner{max-width:1200px;margin:0 auto}
 .scores-grid{display:grid;grid-template-columns:1fr 2fr;gap:64px;align-items:center}
 .score-big{text-align:center;padding:48px;border:1px solid var(--border);background:var(--cream)}
@@ -153,7 +175,7 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .score-fill{height:3px;background:var(--gold);border-radius:0;transform-origin:left;transform:scaleX(0);transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
 
 /* MAPA (restaurado) */
-.map-section{background:#f1e4d6;padding:80px 48px}
+.map-section{background:var(--surface-warm);padding:80px 48px}
 .map-inner{max-width:1200px;margin:0 auto}
 .map-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
 .map-frame{position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:2px;overflow:hidden;border:1px solid var(--border)}
@@ -169,7 +191,7 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    un paso mas claro que el de Scores/Mapa para no aplanar la
    jerarquia visual entre las 3 franjas. Contraste: --muted 5.17:1,
    --ink 17.18:1, --gold-dark 5.23:1, todos por encima de 4.5:1. */
-.verdict-section{background:#faefe7;padding:80px 48px}
+.verdict-section{background:var(--surface-warm-soft);padding:80px 48px}
 .verdict-inner{max-width:1200px;margin:0 auto}
 .verdict-card{display:grid;grid-template-columns:auto 1fr;gap:0;border:1px solid var(--border);overflow:hidden}
 .verdict-accent{width:8px;background:var(--gold)}
@@ -224,9 +246,9 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .hero-title em{font-style:italic;color:var(--gold-light);font-weight:300}
 .hero-subtitle{font-size:15px;color:#ffffff;font-weight:300;letter-spacing:0.05em;max-width:480px;line-height:1.6;margin-bottom:36px}
 .hero-chips{display:flex;flex-wrap:wrap;gap:10px}
-.chip{padding:8px 18px;border:1px solid rgba(255,85,17,0.4);border-radius:2px;font-size:12px;letter-spacing:0.12em;color:rgba(255,255,255,0.85);text-transform:uppercase;font-weight:400;background:rgba(255,85,17,0.08)}
+.chip{padding:8px 18px;border:1px solid rgba(var(--gold-rgb),0.4);border-radius:2px;font-size:12px;letter-spacing:0.12em;color:rgba(255,255,255,0.85);text-transform:uppercase;font-weight:400;background:rgba(var(--gold-rgb),0.08)}
 .chip-gold{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:600}
-.hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(255,85,17,0.3);padding:28px 32px;background:rgb(255,255,255);backdrop-filter:blur(8px)}
+.hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(var(--gold-rgb),0.3);padding:28px 32px;background:rgb(255,255,255);backdrop-filter:blur(8px)}
 /* A11Y (auditoría legibilidad, 2026-08): .score-num/.score-stars viven
    dentro de .hero-score, que tiene fondo BLANCO sólido (no la superposición
    oscura del hero) -- heredaban var(--gold) "vivo", pensado para fondos
@@ -342,7 +364,7 @@ html.u-suprimir-vidrio .hero-score{
 .schedule-day{color:#ffffff;font-weight:300}
 .schedule-time{color:#fff;font-weight:400}
 .schedule-time-closed{color:#f04552;font-weight:400}
-.schedule-note{padding:28px;border:1px solid rgba(255,85,17,0.2)}
+.schedule-note{padding:28px;border:1px solid rgba(var(--gold-rgb),0.2)}
 .schedule-note-label{font-size:10px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
 .schedule-note-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:#fff;margin-bottom:4px}
 .schedule-note-sub{font-size:12px;color:#ffffff}
@@ -390,7 +412,7 @@ html.u-suprimir-vidrio .hero-score{
    levemente de naranja (mismo rgb base que --gold) y se suma un borde
    que pasa a --gold en hover, coherente con el resto de los estados
    interactivos de esta hoja (.tag:hover, .btn-ghost-onlight:hover). */
-.review-card:hover{box-shadow:0 8px 32px rgba(255,85,17,0.12);transform:translateY(-2px);border-color:var(--gold)}
+.review-card:hover{box-shadow:0 8px 32px rgba(var(--gold-rgb),0.12);transform:translateY(-2px);border-color:var(--gold)}
 .review-author{font-size:12px;font-weight:600;letter-spacing:0.08em;color:var(--ink);text-transform:uppercase;margin-bottom:8px}
 /* A11Y (auditoría legibilidad, 2026-08): .review-card tiene fondo #fff
    sólido -- mismo ajuste que el resto de las estrellas/numeros de esta
@@ -474,7 +496,15 @@ html.u-suprimir-vidrio .hero-score{
    la mitad derecha de la sección completamente en blanco en cualquier
    viewport ≥769px (el breakpoint mobile es el único que colapsa a 1fr).
    Reutilizable por cualquier otra ficha con el mismo problema. */
-.side-box{border:1px solid var(--border);background:var(--cream-deep);padding:36px 32px;align-self:start}
+/* JERARQUÍA (auditoría Brode, 2026-08): .side-box es el panel donde vive
+   "Precios verificados"/"Menú oficial en vivo" -- antes se distinguía del
+   cuerpo de texto solo por un borde de 1px casi imperceptible sobre un
+   fondo apenas más oscuro, así que no se leía como bloque propio, se
+   mezclaba con el resto en 2-3 segundos de scaneo. border-top de 3px en
+   --gold reutiliza la misma gramática visual que ya usan .verdict-accent
+   y .review-summary-accent (barra de acento = "esto es un bloque
+   destacado") en vez de inventar un tratamiento nuevo. */
+.side-box{border:1px solid var(--border);border-top:3px solid var(--gold);background:var(--cream-deep);padding:32px 32px 36px;align-self:start}
 .side-box-title{font-size:10px;letter-spacing:0.3em;color:var(--gold-dark);text-transform:uppercase;font-weight:600;margin-bottom:24px}
 .side-box ul{list-style:none;padding:0;margin:0}
 .side-box li{padding:14px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);line-height:1.6}
