@@ -212,14 +212,21 @@
     var estado = calcularEstado(DATA.schedule_rows);
     if (!estado) return;
 
-    // FASE 4 (26/07/2026): mismos valores que --color-estado-abierto/
-    // --color-estado-cerrado en css/tokens.css, actualizados juntos
-    // para pasar WCAG AA 4.5:1 (antes 4.34:1 / 2.98:1, no alcanzaban).
-    // Este archivo no puede leer variables CSS desde JS, así que los
-    // valores quedan duplicados a mano — si tokens.css vuelve a
-    // cambiar estos dos colores, hay que actualizar acá también.
-    var openColor = "#ffffff", openBg = "rgba(255,255,255,0.15)";
-    var closedColor = "#ffffff", closedBg = "rgba(240,69,82,0.12)";
+    // FIX (legibilidad, 2026-08): el fallback de FASE 4 (26/07/2026)
+    // habia aplanado abierto y cerrado al mismo blanco plano porque los
+    // tonos verde/rojo de ese momento no llegaban a 4.5:1 (4.34 / 2.98).
+    // Pero css/badge-estado.css (usado en la tarjeta de descubrimiento)
+    // ya corrio esos mismos dos colores a los valores actuales de
+    // tokens.css -- --color-estado-abierto-fondo: rgb(68,153,111) y
+    // --color-estado-cerrado: #F04552 -- que si pasan AA sobre el fondo
+    // oscuro donde vive este pill (--ink-soft #1a1a1a: 5.00:1 y 4.71:1
+    // respectivamente). Esta ficha se habia quedado con el aplanado a
+    // blanco de antes y nunca se actualizo, perdiendo el codigo de color
+    // verde/rojo que el resto del sitio si tiene: "Abierto" y "Cerrado"
+    // se distinguian solo por una diferencia de fondo casi imperceptible,
+    // obligando a leer el texto en vez de reconocerlo de un vistazo.
+    var openColor = "#44996f", openBg = "rgba(68,153,111,0.15)";
+    var closedColor = "#F04552", closedBg = "rgba(240,69,82,0.12)";
     var neutralColor = "#ffffff", neutralBg = "rgba(160,160,160,0.15)";
 
     var color = estado.abierto === null ? neutralColor : (estado.abierto ? openColor : closedColor);

@@ -158,8 +158,11 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    sobre las secciones de fondo claro (.page/.about-grid, fondo
    var(--cream)), quedando casi invisible. Mismo tratamiento visual
    que .btn-ghost pero con la paleta oscura del sitio para que pase
-   contraste sobre fondo claro. */
-.btn-ghost-onlight{color:var(--ink);border-color:rgba(13,13,13,0.35)}
+   contraste sobre fondo claro. Borde en var(--muted) (no ink al
+   35%) porque un ink translúcido licuaba a un gris ~2.3:1 sobre
+   --cream/--cream-deep, por debajo del minimo 3:1 de WCAG 1.4.11
+   para componentes UI; var(--muted) solido da 5.47:1 / 4.92:1. */
+.btn-ghost-onlight{color:var(--ink);border-color:var(--muted)}
 .btn-ghost-onlight:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
 
 /* HERO */
