@@ -1,0 +1,87 @@
+/* MARCA NARANJA — piloto Brode (2026-08)
+   Pedido explícito: que el naranja de marca (mismo tono del logo) deje
+   de ser "un acento entre otros" y pase a ser la base de la que
+   depende TODO el sistema de color de la ficha — no solo 2-3 secciones
+   especiales, sino el fondo por defecto, los bordes, el texto
+   secundario y hasta las zonas oscuras.
+
+   Se implementa acá, SOLO para Brode, como nuevo gold standard a
+   revisar antes de decidir si se replica a las otras 50 fichas — por
+   eso este archivo no toca ficha.css (compartida por las 51) y en vez
+   de eso redefine las custom properties que ficha.css ya consume via
+   var(...). Como el resto de la hoja lee TODO por variable (botones,
+   .section-warm, .side-box, bordes, tags, estrellas, section-label),
+   este archivo re-tiñe la ficha entera sin reescribir esas ~90 reglas.
+
+   Contraste: recalculado con la fórmula WCAG relativa (no "a ojo") para
+   cada texto sobre cada fondo nuevo. Detalle en cada bloque de abajo. */
+
+:root{
+  /* BASE — antes era un "casi blanco" con insinuación de crema; ahora
+     el propio fondo por defecto de la página nace del naranja de
+     marca, así que hasta las secciones que antes eran ".page blanca"
+     ya están dentro del sistema. --ink sobre este tono: 17.3:1. */
+  --cream:#fdf1e4;
+  --cream-deep:#f8dfbd;
+
+  /* SUPERFICIES "CAPÍTULO" (Catálogo, Puntajes, Mapa, Presencia
+     digital, Veredicto) — dejan de ser un tinte casi imperceptible y
+     pasan a un naranja de superficie que se reconoce a simple vista
+     como color de marca, no como "beige genérico". */
+  --surface-warm:#f2cf98;
+  --surface-warm-soft:#f9e6cc;
+
+  /* BORDES / DIVISORES — de 25% a 45% de opacidad del naranja de
+     marca: separadores, .tag, .chip, .side-box, celdas y cards dejan
+     de tener un borde casi invisible y pasan a una línea naranja real. */
+  --border:rgba(var(--gold-rgb),0.45);
+
+  /* TEXTO SECUNDARIO Y ACENTO OSCURO — recalculados para seguir
+     pasando AA (4.5:1) incluso sobre --surface-warm reforzado de
+     arriba (antes solo estaban verificados sobre fondos casi
+     blancos). --muted pasa de gris neutro a marrón cálido: hasta el
+     texto secundario de la ficha queda dentro de la familia del
+     naranja en vez de ser el único elemento sin relación con la marca.
+     Verificado sobre cream / cream-deep / surface-warm-soft /
+     surface-warm:
+       --muted     8.33:1 / 7.05:1 / 7.48:1 / 6.16:1
+       --gold-dark 6.89:1 / 5.82:1 / 6.18:1 / 5.09:1
+     Los 4 pasan AA (texto normal, 4.5:1) en los 4 fondos nuevos. */
+  --muted:#57432f;
+  --gold-dark:#963003;
+
+  /* ZONAS OSCURAS (hero, info-strip, highlights, horarios) — pasan de
+     negro neutro a un carbón con base naranja, para que hasta las
+     franjas oscuras se sientan parte del mismo sistema de marca en vez
+     de "negro genérico + acentos naranja sueltos encima".
+     Blanco sobre este tono: 18.0:1 · --gold sobre este tono: 5.6:1. */
+  --ink-soft:#20140c;
+
+  /* TEXTO PRINCIPAL — mismo rol que antes, con un pelo de temperatura
+     cálida en vez de negro puro: imperceptible a simple vista, pero
+     saca del sistema al último color sin relación con la marca.
+     Sobre el nuevo --cream: 17.3:1. */
+  --ink:#140d09;
+}
+
+/* El nav usa un rgba() fijo (no var(--cream)) porque necesita su propia
+   transparencia para el blur del scroll — se actualiza a mano para que
+   no quede como el único elemento "blanco viejo" flotando sobre un
+   sistema que ahora es cálido en todos lados. Mismo ajuste en su
+   fallback de prefers-reduced-transparency, que también hardcodea el
+   rgba original. */
+.nav{background:rgba(253,241,226,0.94)}
+@media(prefers-reduced-transparency:reduce){
+  .nav{background:rgba(253,241,226,.97)}
+}
+
+/* Overlay del hero: mismo cambio de "negro neutro" a "carbón cálido"
+   que --ink-soft de arriba, para que la franja más grande y oscura de
+   la ficha también dependa del naranja de marca en su base en vez de
+   ser negro puro. No afecta el contraste del texto blanco encima (que
+   ya pasaba con enorme margen) — solo el tono de fondo detrás. */
+.hero-overlay{background:linear-gradient(to top,rgba(32,20,12,0.97) 0%,rgba(32,20,12,0.4) 50%,rgba(32,20,12,0.1) 100%)}
+
+/* Placa de puntaje del hero: pasa de blanco puro a la misma base cálida
+   que el resto de la ficha, coherente con el nuevo --cream. */
+.hero-score{background:rgba(253,241,226,0.92)}
