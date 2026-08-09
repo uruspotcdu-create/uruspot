@@ -50,6 +50,22 @@ header .membrete{
   background:var(--gradiente-halo); filter:blur(6px); pointer-events:none;
   animation:uru-flotar 10s ease-in-out infinite;
 }
+/* Segunda capa de profundidad (2026-08-08): mismo elemento, un
+   ::after independiente para que el halo deje de leerse como una
+   sola mancha plana y pase a tener dos planos de luz superpuestos,
+   como el resto del sistema (Ambient Engine) ya hace con P0/P1.
+   Mismas reglas de performance que el elemento base: solo
+   transform+opacity animan, nunca top/left/width (Cap. 9.1 del
+   Ambient Engine, aplicado acá aunque este halo es del hero, no del
+   motor, para no introducir dos estándares distintos de movimiento
+   en la misma pantalla). Desfasada 3.4s y con blur/opacidad menores
+   para que se lea detrás de la capa principal, nunca compitiendo con
+   ella ni con el texto del titular. */
+.hero__halo::after{
+  content:""; position:absolute; inset:0;
+  background:var(--gradiente-halo-profundidad); filter:blur(10px); opacity:.7;
+  animation:uru-flotar 14s ease-in-out -3.4s infinite;
+}
 /* Eyebrow: declara QUÉ es esto antes de que la persona lea el resto
    del titular. Sin esto, alguien que entra por primera vez llega
    directo a una frase que contrasta URU SPOT con "el padrón entero"
@@ -395,6 +411,7 @@ footer{
 /* ── Protección de reduced-motion ── */
 @media (prefers-reduced-motion: reduce){
   .hero__halo,
+  .hero__halo::after,
   .hero__eyebrow,
   .hero h1,
   .hero p,

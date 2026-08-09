@@ -424,11 +424,11 @@
       // 2026-08-08 (Revisión 4): reemplazo completo del SVG — dejó
       // de ser un diagrama abstracto de línea+círculo para ser una
       // brújula reconocible (aguja de rombo bicolor). Ver la
-      // cabecera de brujula--default--regular-v3.svg para el detalle
+      // cabecera de brujula--default--regular-v4.svg para el detalle
       // completo. Nombre -v3 por el mismo motivo de cache-busting ya
       // documentado en el bump anterior a -v2: URL nueva, nadie
       // tiene nada cacheado para ella.
-      archivo: 'assets/ambient/brujula/brujula--default--regular-v3.svg'
+      archivo: 'assets/ambient/brujula/brujula--default--regular-v4.svg'
     },
     'particulas-deriva': {
       tipo: 'particula-deriva', capa: 'particulas', carga: 'anticipada',

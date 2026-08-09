@@ -3,7 +3,7 @@
  * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-09T00:38:58.020Z
+ * Generado: 2026-08-09T00:52:17.244Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -142,6 +142,9 @@ html.u-suprimir-vidrio{
   --gradiente-marca:   linear-gradient(135deg,#9C3A46 0%,#C97A83 55%,#E0A5AC 100%);
   --gradiente-halo:    radial-gradient(60% 60% at 30% 20%, rgba(201,122,131,.35), transparent 70%),
                         radial-gradient(50% 50% at 85% 0%, rgba(126,166,224,.20), transparent 65%);
+  
+  --gradiente-halo-profundidad: radial-gradient(55% 55% at 60% 60%, rgba(224,165,172,.22), transparent 72%),
+                        radial-gradient(45% 45% at 10% 90%, rgba(156,58,70,.16), transparent 68%);
   --gradiente-superficie: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%);
   --gradiente-borde-top:  linear-gradient(90deg, var(--chip-color, var(--color-granate-clara)), transparent 85%);
 
@@ -467,14 +470,10 @@ body.u-vidrio-reducido{
 
 .amb-asset--reticula {
   animation: amb-respiracion 10s ease-in-out infinite;
-  
-  transform: translateY(calc(var(--amb-p0-scroll, 0) * 1px));
 }
 
 .amb-asset--topograficas {
   animation: amb-respiracion 24s ease-in-out infinite;
-  
-  transform: translateY(calc(var(--amb-p0-scroll, 0) * 1px));
 }
 
 @keyframes amb-deriva {
@@ -495,7 +494,6 @@ body.u-vidrio-reducido{
   .amb-asset--topograficas {
     animation: none !important;
     --amb-resp-mult: 1;
-    transform: none !important;
   }
   .amb-asset--corrientes .corrientes-deriva {
     animation: none !important;
@@ -740,6 +738,27 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
 @keyframes amb-brujula-glow-respiracion {
   0%, 100% { opacity: 1; }
   50% { opacity: .88; }
+}
+
+.ambiente-plano--p2::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(130vmin, 1360px);
+  height: min(130vmin, 1360px);
+  transform: translate(
+    calc(-50% + (var(--amb-brujula-glow-puntero-x, 0) * 1px)),
+    calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px) + (var(--amb-brujula-glow-puntero-y, 0) * 1px))
+  );
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--amb-p3-color) 7%, transparent) 0%,
+    color-mix(in srgb, var(--amb-p3-color) 2.5%, transparent) 50%,
+    transparent 74%
+  );
+  pointer-events: none;
+  animation: amb-brujula-glow-respiracion 12s ease-in-out -6s infinite;
 }
 
 /* ==== css/ambiente-capa-fondo.css ==== */
@@ -2180,6 +2199,12 @@ header .membrete{
   animation:uru-flotar 10s ease-in-out infinite;
 }
 
+.hero__halo::after{
+  content:""; position:absolute; inset:0;
+  background:var(--gradiente-halo-profundidad); filter:blur(10px); opacity:.7;
+  animation:uru-flotar 14s ease-in-out -3.4s infinite;
+}
+
 .hero__eyebrow{
   font:var(--tipo-dato-xs); color:var(--color-granate-clara);
   text-transform:uppercase; letter-spacing:var(--ls-extra);
@@ -2434,6 +2459,7 @@ footer{
 
 @media (prefers-reduced-motion: reduce){
   .hero__halo,
+  .hero__halo::after,
   .hero__eyebrow,
   .hero h1,
   .hero p,
