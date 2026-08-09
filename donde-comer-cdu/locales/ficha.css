@@ -58,10 +58,27 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    fichas de negocio (locales/*/index.html → ../ficha.css); la copia de
    css/ficha.css en la raíz ya tenía este mismo fix pero no la referencia
    ninguna página real, así que nunca llegaba a producción. */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.12em;color:var(--gold-dark);text-decoration:none;text-transform:uppercase;transition:color .2s}
+/* AGRUPACIÓN VISUAL (auditoría Brode, 2026-08-3) — con justify-content:
+   space-between, los 4 hijos (logo, tag, verificado, destacado) se
+   leían como una fila de chips sueltos sin relación entre sí: el logo
+   y el eslogan quedaban tan pegados como el eslogan y el badge
+   verificado, aunque conceptualmente el primer par es "identidad de
+   marca" y el segundo es "estado del lugar". margin-right:auto en
+   .nav-tag empuja todo lo que viene después hacia la derecha, así el
+   lockup logo+eslogan queda agrupado a la izquierda y los dos badges
+   quedan agrupados a la derecha, con el aire real concentrado en el
+   medio en vez de repartido mecánicamente en 3 huecos iguales. */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:18px;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+/* IDENTIDAD (auditoría Brode, 2026-08-3): --gold-dark (#b83505) tiene
+   H≈16° -- un naranja corrido hacia el rojo que sobre --cream se
+   percibe más "ladrillo/óxido" que "naranja de marca". Se sube el
+   matiz a H≈20° manteniendo saturación y luminosidad casi intactas
+   (#b84105) para que se lea más cerca del naranja del logo real sin
+   tocar el margen de contraste ya verificado: 5.17:1 sobre --cream
+   (baja de 5.54:1, sigue sobrando para AA normal-text 4.5:1). */
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:0.12em;color:#b84105;text-decoration:none;text-transform:uppercase;transition:color .2s}
 .nav-logo:hover{color:var(--gold)}
-.nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500}
+.nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500;margin-right:auto}
 .nav-badge{background:var(--gold);color:var(--ink);font-size:10px;font-weight:600;letter-spacing:0.15em;padding:5px 14px;border-radius:2px;text-transform:uppercase}
 
 /* BUGFIX (auditoria Brode, 2026-08): .badge-verificado se agrego al nav
@@ -73,7 +90,15 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    con el resto de los badges del nav (.nav-tag/.nav-badge), mismo
    tratamiento responsive: se oculta en mobile por espacio, igual que
    ellos, en vez de forzar overflow horizontal en el nav. */
-.badge-verificado{display:inline-flex;align-items:center;gap:6px;background:rgba(45,106,79,0.1);color:var(--green-accent);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:2px;white-space:nowrap;flex-shrink:0}
+/* LEGIBILIDAD (auditoría Brode, 2026-08-3) — el chip tenía relleno al
+   10% de opacidad y sin borde: sobre el fondo casi-blanco del nav
+   (rgba(250,247,242,0.92)) el relleno prácticamente no se distinguía
+   del fondo, así que dejaba de leerse como "badge" y quedaba como
+   texto verde flotando sin contenedor. El texto en sí siempre tuvo
+   buen contraste (5.98:1, sin cambios acá) -- el problema era la forma
+   del chip, no el color del texto. Relleno al 16% + borde propio le
+   dan la misma "masa" visual que ya tiene .nav-badge al lado. */
+.badge-verificado{display:inline-flex;align-items:center;gap:6px;background:rgba(45,106,79,0.16);border:1px solid rgba(45,106,79,0.3);color:var(--green-accent);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:2px;white-space:nowrap;flex-shrink:0}
 .badge-verificado svg{width:14px;height:14px;flex-shrink:0;display:block}
 
 /* MAIN LAYOUT (restaurado — borrado por error en commit 96b7b08) */
