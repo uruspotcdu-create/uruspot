@@ -157,10 +157,16 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   pointer-events: none;
 }
 
-/* 2026-08-08: la Brújula (assets/ambient/brujula) es, desde este
-   cambio, la única familia de fondo que corre (ver nota en
-   js/ambiente-orquestador.js: Retícula/Topográficas/Corrientes
-   quedan sin iniciar a propósito). Su propio SVG no trae width/height
+/* Nota 2026-08-09 (auditoría): el comentario original de acá decía
+   "Retícula/Topográficas/Corrientes quedan sin iniciar a propósito",
+   pero ya no es así — quedó desactualizado tras revisiones
+   posteriores (ver js/ambiente-orquestador.js para el estado real y
+   actualizado de cada familia). Se deja este aviso en vez de borrar
+   el historial de la nota original de abajo, que sigue siendo
+   correcta en cuanto a POR QUÉ existe esta regla para la Brújula. */
+/* 2026-08-08: la Brújula (assets/ambient/brujula) fue, en su momento,
+   la primera familia de fondo reactivada tras el rediseño. Su propio
+   SVG no trae width/height
    — solo viewBox 100x100 (Cap. 3.4 del documento de assets: los
    assets nunca fijan su propio tamaño en pantalla) — así que sin esta
    regla el navegador la dibuja con el tamaño de reemplazo por
@@ -193,6 +199,27 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
     calc(-50% + (var(--amb-brujula-puntero-x, 0) * 1px)),
     calc(-50% + (var(--amb-brujula-scroll, 0) * 1px) + (var(--amb-brujula-puntero-y, 0) * 1px))
   );
+}
+
+/* 2026-08-09 (auditoría, causa raíz documentada en
+   js/ambiente-orquestador.js): Partículas de deriva se reactiva.
+   A diferencia de la Brújula, su SVG (particulas--deriva-libre--
+   hairline.svg, viewBox 100x100) nunca tuvo esta regla — sin ella,
+   el navegador lo dibuja con el tamaño de reemplazo por defecto y
+   sus 5 "motas" (pensadas como puntos minúsculos dentro de esa
+   grilla de 100 unidades) se estiran junto con el resto del SVG,
+   pasando a ser círculos grandes superpuestos al contenido real.
+   Mismo patrón, misma solución que ya tiene .amb-asset--brujula
+   arriba: fijar el tamaño real en viewport antes de que el asset se
+   dibuje. El propio SVG usa preserveAspectRatio por defecto
+   (xMidYMid meet), así que esto no distorsiona las motas — solo les
+   da un lienzo de tamaño real donde su escala interna (0.12–0.20)
+   vuelve a leerse como puntos chicos, no como manchas. */
+.amb-asset--particulas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
 }
 
 /* 2026-08-08: los dos anillos de resplandor que vivían acá

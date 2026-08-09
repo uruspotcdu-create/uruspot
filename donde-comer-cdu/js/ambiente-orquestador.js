@@ -196,12 +196,46 @@
       // sacar de encima. Sigue existiendo en el repo por si alguna
       // vez se rediseña con otra primitiva.
       if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
-      // if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar(); — 2026-08-08: sacado a pedido explícito. Sus arcos anidados (curvas-topograficas), a la escala real del viewport, se leían como grandes círculos de fondo — exactamente lo que el pedido pide sacar. Ver también la familia "Brujulitas" (más abajo, ya activa) como el reemplazo de movimiento de fondo que sí se mantiene.
-      // if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
+      // if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar(); — 2026-08-08: sacado a pedido explícito. Sus arcos anidados (curvas-topograficas), a la escala real del viewport, se leían como grandes círculos de fondo — exactamente lo que el pedido pide sacar. A diferencia de Corrientes/Partículas (ver notas de reactivación más abajo), acá el problema no es solo la regla CSS que falta: la composición en sí (arcos aislados, no un patrón que cubra todo el viewBox) necesita rediseñarse a menor escala antes de volver a activarla — por eso, a propósito, sigue apagada. Ver también la familia "Brujulitas" (más abajo, ya activa) como el reemplazo de movimiento de fondo que sí se mantiene.
+      // 2026-08-09 (auditoría): se reactiva. Se había apagado por una
+      // razón de gusto (Corrientes usa la primitiva prim-sinusoide, el
+      // patrón de curva onduladas que en su momento se pidió sacar),
+      // no por el bug de escala de la nota de abajo — de hecho,
+      // Corrientes es estructuralmente como Retícula, no como
+      // Topográficas/Partículas: su SVG es un patrón de líneas que
+      // cubre todo el viewBox 0-100 de punta a punta (2 tiles de
+      // "franjas" en diagonal), no un motivo aislado y chico dentro de
+      // esa grilla — por eso no sufre el mismo síntoma de "círculo
+      // gigante" al estirarse (mismo motivo por el que Retícula nunca
+      // necesitó su propia regla CSS de tamaño). La razón de gusto
+      // original ya no aplica: era que se confundía con la Brújula de
+      // línea fina de entonces; la Brújula ahora es un ícono sólido
+      // bicolor, visualmente muy distinto (mismo razonamiento que ya
+      // se usó para reactivar Retícula en la Revisión 2). Si al verla
+      // en pantalla no convence, alcanza con volver a comentar esta
+      // línea — no toca ningún otro archivo.
+      if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
       if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
       if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
       if (global.AmbienteBrujulitas) global.AmbienteBrujulitas.iniciar();
-      // if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar(); — 2026-08-09: sacado de nuevo, esta vez por la causa raíz real. La Revisión 2 (comentario de arriba, ahora incorrecto) asumió que el problema era de contraste de color/forma contra la Brújula; el problema real es de escala: a diferencia de .amb-asset--brujula, la familia particulas-deriva.svg NUNCA tuvo su propia regla CSS de width/height/position (ver css/ambiente-planos.css). Sin esa regla, el navegador estira el <svg> (viewBox 100x100) a pantalla completa, y sus 5 "motas" — dibujadas como aros de hasta el 20% del ancho de esa grilla de 100 unidades, pensadas como puntos minúsculos — se estiran con él: dejan de ser puntitos y pasan a ser círculos grandes, algunos de decenas de % del ancho de pantalla, superpuestos al contenido real. Es exactamente el mismo síntoma que ya motivó sacar Topográficas y Corrientes: círculos de fondo que no aportan nada. Si en el futuro se quiere esta familia de vuelta, primero hay que sumarle una regla `.amb-asset--particulas { position: fixed; inset: 0; width: 100vw; height: 100vh; }` explícita (como tiene la Brújula) y volver a calibrar la escala de cada mota para que sea realmente chica en píxeles, no proporcional a un viewBox que ahora cubre toda la pantalla.
+      // 2026-08-09 (auditoría): se reactiva Partículas de deriva. La
+      // Revisión 2 (comentario de arriba) había asumido que el
+      // problema era de contraste de color/forma contra la Brújula;
+      // el problema real era de escala: a diferencia de
+      // .amb-asset--brujula, la familia particulas-deriva.svg nunca
+      // tuvo su propia regla CSS de width/height/position (ver
+      // css/ambiente-planos.css). Sin esa regla, el navegador estiraba
+      // el <svg> (viewBox 100x100) a pantalla completa, y sus 5
+      // "motas" — dibujadas como aros pensados como puntos minúsculos
+      // — se estiraban con él, pasando a ser círculos grandes
+      // superpuestos al contenido real. Se agregó la regla
+      // `.amb-asset--particulas { position: fixed; inset: 0; width:
+      // 100vw; height: 100vh; }` (mismo criterio que ya tenía la
+      // Brújula) en css/ambiente-planos.css — con eso, el
+      // preserveAspectRatio por defecto del SVG mantiene la escala
+      // interna (0.12–0.20) sin distorsión, así que las motas vuelven
+      // a leerse como puntos chicos.
+      if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
       if (global.AmbienteHalos) global.AmbienteHalos.iniciar();
       if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
       // Fase 8 (Visual & Design Master Pass): AmbienteParticulas (Fase 2,

@@ -560,7 +560,7 @@ import { crearAppCoordinator } from './app-coordinator.js';
     // js/motor.bundle.js en index.html — acá el "index.html" a
     // reescribir es este propio app.js, porque la URL no vive en el
     // HTML sino en este array.
-    var HASH_AMBIENTE_BUNDLE = '8f41aa2a85';
+    var HASH_AMBIENTE_BUNDLE = '30eb488c26';
     var HASH_COREOGRAFIAS = 'b5d33056eb';
 
     var lanzar = function () {
