@@ -76,6 +76,36 @@
     color-mix(in srgb, var(--amb-p1-color) 5%, transparent) 100%
   );
   pointer-events: none;
+  /* Revisión 9 (2026-08-08, pase "hasta el límite"): un solo eje de
+     parallax de scroll sobre esta capa (recién nacida en la
+     Revisión 8, así que sumar este primer eje no toca el límite de
+     2 por familia — Cap. 5). Reutiliza --amb-brujula-scroll (ya
+     escrita por js/ambiente-brujula.js) en vez de inventar una
+     variable nueva: esta capa se mueve mucho más lento que la
+     Brújula (factor 0.15) para leerse como el fondo más lejano de
+     todos, detrás de todo lo demás. */
+  transform: translateY(calc(var(--amb-brujula-scroll, 0) * 0.15px));
+}
+
+/* Grano/textura (Revisión 9) — capa puramente estática, sin
+   animation ni transform, un único paint que nunca se recalcula.
+   Objetivo: el fondo hoy es 100% degradés lisos (gradientes CSS),
+   que en pantallas grandes se ven "planos"/digitales; una textura de
+   ruido finísima (SVG turbulence en data-URI, sin request de red,
+   sin librería) rompe ese efecto banding y da una sensación de
+   superficie física — el mismo recurso que cine/foto usan hace
+   décadas para que un degradé no se vea "hecho por computadora".
+   Opacidad muy baja (0.025) a propósito: perceptible solo como
+   textura, nunca como ruido visible. Costo: un solo paint estático,
+   cero animación, cero JS. */
+.ambiente-plano--p0::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .025;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .ambiente-plano--p2 {
@@ -251,11 +281,24 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
     calc(-50% + (var(--amb-brujula-glow-puntero-x, 0) * 1px)),
     calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px) + (var(--amb-brujula-glow-puntero-y, 0) * 1px))
   );
+  /* Revisión 9 (2026-08-08, pase "hasta el límite"): se suma un
+     tercer anillo "sonar" como una tercera capa DENTRO del mismo
+     background — no un pseudo-elemento ni un <div> nuevo (eso
+     obligaría a una familia a crear su propio elemento, en contra
+     de Cap. 4.1: "ninguna familia crea su propio plano"). Mismo
+     elemento, mismo transform, cero costo extra de layout/paint más
+     allá de un stop de gradiente adicional. */
   background: radial-gradient(
     circle,
     color-mix(in srgb, var(--amb-p3-color) 7%, transparent) 0%,
     color-mix(in srgb, var(--amb-p3-color) 2.5%, transparent) 50%,
     transparent 74%
+  ),
+  radial-gradient(
+    circle,
+    transparent 60%,
+    color-mix(in srgb, var(--amb-p3-color) 1.2%, transparent) 78%,
+    transparent 92%
   );
   pointer-events: none;
   /* Segundo eje sobre esta misma familia de capa (glow exterior):

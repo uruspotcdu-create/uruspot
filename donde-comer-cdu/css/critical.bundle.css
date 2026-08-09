@@ -3,7 +3,7 @@
  * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-09T01:02:46.015Z
+ * Generado: 2026-08-09T01:08:35.425Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -682,6 +682,18 @@ body.u-vidrio-reducido{
     color-mix(in srgb, var(--amb-p1-color) 5%, transparent) 100%
   );
   pointer-events: none;
+  
+  transform: translateY(calc(var(--amb-brujula-scroll, 0) * 0.15px));
+}
+
+.ambiente-plano--p0::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .025;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .ambiente-plano--p2 {
@@ -763,11 +775,18 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
     calc(-50% + (var(--amb-brujula-glow-puntero-x, 0) * 1px)),
     calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px) + (var(--amb-brujula-glow-puntero-y, 0) * 1px))
   );
+  
   background: radial-gradient(
     circle,
     color-mix(in srgb, var(--amb-p3-color) 7%, transparent) 0%,
     color-mix(in srgb, var(--amb-p3-color) 2.5%, transparent) 50%,
     transparent 74%
+  ),
+  radial-gradient(
+    circle,
+    transparent 60%,
+    color-mix(in srgb, var(--amb-p3-color) 1.2%, transparent) 78%,
+    transparent 92%
   );
   pointer-events: none;
   
