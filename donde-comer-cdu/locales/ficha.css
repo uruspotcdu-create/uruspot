@@ -277,7 +277,16 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    estrellitas (14px) son texto normal y necesitan 4.5:1 -- no lo alcanzan.
    var(--gold-dark) da 5.92:1 sobre blanco en ambos casos, de sobra. */
 .score-num{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold-dark);line-height:1}
-.score-label{font-size:10px;letter-spacing:0.3em;color:#ffffff;text-transform:uppercase;margin-top:4px}
+/* BUGFIX (auditoría Brode, 2026-08-2): .score-label heredaba el mismo
+   color blanco de .info-cell-label/.schedule-* (pensado para las franjas
+   OSCURAS del sitio), pero vive dentro de .hero-score, que tiene fondo
+   BLANCO sólido (rgb(255,255,255) arriba) -- texto blanco sobre fondo
+   blanco, invisible en la práctica. Es exactamente el mismo bug que ya
+   se corrigió acá al lado en .score-num/.score-stars (ver comentario
+   A11Y arriba), que por lo visto no cubrió esta línea. var(--muted)
+   es el tratamiento que ya usa la etiqueta gemela .score-big-label
+   más abajo en esta misma hoja para el mismo rol sobre fondo claro. */
+.score-label{font-size:10px;letter-spacing:0.3em;color:var(--muted);text-transform:uppercase;margin-top:4px}
 .score-stars{color:var(--gold-dark);font-size:14px;margin-top:8px}
 
 /* PERF (auditoría scroll, 2026-08-04): .nav queda en pantalla durante
