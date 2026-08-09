@@ -68,7 +68,13 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    lockup logo+eslogan queda agrupado a la izquierda y los dos badges
    quedan agrupados a la derecha, con el aire real concentrado en el
    medio en vez de repartido mecánicamente en 3 huecos iguales. */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:18px;padding:18px 48px;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+/* MARCA, TOMA 3 (auditoría Brode, 2026-08-5) — border-bottom:1px solid
+   var(--border) (naranja al 25% de opacidad, 1px) es casi invisible a
+   la distancia normal de lectura: la franja entera terminaba sin
+   ningún ancla de marca real en su límite inferior. Se sube a 3px
+   sólido en --gold: ahora hay una línea naranja de verdad marcando la
+   base del nav en TODA la página, no un pixel translúcido. */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:18px;padding:20px 48px;background:rgba(250,247,242,0.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:3px solid var(--gold)}
 /* IDENTIDAD, TOMA 2 (auditoría Brode, 2026-08-4) — el ajuste anterior
    (H16→H20, manteniendo casi la misma luminosidad) era matemáticamente
    correcto pero visualmente imperceptible a simple vista: seguía siendo
@@ -85,7 +91,14 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .nav-logo{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;letter-spacing:0.1em;color:#e6460a;text-decoration:none;text-transform:uppercase;transition:color .2s}
 .nav-logo:hover{color:var(--gold)}
 .nav-tag{font-size:11px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;font-weight:500;margin-right:auto}
-.nav-badge{background:var(--gold);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:0.13em;padding:7px 16px;border-radius:3px;text-transform:uppercase}
+/* FORMA, TOMA 3 (auditoría Brode, 2026-08-5) — hasta ahora el único
+   cambio en los badges fue de color/relleno; la FORMA seguía siendo
+   un rectángulo apenas redondeado (3px), que a este tamaño de texto
+   casi no se percibe como "redondeado" -- se lee como un rectángulo
+   más. border-radius:999px (pill real) + box-shadow le dan a ambos
+   badges una silueta inconfundible y una elevación física que el
+   nav no tenía en ningún elemento hasta ahora. */
+.nav-badge{background:var(--gold);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:0.13em;padding:7px 18px;border-radius:999px;text-transform:uppercase;box-shadow:0 2px 6px rgba(var(--gold-rgb),0.35)}
 
 /* BUGFIX (auditoria Brode, 2026-08): .badge-verificado se agrego al nav
    de brode/index.html sin ninguna regla de CSS en todo el repo. El <svg>
@@ -104,8 +117,8 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    claro), para que ambos badges se lean como el mismo tipo de elemento
    con el mismo peso. Contraste texto blanco sobre --green-accent: 6.39:1,
    de sobra para AA normal-text (4.5:1). */
-.badge-verificado{display:inline-flex;align-items:center;gap:6px;background:var(--green-accent);border:none;color:#fff;font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;padding:7px 14px;border-radius:3px;white-space:nowrap;flex-shrink:0}
-.badge-verificado svg{width:14px;height:14px;flex-shrink:0;display:block}
+.badge-verificado{display:inline-flex;align-items:center;gap:6px;background:var(--green-accent);border:none;color:#fff;font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;padding:7px 16px;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 6px rgba(45,106,79,0.35)}
+.badge-verificado svg{width:15px;height:15px;flex-shrink:0;display:block}
 
 /* MAIN LAYOUT (restaurado — borrado por error en commit 96b7b08) */
 .page{max-width:1200px;margin:0 auto;padding:80px 48px}
