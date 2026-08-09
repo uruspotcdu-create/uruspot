@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  URU SPOT — Ambient Engine — Familia: Brújula
+  Archivo: brujula, variante default, peso regular — Revisión 4.
+
+  Reemplazo completo (feedback visual directo: "esto no se ve como
+  una brújula"). Las revisiones 1-3 mantenían el círculo + aguja
+  como una sola línea recta fina con marcas de coordenada en los
+  4 puntos cardinales — geométricamente correcto según el sistema
+  de "primitivas compartidas" del documento de diseño, pero el
+  resultado se leía como un diagrama técnico abstracto, no como el
+  objeto "brújula" que cualquier persona reconoce a simple vista.
+
+  Esta versión prioriza legibilidad inmediata del símbolo por sobre
+  el vocabulario de primitivas del documento de diseño: la aguja
+  ahora es una forma de rombo/cometa en dos mitades (norte con
+  acento de color, sur en el tono neutro del plano P2) — el mismo
+  lenguaje visual que cualquier ícono de brújula reconocible (mapas,
+  señalización, brújulas físicas reales). Se mantienen los 3 grupos
+  con nombre (brujula-aro / brujula-marcas / brujula-aguja) para que
+  las animaciones existentes en ambiente-tokens-movimiento.css (Cap.
+  5: rotación mínima del aro + oscilación de la aguja) seigan
+  aplicando sin cambios — ninguna otra parte del sistema tuvo que
+  tocarse para este reemplazo.
+
+  Nombre de archivo -v3 (en vez de editar el -v2 existente): el repo
+  cachea assets/ambient/*.svg como immutable/1 año en el borde de
+  Cloudflare (ver _headers) — cualquier navegador que ya haya pedido
+  -v2 una vez seguiría sirviendo el diagrama viejo desde su propia
+  caché HTTP para siempre si se reutilizara ese nombre. Renombrar es
+  la única forma de garantizar que todos vean el reemplazo real.
+-->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     class="amb-asset amb-asset--brujula"
+     style="color:var(--amb-p2-color);
+            opacity:0.9;
+            fill:none;" aria-hidden="true" focusable="false">
+
+  <!-- Aro — círculo grueso, doble trazo (aro exterior + aro interior
+       fino) para que se lea como el cuerpo físico del instrumento,
+       no como una línea sola. Rotación mínima aplicada por CSS sobre
+       este grupo (igual que antes). -->
+  <g class="brujula-aro" transform-box="fill-box" transform-origin="center">
+    <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor"
+            stroke-width="2.6" vector-effect="non-scaling-stroke"/>
+    <circle cx="50" cy="50" r="33" fill="none" stroke="currentColor"
+            stroke-width="1" opacity="0.5" vector-effect="non-scaling-stroke"/>
+  </g>
+
+  <!-- Marcas — ticks cardinales gruesos (N/E/S/O) + ticks
+       intercardinales finos (NE/SE/SO/NO), como una rosa de los
+       vientos real, más el índice/puntero triangular sobre el Norte
+       (la marca fija de referencia, fuera del aro). Grupo estático:
+       nunca rota ni oscila. -->
+  <g class="brujula-marcas" fill="currentColor" stroke="none">
+    <!-- índice fijo de Norte -->
+    <path d="M 50 4 L 55 13 L 45 13 Z" fill="var(--color-granate-clara, #C97A83)"/>
+
+    <!-- ticks cardinales (gruesos) -->
+    <g stroke="currentColor" stroke-width="2.4" vector-effect="non-scaling-stroke">
+      <line x1="50" y1="10" x2="50" y2="18"/>
+      <line x1="90" y1="50" x2="82" y2="50"/>
+      <line x1="50" y1="90" x2="50" y2="82"/>
+      <line x1="10" y1="50" x2="18" y2="50"/>
+    </g>
+
+    <!-- ticks intercardinales (finos) -->
+    <g stroke="currentColor" stroke-width="1.2" opacity="0.6" vector-effect="non-scaling-stroke">
+      <line x1="21.7" y1="21.7" x2="27.2" y2="27.2"/>
+      <line x1="78.3" y1="21.7" x2="72.8" y2="27.2"/>
+      <line x1="78.3" y1="78.3" x2="72.8" y2="72.8"/>
+      <line x1="21.7" y1="78.3" x2="27.2" y2="72.8"/>
+    </g>
+  </g>
+
+  <!-- Aguja — rombo/cometa en dos mitades, la forma que cualquiera
+       reconoce como aguja de brújula: mitad Norte con el acento de
+       color de marca, mitad Sur en el tono neutro del plano P2.
+       Todo el grupo es lo que oscila (Cap. 5: "la aguja oscila
+       buscando norte"); en reposo la punta norte apunta al índice
+       fijo de brujula-marcas. -->
+  <g class="brujula-aguja" transform-box="fill-box" transform-origin="center"
+     stroke="currentColor" stroke-width="0.8" vector-effect="non-scaling-stroke">
+    <path d="M 50 12 L 58 50 L 50 50 Z" fill="var(--color-granate-clara, #C97A83)"/>
+    <path d="M 50 12 L 42 50 L 50 50 Z" fill="var(--color-granate-clara, #C97A83)" opacity="0.75"/>
+    <path d="M 50 88 L 58 50 L 50 50 Z" fill="currentColor" opacity="0.55"/>
+    <path d="M 50 88 L 42 50 L 50 50 Z" fill="currentColor" opacity="0.4"/>
+    <circle cx="50" cy="50" r="3.4" fill="currentColor" stroke="none"/>
+  </g>
+
+</svg>
