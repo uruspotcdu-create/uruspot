@@ -496,7 +496,12 @@
 .esqueleto-linea--rubro{ width:40%; height:9px; }
 .esqueleto-linea--nombre{ width:75%; height:16px; margin-top:var(--esp-2); }
 .esqueleto-linea--direccion{ width:55%; }
-.esqueleto-linea--acciones{ width:90%; height:26px; margin-top:var(--esp-4); border-radius:var(--radio-full); }
+/* 2026-08-09 (pasada #3): margin-top:auto — mismo criterio que
+   .tarjeta-acciones más arriba, así el esqueleto de carga ya anticipa
+   la misma composición (pie al fondo) que va a tener la tarjeta real
+   que lo reemplaza, en vez de mostrar un layout que después "salta"
+   al llegar el dato real. */
+.esqueleto-linea--acciones{ width:90%; height:26px; margin-top:auto; padding-top:var(--esp-4); border-radius:var(--radio-full); }
 
 /* ── Preparado para cuando haya foto por lugar (Fase 1.5) ── */
 .tarjeta--con-imagen{ padding:0; overflow:hidden; }

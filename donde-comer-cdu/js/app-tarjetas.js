@@ -311,8 +311,8 @@
       art.innerHTML =
         marcaAguaRubro +
         '<div class="tarjeta-rubro">' + iconoRubro + Formato.escapeHTML(rubro) + pendienteTxt +
-        (ratingTxt ? '<span class="tarjeta-rating">' + Formato.escapeHTML(ratingTxt) + '</span>' : '') +
-        (distanciaTxt ? '<span class="tarjeta-distancia">📍 ' + Formato.escapeHTML(distanciaTxt) + '</span>' : '') +
+        (ratingTxt ? '<span class="tarjeta-rating" aria-label="Calificación ' + Formato.escapeHTML(lugar.rating.toFixed(1).replace('.', ',')) + ' sobre 5' + (typeof lugar.ratingCount === 'number' ? ', ' + lugar.ratingCount.toLocaleString('es-AR') + ' reseñas' : '') + '">' + Formato.escapeHTML(ratingTxt) + '</span>' : '') +
+        (distanciaTxt ? '<span class="tarjeta-distancia" aria-label="A ' + Formato.escapeHTML(distanciaTxt) + ' de tu ubicación">📍 ' + Formato.escapeHTML(distanciaTxt) + '</span>' : '') +
         badgeMejorRating + badgeMasCercano + '</div>' +
         // Fase 4, Cap. 6 "Apertura de ficha": "El elemento de origen (la
         // tarjeta tocada) se convierte visualmente en el encabezado de
