@@ -230,8 +230,19 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    35%) porque un ink translúcido licuaba a un gris ~2.3:1 sobre
    --cream/--cream-deep, por debajo del minimo 3:1 de WCAG 1.4.11
    para componentes UI; var(--muted) solido da 5.47:1 / 4.92:1. */
-.btn-ghost-onlight{color:var(--ink);border-color:var(--muted)}
-.btn-ghost-onlight:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
+/* LEGIBILIDAD (auditoría Brode, 2026-08-2): el fix anterior resolvía
+   contraste de texto/borde pero el botón seguía siendo transparente
+   puro -- al lado de un .btn-primary sólido (fondo naranja) se leía
+   como "casi nada" en el primer barrido visual, que es justo el
+   síntoma reportado en "Confirmar precios vigentes"/"Menú oficial en
+   vivo". Se le suma un relleno tenue en la familia del naranja (5%,
+   misma receta que --surface-warm-soft) para que tenga masa visual
+   propia sin convertirse en un segundo botón naranja compitiendo con
+   el primario. Contraste sin cambios relevantes: el fondo mezclado es
+   ~1-2% más oscuro que --cream/--cream-deep, la diferencia es
+   imperceptible para los ratios ya verificados de --ink/--gold-dark. */
+.btn-ghost-onlight{color:var(--ink);border-color:var(--muted);background:rgba(var(--gold-rgb),0.05)}
+.btn-ghost-onlight:hover{border-color:var(--gold-dark);color:var(--gold-dark);background:rgba(var(--gold-rgb),0.1)}
 
 /* HERO */
 .hero{position:relative;height:100vh;min-height:600px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
@@ -512,6 +523,23 @@ html.u-suprimir-vidrio .hero-score{
 .side-box li:first-child{padding-top:0}
 .side-box li strong{color:var(--ink);font-weight:500;display:block;margin-bottom:3px;font-size:13px;letter-spacing:0.02em}
 .side-box-val{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold-dark);font-weight:400}
+
+/* SIDE-BOX CTA (auditoría Brode, 2026-08-2) — antes "Menú oficial en
+   vivo" era un .btn-ghost-onlight suelto dentro del side-box: una
+   forma de botón (rectángulo con borde + texto centrado) que no
+   comparte gramática visual con la lista de precios que tiene arriba
+   (filas con borde inferior, valor a la derecha), así que el ojo lo
+   lee como un elemento pegado, no relacionado. .side-box-cta reusa
+   exactamente el patrón de fila de .side-box li (mismo padding
+   vertical, mismo borde) para que se sienta parte del mismo bloque,
+   con una flecha como único indicador de que es un link externo —
+   sin competir en peso visual con los botones reales de la página. */
+.side-box-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:14px 18px;background:var(--cream);border:1px solid var(--border);border-radius:2px;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);text-decoration:none;transition:border-color .2s,color .2s}
+.side-box-cta::after{content:'→';flex-shrink:0;color:var(--gold-dark);font-weight:600;transition:transform .2s}
+.side-box-cta:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
+.side-box-cta:hover::after{transform:translateX(3px)}
+.side-box-cta:focus-visible{outline:2px solid var(--gold-dark);outline-offset:2px}
+
 @media(max-width:768px){
   .side-box{padding:28px 24px;margin-top:8px}
 }
