@@ -121,7 +121,16 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   left: 50%;
   width: min(64vmin, 720px);
   height: min(64vmin, 720px);
-  transform: translate(-50%, -50%);
+  /* 2026-08-08 (Revisión 4): se suma el offset de profundidad por
+     scroll (js/ambiente-brujula.js escribe --amb-brujula-scroll) al
+     centrado ya existente, vía calc — mismo criterio que
+     .particulas-parallax en assets/ambient/_tokens/
+     ambiente-tokens-movimiento.css: solo transform, nunca top/left
+     (Cap. 9.1, evita reflow). Sin JS o con prefers-reduced-motion la
+     variable nunca se escribe y el término queda en 0 (fallback),
+     así que la regla de abajo la neutraliza igual sin necesitar un
+     caso especial acá. */
+  transform: translate(-50%, calc(-50% + (var(--amb-brujula-scroll, 0) * 1px)));
 }
 
 /* 2026-08-08 (Revisión 2, mejora de fondo tras el rediseño a ícono
@@ -147,7 +156,15 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   left: 50%;
   width: min(95vmin, 1000px);
   height: min(95vmin, 1000px);
-  transform: translate(-50%, -50%);
+  /* 2026-08-08 (Revisión 4): mismo mecanismo que .amb-asset--brujula
+     de más arriba, pero leyendo --amb-brujula-glow-scroll — una
+     variable distinta, a propósito, escrita por el mismo módulo con
+     una velocidad y sentido distintos (ver nota extensa en
+     js/ambiente-brujula.js). El glow queda relativamente atrás de la
+     Brújula al scrollear: esa diferencia de velocidad entre las dos
+     variables es lo que se lee como profundidad de dos capas, no
+     como un solo elemento plano. */
+  transform: translate(-50%, calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px)));
   /* 2026-08-08 (Revisión 3): antes usaba --color-granate-clara fijo,
      desincronizado del tinte de amanecer/atardecer que ya aplica
      js/ambiente-horario-tinte.js sobre --amb-p3-color (Cap. 7.3). Se
