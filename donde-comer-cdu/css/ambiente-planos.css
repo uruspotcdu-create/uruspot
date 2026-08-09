@@ -201,6 +201,33 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   );
 }
 
+/* 2026-08-09 (auditoría, sección 2.2 / Cap. 6.1): reactividad de
+   Corrientes al scroll (parallax de velocidad-de-posición), marcada
+   como pendiente en el propio SVG (corrientes--diagonal-lenta--
+   hairline.svg: "en este paso NO se implementa la reacción a
+   scroll... quedan pendientes"). Reutiliza --amb-brujula-scroll (ya
+   publicada en document.documentElement, ver la nota de
+   raizVariables en js/ambiente-brujula.js) en vez de inventar una
+   señal de scroll nueva — mismo criterio que ya usa la capa
+   atmosférica de P1 (.ambiente-plano--p1::before, más arriba).
+   Se aplica sobre el <svg> raíz (.amb-asset--corrientes), NUNCA
+   sobre .corrientes-deriva (el grupo interno que ya anima su propio
+   transform:translateX vía keyframes en
+   assets/ambient/_tokens/ambiente-tokens-movimiento.css) — dos
+   transforms sobre el mismo elemento se pisarían entre sí; acá, en
+   cambio, cada uno vive en su propio nivel del árbol SVG y ambos se
+   componen sin conflicto. Factor deliberadamente chico (0.05, un
+   tercio del que ya usa la capa atmosférica) porque Corrientes es un
+   asset con opacidad/presencia mayor que esa capa: un desplazamiento
+   grande acá competiría con la Deriva en vez de sumarse como
+   profundidad sutil. Bajo reducirMovimiento, --amb-brujula-scroll
+   nunca se escribe (ver js/ambiente-brujula.js) y el calc() cae en su
+   valor por defecto (0), así que esta regla no necesita su propia
+   entrada en el @media (prefers-reduced-motion: reduce) de más abajo. */
+.amb-asset--corrientes {
+  transform: translateY(calc(var(--amb-brujula-scroll, 0) * 0.05px));
+}
+
 /* 2026-08-09 (auditoría, causa raíz documentada en
    js/ambiente-orquestador.js): Partículas de deriva se reactiva.
    A diferencia de la Brújula, su SVG (particulas--deriva-libre--

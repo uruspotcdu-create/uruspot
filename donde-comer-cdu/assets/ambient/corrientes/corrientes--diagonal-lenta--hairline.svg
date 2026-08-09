@@ -50,11 +50,19 @@
   puramente horizontal — sigue siendo geométricamente construida
   (rotación exacta, Cap. 1.2), no una curva "a mano alzada".
 
-  Reactividad (Cap. 6.1): en este paso NO se implementa la reacción a
-  scroll (parallax de velocidad) ni a clima (velocidad ↑ con lluvia)
-  — quedan pendientes para el paso de integración de interacción,
-  mismo criterio que dejó pendientes los shifts de clima/horario en
-  assets/ambient/_tokens/ambiente-tokens-visual.css. Este archivo solo
+  Reactividad (Cap. 6.1): scroll (parallax de posición, no de
+  velocidad) SÍ implementado — 2026-08-09 (auditoría), ver
+  .amb-asset--corrientes en css/ambiente-planos.css, que traslada el
+  <svg> raíz completo con --amb-brujula-scroll (misma señal ya
+  publicada para la capa atmosférica de P1). Deliberadamente NO en
+  este archivo: la traslación se resuelve en CSS, no acá, mismo
+  criterio que la propia Deriva de más abajo. Velocidad ↑ con lluvia
+  sigue, a propósito, sin implementar: js/ambiente-clima.js (Auditoría
+  de conexiones, Fase 8) ya evaluó esa asociación y la descartó
+  explícitamente por Cap. 8.2 ("forzar lluvia/niebla sobre Corrientes/
+  Partículas sería inventar una asociación que el propio documento
+  pide evitar") — viento sigue siendo la única señal de clima real que
+  acelera esta familia (ver --amb-clima-viento). Este archivo solo
   resuelve la familia y su firma de movimiento propia (deriva).
 
   Complejidad (Cap. 9.2): 4 grupos (límite 6: deriva > diagonal >

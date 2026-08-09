@@ -73,6 +73,27 @@
 
   var contenedorPlano = null;
   var ultimoScrollY = null;
+
+  // 2026-08-09 (auditoría, hallazgo de código): las 4 variables de
+  // parallax (scroll x2, puntero x2) se escribían solo sobre
+  // contenedorPlano (el div de P2) — como los planos son 4 <div>
+  // hermanos bajo #ambiente-planos (ver js/ambiente-planos.js), una
+  // custom property escrita ahí nunca llega a P0/P1/P3 por herencia
+  // (las custom properties heredan hacia abajo del árbol DOM, nunca
+  // entre hermanos). Esto no rompía nada visible en la Brújula ni en
+  // su propio glow (ambos SÍ son descendientes de P2, así que a ellos
+  // sí les llegaba), pero dejaba muerta a .ambiente-plano--p1::before
+  // (capa atmosférica, Revisión 9 en css/ambiente-planos.css), que
+  // lee --amb-brujula-scroll esperando que valga algo distinto de 0
+  // y en la práctica siempre calculaba translateY(0) — la variable
+  // jamás llegaba a P1. Se agrega un segundo destino de escritura,
+  // document.documentElement (ancestro real de los 4 planos, mismo
+  // elemento donde ya publica su propia señal js/ambiente-clima.js),
+  // sin sacar la escritura sobre contenedorPlano — así ningún
+  // consumidor actual (Brújula, su glow) cambia de comportamiento, y
+  // los nuevos consumidores entre planos (P1, y Corrientes más abajo)
+  // pasan a recibir el valor real.
+  var raizVariables = (typeof document !== 'undefined') ? document.documentElement : null;
   var frameSolicitado = false;
   var listenerActivo = false;
   var frameSolicitadoPuntero = false;
@@ -94,10 +115,19 @@
     frameSolicitado = false;
     if (!contenedorPlano) return;
     var y = global.scrollY;
-    contenedorPlano.style.setProperty('--amb-brujula-scroll', clamp(y * FACTOR_BRUJULA, TOPE_BRUJULA));
+    var valorScroll = clamp(y * FACTOR_BRUJULA, TOPE_BRUJULA);
+    var valorGlowScroll = clamp(y * -FACTOR_GLOW, TOPE_GLOW);
+    contenedorPlano.style.setProperty('--amb-brujula-scroll', valorScroll);
     // Sentido invertido a propósito (nota de más arriba): el glow
     // queda relativamente atrás de la Brújula, no acompañándola 1:1.
-    contenedorPlano.style.setProperty('--amb-brujula-glow-scroll', clamp(y * -FACTOR_GLOW, TOPE_GLOW));
+    contenedorPlano.style.setProperty('--amb-brujula-glow-scroll', valorGlowScroll);
+    // Ver nota de raizVariables más arriba: mismo valor, también en el
+    // ancestro común de los 4 planos, para que P1 (y cualquier otro
+    // plano que en el futuro quiera sumarse) también lo reciba.
+    if (raizVariables) {
+      raizVariables.style.setProperty('--amb-brujula-scroll', valorScroll);
+      raizVariables.style.setProperty('--amb-brujula-glow-scroll', valorGlowScroll);
+    }
   }
 
   function alScroll() {
@@ -179,6 +209,10 @@
     if (contenedorPlano) {
       contenedorPlano.style.removeProperty('--amb-brujula-scroll');
       contenedorPlano.style.removeProperty('--amb-brujula-glow-scroll');
+    }
+    if (raizVariables) {
+      raizVariables.style.removeProperty('--amb-brujula-scroll');
+      raizVariables.style.removeProperty('--amb-brujula-glow-scroll');
     }
   }
 
