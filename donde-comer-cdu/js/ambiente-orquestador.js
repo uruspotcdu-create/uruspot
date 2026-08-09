@@ -179,7 +179,7 @@
     if (!global.AmbienteFlags || global.AmbienteFlags.activo('sustratoVisual')) {
       if (global.AmbientePlanos) global.AmbientePlanos.iniciar();
       // 2026-08-08 (Revisión 2, tras el rediseño de la Brújula a
-      // ícono sólido bicolor — ver brujula--default--regular-v6.svg):
+      // ícono sólido bicolor — ver brujula--default--regular-v5.svg):
       // Retícula y Topográficas se reactivan. El motivo original para
       // apagarlas (más abajo, nota sin tocar) era que la Brújula, con
       // su geometría anterior de línea fina, se confundía con estas
