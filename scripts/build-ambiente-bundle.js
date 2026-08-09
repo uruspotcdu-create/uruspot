@@ -43,10 +43,13 @@
 const fs = require('fs');
 const path = require('path');
 const terser = require('terser');
+const { calcularHash } = require('./lib/cache-bust');
 
 const JS_DIR = path.join(__dirname, '..', 'donde-comer-cdu', 'js');
 const INDEX_HTML = path.join(__dirname, '..', 'donde-comer-cdu', 'index.html');
 const SALIDA = path.join(JS_DIR, 'ambiente.bundle.js');
+const APP_JS = path.join(JS_DIR, 'app.js');
+const COREOGRAFIAS_JS = path.join(JS_DIR, 'coreografias.js');
 
 function conservarComentario(_nodo, comentario) {
   var v = comentario.value;
@@ -161,6 +164,40 @@ async function build() {
   console.log(`${ORDEN.length} módulos → 1 archivo.`);
   console.log(`Sin minificar: ${bytesSinMinificar} bytes → minificado: ${bytesBundle} bytes (-${(100 * (1 - bytesBundle / bytesSinMinificar)).toFixed(1)}%).`);
   console.log('27 requests HTTP → 1 request para este bloque.');
+
+  actualizarCacheBustEnAppJs();
+}
+
+// 2026-08-09: ambiente.bundle.js y coreografias.js se cargan en runtime
+// desde js/app.js (cargarMotorAmbientalDiferido), no desde index.html,
+// así que actualizarVersionEnHtml (pensada para reescribir un <link>/
+// <script> en un HTML) no sirve tal cual acá — mismo mecanismo
+// (hash sha256 de scripts/lib/cache-bust.js), pero reescribiendo dos
+// placeholders en js/app.js en vez de un atributo href/src en HTML.
+// Corre al final de este mismo build porque necesita el
+// ambiente.bundle.js recién generado arriba para hashearlo.
+function actualizarCacheBustEnAppJs() {
+  const hashAmbiente = calcularHash(SALIDA);
+  const hashCoreografias = calcularHash(COREOGRAFIAS_JS);
+
+  let appJs = fs.readFileSync(APP_JS, 'utf8');
+  const antes = appJs;
+
+  appJs = appJs.replace(/HASH_AMBIENTE_BUNDLE = '(__HASH_AMBIENTE_BUNDLE__|[a-f0-9]+)'/, `HASH_AMBIENTE_BUNDLE = '${hashAmbiente}'`);
+  appJs = appJs.replace(/HASH_COREOGRAFIAS = '(__HASH_COREOGRAFIAS__|[a-f0-9]+)'/, `HASH_COREOGRAFIAS = '${hashCoreografias}'`);
+
+  if (!appJs.includes(`HASH_AMBIENTE_BUNDLE = '${hashAmbiente}'`) || !appJs.includes(`HASH_COREOGRAFIAS = '${hashCoreografias}'`)) {
+    console.error('cache-bust: no se encontraron los placeholders HASH_AMBIENTE_BUNDLE/HASH_COREOGRAFIAS en js/app.js.');
+    process.exit(1);
+  }
+
+  if (appJs !== antes) {
+    fs.writeFileSync(APP_JS, appJs, 'utf8');
+    console.log(`  cache-bust: js/ambiente.bundle.js -> ?v=${hashAmbiente} (en js/app.js)`);
+    console.log(`  cache-bust: js/coreografias.js -> ?v=${hashCoreografias} (en js/app.js)`);
+  } else {
+    console.log(`  cache-bust: js/app.js sin cambios (?v=${hashAmbiente} / ?v=${hashCoreografias} ya estaban)`);
+  }
 }
 
 build().catch((err) => {

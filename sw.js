@@ -37,6 +37,21 @@
 
 'use strict';
 
+// v8 (2026-08-09): segundo bump manual, mismo motivo documentado en
+// el comentario de v7 de abajo — dos fixes reales de
+// ambiente.bundle.js (brújula apuntando a un SVG inexistente, y
+// después la familia Partículas de deriva mal escalada) se pisaron en
+// la práctica porque ese archivo sigue sin su propio ?v=hash, así que
+// stale-while-revalidate le seguía sirviendo a cualquiera que ya
+// tenía el sitio visitado la copia vieja cacheada, con los círculos
+// de fondo que se suponía que ya no estaban. Subir VERSION de nuevo
+// fuerza a borrar esos caches viejos. El problema de fondo (sumarle
+// a ambiente.bundle.js/coreografias.js el mismo ?v=hash que ya tienen
+// css/critical.bundle.css y js/motor.bundle.js) sigue pendiente —
+// mientras no se resuelva, cualquier fix futuro a esos dos archivos
+// va a necesitar este mismo bump manual para llegar de verdad a
+// quien ya visitó el sitio antes.
+//
 // v7 (2026-08-08): bump manual de versión. js/ambiente.bundle.js y
 // js/coreografias.js se cargan dinámicamente (ver
 // cargarMotorAmbientalDiferido() en js/app.js) SIN query de cache-bust
@@ -53,7 +68,7 @@
 // deberían tener su propio ?v=hash como el resto de los bundles) —
 // que queda pendiente como mejora aparte — pero resuelve el síntoma
 // inmediato para quien ya tenía el sitio cacheado.
-var VERSION = 'v7';
+var VERSION = 'v8';
 var CACHE_PAGINAS = 'uruspot-paginas-' + VERSION;
 var CACHE_DATOS = 'uruspot-datos-' + VERSION;
 var CACHE_ESTATICOS = 'uruspot-estaticos-' + VERSION;

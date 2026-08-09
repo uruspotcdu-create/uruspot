@@ -548,8 +548,26 @@ import { crearAppCoordinator } from './app-coordinator.js';
     if (motorAmbientalDiferidoLanzado) return; // idempotente
     motorAmbientalDiferidoLanzado = true;
 
+    // 2026-08-09: cache-bust real para estos dos archivos (ver el
+    // comentario largo de más arriba: antes se cargaban SIN query de
+    // versión, así que stale-while-revalidate en sw.js podía seguir
+    // sirviendo la copia vieja a cualquiera que ya hubiera visitado
+    // el sitio, incluso después de un fix real en el repo — pasó dos
+    // veces con ambiente.bundle.js. Los placeholders de abajo los
+    // reemplaza scripts/build-ambiente-bundle.js con el hash real del
+    // contenido de cada archivo, mismo mecanismo (scripts/lib/
+    // cache-bust.js) que ya usan css/critical.bundle.css y
+    // js/motor.bundle.js en index.html — acá el "index.html" a
+    // reescribir es este propio app.js, porque la URL no vive en el
+    // HTML sino en este array.
+    var HASH_AMBIENTE_BUNDLE = '8f41aa2a85';
+    var HASH_COREOGRAFIAS = 'b5d33056eb';
+
     var lanzar = function () {
-      ['js/ambiente.bundle.js', 'js/coreografias.js'].forEach(function (src) {
+      [
+        'js/ambiente.bundle.js?v=' + HASH_AMBIENTE_BUNDLE,
+        'js/coreografias.js?v=' + HASH_COREOGRAFIAS
+      ].forEach(function (src) {
         var s = document.createElement('script');
         s.src = src;
         s.async = false; // preserva orden de ejecución entre los dos
