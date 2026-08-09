@@ -186,8 +186,15 @@ html.u-suprimir-vidrio .hero-score{
 }
 
 /* INFO STRIP */
+/* BALANCE VERTICAL (auditoría BRODE, 2026-08): las 3 celdas de una misma
+   fila comparten alto (grid stretch por defecto), pero su contenido no
+   siempre pesa igual — la celda "Contacto" suele traer 2-3 botones que
+   las otras no tienen, así que quedaba más alta y las celdas cortas
+   ("Estado actual", "Ubicación") flotaban pegadas arriba con un bloque
+   vacío debajo. justify-content:center reparte ese sobrante arriba y
+   abajo en vez de dejarlo todo abajo. */
 .info-strip{background:var(--ink-soft);color:#fff;display:grid;grid-template-columns:repeat(3,1fr)}
-.info-cell{padding:32px 40px;border-right:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:6px}
+.info-cell{padding:32px 40px;border-right:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:6px;justify-content:center}
 .info-cell:last-child{border-right:none}
 .info-cell-label{font-size:10px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;font-weight:500}
 .info-cell-value{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;color:#fff}
