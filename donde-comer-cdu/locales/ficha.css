@@ -121,7 +121,17 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .highlight-text{font-size:13px;color:#ffffff;line-height:1.6}
 
 /* SCORES (restaurado) */
-.scores-section{background:var(--cream-deep);padding:80px 48px}
+/* TINTE NARANJA (2026-08): --cream-deep + 5% de --gold mezclado a
+   mano (no eyeballed) -- mismo criterio que el resto del rebrand.
+   Se aplica solo a las 3 franjas de ancho completo que ya cortan el
+   ritmo de la pagina (Scores/Mapa/Veredicto), no a los bloques de
+   contenido individuales (side-box, pullquote, score-big siguen en
+   --cream/--cream-deep planos) para que el matiz se lea como un
+   gesto de diseño intencional y no como manchas sueltas. Contraste
+   verificado sin cambios relevantes: --muted 4.68:1, --ink 15.56:1,
+   --gold-dark 4.74:1 sobre este tono (todos por encima del minimo
+   AA de 4.5:1 para texto normal). */
+.scores-section{background:#f1e4d6;padding:80px 48px}
 .scores-inner{max-width:1200px;margin:0 auto}
 .scores-grid{display:grid;grid-template-columns:1fr 2fr;gap:64px;align-items:center}
 .score-big{text-align:center;padding:48px;border:1px solid var(--border);background:var(--cream)}
@@ -137,7 +147,7 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .score-fill{height:3px;background:var(--gold);border-radius:0;transform-origin:left;transform:scaleX(0);transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
 
 /* MAPA (restaurado) */
-.map-section{background:var(--cream-deep);padding:80px 48px}
+.map-section{background:#f1e4d6;padding:80px 48px}
 .map-inner{max-width:1200px;margin:0 auto}
 .map-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
 .map-frame{position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:2px;overflow:hidden;border:1px solid var(--border)}
@@ -147,7 +157,13 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .map-detail strong{color:var(--ink);font-weight:500}
 
 /* VERDICT (restaurado) */
-.verdict-section{padding:80px 48px}
+/* Mismo criterio que .scores-section/.map-section de arriba, pero
+   mezclado sobre --cream (esta franja no tenia --cream-deep antes,
+   quedaba a ras del blanco de pagina) -- 5% de --gold da #faefe7,
+   un paso mas claro que el de Scores/Mapa para no aplanar la
+   jerarquia visual entre las 3 franjas. Contraste: --muted 5.17:1,
+   --ink 17.18:1, --gold-dark 5.23:1, todos por encima de 4.5:1. */
+.verdict-section{background:#faefe7;padding:80px 48px}
 .verdict-inner{max-width:1200px;margin:0 auto}
 .verdict-card{display:grid;grid-template-columns:auto 1fr;gap:0;border:1px solid var(--border);overflow:hidden}
 .verdict-accent{width:8px;background:var(--gold)}
