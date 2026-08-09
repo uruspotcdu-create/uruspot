@@ -3,7 +3,7 @@
  * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-09T06:29:45.305Z
+ * Generado: 2026-08-09T06:30:52.015Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -1451,8 +1451,17 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
 .tarjeta-acciones{ display:flex; gap:var(--esp-2); margin-top:auto; padding-top:var(--esp-4); flex-wrap:wrap; }
 
 @media (hover:hover) and (pointer:fine){
-.tarjeta-btn--maps:hover{ color:#7fb8e0; border-color:#7fb8e0; background:rgba(127,184,224,.12); }
-.tarjeta-btn--tel:hover{ color:#8fd0a0; border-color:#8fd0a0; background:rgba(143,208,160,.12); }
+
+.tarjeta-btn--maps:hover{
+  --tarjeta-acento-maps:#7fb8e0;
+  color:var(--tarjeta-acento-maps); border-color:var(--tarjeta-acento-maps);
+  background:color-mix(in srgb, var(--tarjeta-acento-maps) 12%, transparent);
+}
+.tarjeta-btn--tel:hover{
+  --tarjeta-acento-tel:#8fd0a0;
+  color:var(--tarjeta-acento-tel); border-color:var(--tarjeta-acento-tel);
+  background:color-mix(in srgb, var(--tarjeta-acento-tel) 12%, transparent);
+}
 }
 .tarjeta-btn--compartir{ padding-left:10px; padding-right:10px; }
 

@@ -386,8 +386,25 @@
    componente .tarjeta-btn, con un acento de color sutil por tipo de
    acción para que se distingan de un vistazo sin gritar. */
 @media (hover:hover) and (pointer:fine){
-.tarjeta-btn--maps:hover{ color:#7fb8e0; border-color:#7fb8e0; background:rgba(127,184,224,.12); }
-.tarjeta-btn--tel:hover{ color:#8fd0a0; border-color:#8fd0a0; background:rgba(143,208,160,.12); }
+/* 2026-08-09 (pasada #9): el mismo color vivía escrito dos veces en
+   formatos distintos — #7fb8e0 (hex, para color/border-color) y
+   rgba(127,184,224,.12) (mismo color, componentes RGB descompuestos
+   a mano, para el fondo) — cualquier ajuste futuro de este acento
+   requería tocar los dos formatos a la vez sin que nada lo obligue.
+   Se declara una vez como custom property y el fondo se deriva con
+   color-mix, mismo mecanismo que ya usa el resto del archivo
+   (.tarjeta-rubro-icono, .tarjeta-rating, etc.) en vez de un cálculo
+   manual de RGB. */
+.tarjeta-btn--maps:hover{
+  --tarjeta-acento-maps:#7fb8e0;
+  color:var(--tarjeta-acento-maps); border-color:var(--tarjeta-acento-maps);
+  background:color-mix(in srgb, var(--tarjeta-acento-maps) 12%, transparent);
+}
+.tarjeta-btn--tel:hover{
+  --tarjeta-acento-tel:#8fd0a0;
+  color:var(--tarjeta-acento-tel); border-color:var(--tarjeta-acento-tel);
+  background:color-mix(in srgb, var(--tarjeta-acento-tel) 12%, transparent);
+}
 }
 .tarjeta-btn--compartir{ padding-left:10px; padding-right:10px; }
 /* Jerarquía deliberada: "no me interesa" es la única acción negativa
