@@ -108,7 +108,13 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 
 /* TAGS (restaurado) */
 .tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
-.tag{padding:7px 16px;border:1px solid var(--border);font-size:11px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;font-weight:400;border-radius:2px}
+.tag{padding:7px 16px;border:1px solid var(--border);font-size:11px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;font-weight:400;border-radius:2px;transition:border-color .2s,color .2s}
+/* MARCA (refuerzo naranja, 2026-08): los tags eran puramente decorativos
+   -- sin ningún feedback al pasar el mouse. border-color/color ya estaban
+   en la familia naranja (var(--border) deriva de --gold), este hover solo
+   lo hace explícito, mismo criterio de --gold-dark ya usado en el resto
+   de los estados :hover sobre fondo claro (contraste ya verificado arriba). */
+.tag:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
 
 /* HIGHLIGHTS (restaurado) */
 .highlights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
@@ -221,9 +227,16 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .chip{padding:8px 18px;border:1px solid rgba(255,85,17,0.4);border-radius:2px;font-size:12px;letter-spacing:0.12em;color:rgba(255,255,255,0.85);text-transform:uppercase;font-weight:400;background:rgba(255,85,17,0.08)}
 .chip-gold{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:600}
 .hero-score{position:absolute;top:50%;right:72px;transform:translateY(-50%);z-index:2;text-align:center;border:1px solid rgba(255,85,17,0.3);padding:28px 32px;background:rgb(255,255,255);backdrop-filter:blur(8px)}
-.score-num{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold);line-height:1}
+/* A11Y (auditoría legibilidad, 2026-08): .score-num/.score-stars viven
+   dentro de .hero-score, que tiene fondo BLANCO sólido (no la superposición
+   oscura del hero) -- heredaban var(--gold) "vivo", pensado para fondos
+   oscuros (6.07:1 sobre --ink), que sobre blanco cae a ~3.2:1. El numeral
+   grande (64px) raspa el mínimo de 3:1 para texto grande, pero las
+   estrellitas (14px) son texto normal y necesitan 4.5:1 -- no lo alcanzan.
+   var(--gold-dark) da 5.92:1 sobre blanco en ambos casos, de sobra. */
+.score-num{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:300;color:var(--gold-dark);line-height:1}
 .score-label{font-size:10px;letter-spacing:0.3em;color:#ffffff;text-transform:uppercase;margin-top:4px}
-.score-stars{color:var(--gold);font-size:14px;margin-top:8px}
+.score-stars{color:var(--gold-dark);font-size:14px;margin-top:8px}
 
 /* PERF (auditoría scroll, 2026-08-04): .nav queda en pantalla durante
    TODO el scroll de la ficha (es fixed) y hasta ahora pagaba backdrop-filter
@@ -359,16 +372,30 @@ html.u-suprimir-vidrio .hero-score{
 .review-summary{display:flex;border:1px solid var(--border);background:#fff;margin-bottom:40px;overflow:hidden}
 .review-summary-accent{width:8px;background:var(--gold);flex-shrink:0}
 .review-summary-body{display:grid;grid-template-columns:auto 1fr;gap:48px;padding:40px 48px;align-items:center}
-.review-big-num{font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;color:var(--gold);line-height:1;text-align:center}
-.review-stars-big{color:var(--gold);font-size:16px;text-align:center;margin-top:8px}
+/* A11Y (auditoría legibilidad, 2026-08): mismo problema que .score-num/
+   .score-stars de más arriba -- .review-big-num/.review-stars-big caen
+   sobre --cream (fondo claro de .reviews-section), no sobre un fondo
+   oscuro. var(--gold) da 2.99:1 ahí, por debajo hasta del mínimo de 3:1
+   para el numeral grande. var(--gold-dark): 5.54:1, cubre numeral y
+   estrellas (texto normal, exige 4.5:1). */
+.review-big-num{font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;color:var(--gold-dark);line-height:1;text-align:center}
+.review-stars-big{color:var(--gold-dark);font-size:16px;text-align:center;margin-top:8px}
 .review-count{font-size:11px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:0.05em}
 .review-quote{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;font-weight:300;color:var(--ink);line-height:1.5;margin-bottom:12px}
 .review-desc{font-size:14px;color:var(--muted);line-height:1.7}
 .reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.review-card{border:1px solid var(--border);padding:28px 24px;background:#fff;position:relative;transition:box-shadow .3s,transform .3s}
-.review-card:hover{box-shadow:0 8px 32px rgba(0,0,0,0.08);transform:translateY(-2px)}
+.review-card{border:1px solid var(--border);padding:28px 24px;background:#fff;position:relative;transition:box-shadow .3s,transform .3s,border-color .3s}
+/* MARCA (refuerzo naranja, 2026-08): la sombra de hover era gris neutro
+   (rgba negro puro), sin relación con la identidad de marca. Se tiñe
+   levemente de naranja (mismo rgb base que --gold) y se suma un borde
+   que pasa a --gold en hover, coherente con el resto de los estados
+   interactivos de esta hoja (.tag:hover, .btn-ghost-onlight:hover). */
+.review-card:hover{box-shadow:0 8px 32px rgba(255,85,17,0.12);transform:translateY(-2px);border-color:var(--gold)}
 .review-author{font-size:12px;font-weight:600;letter-spacing:0.08em;color:var(--ink);text-transform:uppercase;margin-bottom:8px}
-.review-stars{color:var(--gold);font-size:13px;margin-bottom:12px}
+/* A11Y (auditoría legibilidad, 2026-08): .review-card tiene fondo #fff
+   sólido -- mismo ajuste que el resto de las estrellas/numeros de esta
+   hoja, var(--gold-dark) da 5.92:1 sobre blanco vs. 3.2:1 de var(--gold). */
+.review-stars{color:var(--gold-dark);font-size:13px;margin-bottom:12px}
 .review-text{font-size:15px;color:var(--muted);line-height:1.7;font-style:italic;font-family:'Cormorant Garamond',serif;font-weight:300}
 .review-note{font-size:12px;color:var(--muted);text-align:center;margin-top:32px;letter-spacing:0.03em}
 
