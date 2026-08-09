@@ -546,8 +546,26 @@ img, svg, video, canvas{ max-width:100%; }
 img, video{ height:auto; }
 h1, h2, h3, h4, h5, h6, p, li, blockquote{ overflow-wrap:break-word; }
 
-/* ── Contenedor compartido por toda página del producto ── */
-.envoltorio{ max-width:1000px; margin:0 auto; padding:0 var(--esp-8); }
+/* ── Contenedor compartido por toda página del producto ──
+ * 2026-08-09 (pedido directo): antes max-width:1000px fijo — dejaba
+ * franjas enormes sin usar en pantallas anchas (desktop, ultrawide,
+ * TV). Se reemplaza por un ancho fluido: crece con el viewport hasta
+ * un techo generoso (1800px) para no volver ilegibles los párrafos de
+ * .contenido-editorial en monitores ultrawide, pero en cualquier
+ * resolución típica (hasta ~1800px de ancho) el contenedor ocupa
+ * prácticamente el 100% de la ventana. El padding también es fluido
+ * (clamp) para que el aire lateral crezca con la pantalla en vez de
+ * quedar fijo. Las grillas de tarjetas (tarjeta-lugar.css,
+ * contenido-editorial.css) ya usan auto-fill/auto-fit + minmax, así
+ * que al ensanchar el contenedor agregan columnas solas — no hace
+ * falta tocar cada grilla por separado. */
+.envoltorio{
+  width:100%;
+  max-width:1800px;
+  margin:0 auto;
+  padding:0 clamp(var(--esp-4), 4vw, 96px);
+  box-sizing:border-box;
+}
 @media (max-width:720px){ .envoltorio{ padding:0 var(--esp-4); } }
 
 /* ── Respeto por reduced-motion en toda la plataforma ── */

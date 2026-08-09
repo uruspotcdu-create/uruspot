@@ -309,6 +309,11 @@ header .membrete{
 /* ── Manifiesto: grid de tarjetas de vidrio ── */
 .manifiesto h2{ font:var(--tipo-display-md); color:var(--color-tinta); margin-bottom:var(--esp-6); }
 .manifiesto-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:var(--esp-4); }
+/* 2026-08-09: .envoltorio pasó de 1000px fijo a fluido (hasta 1800px) —
+   con 13 tarjetas a solo 2 columnas, pantallas anchas dejaban tarjetas
+   enormes y una columna larguísima. Se suma una columna extra a partir
+   de 1100px de viewport para aprovechar el ancho real disponible. */
+@media (min-width:1100px){ .manifiesto-grid{ grid-template-columns:repeat(3,1fr); } }
 @media (max-width:720px){ .manifiesto-grid{ grid-template-columns:1fr; } }
 .manifiesto-card{
   background:var(--glass-bg); border:1px solid var(--glass-borde); border-radius:var(--radio-lg);
@@ -372,6 +377,10 @@ header .membrete{
 .accesos h2{ font:var(--tipo-display-md); color:var(--color-tinta); margin-bottom:var(--esp-2); }
 .accesos-intro{ font:var(--tipo-cuerpo-sm); color:var(--color-tinta-60); margin-bottom:var(--esp-6); }
 .accesos-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:var(--esp-3); }
+/* Mismo motivo que .manifiesto-grid arriba: con el envoltorio fluido,
+   8 accesos a 4 columnas se ven bien hasta ~1400px; más allá conviene
+   sumar 2 columnas más (8 = 4x2 en vez de una fila larga). */
+@media (min-width:1400px){ .accesos-grid{ grid-template-columns:repeat(6,1fr); } }
 @media (max-width:960px){ .accesos-grid{ grid-template-columns:repeat(3,1fr); } }
 @media (max-width:720px){ .accesos-grid{ grid-template-columns:repeat(2,1fr); } }
 .acceso-card{

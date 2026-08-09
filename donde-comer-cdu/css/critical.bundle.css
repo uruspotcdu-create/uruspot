@@ -3,7 +3,7 @@
  * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-09T05:24:05.727Z
+ * Generado: 2026-08-09T05:43:11.572Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -250,7 +250,13 @@ img, svg, video, canvas{ max-width:100%; }
 img, video{ height:auto; }
 h1, h2, h3, h4, h5, h6, p, li, blockquote{ overflow-wrap:break-word; }
 
-.envoltorio{ max-width:1000px; margin:0 auto; padding:0 var(--esp-8); }
+.envoltorio{
+  width:100%;
+  max-width:1800px;
+  margin:0 auto;
+  padding:0 clamp(var(--esp-4), 4vw, 96px);
+  box-sizing:border-box;
+}
 @media (max-width:720px){ .envoltorio{ padding:0 var(--esp-4); } }
 
 @media (prefers-reduced-motion: reduce){
@@ -2347,6 +2353,8 @@ header .membrete{
 
 .manifiesto h2{ font:var(--tipo-display-md); color:var(--color-tinta); margin-bottom:var(--esp-6); }
 .manifiesto-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:var(--esp-4); }
+
+@media (min-width:1100px){ .manifiesto-grid{ grid-template-columns:repeat(3,1fr); } }
 @media (max-width:720px){ .manifiesto-grid{ grid-template-columns:1fr; } }
 .manifiesto-card{
   background:var(--glass-bg); border:1px solid var(--glass-borde); border-radius:var(--radio-lg);
@@ -2396,6 +2404,8 @@ header .membrete{
 .accesos h2{ font:var(--tipo-display-md); color:var(--color-tinta); margin-bottom:var(--esp-2); }
 .accesos-intro{ font:var(--tipo-cuerpo-sm); color:var(--color-tinta-60); margin-bottom:var(--esp-6); }
 .accesos-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:var(--esp-3); }
+
+@media (min-width:1400px){ .accesos-grid{ grid-template-columns:repeat(6,1fr); } }
 @media (max-width:960px){ .accesos-grid{ grid-template-columns:repeat(3,1fr); } }
 @media (max-width:720px){ .accesos-grid{ grid-template-columns:repeat(2,1fr); } }
 .acceso-card{
