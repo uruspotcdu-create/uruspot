@@ -12,9 +12,17 @@
    Requiere tokens.css cargado antes.
    ═══════════════════════════════════════════════════════════════════ */
 
+/* 2026-08-09 (pasada dedicada a tarjetas + su entorno): minmax sube de
+   260px a 280px (tarjetas un poco más presentes, con más aire interno
+   para el texto) y el gap sube de --esp-4 (16px) a --esp-6 (24px) —
+   con el envoltorio ya fluido (tokens.css), 16px de separación entre
+   decenas de tarjetas de vidrio en una pantalla ancha se leía denso;
+   24px las deja respirar sin perder densidad de información. auto-fill
+   sigue resolviendo solo cuántas columnas entran en cada ancho — no
+   hace falta un breakpoint nuevo acá. */
 #panelDescubrimiento{
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:var(--esp-4); padding:var(--esp-4) 0 var(--esp-12); position:relative; z-index:1;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:var(--esp-6); padding:var(--esp-6) 0 var(--esp-12); position:relative; z-index:1;
 }
 
 .tarjeta{
@@ -64,21 +72,29 @@
 }
 /* Franja superior con el color del rubro (app.js fija --chip-color
    inline por tarjeta) — mismo idioma visual que el pin del mapa y el
-   chip de la leyenda. */
+   chip de la leyenda.
+   2026-08-09: sube de 3px a 4px y de opacity:.9 fija a una transición
+   que la refuerza a opacity:1 en :hover/:focus-within — mismo patrón
+   ya usado por el glow del borde en la regla de hover de abajo, así
+   la franja de color pasa a formar parte de la respuesta táctil de la
+   tarjeta (confirma "esto es interactivo, este es su rubro") en vez
+   de ser una decoración estática. */
 .tarjeta::before{
-  content:""; position:absolute; inset:0 0 auto 0; height:3px;
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
   background:linear-gradient(90deg, var(--chip-color, var(--color-granate-clara)), transparent 85%);
-  opacity:.9;
+  opacity:.85;
+  transition:opacity var(--dur-media) var(--easing-estandar);
 }
 .tarjeta::after{
   content:""; position:absolute; inset:0; pointer-events:none; z-index:-1;
   background:var(--gradiente-superficie);
 }
+.tarjeta:hover::before, .tarjeta:focus-within::before, .tarjeta--resaltada::before{ opacity:1; }
 @media (hover:hover) and (pointer:fine){
 .tarjeta:hover{
   will-change:transform;
-  transform:translateY(-4px); border-color:var(--glass-borde-hover);
-  box-shadow:var(--sombra-vidrio), 0 0 28px -10px var(--chip-color, rgba(201,122,131,.5));
+  transform:translateY(-6px); border-color:var(--glass-borde-hover);
+  box-shadow:var(--sombra-vidrio), 0 0 32px -8px var(--chip-color, rgba(201,122,131,.5));
 }
 }
 /* Mismo criterio que :hover arriba, pero para foco por teclado (sin
@@ -107,8 +123,26 @@
   transform:scale(.985);
   transition-duration:var(--dur-instantaneo);
 }
+/* 2026-08-09: .tarjeta--narrativa ya ocupaba 2 columnas (más ancho de
+   contenido) pero no tenía NINGÚN otro rasgo que la distinguiera de
+   una tarjeta común — el ancho extra se notaba, pero no comunicaba
+   "esta es una elección editorial, no una fila más del catálogo".
+   Se le suma: --tipo-display-md en vez de --tipo-display-sm para el
+   nombre (jerarquía real, no solo ancho) y un halo de fondo sutil con
+   el color del propio rubro (mismo --chip-color que ya trae inline,
+   sin inventar un color nuevo) para separarla del resto sin competir
+   con --gradiente-marca (reservado para acciones primarias/estado). */
 .tarjeta--narrativa{ grid-column:span 2; }
-@media (max-width:720px){ .tarjeta--narrativa{ grid-column:span 1; } }
+.tarjeta--narrativa .tarjeta-nombre{ font:var(--tipo-display-md); }
+.tarjeta--narrativa::after{
+  background:
+    radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--chip-color, var(--color-granate-clara)) 10%, transparent), transparent 60%),
+    var(--gradiente-superficie);
+}
+@media (max-width:720px){
+  .tarjeta--narrativa{ grid-column:span 1; }
+  .tarjeta--narrativa .tarjeta-nombre{ font:var(--tipo-display-sm); }
+}
 .tarjeta.descartada{ opacity:0; transform:scale(.92); pointer-events:none; }
 
 /* Selección sincronizada con el mapa: misma tarjeta que corresponde
@@ -171,8 +205,13 @@
   grid-column:1 / -1; color:var(--color-tinta-60); font:var(--tipo-cuerpo-xs);
   margin:0 0 calc(-1 * var(--esp-2)) 0;
 }
+/* 2026-08-09: margin-top sube de --esp-1 (4px) a --esp-2 (8px) — con
+   la fila superior (rubro/rating/distancia) devolviendo hasta 3-4
+   piezas de dato en una sola línea con flex-wrap, 4px de aire antes
+   del nombre se sentía apretado, sobre todo cuando esa fila envuelve
+   a dos líneas en tarjetas angostas. */
 .tarjeta-nombre{
-  font:var(--tipo-display-sm); margin-top:var(--esp-1);
+  font:var(--tipo-display-sm); margin-top:var(--esp-2); letter-spacing:-.01em;
 }
 .tarjeta-direccion{
   color:var(--color-tinta-60); font:var(--tipo-cuerpo-sm); margin-top:var(--esp-1);
@@ -242,9 +281,13 @@
 /* app.js emite class="tarjeta-btn" directamente (no "btn") — mismo
    componente visual que boton.css, pero declarado acá explícitamente
    para no depender de que el markup lleve dos clases. */
+/* 2026-08-09: padding vertical sube de 7px a 8px — objetivo táctil más
+   cómodo en la fila de acciones (hasta 5 botones por tarjeta, en la
+   franja donde más se toca en mobile) sin alterar el resto del
+   componente. */
 .tarjeta-btn{
   font-family:var(--f-ui); font-size:var(--tipo-cuerpo-xs); border:1px solid var(--glass-borde);
-  background:rgba(10,13,19,.35); color:var(--color-tinta-60); padding:7px var(--esp-3);
+  background:rgba(10,13,19,.35); color:var(--color-tinta-60); padding:8px var(--esp-3);
   border-radius:var(--radio-full); cursor:pointer; text-decoration:none;
   transition:color var(--dur-media), border-color var(--dur-media), transform var(--dur-rapido),
              background var(--dur-media), box-shadow var(--dur-media);
@@ -280,9 +323,14 @@
   background:var(--gradiente-marca); border-color:transparent; color:var(--color-texto-sobre-marca);
   font-weight:600;
 }
+/* 2026-08-09: se suma un glow con el mismo --chip-color que ya usa la
+   franja superior y el hover de la tarjeta (arriba en este archivo),
+   así "esta es la acción con más peso" queda coherente en los tres
+   lugares donde aparece ese acento por rubro. */
 @media (hover:hover) and (pointer:fine){
 .tarjeta-btn--primaria:hover{
   filter:brightness(1.08); color:var(--color-texto-sobre-marca); border-color:transparent;
+  box-shadow:0 4px 14px -4px var(--chip-color, rgba(201,122,131,.6));
 }
 }
 .tarjeta-btn--fav.activo{
@@ -312,6 +360,14 @@
   min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--esp-4);
   text-align:center;
 }
+/* 2026-08-09: el estado vacío "no hay resultados" no tenía ningún
+   soporte visual, a diferencia de .vacio.error (que ya usa "⚠" abajo)
+   — se leía como un bloque de texto plano perdido en medio de la
+   grilla. Mismo criterio que el resto del sitio (emoji funcional, no
+   un asset del Ambient Engine): .vacio.error ya pisa este ::before
+   con su propio contenido por especificidad mayor (.vacio.error vs
+   .vacio), así que no hace falta excluirlo a mano. */
+.vacio::before{ content:"🔍"; font-size:22px; opacity:.7; }
 .vacio p{ margin:0; }
 /* BUG REAL corregido: `.vacio.error` (el timeout de 12s en index.html
    y, tras el ajuste de una línea en app.js, también la falla de
