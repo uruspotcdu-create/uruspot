@@ -267,10 +267,18 @@
    este CSS). Mismo --color-granate-clara que ya usan .btn--cerca-tuyo,
    .aviso-cambio-region y el borde de mapa en Exploración — un acento que
    ya significa "esto es información activa del sistema", no un color
-   nuevo para "ganador de comparación". */
+   nuevo para "ganador de comparación".
+   2026-08-09 (pasada #5): pasa de texto suelto a badge — la pasada #2
+   ya le dio este tratamiento a .tarjeta-rating/.tarjeta-distancia en
+   esta misma fila; dejar el badge de comparación como texto plano al
+   lado de esos dos badges rompía el lenguaje visual que la propia
+   pasada #2 estableció (algunos datos de la fila con fondo propio,
+   este sin). Mismo mecanismo color-mix que .tarjeta-rating. */
 .tarjeta-badge-comparacion{
   color:var(--color-granate-clara); font-weight:var(--peso-semibold);
   font-family:var(--f-dato); text-transform:none; letter-spacing:normal;
+  background:color-mix(in srgb, var(--color-granate-clara) 14%, transparent);
+  padding:1px 7px; border-radius:var(--radio-full);
 }
 .tarjeta--comparando{
   border-color:var(--color-granate-clara);
