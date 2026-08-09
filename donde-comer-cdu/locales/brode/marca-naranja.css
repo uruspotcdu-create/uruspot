@@ -1,26 +1,31 @@
-/* MARCA NARANJA — piloto Brode (2026-08), TOMA 4
-   Feedback directo con captura real: "ESO NO ES NARANJA, ES AMARILLO
-   [...] QUIERO NARANJA NOMAS, NO VARIANTES, QUE SEA IGUAL AL
-   LOGOTIPO". La toma 3 corrigió el problema de "bloque de pintura"
-   bajándole tanto la saturación a --surface-warm (#f3d0a0) que el
-   resultado, aunque técnicamente sigue siendo un naranja pálido, se
-   percibe como beige/amarillento -- exactamente lo que se acaba de
-   rechazar. Esta toma revierte esa lógica: --surface-warm pasa a ser
-   EL MISMO valor que --gold (#ff5511), el naranja real extraído por
-   muestreo de /img/logo.webp que ya documenta ficha.css -- no una
-   segunda aproximación con hex propio, así que "igual al logotipo" es
-   literal, no una interpretación.
+/* MARCA NARANJA — piloto Brode (2026-08), TOMA 5
+   Feedback con captura real de .verdict-section (el bloque "VEREDICTO
+   URU SPOT" al final de la ficha): esa sección SÍ funciona -- fondo
+   salmón cálido, texto negro/--ink, etiquetas en --gold-dark, acento
+   sólido de --gold en el borde izquierdo -- y es justamente la única
+   de las 4 secciones "cálidas" de la ficha que la toma 4 dejó SIN
+   tocar (no está en el selector .section-warm/.scores-section/
+   .map-section, así que nunca heredó el naranja puro a saturación
+   completa). El pedido es literal: llevar ESE tratamiento -- el que
+   ya se ve bien en Veredicto -- a Catálogo, Puntajes y Mapa, en vez
+   de la solución a medida que la toma 4 armó para el naranja sólido
+   (que es justo lo que no convenció).
 
-   Un naranja de marca a saturación completa como fondo de sección
-   grande rompe el contraste de --muted/--gold-dark tal como están
-   definidos para fondos pálidos (--gold-dark cae a 1.85:1 sobre
-   --gold, --muted a 3.73:1 -- ambos muy por debajo de AA). En vez de
-   diluir el color para acomodar el texto (que es la trampa en la que
-   cayeron las tomas 2 y 3), se resuelve al revés: el naranja se queda
-   fijo en su valor real, y --muted/--gold-dark se redefinen LOCALMENTE
-   (scoped a las secciones que usan --surface-warm puro) para seguir
-   pasando AA sobre ese naranja específico. Ver bloque de reglas más
-   abajo.
+   Mecánicamente esto es más simple que la toma 4, no más complejo:
+   --surface-warm deja de apuntar a var(--gold) (naranja puro,
+   #ff5511) y pasa a ser EL MISMO valor que --surface-warm-soft
+   (#ffb394, el salmón que ya usa Veredicto). Con eso, los overrides
+   locales de --muted/--gold-dark/--border y los parches de
+   .btn-primary/.btn-ghost-onlight que la toma 4 necesitó SOLO porque
+   el fondo era naranja sólido (texto oscuro sin contraste, botón
+   dorado invisible sobre fondo dorado) dejan de tener motivo de
+   existir: sobre #ffb394, los valores POR DEFECTO de --muted/
+   --gold-dark ya pasan AA con margen real (verificado con
+   contrast.py, ver comentario de --surface-warm-soft más abajo) --
+   son los mismos que ya está usando Veredicto en este momento, así
+   que remover el override no es una apuesta, es copiar lo que ya
+   funciona. Se elimina esa sección completa de reglas en vez de
+   dejarla muerta.
 
    Sigue siendo SOLO Brode (no toca ficha.css compartido) — mismo
    mecanismo: redefine las custom properties que ficha.css ya consume
@@ -33,38 +38,39 @@
   --cream:#f9dcbb;
   --cream-deep:#f3c489;
 
-  /* SUPERFICIES "CAPÍTULO" — --surface-warm ya NO es una aproximación
-     propia: es var(--gold) en su valor real (#ff5511), el mismo
-     naranja que ya usan los botones primarios y el logo del nav. Cero
-     dilución, cero variante. --surface-warm-soft deja de ser un
-     hex con matiz distinto (la toma 3 usaba #f7dcb6, que shiftea
-     hacia amarillo) y pasa a ser el MISMO matiz de --gold mezclado
-     con blanco al 55% (no con --cream, que ya tiene su propio sesgo
-     amarillento) -- así "suave" significa "más claro", no "más
-     amarillo". Contraste verificado (contrast.py):
-       sobre --surface-warm-soft (#ffb394): --muted 6.89:1,
-         --gold-dark 6.08:1 -- pasan AA con los valores POR DEFECTO
-         de --muted/--gold-dark de más abajo, sin necesitar override.
-       sobre --surface-warm (#ff5511 puro): --muted 3.73:1,
-         --gold-dark 1.85:1 -- NO pasan; por eso existe el bloque de
-         overrides scoped más abajo (--muted/--gold-dark solo dentro
-         de .section-warm/.scores-section/.map-section). */
-  --surface-warm:var(--gold);
+  /* SUPERFICIES "CAPÍTULO" — --surface-warm y --surface-warm-soft
+     pasan a ser el MISMO valor (#ffb394): el salmón cálido que ya usa
+     .verdict-section (y que ya funcionaba bien ahí antes de esta
+     toma). Antes --surface-warm apuntaba a var(--gold) puro
+     (#ff5511) a saturación completa como fondo de sección grande, que
+     es justo lo que no convenció. No se mantienen como dos variantes
+     porque ya no hay una versión "más suave" y otra "más fuerte": hay
+     una sola superficie cálida, y las 4 secciones que la usan
+     (Catálogo, Puntajes, Mapa, Veredicto) ahora se ven consistentes
+     entre sí en vez de que una (Veredicto) se vea bien y las otras
+     tres luzcan un naranja sólido distinto.
+     Contraste verificado (contrast.py) sobre #ffb394:
+       --muted (#4a3218, valor por defecto de más abajo): 6.89:1
+       --gold-dark (#732503, valor por defecto de más abajo): 6.08:1
+       --ink (#170e07): 11.00:1
+     Los tres pasan AA con margen real usando los valores POR DEFECTO
+     -- no hace falta ningún override local por sección (ver más abajo
+     por qué se eliminó el bloque que existía para el naranja puro). */
+  --surface-warm:#ffb394;
   --surface-warm-soft:#ffb394;
 
   /* BORDES / DIVISORES — sin cambios de opacidad respecto a la toma 3
-     (45%); lo que cambia es el fondo detrás, no esta regla. Se ajusta
-     visualmente aparte donde --border queda casi invisible sobre
-     --surface-warm puro (ver overrides de sección abajo). */
+     (45%). Con --surface-warm ya no siendo naranja puro, este valor
+     se ve bien sobre las 4 secciones cálidas (Catálogo, Puntajes,
+     Mapa, Veredicto) sin necesitar ningún override adicional. */
   --border:rgba(var(--gold-rgb),0.45);
 
-  /* TEXTO SECUNDARIO Y ACENTO OSCURO — valores por defecto, los que
-     ya pasaban AA de sobra sobre --cream/--cream-deep/--surface-warm-
-     soft. NO se tocan acá porque hacerlo otra vez para acomodar
-     --surface-warm puro es la misma trampa de la toma 3 (diluir el
-     sistema entero por una sola superficie). En su lugar, hay un
-     override LOCAL más abajo que solo aplica dentro de las secciones
-     que usan --surface-warm a saturación completa. */
+  /* TEXTO SECUNDARIO Y ACENTO OSCURO — valores por defecto, los mismos
+     que ya usa .verdict-section. Pasan AA de sobra sobre --cream/
+     --cream-deep/--surface-warm (6.89:1 / 6.08:1, ver comentario de
+     --surface-warm más arriba), así que no hace falta ningún override
+     por sección: las 4 secciones cálidas comparten exactamente el
+     mismo tratamiento de texto. */
   --muted:#4a3218;
   --gold-dark:#732503;
 
@@ -73,57 +79,18 @@
   --ink:#170e07;
 }
 
-/* OVERRIDE LOCAL DE TEXTO — solo dentro de las 3 secciones que pintan
-   --surface-warm a saturación completa (Catálogo, Puntajes, Mapa).
-   Como .about-body/.section-label/.score-val/etc. en ficha.css ya
-   leen color:var(--muted) / color:var(--gold-dark), redefinir estas
-   dos variables en el selector de la sección basta para que TODO el
-   texto hijo (encabezados de sección, párrafos, tags, números de
-   puntaje, detalle de mapa...) herede el tono correcto sin tocar cada
-   regla una por una.
-     --muted   #2c1c0c sobre #ff5511 → 5.13:1 (AA con margen)
-     --gold-dark #4a1000 sobre #ff5511 → 4.80:1 (AA con margen)
-   .side-box vive anidado dentro de estas secciones pero tiene su
-   propio fondo fijo (--cream-deep, no --surface-warm) -- heredar un
-   --muted/--gold-dark más oscuros ahí solo SUBE el contraste que ya
-   tenía (nunca lo baja), así que no hace falta excluirlo. */
-.section-warm,.scores-section,.map-section{
-  --muted:#2c1c0c;
-  --gold-dark:#4a1000;
-  --border:rgba(23,14,7,0.28);
-}
-
-/* .btn-ghost-onlight asumía un fondo pálido detrás (relleno de 18%
-   de naranja sobre --cream apenas se nota) -- sobre --surface-warm ya
-   puro, ese mismo relleno es naranja-sobre-naranja y desaparece. Se
-   invierte a un panel claro (blanco translúcido, borde y texto en
-   --ink) SOLO dentro de estas 3 secciones, para que "Confirmar
-   precios vigentes" se siga leyendo como botón secundario distinto
-   del primario, no como el mismo naranja del fondo. */
-.section-warm .btn-ghost-onlight,.scores-section .btn-ghost-onlight,.map-section .btn-ghost-onlight{
-  background:rgba(255,255,255,0.82);border-color:var(--ink);color:var(--ink)
-}
-.section-warm .btn-ghost-onlight:hover,.scores-section .btn-ghost-onlight:hover,.map-section .btn-ghost-onlight:hover{
-  background:#fff;border-color:var(--ink)
-}
-
-/* BUG REAL detectado en captura: .btn-primary es background:var(--gold)
-   con texto --ink -- funciona sobre CUALQUIER fondo pálido, pero acá
-   el fondo de la sección ES var(--gold) (mismo valor exacto, por
-   diseño de esta toma). Resultado: el botón "Ver catálogo fotográfico
-   completo" se fusiona por completo con el fondo, sin borde ni relleno
-   visible -- el peor tipo de falla de legibilidad, invisible en vez de
-   solo incómoda. Se invierte SOLO dentro de estas 3 secciones: fondo
-   --ink, texto --gold, mismo patrón que .highlight-card (que ya usa
-   esa combinación en otra parte de la ficha) para que quede
-   consistente con el resto del sistema en vez de inventar un color
-   nuevo. Blanco/--gold sobre --ink: 16.9:1 / 6.07:1, ambos de sobra. */
-.section-warm .btn-primary,.scores-section .btn-primary,.map-section .btn-primary{
-  background:var(--ink);color:var(--gold)
-}
-.section-warm .btn-primary:hover,.scores-section .btn-primary:hover,.map-section .btn-primary:hover{
-  background:var(--ink-soft)
-}
+/* Nota: acá existía un bloque de overrides locales (--muted/--gold-dark/
+   --border redefinidos dentro de .section-warm/.scores-section/
+   .map-section, más parches de .btn-primary/.btn-ghost-onlight)
+   armado específicamente para que el texto y los botones no
+   desaparecieran sobre --surface-warm cuando ese token era naranja
+   puro (#ff5511). Con --surface-warm unificado a #ffb394 (ver arriba)
+   ese problema no existe: los valores por defecto de --muted/
+   --gold-dark ya pasan AA sobre #ffb394 (6.89:1 / 6.08:1, contraste
+   documentado más arriba) y .btn-primary (fondo --gold sobre una
+   sección que ya NO es --gold) vuelve a ser un botón sólido con
+   contraste real contra su propio fondo, igual que en el resto del
+   sitio. Se elimina el bloque entero en vez de dejarlo muerto. */
 
 /* NAV: bg hardcodeado a juego con el nuevo --cream, y la línea de
    marca en la base del nav pasa de 3px a 5px -- la franja fija que
