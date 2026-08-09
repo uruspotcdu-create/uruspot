@@ -449,3 +449,55 @@ Lluvia sobre P1/P2/P3): siguen bloqueados por la misma causa real
 tipografía del motor definido), no por falta de señal — inventar una
 sin esa base seguiría siendo la misma excepción silenciosa que ya
 evitó v1.0.
+
+## v1.4 — Auditoría externa (Paso 12, Roadmap Cap. 12 orden 10 reaplicado)
+
+Re-auditoría solicitada desde fuera del equipo (documento externo,
+2026-08-09), cruzada punto por punto contra el estado real del repo
+en este commit — no contra la documentación. Resultado: los tres
+hallazgos de "familia apagada" y los dos de "roadmap sin construir"
+que el documento externo marcaba como abiertos ya estaban resueltos
+en el propio código antes de esta re-auditoría (v1.1/v1.3 más
+arriba), solo que el documento externo no tenía visibilidad de esos
+commits. Se deja registro explícito para que la próxima auditoría no
+vuelva a marcarlos como pendientes por el mismo motivo:
+
+- **Corrientes, Retícula y Partículas de deriva**: activas
+  (`js/ambiente-orquestador.js`), con la regla CSS de tamaño fijo que
+  a Partículas le faltaba ya agregada (`.amb-asset--particulas`,
+  `css/ambiente-planos.css`) — mismo patrón que `.amb-asset--brujula`.
+- **Reactividad de Corrientes al scroll** (Cap. 12 orden 9,
+  parallax de velocidad-de-posición): implementada sobre
+  `.amb-asset--corrientes` reutilizando `--amb-brujula-scroll`
+  (`css/ambiente-planos.css`).
+- **Peso 700 de IBM Plex Sans + itálicas reales de Fraunces/IBM Plex
+  Sans** (Cap. 3.5 del documento externo): los cinco `@font-face`
+  faltantes ya están cargados en `css/fuentes-local.css`.
+- **Comentario desactualizado** que decía "Retícula/Topográficas/
+  Corrientes quedan sin iniciar a propósito": ya tiene una nota
+  correctiva fechada al lado, sin borrar el historial original.
+- Se corrió la suite completa (`node js/run-tests.js`, 14 suites) tras
+  la revisión: las 14 pasan, sin regresiones.
+
+**Confirmado, sin tocar, y a propósito (no son hallazgos nuevos, el
+documento externo coincide con la razón ya registrada):**
+
+- **Curvas topográficas** siguen apagadas. El documento externo lo
+  marca correctamente como el único de los tres que necesita
+  rediseño real (arcos a menor escala, no solo una regla CSS) antes
+  de reactivarse — sigue siendo trabajo de diseño visual, no un
+  fix de código, así que queda fuera del alcance de esta pasada.
+- **Shift de color por lluvia/noche sobre Corrientes y Partículas**
+  (Cap. 12 orden 9 del documento de Lenguaje de Assets): el documento
+  externo lo propone como oportunidad; el propio repo ya lo evaluó y
+  lo descartó a propósito en v1.3 ("inventar [una asociación] sin esa
+  base seguiría siendo la misma excepción silenciosa que ya evitó
+  v1.0" — ver nota arriba). No se reabre sin una decisión de producto
+  explícita, para no introducir en silencio la excepción que el
+  Cap. 8.2 pide evitar.
+- **Lottie, Three.js/WebGL, iconografía figurativa externa**: el
+  documento externo los evalúa contra las reglas propias del Cap. 1,
+  5, 9 y 11 y concluye que contradicen la identidad visual documentada
+  (geometría construida, máx. 2 ejes de movimiento, sin blur/sombra
+  como atajo de profundidad, sin iconografía figurativa en el Ambient
+  Engine). Coincide con el criterio ya vigente — no se incorporan.
