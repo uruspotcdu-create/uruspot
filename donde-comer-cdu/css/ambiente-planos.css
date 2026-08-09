@@ -130,7 +130,16 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
      variable nunca se escribe y el término queda en 0 (fallback),
      así que la regla de abajo la neutraliza igual sin necesitar un
      caso especial acá. */
-  transform: translate(-50%, calc(-50% + (var(--amb-brujula-scroll, 0) * 1px)));
+  /* 2026-08-08 (Revisión 6): se suma el offset de puntero
+     (--amb-brujula-puntero-x/-y, solo escrito en desktop con mouse —
+     ver nota extensa en js/ambiente-brujula.js) al de scroll ya
+     existente. Misma variable de fallback en 0 cuando no aplica
+     (touch, reducirMovimiento), así que esta regla nunca necesita
+     saber cuál de las dos señales está activa en cada momento. */
+  transform: translate(
+    calc(-50% + (var(--amb-brujula-puntero-x, 0) * 1px)),
+    calc(-50% + (var(--amb-brujula-scroll, 0) * 1px) + (var(--amb-brujula-puntero-y, 0) * 1px))
+  );
 }
 
 /* 2026-08-08 (Revisión 2, mejora de fondo tras el rediseño a ícono
@@ -164,7 +173,10 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
      Brújula al scrollear: esa diferencia de velocidad entre las dos
      variables es lo que se lee como profundidad de dos capas, no
      como un solo elemento plano. */
-  transform: translate(-50%, calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px)));
+  transform: translate(
+    calc(-50% + (var(--amb-brujula-glow-puntero-x, 0) * 1px)),
+    calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px) + (var(--amb-brujula-glow-puntero-y, 0) * 1px))
+  );
   /* 2026-08-08 (Revisión 3): antes usaba --color-granate-clara fijo,
      desincronizado del tinte de amanecer/atardecer que ya aplica
      js/ambiente-horario-tinte.js sobre --amb-p3-color (Cap. 7.3). Se
