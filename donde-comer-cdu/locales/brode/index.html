@@ -38,10 +38,115 @@
      para que la página se sienta más compacta y llena en vez de una
      sucesión larga de bloques con mucho espacio en blanco. -->
 <style>
-  .page{padding:56px 48px}
-  .section-header{margin-bottom:36px}
-  .about-grid{gap:48px}
-  .scores-section,.map-section,.verdict-section,.schedule-block,.amenities-section,.reviews-section{padding:56px 48px}
+  /* AUDITORÍA COMPLETA DE BRODE — Mejoras de legibilidad y jerarquía visual */
+  
+  .page {
+    padding: 64px 48px;
+  }
+  
+  .section-header {
+    margin-bottom: 42px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .section-line {
+    flex: 1;
+    height: 2px;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+  
+  .about-grid {
+    gap: 56px;
+    align-items: start;
+  }
+  
+  /* Secciones de ritmo editorial: fondos estratégicos para romper
+     la monotonía visual de contenido largo */
+  
+  .scores-section,
+  .map-section,
+  .verdict-section,
+  .schedule-block,
+  .amenities-section,
+  .reviews-section {
+    padding: 64px 48px;
+  }
+  
+  /* Texto destacado dentro de párrafos */
+  .about-body strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  
+  /* Subtítulos en secciones */
+  .about-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 14px;
+    margin-top: 24px;
+  }
+  
+  .about-title:first-of-type {
+    margin-top: 0;
+  }
+  
+  /* Mejorar legibilidad de listas */
+  .about-grid ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .about-grid li {
+    margin-bottom: 14px;
+    padding-left: 0;
+    line-height: 1.7;
+  }
+  
+  /* Row de acciones con mejor espaciado */
+  .action-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  /* Botón con mejor visibilidad */
+  .btn {
+    padding: 13px 24px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    border-radius: 3px;
+    transition: all 0.25s ease;
+    border: 2px solid;
+    cursor: pointer;
+  }
+  
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Notas de fuente con mejor contraste */
+  .about-grid > div > p[style*="font-size:11px"],
+  p[style*="font-size:10px"] {
+    color: var(--muted);
+    line-height: 1.6;
+  }
 </style>
 <script type="application/ld+json">
 {
@@ -316,20 +421,20 @@
   </div>
   <div class="about-grid">
     <div>
-      <p class="about-body" style="margin-bottom:28px"><strong>Catálogo verificado (información actualizada).</strong> Brødë ofrece una variedad de productos elaborados diariamente. Los más populares son los laminados y los panes de masa madre. A continuación, los productos más demandados:</p>
+      <p class="about-body" style="margin-bottom:32px;font-size:16px;font-weight:400"><strong style="color:var(--gold-dark);font-weight:700">Catálogo verificado (información actualizada).</strong> Brødë ofrece una variedad de productos elaborados diariamente. Los más populares son los laminados y los panes de masa madre. A continuación, los productos más demandados:</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">Laminados</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">Laminados</h3>
       <p class="about-body"><strong>Croissants:</strong> Con más de 25 capas de manteca y masa hojaldrada. Disponibles dulces o salados. Son reconocidos como los "mejores laminados de la zona". <strong>Medialunas:</strong> laminados de múltiples capas con sabor auténtico argentino y técnica francesa, disponibles diariamente. <strong>Rolls de Canela:</strong> especialidad de la casa, masa suave y aromática rellena con canela y azúcar, descritos como "impresionantes" por clientes verificados.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">Panadería salada</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">Panadería salada</h3>
       <p class="about-body"><strong>Focaccia:</strong> Uno de los productos más celebrados por los clientes, especialmente preparada como sándwich — reseñas la describen como una de las mejores experiencias del local.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">Panes de Masa Madre y Brioche</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">Panes de Masa Madre y Brioche</h3>
       <p class="about-body"><strong>Pan de Campo:</strong> pan rústico que se distingue por su sabor robusto, corteza crujiente y miga densa con acidez característica, de fermentación lenta tradicional. <strong>Pan de Hamburguesa:</strong> pan brioche con corteza brillante y dorada, miga suave, esponjosa y de textura delicada. <strong>Pan de Molde:</strong> especialidad muy solicitada, pan integral de masa madre.</p>
       
       <p class="about-body">Los productos se agotan rápido — conviene llegar temprano o consultar disponibilidad por WhatsApp. Para pedidos especiales, eventos o cantidades grandes, contactar directamente.</p>
 
-      <p style="font-size:11px;color:var(--muted);margin-top:10px;letter-spacing:0.03em">Brødë actualiza sus precios con frecuencia — antes de confirmar una compra, corroborá el valor vigente por WhatsApp. El catálogo fotográfico completo (todas las líneas de producto, sin precios listados) está disponible en el álbum oficial de Google Drive que Brødë mantiene enlazado desde su Instagram.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:16px;line-height:1.6;padding:16px;background:rgba(var(--gold-rgb),0.06);border-left:3px solid var(--gold);border-radius:2px">⚠️ <strong style="color:var(--ink)">Brødë actualiza sus precios con frecuencia</strong> — antes de confirmar una compra, corroborá el valor vigente por WhatsApp. El catálogo fotográfico completo (todas las líneas de producto, sin precios listados) está disponible en el álbum oficial de Google Drive que Brødë mantiene enlazado desde su Instagram.</p>
 
       <div class="action-row" style="margin-top:16px;flex-wrap:wrap">
         <a href="https://drive.google.com/drive/folders/1m5vGjX1mYH-nuh84y8LazweEyd5MClgm" class="btn btn-primary" target="_blank" rel="noopener noreferrer">📂 Ver catálogo fotográfico completo</a><a href="https://wa.me/5493442306349?text=Hola!%20Me%20gustar%C3%ADa%20consultar%20sobre%20el%20cat%C3%A1logo%20completo%20y%20disponibilidad" class="btn btn-ghost btn-ghost-onlight" target="_blank" rel="noopener noreferrer">💬 Confirmar precios vigentes</a>
@@ -344,7 +449,7 @@
         <li><strong>Pan de Hamburguesa</strong><span class="side-box-val">$ 385</span><br><span style="font-size:11px">precio unitario</span></li>
       </ul>
       <a href="https://queresto.com/BRODE" class="side-box-cta" target="_blank" rel="noopener noreferrer">🧾 Menú oficial en vivo</a>
-      <p style="font-size:10px;color:var(--muted);margin-top:14px;line-height:1.5">Fuente: menú oficial de Brødë en QueResto.com (consultado ago-2026), la referencia más confiable de precios vigentes que encontramos.</p>
+      <p style="font-size:11px;color:var(--muted);margin-top:16px;line-height:1.6;padding-top:12px;border-top:1px solid rgba(var(--gold-rgb),0.2)"><em>Fuente: menú oficial de Brødë en QueResto.com (consultado ago-2026)</em></p>
     </div>
   </div>
 </div>
@@ -568,10 +673,10 @@
     <div>
       <p class="about-body">Brødë mantiene dos canales oficiales en Instagram: uno para el público que compra en el local, y otro dedicado a la operación mayorista — la fábrica que abastece a negocios seleccionados de la región. El WhatsApp es el principal medio para coordinar pedidos, consultas y disponibilidad, con respuestas rápidas y atención personalizada.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">Línea Mayorista</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">Línea Mayorista</h3>
       <p class="about-body">Brødë ofrece canal mayorista para negocios, dietéticas y comercios. Se coordinan por WhatsApp con catálogo completo de productos, cantidades mínimas y condiciones especiales — ideal para quien compra en volumen o busca abastecer su punto de venta. Brødë mantiene un enlace de WhatsApp específico para este canal, separado del contacto general del local.</p>
 
-      <h3 class="about-title" style="font-size:1.05rem">Accesos directos oficiales</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">Accesos directos oficiales</h3>
       <p class="about-body">Estos son los enlaces que Brødë mismo publica y mantiene actualizados en su Instagram (vía Linktree): pedidos, catálogo fotográfico y línea mayorista.</p>
       
       <div class="action-row" style="margin-top:16px;flex-wrap:wrap">
@@ -603,30 +708,30 @@
   </div>
   <div class="about-grid">
     <div>
-      <h3 class="about-title" style="font-size:1.05rem">¿Qué días abre Brødë?</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">¿Qué días abre Brødë?</h3>
       <p class="about-body">De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">¿Cuál es la especialidad de la casa?</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">¿Cuál es la especialidad de la casa?</h3>
       <p class="about-body">Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como "los mejores laminados de la zona". Todo pasa por un proceso de 72 horas.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">¿Cuáles son los precios?</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">¿Cuáles son los precios?</h3>
       <p class="about-body">Croissant: <strong class="stat">$1.530</strong>. Pan de Campo (caja de 10): <strong class="stat">$1.650</strong>. Pan de Hamburguesa: <strong class="stat">$385</strong>. Para otros productos y promociones, consultar directamente por WhatsApp.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">¿Se puede comprar en otro lugar además del local?</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">¿Se puede comprar en otro lugar además del local?</h3>
       <p class="about-body">Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp.</p>
     </div>
 
     <div>
-      <h3 class="about-title" style="font-size:1.05rem">¿Qué pasa con el pan que no se vende?</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">¿Qué pasa con el pan que no se vende?</h3>
       <p class="about-body">Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">¿El local es accesible para sillas de ruedas?</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">¿El local es accesible para sillas de ruedas?</h3>
       <p class="about-body">No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">¿Hay opciones veganas o sin gluten?</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">¿Hay opciones veganas o sin gluten?</h3>
       <p class="about-body">Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita.</p>
       
-      <h3 class="about-title" style="font-size:1.05rem">¿Cuánto tiempo lleva el proceso de un pan?</h3>
+      <h3 class="about-title" style="font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px">¿Cuánto tiempo lleva el proceso de un pan?</h3>
       <p class="about-body"><strong class="stat">72 horas</strong> desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante.</p>
     </div>
   </div>

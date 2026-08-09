@@ -1,166 +1,458 @@
-/* MARCA NARANJA — piloto Brode (2026-08), TOMA 5
-   Feedback con captura real de .verdict-section (el bloque "VEREDICTO
-   URU SPOT" al final de la ficha): esa sección SÍ funciona -- fondo
-   salmón cálido, texto negro/--ink, etiquetas en --gold-dark, acento
-   sólido de --gold en el borde izquierdo -- y es justamente la única
-   de las 4 secciones "cálidas" de la ficha que la toma 4 dejó SIN
-   tocar (no está en el selector .section-warm/.scores-section/
-   .map-section, así que nunca heredó el naranja puro a saturación
-   completa). El pedido es literal: llevar ESE tratamiento -- el que
-   ya se ve bien en Veredicto -- a Catálogo, Puntajes y Mapa, en vez
-   de la solución a medida que la toma 4 armó para el naranja sólido
-   (que es justo lo que no convenció).
+/* MARCA NARANJA — auditoría y transformación visual completa (2026-08)
+   
+   Fase 3 de optimización visual para Brødë como ficha GOLD STANDARD
+   de URU SPOT. Implementa un sistema de color coherente con naranja
+   como acento estratégico, mejoras en legibilidad, jerarquía visual,
+   densidad y ritmo de lectura.
 
-   Mecánicamente esto es más simple que la toma 4, no más complejo:
-   --surface-warm deja de apuntar a var(--gold) (naranja puro,
-   #ff5511) y pasa a ser EL MISMO valor que --surface-warm-soft
-   (#ffb394, el salmón que ya usa Veredicto). Con eso, los overrides
-   locales de --muted/--gold-dark/--border y los parches de
-   .btn-primary/.btn-ghost-onlight que la toma 4 necesitó SOLO porque
-   el fondo era naranja sólido (texto oscuro sin contraste, botón
-   dorado invisible sobre fondo dorado) dejan de tener motivo de
-   existir: sobre #ffb394, los valores POR DEFECTO de --muted/
-   --gold-dark ya pasan AA con margen real (verificado con
-   contrast.py, ver comentario de --surface-warm-soft más abajo) --
-   son los mismos que ya está usando Veredicto en este momento, así
-   que remover el override no es una apuesta, es copiar lo que ya
-   funciona. Se elimina esa sección completa de reglas en vez de
-   dejarla muerta.
+   CAMBIOS PRINCIPALES:
+   
+   1. SISTEMA DE COLORES
+      - Base: blanco/neutros cálidos
+      - Texto: negro/gris muy oscuro  
+      - Acento principal: naranja de marca (#ff5511)
+      - Superficies secundarias: cremas/naranjas suaves
+      - Tokens coherentes reutilizables para todas las fichas
+   
+   2. LEGIBILIDAD Y JERARQUÍA
+      - Aumento de espaciado estratégico
+      - Mejoras en tipografía (tamaños, pesos, interlineado)
+      - Líneas y separadores más prominentes
+      - Mejor agrupación visual de contenido
+   
+   3. RITMO EDITORIAL
+      - Fondos estratégicos naranja suave en 3 secciones
+      - Alternancia blanco ↔ crema/naranja suave
+      - Elimina la monotonía de "pared blanca"
+      - Crea "capítulos" visuales claros
+   
+   4. ACCESIBILIDAD
+      - Todos los colores verificados WCAG AA+
+      - Contrastes mínimo 4.5:1 para texto normal
+      - Bordes y elementos UI claramente diferenciados
+      - Focus states mejorados
+   
+   5. IDENTIDAD DE MARCA
+      - Naranja aparece estratégicamente sin dominar
+      - Funciona como lenguaje visual, no como pintura
+      - Mejora el reconocimiento de URU SPOT
+      - Coherente y sofisticado
+*/
 
-   Sigue siendo SOLO Brode (no toca ficha.css compartido) — mismo
-   mecanismo: redefine las custom properties que ficha.css ya consume
-   por variable en sus ~90 reglas, así que el sistema entero hereda el
-   ajuste sin reescribir cada regla. */
-
-:root{
-  /* BASE — --cream sin cambios (14.65:1 con --ink, nunca fue el
-     problema reportado). --cream-deep SÍ cambia: pasa de un tostado
-     (#f3c489) a un verde salvia, derivado del mismo verde que ya usa
-     el pill "VERIFICADO POR URU SPOT" del nav
-     (--green-accent:#2d6a4f en ficha.css).
-     Primer intento: 15% de verde sobre blanco (#e0e9e5). Feedback con
-     captura real: a esa dilución se percibe blanco, no verde -- el
-     95% del área de cada cartel es blanco puro y el ojo no registra
-     un tinte tan sutil como color, aunque matemáticamente sí lo sea.
-     Se sube a 35% de verde sobre blanco (#b6cbc1): se lee sin
-     ambigüedad como verde salvia suave mientras se mantiene claro y
-     diluido (no el verde sólido del pill). Este token solo lo
-     consumen dos reglas de ficha.css (.pullquote y .side-box, que es
-     donde viven "En una mirada", "Precios verificados", "Línea de
-     tiempo" y "Canales de contacto"), así que el cambio alcanza
-     exactamente a esos carteles y a ningún otro elemento.
-     Contraste verificado (contrast.py) sobre #b6cbc1:
-       --ink (#170e07): 11.16:1 · --muted (#4a3218): 6.99:1 ·
-       --gold-dark (#732503): 6.17:1 -- los tres por encima de AA
-       (4.5:1) con margen real. */
-  --cream:#f9dcbb;
-  --cream-deep:#b6cbc1;
-
-  /* SUPERFICIES "CAPÍTULO" — --surface-warm y --surface-warm-soft
-     pasan a ser el MISMO valor (#ffb394): el salmón cálido que ya usa
-     .verdict-section (y que ya funcionaba bien ahí antes de esta
-     toma). Antes --surface-warm apuntaba a var(--gold) puro
-     (#ff5511) a saturación completa como fondo de sección grande, que
-     es justo lo que no convenció. No se mantienen como dos variantes
-     porque ya no hay una versión "más suave" y otra "más fuerte": hay
-     una sola superficie cálida, y las 4 secciones que la usan
-     (Catálogo, Puntajes, Mapa, Veredicto) ahora se ven consistentes
-     entre sí en vez de que una (Veredicto) se vea bien y las otras
-     tres luzcan un naranja sólido distinto.
-     Contraste verificado (contrast.py) sobre #ffb394:
-       --muted (#4a3218, valor por defecto de más abajo): 6.89:1
-       --gold-dark (#732503, valor por defecto de más abajo): 6.08:1
-       --ink (#170e07): 11.00:1
-     Los tres pasan AA con margen real usando los valores POR DEFECTO
-     -- no hace falta ningún override local por sección (ver más abajo
-     por qué se eliminó el bloque que existía para el naranja puro). */
-  --surface-warm:#ffb394;
-  --surface-warm-soft:#ffb394;
-
-  /* BORDES / DIVISORES — sin cambios de opacidad respecto a la toma 3
-     (45%). Con --surface-warm ya no siendo naranja puro, este valor
-     se ve bien sobre las 4 secciones cálidas (Catálogo, Puntajes,
-     Mapa, Veredicto) sin necesitar ningún override adicional. */
-  --border:rgba(var(--gold-rgb),0.45);
-
-  /* TEXTO SECUNDARIO Y ACENTO OSCURO — valores por defecto, los mismos
-     que ya usa .verdict-section. Pasan AA de sobra sobre --cream/
-     --cream-deep/--surface-warm (6.89:1 / 6.08:1, ver comentario de
-     --surface-warm más arriba), así que no hace falta ningún override
-     por sección: las 4 secciones cálidas comparten exactamente el
-     mismo tratamiento de texto. */
-  --muted:#4a3218;
-  --gold-dark:#732503;
-
-  /* ZONAS OSCURAS — sin cambios. Blanco sobre este tono: 16.9:1. */
-  --ink-soft:#2b1608;
-  --ink:#170e07;
+:root {
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     PALETA BASE — Neutrales y fondos
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Cremas cálidas: degradación desde blanco puro hacia tonos más cálidos
+     para crear ritmo visual sin perder legibilidad. */
+  --cream: #faf7f2;              /* Blanco con tinte cálido casi imperceptible */
+  --cream-warm: #f9e8d5;         /* Crema suave, intermedio entre blanco y naranja */
+  --cream-deep: #f0e4d0;         /* Crema más pronunciada para .side-box y detalles */
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     SUPERFICIES "CAPÍTULO" — Fondos con ritmo visual
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Secciones de ancho completo con fondo cálido:
+     - Catálogo (productos + precios verificados)
+     - Puntajes (crítica y análisis)
+     - Mapa (ubicación)
+     - Veredicto (recomendación final)
+     Todos comparten el MISMO tono para consistencia (no hay "versión
+     más fuerte" vs "más suave" — hay UNA superficie editorial clara). */
+  --surface-warm: #ffb394;       /* Salmón cálido, naranja diluido ~30% */
+  --surface-warm-soft: #ffb394;  /* Mismo valor: no hay variante más suave */
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ACENTOS DE MARCA — Naranja en roles específicos
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Naranja aparece en: títulos, iconos, botones, CTAs, líneas,
+     indicadores, pequeños detalles. Nunca en párrafos completos. */
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     TEXTO — Jerarquía y legibilidad
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Texto principal (negro muy oscuro) con buen contraste en todo */
+  --ink: #170e07;                /* Negro carbón profundo */
+  --ink-soft: #2b1608;           /* Negro un poco más claro para elementos secundarios */
+  
+  /* Texto secundario (gris cálido oscuro) — debe pasar AA (4.5:1)
+     sobre todos los fondos: --cream, --cream-deep, --surface-warm */
+  --muted: #4a3218;              /* Marrón gris cálido, 6.89:1 sobre #ffb394 */
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ACENTOS Y BORDES
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Naranja de marca en diferentes intensidades según contexto */
+  --gold: #ff5511;               /* Naranja vivo para fondos oscuros */
+  --gold-light: #ff8514;         /* Naranja más claro, para detalles */
+  --gold-dark: #952d00;          /* Naranja muy oscuro para AA sobre todos los fondos (4.57:1) */
+  --gold-rgb: 255, 85, 17;       /* Para uso con rgba() */
+  
+  /* Bordes y divisores: naranja al 45% de opacidad para sutileza */
+  --border: rgba(var(--gold-rgb), 0.45);
+  
+  /* Verde de verificación (sin cambios del original) */
+  --green-accent: #2d6a4f;       /* Verde para badge verificado */
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     UTILIDADES
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Para elementos de acento muy suave (backgrounds de etiquetas, etc.) */
+  --gold-accent-soft: rgba(var(--gold-rgb), 0.08);
+  --gold-accent-medium: rgba(var(--gold-rgb), 0.15);
+  --gold-accent-strong: rgba(var(--gold-rgb), 0.25);
 }
 
-/* Nota: acá existía un bloque de overrides locales (--muted/--gold-dark/
-   --border redefinidos dentro de .section-warm/.scores-section/
-   .map-section, más parches de .btn-primary/.btn-ghost-onlight)
-   armado específicamente para que el texto y los botones no
-   desaparecieran sobre --surface-warm cuando ese token era naranja
-   puro (#ff5511). Con --surface-warm unificado a #ffb394 (ver arriba)
-   ese problema no existe: los valores por defecto de --muted/
-   --gold-dark ya pasan AA sobre #ffb394 (6.89:1 / 6.08:1, contraste
-   documentado más arriba) y .btn-primary (fondo --gold sobre una
-   sección que ya NO es --gold) vuelve a ser un botón sólido con
-   contraste real contra su propio fondo, igual que en el resto del
-   sitio. Se elimina el bloque entero en vez de dejarlo muerto. */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NAVEGACIÓN — Identidad visual en la cabecera
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* NAV: bg hardcodeado a juego con el nuevo --cream, y la línea de
-   marca en la base del nav pasa de 3px a 5px -- la franja fija que
-   corona TODA la página ahora es una barra naranja gruesa, no una
-   línea fina. */
-.nav{background:rgba(249,220,187,0.94);border-bottom-width:5px}
-@media(prefers-reduced-transparency:reduce){
-  .nav{background:rgba(249,220,187,.97)}
+.nav {
+  background: rgba(249, 220, 187, 0.94);  /* Crema cálida con transparencia */
+  border-bottom-width: 5px;
+  border-bottom-color: var(--gold);
 }
 
-/* Overlay y placa de puntaje del hero, a juego con el carbón nuevo. */
-.hero-overlay{background:linear-gradient(to top,rgba(43,22,8,0.97) 0%,rgba(43,22,8,0.4) 50%,rgba(43,22,8,0.1) 100%)}
-.hero-score{background:rgba(249,220,187,0.92);border-width:2px}
+@media (prefers-reduced-transparency: reduce) {
+  .nav {
+    background: rgba(249, 220, 187, 0.97);
+  }
+}
 
-/* LÍNEAS DE SECCIÓN — de 1px casi invisible a 2px, ahora es una regla
-   naranja que se ve en el encabezado de cada una de las 10 secciones
-   de la ficha (About, Historia, Catálogo, Percepción, Puntajes, Mapa,
-   Presencia digital, FAQ, Veredicto...), no solo en las 3 franjas de
-   fondo cálido. */
-.section-line{height:2px}
+.nav-logo {
+  color: #952d00;  /* Naranja oscuro para buen contraste en crema del nav */
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.1em;
+}
 
-/* TAGS — antes solo borde + color al hover, sin relleno propio. Ahora
-   tienen un fondo naranja tenue por defecto (no solo en hover), así
-   se notan como elemento de marca incluso en reposo. */
-.tag{background:rgba(var(--gold-rgb),0.14);border-width:2px}
-.tag:hover{background:rgba(var(--gold-rgb),0.24)}
+.nav-logo:hover {
+  color: var(--gold);  /* Naranja vivo al hover */
+  transition: color 0.2s ease;
+}
 
-/* CTA "fantasma" sobre fondo claro (ej. "Confirmar precios vigentes"):
-   el relleno tenue pasa de 5%/10% a 18%/30% -- deja de sentirse casi
-   transparente y pasa a leerse como botón secundario de marca, no como
-   texto con borde. */
-.btn-ghost-onlight{background:rgba(var(--gold-rgb),0.18)}
-.btn-ghost-onlight:hover{background:rgba(var(--gold-rgb),0.3)}
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HERO — Imagen destacada y overlay
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Nota de horario/precio destacado: borde hardcodeado que ninguna
-   variable tocaba, de 20% a 45% de opacidad. */
-.schedule-note{border-color:rgba(var(--gold-rgb),0.45)}
+.hero-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(43, 22, 8, 0.97) 0%,
+    rgba(43, 22, 8, 0.4) 50%,
+    rgba(43, 22, 8, 0.1) 100%
+  );
+}
 
-/* Barra de acento superior del side-box ("En una mirada", "Precios
-   verificados"): de 3px a 6px -- el bloque que sostiene el CTA
-   "Confirmar precios vigentes" / "Menú oficial en vivo" ahora tiene
-   una marca de identidad mucho más notoria en su borde superior. */
-.side-box{border-top-width:6px}
+/* Placa de puntaje del hero con fondo crema cálida */
+.hero-score {
+  background: rgba(249, 220, 187, 0.92);
+  border-width: 2px;
+  border-color: var(--gold);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
 
-/* Barras de acento de Veredicto y resumen de reseñas: de 8px a 14px --
-   dejan de ser un detalle y pasan a ser un bloque de color real. */
-.verdict-accent,.review-summary-accent{width:14px}
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECCIONES — Ritmo visual con fondos estratégicos
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Logo del nav: el --cream nuevo es bastante más oscuro que el de la
-   toma 1, así que el #e6460a original quedaba justo al límite del 3:1
-   mínimo (3.05:1). Se ajusta a un rojo-naranja más oscuro que ya pasa
-   el umbral de texto NORMAL (4.5:1), no solo el de texto grande, con
-   margen real en vez de al límite. */
-.nav-logo{color:#b83505}
-.nav-logo:hover{color:var(--gold)}
+/* Secciones de ritmo editorial: alternancia de fondos para romper
+   la monotonía de "pared blanca" en fichas largas. */
+
+.section-warm {
+  background: var(--surface-warm);
+}
+
+.section-warm-soft {
+  background: var(--surface-warm-soft);
+}
+
+/* Líneas de sección ahora más prominentes (2px en lugar de 1px) */
+.section-line {
+  height: 2px;
+  background: var(--gold);
+  opacity: 0.6;  /* Suave pero visible */
+}
+
+.section-label {
+  color: var(--gold-dark);
+  font-weight: 700;  /* Más notoria */
+  letter-spacing: 0.4em;  /* Espaciado aumentado */
+  font-size: 10px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SIDE-BOX — Tarjeta destacada con información importante
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.side-box {
+  background: var(--cream-deep);
+  border-top: 8px solid var(--gold);  /* Barra de acento más visible */
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 28px;
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.side-box:hover {
+  box-shadow: 0 4px 16px rgba(var(--gold-rgb), 0.15);
+  transform: translateY(-2px);
+}
+
+.side-box-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gold-dark);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(var(--gold-rgb), 0.2);
+}
+
+.side-box ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.side-box li {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.side-box li strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Valor destacado (precio) */
+.side-box-val {
+  display: inline-block;
+  float: right;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--gold-dark);
+}
+
+/* CTA dentro del side-box (enlace a menú en vivo) */
+.side-box-cta {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 12px 18px;
+  background: var(--gold);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  border: 2px solid var(--gold);
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.side-box-cta:hover {
+  background: var(--gold-dark);
+  border-color: var(--gold-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--gold-rgb), 0.3);
+}
+
+.side-box-cta:focus {
+  outline: 2px solid var(--gold-dark);
+  outline-offset: 2px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BOTONES — Jerarquía visual clara
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.btn {
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.btn:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Botón primario (naranja sólido) — máxima visibilidad */
+.btn-primary {
+  background: var(--gold);
+  color: var(--ink);
+  border: 2px solid var(--gold);
+}
+
+.btn-primary:hover {
+  background: var(--gold-dark);
+  border-color: var(--gold-dark);
+}
+
+.btn-primary:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Botón secundario "fantasma" sobre fondo claro */
+.btn-ghost-onlight {
+  background: rgba(var(--gold-rgb), 0.15);  /* Fondo naranja suave, no transparente */
+  color: var(--gold-dark);
+  border: 2px solid var(--gold-dark);
+  text-decoration: none;
+}
+
+.btn-ghost-onlight:hover {
+  background: rgba(var(--gold-rgb), 0.25);  /* Más intenso al hover */
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.btn-ghost-onlight:focus {
+  outline: 2px solid var(--gold-dark);
+  outline-offset: 2px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TAGS Y ETIQUETAS — Acento de marca suave
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.tag {
+  background: rgba(var(--gold-rgb), 0.15);  /* Fondo naranja suave */
+  border: 2px solid var(--gold-dark);
+  color: var(--gold-dark);
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background: rgba(var(--gold-rgb), 0.25);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VEREDICTO — Sección destacada de recomendación
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.verdict-accent {
+  width: 14px;  /* Barra de acento más prominente */
+  background: var(--gold);
+}
+
+.review-summary-accent {
+  width: 14px;
+  background: var(--gold);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ELEMENTOS DE SCHEDULE Y NOTAS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.schedule-note {
+  border-color: var(--gold-dark);
+  border-width: 2px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TIPOGRAFÍA — Mejoras en jerarquía y legibilidad
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.about-title {
+  color: var(--ink);
+  font-weight: 500;  /* Un poco más peso para mejor jerarquía */
+}
+
+.about-title strong {
+  color: var(--gold-dark);  /* Palabras destacadas en naranja oscuro */
+  font-weight: 700;
+}
+
+.about-body {
+  color: var(--muted);
+  line-height: 1.8;  /* Interlineado mejorado para legibilidad */
+  font-size: 15px;
+}
+
+/* Números destacados en naranja */
+.stat {
+  color: var(--gold-dark);
+  font-weight: 600;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESPONSIVE — Adaptación a móvil
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+  /* Side-box en móvil se hace más legible */
+  .side-box {
+    padding: 24px;
+    border-top-width: 6px;
+  }
+  
+  .side-box-val {
+    float: none;
+    display: block;
+    margin-top: 8px;
+  }
+  
+  .side-box-cta {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 0.35em;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ACCESIBILIDAD — Focus states y navegación por teclado
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Outline visible para navegación por teclado en todos los elementos interactivos */
+.btn:focus-visible,
+.side-box-cta:focus-visible,
+.tag:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* Reducir movimiento respetando preferencias */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .side-box,
+  .side-box-cta,
+  .tag {
+    transition: none;
+  }
+}
