@@ -196,7 +196,7 @@
       // sacar de encima. Sigue existiendo en el repo por si alguna
       // vez se rediseña con otra primitiva.
       if (global.AmbienteReticula) global.AmbienteReticula.iniciar();
-      if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar();
+      // if (global.AmbienteTopografia) global.AmbienteTopografia.iniciar(); — 2026-08-08: sacado a pedido explícito. Sus arcos anidados (curvas-topograficas), a la escala real del viewport, se leían como grandes círculos de fondo — exactamente lo que el pedido pide sacar. Ver también la familia "Brujulitas" (más abajo, ya activa) como el reemplazo de movimiento de fondo que sí se mantiene.
       // if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
       if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
       if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
