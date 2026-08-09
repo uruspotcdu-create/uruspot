@@ -193,10 +193,20 @@
       // if (global.AmbienteCorrientes) global.AmbienteCorrientes.iniciar();
       if (global.AmbienteCoordenadas) global.AmbienteCoordenadas.iniciar();
       if (global.AmbienteBrujula) global.AmbienteBrujula.iniciar();
-      // Fase 3 (Paso 8/9, roadmap Cap. 12 orden 7/8): mismo patrón que
-      // el resto de las familias — cada una inicia su propia inserción
-      // en el plano que le corresponde, el orquestador solo dispara.
-      if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
+      // 2026-08-08 (feedback visual directo, mismo motivo que la nota
+      // de más arriba sobre Retícula/Topográficas/Corrientes): las
+      // Partículas de deriva son 5 círculos sueltos (misma primitiva
+      // circulo-concéntrico que usa el aro de la Brújula, Cap. 3.3)
+      // esparcidos por TODO el viewport, no solo cerca del centro —
+      // el resultado, en la práctica, era el mismo problema que ya
+      // se había resuelto para las otras tres familias: demasiados
+      // círculos del mismo estilo compitiendo contra la Brújula por
+      // atención, ninguno leyéndose como "esto es la Brújula" en
+      // particular. Queda sin iniciar por el mismo criterio: la
+      // Brújula es el "ancla simbólica única del producto" (Cap. 2.1)
+      // y debe quedar sola en pantalla. El módulo sigue existiendo en
+      // el repo — basta con descomentar esta línea para reactivarlo.
+      // if (global.AmbienteParticulasDeriva) global.AmbienteParticulasDeriva.iniciar();
       if (global.AmbienteHalos) global.AmbienteHalos.iniciar();
       if (global.AmbienteCapaFondo) global.AmbienteCapaFondo.iniciar();
       // Fase 8 (Visual & Design Master Pass): AmbienteParticulas (Fase 2,

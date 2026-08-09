@@ -61,13 +61,27 @@
   Complejidad (Cap. 9.2): 3 grupos (límite 6), 7 nodos <use> (límite
   80 por asset). Sin filter, sin animación de propiedades de layout
   (Cap. 9.1) — solo transform vía las clases de cada grupo.
+
+  Revisión 3 (feedback visual directo, post-fix del 404 del nombre de
+  archivo): con el 404 resuelto y las Partículas de deriva apagadas
+  (ver nota 2026-08-08 en js/ambiente-orquestador.js), la Brújula
+  seguía sin leerse con claridad — opacidad 0.55 y el grosor
+  compartido de --amb-trazo-regular (1.5, pensado para líneas de
+  fondo sutiles como Retícula/Topográficas) resultaban demasiado
+  tenues para un círculo de ~500-700px de diámetro en pantalla.
+  Se sube la opacidad propia a 0.85 y el grosor a 2.4x el trazo
+  regular — ambos siguen siendo excepciones ya justificadas en la
+  Revisión 2 de arriba (la Brújula es el "ancla simbólica única del
+  producto", Cap. 2.1, la única familia con licencia para pedir más
+  presencia que el resto del sistema), simplemente llevadas más
+  lejos porque la Revisión 2 no alcanzaba en la práctica.
 -->
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      class="amb-asset amb-asset--brujula"
      style="color:var(--amb-p2-color);
-            opacity:0.55;
-            stroke:currentColor; stroke-width:var(--amb-trazo-regular);
+            opacity:0.85;
+            stroke:currentColor; stroke-width:calc(var(--amb-trazo-regular) * 2.4);
             fill:none;" aria-hidden="true" focusable="false">
 
   <!-- Aro — círculo concéntrico sin escalar (radio 30, el mismo que
