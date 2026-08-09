@@ -98,7 +98,6 @@
   .amb-asset--coordenadas {
     transition: none !important;
   }
-  .amb-asset--brujula .brujula-aro,
   .amb-asset--brujula .brujula-aguja {
     animation: none !important;
     transform: none !important;
@@ -113,9 +112,12 @@
      el listener de scroll bajo reducirMovimiento, pero esta regla
      documenta la intención acá mismo y cubre cualquier valor que
      hubiera quedado escrito antes de que la preferencia cambiara en
-     caliente — mismo criterio que la regla de Partículas de arriba). */
-  .amb-asset--brujula,
-  .ambiente-plano--p2::before {
+     caliente — mismo criterio que la regla de Partículas de arriba).
+     2026-08-08 (Revisión 6): se saca ".ambiente-plano--p2::before"
+     de este selector — ese pseudo-elemento (el resplandor de fondo
+     de la Brújula) ya no existe, ver la nota correspondiente en
+     css/ambiente-planos.css. */
+  .amb-asset--brujula {
     transform: translate(-50%, -50%) !important;
   }
   /* El halo NO se apaga entero: sigue siendo el único feedback
@@ -165,38 +167,18 @@
   opacity: var(--amb-p1-opacidad);
 }
 
-/* Brújula (Fase 3, familia Brújula) — Rotación mínima + oscilación de
-   aguja (Cap. 5): "el aro casi no rota; la aguja oscila buscando
-   norte — debe comportarse como un instrumento real, no decorativo."
-   Dos ejes de movimiento simultáneos (el máximo del Cap. 5), cada
-   uno sobre su propio grupo dentro del asset (Cap. 3.3): el aro y la
-   aguja nunca comparten animación ni duración, para que se lean
-   como dos piezas mecánicas independientes, no como un solo bloque
-   girando.
+/* Brújula (Fase 3, familia Brújula) — oscilación de aguja (Cap. 5):
+   "la aguja oscila buscando norte — debe comportarse como un
+   instrumento real, no decorativo."
 
-   Ambas animan `transform: rotate()` sobre el propio <g>, nunca una
-   propiedad de layout (Cap. 9.1). transform-box: fill-box +
-   transform-origin: center hacen que la rotación pivote sobre el
-   centro geométrico de cada grupo (el centro óptico del asset,
-   Cap. 3.1), no sobre la esquina superior izquierda del viewBox por
-   defecto — sin esto el aro y la aguja "orbitarían" en vez de girar
-   sobre sí mismos. */
-@keyframes amb-rotacion-minima {
-  0%   { transform: rotate(-3deg); }
-  50%  { transform: rotate(3deg); }
-  100% { transform: rotate(-3deg); }
-}
-
-.amb-asset--brujula .brujula-aro {
-  transform-box: fill-box;
-  transform-origin: center;
-  /* 60s: deliberadamente el ciclo más largo de todo el sistema hasta
-     ahora (más lento que la Respiración de P0, 10-24s) — "el aro
-     casi no rota" es, acá, casi imperceptible salvo mirando con
-     atención, coherente con que P2 se mueve más que P0/P1 pero el
-     aro específicamente es la pieza fija del instrumento. */
-  animation: amb-rotacion-minima 60s ease-in-out infinite;
-}
+   2026-08-08 (Revisión 6): se retira @keyframes amb-rotacion-minima
+   y la regla .amb-asset--brujula .brujula-aro que la usaba — el
+   grupo brujula-aro (el aro/marco de círculos concéntricos) se sacó
+   del propio SVG (ver brujula--default--regular-v6.svg): giraba ±3°
+   cada 60s, "casi imperceptible salvo mirando con atención" según su
+   propio comentario de diseño, y sin ese grupo en el DOM la regla no
+   tiene destino. Queda un solo eje de movimiento en esta familia (la
+   aguja), no dos. */
 
 @keyframes amb-oscilacion-aguja {
   0%   { transform: rotate(-8deg); }
