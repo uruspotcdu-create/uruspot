@@ -33,10 +33,24 @@
    ajuste sin reescribir cada regla. */
 
 :root{
-  /* BASE — sin cambios respecto a la toma 3: --ink sobre este tono:
-     14.65:1. Esta parte nunca fue el problema reportado. */
+  /* BASE — --cream sin cambios (14.65:1 con --ink, nunca fue el
+     problema reportado). --cream-deep SÍ cambia: pasa de un tostado
+     (#f3c489) a un verde salvia muy suave, derivado del mismo verde
+     que ya usa el pill "VERIFICADO POR URU SPOT" del nav
+     (--green-accent:#2d6a4f en ficha.css) mezclado con blanco al 85%
+     (15% de verde puro) -- mismo mecanismo que --surface-warm-soft
+     (color de marca diluido con blanco, no un verde con hex propio
+     inventado a ojo). Este token solo lo consumen dos reglas de
+     ficha.css (.pullquote y .side-box, que es donde viven "En una
+     mirada", "Precios verificados", "Línea de tiempo" y "Canales de
+     contacto"), así que el cambio alcanza exactamente a esos carteles
+     y a ningún otro elemento.
+     Contraste verificado (contrast.py) sobre #e0e9e5:
+       --ink (#170e07): 15.38:1 · --muted (#4a3218): 9.63:1 ·
+       --gold-dark (#732503): 8.5:1 -- los tres muy por encima de AA
+       (4.5:1), con más margen incluso que sobre el tostado anterior. */
   --cream:#f9dcbb;
-  --cream-deep:#f3c489;
+  --cream-deep:#e0e9e5;
 
   /* SUPERFICIES "CAPÍTULO" — --surface-warm y --surface-warm-soft
      pasan a ser el MISMO valor (#ffb394): el salmón cálido que ya usa
