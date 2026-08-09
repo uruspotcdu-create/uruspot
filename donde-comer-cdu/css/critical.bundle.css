@@ -3,7 +3,7 @@
  * Fuente: 17 archivos + scripts/build-css-bundle.js
  * Para modificar, editá el CSS fuente correspondiente y volvé a correr:
  *   node scripts/build-css-bundle.js
- * Generado: 2026-08-09T00:14:38.135Z
+ * Generado: 2026-08-09T00:38:58.020Z
  */
 
 /* ==== css/tokens.css ==== */
@@ -467,10 +467,14 @@ body.u-vidrio-reducido{
 
 .amb-asset--reticula {
   animation: amb-respiracion 10s ease-in-out infinite;
+  
+  transform: translateY(calc(var(--amb-p0-scroll, 0) * 1px));
 }
 
 .amb-asset--topograficas {
   animation: amb-respiracion 24s ease-in-out infinite;
+  
+  transform: translateY(calc(var(--amb-p0-scroll, 0) * 1px));
 }
 
 @keyframes amb-deriva {
@@ -491,6 +495,7 @@ body.u-vidrio-reducido{
   .amb-asset--topograficas {
     animation: none !important;
     --amb-resp-mult: 1;
+    transform: none !important;
   }
   .amb-asset--corrientes .corrientes-deriva {
     animation: none !important;
@@ -508,6 +513,11 @@ body.u-vidrio-reducido{
   .amb-asset--particulas .particulas-mota {
     animation: none !important;
     transform: none !important;
+  }
+  
+  .amb-asset--brujula,
+  .ambiente-plano--p2::before {
+    transform: translate(-50%, -50%) !important;
   }
   
   .amb-asset--halo {
@@ -695,7 +705,12 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   left: 50%;
   width: min(64vmin, 720px);
   height: min(64vmin, 720px);
-  transform: translate(-50%, -50%);
+  
+  
+  transform: translate(
+    calc(-50% + (var(--amb-brujula-puntero-x, 0) * 1px)),
+    calc(-50% + (var(--amb-brujula-scroll, 0) * 1px) + (var(--amb-brujula-puntero-y, 0) * 1px))
+  );
 }
 
 .ambiente-plano--p2::before {
@@ -705,14 +720,26 @@ html[data-ambiente-estado="carga"] #ambiente-plano-p2 {
   left: 50%;
   width: min(95vmin, 1000px);
   height: min(95vmin, 1000px);
-  transform: translate(-50%, -50%);
+  
+  transform: translate(
+    calc(-50% + (var(--amb-brujula-glow-puntero-x, 0) * 1px)),
+    calc(-50% + (var(--amb-brujula-glow-scroll, 0) * 1px) + (var(--amb-brujula-glow-puntero-y, 0) * 1px))
+  );
+  
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--color-granate-clara, #C97A83) 16%, transparent) 0%,
-    color-mix(in srgb, var(--color-granate-clara, #C97A83) 6%, transparent) 45%,
+    color-mix(in srgb, var(--amb-p3-color) 16%, transparent) 0%,
+    color-mix(in srgb, var(--amb-p3-color) 6%, transparent) 45%,
     transparent 72%
   );
   pointer-events: none;
+  
+  animation: amb-brujula-glow-respiracion 12s ease-in-out infinite;
+}
+
+@keyframes amb-brujula-glow-respiracion {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .88; }
 }
 
 /* ==== css/ambiente-capa-fondo.css ==== */
