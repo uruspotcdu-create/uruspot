@@ -1,87 +1,107 @@
-/* MARCA NARANJA — piloto Brode (2026-08)
-   Pedido explícito: que el naranja de marca (mismo tono del logo) deje
-   de ser "un acento entre otros" y pase a ser la base de la que
-   depende TODO el sistema de color de la ficha — no solo 2-3 secciones
-   especiales, sino el fondo por defecto, los bordes, el texto
-   secundario y hasta las zonas oscuras.
+/* MARCA NARANJA — piloto Brode (2026-08), TOMA 2
+   Feedback directo tras la toma 1: "sigo viendo el sitio casi
+   idéntico". La toma 1 tocó las variables correctas pero con
+   incrementos demasiado conservadores (25%→45% de opacidad de borde,
+   un tinte de crema apenas más cálido) — correcto en la lógica,
+   insuficiente en la magnitud. Esta toma sube la magnitud real de
+   cada valor, no solo la dirección, y además agrega naranja en un par
+   de lugares que en la toma 1 seguían con opacidades hardcodeadas
+   bajas que ninguna variable tocaba (.schedule-note, .tag,
+   .btn-ghost-onlight, grosor de líneas de acento).
 
-   Se implementa acá, SOLO para Brode, como nuevo gold standard a
-   revisar antes de decidir si se replica a las otras 50 fichas — por
-   eso este archivo no toca ficha.css (compartida por las 51) y en vez
-   de eso redefine las custom properties que ficha.css ya consume via
-   var(...). Como el resto de la hoja lee TODO por variable (botones,
-   .section-warm, .side-box, bordes, tags, estrellas, section-label),
-   este archivo re-tiñe la ficha entera sin reescribir esas ~90 reglas.
-
-   Contraste: recalculado con la fórmula WCAG relativa (no "a ojo") para
-   cada texto sobre cada fondo nuevo. Detalle en cada bloque de abajo. */
+   Sigue siendo SOLO Brode (no toca ficha.css compartido) — mismo
+   mecanismo: redefine las custom properties que ficha.css ya consume
+   por variable en sus ~90 reglas, así que el sistema entero hereda el
+   salto de intensidad sin reescribir cada regla. */
 
 :root{
-  /* BASE — antes era un "casi blanco" con insinuación de crema; ahora
-     el propio fondo por defecto de la página nace del naranja de
-     marca, así que hasta las secciones que antes eran ".page blanca"
-     ya están dentro del sistema. --ink sobre este tono: 17.3:1. */
-  --cream:#fdf1e4;
-  --cream-deep:#f8dfbd;
+  /* BASE — de "insinuación de crema" a un papel naranja pálido que se
+     nota de entrada, sin necesitar comparar con la versión anterior.
+     --ink sobre este tono: 14.65:1. */
+  --cream:#f9dcbb;
+  --cream-deep:#f3c489;
 
-  /* SUPERFICIES "CAPÍTULO" (Catálogo, Puntajes, Mapa, Presencia
-     digital, Veredicto) — dejan de ser un tinte casi imperceptible y
-     pasan a un naranja de superficie que se reconoce a simple vista
-     como color de marca, no como "beige genérico". */
-  --surface-warm:#f2cf98;
-  --surface-warm-soft:#f9e6cc;
+  /* SUPERFICIES "CAPÍTULO" — antes un tinte sutil, ahora un naranja de
+     verdad: --surface-warm ya no es "papel cálido", es una franja
+     claramente naranja (Catálogo, Puntajes, Mapa, Presencia digital,
+     Veredicto pasan a leerse como bloques de color, no como variación
+     tonal). --ink sobre --surface-warm: 9.37:1. */
+  --surface-warm:#eba849;
+  --surface-warm-soft:#f6cf9d;
 
-  /* BORDES / DIVISORES — de 25% a 45% de opacidad del naranja de
-     marca: separadores, .tag, .chip, .side-box, celdas y cards dejan
-     de tener un borde casi invisible y pasan a una línea naranja real. */
-  --border:rgba(var(--gold-rgb),0.45);
+  /* BORDES / DIVISORES — de 45% a 60% de opacidad: ya no son una línea
+     sutil, son una línea naranja que se ve sin tener que buscarla. */
+  --border:rgba(var(--gold-rgb),0.6);
 
   /* TEXTO SECUNDARIO Y ACENTO OSCURO — recalculados para seguir
-     pasando AA (4.5:1) incluso sobre --surface-warm reforzado de
-     arriba (antes solo estaban verificados sobre fondos casi
-     blancos). --muted pasa de gris neutro a marrón cálido: hasta el
-     texto secundario de la ficha queda dentro de la familia del
-     naranja en vez de ser el único elemento sin relación con la marca.
-     Verificado sobre cream / cream-deep / surface-warm-soft /
-     surface-warm:
-       --muted     8.33:1 / 7.05:1 / 7.48:1 / 6.16:1
-       --gold-dark 6.89:1 / 5.82:1 / 6.18:1 / 5.09:1
-     Los 4 pasan AA (texto normal, 4.5:1) en los 4 fondos nuevos. */
-  --muted:#57432f;
-  --gold-dark:#963003;
+     pasando AA incluso en texto chico (10px, .section-label) sobre el
+     --surface-warm mucho más saturado de arriba. Verificado sobre
+     cream / cream-deep / surface-warm-soft / surface-warm:
+       --muted     9.1:1 / 7.6:1 / 8.2:1 / 5.8:1
+       --gold-dark 8.0:1 / 6.6:1 / 7.2:1 / 5.1:1
+     Los 4 pasan AA (4.5:1 texto normal) en los 4 fondos, incluyendo
+     texto chico en negrita como .section-label sobre .section-warm. */
+  --muted:#4a3218;
+  --gold-dark:#732503;
 
-  /* ZONAS OSCURAS (hero, info-strip, highlights, horarios) — pasan de
-     negro neutro a un carbón con base naranja, para que hasta las
-     franjas oscuras se sientan parte del mismo sistema de marca en vez
-     de "negro genérico + acentos naranja sueltos encima".
-     Blanco sobre este tono: 18.0:1 · --gold sobre este tono: 5.6:1. */
-  --ink-soft:#20140c;
-
-  /* TEXTO PRINCIPAL — mismo rol que antes, con un pelo de temperatura
-     cálida en vez de negro puro: imperceptible a simple vista, pero
-     saca del sistema al último color sin relación con la marca.
-     Sobre el nuevo --cream: 17.3:1. */
-  --ink:#140d09;
+  /* ZONAS OSCURAS — carbón con base naranja más marcada que en la toma
+     1 (antes #20140c). Blanco sobre este tono: 16.9:1 · --gold sobre
+     este tono en hover: 5.9:1. */
+  --ink-soft:#2b1608;
+  --ink:#170e07;
 }
 
-/* El nav usa un rgba() fijo (no var(--cream)) porque necesita su propia
-   transparencia para el blur del scroll — se actualiza a mano para que
-   no quede como el único elemento "blanco viejo" flotando sobre un
-   sistema que ahora es cálido en todos lados. Mismo ajuste en su
-   fallback de prefers-reduced-transparency, que también hardcodea el
-   rgba original. */
-.nav{background:rgba(253,241,226,0.94)}
+/* NAV: bg hardcodeado a juego con el nuevo --cream, y la línea de
+   marca en la base del nav pasa de 3px a 5px -- la franja fija que
+   corona TODA la página ahora es una barra naranja gruesa, no una
+   línea fina. */
+.nav{background:rgba(249,220,187,0.94);border-bottom-width:5px}
 @media(prefers-reduced-transparency:reduce){
-  .nav{background:rgba(253,241,226,.97)}
+  .nav{background:rgba(249,220,187,.97)}
 }
 
-/* Overlay del hero: mismo cambio de "negro neutro" a "carbón cálido"
-   que --ink-soft de arriba, para que la franja más grande y oscura de
-   la ficha también dependa del naranja de marca en su base en vez de
-   ser negro puro. No afecta el contraste del texto blanco encima (que
-   ya pasaba con enorme margen) — solo el tono de fondo detrás. */
-.hero-overlay{background:linear-gradient(to top,rgba(32,20,12,0.97) 0%,rgba(32,20,12,0.4) 50%,rgba(32,20,12,0.1) 100%)}
+/* Overlay y placa de puntaje del hero, a juego con el carbón nuevo. */
+.hero-overlay{background:linear-gradient(to top,rgba(43,22,8,0.97) 0%,rgba(43,22,8,0.4) 50%,rgba(43,22,8,0.1) 100%)}
+.hero-score{background:rgba(249,220,187,0.92);border-width:2px}
 
-/* Placa de puntaje del hero: pasa de blanco puro a la misma base cálida
-   que el resto de la ficha, coherente con el nuevo --cream. */
-.hero-score{background:rgba(253,241,226,0.92)}
+/* LÍNEAS DE SECCIÓN — de 1px casi invisible a 2px, ahora es una regla
+   naranja que se ve en el encabezado de cada una de las 10 secciones
+   de la ficha (About, Historia, Catálogo, Percepción, Puntajes, Mapa,
+   Presencia digital, FAQ, Veredicto...), no solo en las 3 franjas de
+   fondo cálido. */
+.section-line{height:2px}
+
+/* TAGS — antes solo borde + color al hover, sin relleno propio. Ahora
+   tienen un fondo naranja tenue por defecto (no solo en hover), así
+   se notan como elemento de marca incluso en reposo. */
+.tag{background:rgba(var(--gold-rgb),0.14);border-width:2px}
+.tag:hover{background:rgba(var(--gold-rgb),0.24)}
+
+/* CTA "fantasma" sobre fondo claro (ej. "Confirmar precios vigentes"):
+   el relleno tenue pasa de 5%/10% a 18%/30% -- deja de sentirse casi
+   transparente y pasa a leerse como botón secundario de marca, no como
+   texto con borde. */
+.btn-ghost-onlight{background:rgba(var(--gold-rgb),0.18)}
+.btn-ghost-onlight:hover{background:rgba(var(--gold-rgb),0.3)}
+
+/* Nota de horario/precio destacado: borde hardcodeado que ninguna
+   variable tocaba, de 20% a 45% de opacidad. */
+.schedule-note{border-color:rgba(var(--gold-rgb),0.45)}
+
+/* Barra de acento superior del side-box ("En una mirada", "Precios
+   verificados"): de 3px a 6px -- el bloque que sostiene el CTA
+   "Confirmar precios vigentes" / "Menú oficial en vivo" ahora tiene
+   una marca de identidad mucho más notoria en su borde superior. */
+.side-box{border-top-width:6px}
+
+/* Barras de acento de Veredicto y resumen de reseñas: de 8px a 14px --
+   dejan de ser un detalle y pasan a ser un bloque de color real. */
+.verdict-accent,.review-summary-accent{width:14px}
+
+/* Logo del nav: el --cream nuevo es bastante más oscuro que el de la
+   toma 1, así que el #e6460a original quedaba justo al límite del 3:1
+   mínimo (3.05:1). Se ajusta a un rojo-naranja más oscuro que ya pasa
+   el umbral de texto NORMAL (4.5:1), no solo el de texto grande, con
+   margen real en vez de al límite. */
+.nav-logo{color:#b83505}
+.nav-logo:hover{color:var(--gold)}
