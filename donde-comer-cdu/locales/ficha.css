@@ -442,6 +442,35 @@ html.u-suprimir-vidrio .hero-score{
 .schedule-note-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:#fff;margin-bottom:4px}
 .schedule-note-sub{font-size:12px;color:#ffffff}
 
+/* SKIP LINK (auditoría Brode, 2026-08 — Importante 5): mismo patrón que
+   donde-comer-cdu/index.html e inicio/index.html (.skip-link + .u-sr-only
+   en tokens.css), pero autocontenido acá porque las fichas de locales/
+   no cargan tokens.css. Debe ser el primer elemento enfocable del
+   <body> (ver AGENTS.md, Capítulo 9.2) — inyectado por
+   ficha-template.js justo después de <body>. */
+.skip-link{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+.skip-link:focus{
+  position:fixed;top:12px;left:12px;width:auto;height:auto;
+  clip:auto;overflow:visible;white-space:normal;z-index:1000;
+  padding:.6em 1.1em;background:var(--gold);color:var(--ink);
+  font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;
+  border-radius:4px;text-decoration:none;
+  box-shadow:0 4px 20px rgba(0,0,0,.35);
+}
+
+/* ESTILOS PROMOVIDOS DESDE INLINE (auditoría Brode, 2026-08 — Crítico 3):
+   estos 3 patrones aparecían repetidos como style="" byte-por-byte
+   idénticos dentro de cuerpo.html (13 veces .about-subtitle, 3 veces
+   .source-caption en Brode sola). Promovidos a clase real acá para que
+   un cambio futuro sea 1 línea de CSS y no un find/replace en 1500
+   archivos HTML. Ver AGENTS.md Capítulo 15 (tokens, no literales). */
+.about-subtitle{font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px}
+.source-caption{font-size:11px;color:var(--muted);margin-top:10px;letter-spacing:0.03em}
+.price-warning-box{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.6;padding:16px;background:rgba(var(--gold-rgb),0.06);border-left:3px solid var(--gold);border-radius:2px}
+
 /* LISTA ADN (features rápidas en bloque de horarios) */
 .adn-list{list-style:none;padding:0;margin:0}
 .adn-list li{padding:8px 0;font-size:13px;color:#ffffff;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:flex-start;gap:10px}
