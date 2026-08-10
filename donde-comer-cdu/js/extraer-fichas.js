@@ -35,7 +35,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const LOCALES_DIR = path.join(__dirname, "..", "donde-comer-cdu", "locales");
+const LOCALES_DIR = path.join(__dirname, "..", "locales");
 
 function leerLatin1(p) {
   return fs.readFileSync(p, "latin1");
@@ -87,13 +87,16 @@ function extraerFicha(slug) {
       true
     ),
     // Opcional: donde-comer-cdu/locales/parrilla-la-gruta/index.html no
-    // tiene <meta property="og:image">, un gap preexistente real (no un
-    // bug de este script) — se preserva tal cual, no se inventa un valor.
-    ogImage: extraerUno(
-      "og:image",
-      /<meta property="og:image" content="([^"]*)">/,
+    // tiene <meta property="og:image"> (dejó una línea en blanco donde
+    // antes estaba) — gap preexistente real, no un bug de este script.
+    // Se captura el fragmento crudo completo (línea de og:image si existe,
+    // o el whitespace que haya quedado si no) para regenerar byte a byte
+    // sin adivinar formato.
+    ogImageBlockRaw: extraerUno(
+      "bloque og:image",
+      /<meta property="og:description" content="[^"]*">\n([\s\S]*?)<meta property="og:type"/,
       html,
-      false
+      true
     ),
     canonical: extraerUno(
       "canonical",
@@ -102,19 +105,19 @@ function extraerFicha(slug) {
       true
     ),
     navTag: extraerUno("nav-tag", /class="nav-tag">([^<]*)</, html, true),
-    // Opcional, hoy exclusivo de Brode: badge de verificación real (SVG +
-    // texto), condicionado en la fuente a lugares-estado.json →
-    // estado_verificacion:"VALIDADO_FINAL" (ver comentario original en el
-    // HTML, preservado literal acá — no se re-deriva la condición, se
-    // preserva el bloque tal cual salió del dato real). Se busca ANTES
-    // que nav-badge porque en el HTML aparece entre nav-tag y nav-badge.
-    navBadgeVerificadoRaw: extraerUno(
-      "badge-verificado",
-      /<span class="nav-tag">[^<]*<\/span>\n(\s*<!--[\s\S]*?-->\n\s*<span class="badge-verificado">[\s\S]*?<\/span>\n)/,
+    // Bloque verbatim entre el cierre de nav-tag y </nav>: cubre el
+    // badge-verificado opcional (SVG + texto, condicionado en la fuente a
+    // lugares-estado.json → estado_verificacion:"VALIDADO_FINAL", hoy solo
+    // en Brode) y el nav-badge opcional ("🥐 Destacado", etc.). Dos fichas
+    // (el-arca-resto-bar, papa-luigi) no tienen ningún badge pero sí dejan
+    // una línea en blanco ahí — capturar el bloque tal cual, sin
+    // reconstruirlo campo por campo, preserva ese detalle sin adivinar.
+    navBadgesBlockRaw: extraerUno(
+      "bloque de badges del nav",
+      /<span class="nav-tag">[^<]*<\/span>\n([\s\S]*?)<\/nav>/,
       html,
-      false
+      true
     ),
-    navBadge: extraerUno("nav-badge", /class="nav-badge">([^<]*)</, html, false),
     footerLine2: extraerUno(
       "footer línea 2",
       /<footer class="footer">\s*<a href="\.\.\/\.\.\/"[^>]*>URU SPOT<\/a>\s*<span>([^<]*)<\/span>/,
@@ -151,8 +154,10 @@ function extraerFicha(slug) {
   // scripts, cualquier parche inline) literal.
   const colaCompleta = html.slice(footerIdx);
   const footerCloseIdx = colaCompleta.indexOf("</footer>");
-  const colaScripts = colaCompleta.slice(footerCloseIdx + "</footer>".length);
-  shell.colaScriptsRaw = colaScripts.replace(/^\s+/, "");
+  // Se preserva el whitespace inicial TAL CUAL viene del original (algunas
+  // fichas tienen una línea en blanco entre </footer> y el siguiente
+  // <script>, Brode no) — no se normaliza, para regenerar byte a byte.
+  shell.colaScriptsRaw = colaCompleta.slice(footerCloseIdx + "</footer>".length);
 
   return { shell, cuerpo };
 }
