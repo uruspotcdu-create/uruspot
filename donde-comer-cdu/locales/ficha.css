@@ -160,6 +160,31 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:repeat(2,1fr);gap:6px;border-radius:4px;overflow:hidden;height:100%;min-height:484px}
 .gallery:has(.gallery-item:nth-child(4)){grid-template-rows:repeat(3,1fr)}
 .gallery-main{grid-row:1/-1}
+/* [IMPORTANTE 2] (auditoría Brode, 2026-08) — aspect-ratio de resguardo
+   a nivel de plantilla. .gallery img ya se estira a width:100%;
+   height:100% dentro de un contenedor con min-height:484px fijo (o
+   height:220px explícito en mobile, ver breakpoint 768px más abajo), así
+   que en ESTA ficha puntual el layout ya está reservado por el propio
+   grid antes de que la imagen cargue, incluso si el <img> no trajera
+   width/height en el HTML.
+   Pero eso depende de que .gallery conserve ese min-height/height fijos
+   -- ninguna garantía real para las otras ~1500 fichas que reusan esta
+   misma clase: alcanza con que una futura fila de precios, un layout de
+   2 fotos en vez de 3, o un ajuste de espaciado toque min-height/height
+   y ese resguardo desaparece silenciosamente. object-fit ya recorta
+   cualquier proporción real de foto al rectángulo del contenedor -- el
+   valor exacto de aspect-ratio acá es solo la reserva de espacio antes
+   de tener las dimensiones reales, no el recorte final (eso lo sigue
+   haciendo object-fit). 3/4 es un promedio razonable para fotos de
+   productos/interiores en retrato (el caso típico de esta plantilla);
+   no pisa nada porque width/height:100% dejan sin efecto a aspect-ratio
+   en cualquier <img> que SÍ declare sus propios width/height reales en
+   el HTML -- aspect-ratio solo entra a jugar cuando falta uno de los
+   dos lados. Ver también brode/index.html línea ~231 y ss.: esa ficha
+   además declara width/height reales por imagen (recomendación primaria,
+   más precisa); esta regla es el piso de seguridad para cuando otra
+   ficha no lo haga. */
+.gallery-item img{aspect-ratio:3/4}
 .gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;filter:brightness(0.9) saturate(0.95)}
 .gallery-item{overflow:hidden}
 .gallery-item:hover img{transform:scale(1.04)}
