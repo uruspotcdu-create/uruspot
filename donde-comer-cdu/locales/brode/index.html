@@ -5,10 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Brødë en Concepción del Uruguay. 72 horas de proceso artesanal, ingredientes premium y el arte de hacer pan. Croissants, medialunas y pan de masa madre verificados.">
 <meta name="theme-color" content="#140d09">
+
+<!-- Favicon + manifest (CRÍTICO 1, 2026-08): faltaban en las 51 fichas -->
+<link rel="manifest" href="/donde-comer-cdu/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
+
+<meta name="robots" content="index, follow, max-image-preview:large">
+
 <meta property="og:title" content="Brødë · URU SPOT">
 <meta property="og:description" content="72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Catálogo, precios y pedidos verificados.">
-<meta property="og:image" content="/img/brodefrente.webp">
-<meta property="og:type" content="article">
+<meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/locales/brode/">
+<meta property="og:site_name" content="URU SPOT">
+<meta property="og:locale" content="es_AR">
+<!-- og:image URL ABSOLUTA (no "/img/..."): Facebook/X/WhatsApp/Telegram
+     no tienen una "página actual" contra la cual resolver una ruta
+     relativa, a diferencia del navegador. Con ruta relativa muchos
+     crawlers simplemente descartan la imagen -> preview sin foto o
+     directamente el link se ve como texto plano. Causa raíz probable
+     del síntoma reportado en el audit "previa de WhatsApp poco confiable". -->
+<meta property="og:image" content="https://uruspot.pages.dev/img/brodefrente.webp">
+<meta property="og:image:secure_url" content="https://uruspot.pages.dev/img/brodefrente.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/webp">
+<meta property="og:image:alt" content="Brødë Panadería — Frente del local artesanal en Concepción del Uruguay">
+<!-- og:type "website" (no "article"): esta es una ficha de negocio, no un
+     post de blog. "article" hace que Facebook espere metadata de artículo
+     (article:published_time, article:author, etc.) que esta página no
+     tiene, lo cual puede degradar cómo arma la preview. -->
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brødë · URU SPOT">
+<meta name="twitter:description" content="72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Catálogo, precios y pedidos verificados.">
+<meta name="twitter:image" content="https://uruspot.pages.dev/img/brodefrente.webp">
+<meta name="twitter:image:alt" content="Brødë Panadería — Frente del local artesanal en Concepción del Uruguay">
+
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/locales/brode/">
 
 <title>Brødë Panadería — URU SPOT</title>
@@ -20,9 +55,9 @@
 <link rel="preload" href="../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
-<!-- El sistema visual de Brode (piloto "marca-naranja") se promovi� a
+<!-- El sistema visual de Brode (piloto "marca-naranja") se promovió a
      sistema base de TODAS las fichas - fusionado dentro de ../ficha.css
-     (secci�n "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
+     (sección "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
      hoja CSS propia. Ver ARCHITECTURE.md. -->
 <script type="application/ld+json">
 {
@@ -30,7 +65,7 @@
   "@type": "Bakery",
   "name": "Brødë Panadería — URU SPOT",
   "description": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Panadería artesanal de masa madre con especialidades en laminados.",
-  "image": "/img/brodefrente.webp",
+  "image": "https://uruspot.pages.dev/img/brodefrente.webp",
   "url": "https://uruspot.pages.dev/donde-comer-cdu/locales/brode/",
   "telephone": "+5493442306349",
   "address": {
