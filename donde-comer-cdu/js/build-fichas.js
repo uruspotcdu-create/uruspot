@@ -26,12 +26,21 @@
  * fichas:verify (que siguen dependiendo solo de errores/drift reales),
  * solo hace visible el problema en cada corrida. Ver ese archivo para
  * el detalle de por qué se decidió así.
+ *
+ * [IMPORTANTE 4] (auditoría contenido, 2026-08): mismo criterio para
+ * validarPreciosCuerpo (./validar-precios-cuerpo.js) — detecta cuando
+ * el side-box "Precios verificados" y la FAQ "¿Cuáles son los precios?"
+ * de un mismo cuerpo.html quedaron con montos distintos (ambos son
+ * texto plano escrito a mano, sin fuente única — ver ese archivo para
+ * por qué no se resolvió templando el contenido en su lugar). También
+ * WARNING, no error.
  */
 "use strict";
 const fs = require("fs");
 const path = require("path");
 const { renderFicha } = require("./ficha-template.js");
 const { validarLongitudesMeta } = require("./validar-meta-longitud.js");
+const { validarPreciosCuerpo } = require("./validar-precios-cuerpo.js");
 const LOCALES_DIR = path.join(__dirname, "..", "locales");
 const VERIFY = process.argv.includes("--verify");
 function leerLatin1(p) {
@@ -51,6 +60,7 @@ function main() {
   const drift = [];
   const errores = [];
   const warningsSeo = [];
+  const warningsPrecios = [];
   for (const slug of slugs) {
     const dir = path.join(LOCALES_DIR, slug);
     const fichaJsonPath = path.join(dir, "ficha.json");
@@ -65,6 +75,7 @@ function main() {
       const cuerpo = leerLatin1(cuerpoPath);
       const generado = renderFicha(shell, cuerpo);
       warningsSeo.push(...validarLongitudesMeta(slug, shell));
+      warningsPrecios.push(...validarPreciosCuerpo(slug, cuerpo));
       if (VERIFY) {
         const actual = fs.existsSync(indexPath) ? leerLatin1(indexPath) : null;
         if (actual !== generado) {
@@ -85,6 +96,10 @@ function main() {
   if (warningsSeo.length) {
     console.log("SEO — " + warningsSeo.length + " advertencia(s) de longitud (title/metaDescription):");
     warningsSeo.forEach((w) => console.log(" - " + w));
+  }
+  if (warningsPrecios.length) {
+    console.log("PRECIOS — " + warningsPrecios.length + " advertencia(s) de desincronización side-box/FAQ:");
+    warningsPrecios.forEach((w) => console.log(" - " + w));
   }
   if (VERIFY) {
     console.log("fichas:verify — " + procesadas + " fichas chequeadas.");
