@@ -15,52 +15,56 @@
  * extraer-fichas.js: preserva bytes exactos, incluidos los de fichas
  * con codificación preexistente no-UTF-8 real. Ver
  * docs/project-context/FICHAS_ARQUITECTURA.md.
+ *
+ * [IMPORTANTE 3] (auditoría SEO, 2026-08): se suma validarLongitudesMeta
+ * (./validar-meta-longitud.js) al mismo loop que ya lee cada ficha.json,
+ * para detectar title/metaDescription por encima de los límites que
+ * Google trunca en SERP (60/160 caracteres) — antes esto no se
+ * chequeaba en ningún lado del pipeline, así que el problema podía
+ * repetirse en las 1500 fichas sin que nadie lo notara. Es un WARNING,
+ * no un error: no cambia el código de salida de fichas:build ni de
+ * fichas:verify (que siguen dependiendo solo de errores/drift reales),
+ * solo hace visible el problema en cada corrida. Ver ese archivo para
+ * el detalle de por qué se decidió así.
  */
 "use strict";
-
 const fs = require("fs");
 const path = require("path");
 const { renderFicha } = require("./ficha-template.js");
-
+const { validarLongitudesMeta } = require("./validar-meta-longitud.js");
 const LOCALES_DIR = path.join(__dirname, "..", "locales");
 const VERIFY = process.argv.includes("--verify");
-
 function leerLatin1(p) {
   return fs.readFileSync(p, "latin1");
 }
-
 function escribirLatin1(p, contenido) {
   fs.writeFileSync(p, Buffer.from(contenido, "latin1"));
 }
-
 function main() {
   const slugs = fs
     .readdirSync(LOCALES_DIR, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name)
     .sort();
-
   let procesadas = 0;
   let cambiadas = 0;
   const drift = [];
   const errores = [];
-
+  const warningsSeo = [];
   for (const slug of slugs) {
     const dir = path.join(LOCALES_DIR, slug);
     const fichaJsonPath = path.join(dir, "ficha.json");
     const cuerpoPath = path.join(dir, "cuerpo.html");
     const indexPath = path.join(dir, "index.html");
-
     if (!fs.existsSync(fichaJsonPath) || !fs.existsSync(cuerpoPath)) {
       // Directorio en locales/ que no es una ficha migrada (todavía).
       continue;
     }
-
     try {
       const shell = JSON.parse(leerLatin1(fichaJsonPath));
       const cuerpo = leerLatin1(cuerpoPath);
       const generado = renderFicha(shell, cuerpo);
-
+      warningsSeo.push(...validarLongitudesMeta(slug, shell));
       if (VERIFY) {
         const actual = fs.existsSync(indexPath) ? leerLatin1(indexPath) : null;
         if (actual !== generado) {
@@ -78,7 +82,10 @@ function main() {
       errores.push(slug + ": " + e.message);
     }
   }
-
+  if (warningsSeo.length) {
+    console.log("SEO — " + warningsSeo.length + " advertencia(s) de longitud (title/metaDescription):");
+    warningsSeo.forEach((w) => console.log(" - " + w));
+  }
   if (VERIFY) {
     console.log("fichas:verify — " + procesadas + " fichas chequeadas.");
     if (drift.length) {
@@ -102,5 +109,4 @@ function main() {
     }
   }
 }
-
 main();
