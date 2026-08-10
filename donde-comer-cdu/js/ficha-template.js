@@ -28,24 +28,6 @@
 "use strict";
 
 function renderFicha(shell, cuerpo) {
-  // el-arca-resto-bar y papa-luigi no tienen nav-badge (gap real
-  // preexistente, no se inventa uno).
-  const navBadgeHtml = shell.navBadge
-    ? `  <span class="nav-badge">${shell.navBadge}</span>\n`
-    : "";
-
-  // Ver comentario en extraer-fichas.js: bloque opcional, hoy exclusivo
-  // de Brode, preservado literal (incluye su propio comentario
-  // explicativo de la condición real de datos).
-  const navBadgeVerificadoHtml = shell.navBadgeVerificadoRaw || "";
-
-  // parrilla-la-gruta es la única ficha sin og:image hoy (gap real
-  // preexistente, ver extraer-fichas.js) — se omite la etiqueta entera
-  // en vez de emitir content="undefined" o inventar una imagen.
-  const ogImageTag = shell.ogImage
-    ? `<meta property="og:image" content="${shell.ogImage}">\n`
-    : "";
-
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -55,7 +37,7 @@ function renderFicha(shell, cuerpo) {
 <meta name="theme-color" content="${shell.themeColor}">
 <meta property="og:title" content="${shell.ogTitle}">
 <meta property="og:description" content="${shell.ogDescription}">
-${ogImageTag}<meta property="og:type" content="article">
+${shell.ogImageBlockRaw}<meta property="og:type" content="article">
 <link rel="canonical" href="${shell.canonical}">
 
 <title>${shell.title}</title>
@@ -68,7 +50,7 @@ ${ogImageTag}<meta property="og:type" content="article">
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
 <!-- El sistema visual de Brode (piloto "marca-naranja") se promovió a
-     sistema base de TODAS las fichas — fusionado dentro de ../ficha.css
+     sistema base de TODAS las fichas - fusionado dentro de ../ficha.css
      (sección "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
      hoja CSS propia. Ver ARCHITECTURE.md. -->
 <script type="application/ld+json">
@@ -81,14 +63,13 @@ ${shell.jsonLdRaw}
 <nav class="nav" role="navigation" aria-label="URU SPOT">
   <a href="../../" class="nav-logo">URU SPOT</a>
   <span class="nav-tag">${shell.navTag}</span>
-${navBadgeVerificadoHtml}${navBadgeHtml}</nav>
+${shell.navBadgesBlockRaw}</nav>
 
 ${cuerpo}<footer class="footer">
   <a href="../../" class="footer-logo">URU SPOT</a>
   <span>${shell.footerLine2}</span>
   <span>${shell.footerLine3}</span>
-</footer>
-${shell.colaScriptsRaw}`;
+</footer>${shell.colaScriptsRaw}`;
 }
 
 module.exports = { renderFicha };
