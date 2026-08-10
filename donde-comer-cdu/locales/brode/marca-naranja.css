@@ -527,6 +527,45 @@ a:focus-visible {
   padding: 64px 48px;
 }
 
+/* BUG REAL detectado en la segunda auditoría: las reglas de arriba son
+   incondicionales y cargan DESPUÉS de ficha.css en el documento, así
+   que pisaban los `@media(max-width:768px)`/`480px` de ficha.css a
+   CUALQUIER ancho de pantalla — en mobile, Brode terminaba con 48-64px
+   de padding horizontal en vez de los 20px pensados para pantallas
+   chicas (desperdicio de ancho justo donde menos sobra). Se restauran
+   acá los mismos valores mobile que ya tiene ficha.css para estas
+   clases, para que el piloto no rompa el responsive que el resto del
+   sitio ya resolvió bien. */
+@media (max-width: 768px) {
+  .page {
+    padding: 48px 20px;
+  }
+
+  .scores-section,
+  .map-section,
+  .verdict-section,
+  .amenities-section,
+  .reviews-section {
+    padding: 52px 20px;
+  }
+
+  .schedule-block {
+    padding: 36px 20px;
+  }
+
+  .section-header {
+    margin-bottom: 32px;
+  }
+
+  /* Mismo bug que arriba: sin esto, el gap:56px de escritorio pisaba el
+     gap:32px que ficha.css define para cuando .about-grid colapsa a una
+     sola columna en mobile — dejaba demasiado aire vertical entre
+     bloques apilados en pantallas chicas. */
+  .about-grid {
+    gap: 32px;
+  }
+}
+
 /* Texto destacado dentro de párrafos */
 .about-body strong {
   font-weight: 600;
