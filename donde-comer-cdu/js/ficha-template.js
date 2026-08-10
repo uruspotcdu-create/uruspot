@@ -71,7 +71,7 @@ ${shell.twitterImageBlockRaw || ""}<link rel="canonical" href="${shell.canonical
 <script type="application/ld+json">
 ${shell.jsonLdRaw}
 </script>
-</head>
+${shell.breadcrumbBlockRaw || ""}</head>
 <body>
 
 <!-- NAV -->
