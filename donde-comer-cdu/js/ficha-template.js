@@ -35,10 +35,25 @@ function renderFicha(shell, cuerpo) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="${shell.metaDescription}">
 <meta name="theme-color" content="${shell.themeColor}">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:title" content="${shell.ogTitle}">
 <meta property="og:description" content="${shell.ogDescription}">
 ${shell.ogImageBlockRaw}<meta property="og:type" content="article">
-<link rel="canonical" href="${shell.canonical}">
+<meta property="og:url" content="${shell.canonical}">
+<meta property="og:site_name" content="URU SPOT">
+<meta property="og:locale" content="es_AR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${shell.ogTitle}">
+<meta name="twitter:description" content="${shell.ogDescription}">
+${shell.twitterImageBlockRaw || ""}<link rel="canonical" href="${shell.canonical}">
+
+<!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditoría
+     Brode 2026-08: faltaban por completo en las fichas — ver Crítico 1). -->
+<link rel="manifest" href="/donde-comer-cdu/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
 
 <title>${shell.title}</title>
 
