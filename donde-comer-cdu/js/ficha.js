@@ -545,31 +545,75 @@
     "sábado": 6, sabado: 6, "sábados": 6, sabados: 6, "sáb": 6, sab: 6,
   };
 
-  // "18:00 p.m. – 02:00 a.m." / "8:00 a.m. – 10:00 p.m." / "Cerrado" -> {openH, closeH} en escala 0-30 (permite cruzar medianoche)
-  function parseRangoHora(str) {
-    if (!str) return null;
-    var s = str.toLowerCase();
-    if (s.indexOf("cerrado") !== -1) return null;
+  // "18:00 p.m. – 02:00 a.m." -> {h, min, ampm|null}, o null si no matchea.
+  function parseParteHora(p) {
+    var m = p.match(/(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i);
+    if (!m) return null;
+    return {
+      h: parseInt(m[1], 10),
+      min: m[2] ? parseInt(m[2], 10) : 0,
+      ampm: m[3] ? m[3].replace(/\./g, "").toLowerCase() : null
+    };
+  }
 
-    var partes = s.split(/–|-|a\s(?=\d)/).map(function (p) { return p.trim(); });
+  function aHora24(h, min, ampm) {
+    if (ampm === "pm" && h < 12) h += 12;
+    if (ampm === "am" && h === 12) h = 0;
+    return h + min / 60;
+  }
+
+  // Parsea UNA franja "8:00 a.m. – 12:30 p.m." -> {open, close} en escala
+  // 0-30 (permite cruzar medianoche). Recibe ya el bloque de una sola
+  // franja (ver parseVentanasHora abajo para filas con más de una).
+  function parseRangoHora(bloque) {
+    if (!bloque) return null;
+    var partes = bloque.split(/–|-|a\s(?=\d)/).map(function (p) { return p.trim(); }).filter(Boolean);
     if (partes.length < 2) return null;
 
-    function aHora24(p) {
-      var m = p.match(/(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i);
-      if (!m) return null;
-      var h = parseInt(m[1], 10);
-      var min = m[2] ? parseInt(m[2], 10) : 0;
-      var ampm = m[3] ? m[3].replace(/\./g, "").toLowerCase() : null;
-      if (ampm === "pm" && h < 12) h += 12;
-      if (ampm === "am" && h === 12) h = 0;
-      return h + min / 60;
+    var pOpen = parseParteHora(partes[0]);
+    var pClose = parseParteHora(partes[1]);
+    if (!pOpen || !pClose) return null;
+
+    // BUGFIX (auditoría 2026-08, [IMPORTANTE 1]): en el dataset real
+    // ("4 – 8 p.m.") la franja de apertura suele venir sin su propio
+    // marcador am/pm porque el del cierre ya lo deja claro por contexto.
+    // Sin esto, "4" se interpretaba literal como 4 a.m. en vez de 4 p.m.,
+    // ensanchando la ventana "abierta" muchas horas de más (o angostándola,
+    // según el caso) en vez de reflejar la franja real. Solo se hereda
+    // cuando el open no trae marcador propio y su hora leída es < 12 (para
+    // no pisar formatos 24h como "16 – 20" que no necesitan inferencia).
+    var ampmOpen = pOpen.ampm;
+    if (!ampmOpen && pClose.ampm && pOpen.h < 12) {
+      ampmOpen = pClose.ampm;
     }
 
-    var open = aHora24(partes[0]);
-    var close = aHora24(partes[1]);
-    if (open === null || close === null) return null;
+    var open = aHora24(pOpen.h, pOpen.min, ampmOpen);
+    var close = aHora24(pClose.h, pClose.min, pClose.ampm);
     if (close <= open) close += 24; // cruza medianoche
     return { open: open, close: close };
+  }
+
+  // Parsea una fila COMPLETA de horario, que puede traer más de una franja
+  // separadas por "·" (mismo separador que ya usa expandirDias() para
+  // listas de días, ej. "Lun · Mié · Jue"). Caso real: "8:00 a.m. –
+  // 12:30 p.m. · 4 – 8 p.m." (mañana + tarde, con pausa al mediodía).
+  //
+  // BUGFIX (auditoría 2026-08, [IMPORTANTE 1]): antes existía una sola
+  // parseRangoHora(str) que tomaba la fila COMPLETA como una única franja
+  // -- con filas de doble franja como la de Brode, el split por "–"/"-"
+  // producía 3 fragmentos en vez de 2, y el código solo usaba los dos
+  // primeros: la franja de la tarde (16-20hs) se perdía en silencio. El
+  // sitio mostraba "Cerrado" durante horas en las que el negocio estaba
+  // realmente abierto (confirmado: Brode a las 18:00 un miércoles).
+  function parseVentanasHora(str) {
+    if (!str) return [];
+    var s = str.toLowerCase();
+    if (s.indexOf("cerrado") !== -1) return [];
+    return s.split('·')
+      .map(function (bloque) { return bloque.trim(); })
+      .filter(Boolean)
+      .map(parseRangoHora)
+      .filter(Boolean);
   }
 
   // Expande "Lunes a Viernes", "Mar – Sáb (mediodía)", "Sábado y Domingo", "Lunes a Domingo",
@@ -636,8 +680,7 @@
     scheduleRows.forEach(function (row) {
       var dias = expandirDias(row.day);
       if (dias.indexOf(diaHoy) === -1) return;
-      var rango = parseRangoHora(row.time);
-      if (rango) ventanasHoy.push(rango);
+      parseVentanasHora(row.time).forEach(function (v) { ventanasHoy.push(v); });
     });
 
     // También considerar el cierre "extendido" de la ventana de ayer (cruza medianoche)
@@ -645,10 +688,11 @@
     scheduleRows.forEach(function (row) {
       var dias = expandirDias(row.day);
       if (dias.indexOf(diaAyer) === -1) return;
-      var rango = parseRangoHora(row.time);
-      if (rango && rango.close > 24) {
-        ventanasHoy.push({ open: rango.open - 24, close: rango.close - 24 });
-      }
+      parseVentanasHora(row.time).forEach(function (v) {
+        if (v.close > 24) {
+          ventanasHoy.push({ open: v.open - 24, close: v.close - 24 });
+        }
+      });
     });
 
     if (!ventanasHoy.length) {
@@ -871,5 +915,3 @@
     inicializarBrujula();
   });
 })();
-
-
