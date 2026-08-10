@@ -47,6 +47,34 @@ function leerLatin1(p) {
   return fs.readFileSync(p, "latin1");
 }
 function escribirLatin1(p, contenido) {
+  // Guardia de seguridad (auditoría accesibilidad, 2026-08): portada del
+  // script huérfano build-fichs.js en la raíz del repo, que la tenía pero
+  // no está wireado a ningún script de package.json — este archivo
+  // (donde-comer-cdu/js/build-fichas.js) es el que `npm run fichas:build`
+  // ejecuta de verdad, y hasta ahora escribía Buffer.from(contenido,
+  // "latin1") sin ningún chequeo previo. Buffer.from trunca en silencio
+  // cualquier code point > 255 a su byte bajo (ej. "—" U+2014 se
+  // convierte en el byte de control 0x14) — esto YA pasó una vez en un
+  // comentario estático de ficha-template.js (encontrado recién ahora,
+  // reproducido al regenerar), y sin esta guardia se sigue escribiendo
+  // en silencio en cada build futuro. Falla fuerte ANTES de escribir
+  // nada, en vez de depender de que alguien lo note a ojo en el HTML.
+  for (let i = 0; i < contenido.length; i++) {
+    const code = contenido.codePointAt(i);
+    if (code > 255) {
+      throw new Error(
+        "Carácter fuera de rango latin1 (U+" +
+          code.toString(16).toUpperCase() +
+          " \"" +
+          contenido[i] +
+          "\") en posición " +
+          i +
+          " del HTML generado para " +
+          p +
+          " — escribiría bytes corruptos. Revisar ficha-template.js/ficha.json."
+      );
+    }
+  }
   fs.writeFileSync(p, Buffer.from(contenido, "latin1"));
 }
 function main() {
