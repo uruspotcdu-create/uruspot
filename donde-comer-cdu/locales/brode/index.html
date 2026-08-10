@@ -90,6 +90,15 @@
     "latitude": "-32.4806862",
     "longitude": "-58.2545511"
   },
+  "amenityFeature": [
+    { "@type": "LocationFeatureSpecification", "name": "Para llevar", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Línea mayorista", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Pedidos por WhatsApp", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Catálogo fotográfico online", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Acceso para sillas de ruedas", "value": false },
+    { "@type": "LocationFeatureSpecification", "name": "Opciones veganas", "value": false },
+    { "@type": "LocationFeatureSpecification", "name": "Opciones sin TACC", "value": false }
+  ],
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "5.0",
@@ -431,6 +440,57 @@
 
 <!-- AMENITIES -->
 
+<section class="amenities-section" aria-labelledby="amenities-heading">
+  <div class="amenities-inner">
+    <div class="section-header">
+      <h2 class="section-label" id="amenities-heading">Servicios y accesibilidad</h2>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <div class="amenities-grid">
+      <div class="amenities-col">
+        <ul aria-label="Servicios y modalidades de compra">
+          <li>Venta para llevar en el local</li>
+          <li>Línea mayorista para negocios, dietéticas y comercios</li>
+          <li>Pedidos y consultas por WhatsApp (link oficial)</li>
+          <li>Catálogo fotográfico completo disponible online</li>
+          <li>Retiro en el local — sin envíos a domicilio confirmados</li>
+        </ul>
+      </div>
+      <div class="amenities-col">
+        <ul aria-label="Accesibilidad y dietas especiales">
+          <li>Acceso para sillas de ruedas: <strong>no confirmado</strong> oficialmente</li>
+          <li>Opciones veganas: en desarrollo, <strong>no confirmadas aún</strong> en el local actual</li>
+          <li>Opciones sin gluten/TACC: en desarrollo, <strong>no confirmadas aún</strong> en el local actual</li>
+          <li>Formas de pago: consultar directamente por WhatsApp (no confirmado en fuentes revisadas)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="amenities-icons" role="list" aria-label="Resumen de servicios">
+      <div class="amenity-icon-item" role="listitem">
+        <span aria-hidden="true">🥐</span>
+        <span class="amenity-icon-label">Para llevar</span>
+      </div>
+      <div class="amenity-icon-item" role="listitem">
+        <span aria-hidden="true">🏭</span>
+        <span class="amenity-icon-label">Línea mayorista</span>
+      </div>
+      <div class="amenity-icon-item" role="listitem">
+        <span aria-hidden="true">💬</span>
+        <span class="amenity-icon-label">Pedidos por WhatsApp</span>
+      </div>
+      <div class="amenity-icon-item" role="listitem">
+        <span aria-hidden="true">♿</span>
+        <span class="amenity-icon-label">Acceso no confirmado</span>
+      </div>
+      <div class="amenity-icon-item" role="listitem">
+        <span aria-hidden="true">🌱</span>
+        <span class="amenity-icon-label">Vegano/TACC: en desarrollo</span>
+      </div>
+    </div>
+    <p class="review-note">Fuentes: FAQ oficial de esta ficha, linktr.ee/brodepanaderia y entrevistas de La Prensa Federal a Brødë Hermanos (2025). Los ítems marcados "no confirmado" reflejan ausencia de dato verificable, no negación del servicio.</p>
+  </div>
+</section>
+
 
 <!-- SCORES -->
 
@@ -573,7 +633,17 @@
 </section>
 
 
-<!-- REVIEWS -->
+<!-- REVIEWS: sección omitida intencionalmente (auditoría 2026-08).
+     .reviews-section/.review-card ya están construidas y listas en
+     ficha.css, pero no se completan acá porque no hay 2-3 reseñas
+     textuales reales y atribuibles disponibles (Google Maps, Instagram,
+     QueResto) al momento de esta revisión — no se inventan testimonios.
+     El aggregateRating agregado (5.0/67) sigue viviendo en el JSON-LD de
+     <head> y en .scores-section; no se toca ni se duplica acá.
+     PENDIENTE DE FUENTE: si en el futuro se consiguen 2-3 citas reales
+     con fuente verificable, poblar con .review-summary + hasta 3
+     .review-card siguiendo la estructura ya definida en ficha.css
+     (líneas ~464-501). No rellenar con contenido no verificado. -->
 
 
 <!-- PRESENCIA DIGITAL -->
