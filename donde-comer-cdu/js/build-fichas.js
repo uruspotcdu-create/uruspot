@@ -103,7 +103,7 @@ function obtenerFooterLine3(cuerpoPath, fichaJsonPath) {
   }
   const mes = MESES_ES[fecha.getMonth()];
   const anio = fecha.getFullYear();
-  return "Información verificada y actualizada — " + mes.charAt(0).toUpperCase() + mes.slice(1) + " " + anio;
+  return "Información verificada y actualizada &mdash; " + mes.charAt(0).toUpperCase() + mes.slice(1) + " " + anio;
 }
 function escribirLatin1(p, contenido) {
   // Guardia de seguridad (auditoría accesibilidad, 2026-08): portada del
