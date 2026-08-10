@@ -59,10 +59,19 @@
      - Puntajes (crítica y análisis)
      - Mapa (ubicación)
      - Veredicto (recomendación final)
-     Todos comparten el MISMO tono para consistencia (no hay "versión
-     más fuerte" vs "más suave" — hay UNA superficie editorial clara). */
-  --surface-warm: #ffb394;       /* Salmón cálido, naranja diluido ~30% */
-  --surface-warm-soft: #ffb394;  /* Mismo valor: no hay variante más suave */
+     - Presencia digital (surface-warm-soft)
+     Auditoría 2026-08 (segunda pasada): el salmón original (#ffb394) era
+     demasiado saturado para una franja de ancho completo — se leía más
+     "banner naranja" que "papel cálido", y contradecía el propio objetivo
+     del sistema ("cremas y naranjas extremadamente suaves", nunca "todo
+     naranja"). Se reemplaza por dos tonos de papel realmente cálidos pero
+     desaturados, que además ahora SÍ son distintos entre sí — antes
+     compartían el mismo valor a pesar de tener nombres distintos, lo cual
+     era una inconsistencia real del sistema (dos tokens, un solo color).
+     Contraste verificado contra --ink/--muted/--gold-dark: ver comentarios
+     en cada regla de abajo. */
+  --surface-warm: #f6ddc8;       /* Papel cálido claro — Catálogo, Puntajes, Mapa, Veredicto */
+  --surface-warm-soft: #efd0b4;  /* Papel cálido un escalón más profundo — Presencia digital */
   
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      ACENTOS DE MARCA — Naranja en roles específicos
@@ -233,9 +242,17 @@
   padding: 0;
 }
 
+/* El markup de estos <li> es "<strong>Etiqueta</strong>Texto" sin espacio
+   de por medio (línea de tiempo, "En una mirada", presencia digital) —
+   sin esto, la etiqueta y el texto se leen pegados como una sola palabra
+   ("2020Nace en pandemia..."). Convertir el <strong> en su propia línea
+   lo resuelve sin tocar el HTML y de paso lo hace más escaneable: cada
+   ítem se lee como etiqueta corta arriba, detalle abajo. */
 .side-box li strong {
+  display: block;
   color: var(--ink);
   font-weight: 600;
+  margin-bottom: 4px;
 }
 
 /* Fila label + precio: flex en vez de float, para que el precio
@@ -469,4 +486,116 @@ a:focus-visible {
   .tag {
     transition: none;
   }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RITMO Y ESPACIADO — piloto de reordenamiento visual (2026-08)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Consolidado acá (segunda pasada de auditoría) desde un <style> inline
+   en index.html: mismo criterio que el resto del archivo — todo lo que
+   sea propio del piloto Brode vive en UN solo lugar, no repartido entre
+   el HTML y esta hoja. No toca ficha.css (compartida por las otras 50
+   fichas). Reduce el aire entre secciones para que la página se sienta
+   compacta y llena en vez de una sucesión larga de bloques con mucho
+   espacio en blanco — sin sacrificar el ritmo de lectura. */
+
+.page {
+  padding: 64px 48px;
+}
+
+.section-header {
+  margin-bottom: 42px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.about-grid {
+  gap: 56px;
+  align-items: start;
+}
+
+/* Secciones de ritmo editorial: mismo padding vertical que .page para
+   que el "capítulo" de ancho completo no se sienta más apretado que el
+   resto del contenido. */
+.scores-section,
+.map-section,
+.verdict-section,
+.schedule-block,
+.amenities-section,
+.reviews-section {
+  padding: 64px 48px;
+}
+
+/* Texto destacado dentro de párrafos */
+.about-body strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Subtítulos en secciones */
+.about-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 14px;
+  margin-top: 24px;
+}
+
+.about-title:first-of-type {
+  margin-top: 0;
+}
+
+/* Mejorar legibilidad de listas */
+.about-grid ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.about-grid li {
+  margin-bottom: 14px;
+  padding-left: 0;
+  line-height: 1.7;
+}
+
+/* Row de acciones con mejor espaciado */
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Botón con mejor visibilidad */
+.btn {
+  padding: 13px 24px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  border-radius: 3px;
+  transition: all 0.25s ease;
+  border: 2px solid;
+  cursor: pointer;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}
+
+/* Notas de fuente con mejor contraste — selector de atributo porque el
+   markup de estas notas usa estilo inline puntual (font-size:11px/10px)
+   en vez de una clase dedicada; ver Roadmap: candidato a clase real
+   (.field-note) si el patrón se replica al resto de las fichas. */
+.about-grid > div > p[style*="font-size:11px"],
+p[style*="font-size:10px"] {
+  color: var(--muted);
+  line-height: 1.6;
 }
