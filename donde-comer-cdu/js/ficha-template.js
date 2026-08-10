@@ -1,11 +1,12 @@
 /* ficha-template.js — ÚNICA fuente de la estructura HTML compartida por
- * las fichas de donde-comer-cdu/locales/ (<!DOCTYPE>, <head>, <nav>,
- * <footer>, orden de <script>). Basada en la estructura de Brode, la
- * ficha GOLD STANDARD del sitio (ver ARCHITECTURE.md).
+ * las fichas de donde-comer-cdu/locales/ (<!DOCTYPE>, <head>, skip-link,
+ * <nav>, <main>, <footer>, orden de <script>). Basada en la estructura
+ * de Brode, la ficha GOLD STANDARD del sitio (ver ARCHITECTURE.md).
  *
  * Qué SÍ arma este template (datos → HTML, `shell` de ficha.json):
  *   <title>, meta description/theme-color/og:*, <link rel="canonical">,
- *   bloque JSON-LD, <nav>, <footer>, orden de <link>/<script>.
+ *   bloque JSON-LD, skip-link, <nav>, <main id="contenido-principal">
+ *   (envolviendo el cuerpo editorial), <footer>, orden de <link>/<script>.
  *
  * Qué NO arma este template (se preserva byte a byte desde cuerpo.html
  * y los campos *Raw de ficha.json):
@@ -24,6 +25,18 @@
  * contenido de una sola ficha. Nunca tocar index.html a mano — se
  * regenera con `npm run fichas:build` y ese archivo queda como salida
  * de build, igual que motor.bundle.js / app.min.js (ver package.json).
+ * [IMPORTANTE 5] (auditoría accesibilidad, 2026-08): se agrega el
+ * skip-link "Ir al contenido principal" acá, como primer elemento del
+ * <body>, en vez de tocar cuerpo.html — la misma razón de siempre: es
+ * estructura compartida por las 51 fichas, no contenido editorial. La
+ * convención ya existía en donde-comer-cdu/index.html e inicio/index.html
+ * (con targets distintos entre sí, #contenido-principal y #main-content)
+ * pero nunca se había portado a las fichas. AGENTS.md §9.2 lo documenta
+ * como invariante del sitio: "el skip-link debe seguir siendo el primer
+ * elemento enfocable del <body>". Envolver ${cuerpo} en <main id> (en vez
+ * de exigir que cada cuerpo.html empiece con un id concreto) mantiene esa
+ * garantía sin requerir tocar las 51 fichas una por una ni las que se
+ * sumen después.
  */
 "use strict";
 
@@ -48,7 +61,15 @@ ${shell.ogImageBlockRaw}<meta property="og:type" content="article">
 ${shell.twitterImageBlockRaw || ""}<link rel="canonical" href="${shell.canonical}">
 
 <!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditoría
-     Brode 2026-08: faltaban por completo en las fichas — ver Crítico 1). -->
+     Brode 2026-08: faltaban por completo en las fichas - ver Crítico 1). -->
+<!-- NOTA (auditoría accesibilidad, 2026-08): el guion largo original de
+     este comentario se corrompía en cada build a un byte de control
+     0x14 - ver escribirLatin1() en build-fichas.js. Cambiado a guion
+     simple ("-"), el único carácter seguro acá: es un comentario HTML
+     dentro del template literal (se emite tal cual al HTML final), a
+     diferencia de los comentarios /* JS */ de este mismo archivo, que
+     nunca llegan al output y sí pueden usar tildes o guiones largos sin
+     riesgo. -->
 <link rel="manifest" href="/donde-comer-cdu/manifest.json">
 <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
@@ -74,13 +95,19 @@ ${shell.jsonLdRaw}
 ${shell.breadcrumbBlockRaw || ""}</head>
 <body>
 
+<!-- SKIP LINK - invariante AGENTS.md §9.2: debe ser el primer elemento
+     enfocable del <body>. Apunta al <main> de más abajo. -->
+<a href="#contenido-principal" class="skip-link u-sr-only">Ir al contenido principal</a>
+
 <!-- NAV -->
 <nav class="nav" role="navigation" aria-label="URU SPOT">
   <a href="../../" class="nav-logo">URU SPOT</a>
   <span class="nav-tag">${shell.navTag}</span>
 ${shell.navBadgesBlockRaw}</nav>
 
-${cuerpo}<footer class="footer">
+<main id="contenido-principal">
+${cuerpo}</main>
+<footer class="footer">
   <a href="../../" class="footer-logo">URU SPOT</a>
   <span>${shell.footerLine2}</span>
   <span>${shell.footerLine3}</span>
