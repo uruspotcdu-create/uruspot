@@ -257,7 +257,15 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .status-dot{width:6px;height:6px;border-radius:50%}
 
 /* ACTIONS / BOTONES (restaurado) */
-.action-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+/* [CRÍTICO 3, 2026-08]: la definición de .action-row que vivía acá
+   (display:flex;gap:10px;margin-top:16px;flex-wrap:wrap) quedaba
+   totalmente tapada por la cascada por la regla .action-row más completa
+   más abajo en este mismo archivo (gap:12px;margin-top:24px;
+   align-items:center) -- dos selectores de igual especificidad, gana la
+   que aparece después. Nunca se aplicaba en ningún render real; se quita
+   para no dejar dos fuentes de verdad contradictorias del mismo
+   selector. Ver esa regla (y los modificadores --compact/--after-text
+   agregados junto a ella) para el comportamiento real y su historia. */
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:2px;font-size:12px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;text-decoration:none;transition:opacity .2s,transform .15s;cursor:pointer;border:none;font-family:'DM Sans',sans-serif}
 .btn:hover{opacity:.85;transform:translateY(-1px)}
 .btn:active{transform:translateY(0)}
@@ -441,35 +449,6 @@ html.u-suprimir-vidrio .hero-score{
 .schedule-note-label{font-size:10px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
 .schedule-note-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:#fff;margin-bottom:4px}
 .schedule-note-sub{font-size:12px;color:#ffffff}
-
-/* SKIP LINK (auditoría Brode, 2026-08 — Importante 5): mismo patrón que
-   donde-comer-cdu/index.html e inicio/index.html (.skip-link + .u-sr-only
-   en tokens.css), pero autocontenido acá porque las fichas de locales/
-   no cargan tokens.css. Debe ser el primer elemento enfocable del
-   <body> (ver AGENTS.md, Capítulo 9.2) — inyectado por
-   ficha-template.js justo después de <body>. */
-.skip-link{
-  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
-  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
-}
-.skip-link:focus{
-  position:fixed;top:12px;left:12px;width:auto;height:auto;
-  clip:auto;overflow:visible;white-space:normal;z-index:1000;
-  padding:.6em 1.1em;background:var(--gold);color:var(--ink);
-  font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;
-  border-radius:4px;text-decoration:none;
-  box-shadow:0 4px 20px rgba(0,0,0,.35);
-}
-
-/* ESTILOS PROMOVIDOS DESDE INLINE (auditoría Brode, 2026-08 — Crítico 3):
-   estos 3 patrones aparecían repetidos como style="" byte-por-byte
-   idénticos dentro de cuerpo.html (13 veces .about-subtitle, 3 veces
-   .source-caption en Brode sola). Promovidos a clase real acá para que
-   un cambio futuro sea 1 línea de CSS y no un find/replace en 1500
-   archivos HTML. Ver AGENTS.md Capítulo 15 (tokens, no literales). */
-.about-subtitle{font-size:1.1rem;color:var(--ink);font-weight:600;margin-top:28px}
-.source-caption{font-size:11px;color:var(--muted);margin-top:10px;letter-spacing:0.03em}
-.price-warning-box{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.6;padding:16px;background:rgba(var(--gold-rgb),0.06);border-left:3px solid var(--gold);border-radius:2px}
 
 /* LISTA ADN (features rápidas en bloque de horarios) */
 .adn-list{list-style:none;padding:0;margin:0}
@@ -1233,6 +1212,77 @@ a:focus-visible {
   margin-top: 24px;
   flex-wrap: wrap;
   align-items: center;
+}
+
+/* [CRÍTICO 3] (auditoría inline-styles, 2026-08): clases nuevas para
+   promover los patrones que se venían repitiendo como style="" literal
+   en el HTML de cada ficha (36 atributos style en Brode, 13 de ellos
+   byte-por-byte idénticos). Documentado acá, junto a .action-row/
+   .about-title, porque son justamente las dos clases que estos nuevos
+   modificadores/complementos extienden — ver AGENTS.md Cap. 15. */
+
+/* .about-subtitle: SIEMPRE junto a "about-title" (no reemplaza la clase,
+   la complementa) -- <h3 class="about-title about-subtitle">. .about-title
+   sola ya tiene DOS definiciones distintas en este archivo (línea ~145,
+   pensada para el <h2> grande de la intro editorial, y línea ~1175, un
+   parche posterior que la reduce a subtítulo 18px/500). Tocar cualquiera
+   de esas dos reglas es riesgoso -- la de línea 145 todavía gobierna el
+   único <h2 class="about-title"> real de la página. En vez de eso,
+   .about-subtitle se declara DESPUÉS de ambas y sólo fija las 4
+   propiedades que antes vivían como style="" repetido en cada <h3>: así
+   gana la cascada sin tocar ni arriesgar el <h2>. */
+.about-subtitle {
+  font-size: 1.1rem;
+  color: var(--ink);
+  font-weight: 600;
+  margin-top: 28px;
+}
+
+/* .source-caption: leyendas "Fuente: ..." bajo bloques editoriales
+   (era style="font-size:11px;color:var(--muted);margin-top:10px;
+   letter-spacing:0.03em", repetido 3 veces idéntico en Brode). */
+.source-caption {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 10px;
+  letter-spacing: 0.03em;
+}
+
+/* .price-warning-box: aviso "los precios cambian, confirmá por
+   WhatsApp" con fondo/borde dorado. Sólo aparece 1 vez en Brode, pero
+   el propio patrón (catálogo con precios variables) se repite en
+   cualquier rubro con productos -> se promueve igual antes de clonar. */
+.price-warning-box {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 16px;
+  line-height: 1.6;
+  padding: 16px;
+  background: rgba(var(--gold-rgb), 0.06);
+  border-left: 3px solid var(--gold);
+  border-radius: 2px;
+}
+.price-warning-box strong {
+  color: var(--ink);
+}
+
+/* Modificadores de .action-row: mismo principio que .about-subtitle --
+   se agregan COMBINADOS con "action-row" (no la reemplazan), porque
+   .action-row también tiene dos definiciones en este archivo (línea
+   ~260, un rezago sin flex-wrap con margin-top:16px, hoy totalmente
+   tapado por la cascada, y ésta de acá arriba con margin-top:24px que sí
+   es la que efectivamente se renderiza). Ninguna ficha de Brode usaba en
+   realidad el margin-top:24px sin override -- las 6 instancias reales
+   pisaban ese valor a mano con style="margin-top:12px" (x4, dentro de
+   .info-cell) o style="margin-top:16px;flex-wrap:wrap" (x2, debajo de
+   párrafo editorial). Se nombran los dos casos reales en vez de adivinar
+   una escala de espaciado que no existe en este archivo (no hay tokens
+   --space-* en :root, sólo color/tipografía están tokenizados acá). */
+.action-row--compact {
+  margin-top: 12px;
+}
+.action-row--after-text {
+  margin-top: 16px;
 }
 
 /* Botón con mejor visibilidad */
