@@ -34,17 +34,76 @@
  * texto plano escrito a mano, sin fuente única — ver ese archivo para
  * por qué no se resolvió templando el contenido en su lugar). También
  * WARNING, no error.
+ *
+ * [DESEABLE 5] (auditoría copy, 2026-08): footerLine3 dejó de ser un
+ * literal fijo en cada ficha.json ("Información verificada y
+ * actualizada — Agosto 2026", igual en las 1500 fichas). Con fichas
+ * editándose en momentos distintos, ese string se vuelve falso para
+ * las fichas viejas apenas pasa un mes. Ahora se CALCULA acá, en cada
+ * build, a partir de la fecha real del último commit que tocó
+ * cuerpo.html o ficha.json de ese local (mismo criterio que
+ * badge-verificado: dato real, no decorativo — ver comentario
+ * navBadgesBlockRaw en ficha.json). Si el repo no tiene historial git
+ * disponible (ej. checkout shallow, o corriendo fuera de un repo),
+ * cae a la fecha de modificación del archivo en disco. El campo
+ * footerLine3 que pueda quedar en ficha.json ya no se usa para esto:
+ * se sobreescribe siempre acá antes de renderFicha. No se borra del
+ * JSON para no romper fichas viejas que todavía no pasaron por este
+ * build, pero ya no es la fuente de verdad.
  */
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
 const { renderFicha } = require("./ficha-template.js");
 const { validarLongitudesMeta } = require("./validar-meta-longitud.js");
 const { validarPreciosCuerpo } = require("./validar-precios-cuerpo.js");
 const LOCALES_DIR = path.join(__dirname, "..", "locales");
 const VERIFY = process.argv.includes("--verify");
+const MESES_ES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
 function leerLatin1(p) {
   return fs.readFileSync(p, "latin1");
+}
+// Fecha del último commit que tocó `p` (ISO, solo fecha). Devuelve
+// null si el archivo no tiene historial git (sin commitear todavía,
+// o repo sin historial disponible) para poder caer al mtime del
+// archivo sin fallar el build entero.
+function fechaUltimoCommit(p) {
+  try {
+    const out = execSync(
+      'git log -1 --format=%cI -- "' + p.replace(/"/g, '\\"') + '"',
+      { cwd: path.dirname(p), stdio: ["ignore", "pipe", "ignore"] }
+    )
+      .toString()
+      .trim();
+    return out ? new Date(out) : null;
+  } catch (e) {
+    return null;
+  }
+}
+// Fecha de "última verificación" de una ficha: la más reciente entre
+// el commit de cuerpo.html y el de ficha.json (cualquiera de los dos
+// pudo ser el que se actualizó), con fallback al mtime en disco si
+// git no está disponible (ej. tarball sin .git, CI con checkout
+// shallow). Devuelve el texto ya formado para footerLine3, en
+// español y sin depender de la config regional del entorno de build.
+function obtenerFooterLine3(cuerpoPath, fichaJsonPath) {
+  const fechaCuerpo = fechaUltimoCommit(cuerpoPath);
+  const fechaJson = fechaUltimoCommit(fichaJsonPath);
+  let fecha = fechaCuerpo && fechaJson
+    ? (fechaCuerpo > fechaJson ? fechaCuerpo : fechaJson)
+    : fechaCuerpo || fechaJson;
+  if (!fecha) {
+    const mtimeCuerpo = fs.statSync(cuerpoPath).mtime;
+    const mtimeJson = fs.statSync(fichaJsonPath).mtime;
+    fecha = mtimeCuerpo > mtimeJson ? mtimeCuerpo : mtimeJson;
+  }
+  const mes = MESES_ES[fecha.getMonth()];
+  const anio = fecha.getFullYear();
+  return "Información verificada y actualizada — " + mes.charAt(0).toUpperCase() + mes.slice(1) + " " + anio;
 }
 function escribirLatin1(p, contenido) {
   // Guardia de seguridad (auditoría accesibilidad, 2026-08): portada del
@@ -101,6 +160,7 @@ function main() {
     try {
       const shell = JSON.parse(leerLatin1(fichaJsonPath));
       const cuerpo = leerLatin1(cuerpoPath);
+      shell.footerLine3 = obtenerFooterLine3(cuerpoPath, fichaJsonPath);
       const generado = renderFicha(shell, cuerpo);
       warningsSeo.push(...validarLongitudesMeta(slug, shell));
       warningsPrecios.push(...validarPreciosCuerpo(slug, cuerpo));
