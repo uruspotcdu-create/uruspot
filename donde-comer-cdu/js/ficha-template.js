@@ -40,7 +40,40 @@
  */
 "use strict";
 
+// [FIX] (2026-08): dos esquemas conviven en locales/*/ficha.json — las 50
+// fichas "viejas" traen ogImageBlockRaw suelto (og:url/site_name/locale y
+// twitter:card/title/description quedan hardcodeados acá, og:type fijo en
+// "article"); brode (la única migrada al esquema "consolidado") trae
+// ogBlockRaw/twitterBlockRaw ya armados con todo adentro, más un campo
+// ogType propio. El template previo asumía SOLO el esquema consolidado
+// (shell.ogImageBlockRaw no existía en ningún ficha.json real) — con
+// cualquier ficha vieja eso interpolaba el string literal "undefined" en
+// el HTML. Estas dos constantes resuelven cuál esquema usar por ficha,
+// sin duplicar og:url/twitter:card cuando el bloque consolidado ya los
+// trae adentro.
+function armarBloqueOg(shell) {
+  if (shell.ogBlockRaw) return shell.ogBlockRaw;
+  return (
+    `<meta property="og:url" content="${shell.canonical}">\n` +
+    `<meta property="og:site_name" content="URU SPOT">\n` +
+    `<meta property="og:locale" content="es_AR">\n` +
+    (shell.ogImageBlockRaw || "")
+  );
+}
+function armarBloqueTwitter(shell) {
+  if (shell.twitterBlockRaw) return shell.twitterBlockRaw;
+  return (
+    `<meta name="twitter:card" content="summary_large_image">\n` +
+    `<meta name="twitter:title" content="${shell.ogTitle}">\n` +
+    `<meta name="twitter:description" content="${shell.ogDescription}">\n` +
+    (shell.twitterImageBlockRaw || "")
+  );
+}
+
 function renderFicha(shell, cuerpo) {
+  const ogType = shell.ogType || "article";
+  const bloqueOg = armarBloqueOg(shell);
+  const bloqueTwitter = armarBloqueTwitter(shell);
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -51,14 +84,9 @@ function renderFicha(shell, cuerpo) {
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:title" content="${shell.ogTitle}">
 <meta property="og:description" content="${shell.ogDescription}">
-${shell.ogImageBlockRaw}<meta property="og:type" content="article">
-<meta property="og:url" content="${shell.canonical}">
-<meta property="og:site_name" content="URU SPOT">
-<meta property="og:locale" content="es_AR">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${shell.ogTitle}">
-<meta name="twitter:description" content="${shell.ogDescription}">
-${shell.twitterImageBlockRaw || ""}<link rel="canonical" href="${shell.canonical}">
+${bloqueOg}<meta property="og:type" content="${ogType}">
+
+${bloqueTwitter}<link rel="canonical" href="${shell.canonical}">
 
 <!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditoría
      Brode 2026-08: faltaban por completo en las fichas - ver Crítico 1). -->
