@@ -1672,3 +1672,189 @@ p[style*="font-size:10px"] {
     max-width: 100%;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PASE DE REFINAMIENTO PREMIUM — auditoría "Ficha Maestra" (2026-08)
+   ═══════════════════════════════════════════════════════════════════════
+   Capa 100% ADITIVA sobre el SISTEMA GOLD STANDARD de arriba: ninguna
+   regla existente se toca ni se sobreescribe con !important salvo el
+   guard de prefers-reduced-motion (intencional, es el mismo patrón que
+   ya usa el resto del archivo). Objetivo: llevar el revelado progresivo,
+   la profundidad y el feedback táctil que hoy sólo tienen las fotos
+   (.u-fade-in-img) y las barras de score al resto de los bloques de
+   contenido, y afinar micro-interacciones de botones/tarjetas.
+   Sólo transform/opacity para no generar layout thrashing (perf). */
+
+/* ---- 1) Revelado progresivo genérico ----------------------------------
+   Contraparte de .u-fade-in-img para bloques de contenido (encabezados
+   de sección, side-box, veredicto). Arranca invisible/desplazado y JS
+   (inicializarRevealGenerico en ficha.js) agrega .is-visible vía
+   IntersectionObserver la primera vez que entra en viewport. */
+.u-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .7s cubic-bezier(.16,.84,.32,1),
+              transform .7s cubic-bezier(.16,.84,.32,1);
+}
+.u-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Variante para grillas/filas: cada hijo directo entra con un pequeño
+   desfase (stagger) en vez de todos a la vez — usado en about-grid,
+   tags-row, amenities-grid y scores-grid. */
+.u-reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s cubic-bezier(.16,.84,.32,1),
+              transform .6s cubic-bezier(.16,.84,.32,1);
+}
+.u-reveal-stagger.is-visible > * { opacity: 1; transform: translateY(0); }
+.u-reveal-stagger.is-visible > *:nth-child(1) { transition-delay: .03s; }
+.u-reveal-stagger.is-visible > *:nth-child(2) { transition-delay: .09s; }
+.u-reveal-stagger.is-visible > *:nth-child(3) { transition-delay: .15s; }
+.u-reveal-stagger.is-visible > *:nth-child(4) { transition-delay: .21s; }
+.u-reveal-stagger.is-visible > *:nth-child(5) { transition-delay: .27s; }
+.u-reveal-stagger.is-visible > *:nth-child(n+6) { transition-delay: .32s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .u-reveal,
+  .u-reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---- 2) Feedback táctil de presión — botones, chips, CTAs -------------
+   Hoy .btn/.tag/.side-box-cta sólo reaccionan al :hover; en touch (donde
+   no hay hover real) no había ninguna confirmación visual del tap. */
+.btn:active,
+.side-box-cta:active,
+.tag:active {
+  transform: scale(.96);
+  transition: transform .1s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0) scale(.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active,
+  .btn:hover,
+  .side-box-cta:active,
+  .tag:active {
+    transform: none;
+  }
+}
+
+/* Veta de brillo diagonal sutil en el botón primario al hover — refuerza
+   la jerarquía "esta es la acción principal" sin caer en efecto plástico
+   (opacidad baja, se recorre una sola vez, no en loop). */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg,
+    rgba(255,255,255,0) 30%,
+    rgba(255,255,255,.35) 48%,
+    rgba(255,255,255,0) 66%);
+  transform: translateX(-120%);
+  transition: transform .6s ease;
+  pointer-events: none;
+}
+.btn-primary:hover::before { transform: translateX(120%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary::before { display: none; }
+}
+
+/* ---- 3) Entrada del hero — primera impresión con más vida -------------
+   Sólo al cargar la página (no ligado a scroll: el hero siempre está
+   arriba de todo). Cascada breve entre eyebrow → título → subtítulo →
+   chips para que la jerarquía se "arme" en vez de aparecer toda junta. */
+.hero-content > * {
+  animation: heroEntrada .8s cubic-bezier(.16,.84,.32,1) both;
+}
+.hero-eyebrow { animation-delay: .05s; }
+.hero-title { animation-delay: .12s; }
+.hero-subtitle { animation-delay: .2s; }
+.hero-chips { animation-delay: .28s; }
+
+@keyframes heroEntrada {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-content > * { animation: none; opacity: 1; transform: none; }
+}
+
+/* ---- 4) Profundidad — veredicto y side-box -----------------------------
+   Sombra en capas (una difusa + una ajustada) en vez de una sola sombra
+   plana, más elevación sutil al hover para reforzar que son las piezas
+   "destacadas" de la ficha. */
+.verdict-card {
+  box-shadow: 0 12px 40px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+  transition: box-shadow .35s ease, transform .35s ease;
+}
+.verdict-card:hover {
+  box-shadow: 0 18px 56px rgba(var(--gold-rgb),.16), 0 4px 12px rgba(0,0,0,.08);
+  transform: translateY(-3px);
+}
+
+.side-box:hover {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verdict-card:hover,
+  .side-box:hover {
+    transform: none;
+  }
+}
+
+/* ---- 5) Reseñas — entrada de tarjetas + spinner de carga --------------
+   Las tarjetas de reseña llegan async (fetch) y ya podrían estar en
+   viewport cuando aparecen, así que usan una animación propia disparada
+   al insertarse (ver crearTarjetaResena en ficha.js) en vez de depender
+   de IntersectionObserver como el resto de esta sección. */
+.review-card--in {
+  animation: reviewCardIn .6s cubic-bezier(.16,.84,.32,1) both;
+}
+@keyframes reviewCardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#reviewsStatus[data-loading="true"]::after {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+  border: 2px solid rgba(var(--gold-rgb),.3);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .review-card--in { animation: none; }
+  #reviewsStatus[data-loading="true"]::after { animation: none; }
+}
+
+/* ---- 6) Touch targets — mínimo 44px en móvil (WCAG 2.5.5) ------------- */
+@media (max-width: 768px) {
+  .btn,
+  .side-box-cta,
+  .tag {
+    min-height: 44px;
+  }
+}
