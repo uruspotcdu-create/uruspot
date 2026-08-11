@@ -1858,3 +1858,160 @@ p[style*="font-size:10px"] {
     min-height: 44px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PASE FINAL — "Ficha Maestra", cierre de auditoría (2026-08)
+   ═══════════════════════════════════════════════════════════════════════
+   100% ADITIVO, mismo criterio que el PASE DE REFINAMIENTO PREMIUM de
+   arriba: ningún selector existente se toca ni se sobreescribe. Sólo se
+   suman aquí los detalles que sobreviven a una revisión de "¿esto es una
+   mejora real o un efecto porque sí?" — nada de esto depende de HTML ni
+   JS nuevos, y todo tiene guard de accesibilidad/perf donde corresponde.
+   Ningún otro archivo del proyecto fue tocado (regla del encargo: un solo
+   archivo, ficha.css). */
+
+/* ---- 1) Selección de texto con identidad de marca ---------------------
+   El navegador por defecto pinta la selección con el azul de sistema del
+   SO, que no tiene relación con el resto de la ficha. Un detalle menor
+   pero que aparece constantemente (cualquiera que copie una dirección,
+   un horario o un precio lo ve) y cuesta cero riesgo: sólo color, cero
+   layout, cero motion. */
+::selection {
+  background: var(--gold);
+  color: var(--ink);
+}
+::-moz-selection {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+/* ---- 2) Scrollbar con identidad de marca (navegadores que lo soportan)-
+   Progresivo: en navegadores sin soporte (o el usuario con estilos de SO
+   forzados) simplemente se ve la scrollbar nativa de siempre, nada se
+   rompe. scrollbar-color es el estándar (Firefox + Chromium recientes);
+   los pseudo-elementos ::-webkit-scrollbar son el fallback para el resto
+   de Chromium/Safari. Delgada y tenue -- funcional, no protagonista. */
+html {
+  scrollbar-color: rgba(var(--gold-rgb), 0.45) transparent;
+  scrollbar-width: thin;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--gold-rgb), 0.35);
+  border-radius: 999px;
+  border: 2px solid var(--cream);
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--gold-rgb), 0.55);
+}
+
+/* ---- 3) Anclas/deep-links no quedan tapados por el .nav fijo -----------
+   .nav es position:fixed (línea ~88) y con scroll-behavior:smooth activo
+   (línea ~49) cualquier salto a un ancla interna (o el propio skip-link
+   al entrar por teclado) aterriza con el título tapado por la franja del
+   nav. scroll-padding-top reserva ese alto para CUALQUIER destino de
+   scroll, sin necesitar tocar cada id a mano. Valor conservador (96px)
+   cubre el nav en su estado más alto (padding:20px 48px + logo 24px);
+   sobra margen antes que faltar. */
+html {
+  scroll-padding-top: 96px;
+}
+@media (max-width: 768px) {
+  html {
+    scroll-padding-top: 64px;
+  }
+}
+
+/* ---- 4) Titulares que no cortan en un hueco feo ------------------------
+   text-wrap:balance reparte el texto en líneas de largo más parejo en
+   vez de dejar una última línea huérfana de una sola palabra -- sólo
+   afecta el corte de línea, nunca el tamaño ni el color. Propiedad no
+   soportada = ignorada silenciosamente por el navegador (misma lógica
+   que ya usa este archivo con view-transition arriba), así que no hace
+   falta @supports: donde no hay soporte, se ve exactamente igual que
+   hoy. Limitado a titulares editoriales cortos (nunca a .about-body ni
+   a párrafos largos, donde balance no aporta y sí puede ser costoso). */
+.hero-title,
+.about-title,
+.map-info-title,
+.schedule-title,
+.verdict-text,
+.pullquote p,
+.review-quote {
+  text-wrap: balance;
+}
+
+/* ---- 5) Modo de alto contraste forzado (Windows High Contrast /
+   forced-colors) — los botones y tarjetas de esta ficha comunican
+   jerarquía con color de fondo (.btn-primary, .tag, .status-pill), que
+   forced-colors aplana a los colores del sistema. Sin un borde explícito
+   ahí, algunos quedan sin límite visible. Se usa el color-system
+   `ButtonText`/`Highlight` en vez de valores propios porque en este modo
+   el usuario ya eligió su propia paleta -- imponer --gold encima
+   contradice el propósito del modo. */
+@media (forced-colors: active) {
+  .btn,
+  .tag,
+  .side-box-cta,
+  .status-pill,
+  .chip {
+    forced-color-adjust: none;
+    border: 1px solid ButtonText;
+  }
+  .btn:focus-visible,
+  .side-box-cta:focus-visible,
+  .tag:focus-visible,
+  a:focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* ---- 6) Contraste aumentado (prefers-contrast: more) -------------------
+   Usuarios que piden más contraste del que ya da la paleta AA/AAA
+   verificada en el resto de este archivo. En vez de recalcular una
+   paleta nueva, se refuerzan los bordes -- hoy en --border al 25-45% de
+   opacidad, pensados para verse "sutiles" -- que es justo lo que este
+   modo pide evitar. Sólido en vez de traslúcido, mismo tono. */
+@media (prefers-contrast: more) {
+  .tag,
+  .side-box,
+  .side-box-cta,
+  .schedule-note,
+  .reveal-photo,
+  .map-frame,
+  .verdict-card,
+  .review-card,
+  .review-summary {
+    border-color: var(--gold-dark);
+  }
+  .section-line {
+    background: var(--gold-dark);
+    opacity: 1;
+  }
+}
+
+/* ---- 7) will-change puntual — sólo donde el costo se paga seguro -------
+   .hero-img ya anima transform en dos disparadores garantizados (carga:
+   scale 1.06→1 en 8s vía la propia regla base; hover: 1.06→1.02, línea
+   ~379) -- es la única superficie de este archivo con una animación de
+   transform de larga duración corriendo prácticamente siempre que el
+   hero está en pantalla, así que es la única que justifica adelantarle
+   al navegador que reserve su propia capa de compositing. No se agrega
+   a .btn/.tag/.review-card/etc.: son transiciones cortas en :hover, y
+   sembrar will-change ahí de forma permanente reserva memoria de capa
+   sin necesidad real (contrario al pedido explícito de performance). */
+.hero-img {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-img {
+    will-change: auto;
+  }
+}
