@@ -16,6 +16,17 @@
     DATA = {};
   }
 
+  /* REFACTOR (auditoría "Ficha Maestra" 2026-08): la misma consulta
+     window.matchMedia("(prefers-reduced-motion: reduce)").matches se
+     repetía, idéntica, en 3 lugares distintos de este archivo
+     (inicializarFotosReveal, inicializarRevealGenerico, crearTarjetaResena).
+     Una sola fuente de verdad -- se sigue consultando en vivo en cada
+     llamado (no se cachea en una variable de módulo) para no asumir que la
+     preferencia del usuario no puede cambiar durante la sesión. */
+  function prefiereMenosMovimiento() {
+    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
   /* ───────────────────────── PICTOGRAMA DE RUBRO EN HERO (Design System) ──
      URUSPOT-PENDIENTES §6: URU_RUBROS_ICONO_SVG() ya se usaba en el filtro
      "Por rubro" y en la leyenda del mapa, pero no en hero-eyebrow de la
@@ -65,31 +76,67 @@
     "sábado": 6, sabado: 6, "sábados": 6, sabados: 6, "sáb": 6, sab: 6,
   };
 
-  // "18:00 p.m. – 02:00 a.m." / "8:00 a.m. – 10:00 p.m." / "Cerrado" -> {openH, closeH} en escala 0-30 (permite cruzar medianoche)
-  function parseRangoHora(str) {
-    if (!str) return null;
+  // "18:00 p.m. – 02:00 a.m." / "8:00 a.m. – 10:00 p.m." / "8:00 a.m. – 12:30
+  // p.m. · 4 – 8 p.m." / "Cerrado" -> lista de {openH, closeH} en escala 0-30
+  // (permite cruzar medianoche).
+  //
+  // BUGFIX (auditoría "Ficha Maestra" 2026-08, ficha.js): esta función se
+  // llamaba parseRangoHora (singular) y devolvía UN SOLO rango -- con turno
+  // partido ("8:00 a.m. – 12:30 p.m. · 4 – 8 p.m.", el propio horario de
+  // Brødë de miércoles a domingo) sólo se veía el primer "–" de la cadena
+  // completa, así que calcularEstado() nunca se enteraba del segundo turno:
+  // entre las 16:00 y las 20:00 la ficha mostraba "Cerrado hoy" o "Abre
+  // mañana" estando en realidad abierta. Ahora la cadena se separa primero
+  // por "·" (mismo separador que ya usa este archivo para días, ver
+  // expandirDias) y cada turno se parsea por separado, devolviendo un array.
+  //
+  // De paso resuelve una ambigüedad real de este mismo dato: "4 – 8 p.m."
+  // (el segundo turno de Brødë) no aclara a.m./p.m. en el extremo de
+  // apertura -- sin más contexto, "4" se leería como 4 a.m. y el turno de
+  // la tarde quedaría invertido (4:00–20:00 en vez de 16:00–20:00). Cuando
+  // un extremo no trae período propio, hereda el del otro extremo (mismo
+  // criterio que usaría una persona leyendo "4 a 8 de la tarde").
+  function parseRangosHora(str) {
+    if (!str) return [];
     var s = str.toLowerCase();
-    if (s.indexOf("cerrado") !== -1) return null;
+    if (s.indexOf("cerrado") !== -1) return [];
 
-    var partes = s.split(/–|-|a\s(?=\d)/).map(function (p) { return p.trim(); });
-    if (partes.length < 2) return null;
+    var turnos = s.split(/·|,(?=\s*\d)/).map(function (t) { return t.trim(); }).filter(Boolean);
 
-    function aHora24(p) {
+    function partesHora(p) {
       var m = p.match(/(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i);
       if (!m) return null;
-      var h = parseInt(m[1], 10);
-      var min = m[2] ? parseInt(m[2], 10) : 0;
-      var ampm = m[3] ? m[3].replace(/\./g, "").toLowerCase() : null;
-      if (ampm === "pm" && h < 12) h += 12;
-      if (ampm === "am" && h === 12) h = 0;
-      return h + min / 60;
+      return {
+        h: parseInt(m[1], 10),
+        min: m[2] ? parseInt(m[2], 10) : 0,
+        ampm: m[3] ? m[3].replace(/\./g, "").toLowerCase() : null,
+      };
     }
 
-    var open = aHora24(partes[0]);
-    var close = aHora24(partes[1]);
-    if (open === null || close === null) return null;
-    if (close <= open) close += 24; // cruza medianoche
-    return { open: open, close: close };
+    function aHoraDecimal(hm, ampm) {
+      var h = hm.h;
+      if (ampm === "pm" && h < 12) h += 12;
+      if (ampm === "am" && h === 12) h = 0;
+      return h + hm.min / 60;
+    }
+
+    var rangos = [];
+    turnos.forEach(function (turno) {
+      var partes = turno.split(/–|-|a\s(?=\d)/).map(function (p) { return p.trim(); });
+      if (partes.length < 2) return;
+
+      var o = partesHora(partes[0]);
+      var c = partesHora(partes[1]);
+      if (!o || !c) return;
+
+      var openAmpm = o.ampm || c.ampm; // hereda si falta el propio
+      var closeAmpm = c.ampm || o.ampm;
+      var open = aHoraDecimal(o, openAmpm);
+      var close = aHoraDecimal(c, closeAmpm);
+      if (close <= open) close += 24; // cruza medianoche
+      rangos.push({ open: open, close: close });
+    });
+    return rangos;
   }
 
   // Expande "Lunes a Viernes", "Mar – Sáb (mediodía)", "Sábado y Domingo", "Lunes a Domingo",
@@ -136,7 +183,7 @@
   }
 
   function calcularEstado(scheduleRows) {
-    if (!scheduleRows || !scheduleRows.length) return null;
+    if (!Array.isArray(scheduleRows) || !scheduleRows.length) return null;
 
     // Si ninguna fila del horario corresponde a un día real de la semana (p. ej. fichas de
     // hotel cuyo "horario" son categorías como "Check-in" / "Recepción" / "Desayuno"), no hay
@@ -156,8 +203,9 @@
     scheduleRows.forEach(function (row) {
       var dias = expandirDias(row.day);
       if (dias.indexOf(diaHoy) === -1) return;
-      var rango = parseRangoHora(row.time);
-      if (rango) ventanasHoy.push(rango);
+      parseRangosHora(row.time).forEach(function (rango) {
+        ventanasHoy.push(rango);
+      });
     });
 
     // También considerar el cierre "extendido" de la ventana de ayer (cruza medianoche)
@@ -165,10 +213,11 @@
     scheduleRows.forEach(function (row) {
       var dias = expandirDias(row.day);
       if (dias.indexOf(diaAyer) === -1) return;
-      var rango = parseRangoHora(row.time);
-      if (rango && rango.close > 24) {
-        ventanasHoy.push({ open: rango.open - 24, close: rango.close - 24 });
-      }
+      parseRangosHora(row.time).forEach(function (rango) {
+        if (rango.close > 24) {
+          ventanasHoy.push({ open: rango.open - 24, close: rango.close - 24 });
+        }
+      });
     });
 
     if (!ventanasHoy.length) {
@@ -355,9 +404,7 @@
   function crearTarjetaResena(r, indice) {
     var card = document.createElement("article");
     card.className = "review-card review-card--in";
-    var prefiereMenosMovimiento =
-      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!prefiereMenosMovimiento && typeof indice === "number") {
+    if (!prefiereMenosMovimiento() && typeof indice === "number") {
       card.style.animationDelay = Math.min(indice * 70, 420) + "ms";
     }
 
@@ -518,10 +565,7 @@
     var fotos = document.querySelectorAll(".u-fade-in-img");
     if (!fotos.length) return;
 
-    var prefiereMenosMovimiento =
-      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (prefiereMenosMovimiento || !("IntersectionObserver" in window)) {
+    if (prefiereMenosMovimiento() || !("IntersectionObserver" in window)) {
       fotos.forEach(function (f) { f.classList.add("is-visible"); });
       return;
     }
@@ -551,10 +595,7 @@
     var elementos = document.querySelectorAll(".u-reveal, .u-reveal-stagger");
     if (!elementos.length) return;
 
-    var prefiereMenosMovimiento =
-      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (prefiereMenosMovimiento || !("IntersectionObserver" in window)) {
+    if (prefiereMenosMovimiento() || !("IntersectionObserver" in window)) {
       elementos.forEach(function (el) { el.classList.add("is-visible"); });
       return;
     }
