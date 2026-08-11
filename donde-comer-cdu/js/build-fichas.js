@@ -88,9 +88,11 @@ function fechaUltimoCommit(p) {
 // el commit de cuerpo.html y el de ficha.json (cualquiera de los dos
 // pudo ser el que se actualizó), con fallback al mtime en disco si
 // git no está disponible (ej. tarball sin .git, CI con checkout
-// shallow). Devuelve el texto ya formado para footerLine3, en
-// español y sin depender de la config regional del entorno de build.
-function obtenerFooterLine3(cuerpoPath, fichaJsonPath) {
+// shallow). Devuelve el objeto Date crudo -- lo consumen tanto
+// footerLine3 (texto en español) como dateModified en JSON-LD (ISO),
+// ver más abajo, para no calcular la misma fecha dos veces ni
+// arriesgar que ambas queden desincronizadas entre sí.
+function fechaVerificacion(cuerpoPath, fichaJsonPath) {
   const fechaCuerpo = fechaUltimoCommit(cuerpoPath);
   const fechaJson = fechaUltimoCommit(fichaJsonPath);
   let fecha = fechaCuerpo && fechaJson
@@ -101,9 +103,20 @@ function obtenerFooterLine3(cuerpoPath, fichaJsonPath) {
     const mtimeJson = fs.statSync(fichaJsonPath).mtime;
     fecha = mtimeCuerpo > mtimeJson ? mtimeCuerpo : mtimeJson;
   }
+  return fecha;
+}
+// Texto para footerLine3, en español y sin depender de la config
+// regional del entorno de build.
+function formatearFooterLine3(fecha) {
   const mes = MESES_ES[fecha.getMonth()];
   const anio = fecha.getFullYear();
   return "Informaci&oacute;n verificada y actualizada &mdash; " + mes.charAt(0).toUpperCase() + mes.slice(1) + " " + anio;
+}
+// Fecha ISO (solo fecha, sin hora) para dateModified en JSON-LD -- ver
+// [IMPORTANTE 6] más abajo, placeholder __DATE_MODIFIED__ en
+// webPageBlockRaw.
+function formatearFechaIso(fecha) {
+  return fecha.toISOString().slice(0, 10);
 }
 function escribirLatin1(p, contenido) {
   // Guardia de seguridad (auditoría accesibilidad, 2026-08): portada del
@@ -160,7 +173,21 @@ function main() {
     try {
       const shell = JSON.parse(leerLatin1(fichaJsonPath));
       const cuerpo = leerLatin1(cuerpoPath);
-      shell.footerLine3 = obtenerFooterLine3(cuerpoPath, fichaJsonPath);
+      const fecha = fechaVerificacion(cuerpoPath, fichaJsonPath);
+      shell.footerLine3 = formatearFooterLine3(fecha);
+      // [IMPORTANTE 6] (auditoría SEO técnico, 2026-08): dateModified en
+      // JSON-LD (WebPage, ver webPageBlockRaw) usa el mismo criterio de
+      // "fecha real" que footerLine3 -- nunca un literal escrito a mano
+      // que se vuelve falso con el tiempo. Reemplazo por texto plano
+      // (no JSON.parse + reserializar) para no arriesgar diffs de
+      // formato/espaciado en los *BlockRaw ya commiteados de fichas que
+      // todavía no adoptaron este placeholder. Campo opcional: fichas
+      // sin __DATE_MODIFIED__ en ningún *BlockRaw no sufren ningún
+      // cambio (String.replace de un patrón ausente es no-op).
+      const fechaIso = formatearFechaIso(fecha);
+      if (shell.webPageBlockRaw && shell.webPageBlockRaw.indexOf("__DATE_MODIFIED__") !== -1) {
+        shell.webPageBlockRaw = shell.webPageBlockRaw.split("__DATE_MODIFIED__").join(fechaIso);
+      }
       const generado = renderFicha(shell, cuerpo);
       warningsSeo.push(...validarLongitudesMeta(slug, shell));
       warningsPrecios.push(...validarPreciosCuerpo(slug, cuerpo));

@@ -136,7 +136,7 @@ ${shell.imagePath ? `<!-- Preload de la foto del hero (candidata a LCP de esta p
 <script type="application/ld+json">
 ${shell.jsonLdRaw}
 </script>
-${shell.breadcrumbBlockRaw || ""}${shell.faqBlockRaw || ""}</head>
+${shell.breadcrumbBlockRaw || ""}${shell.faqBlockRaw || ""}${shell.webPageBlockRaw || ""}</head>
 <body>
 
 <!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento
