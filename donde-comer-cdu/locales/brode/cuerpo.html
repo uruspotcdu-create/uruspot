@@ -547,6 +547,12 @@
      ABOUT SECTION — Subtle depth and typography rhythm
      ═════════════════════════════════════════════════════════════════════ */
 
+  /* FIX (auditoría 2026-08, pase de limpieza): esta regla nunca se
+     aplicaba — el <section> real de "Sobre Brødë" usaba class="page"
+     nada más, sin "about-section", así que aboutSectionFadeIn quedaba
+     definida pero nunca disparada. Se agregó la clase al elemento en
+     vez de reescribir la animación, para no tocar el resto de reglas de
+     .page (compartidas con Historia/Percepción/FAQ). */
   .about-section {
     animation: aboutSectionFadeIn 0.8s ease-out 0.3s backwards;
   }
@@ -601,37 +607,16 @@
     }
   }
 
-  .score-item {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 12px;
-    padding: 18px;
-    animation: scoreItemSlideIn 0.6s cubic-bezier(0.16, 0.84, 0.32, 1) backwards;
-    transition: all var(--transition-smooth);
-  }
-
-  .score-item:nth-child(1) { animation-delay: 0.3s; }
-  .score-item:nth-child(2) { animation-delay: 0.4s; }
-  .score-item:nth-child(3) { animation-delay: 0.5s; }
-
-  @keyframes scoreItemSlideIn {
-    from {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  .score-item:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    transform: translateY(-4px);
-    background: rgba(255, 255, 255, 0.75);
-    border-color: rgba(255, 85, 17, 0.2);
-  }
+  /* LIMPIEZA (auditoría 2026-08, pase de limpieza): .score-item /
+     .score-bar / .score-bar-fill (y su @keyframes scoreItemSlideIn)
+     pertenecían a una versión anterior del bloque de scores, con tarjetas
+     individuales por métrica. Esa versión fue reemplazada por el layout
+     actual (.score-big + .score-bars > .score-row > .score-track >
+     .score-fill, ver más abajo la sección SCORES del <body> y
+     .score-fill en ficha.css), pero las reglas viejas habían quedado sin
+     borrar: no calzaban con ningún elemento real del HTML (0 usos), sólo
+     sumaban peso a la hoja. .score-big-num y .score-val SÍ siguen en uso
+     real y se mantienen tal cual. */
 
   .score-big-num {
     font-variant-numeric: tabular-nums;
@@ -645,33 +630,9 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .score-bar {
-    background: linear-gradient(90deg, rgba(var(--gold-rgb), 0.08) 0%, rgba(var(--gold-rgb), 0.04) 100%);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-    border-radius: 2px;
-    overflow: hidden;
-    border: 1px solid rgba(var(--gold-rgb), 0.15);
-  }
-
-  .score-bar-fill {
-    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
-    box-shadow: 0 2px 8px rgba(255, 85, 17, 0.3);
-    transition: width 1.2s cubic-bezier(0.16, 0.84, 0.32, 1);
-    border-radius: 2px;
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .scores-section,
-    .score-item {
+    .scores-section {
       animation: none;
-    }
-
-    .score-item:hover {
-      transform: none;
-    }
-
-    .score-bar-fill {
-      transition: none;
     }
   }
 
@@ -762,6 +723,11 @@
      FAQ SECTION — Premium accordion interaction
      ═════════════════════════════════════════════════════════════════════ */
 
+  /* FIX (auditoría 2026-08, pase de limpieza): mismo problema que
+     .about-section arriba — el <section> de preguntas frecuentes tenía
+     class="page" sin "faq-section", así que faqSectionFadeIn (el fundido
+     de la sección completa, además del stagger propio de cada
+     .faq-item) nunca corría. */
   .faq-section {
     animation: faqSectionFadeIn 0.8s ease-out 0.3s backwards;
   }
@@ -1047,10 +1013,6 @@
       grid-template-columns: 1fr 1fr;
     }
 
-    .score-item {
-      padding: 16px;
-    }
-
     .score-big-num {
       font-size: 2rem;
     }
@@ -1218,7 +1180,7 @@
 
 <!-- ABOUT -->
 
-<section class="page" aria-labelledby="about-heading">
+<section class="page about-section" aria-labelledby="about-heading">
   <div class="section-header u-reveal">
     <span class="section-label">Sobre el lugar</span>
     <span class="section-line" aria-hidden="true"></span>
@@ -1759,7 +1721,7 @@
 
 <!-- FAQ -->
 
-<section class="page" aria-labelledby="faq-heading">
+<section class="page faq-section" aria-labelledby="faq-heading">
   <div class="section-header u-reveal">
     <h2 class="section-label" id="faq-heading">Preguntas frecuentes</h2>
     <span class="section-line" aria-hidden="true"></span>
