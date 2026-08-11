@@ -74,10 +74,33 @@
      sistema base de TODAS las fichas - fusionado dentro de ../ficha.css
      (sección "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
      hoja CSS propia. Ver ARCHITECTURE.md. -->
-<!-- FUENTE DE aggregateRating (auditoría 2026-08, pendiente aclarado): el
-     5.0/67 de más abajo es el ranking/puntaje propio de URU SPOT para
-     este local, no un agregado de reseñas externas (Google/Instagram/
-     etc). Por eso no hay "review"/citas de terceros en este JSON-LD. -->
+<!-- AUDITORÍA SEO TÉCNICO (2026-08, pilot Brode → replicar en las 51):
+     1) aggregateRating ELIMINADO. La aclaración anterior confirmaba que
+        el 5.0/67 era el puntaje propio de URU SPOT, no reseñas reales
+        de usuarios -- eso es exactamente lo que las guías de datos
+        estructurados de Google prohíben para LocalBusiness/Review-
+        snippet ("Ratings must be sourced directly from users. Don't
+        rely on human editors to create, curate, or compile ratings").
+        Mantenerlo arriesga una acción manual o directamente la no
+        elegibilidad para rich results. Además el valor (5.0/5) ni
+        siquiera coincidía en escala con el "9.3/10" que sí se muestra
+        en pantalla en .scores-section -- ese widget es contenido
+        editorial plano (no está marcado como schema.org Rating), así
+        que no se toca y sigue mostrándose normalmente.
+     2) "image": ahora empieza con brode-og.webp (1200x630), la única
+        foto del set que cumple el ancho mínimo recomendado por Google
+        (≥1200px) para que "image" sea candidata a resultados enriquecidos.
+        brodefrente/brode1/brode2/brode3 quedan igual pero están todas
+        por debajo de ese mínimo (ver dimensiones reales en /img) --
+        pendiente para las 51 fichas: generar un recorte 1200px+ por
+        foto o priorizar siempre el ogImagePath como primera entrada.
+     3) "makesOffer": se agregó "availability": InStock a cada Offer
+        (dato real, Brode vende activamente estos productos).
+     NOTA DE PROCESO: esta ficha tenía además drift entre ficha.json
+     (jsonLdRaw) y este index.html -- faltaban acá "@id"/"inLanguage"
+     del lado del JSON y "makesOffer" del lado de ficha.json. Se
+     sincronizaron ambos archivos en esta misma auditoría (ver
+     ficha.json). -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -87,6 +110,7 @@
   "name": "Brødë Panadería — URU SPOT",
   "description": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Panadería artesanal de masa madre con especialidades en laminados.",
   "image": [
+    "https://uruspot.pages.dev/img/brode-og.webp",
     "https://uruspot.pages.dev/img/brodefrente.webp",
     "https://uruspot.pages.dev/img/brode1.webp",
     "https://uruspot.pages.dev/img/brode2.webp",
@@ -114,39 +138,72 @@
     "longitude": "-58.2545511"
   },
   "amenityFeature": [
-    { "@type": "LocationFeatureSpecification", "name": "Para llevar", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "Línea mayorista", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "Pedidos por WhatsApp", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "Catálogo fotográfico online", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "Acceso para sillas de ruedas", "value": false },
-    { "@type": "LocationFeatureSpecification", "name": "Opciones veganas", "value": false },
-    { "@type": "LocationFeatureSpecification", "name": "Opciones sin TACC", "value": false }
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "Para llevar",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "Línea mayorista",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "Pedidos por WhatsApp",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "Catálogo fotográfico online",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "Acceso para sillas de ruedas",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "Opciones veganas",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "Opciones sin TACC",
+      "value": false
+    }
   ],
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "5.0",
-    "reviewCount": "67",
-    "bestRating": "5",
-    "worstRating": "1"
-  },
   "makesOffer": [
     {
       "@type": "Offer",
-      "itemOffered": { "@type": "Product", "name": "Croissant" },
+      "itemOffered": {
+        "@type": "Product",
+        "name": "Croissant"
+      },
       "price": "1530",
-      "priceCurrency": "ARS"
+      "priceCurrency": "ARS",
+      "availability": "https://schema.org/InStock"
     },
     {
       "@type": "Offer",
-      "itemOffered": { "@type": "Product", "name": "Pan de Campo (caja de 10 unidades)" },
+      "itemOffered": {
+        "@type": "Product",
+        "name": "Pan de Campo (caja de 10 unidades)"
+      },
       "price": "1650",
-      "priceCurrency": "ARS"
+      "priceCurrency": "ARS",
+      "availability": "https://schema.org/InStock"
     },
     {
       "@type": "Offer",
-      "itemOffered": { "@type": "Product", "name": "Pan de Hamburguesa (unidad)" },
+      "itemOffered": {
+        "@type": "Product",
+        "name": "Pan de Hamburguesa (unidad)"
+      },
       "price": "385",
-      "priceCurrency": "ARS"
+      "priceCurrency": "ARS",
+      "availability": "https://schema.org/InStock"
     }
   ],
   "openingHoursSpecification": [
