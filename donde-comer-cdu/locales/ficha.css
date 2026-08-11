@@ -1352,3 +1352,93 @@ p[style*="font-size:10px"] {
   color: var(--muted);
   line-height: 1.6;
 }
+
+/* Clases reales (auditoría Brode 2026-08) para reemplazar los estilos
+   inline puntuales que tenía cuerpo.html — Brode es la ficha "gold
+   standard" que se clona para las 51 fichas, así que estos patrones se
+   vuelven clases reutilizables en vez de quedar hardcodeados a mano cada
+   vez. La regla de atributo de arriba se deja intacta: sigue cubriendo
+   inline styles equivalentes que puedan tener las otras 50 fichas hasta
+   que se migren una por una. */
+
+/* .info-strip--flush: pega la franja de accesos al borde inferior del
+   hero sin el gap por defecto de .page/.section-* (era style="margin-top:-1px"). */
+.info-strip--flush {
+  margin-top: -1px;
+}
+
+/* .catalog-lead: párrafo de apertura del catálogo, más grande/liviano
+   que .about-body por defecto; .catalog-lead strong marca el término
+   clave en dorado (era style="margin-bottom:32px;font-size:16px;
+   font-weight:400" + strong style="color:var(--gold-dark);font-weight:700"). */
+.catalog-lead {
+  margin-bottom: 32px;
+  font-size: 16px;
+  font-weight: 400;
+}
+.catalog-lead strong {
+  color: var(--gold-dark);
+  font-weight: 700;
+}
+
+/* .source-caption--bordered: variante de .source-caption con separador
+   superior, usada cuando la leyenda de fuente cierra un bloque con datos
+   propios (catálogo, segundo local) en vez de ir suelta bajo un párrafo
+   (era style="font-size:11px;color:var(--muted);margin-top:16px;
+   line-height:1.6;padding-top:12px;border-top:1px solid
+   rgba(var(--gold-rgb),0.2)"; combinar siempre con .source-caption). */
+.source-caption--bordered {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(var(--gold-rgb), 0.2);
+}
+
+/* .adn-list--spaced: separa la lista de características del bloque
+   anterior (era style="margin-top:28px"). */
+.adn-list--spaced {
+  margin-top: 28px;
+}
+
+/* Bloque de horarios (fondo oscuro .schedule-block): nota de
+   actualización, contenedor del estado en vivo, texto de detalle del
+   estado, y el stack de botones de acción — antes 5 estilos inline
+   sueltos dentro de la misma sección. */
+.schedule-updated-note {
+  font-size: 11px;
+  color: #ffffff;
+  margin-top: 16px;
+  letter-spacing: 0.05em;
+}
+.schedule-live-status {
+  margin-bottom: 24px;
+}
+/* Estado por defecto de pill/punto antes de que ficha.js calcule el
+   horario real y pise estos valores vía element.style — JS siempre gana
+   sobre la clase, así que este es solo el fallback visual pre-JS/no-JS,
+   ver aplicarEstado() en ficha.js. */
+.status-pill--default {
+  background: rgba(68, 153, 111, 0.15);
+  color: #ffffff;
+}
+.status-dot--default {
+  background: #ffffff;
+}
+.sched-info-text {
+  font-size: 12px;
+  color: #ffffff;
+  margin-top: 8px;
+}
+.schedule-actions-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* .map-actions-stack: stack vertical de botones dentro de la tarjeta de
+   mapa (era style="margin-top:28px;display:flex;flex-direction:column;gap:10px"). */
+.map-actions-stack {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

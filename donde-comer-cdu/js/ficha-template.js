@@ -81,7 +81,7 @@ function renderFicha(shell, cuerpo) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="${shell.metaDescription}">
 <meta name="theme-color" content="${shell.themeColor}">
-<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta property="og:title" content="${shell.ogTitle}">
 <meta property="og:description" content="${shell.ogDescription}">
 ${bloqueOg}<meta property="og:type" content="${ogType}">
@@ -109,8 +109,16 @@ ${bloqueTwitter}<link rel="canonical" href="${shell.canonical}">
 <!-- Fuentes self-hosted (heredado del sistema Gold Standard de Brode,
      ver ../ficha-fonts.css): sin request externo a fonts.googleapis.com,
      render identico entre todas las fichas. -->
-<link rel="preload" href="../fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<!-- Preload de la foto del hero (candidata a LCP de esta página, auditoría
+     Brode 2026-08): adelanta la descarga antes de que el parser llegue al
+     <img> en el <body>, complementando el fetchpriority="high"+loading="eager"
+     que ya trae ese tag en cuerpo.html. Usa shell.imagePath, que ya existe en
+     el ficha.json de las 51 fichas -- antes vivía hardcodeado a mano solo en
+     Brode y se perdía al regenerar. Misma ruta absoluta que debe usar el
+     <img> del hero en cuerpo.html. -->
+<link rel="preload" href="${shell.imagePath}" as="image" fetchpriority="high">
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
 <!-- El sistema visual de Brode (piloto "marca-naranja") se promovió a
@@ -120,12 +128,12 @@ ${bloqueTwitter}<link rel="canonical" href="${shell.canonical}">
 <script type="application/ld+json">
 ${shell.jsonLdRaw}
 </script>
-${shell.breadcrumbBlockRaw || ""}</head>
+${shell.breadcrumbBlockRaw || ""}${shell.faqBlockRaw || ""}</head>
 <body>
 
 <!-- SKIP LINK - invariante AGENTS.md §9.2: debe ser el primer elemento
      enfocable del <body>. Apunta al <main> de más abajo. -->
-<a href="#contenido-principal" class="skip-link u-sr-only">Ir al contenido principal</a>
+<a href="#contenido-principal" class="skip-link">Saltar al contenido</a>
 
 <!-- NAV -->
 <nav class="nav" role="navigation" aria-label="URU SPOT">
@@ -133,12 +141,13 @@ ${shell.breadcrumbBlockRaw || ""}</head>
   <span class="nav-tag">${shell.navTag}</span>
 ${shell.navBadgesBlockRaw}</nav>
 
-<main id="contenido-principal">
+<main id="contenido-principal" tabindex="-1">
 ${cuerpo}</main>
 <footer class="footer">
   <a href="../../" class="footer-logo">URU SPOT</a>
   <span>${shell.footerLine2}</span>
   <span>${shell.footerLine3}</span>
+  <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
 </footer>${shell.colaScriptsRaw}`;
 }
 

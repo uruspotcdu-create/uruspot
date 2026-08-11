@@ -5,47 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Brødë en Concepción del Uruguay: 72 horas de proceso artesanal, ingredientes premium y pan de masa madre. Croissants y medialunas verificados.">
 <meta name="theme-color" content="#140d09">
-
-<!-- Favicon + manifest (CRÍTICO 1, 2026-08): faltaban en las 51 fichas -->
-<link rel="manifest" href="/donde-comer-cdu/manifest.json">
-<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
-<link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
-
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-
 <meta property="og:title" content="Brødë · URU SPOT">
 <meta property="og:description" content="72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Catálogo, precios y pedidos verificados.">
 <meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/locales/brode/">
 <meta property="og:site_name" content="URU SPOT">
 <meta property="og:locale" content="es_AR">
-<!-- og:image URL ABSOLUTA (no "/img/..."): Facebook/X/WhatsApp/Telegram
-     no tienen una "página actual" contra la cual resolver una ruta
-     relativa, a diferencia del navegador. Con ruta relativa muchos
-     crawlers simplemente descartan la imagen -> preview sin foto o
-     directamente el link se ve como texto plano. Causa raíz probable
-     del síntoma reportado en el audit "previa de WhatsApp poco confiable". -->
-<!-- [CRÍTICO 2] og:image NO es brodefrente.webp (474x215, pesa 2.4KB):
-     esa es la foto de diseño del hero, muy chica y con relación de
-     aspecto (2.2:1) distinta al estándar 1.91:1 de Open Graph -> se ve
-     borrosa/mal recortada en preview. Se generó un asset NUEVO y
-     dedicado solo para compartir: /img/brode-og.webp, 1200x630,
-     recortado desde brode3.webp (la foto de mejor resolución del lugar,
-     sin texto horneado en los píxeles y sin estacionalidad, a diferencia
-     de brode1.webp/panettone navideño y brode2.webp con "Día
-     Internacional del Croissant" impreso). El hero-img sigue usando
-     brodefrente.webp sin cambios: es un recorte de diseño intencional. -->
 <meta property="og:image" content="https://uruspot.pages.dev/img/brode-og.webp">
 <meta property="og:image:secure_url" content="https://uruspot.pages.dev/img/brode-og.webp">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/webp">
 <meta property="og:image:alt" content="Bagels artesanales recién horneados — Brødë, Concepción del Uruguay">
-<!-- og:type "website" (no "article"): esta es una ficha de negocio, no un
-     post de blog. "article" hace que Facebook espere metadata de artículo
-     (article:published_time, article:author, etc.) que esta página no
-     tiene, lo cual puede degradar cómo arma la preview. -->
 <meta property="og:type" content="website">
 
 <meta name="twitter:card" content="summary_large_image">
@@ -53,8 +24,23 @@
 <meta name="twitter:description" content="72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Catálogo, precios y pedidos verificados.">
 <meta name="twitter:image" content="https://uruspot.pages.dev/img/brode-og.webp">
 <meta name="twitter:image:alt" content="Bagels artesanales recién horneados — Brødë, Concepción del Uruguay">
-
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/locales/brode/">
+
+<!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditor�a
+     Brode 2026-08: faltaban por completo en las fichas - ver Cr�tico 1). -->
+<!-- NOTA (auditor�a accesibilidad, 2026-08): el guion largo original de
+     este comentario se corromp�a en cada build a un byte de control
+     0x14 - ver escribirLatin1() en build-fichas.js. Cambiado a guion
+     simple ("-"), el �nico car�cter seguro ac�: es un comentario HTML
+     dentro del template literal (se emite tal cual al HTML final), a
+     diferencia de los comentarios /* JS */ de este mismo archivo, que
+     nunca llegan al output y s� pueden usar tildes o guiones largos sin
+     riesgo. -->
+<link rel="manifest" href="/donde-comer-cdu/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
 
 <title>Brødë Panadería — URU SPOT</title>
 
@@ -63,50 +49,20 @@
      render identico entre todas las fichas. -->
 <link rel="preload" href="../../fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<!-- Preload de la foto del hero (candidata a LCP de esta página): adelanta
-     la descarga antes de que el parser llegue al <img> en el <body>,
-     complementando el fetchpriority="high"+loading="eager" que ya tiene
-     ese tag más abajo. Misma imagen y misma ruta absoluta que el <img>. -->
+<!-- Preload de la foto del hero (candidata a LCP de esta p�gina, auditor�a
+     Brode 2026-08): adelanta la descarga antes de que el parser llegue al
+     <img> en el <body>, complementando el fetchpriority="high"+loading="eager"
+     que ya trae ese tag en cuerpo.html. Usa shell.imagePath, que ya existe en
+     el ficha.json de las 51 fichas -- antes viv�a hardcodeado a mano solo en
+     Brode y se perd�a al regenerar. Misma ruta absoluta que debe usar el
+     <img> del hero en cuerpo.html. -->
 <link rel="preload" href="/img/brodefrente.webp" as="image" fetchpriority="high">
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
-<!-- El sistema visual de Brode (piloto "marca-naranja") se promovió a
+<!-- El sistema visual de Brode (piloto "marca-naranja") se promovi� a
      sistema base de TODAS las fichas - fusionado dentro de ../ficha.css
-     (sección "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
+     (secci�n "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
      hoja CSS propia. Ver ARCHITECTURE.md. -->
-<!-- AUDITORÍA SEO TÉCNICO (2026-08, pilot Brode → replicar en las 51):
-     1) aggregateRating ELIMINADO. La aclaración anterior confirmaba que
-        el 5.0/67 era el puntaje propio de URU SPOT, no reseñas reales
-        de usuarios -- eso es exactamente lo que las guías de datos
-        estructurados de Google prohíben para LocalBusiness/Review-
-        snippet ("Ratings must be sourced directly from users. Don't
-        rely on human editors to create, curate, or compile ratings").
-        Mantenerlo arriesga una acción manual o directamente la no
-        elegibilidad para rich results. Además el valor (5.0/5) ni
-        siquiera coincidía en escala con el "9.3/10" que sí se muestra
-        en pantalla en .scores-section -- ese widget es contenido
-        editorial plano (no está marcado como schema.org Rating), así
-        que no se toca y sigue mostrándose normalmente.
-     2) "image": ahora empieza con brode-og.webp (1200x630), la única
-        foto del set que cumple el ancho mínimo recomendado por Google
-        (≥1200px) para que "image" sea candidata a resultados enriquecidos.
-        brodefrente/brode1/brode2/brode3 quedan igual pero están todas
-        por debajo de ese mínimo (ver dimensiones reales en /img) --
-        pendiente para las 51 fichas: generar un recorte 1200px+ por
-        foto o priorizar siempre el ogImagePath como primera entrada.
-     3) "makesOffer": se agregó "availability": InStock a cada Offer
-        (dato real, Brode vende activamente estos productos).
-     4) "hasMap" agregado (faltaba). Mismo place_id que ya usan los
-        botones "Cómo llegar" de esta misma página -- no es un dato
-        nuevo, solo se declara también en JSON-LD. Sigue el mismo
-        patrón que ya existe en otras partes del sitio (ver p.ej.
-        los-mejores-restaurantes-cdu/club-social/index.html), que Brode
-        no tenía todavía.
-     NOTA DE PROCESO: esta ficha tenía además drift entre ficha.json
-     (jsonLdRaw) y este index.html -- faltaban acá "@id"/"inLanguage"
-     del lado del JSON y "makesOffer" del lado de ficha.json. Se
-     sincronizaron ambos archivos en esta misma auditoría (ver
-     ficha.json). -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -255,11 +211,6 @@
   ]
 }
 </script>
-<!-- BreadcrumbList (Hallazgo 5): declara la jerarquía Inicio > Gastronomía >
-     Brødë para que Google pueda reemplazar la URL cruda del resultado de
-     búsqueda por breadcrumbs legibles. Bloque independiente del schema
-     "Bakery" de arriba porque BreadcrumbList es un @type propio -- no una
-     propiedad anidable dentro de FoodEstablishment. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -370,6 +321,8 @@
 </head>
 <body>
 
+<!-- SKIP LINK - invariante AGENTS.md �9.2: debe ser el primer elemento
+     enfocable del <body>. Apunta al <main> de m�s abajo. -->
 <a href="#contenido-principal" class="skip-link">Saltar al contenido</a>
 
 <!-- NAV -->
@@ -384,8 +337,9 @@
   <span class="nav-badge">🥐 Destacado</span>
 </nav>
 
+<main id="contenido-principal" tabindex="-1">
 <!-- HERO -->
-<section class="hero " aria-label="Brødë" id="contenido-principal" tabindex="-1">
+<section class="hero " aria-label="Brødë">
   
   <img class="hero-img" src="/img/brodefrente.webp" alt="Frente de Brødë Panadería Artesanal — Concepción del Uruguay" fetchpriority="high" loading="eager" width="474" height="215" />
   
@@ -451,7 +405,7 @@
 </div>
 
 <!-- ACCESOS OFICIALES (fuente: linktr.ee/brodepanaderia, verificado ago-2026) -->
-<div class="info-strip" role="complementary" aria-label="Accesos oficiales de Brødë" style="margin-top:-1px">
+<div class="info-strip info-strip--flush" role="complementary" aria-label="Accesos oficiales de Brødë">
   <div class="info-cell">
     <span class="info-cell-label">Catálogo oficial</span>
     <span class="info-cell-value">📂 Álbum de fotos</span>
@@ -573,7 +527,7 @@
   </div>
   <div class="about-grid">
     <div>
-      <p class="about-body" style="margin-bottom:32px;font-size:16px;font-weight:400"><strong style="color:var(--gold-dark);font-weight:700">Catálogo verificado (información actualizada).</strong> Brødë ofrece una variedad de productos elaborados diariamente. Los más populares son los laminados y los panes de masa madre. A continuación, los productos más demandados:</p>
+      <p class="about-body catalog-lead"><strong>Catálogo verificado (información actualizada).</strong> Brødë ofrece una variedad de productos elaborados diariamente. Los más populares son los laminados y los panes de masa madre. A continuación, los productos más demandados:</p>
       
       <h3 class="about-title about-subtitle">Laminados</h3>
       <p class="about-body"><strong>Croissants:</strong> Con más de 25 capas de manteca y masa hojaldrada. Disponibles dulces o salados. Son reconocidos como los "mejores laminados de la zona". <strong>Medialunas:</strong> laminados de múltiples capas con sabor auténtico argentino y técnica francesa, disponibles diariamente. <strong>Rolls de Canela:</strong> especialidad de la casa, masa suave y aromática rellena con canela y azúcar, descritos como "impresionantes" por clientes verificados.</p>
@@ -601,7 +555,7 @@
         <li><div class="side-box-row"><strong>Pan de Hamburguesa</strong><span class="side-box-val">$ 385</span></div><span class="side-box-caption">precio unitario</span></li>
       </ul>
       <a href="https://queresto.com/BRODE" class="side-box-cta" target="_blank" rel="noopener noreferrer">🧾 Menú oficial en vivo</a>
-      <p style="font-size:11px;color:var(--muted);margin-top:16px;line-height:1.6;padding-top:12px;border-top:1px solid rgba(var(--gold-rgb),0.2)"><em>Fuente: menú oficial de Brødë en QueResto.com (consultado ago-2026)</em></p>
+      <p class="source-caption source-caption--bordered"><em>Fuente: menú oficial de Brødë en QueResto.com (consultado ago-2026)</em></p>
     </div>
   </div>
 </div>
@@ -806,21 +760,21 @@
     
     
     
-    <ul class="adn-list" aria-label="Características" style="margin-top:28px">
+    <ul class="adn-list adn-list--spaced" aria-label="Características">
       <li>Laminados, croissants, rolls de canela y panes de masa madre de elaboración propia</li><li>Proceso de 72 horas en cada producto</li><li>Pan sobrante donado diariamente a comedores y hogares locales</li><li>Disponible también en negocios seleccionados de la región (línea mayorista)</li>
     </ul>
     
-    <p style="font-size:11px;color:#ffffff;margin-top:16px;letter-spacing:0.05em">Información actualizada — Agosto 2026</p>
+    <p class="schedule-updated-note">Información actualizada — Agosto 2026</p>
   </div>
   <div>
-    <div style="margin-bottom:24px" aria-live="polite">
-      <div id="schedStatusPill" class="status-pill" style="background:rgba(68,153,111,0.15);color:#ffffff">
-        <span class="status-dot" id="schedDot" aria-hidden="true" style="background:#ffffff"></span>
+    <div class="schedule-live-status" aria-live="polite">
+      <div id="schedStatusPill" class="status-pill status-pill--default">
+        <span class="status-dot status-dot--default" id="schedDot" aria-hidden="true"></span>
         <span id="schedStatusText">Cargando…</span>
       </div>
-      <p id="schedInfo" style="font-size:12px;color:#ffffff;margin-top:8px"></p>
+      <p id="schedInfo" class="sched-info-text"></p>
     </div>
-    <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="schedule-actions-stack">
       <a href="https://www.google.com/maps/search/?api=1&query=-32.48069,-58.25455&query_place_id=ChIJL9JzMpnbr5URmp6O9e7YgU4" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🗺️ Cómo llegar</a><a href="https://wa.me/5493442306349?text=Hola!%20Vi%20Brode%20en%20UruSpot%20y%20quer%C3%ADa%20consultar" target="_blank" rel="noopener noreferrer" class="btn btn-primary">💬 Consultar por WhatsApp</a><a href="https://www.instagram.com/brodepanaderia/" target="_blank" rel="noopener noreferrer" class="btn btn-primary">📸 Ver en Instagram</a>
       <button id="share-btn" class="btn btn-ghost" aria-label="Compartir esta página">📤 Compartir</button>
     </div>
@@ -846,7 +800,7 @@
         <strong>Zona:</strong> Casco urbano — acceso sencillo desde el centro<br>
         <strong>Recomendación:</strong> Los productos se agotan rápido — conviene llegar temprano o consultar disponibilidad.<br>
         <strong>También disponible en:</strong> Negocios seleccionados de la región (pedidos por WhatsApp para línea mayorista)
-        <div style="margin-top:28px;display:flex;flex-direction:column;gap:10px">
+        <div class="map-actions-stack">
           <a href="https://www.google.com/maps/search/?api=1&query=-32.48069,-58.25455&query_place_id=ChIJL9JzMpnbr5URmp6O9e7YgU4" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🗺️ Cómo llegar</a><a href="https://wa.me/5493442306349?text=Hola!%20Vi%20Brode%20en%20UruSpot%20y%20quer%C3%ADa%20consultar" target="_blank" rel="noopener noreferrer" class="btn btn-primary">💬 Consultar por WhatsApp</a>
         </div>
       </div>
@@ -910,7 +864,7 @@
         <li><strong>📂 Catálogo</strong>Álbum fotográfico oficial en Google Drive.</li>
         <li><strong>🏬 Segundo local</strong>BRODE Almacén Boutique — Rocamora 459, tel. +54 3442 31-9044.</li>
       </ul>
-      <p style="font-size:11px;color:var(--muted);margin-top:16px;line-height:1.6;padding-top:12px;border-top:1px solid rgba(var(--gold-rgb),0.2)"><em>Fuente del segundo local: base de datos verificada de URU SPOT (registro independiente, estado VALIDADO_FINAL).</em></p>
+      <p class="source-caption source-caption--bordered"><em>Fuente del segundo local: base de datos verificada de URU SPOT (registro independiente, estado VALIDADO_FINAL).</em></p>
     </div>
   </div>
 </div>
@@ -976,10 +930,11 @@
 
 
 <!-- FOOTER -->
+</main>
 <footer class="footer">
   <a href="../../" class="footer-logo">URU SPOT</a>
   <span>Guía gastronómica de Concepción del Uruguay</span>
-  <span>Información verificada y actualizada — Agosto 2026</span>
+  <span>Informaci�n verificada y actualizada &mdash; Agosto 2026</span>
   <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
 </footer>
 <script id="ficha-data" type="application/json">
