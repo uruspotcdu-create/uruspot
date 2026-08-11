@@ -1052,16 +1052,19 @@
 </style>
 
 <!-- HERO -->
-<!-- CORRECCIÓN (auditoría diseño visual, 2026-08): la imagen anterior
-     (brodefrente.webp) era el isotipo de marca a 474×215px estirado a
-     pantalla completa — se veía pixelado en desktop e ilegible en mobile
-     (el hero recortaba directo sobre las letras). Se reemplaza por
-     brode-og.webp, foto real de los bagels insignia de Brødë en formato
-     panorámico 1200×630 (mismo asset que ya usa og:image en el <head>),
-     con object-fit:cover casi sin upscaling. -->
+<!-- HISTORIAL (auditoría diseño visual, 2026-08): esta imagen había sido
+     cambiada de brodefrente.webp (isotipo de marca, 474x215px estirado a
+     pantalla completa - pixelado en desktop, ilegible en mobile) a
+     brode-og.webp (foto de bagels, 1200x630, casi sin upscaling) por
+     motivos de calidad visual. REVERTIDO A PEDIDO DEL CLIENTE (ago-2026):
+     vuelve a brodefrente.webp para que el hero muestre el nombre "BRODE" -
+     el cliente confirmó explícitamente que acepta el pixelado como
+     consecuencia conocida de este cambio. og:image / twitter:image (ver
+     <head>) NO se tocaron: las tarjetas de redes sociales siguen usando
+     brode-og.webp, sin este isotipo estirado. -->
 <section class="hero " aria-label="Brødë">
   
-  <img class="hero-img" src="/img/brode-og.webp" alt="Bagels artesanales recién horneados de Brødë — Concepción del Uruguay" fetchpriority="high" loading="eager" width="1200" height="630" />
+  <img class="hero-img" src="/img/brodefrente.webp" alt="Logo de Brødë sobre fondo de horno — Concepción del Uruguay" fetchpriority="high" loading="eager" width="474" height="215" />
   
   <div class="hero-overlay" aria-hidden="true"></div>
   <div class="hero-content">
