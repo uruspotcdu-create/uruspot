@@ -1,3 +1,108 @@
+<!-- ============================================================
+     CAPA "FICHA MAESTRA" (auditoría UX/UI, 2026-08) — TODO dentro de
+     cuerpo.html. No se toca ficha.css, ficha.js ni ningún otro archivo:
+     lo que sigue son extensiones puramente aditivas para ESTA ficha
+     (Brødë), que reutilizan las variables y clases ya definidas en
+     ficha.css (--gold, --ink, --muted, --border, .btn, .about-body...)
+     y solo agregan selectores propios para piezas nuevas: acordeón de
+     FAQ, barra CTA sticky en mobile (las clases .cta-sticky/.cta-sticky__btn
+     ya existían en ficha.css sin usarse en ninguna ficha — acá se les
+     da contenido real por primera vez), chips de "copiar", contador
+     animado de los scores y un scroll-cue en el hero. Todo el motion
+     respeta prefers-reduced-motion y usa solo transform/opacity para
+     quedar en el hilo de composición (GPU-friendly). Sin librerías
+     externas. ============================================================ -->
+<style>
+  /* ---- Scroll-cue del hero: invita a bajar sin ser intrusivo ---- */
+  .hero-scroll-cue{
+    position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
+    z-index:2;display:flex;flex-direction:column;align-items:center;gap:7px;
+    color:rgba(255,255,255,.72);opacity:1;transition:opacity .4s ease;
+    pointer-events:none;
+  }
+  .hero-scroll-cue span{font-size:9px;letter-spacing:.3em;text-transform:uppercase;font-family:'DM Sans',sans-serif}
+  .hero-scroll-cue svg{animation:heroScrollBounce 2.2s ease-in-out infinite}
+  .hero-scroll-cue.is-hidden{opacity:0}
+  @keyframes heroScrollBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+  @media (prefers-reduced-motion:reduce){
+    .hero-scroll-cue svg{animation:none}
+    .hero-scroll-cue{transition:none}
+  }
+  @media (max-width:768px){ .hero-scroll-cue{display:none} }
+
+  /* ---- Trazo del eyebrow: se dibuja al entrar, en vez de aparecer ya
+     "hecho" -- detalle mínimo que remata la cascada heroEntrada de
+     ficha.css con el mismo lenguaje editorial (líneas finas, --gold). */
+  .eyebrow-line{transform-origin:left center;animation:eyebrowDraw .7s .5s cubic-bezier(.16,.84,.32,1) both}
+  @keyframes eyebrowDraw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @media (prefers-reduced-motion:reduce){ .eyebrow-line{animation:none} }
+
+  /* ---- Halo pulsante en el punto de estado (Abierto ahora/Cerrado) ----
+     #schedDot recibe su color por JS (ficha.js, style inline) -- el halo
+     usa background:inherit para heredar ESE color sin tocar ficha.js. */
+  #schedDot{position:relative}
+  #schedDot::before{
+    content:'';position:absolute;inset:-5px;border-radius:50%;
+    background:inherit;opacity:.5;animation:schedPulse 2.4s ease-out infinite;
+  }
+  @keyframes schedPulse{
+    0%{transform:scale(.6);opacity:.55}
+    70%,100%{transform:scale(1.9);opacity:0}
+  }
+  @media (prefers-reduced-motion:reduce){ #schedDot::before{animation:none;display:none} }
+
+  /* ---- Chips utilitarios: copiar teléfono / dirección con feedback ---- */
+  .copy-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:999px;border:1px solid var(--border);
+    background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
+    font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:border-color .2s ease,color .2s ease,background .2s ease,transform .15s ease;
+  }
+  .copy-chip:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
+  .copy-chip:active{transform:scale(.94)}
+  .copy-chip:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  .copy-chip[data-copied="true"]{border-color:var(--gold-dark);color:var(--gold-dark);background:rgba(var(--gold-rgb),.08)}
+  .info-cell .copy-chip{align-self:flex-start;border-color:rgba(255,255,255,.28);color:rgba(255,255,255,.78)}
+  .info-cell .copy-chip:hover{border-color:var(--gold);color:var(--gold)}
+  .info-cell .copy-chip[data-copied="true"]{border-color:var(--gold);color:var(--gold);background:rgba(var(--gold-rgb),.15)}
+  @media (prefers-reduced-motion:reduce){ .copy-chip{transition:none} }
+
+  /* ---- Números de score: no "saltan" de ancho mientras cuentan ---- */
+  .score-big-num,.score-val{font-variant-numeric:tabular-nums}
+
+  /* ---- FAQ como acordeón accesible (details/summary nativo) ----
+     Sin JavaScript, <details> ya expande/colapsa de forma instantánea,
+     accesible por teclado y sin depender de nada más. El <script> del
+     final de este archivo solo SUMA una animación de alto suave; si no
+     corre (JS desactivado o falla), el comportamiento nativo intacto. */
+  .faq-item{border-bottom:1px solid var(--border);padding:22px 0}
+  .faq-item:first-child{padding-top:0}
+  .faq-item:last-child{border-bottom:none;padding-bottom:0}
+  .faq-item summary{
+    list-style:none;cursor:pointer;display:flex;align-items:center;
+    justify-content:space-between;gap:20px;-webkit-tap-highlight-color:transparent;
+    font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;
+    color:var(--ink);line-height:1.4;
+  }
+  .faq-item summary::-webkit-details-marker{display:none}
+  .faq-item summary::marker{content:''}
+  .faq-item summary:hover{color:var(--gold-dark)}
+  .faq-item summary:focus-visible{outline:2px solid var(--gold);outline-offset:6px;border-radius:2px}
+  .faq-icon{
+    flex-shrink:0;width:28px;height:28px;border-radius:50%;color:var(--muted);
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    transition:transform .35s cubic-bezier(.16,.84,.32,1),background .25s ease,border-color .25s ease,color .25s ease;
+  }
+  .faq-icon svg{width:11px;height:11px}
+  .faq-item[open] .faq-icon{transform:rotate(45deg);background:var(--gold);border-color:var(--gold);color:var(--ink)}
+  .faq-a{overflow:hidden}
+  .faq-a .about-body{padding-top:14px;margin-bottom:0}
+  @media (prefers-reduced-motion:reduce){ .faq-icon{transition:none} }
+  @media (max-width:768px){ .faq-item summary{gap:14px} }
+</style>
+
 <!-- HERO -->
 <!-- CORRECCIÓN (auditoría diseño visual, 2026-08): la imagen anterior
      (brodefrente.webp) era el isotipo de marca a 474×215px estirado a
@@ -49,7 +154,12 @@
     <div class="score-label">URU SPOT Score</div>
     <div class="score-stars" aria-hidden="true">★★★★★</div>
   </div>
-  
+
+  <div class="hero-scroll-cue" aria-hidden="true">
+    <span>Descubrí más</span>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </div>
+
 </section>
 
 <!-- INFO STRIP -->
@@ -80,6 +190,7 @@
     
     <span class="info-cell-value">03442 30-6349</span>
     <span class="info-cell-sub">📈 Alta demanda — se recomienda anticiparse</span>
+    <button type="button" class="copy-chip" data-copy-value="+5493442306349" aria-label="Copiar número de teléfono de Brødë">📋 Copiar número</button>
     
     
     <div class="action-row action-row--compact">
@@ -507,7 +618,7 @@
       </div>
       <div>
         <h2 class="map-info-title" id="map-heading">Dr. J. Lacava 491, Concepción del Uruguay</h2>
-        <strong>Dirección:</strong> Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos<br>
+        <strong>Dirección:</strong> Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos <button type="button" class="copy-chip" data-copy-value="Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos" aria-label="Copiar dirección de Brødë">📋 Copiar</button><br>
         <strong>Zona:</strong> Casco urbano — acceso sencillo desde el centro<br>
         <strong>Recomendación:</strong> Los productos se agotan rápido — conviene llegar temprano o consultar disponibilidad.<br>
         <strong>También disponible en:</strong> Negocios seleccionados de la región (pedidos por WhatsApp para línea mayorista)
@@ -667,33 +778,56 @@
     <h2 class="section-label" id="faq-heading">Preguntas frecuentes</h2>
     <span class="section-line" aria-hidden="true"></span>
   </div>
+  <!-- FAQ COMO ACORDEÓN (auditoría UX/UI, 2026-08): antes eran 8 pares
+       h3+p mostrados siempre expandidos -- mucho texto compitiendo por
+       atención antes de que el usuario elija qué le importa. <details>/
+       <summary> es accesible de forma nativa (teclado, lectores de
+       pantalla, sin JS) y reduce la carga visual inicial a solo las
+       preguntas; el primer ítem de cada columna queda abierto (atributo
+       "open") para que se entienda de un vistazo que es interactivo. -->
   <div class="about-grid u-reveal-stagger">
     <div>
-      <h3 class="about-title about-subtitle">¿Qué días abre Brødë?</h3>
-      <p class="about-body">De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes.</p>
-      
-      <h3 class="about-title about-subtitle">¿Cuál es la especialidad de la casa?</h3>
-      <p class="about-body">Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como "los mejores laminados de la zona". Todo pasa por un proceso de 72 horas.</p>
-      
-      <h3 class="about-title about-subtitle">¿Cuáles son los precios?</h3>
-      <p class="about-body">Croissant: <strong class="stat">$1.530</strong>. Pan de Campo (caja de 10): <strong class="stat">$1.650</strong>. Pan de Hamburguesa: <strong class="stat">$385</strong>. Para otros productos y promociones, consultar directamente por WhatsApp.</p>
-      
-      <h3 class="about-title about-subtitle">¿Se puede comprar en otro lugar además del local?</h3>
-      <p class="about-body">Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp.</p>
+      <details class="faq-item" open>
+        <summary>¿Qué días abre Brødë?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Cuál es la especialidad de la casa?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como "los mejores laminados de la zona". Todo pasa por un proceso de 72 horas.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Cuáles son los precios?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Croissant: <strong class="stat">$1.530</strong>. Pan de Campo (caja de 10): <strong class="stat">$1.650</strong>. Pan de Hamburguesa: <strong class="stat">$385</strong>. Para otros productos y promociones, consultar directamente por WhatsApp.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Se puede comprar en otro lugar además del local?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp.</p></div>
+      </details>
     </div>
 
     <div>
-      <h3 class="about-title about-subtitle">¿Qué pasa con el pan que no se vende?</h3>
-      <p class="about-body">Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad.</p>
-      
-      <h3 class="about-title about-subtitle">¿El local es accesible para sillas de ruedas?</h3>
-      <p class="about-body">No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349.</p>
-      
-      <h3 class="about-title about-subtitle">¿Hay opciones veganas o sin gluten?</h3>
-      <p class="about-body">Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita.</p>
-      
-      <h3 class="about-title about-subtitle">¿Cuánto tiempo lleva el proceso de un pan?</h3>
-      <p class="about-body"><strong class="stat">72 horas</strong> desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante.</p>
+      <details class="faq-item" open>
+        <summary>¿Qué pasa con el pan que no se vende?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿El local es accesible para sillas de ruedas?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Hay opciones veganas o sin gluten?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Cuánto tiempo lleva el proceso de un pan?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body"><strong class="stat">72 horas</strong> desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante.</p></div>
+      </details>
     </div>
   </div>
 </section>
@@ -716,6 +850,217 @@
     </div>
   </div>
 </section>
+
+<!-- CTA STICKY EN MOBILE (auditoría UX/UI, 2026-08): las clases
+     .cta-sticky/.cta-sticky__btn ya existían en ficha.css (comentario
+     "creada por ficha.js — inicializarCtaSticky()"), pero esa función
+     nunca se escribió y ningún cuerpo.html traía el markup -- quedaba
+     muerta. Se completa acá, solo para esta ficha: barra fija de acceso
+     rápido a Llamar/WhatsApp, visible solo en mobile (la propia
+     ficha.css ya la oculta en desktop) y solo después de pasar el hero
+     (ver inicializarScrollUI() más abajo), para no tapar el hero al
+     entrar. Mismos destinos que los botones ya usados en Info rápida. -->
+<div class="cta-sticky" role="complementary" aria-label="Acciones rápidas">
+  <a href="tel:+5493442306349" class="cta-sticky__btn cta-sticky__btn--principal">📞 Llamar</a><a href="https://wa.me/5493442306349?text=Hola!%20Vi%20Brode%20en%20UruSpot%20y%20quer%C3%ADa%20consultar" target="_blank" rel="noopener noreferrer" class="cta-sticky__btn cta-sticky__btn--secundario">💬 WhatsApp</a>
+</div>
+
+<script>
+  /* ficha.js ya inicializa lo compartido entre las ~51 fichas (estado
+     abierto/cerrado, barras de score, compartir, reveals...). Este
+     script SOLO agrega comportamiento nuevo, exclusivo de esta página,
+     sin tocar ni volver a enganchar nada de lo que ficha.js ya maneja
+     (mismos IDs, sin colisión: acá no se usan #share-btn, #reviewForm,
+     etc.). Progresivo: cada función revisa por su cuenta si el
+     navegador soporta lo que necesita y, si no, se retira sin romper
+     nada -- el HTML/CSS de arriba ya funciona sin este <script>. */
+  (function () {
+    "use strict";
+
+    function listo(fn) {
+      if (document.readyState !== "loading") fn();
+      else document.addEventListener("DOMContentLoaded", fn);
+    }
+
+    var prefiereMenosMovimiento =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ───────── Acordeón FAQ: alto animado sobre el <details> nativo ───────── */
+    function inicializarFaqAcordeon() {
+      var items = document.querySelectorAll(".faq-item");
+      if (!items.length) return;
+      if (prefiereMenosMovimiento || typeof Element.prototype.animate !== "function") return;
+
+      items.forEach(function (item) {
+        var summary = item.querySelector("summary");
+        var contenido = item.querySelector(".faq-a");
+        if (!summary || !contenido) return;
+        var animando = false;
+
+        summary.addEventListener("click", function (e) {
+          e.preventDefault();
+          if (animando) return;
+          if (item.open) {
+            cerrar();
+          } else {
+            item.open = true;
+            abrir();
+          }
+        });
+
+        function abrir() {
+          animando = true;
+          var alto = contenido.scrollHeight;
+          contenido.style.overflow = "hidden";
+          var anim = contenido.animate(
+            [{ height: "0px", opacity: 0.4 }, { height: alto + "px", opacity: 1 }],
+            { duration: 260, easing: "cubic-bezier(.16,.84,.32,1)" }
+          );
+          anim.onfinish = function () {
+            contenido.style.overflow = "";
+            contenido.style.height = "";
+            animando = false;
+          };
+        }
+
+        function cerrar() {
+          animando = true;
+          var alto = contenido.scrollHeight;
+          contenido.style.overflow = "hidden";
+          var anim = contenido.animate(
+            [{ height: alto + "px", opacity: 1 }, { height: "0px", opacity: 0.4 }],
+            { duration: 220, easing: "cubic-bezier(.16,.84,.32,1)" }
+          );
+          anim.onfinish = function () {
+            item.open = false;
+            contenido.style.overflow = "";
+            contenido.style.height = "";
+            animando = false;
+          };
+        }
+      });
+    }
+
+    /* ───────── Scroll-cue del hero + CTA sticky: un solo listener ───────── */
+    function inicializarScrollUI() {
+      var hero = document.querySelector(".hero");
+      var cue = document.querySelector(".hero-scroll-cue");
+      var cta = document.querySelector(".cta-sticky");
+      if (!hero || (!cue && !cta)) return;
+
+      var altoHero = hero.offsetHeight;
+      var enEspera = false;
+
+      function actualizar() {
+        var y = window.scrollY || window.pageYOffset;
+        if (cue) cue.classList.toggle("is-hidden", y > 80);
+        if (cta) cta.classList.toggle("is-visible", y > altoHero * 0.6);
+        enEspera = false;
+      }
+
+      actualizar();
+      window.addEventListener(
+        "scroll",
+        function () {
+          if (enEspera) return;
+          enEspera = true;
+          window.requestAnimationFrame(actualizar);
+        },
+        { passive: true }
+      );
+      window.addEventListener(
+        "resize",
+        function () { altoHero = hero.offsetHeight; },
+        { passive: true }
+      );
+    }
+
+    /* ───────── Chips de copiar (teléfono / dirección) ───────── */
+    function inicializarCopyChips() {
+      var chips = document.querySelectorAll(".copy-chip[data-copy-value]");
+      if (!chips.length) return;
+
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        chips.forEach(function (chip) { chip.style.display = "none"; });
+        return;
+      }
+
+      chips.forEach(function (chip) {
+        var etiquetaOriginal = chip.textContent;
+        chip.addEventListener("click", function () {
+          var valor = chip.getAttribute("data-copy-value");
+          navigator.clipboard
+            .writeText(valor)
+            .then(function () {
+              chip.setAttribute("data-copied", "true");
+              chip.textContent = "✓ Copiado";
+              setTimeout(function () {
+                chip.removeAttribute("data-copied");
+                chip.textContent = etiquetaOriginal;
+              }, 1800);
+            })
+            .catch(function () {});
+        });
+      });
+    }
+
+    /* ───────── Contador animado de los scores (9.3, 9.7, 9.5...) ─────────
+       ficha.js ya anima las barras (.score-fill) al entrar en viewport;
+       esto SOLO suma el conteo de los números para que number y barra
+       lleguen con la misma sensación de "revelado", sin duplicar el
+       observer de ficha.js (éste es propio e independiente). */
+    function inicializarContadorScores() {
+      var section = document.querySelector(".scores-section");
+      var numeros = document.querySelectorAll(".score-big-num, .score-val");
+      if (!section || !numeros.length) return;
+
+      numeros.forEach(function (el) {
+        el.setAttribute("data-final-texto", el.textContent);
+      });
+
+      if (prefiereMenosMovimiento || !("IntersectionObserver" in window)) return;
+
+      function contar(el) {
+        var textoFinal = el.getAttribute("data-final-texto") || "";
+        var numFinal = parseFloat(textoFinal.replace(",", "."));
+        if (isNaN(numFinal)) return;
+        var duracion = 1300;
+        var inicio = null;
+
+        function frame(ts) {
+          if (inicio === null) inicio = ts;
+          var progreso = Math.min((ts - inicio) / duracion, 1);
+          var facilitado = 1 - Math.pow(1 - progreso, 3);
+          if (progreso < 1) {
+            el.textContent = (numFinal * facilitado).toFixed(1);
+            window.requestAnimationFrame(frame);
+          } else {
+            el.textContent = textoFinal;
+          }
+        }
+        window.requestAnimationFrame(frame);
+      }
+
+      var io = new IntersectionObserver(
+        function (entries) {
+          if (!entries[0].isIntersecting) return;
+          numeros.forEach(function (el, i) {
+            setTimeout(function () { contar(el); }, i * 120);
+          });
+          io.disconnect();
+        },
+        { threshold: 0.3 }
+      );
+      io.observe(section);
+    }
+
+    listo(function () {
+      inicializarFaqAcordeon();
+      inicializarScrollUI();
+      inicializarCopyChips();
+      inicializarContadorScores();
+    });
+  })();
+</script>
 
 
 <!-- FOOTER -->
