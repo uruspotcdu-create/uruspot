@@ -96,6 +96,12 @@
         foto o priorizar siempre el ogImagePath como primera entrada.
      3) "makesOffer": se agregó "availability": InStock a cada Offer
         (dato real, Brode vende activamente estos productos).
+     4) "hasMap" agregado (faltaba). Mismo place_id que ya usan los
+        botones "Cómo llegar" de esta misma página -- no es un dato
+        nuevo, solo se declara también en JSON-LD. Sigue el mismo
+        patrón que ya existe en otras partes del sitio (ver p.ej.
+        los-mejores-restaurantes-cdu/club-social/index.html), que Brode
+        no tenía todavía.
      NOTA DE PROCESO: esta ficha tenía además drift entre ficha.json
      (jsonLdRaw) y este index.html -- faltaban acá "@id"/"inLanguage"
      del lado del JSON y "makesOffer" del lado de ficha.json. Se
@@ -132,6 +138,7 @@
     "addressRegion": "Entre Ríos",
     "addressCountry": "AR"
   },
+  "hasMap": "https://www.google.com/maps/place/?q=place_id:ChIJL9JzMpnbr5URmp6O9e7YgU4",
   "geo": {
     "@type": "GeoCoordinates",
     "latitude": "-32.4806862",
