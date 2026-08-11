@@ -292,7 +292,23 @@ svg{max-width:100%}
    sólo toca max-width/margin de .reveal-photo, nunca declaró su propio
    aspect-ratio, así que este fix ya cubre todos los tamaños de
    pantalla con una sola regla. */
-.reveal-photo img{display:block;width:100%;height:auto;object-fit:cover;filter:brightness(0.95) saturate(0.97);transition:transform .5s}
+/* FIX (auditoría layout, pase 5 — 2026-08): el pase 4 sacó el recorte
+   (aspect-ratio:3/4 forzado), pero eso solo resuelve el recorte por
+   CSS -- una vez sin ese forzado, lo que se ve es el archivo real tal
+   cual es, y brode2.webp en particular es una toma de por sí muy
+   cerrada del croissant (no hay más foto "alrededor" que recortar
+   distinto: el fix de código no puede agregar encuadre que el archivo
+   no tiene). El cliente pidió, con esa foto de base, que al menos no
+   se sienta tan invasiva/pegada al borde -- se logra pasando de
+   width:100%;height:auto (la imagen estira para llenar TODO el ancho
+   de la tarjeta, borde a borde, sin aire) a un recuadro tipo
+   letterbox: la imagen se limita a max-height y max-width con margen
+   fijo alrededor, object-fit:contain (nunca recorta, solo escala
+   entera dentro de esa caja) y queda centrada sobre el fondo blanco de
+   .reveal-photo. Mismo archivo, mismo encuadre real, pero se ve más
+   chica y compuesta dentro de su marco en vez de invadirlo -- efecto
+   visual de "menos zoom" sin tocar un solo píxel de la foto. */
+.reveal-photo img{display:block;width:auto;max-width:calc(100% - 40px);height:auto;max-height:440px;object-fit:contain;margin:20px auto;filter:brightness(0.95) saturate(0.97);transition:transform .5s}
 .reveal-photo:hover img{transform:scale(1.03)}
 .reveal-photo figcaption{padding:14px 20px;font-size:12px;line-height:1.6;color:var(--muted);font-style:italic;text-align:center;border-top:1px solid var(--border)}
 
@@ -303,6 +319,7 @@ svg{max-width:100%}
 }
 @media(max-width:768px){
   .reveal-photo{max-width:100%;margin:28px 0}
+  .reveal-photo img{max-height:360px;max-width:calc(100% - 28px);margin:14px auto}
 }
 
 /* TAGS (restaurado) */
