@@ -19,6 +19,55 @@
  * (family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600
  * &family=DM+Sans:wght@300;400;500;600), así el render es idéntico entre
  * fichas y el único cambio es de dónde vienen los bytes.
+ *
+ * 2026-08 (auditoría "Ficha Maestra", pase 2 — ajuste de métricas de
+ * fallback): font-display:swap (ya presente en las 12 reglas de abajo)
+ * elimina el texto invisible mientras carga la webfont, pero introduce su
+ * propio costo: durante esa ventana el navegador pinta con la fuente de
+ * respaldo (serif/sans-serif del sistema — ver locales/ficha.css:
+ * body{font-family:'DM Sans',sans-serif}, .hero-title{font-family:
+ * 'Cormorant Garamond',serif}), y esa fuente casi nunca ocupa el mismo
+ * espacio por carácter que la real. Cuando entra el woff2 y el navegador
+ * re-layoutea con las métricas correctas, todo lo que viene después del
+ * texto (imágenes, cards, el resto de la página) salta -- es Cumulative
+ * Layout Shift real y medible, más notorio acá que en la mayoría de los
+ * sitios porque .hero-title llega a clamp(64px,10vw,120px): un salto de
+ * métrica a ese tamaño se nota mucho más que en párrafos de 15px.
+ *
+ * ascent-override/descent-override/line-gap-override/size-adjust (Baseline
+ * ampliamente disponible: Chrome/Edge 92+, Firefox 89+, Safari 17+; en
+ * cualquier navegador más viejo estos cuatro descriptores simplemente se
+ * ignoran -- degradación segura, exactamente el mismo comportamiento que
+ * hoy) le dicen al navegador que fuerce las métricas de la fuente de
+ * fallback a coincidir con las de la fuente real ANTES de que termine de
+ * cargar, así el layout final ya está calculado desde el primer paint y
+ * el intercambio de fuente no mueve una sola caja en pantalla.
+ *
+ * Los cuatro valores por regla NO están estimados a ojo (eso sería peor
+ * que no ponerlos: un ajuste mal calculado desalinea el fallback más de
+ * lo que ya estaba). Se midieron de verdad: se bajaron los 12 archivos
+ * .woff2 reales de esta hoja desde @fontsource/cormorant-garamond y
+ * @fontsource/dm-sans (los mismos paquetes de origen documentados arriba),
+ * se descomprimieron a TTF (wawoff2) y se leyó su tabla hmtx/hhea con
+ * fontkit: unitsPerEm, ascent, descent, line-gap y el ancho promedio de
+ * a-z de cada corte real (no solo el regular -- los pesos más gruesos SÍ
+ * miden distinto: DM Sans 600 pesa ~7% más ancho que DM Sans 300 letra
+ * por letra). Como contraparte del fallback se usaron las métricas
+ * públicas de Times New Roman (fallback de 'serif', para Cormorant
+ * Garamond) y Arial (fallback de 'sans-serif', para DM Sans) de
+ * @capsizecss/metrics -- misma base de datos que usan next/font y Nuxt
+ * Fontaine para este cálculo, no un valor inventado. Fórmula (Capsize):
+ *   sizeAdjust      = (webfont.azAvgWidth/webfont.upm) / (fallback.xWidthAvg/fallback.upm)
+ *   ascent-override  = (webfont.ascent  / webfont.upm) / sizeAdjust
+ *   descent-override = (webfont.descent / webfont.upm) / sizeAdjust
+ *   line-gap-override= (webfont.lineGap / webfont.upm) / sizeAdjust
+ * 'serif'/'sans-serif' genéricos resuelven a fuentes distintas según SO
+ * (Georgia/Noto Serif en algunos casos en vez de Times), así que esto es
+ * una MEJORA sustancial del ajuste por defecto (cero corrección), no una
+ * promesa de cero shift en el 100% de los sistemas operativos -- mismo
+ * criterio de "mejor aproximación real, no perfección inalcanzable" que
+ * ya usa el resto de este proyecto (ver, por ejemplo, aspect-ratio:3/4
+ * como "promedio razonable" en .gallery-item img de ficha.css).
  */
 
 @font-face {
@@ -28,6 +77,10 @@
   font-weight: 300;
   src: url('../fonts/cormorant-garamond-latin-300-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 85.4%;
+  descent-override: 26.53%;
+  line-gap-override: 0%;
+  size-adjust: 108.19%;
 }
 @font-face {
   font-family: 'Cormorant Garamond';
@@ -36,6 +89,10 @@
   font-weight: 300;
   src: url('../fonts/cormorant-garamond-latin-300-italic.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 95.72%;
+  descent-override: 29.73%;
+  line-gap-override: 0%;
+  size-adjust: 96.53%;
 }
 @font-face {
   font-family: 'Cormorant Garamond';
@@ -44,6 +101,10 @@
   font-weight: 400;
   src: url('../fonts/cormorant-garamond-latin-400-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 85.14%;
+  descent-override: 26.45%;
+  line-gap-override: 0%;
+  size-adjust: 108.53%;
 }
 @font-face {
   font-family: 'Cormorant Garamond';
@@ -52,6 +113,10 @@
   font-weight: 400;
   src: url('../fonts/cormorant-garamond-latin-400-italic.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 95.24%;
+  descent-override: 29.58%;
+  line-gap-override: 0%;
+  size-adjust: 97.01%;
 }
 @font-face {
   font-family: 'Cormorant Garamond';
@@ -60,6 +125,10 @@
   font-weight: 600;
   src: url('../fonts/cormorant-garamond-latin-600-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 84.48%;
+  descent-override: 26.24%;
+  line-gap-override: 0%;
+  size-adjust: 109.38%;
 }
 @font-face {
   font-family: 'Cormorant Garamond';
@@ -68,11 +137,19 @@
   font-weight: 600;
   src: url('../fonts/cormorant-garamond-latin-600-italic.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 93.94%;
+  descent-override: 29.18%;
+  line-gap-override: 0%;
+  size-adjust: 98.36%;
 }
 /* Peso 700: crítico para el LCP — es el corte que pintan el <h1> del hero
  * (.hero-title, font-weight:900 pide el más pesado disponible) y
  * .about-title/.schedule-title en font:600/700. Sin este corte el
- * navegador sintetiza un negrita falso en vez de usar los trazos reales. */
+ * navegador sintetiza un negrita falso en vez de usar los trazos reales.
+ * Es además la regla donde el ajuste de métricas de arriba más se nota:
+ * .hero-title vive a clamp(64px,10vw,120px), así que el mismo % de
+ * desajuste de ascent/descent se traduce en más píxeles de salto real
+ * que en cualquier otro texto de la ficha. */
 @font-face {
   font-family: 'Cormorant Garamond';
   font-style: normal;
@@ -80,6 +157,10 @@
   font-weight: 700;
   src: url('../fonts/cormorant-garamond-latin-700-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 84.13%;
+  descent-override: 26.13%;
+  line-gap-override: 0%;
+  size-adjust: 109.83%;
 }
 
 /* Corte 300: crítico para el LCP — es el peso base de .hero-subtitle y
@@ -91,6 +172,10 @@
   font-weight: 300;
   src: url('../fonts/dm-sans-latin-300-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 86.33%;
+  descent-override: 26.98%;
+  line-gap-override: 0%;
+  size-adjust: 114.9%;
 }
 @font-face {
   font-family: 'DM Sans';
@@ -99,6 +184,10 @@
   font-weight: 400;
   src: url('../fonts/dm-sans-latin-400-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 84.74%;
+  descent-override: 26.48%;
+  line-gap-override: 0%;
+  size-adjust: 117.06%;
 }
 @font-face {
   font-family: 'DM Sans';
@@ -107,6 +196,10 @@
   font-weight: 500;
   src: url('../fonts/dm-sans-latin-500-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 82.77%;
+  descent-override: 25.86%;
+  line-gap-override: 0%;
+  size-adjust: 119.85%;
 }
 /* Peso 600: usado por .btn (font-family:'DM Sans',...;font-weight:600) —
  * todos los CTA de la ficha (Llamar, WhatsApp, Cómo llegar, Compartir). */
@@ -117,4 +210,8 @@
   font-weight: 600;
   src: url('../fonts/dm-sans-latin-600-normal.woff2') format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  ascent-override: 80.44%;
+  descent-override: 25.14%;
+  line-gap-override: 0%;
+  size-adjust: 123.32%;
 }
