@@ -266,7 +266,33 @@ svg{max-width:100%}
    el resto de fichas), este mismo elemento no es un item de grid y la
    propiedad no hace nada -- cambio seguro, no rompe ningun otro caso. */
 .reveal-photo{grid-column:1/-1;max-width:380px;margin:36px auto;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:#fff}
-.reveal-photo img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;filter:brightness(0.95) saturate(0.97);transition:transform .5s}
+/* FIX (auditoría layout, pase 4 — 2026-08): esta regla tenía
+   aspect-ratio:3/4 forzado + object-fit:cover. A diferencia de
+   .gallery img (ver comentario [IMPORTANTE 2] más arriba), acá
+   height:auto SÍ deja que aspect-ratio controle el tamaño final de la
+   caja (width es 100%, un valor definido, así que el navegador usa
+   aspect-ratio para derivar la altura en vez de usar la intrínseca de
+   la imagen). El problema: las fotos reales de esta ficha son mucho
+   más angostas y altas que 3:4 -- brode1.webp es 509×689 (≈0.74, cerca
+   de 3:4) pero brode2.webp es 300×547 (≈0.55, bastante más vertical).
+   Forzar la caja a 3:4 y cubrirla con object-fit:cover obligaba a
+   recortar (y visualmente "zoomear") una franja angosta de brode2.webp
+   para que llenara un rectángulo más ancho de lo que la foto es en
+   realidad -- exactamente el recorte raro y la sensación de baja
+   calidad marcados por el cliente sobre la captura de pantalla.
+   Se saca aspect-ratio de acá: sin él, y con las imágenes ya
+   declarando su propio width/height real en el HTML (ver
+   brode/index.html y brode/cuerpo.html), el navegador usa la relación
+   de aspecto INTRÍNSECA de cada foto para calcular la altura -- la
+   imagen se escala completa, proporcional, sin recortar nada. object-fit
+   se deja como resguardo inofensivo (si algún día cambia una foto y su
+   proporción real no coincide exactamente con el cálculo, sigue
+   evitando que se deforme/estire) pero ya no fuerza ningún recorte por
+   sí solo. Aplica igual en mobile: el breakpoint de 768px más abajo
+   sólo toca max-width/margin de .reveal-photo, nunca declaró su propio
+   aspect-ratio, así que este fix ya cubre todos los tamaños de
+   pantalla con una sola regla. */
+.reveal-photo img{display:block;width:100%;height:auto;object-fit:cover;filter:brightness(0.95) saturate(0.97);transition:transform .5s}
 .reveal-photo:hover img{transform:scale(1.03)}
 .reveal-photo figcaption{padding:14px 20px;font-size:12px;line-height:1.6;color:var(--muted);font-style:italic;text-align:center;border-top:1px solid var(--border)}
 
