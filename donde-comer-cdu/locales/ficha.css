@@ -46,8 +46,29 @@
      comentarios de cada sección de abajo (todos >4.5:1 para texto normal). */
   --surface-warm:#f1e4d6;--surface-warm-soft:#faefe7;
 }
-html{scroll-behavior:smooth}
-body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* FIX (auditoria mobile, 2026-08): overflow-x:hidden vivia solo en body.
+   En iOS Safari (y en menor medida otros navegadores moviles) el
+   "rubber-band"/arrastre horizontal de la pagina puede seguir
+   disparandose desde el viewport/html aunque body lo tenga oculto, si
+   CUALQUIER descendiente (aunque sea uno solo, en cualquier ficha futura)
+   termina siendo mas ancho que el viewport -- el sintoma reportado es
+   "se puede mover la pantalla hacia los costados" en celular. Duplicar
+   la regla en html (que es, en la practica, el elemento que realmente
+   scrollea la pagina) cierra esa via aunque body por algun motivo no
+   establezca su propio contexto de scroll. width:100% + max-width:100%
+   evitan ademas que html/body mismos se agranden mas alla del viewport
+   por errores de calculo en un descendiente con box-sizing distinto. */
+html{scroll-behavior:smooth;overflow-x:hidden;width:100%;max-width:100%}
+body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;max-width:100%;overflow-wrap:break-word;word-wrap:break-word}
+/* FIX (auditoria mobile, 2026-08): sin un tope global, cualquier <img>/
+   <svg> a la que se le olvide una regla de ancho especifica (nueva
+   ficha, nuevo bloque de contenido) puede imponer su ancho intrinseco
+   real y forzar scroll horizontal en mobile. Las reglas mas especificas
+   que ya existen (.hero-img, .gallery img, .reveal-photo img, etc.)
+   siguen ganando por especificidad -- esto es solo la red de seguridad
+   de ultima instancia, no reemplaza ningun estilo existente. */
+img,video,iframe,embed,object{max-width:100%;height:auto}
+svg{max-width:100%}
 
 /* SKIP LINK (auditoría Brode, 2026-08 — recomendación "baja", mejora UX
    de teclado, no es requisito WCAG AA en sí mismo). Oculto visualmente
@@ -235,7 +256,16 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    agrega ficha.js vía IntersectionObserver, ver inicializarFotosReveal());
    .reveal-photo es solo el marco visual, separado a propósito por si
    algún día se quiere animar un elemento que no sea una foto enmarcada. */
-.reveal-photo{max-width:380px;margin:36px auto;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:#fff}
+/* FIX (auditoria layout, 2026-08): grid-column:1/-1 solo tiene efecto
+   cuando .reveal-photo es HIJO DIRECTO de un .about-grid (display:grid) --
+   caso nuevo, ver Historia/Catalogo en Brode/cuerpo.html, donde la foto se
+   saco de la columna de texto para que quede debajo de las DOS columnas
+   (texto + .side-box) en vez de a mitad de un parrafo, empatada en altura
+   con el borde inferior del cartel de precios/linea de tiempo. Cuando
+   .reveal-photo sigue anidada dentro de un <div> normal (uso historico en
+   el resto de fichas), este mismo elemento no es un item de grid y la
+   propiedad no hace nada -- cambio seguro, no rompe ningun otro caso. */
+.reveal-photo{grid-column:1/-1;max-width:380px;margin:36px auto;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:#fff}
 .reveal-photo img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;filter:brightness(0.95) saturate(0.97);transition:transform .5s}
 .reveal-photo:hover img{transform:scale(1.03)}
 .reveal-photo figcaption{padding:14px 20px;font-size:12px;line-height:1.6;color:var(--muted);font-style:italic;text-align:center;border-top:1px solid var(--border)}
