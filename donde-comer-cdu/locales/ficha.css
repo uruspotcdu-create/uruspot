@@ -350,6 +350,31 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .hero-eyebrow{display:flex;align-items:center;gap:16px;margin-bottom:20px}
 .eyebrow-line{width:48px;height:1px;background:var(--gold)}
 .eyebrow-text{font-size:11px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;font-weight:500}
+
+/* BREADCRUMB VISIBLE (auditoria SEO Brode, 2026-08): contraparte visible
+   del BreadcrumbList JSON-LD (ver breadcrumbBlockRaw en ficha.json).
+   Vive dentro de .hero-content -- unica franja del hero con overlay
+   suficientemente oscuro (rgba(13,13,13,0.97) en la base de
+   .hero-overlay) para texto claro con contraste real; el propio .nav
+   fijo tapa la franja superior del hero, asi que arriba del todo
+   quedaria escondido. Mismo tratamiento tipografico que .eyebrow-text
+   (uppercase, letter-spacing amplio, un nivel por debajo en jerarquia
+   visual: 11px vs los 11px del eyebrow pero con menos peso). Contraste
+   verificado sobre el mismo fondo que ya usa .eyebrow-text: enlaces en
+   blanco 72% (~9:1 sobre el overlay casi negro) y el item actual en
+   var(--gold), la misma pareja ya validada en .eyebrow-text para este
+   fondo. */
+.breadcrumb{margin-bottom:14px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;align-items:center;padding:0;margin:0}
+.breadcrumb li{display:flex;align-items:center;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:500}
+.breadcrumb li+li::before{content:"/";margin:0 10px;color:rgba(255,255,255,0.35)}
+.breadcrumb a{color:rgba(255,255,255,0.72);text-decoration:none;transition:color .2s}
+.breadcrumb a:hover,.breadcrumb a:focus-visible{color:var(--gold)}
+.breadcrumb li[aria-current="page"]{color:var(--gold);font-weight:600}
+@media (max-width:640px){
+  .breadcrumb{margin-bottom:10px}
+  .breadcrumb li{font-size:10px;letter-spacing:0.08em}
+}
 .hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(64px,10vw,120px);font-weight:900;color:#fff;line-height:0.9;letter-spacing:-0.03em;margin-bottom:24px;text-transform:uppercase}
 .hero-title em{font-style:italic;color:var(--gold-light);font-weight:300}
 .hero-subtitle{font-size:15px;color:#ffffff;font-weight:300;letter-spacing:0.05em;max-width:480px;line-height:1.6;margin-bottom:36px}
