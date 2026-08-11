@@ -34,17 +34,40 @@ const DRY_RUN = process.argv.includes("--dry-run");
 const RE_STATUS_BLOQUE =
   /<span class="info-cell-value" id="statusValue">[^<]*<\/span>(\s*)<span class="info-cell-sub" id="statusSub" aria-live="polite"><\/span>/;
 
-const NOSCRIPT_CON_ANCLA =
+// [BUG REAL, encontrado 2026-08 trabajando la ficha de Brode]: los
+// literales de abajo tienen tildes reales (código fuente de este .js
+// es UTF-8, "ó" es un único code point). escribirLatin1() vuelca cada
+// code point como 1 byte (Buffer.from(str,"latin1")) para preservar
+// bytes exactos del resto del archivo -- pero el resto del archivo NO
+// tiene "ó" como 1 code point: lo tiene como 2 (0xC3,0xB3), porque fue
+// leído con la misma leerLatin1() desde un cuerpo.html real en UTF-8.
+// Al mezclar un literal con code points "reales" (243/225) dentro de
+// ese esquema de "1 byte = 1 code point", el resultado son bytes UTF-8
+// inválidos (0xF3/0xE1 sueltos) justo en esta frase -> se renderiza
+// como "atenci�n" pese a que <meta charset> dice UTF-8. Se confirmó el
+// mismo patrón roto en las ~90 fichas donde ya corrió este script
+// (Brode reparada a mano; el resto queda pendiente de una pasada de
+// reparación aparte, ver AGENTS.md Capítulo 14 sobre cómo documentar
+// bugs históricos). Fix: pasar estos literales por utf8ComoLatin1()
+// antes de insertarlos, para que terminen en el mismo esquema "1 code
+// point = 1 byte UTF-8 real" que ya usa el resto del archivo.
+function utf8ComoLatin1(textoConTildesReales) {
+  return Buffer.from(textoConTildesReales, "utf8").toString("latin1");
+}
+
+const NOSCRIPT_CON_ANCLA = utf8ComoLatin1(
   '<noscript><style>#statusValue,#statusSub{display:none}</style>' +
   '<span class="info-cell-value">Ver horario</span>' +
   '<span class="info-cell-sub"><a href="#schedule-heading">Horarios de atención más abajo</a></span>' +
-  "</noscript>";
+  "</noscript>"
+);
 
-const NOSCRIPT_SIN_ANCLA =
+const NOSCRIPT_SIN_ANCLA = utf8ComoLatin1(
   '<noscript><style>#statusValue,#statusSub{display:none}</style>' +
   '<span class="info-cell-value">Consultar</span>' +
   '<span class="info-cell-sub">Horario disponible por WhatsApp o teléfono</span>' +
-  "</noscript>";
+  "</noscript>"
+);
 
 function leerLatin1(p) {
   return fs.readFileSync(p, "latin1");
