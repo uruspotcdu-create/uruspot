@@ -346,8 +346,107 @@
   "dateModified": "2026-08-11"
 }
 </script>
+
+<!-- ============================================================
+     CAPA DE MEJORAS EXCLUSIVA DE ESTA FICHA (auditoria "Ficha
+     Maestra", pase 2026-08): 100% aditiva sobre ../ficha.css y
+     ../ficha-fonts.css -- ningun selector de esos dos archivos
+     compartidos (usados por las otras ~50 fichas) se sobreescribe
+     con !important, y nada de lo de aca abajo vive en ese sistema:
+     o es namespace propio (.brode-*, elementos que solo existen en
+     este documento) o es refinamiento puntual de clases que en la
+     practica solo aparecen en esta pagina (hero-score, highlight-card,
+     score-val). Todo con guardas de prefers-reduced-motion y pensado
+     solo con transform/opacity para no generar layout thrashing,
+     mismo criterio que ya usa el "PASE DE REFINAMIENTO PREMIUM" de
+     ficha.css. -->
+<style>
+/* ---- Barra de progreso de lectura (fija, arriba de todo) ---- */
+.brode-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:210;background:rgba(0,0,0,.06);pointer-events:none}
+.brode-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));will-change:width}
+
+/* ---- Boton "volver arriba" ---- */
+.brode-top-btn{position:fixed;right:20px;bottom:20px;z-index:150;width:48px;height:48px;border-radius:50%;border:1px solid var(--border);background:var(--ink);color:#fff;font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.24);opacity:0;transform:translateY(12px) scale(.9);pointer-events:none;transition:opacity .3s ease,transform .3s cubic-bezier(.16,.84,.32,1),background .2s}
+.brode-top-btn.is-visible{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.brode-top-btn:hover{background:var(--gold-dark)}
+.brode-top-btn:active{transform:scale(.92)}
+.brode-top-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media (max-width:768px){.brode-top-btn{right:14px;bottom:84px;width:44px;height:44px;font-size:17px}}
+
+/* ---- Barra fija de acciones rapidas (solo mobile, aparece tras el hero) ---- */
+.brode-sticky-bar{display:none}
+@media (max-width:768px){
+  .brode-sticky-bar{
+    display:flex;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:140;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(20,13,9,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border-top:1px solid rgba(var(--gold-rgb),.3);
+    transform:translateY(100%);transition:transform .35s cubic-bezier(.16,.84,.32,1);
+  }
+  .brode-sticky-bar.is-visible{transform:translateY(0)}
+  .brode-sticky-bar .btn{flex:1;text-align:center;font-size:12.5px;padding:12px 10px;box-shadow:none}
+}
+
+/* ---- Entrada propia de .hero-score: no usa .u-reveal (ligado a scroll)
+   porque siempre esta sobre el fold -- entra en cascada junto con el
+   resto de .hero-content, con su propio delay para cerrar esa secuencia. ---- */
+.hero-score{animation:brodeHeroScoreIn .8s cubic-bezier(.16,.84,.32,1) both;animation-delay:.36s}
+@keyframes brodeHeroScoreIn{from{opacity:0;transform:translateY(-50%) translateX(14px) scale(.94)}to{opacity:1;transform:translateY(-50%) scale(1)}}
+
+/* Anillo de pulso sutil detras del score del hero -- refuerza que es el
+   dato mas importante de la franja superior sin competir con el titulo
+   (opacidad baja, un solo anillo, nunca mas de un ciclo por vez). */
+.hero-score::before{content:'';position:absolute;inset:-1px;border:1px solid rgba(var(--gold-rgb),.35);pointer-events:none;animation:brodePulseRing 3.2s ease-out infinite}
+@keyframes brodePulseRing{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
+
+/* Numeros con animacion de conteo: tabular-nums evita que el ancho de
+   la caja salte digito a digito mientras el valor sube. */
+.score-num,.score-big-num,.score-val{font-variant-numeric:tabular-nums}
+
+/* ---- Highlight cards: profundidad real + spotlight que sigue el cursor ---- */
+.highlight-card{
+  --mx:50%;--my:40%;
+  transform:translateY(0) rotateX(0deg) rotateY(0deg) scale(1);
+  transition:transform .5s cubic-bezier(.16,.84,.32,1), background .3s, box-shadow .4s;
+  will-change:transform;
+}
+.highlight-card::after{
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(280px circle at var(--mx) var(--my), rgba(var(--gold-rgb),.22), transparent 72%);
+  transition:opacity .45s ease;
+}
+.highlight-card:hover{box-shadow:0 20px 44px rgba(0,0,0,.35)}
+.highlight-card:hover::after{opacity:1}
+@media (hover:none){.highlight-card::after{display:none}}
+
+/* ---- Chips del hero: pequeno levantamiento al hover, mismo lenguaje
+   de interaccion que el resto de la ficha (.btn, .side-box-cta). ---- */
+.chip{transition:transform .25s cubic-bezier(.16,.84,.32,1), background .2s, border-color .2s}
+.hero-chips .chip:hover{transform:translateY(-2px)}
+
+@media (prefers-reduced-motion: reduce){
+  .brode-progress-fill,.brode-top-btn,.brode-sticky-bar,.chip,.hero-chips .chip:hover{transition:none !important}
+  .hero-score{animation:none}
+  .hero-score::before{display:none}
+  .highlight-card{transition:background .3s, box-shadow .4s;transform:none !important}
+  .highlight-card:hover{transform:none}
+  .highlight-card::after{display:none}
+}
+
+/* ---- Impresion: los controles flotantes no aportan nada en papel ---- */
+@media print{
+  .brode-progress,.brode-top-btn,.brode-sticky-bar{display:none !important}
+}
+</style>
 </head>
 <body>
+
+<!-- BARRA DE PROGRESO DE LECTURA (mejora exclusiva de esta ficha, ver
+     <style> en <head>): decorativa y no enfocable (sin tabindex, sin
+     rol interactivo), asi que puede vivir antes del skip-link sin
+     violar el invariante AGENTS.md 9.2 de que el skip-link sea el
+     primer elemento ENFOCABLE del body -- este div no lo es. -->
+<div class="brode-progress" aria-hidden="true"><div class="brode-progress-fill" id="brodeProgressFill"></div></div>
 
 <!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento
      enfocable del <body>. Apunta al <main> de mas abajo. -->
@@ -422,7 +521,7 @@
 
 <!-- INFO STRIP -->
 
-<div class="info-strip" role="complementary" aria-label="Información rápida">
+<div class="info-strip u-reveal-stagger" role="complementary" aria-label="Información rápida">
   
   <div class="info-cell">
     <span class="info-cell-label">Estado actual</span>
@@ -459,7 +558,7 @@
 </div>
 
 <!-- ACCESOS OFICIALES (fuente: linktr.ee/brodepanaderia, verificado ago-2026) -->
-<div class="info-strip info-strip--flush" role="complementary" aria-label="Accesos oficiales de Brødë">
+<div class="info-strip info-strip--flush u-reveal-stagger" role="complementary" aria-label="Accesos oficiales de Brødë">
   <div class="info-cell">
     <span class="info-cell-label">Catálogo oficial</span>
     <span class="info-cell-value">📂 Álbum de fotos</span>
@@ -490,19 +589,19 @@
 <!-- ABOUT -->
 
 <section class="page" aria-labelledby="about-heading">
-  <div class="section-header">
+  <div class="section-header u-reveal">
     <span class="section-label">Sobre el lugar</span>
     <span class="section-line" aria-hidden="true"></span>
   </div>
-  <div class="about-grid">
+  <div class="about-grid u-reveal-stagger">
     <div>
       <h2 class="about-title" id="about-heading">El arte del pan <strong>lento</strong>, con propósito y sin atajos</h2>
       <p class="about-body">Los productos más elegidos son los laminados — medialunas, croissants y danesas — junto con sus panes integrales de masa madre, en especial el de molde y el de campo. Piezas únicas, elaboradas con técnicas artesanales y materias primas de calidad, que los clientes reconocen y valoran en cada mordida.</p><p class="about-body">Lo que los distingue es el proceso: desde el inicio de la elaboración hasta que el producto está listo para la venta pasan <strong class="stat">72 horas</strong>. Este enfoque lento y meticuloso permite desarrollar sabores profundos y una calidad constante que pocos pueden replicar — cada paso tiene un propósito definido, y los hermanos Tournour no se apresuran, porque el tiempo es parte de la fórmula. Esa misma exigencia se traslada a los ingredientes: buscan activamente a los mejores proveedores, prueban, ajustan y refinan hasta encontrar lo que mejor encaja con cada receta. <strong>Nada es arbitrario</strong> — cada ingrediente tiene un propósito específico en el producto final, y esa obsesión por la calidad es lo que separa a Brødë de una panadería tradicional.</p>
       
-      <div class="pullquote"><p>"Paciencia, precisión y pasión" — La filosofía de Federico y Jonatan Tournour sobre el arte de hacer pan.</p></div>
+      <div class="pullquote u-reveal"><p>"Paciencia, precisión y pasión" — La filosofía de Federico y Jonatan Tournour sobre el arte de hacer pan.</p></div>
       
       
-      <div class="tags-row" aria-label="Características del lugar">
+      <div class="tags-row u-reveal-stagger" aria-label="Características del lugar">
         <span class="tag">Masa Madre</span><span class="tag">Laminados</span><span class="tag">Croissants</span><span class="tag">Pan de Campo</span><span class="tag">Focaccia</span><span class="tag">Artesanal</span><span class="tag">Para llevar</span><span class="tag">Proceso 72hs</span>
       </div>
       
@@ -536,11 +635,11 @@
 <!-- HISTORIA -->
 
 <section class="page" aria-labelledby="historia-heading">
-  <div class="section-header">
+  <div class="section-header u-reveal">
     <h2 class="section-label" id="historia-heading">Cómo nació Brødë</h2>
     <span class="section-line" aria-hidden="true"></span>
   </div>
-  <div class="about-grid">
+  <div class="about-grid u-reveal-stagger">
     <div>
       <p class="about-body"><strong>2020 — El comienzo.</strong> Brødë nació en pandemia, en el balcón de la casa familiar de los mellizos Federico y Jonatan Tournour. No fue un proyecto planeado con anticipación: surgió de la necesidad de esos meses y de algo que ya tenían incorporado — en su casa siempre se cocinó rico y casero. La idea inicial fue simple: <strong>pizzas a la piedra</strong>, hechas en un horno de barro, pensadas para que cada familia las terminara de cocinar en su propia casa o las congelara. Con el tiempo, ese proyecto fue derivando hacia la <strong>panificación artesanal</strong>, hasta convertirse en la panadería de masa madre y laminados que hoy funciona en Dr. J. Lacava 491 — un recorrido que también explica por qué Brødë no se apura: creció despacio, probando y ajustando, de la misma manera en que hoy encara cada receta, hasta desarrollar reputación de referente local y ser reconocida en medios como La Prensa Federal.</p>
       
@@ -558,12 +657,12 @@
         <figcaption>Detrás de escena: el obrador donde nace cada pieza, antes de las 72 horas de proceso.</figcaption>
       </figure>
       
-      <div class="pullquote"><p>"Cocinar siempre fue nuestro fuerte, en casa siempre comimos rico y casero. La idea de crear este proyecto fue una decisión que ni siquiera discutimos — la empezamos."</p></div>
+      <div class="pullquote u-reveal"><p>"Cocinar siempre fue nuestro fuerte, en casa siempre comimos rico y casero. La idea de crear este proyecto fue una decisión que ni siquiera discutimos — la empezamos."</p></div>
       
       <p class="source-caption">Fuente: entrevistas de La Prensa Federal a Federico y Jonatan Tournour (2024) y a los cuatro socios de Brødë Hermanos (2025). Información verificada adicional: análisis de lahelveticaonline.com.ar, QueResto.com y Google Maps.</p>
     </div>
 
-    <div class="side-box" aria-label="Línea de tiempo de Brødë">
+    <div class="side-box u-reveal" aria-label="Línea de tiempo de Brødë">
       <div class="side-box-title">Línea de tiempo</div>
       <ul>
         <li><strong>2020</strong>Nace en pandemia, en el balcón familiar, como proyecto de pizzas a la piedra.</li>
@@ -590,11 +689,11 @@
      el mismo blanco de siempre. -->
 <section class="section-warm" aria-labelledby="catalogo-heading">
 <div class="page">
-  <div class="section-header">
+  <div class="section-header u-reveal">
     <h2 class="section-label" id="catalogo-heading">Productos destacados</h2>
     <span class="section-line" aria-hidden="true"></span>
   </div>
-  <div class="about-grid">
+  <div class="about-grid u-reveal-stagger">
     <div>
       <p class="about-body catalog-lead"><strong>Catálogo verificado (información actualizada).</strong> Brødë ofrece una variedad de productos elaborados diariamente. Los más populares son los laminados y los panes de masa madre. A continuación, los productos más demandados:</p>
       
@@ -619,14 +718,14 @@
       
       <p class="about-body">Los productos se agotan rápido — conviene llegar temprano o consultar disponibilidad por WhatsApp. Para pedidos especiales, eventos o cantidades grandes, contactar directamente.</p>
 
-      <p class="price-warning-box">⚠️ <strong>Brødë actualiza sus precios con frecuencia</strong> — antes de confirmar una compra, corroborá el valor vigente por WhatsApp. El catálogo fotográfico completo (todas las líneas de producto, sin precios listados) está disponible en el álbum oficial de Google Drive que Brødë mantiene enlazado desde su Instagram.</p>
+      <p class="price-warning-box u-reveal">⚠️ <strong>Brødë actualiza sus precios con frecuencia</strong> — antes de confirmar una compra, corroborá el valor vigente por WhatsApp. El catálogo fotográfico completo (todas las líneas de producto, sin precios listados) está disponible en el álbum oficial de Google Drive que Brødë mantiene enlazado desde su Instagram.</p>
 
       <div class="action-row action-row--after-text">
         <a href="https://drive.google.com/drive/folders/1m5vGjX1mYH-nuh84y8LazweEyd5MClgm" class="btn btn-primary" target="_blank" rel="noopener noreferrer">📂 Ver catálogo fotográfico completo</a><a href="https://wa.me/5493442306349?text=Hola!%20Me%20gustar%C3%ADa%20consultar%20sobre%20el%20cat%C3%A1logo%20completo%20y%20disponibilidad" class="btn btn-ghost btn-ghost-onlight" target="_blank" rel="noopener noreferrer">💬 Confirmar precios vigentes</a>
       </div>
     </div>
 
-    <div class="side-box" aria-label="Precios verificados">
+    <div class="side-box u-reveal" aria-label="Precios verificados">
       <div class="side-box-title">Precios verificados</div>
       <ul>
         <li><div class="side-box-row"><strong>Croissant</strong><span class="side-box-val">$ 1.530</span></div></li>
@@ -644,18 +743,18 @@
 <!-- PERCEPCIÓN PÚBLICA -->
 
 <section class="page" aria-labelledby="percepcion-heading">
-  <div class="section-header">
+  <div class="section-header u-reveal">
     <h2 class="section-label" id="percepcion-heading">Cómo la ve el público</h2>
     <span class="section-line" aria-hidden="true"></span>
   </div>
-  <div class="about-grid">
+  <div class="about-grid u-reveal-stagger">
     <div>
       <p class="about-body">Los análisis independientes sobre Brødë coinciden en un mismo punto: no se posiciona como una panadería de barrio tradicional, sino como una propuesta de nicho enfocada en producto y técnica, con una reputación que la ubica de forma consistente entre las mejores opciones de la ciudad para quienes valoran la calidad por sobre todo lo demás. Ese mismo análisis marca también sus límites prácticos: el cierre los días lunes y martes reduce la disponibilidad para parte del público, y el local no cuenta con confirmación oficial de entrada accesible para sillas de ruedas — un punto a tener en cuenta antes de planificar la visita.</p>
       <p class="about-body">A nivel de producto, los rolls de canela y la focaccia (especialmente como sándwich) aparecen mencionados de forma recurrente como los ítems que más sorprenden a quienes visitan el local por primera vez — al punto de que incluso las reseñas con alguna objeción sobre la experiencia general suelen destacarlos igual.</p>
       <p class="source-caption">Fuente: análisis editorial de lahelveticaonline.com.ar sobre BRODE Panadería (consultado ago-2026). Opiniones de terceros, no afirmaciones objetivas de URU SPOT.</p>
     </div>
 
-    <div class="side-box" aria-label="En una mirada">
+    <div class="side-box u-reveal" aria-label="En una mirada">
       <div class="side-box-title">En una mirada</div>
       <ul>
         <li><strong>💪 Fortalezas</strong>Calidad de producto, proceso de 72 horas, estética e impronta de panadería europea moderna.</li>
@@ -669,7 +768,7 @@
 
 <!-- HIGHLIGHTS -->
 
-<div class="highlights-grid" role="list" aria-label="Lo mejor del lugar">
+<div class="highlights-grid u-reveal-stagger" role="list" aria-label="Lo mejor del lugar">
   
   <div class="highlight-card" role="listitem">
     <div class="highlight-num" aria-hidden="true">01</div>
@@ -697,11 +796,11 @@
 
 <section class="amenities-section" aria-labelledby="amenities-heading">
   <div class="amenities-inner">
-    <div class="section-header">
+    <div class="section-header u-reveal">
       <h2 class="section-label" id="amenities-heading">Servicios y accesibilidad</h2>
       <span class="section-line" aria-hidden="true"></span>
     </div>
-    <div class="amenities-grid">
+    <div class="amenities-grid u-reveal-stagger">
       <div class="amenities-col">
         <ul aria-label="Servicios y modalidades de compra">
           <li>Venta para llevar en el local</li>
@@ -720,7 +819,7 @@
         </ul>
       </div>
     </div>
-    <div class="amenities-icons" role="list" aria-label="Resumen de servicios">
+    <div class="amenities-icons u-reveal-stagger" role="list" aria-label="Resumen de servicios">
       <div class="amenity-icon-item" role="listitem">
         <span aria-hidden="true">🥐</span>
         <span class="amenity-icon-label">Para llevar</span>
@@ -751,11 +850,11 @@
 
 <section class="scores-section" aria-labelledby="scores-heading">
   <div class="scores-inner">
-    <div class="section-header">
+    <div class="section-header u-reveal">
       <h2 class="section-label" id="scores-heading">URU SPOT Score</h2>
       <span class="section-line" aria-hidden="true"></span>
     </div>
-    <div class="scores-grid">
+    <div class="scores-grid u-reveal-stagger">
       <div class="score-big" aria-label="Puntuación total: 9.3 de 10">
         <div class="score-big-num">9.3</div>
         <div class="score-big-den">/ 10</div>
@@ -865,11 +964,11 @@
 
 <section class="map-section" aria-labelledby="map-heading">
   <div class="map-inner">
-    <div class="section-header">
+    <div class="section-header u-reveal">
       <span class="section-label">Cómo llegar</span>
       <span class="section-line" aria-hidden="true"></span>
     </div>
-    <div class="map-grid">
+    <div class="map-grid u-reveal-stagger">
       <div class="map-frame">
         <iframe title="Ubicación de Brødë en Google Maps" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d966!2d-58.2545511!3d-32.4806862!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95afdb993273d22f%3A0x4e81d8eef58e9e9a!2sBRODE%20Panader%C3%ADa!5e0!3m2!1ses!2sar!4v1716000000000" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
       </div>
@@ -911,7 +1010,7 @@
 
 <section class="reviews-section" aria-labelledby="reviews-heading">
   <div class="reviews-inner">
-    <div class="section-header">
+    <div class="section-header u-reveal">
       <h2 class="section-label" id="reviews-heading">Reseñas de la comunidad</h2>
       <span class="section-line" aria-hidden="true"></span>
     </div>
@@ -989,11 +1088,11 @@
      mecánico (oscuro-claro-tinte-oscuro-tinte-tinte sería demasiado). -->
 <section class="section-warm-soft" aria-labelledby="digital-heading">
 <div class="page">
-  <div class="section-header">
+  <div class="section-header u-reveal">
     <h2 class="section-label" id="digital-heading">Presencia digital y pedidos</h2>
     <span class="section-line" aria-hidden="true"></span>
   </div>
-  <div class="about-grid">
+  <div class="about-grid u-reveal-stagger">
     <div>
       <p class="about-body">Brødë mantiene dos canales oficiales en Instagram: uno para el público que compra en el local, y otro dedicado a la operación mayorista — la fábrica que abastece a negocios seleccionados de la región. El WhatsApp es el principal medio para coordinar pedidos, consultas y disponibilidad, con respuestas rápidas y atención personalizada.</p>
       
@@ -1012,7 +1111,7 @@
       <p class="source-caption">Fuente de estos enlaces: linktr.ee/brodepanaderia, la página oficial de enlaces enlazada desde el Instagram de Brødë (verificado ago-2026).</p>
     </div>
 
-    <div class="side-box" aria-label="Canales de contacto">
+    <div class="side-box u-reveal" aria-label="Canales de contacto">
       <div class="side-box-title">Canales de contacto</div>
       <ul>
         <li><strong>📸 Instagram (local)</strong>@brodepanaderia — productos frescos, proceso y comunidad.</li>
@@ -1031,11 +1130,11 @@
 <!-- FAQ -->
 
 <section class="page" aria-labelledby="faq-heading">
-  <div class="section-header">
+  <div class="section-header u-reveal">
     <h2 class="section-label" id="faq-heading">Preguntas frecuentes</h2>
     <span class="section-line" aria-hidden="true"></span>
   </div>
-  <div class="about-grid">
+  <div class="about-grid u-reveal-stagger">
     <div>
       <h3 class="about-title about-subtitle">¿Qué días abre Brødë?</h3>
       <p class="about-body">De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes.</p>
@@ -1071,11 +1170,11 @@
 
 <section class="verdict-section" aria-labelledby="verdict-section-heading">
   <div class="verdict-inner">
-    <div class="section-header">
+    <div class="section-header u-reveal">
       <h2 class="section-label" id="verdict-section-heading">Veredicto URU SPOT</h2>
       <span class="section-line" aria-hidden="true"></span>
     </div>
-    <div class="verdict-card">
+    <div class="verdict-card u-reveal">
       <div class="verdict-accent" aria-hidden="true"></div>
       <div class="verdict-content">
         <div class="verdict-label" id="verdict-heading">🟢 Ampliamente recomendado</div>
@@ -1094,10 +1193,190 @@
   <span>Informaci&oacute;n verificada y actualizada &mdash; Agosto 2026</span>
   <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
 </footer>
+
+<!-- BOTON VOLVER ARRIBA (mejora exclusiva de esta ficha) -->
+<button type="button" id="brodeTopBtn" class="brode-top-btn" aria-label="Volver arriba">↑</button>
+
+<!-- BARRA FIJA DE ACCIONES RAPIDAS, solo mobile (mejora exclusiva de esta
+     ficha): mismos numeros/enlaces ya verificados que usa el resto de la
+     pagina (info-strip, schedule-block) -- no se inventa ningun dato
+     nuevo, solo se los deja siempre a mano mientras el usuario scrollea. -->
+<div class="brode-sticky-bar" id="brodeStickyBar" aria-hidden="true">
+  <a href="tel:+5493442306349" class="btn btn-primary" target="_self" rel="noopener noreferrer" tabindex="-1">📞 Llamar</a>
+  <a href="https://wa.me/5493442306349?text=Hola!%20Vi%20Brode%20en%20UruSpot%20y%20quer%C3%ADa%20consultar" class="btn btn-primary" target="_blank" rel="noopener noreferrer" tabindex="-1">💬 WhatsApp</a>
+</div>
+
 <script id="ficha-data" type="application/json">
 {"nombre": "Brødë", "uruId": "URU-00624", "rubro": "gastronomia", "schedule_rows": [{"closed": true, "day": "Lunes y Martes", "time": "Cerrado"}, {"closed": false, "day": "Miércoles a Viernes", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Sábado", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Domingo", "time": "9:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}], "share_text": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Brødë — la mejor panadería artesanal de Concepción del Uruguay."}
 </script>
 <script src="../../js/rubros-meta.js" defer></script>
 <script src="../ficha.js" defer></script>
+
+<!-- ============================================================
+     MEJORAS EXCLUSIVAS DE ESTA FICHA (2026-08): modulo propio,
+     independiente de ficha.js (no lo modifica ni depende de sus
+     funciones internas) -- barra de progreso de lectura, boton
+     volver arriba, barra fija de acciones en mobile, conteo animado
+     de los numeros de puntuacion y spotlight/tilt en las highlight
+     cards. Mismo patron defensivo que ya usa ficha.js: guardas de
+     "si el elemento no existe, no hacer nada", scroll con rAF (nunca
+     trabajo pesado por evento crudo) y respeto total de
+     prefers-reduced-motion. No usa librerias externas. -->
+<script>
+(function () {
+  "use strict";
+
+  function prefiereMenosMovimiento() {
+    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+  var puedeHover = !!(window.matchMedia && window.matchMedia("(hover:hover) and (pointer:fine)").matches);
+
+  /* ───────────────── Barra de progreso de lectura ───────────────── */
+  function inicializarBarraProgreso() {
+    var fill = document.getElementById("brodeProgressFill");
+    if (!fill) return;
+    var pendiente = false;
+    function actualizar() {
+      pendiente = false;
+      var doc = document.documentElement;
+      var alto = doc.scrollHeight - doc.clientHeight;
+      var pct = alto > 0 ? Math.min(100, Math.max(0, (doc.scrollTop / alto) * 100)) : 0;
+      fill.style.width = pct + "%";
+    }
+    function solicitar() {
+      if (pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(actualizar);
+    }
+    window.addEventListener("scroll", solicitar, { passive: true });
+    window.addEventListener("resize", solicitar, { passive: true });
+    actualizar();
+  }
+
+  /* ───────────────── Boton volver arriba + barra sticky mobile ───────────────── */
+  function inicializarControlesFlotantes() {
+    var topBtn = document.getElementById("brodeTopBtn");
+    var stickyBar = document.getElementById("brodeStickyBar");
+    var hero = document.querySelector(".hero");
+    if (!topBtn && !stickyBar) return;
+
+    var stickyLinks = stickyBar ? stickyBar.querySelectorAll("a") : [];
+    var pendiente = false;
+
+    function actualizar() {
+      pendiente = false;
+      var umbral = hero ? Math.max(hero.offsetHeight - 100, 240) : 500;
+      var pasoElUmbral = window.scrollY > umbral;
+
+      if (topBtn) topBtn.classList.toggle("is-visible", pasoElUmbral);
+
+      if (stickyBar) {
+        stickyBar.classList.toggle("is-visible", pasoElUmbral);
+        stickyBar.setAttribute("aria-hidden", pasoElUmbral ? "false" : "true");
+        for (var i = 0; i < stickyLinks.length; i++) {
+          if (pasoElUmbral) stickyLinks[i].removeAttribute("tabindex");
+          else stickyLinks[i].setAttribute("tabindex", "-1");
+        }
+      }
+    }
+    function solicitar() {
+      if (pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(actualizar);
+    }
+
+    window.addEventListener("scroll", solicitar, { passive: true });
+    window.addEventListener("resize", solicitar, { passive: true });
+    actualizar();
+
+    if (topBtn) {
+      topBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: prefiereMenosMovimiento() ? "auto" : "smooth" });
+      });
+    }
+  }
+
+  /* ───────────────── Conteo animado de numeros de puntuacion ───────────────── */
+  function animarConteo(el, delayMs) {
+    if (!el) return;
+    var destino = parseFloat((el.textContent || "").replace(",", "."));
+    if (isNaN(destino)) return;
+    var decimales = /\./.test(el.textContent) || /,/.test(el.textContent) ? 1 : 0;
+    setTimeout(function () {
+      var inicio = null;
+      var duracion = 900;
+      function paso(ts) {
+        if (inicio === null) inicio = ts;
+        var t = Math.min(1, (ts - inicio) / duracion);
+        var facilitado = 1 - Math.pow(1 - t, 3); // easeOutCubic
+        var valor = destino * facilitado;
+        el.textContent = valor.toFixed(decimales);
+        if (t < 1) requestAnimationFrame(paso);
+        else el.textContent = destino.toFixed(decimales);
+      }
+      requestAnimationFrame(paso);
+    }, delayMs || 0);
+  }
+
+  function inicializarConteoHero() {
+    if (prefiereMenosMovimiento()) return;
+    var num = document.querySelector(".hero-score .score-num");
+    if (!num) return;
+    setTimeout(function () { animarConteo(num, 0); }, 950); // sincronizado con brodeHeroScoreIn
+  }
+
+  function inicializarConteoScores() {
+    if (prefiereMenosMovimiento() || !("IntersectionObserver" in window)) return;
+    var section = document.querySelector(".scores-section");
+    if (!section) return;
+    var big = section.querySelector(".score-big-num");
+    var vals = section.querySelectorAll(".score-val");
+
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      animarConteo(big, 0);
+      vals.forEach(function (v, i) { animarConteo(v, i * 150); }); // mismo stagger que animarScores() en ficha.js
+      io.disconnect();
+    }, { threshold: 0.3 });
+    io.observe(section);
+  }
+
+  /* ───────────────── Spotlight + tilt en highlight cards ───────────────── */
+  function inicializarHighlightCards() {
+    if (!puedeHover || prefiereMenosMovimiento()) return;
+    var cards = document.querySelectorAll(".highlight-card");
+    if (!cards.length) return;
+
+    cards.forEach(function (card) {
+      card.addEventListener("mousemove", function (ev) {
+        var r = card.getBoundingClientRect();
+        var x = ev.clientX - r.left;
+        var y = ev.clientY - r.top;
+        card.style.setProperty("--mx", x + "px");
+        card.style.setProperty("--my", y + "px");
+
+        var relX = (x / r.width) - 0.5;
+        var relY = (y / r.height) - 0.5;
+        var rotY = relX * 8; // grados
+        var rotX = relY * -8;
+        card.style.transform =
+          "translateY(-4px) rotateX(" + rotX.toFixed(2) + "deg) rotateY(" + rotY.toFixed(2) + "deg) scale(1.015)";
+      }, { passive: true });
+
+      card.addEventListener("mouseleave", function () {
+        card.style.transform = "";
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    inicializarBarraProgreso();
+    inicializarControlesFlotantes();
+    inicializarConteoHero();
+    inicializarConteoScores();
+    inicializarHighlightCards();
+  });
+})();
+</script>
 </body>
 </html>
