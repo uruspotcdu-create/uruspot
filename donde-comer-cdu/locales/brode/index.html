@@ -26,15 +26,15 @@
 <meta name="twitter:image:alt" content="Bagels artesanales recién horneados — Brødë, Concepción del Uruguay">
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/locales/brode/">
 
-<!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditor�a
-     Brode 2026-08: faltaban por completo en las fichas - ver Cr�tico 1). -->
-<!-- NOTA (auditor�a accesibilidad, 2026-08): el guion largo original de
-     este comentario se corromp�a en cada build a un byte de control
+<!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditoría
+     Brode 2026-08: faltaban por completo en las fichas - ver Crítico 1). -->
+<!-- NOTA (auditoría accesibilidad, 2026-08): el guion largo original de
+     este comentario se corrompía en cada build a un byte de control
      0x14 - ver escribirLatin1() en build-fichas.js. Cambiado a guion
-     simple ("-"), el �nico car�cter seguro ac�: es un comentario HTML
+     simple ("-"), el único carácter seguro acá: es un comentario HTML
      dentro del template literal (se emite tal cual al HTML final), a
      diferencia de los comentarios /* JS */ de este mismo archivo, que
-     nunca llegan al output y s� pueden usar tildes o guiones largos sin
+     nunca llegan al output y sí pueden usar tildes o guiones largos sin
      riesgo. -->
 <link rel="manifest" href="/donde-comer-cdu/manifest.json">
 <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
@@ -49,19 +49,25 @@
      render identico entre todas las fichas. -->
 <link rel="preload" href="../../fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<!-- Preload de la foto del hero (candidata a LCP de esta p�gina, auditor�a
+<!-- Preload de la foto del hero (candidata a LCP de esta página, auditoría
      Brode 2026-08): adelanta la descarga antes de que el parser llegue al
      <img> en el <body>, complementando el fetchpriority="high"+loading="eager"
-     que ya trae ese tag en cuerpo.html. Usa shell.imagePath, que ya existe en
-     el ficha.json de las 51 fichas -- antes viv�a hardcodeado a mano solo en
-     Brode y se perd�a al regenerar. Misma ruta absoluta que debe usar el
-     <img> del hero en cuerpo.html. -->
-<link rel="preload" href="/img/brodefrente.webp" as="image" fetchpriority="high">
+     que ya trae ese tag en cuerpo.html. Misma ruta absoluta que debe usar el
+     <img> del hero en cuerpo.html.
+     CORRECCIÓN (auditoría diseño visual, 2026-08): brodefrente.webp NO es
+     una foto — es el isotipo de marca (474×215px) estirado a 100vh de alto
+     por toda la pantalla, lo que lo vuelve un bloque pixelado/ilegible
+     (peor todavía en mobile, donde el hero recorta directo sobre las
+     letras). Se reemplaza por brode-og.webp: mismo asset ya usado para
+     og:image/twitter:image más abajo, foto real de los bagels insignia de
+     Brødë, formato panorámico 1200×630 nativo (cover-fit sin apenas
+     upscaling, a diferencia del logo que se escalaba ~3-4x). -->
+<link rel="preload" href="/img/brode-og.webp" as="image" fetchpriority="high">
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
-<!-- El sistema visual de Brode (piloto "marca-naranja") se promovi� a
+<!-- El sistema visual de Brode (piloto "marca-naranja") se promovió a
      sistema base de TODAS las fichas - fusionado dentro de ../ficha.css
-     (secci�n "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
+     (sección "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
      hoja CSS propia. Ver ARCHITECTURE.md. -->
 <script type="application/ld+json">
 {
@@ -321,8 +327,8 @@
 </head>
 <body>
 
-<!-- SKIP LINK - invariante AGENTS.md �9.2: debe ser el primer elemento
-     enfocable del <body>. Apunta al <main> de m�s abajo. -->
+<!-- SKIP LINK - invariante AGENTS.md §9.2: debe ser el primer elemento
+     enfocable del <body>. Apunta al <main> de más abajo. -->
 <a href="#contenido-principal" class="skip-link">Saltar al contenido</a>
 
 <!-- NAV -->
@@ -341,7 +347,7 @@
 <!-- HERO -->
 <section class="hero " aria-label="Brødë">
   
-  <img class="hero-img" src="/img/brodefrente.webp" alt="Frente de Brødë Panadería Artesanal — Concepción del Uruguay" fetchpriority="high" loading="eager" width="474" height="215" />
+  <img class="hero-img" src="/img/brode-og.webp" alt="Bagels artesanales recién horneados de Brødë — Concepción del Uruguay" fetchpriority="high" loading="eager" width="1200" height="630" />
   
   <div class="hero-overlay" aria-hidden="true"></div>
   <div class="hero-content">
@@ -462,7 +468,7 @@
         </div>
         
         <div class="gallery-item ">
-          <img src="/img/brode2.webp" alt="Laminados y masa madre de Brødë" loading="lazy" decoding="async" width="574" height="692" />
+          <img src="/img/brode2.webp" alt="Croissant artesanal recién horneado de Brødë" loading="lazy" decoding="async" width="300" height="547" />
         </div>
         
         <div class="gallery-item ">
@@ -934,7 +940,7 @@
 <footer class="footer">
   <a href="../../" class="footer-logo">URU SPOT</a>
   <span>Guía gastronómica de Concepción del Uruguay</span>
-  <span>Informaci�n verificada y actualizada &mdash; Agosto 2026</span>
+  <span>Información verificada y actualizada &mdash; Agosto 2026</span>
   <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
 </footer>
 <script id="ficha-data" type="application/json">
