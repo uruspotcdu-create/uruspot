@@ -217,6 +217,38 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
    filas implícitas la foto principal no llegaba a estirarse. */
 .about-grid > div:has(> .gallery){align-self:stretch}
 
+/* GALLERY — modificador de 1 sola foto (auditoría interacción, 2026-08):
+   .gallery base asume 2-3 fotos (grid-template-columns:2fr 1fr + filas
+   explícitas para que .gallery-main ocupe con grid-row:1/-1). Con un
+   solo .gallery-item ese grid de 2 columnas dejaría una columna 1fr
+   vacía a la derecha en desktop. Este modificador colapsa el grid a
+   1 columna/1 fila SOLO cuando se aplica esta clase extra -- .gallery
+   sin ella (las ~50 fichas con 2-3 fotos) queda exactamente igual. */
+.gallery--single{grid-template-columns:1fr;grid-template-rows:1fr}
+.gallery--single .gallery-main{grid-row:auto}
+
+/* FOTOS CON REVEAL AL SCROLLEAR (auditoría interacción, 2026-08) — nace
+   en Brode pero pensada para reutilizarse en cualquier ficha: figura
+   enmarcada + caption, para fotos que se insertan sueltas dentro del
+   texto (no en la .gallery de arriba). .u-fade-in-img es la parte
+   genérica y reutilizable (opacity/transform + estado .is-visible que
+   agrega ficha.js vía IntersectionObserver, ver inicializarFotosReveal());
+   .reveal-photo es solo el marco visual, separado a propósito por si
+   algún día se quiere animar un elemento que no sea una foto enmarcada. */
+.reveal-photo{max-width:380px;margin:36px auto;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:#fff}
+.reveal-photo img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;filter:brightness(0.95) saturate(0.97);transition:transform .5s}
+.reveal-photo:hover img{transform:scale(1.03)}
+.reveal-photo figcaption{padding:14px 20px;font-size:12px;line-height:1.6;color:var(--muted);font-style:italic;text-align:center;border-top:1px solid var(--border)}
+
+.u-fade-in-img{opacity:0;transform:translateY(36px);transition:opacity .9s cubic-bezier(.22,.61,.36,1),transform .9s cubic-bezier(.22,.61,.36,1)}
+.u-fade-in-img.is-visible{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  .u-fade-in-img{transition:none;transform:none}
+}
+@media(max-width:768px){
+  .reveal-photo{max-width:100%;margin:28px 0}
+}
+
 /* TAGS (restaurado) */
 .tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
 .tag{padding:7px 16px;border:1px solid var(--border);font-size:11px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;font-weight:400;border-radius:2px;transition:border-color .2s,color .2s}

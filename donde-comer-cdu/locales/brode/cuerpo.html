@@ -141,18 +141,21 @@
     </div>
     
     <div>
-      <div class="gallery" aria-label="Galería de fotos de Brødë">
+      <!-- GALERÍA (auditoría interacción, 2026-08): antes mostraba las 3
+           fotos juntas en el grid 2fr/1fr de .gallery. Ahora solo queda
+           la foto principal acá; brode2.webp y brode1.webp se movieron
+           a Historia y Catálogo respectivamente, cada una revelándose
+           con fade-in propio (.u-fade-in-img, ver ficha.js) cuando el
+           usuario scrollea hasta esa sección — en vez de las 3 competiendo
+           por atención de entrada, el usuario las va descubriendo en el
+           mismo orden narrativo de la ficha (foto de producto → cómo se
+           hace → qué se vende). .gallery--single es un modificador nuevo
+           y aislado (no toca .gallery ni .gallery-item base, que siguen
+           usando las otras ~50 fichas con 2-3 fotos sin cambios). -->
+      <div class="gallery gallery--single" aria-label="Foto de Brødë">
         
         <div class="gallery-item gallery-main">
           <img src="/img/brode3.webp" alt="Productos artesanales de Brødë" loading="lazy" decoding="async" width="570" height="705" />
-        </div>
-        
-        <div class="gallery-item ">
-          <img src="/img/brode2.webp" alt="Croissant artesanal recién horneado de Brødë" loading="lazy" decoding="async" width="300" height="547" />
-        </div>
-        
-        <div class="gallery-item ">
-          <img src="/img/brode1.webp" alt="Interior y producción de Brødë" loading="lazy" decoding="async" width="509" height="689" />
         </div>
         
       </div>
@@ -174,6 +177,18 @@
       <p class="about-body"><strong>2020 — El comienzo.</strong> Brødë nació en pandemia, en el balcón de la casa familiar de los mellizos Federico y Jonatan Tournour. No fue un proyecto planeado con anticipación: surgió de la necesidad de esos meses y de algo que ya tenían incorporado — en su casa siempre se cocinó rico y casero. La idea inicial fue simple: <strong>pizzas a la piedra</strong>, hechas en un horno de barro, pensadas para que cada familia las terminara de cocinar en su propia casa o las congelara. Con el tiempo, ese proyecto fue derivando hacia la <strong>panificación artesanal</strong>, hasta convertirse en la panadería de masa madre y laminados que hoy funciona en Dr. J. Lacava 491 — un recorrido que también explica por qué Brødë no se apura: creció despacio, probando y ajustando, de la misma manera en que hoy encara cada receta, hasta desarrollar reputación de referente local y ser reconocida en medios como La Prensa Federal.</p>
       
       <p class="about-body"><strong>2025 — Brødë Hermanos.</strong> La expansión llegó con un equipo ampliado: Jonatan, Federico, Jerónimo y Abril forman ahora Brødë Hermanos, un proyecto que va más allá de la panadería. Con un promedio de edad de 25 años, están redefiniendo la experiencia gastronómica local con múltiples formatos de negocio y nuevos puntos de distribución en 2025. Según explicaron sus propios fundadores, el objetivo declarado es abrir nuevos espacios gastronómicos —desde centros de producción hasta conceptos de panadería y café— y llevar la marca a otras ciudades. Ellos mismos describen el proyecto como un ecosistema gastronómico completo: no solo panadería artesanal y pastelería, sino también propuestas listas para disfrutar en casa, con una apuesta declarada por incorporar alternativas veganas y sin gluten a futuro.</p>
+
+      <!-- FOTO REVEAL 2/3 (auditoría interacción, 2026-08): ver comentario
+           GALERÍA más arriba -- .u-fade-in-img la arranca en opacity:0 +
+           corrida hacia abajo, ficha.js le suma .is-visible (vía
+           IntersectionObserver, una sola vez) cuando esta figura entra en
+           viewport. Sin JS o con prefers-reduced-motion, ficha.js la
+           muestra directo sin animación (ver inicializarFotosReveal()) --
+           nunca queda invisible por falta de JS. */ -->
+      <figure class="reveal-photo u-fade-in-img">
+        <img src="/img/brode1.webp" alt="Interior y producción de Brødë" loading="lazy" decoding="async" width="509" height="689" />
+        <figcaption>Detrás de escena: el obrador donde nace cada pieza, antes de las 72 horas de proceso.</figcaption>
+      </figure>
       
       <div class="pullquote"><p>"Cocinar siempre fue nuestro fuerte, en casa siempre comimos rico y casero. La idea de crear este proyecto fue una decisión que ni siquiera discutimos — la empezamos."</p></div>
       
@@ -217,6 +232,16 @@
       
       <h3 class="about-title about-subtitle">Laminados</h3>
       <p class="about-body"><strong>Croissants:</strong> Con más de 25 capas de manteca y masa hojaldrada. Disponibles dulces o salados. Son reconocidos como los "mejores laminados de la zona". <strong>Medialunas:</strong> laminados de múltiples capas con sabor auténtico argentino y técnica francesa, disponibles diariamente. <strong>Rolls de Canela:</strong> especialidad de la casa, masa suave y aromática rellena con canela y azúcar, descritos como "impresionantes" por clientes verificados.</p>
+
+      <!-- FOTO REVEAL 3/3 (auditoría interacción, 2026-08): ver comentario
+           GALERÍA en "Sobre el lugar". Última de las 3 fotos de la
+           galería original -- para cuando el usuario llega acá ya vio la
+           foto de producto (gallery) y el obrador (Historia); esta cierra
+           con el croissant, justo donde el texto lo menciona. -->
+      <figure class="reveal-photo u-fade-in-img">
+        <img src="/img/brode2.webp" alt="Croissant artesanal recién horneado de Brødë" loading="lazy" decoding="async" width="300" height="547" />
+        <figcaption>Croissant recién horneado — más de 25 capas de manteca y masa hojaldrada.</figcaption>
+      </figure>
       
       <h3 class="about-title about-subtitle">Panadería salada</h3>
       <p class="about-body"><strong>Focaccia:</strong> Uno de los productos más celebrados por los clientes, especialmente preparada como sándwich — reseñas la describen como una de las mejores experiencias del local.</p>

@@ -496,6 +496,40 @@
     });
   }
 
+  /* ───────────────────────── FOTOS CON REVEAL AL SCROLLEAR ────────────
+     Contraparte JS de .u-fade-in-img/.reveal-photo en ficha.css. Mismo
+     patrón que animarScores() más arriba: IntersectionObserver, dispara
+     una sola vez por elemento (unobserve tras el reveal, no un
+     toggle que se prenda y apague en cada scroll) y respeta
+     prefers-reduced-motion mostrando todo directo, sin animación. Sin
+     esta función, o sin JS, las fotos NUNCA se verían (arrancan en
+     opacity:0 por CSS) -- por eso el fallback siempre las muestra en vez
+     de asumir que el observer va a correr. */
+  function inicializarFotosReveal() {
+    var fotos = document.querySelectorAll(".u-fade-in-img");
+    if (!fotos.length) return;
+
+    var prefiereMenosMovimiento =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefiereMenosMovimiento || !("IntersectionObserver" in window)) {
+      fotos.forEach(function (f) { f.classList.add("is-visible"); });
+      return;
+    }
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          io.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -80px 0px" }
+    );
+    fotos.forEach(function (f) { io.observe(f); });
+  }
+
   /* ───────────────────────── INIT ───────────────────────── */
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -507,6 +541,7 @@
     inicializarSupresionVidrio();
     cargarResenas();
     manejarFormularioResena();
+    inicializarFotosReveal();
   });
 })();
 
