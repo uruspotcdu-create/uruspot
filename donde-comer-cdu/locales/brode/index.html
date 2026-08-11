@@ -437,6 +437,23 @@
 @media print{
   .brode-progress,.brode-top-btn,.brode-sticky-bar{display:none !important}
 }
+
+/* ---- Fotos de Historia y Catalogo en la columna derecha (pedido
+   explicito del cliente, senalado con flechas sobre captura de
+   pantalla, ago-2026): el fix anterior las hacia grid-column:1/-1
+   (ancho completo, debajo de AMBAS columnas) para que no quedaran
+   "rompiendo" el texto -- correcto tecnicamente, pero el cliente
+   prefiere que ocupen el espacio vacio que queda a la derecha,
+   apiladas debajo del side-box de su misma fila (Linea de tiempo /
+   Precios verificados), no centradas abajo de todo. Se logra con
+   grid-column:2 (encajan en la 2da columna del grid, la misma donde
+   ya cae el side-box) + max-width:100% (mismo ancho de columna que el
+   side-box, sin el limite de 380px pensado para el layout anterior).
+   Solo aplica en desktop/tablet: en mobile (.about-grid colapsa a
+   1fr en la media query de 768px de ficha.css) no existe una "columna
+   2" a la que anclarse, asi que la figura simplemente cae en el flujo
+   normal de la unica columna, en el mismo lugar de siempre. ---- */
+.reveal-photo--aside{grid-column:2;grid-row:auto;max-width:100%;margin:24px 0 0}
 </style>
 </head>
 <body>
@@ -674,7 +691,7 @@
          Ahora es hermana directa de las dos columnas del grid
          (grid-column:1/-1 en ficha.css la hace ocupar el ancho
          completo), asi siempre queda debajo de AMBAS columnas. -->
-    <figure class="reveal-photo u-fade-in-img">
+    <figure class="reveal-photo reveal-photo--aside u-fade-in-img">
       <img src="/img/brode1.webp" alt="Interior y producción de Brødë" loading="lazy" decoding="async" width="509" height="689" />
       <figcaption>Detrás de escena: el obrador donde nace cada pieza, antes de las 72 horas de proceso.</figcaption>
     </figure>
@@ -741,7 +758,7 @@
          seguia mal ubicada. Ahora es hermana directa de las dos
          columnas del grid, asi cae debajo de AMBAS (texto + precios
          verificados), nunca a un costado. -->
-    <figure class="reveal-photo u-fade-in-img">
+    <figure class="reveal-photo reveal-photo--aside u-fade-in-img">
       <img src="/img/brode2.webp" alt="Croissant artesanal recién horneado de Brødë" loading="lazy" decoding="async" width="300" height="547" />
       <figcaption>Croissant recién horneado — más de 25 capas de manteca y masa hojaldrada.</figcaption>
     </figure>
