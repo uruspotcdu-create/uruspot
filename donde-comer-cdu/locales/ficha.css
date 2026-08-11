@@ -1467,3 +1467,176 @@ p[style*="font-size:10px"] {
   flex-direction: column;
   gap: 10px;
 }
+
+/* ───────────────────────── RESEÑAS: FORMULARIO Y ESTADOS DINÁMICOS ──────
+   (auditoría funcionalidad, 2026-08) — complementa las reglas de REVIEWS
+   más arriba (.reviews-section/.review-card/etc., ya existentes desde
+   antes). Lo que faltaba: el estado de carga/vacío, el formulario de
+   envío accesible (grupo de radios en vez de estrellas solo-click, que
+   no sería operable por teclado ni anunciable por lector de pantalla) y
+   la utilidad .u-sr-only para el honeypot -- tokens.css sí la define
+   pero las fichas no cargan tokens.css (ver ../ficha.css head), así que
+   se repite acá para no sumar una dependencia nueva de CSS a las 51
+   fichas por un solo campo oculto. */
+
+.reviews-intro {
+  max-width: 760px;
+  margin-bottom: 32px;
+}
+
+.review-status {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 24px 0;
+  text-align: center;
+}
+.review-status[hidden] {
+  display: none;
+}
+
+.review-date {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  margin-top: 14px;
+}
+
+.u-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.review-form-wrap {
+  margin-top: 56px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+  max-width: 560px;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.review-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-form-row label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.review-form-row input[type="text"],
+.review-form-row textarea {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+.review-form-row input[type="text"]:focus,
+.review-form-row textarea:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+  border-color: var(--gold);
+}
+
+/* Grupo de puntuación: fieldset/legend + radios reales (no divs con
+   onclick) -- operable con Tab/flechas y con anuncio correcto de "1 de 5,
+   seleccionado" en lectores de pantalla, algo que un widget de estrellas
+   solo-visual no da gratis. Los radios se ocultan visualmente pero no de
+   accesibilidad (sr-only manual en el input, no display:none) y el label
+   siguiente hace de estrella clickeable/focuseable vía :focus-visible. */
+.review-rating-group {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.review-rating-group legend {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 0;
+  margin-bottom: 4px;
+}
+/* Orden visual invertido (5 primero) a propósito: es el orden en que ya
+   aparecen los radios en el HTML (más fácil de leer/mantener 5→1 que
+   armar el markup al revés), y flex-direction:row-reverse lo reacomoda
+   en pantalla como 1★→5★ de izquierda a derecha sin tocar el DOM. */
+.review-rating-stars {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.review-rating-stars input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.review-rating-stars label {
+  cursor: pointer;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--border);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+  padding: 4px;
+}
+.review-rating-stars label::before {
+  content: "★";
+}
+.review-rating-stars input:focus-visible + label {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.review-rating-stars label:hover,
+.review-rating-stars label:hover ~ label,
+.review-rating-stars input:checked + label,
+.review-rating-stars input:checked + label ~ label {
+  color: var(--gold-dark);
+}
+
+.review-form-status {
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 18px;
+}
+
+@media (max-width: 768px) {
+  .review-form-wrap {
+    max-width: 100%;
+  }
+}

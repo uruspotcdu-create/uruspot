@@ -863,17 +863,95 @@
 </section>
 
 
-<!-- REVIEWS: sección omitida intencionalmente (auditoría 2026-08).
-     .reviews-section/.review-card ya están construidas y listas en
-     ficha.css, pero no se completan acá porque no hay 2-3 reseñas
-     textuales reales y atribuibles disponibles (Google Maps, Instagram,
-     QueResto) al momento de esta revisión — no se inventan testimonios.
-     El aggregateRating agregado (5.0/67) sigue viviendo en el JSON-LD de
-     <head> y en .scores-section; no se toca ni se duplica acá.
-     PENDIENTE DE FUENTE: si en el futuro se consiguen 2-3 citas reales
-     con fuente verificable, poblar con .review-summary + hasta 3
-     .review-card siguiendo la estructura ya definida en ficha.css
-     (líneas ~464-501). No rellenar con contenido no verificado. -->
+<!-- RESEÑAS DE LA COMUNIDAD (auditoría funcionalidad, 2026-08): reemplaza
+     el bloque anterior, que dejaba esta sección afuera por falta de
+     citas textuales reales y atribuibles (Google Maps/Instagram/
+     QueResto) -- ese razonamiento seguía siendo válido para reseñas
+     de OTRAS plataformas (no se inventan ni se reempaquetan sin fuente),
+     pero pasaba por alto que URU SPOT ya tiene su PROPIO sistema de
+     reseñas de usuarios reales (functions/reviews.js + reviews-admin.js,
+     con moderación: toda reseña nueva entra "pendiente" y no se muestra
+     hasta aprobarse a mano) funcionando en el backend desde 2026-08-05,
+     sin que ninguna ficha lo llamara todavía desde el frontend. Esta
+     sección es la primera integración real: se renderiza vacía en el
+     HTML (nada que inventar acá) y la arma ficha.js en tiempo de carga
+     con lo que devuelva GET /reviews?id=URU-00624 (ver #ficha-data
+     más abajo). El aggregateRating agregado (9.3/67, otra fuente:
+     puntuación interna de URU SPOT) sigue viviendo sin tocarse en
+     .scores-section y el JSON-LD de <head> -- son dos números distintos
+     a propósito, con etiquetas separadas para no confundir al usuario
+     sobre de dónde sale cada uno. Funciona sin JavaScript (noscript
+     redirige a WhatsApp) y degrada con elegancia si REVIEWS_KV no
+     está disponible (ver el .catch() de cargarResenas() en ficha.js). -->
+
+<section class="reviews-section" aria-labelledby="reviews-heading">
+  <div class="reviews-inner">
+    <div class="section-header">
+      <h2 class="section-label" id="reviews-heading">Reseñas de la comunidad</h2>
+      <span class="section-line" aria-hidden="true"></span>
+    </div>
+    <p class="about-body reviews-intro">Reseñas propias de usuarios de URU SPOT, distintas de la puntuación general de arriba. Cada una pasa por una revisión antes de publicarse, así que puede haber una demora entre que la enviás y que aparece acá.</p>
+
+    <div id="reviewsSummary" class="review-summary" hidden>
+      <div class="review-summary-accent" aria-hidden="true"></div>
+      <div class="review-summary-body">
+        <div>
+          <div class="review-big-num" id="reviewSummaryNum">—</div>
+          <div class="review-stars-big" id="reviewSummaryStars" aria-hidden="true"></div>
+          <div class="review-count" id="reviewSummaryCount"></div>
+        </div>
+        <p class="review-desc" id="reviewSummaryDesc"></p>
+      </div>
+    </div>
+
+    <div id="reviewsStatus" class="review-status" role="status" aria-live="polite">Cargando reseñas…</div>
+    <div id="reviewsGrid" class="reviews-grid" aria-live="polite"></div>
+
+    <noscript>
+      <p class="about-body">Activá JavaScript para ver y dejar reseñas, o escribinos directo por <a href="https://wa.me/5493442306349?text=Hola!%20Quer%C3%ADa%20dejar%20una%20rese%C3%B1a%20de%20Brode%20en%20UruSpot">WhatsApp</a>.</p>
+    </noscript>
+
+    <div class="review-form-wrap">
+      <h3 class="about-title about-subtitle">Dejá tu reseña</h3>
+      <form id="reviewForm" class="review-form" novalidate>
+        <div class="review-form-row">
+          <label for="reviewAutor">Tu nombre</label>
+          <input type="text" id="reviewAutor" name="autor" maxlength="60" required autocomplete="name" />
+        </div>
+
+        <fieldset class="review-rating-group">
+          <legend>Tu puntuación</legend>
+          <div class="review-rating-stars">
+            <input type="radio" id="reviewStar5" name="puntuacion" value="5" required /><label for="reviewStar5">5 estrellas</label>
+            <input type="radio" id="reviewStar4" name="puntuacion" value="4" /><label for="reviewStar4">4 estrellas</label>
+            <input type="radio" id="reviewStar3" name="puntuacion" value="3" /><label for="reviewStar3">3 estrellas</label>
+            <input type="radio" id="reviewStar2" name="puntuacion" value="2" /><label for="reviewStar2">2 estrellas</label>
+            <input type="radio" id="reviewStar1" name="puntuacion" value="1" /><label for="reviewStar1">1 estrella</label>
+          </div>
+        </fieldset>
+
+        <div class="review-form-row">
+          <label for="reviewComentario">Tu comentario (opcional)</label>
+          <textarea id="reviewComentario" name="comentario" maxlength="600" rows="4"></textarea>
+        </div>
+
+        <!-- Honeypot anti-spam: campo real en el DOM (los bots suelen
+             completar todo lo que encuentran) pero invisible y fuera del
+             flujo de foco/lectura para una persona usando teclado o
+             lector de pantalla (aria-hidden + tabindex=-1), no solo
+             oculto por CSS. Si llega con contenido, functions/reviews.js
+             lo descarta en silencio. -->
+        <div class="u-sr-only" aria-hidden="true">
+          <label for="reviewWebsite">No completar este campo</label>
+          <input type="text" id="reviewWebsite" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="reviewSubmitBtn">Enviar reseña</button>
+        <p id="reviewFormStatus" class="review-form-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
 
 
 <!-- PRESENCIA DIGITAL -->
@@ -992,7 +1070,7 @@
   <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
 </footer>
 <script id="ficha-data" type="application/json">
-{"nombre": "Brødë", "rubro": "gastronomia", "schedule_rows": [{"closed": true, "day": "Lunes y Martes", "time": "Cerrado"}, {"closed": false, "day": "Miércoles a Viernes", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Sábado", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Domingo", "time": "9:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}], "share_text": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Brødë — la mejor panadería artesanal de Concepción del Uruguay."}
+{"nombre": "Brødë", "uruId": "URU-00624", "rubro": "gastronomia", "schedule_rows": [{"closed": true, "day": "Lunes y Martes", "time": "Cerrado"}, {"closed": false, "day": "Miércoles a Viernes", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Sábado", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Domingo", "time": "9:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}], "share_text": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Brødë — la mejor panadería artesanal de Concepción del Uruguay."}
 </script>
 <script src="../../js/rubros-meta.js" defer></script>
 <script src="../ficha.js" defer></script>

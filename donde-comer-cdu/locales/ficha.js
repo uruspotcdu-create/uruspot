@@ -320,6 +320,182 @@
     window.addEventListener("scroll", manejarScrollParaSupresionVidrio, { passive: true });
   }
 
+  /* ───────────────────────── RESEÑAS DE LA COMUNIDAD ──────────────────
+     Consume functions/reviews.js (GET/POST /reviews?id=URU-XXXXX), que ya
+     existía y funcionaba en el backend sin que ninguna ficha lo llamara
+     todavía. Vive en este archivo compartido (no en brode/cuerpo.html)
+     para que activar la sección en cualquier otra ficha, más adelante,
+     sea solo: 1) sumar "uruId" a su #ficha-data, 2) copiar el bloque
+     HTML de reviews-section de Brode a su cuerpo.html. Todo acá abajo
+     está guardado con "si no existe el elemento/dato, no hacer nada" —
+     no rompe ninguna de las fichas que todavía no tienen esta sección. */
+
+  var ESTRELLA_LLENA = "★", ESTRELLA_VACIA = "☆";
+
+  function dibujarEstrellas(valor) {
+    var redondeado = Math.round(valor);
+    var out = "";
+    for (var i = 1; i <= 5; i++) out += i <= redondeado ? ESTRELLA_LLENA : ESTRELLA_VACIA;
+    return out;
+  }
+
+  function formatearFechaResena(iso) {
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleDateString("es-AR", { year: "numeric", month: "long" });
+    } catch (e) {
+      return "";
+    }
+  }
+
+  // Crea el DOM de una tarjeta de reseña con textContent (nunca innerHTML)
+  // porque autor/comentario son texto enviado por usuarios: no hay que
+  // interpretarlo nunca como HTML, sanitizado en el backend o no.
+  function crearTarjetaResena(r) {
+    var card = document.createElement("article");
+    card.className = "review-card";
+
+    var autor = document.createElement("div");
+    autor.className = "review-author";
+    autor.textContent = r.autor || "Anónimo";
+    card.appendChild(autor);
+
+    var stars = document.createElement("div");
+    stars.className = "review-stars";
+    stars.setAttribute("aria-label", "Puntuación: " + r.puntuacion + " de 5");
+    stars.textContent = dibujarEstrellas(r.puntuacion);
+    card.appendChild(stars);
+
+    if (r.comentario) {
+      var texto = document.createElement("p");
+      texto.className = "review-text";
+      texto.textContent = r.comentario;
+      card.appendChild(texto);
+    }
+
+    var fechaTexto = formatearFechaResena(r.fecha);
+    if (fechaTexto) {
+      var fecha = document.createElement("div");
+      fecha.className = "review-date";
+      fecha.textContent = fechaTexto;
+      card.appendChild(fecha);
+    }
+
+    return card;
+  }
+
+  function cargarResenas() {
+    var grid = document.getElementById("reviewsGrid");
+    var status = document.getElementById("reviewsStatus");
+    var summary = document.getElementById("reviewsSummary");
+    if (!grid || !status) return; // ficha sin sección de reseñas todavía
+
+    if (!DATA.uruId) {
+      status.textContent = "Reseñas no disponibles para este local por el momento.";
+      return;
+    }
+
+    fetch("/reviews?id=" + encodeURIComponent(DATA.uruId))
+      .then(function (res) {
+        if (!res.ok) throw new Error("http_" + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        var resenas = (data && data.resenas) || [];
+        if (!resenas.length) {
+          status.textContent = "Todavía no hay reseñas publicadas de la comunidad — ¡sé el primero en dejar la tuya!";
+          return;
+        }
+
+        status.textContent = "";
+        status.hidden = true;
+
+        if (summary && data.promedio != null) {
+          var num = document.getElementById("reviewSummaryNum");
+          var starsBig = document.getElementById("reviewSummaryStars");
+          var count = document.getElementById("reviewSummaryCount");
+          var desc = document.getElementById("reviewSummaryDesc");
+          if (num) num.textContent = String(data.promedio).replace(".", ",");
+          if (starsBig) starsBig.textContent = dibujarEstrellas(data.promedio);
+          if (count) count.textContent = data.total + (data.total === 1 ? " reseña" : " reseñas") + " de la comunidad URU SPOT";
+          if (desc) desc.textContent = "Promedio de reseñas enviadas y aprobadas por usuarios de URU SPOT.";
+          summary.hidden = false;
+        }
+
+        grid.innerHTML = "";
+        resenas.forEach(function (r) {
+          grid.appendChild(crearTarjetaResena(r));
+        });
+      })
+      .catch(function () {
+        status.textContent = "No pudimos cargar las reseñas en este momento. Podés escribirnos directo por WhatsApp mientras tanto.";
+      });
+  }
+
+  function manejarFormularioResena() {
+    var form = document.getElementById("reviewForm");
+    if (!form) return;
+    var btn = document.getElementById("reviewSubmitBtn");
+    var statusEl = document.getElementById("reviewFormStatus");
+
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      if (!DATA.uruId) {
+        if (statusEl) statusEl.textContent = "No se pudo enviar: reseñas no disponibles para este local.";
+        return;
+      }
+
+      var autor = (form.autor.value || "").trim();
+      var comentario = (form.comentario.value || "").trim();
+      var puntuacionEl = form.querySelector('input[name="puntuacion"]:checked');
+      var website = form.website ? form.website.value : "";
+
+      if (!autor) {
+        if (statusEl) statusEl.textContent = "Falta tu nombre.";
+        form.autor.focus();
+        return;
+      }
+      if (!puntuacionEl) {
+        if (statusEl) statusEl.textContent = "Elegí una puntuación de 1 a 5 estrellas.";
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (statusEl) statusEl.textContent = "Enviando…";
+
+      fetch("/reviews", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          id: DATA.uruId,
+          autor: autor,
+          puntuacion: parseInt(puntuacionEl.value, 10),
+          comentario: comentario,
+          website: website,
+        }),
+      })
+        .then(function (res) {
+          if (res.status === 429) throw new Error("rate_limit");
+          if (!res.ok) throw new Error("http_" + res.status);
+          return res.json();
+        })
+        .then(function () {
+          form.reset();
+          if (statusEl) statusEl.textContent = "¡Gracias! Tu reseña quedó pendiente de aprobación y se va a publicar pronto.";
+          if (btn) btn.disabled = false;
+        })
+        .catch(function (err) {
+          if (statusEl) {
+            statusEl.textContent = err && err.message === "rate_limit"
+              ? "Ya enviaste una reseña hace poco. Probá de nuevo en unos minutos."
+              : "No pudimos enviar tu reseña. Probá de nuevo o escribinos por WhatsApp.";
+          }
+          if (btn) btn.disabled = false;
+        });
+    });
+  }
+
   /* ───────────────────────── INIT ───────────────────────── */
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -329,6 +505,8 @@
     aplicarNombreDeTransicion();
     aplicarPictogramaRubro();
     inicializarSupresionVidrio();
+    cargarResenas();
+    manejarFormularioResena();
   });
 })();
 
