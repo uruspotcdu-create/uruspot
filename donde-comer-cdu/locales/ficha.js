@@ -352,9 +352,14 @@
   // Crea el DOM de una tarjeta de reseña con textContent (nunca innerHTML)
   // porque autor/comentario son texto enviado por usuarios: no hay que
   // interpretarlo nunca como HTML, sanitizado en el backend o no.
-  function crearTarjetaResena(r) {
+  function crearTarjetaResena(r, indice) {
     var card = document.createElement("article");
-    card.className = "review-card";
+    card.className = "review-card review-card--in";
+    var prefiereMenosMovimiento =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!prefiereMenosMovimiento && typeof indice === "number") {
+      card.style.animationDelay = Math.min(indice * 70, 420) + "ms";
+    }
 
     var autor = document.createElement("div");
     autor.className = "review-author";
@@ -396,12 +401,15 @@
       return;
     }
 
+    status.dataset.loading = "true";
+
     fetch("/reviews?id=" + encodeURIComponent(DATA.uruId))
       .then(function (res) {
         if (!res.ok) throw new Error("http_" + res.status);
         return res.json();
       })
       .then(function (data) {
+        delete status.dataset.loading;
         var resenas = (data && data.resenas) || [];
         if (!resenas.length) {
           status.textContent = "Todavía no hay reseñas publicadas de la comunidad — ¡sé el primero en dejar la tuya!";
@@ -424,11 +432,12 @@
         }
 
         grid.innerHTML = "";
-        resenas.forEach(function (r) {
-          grid.appendChild(crearTarjetaResena(r));
+        resenas.forEach(function (r, i) {
+          grid.appendChild(crearTarjetaResena(r, i));
         });
       })
       .catch(function () {
+        delete status.dataset.loading;
         status.textContent = "No pudimos cargar las reseñas en este momento. Podés escribirnos directo por WhatsApp mientras tanto.";
       });
   }
@@ -530,6 +539,39 @@
     fotos.forEach(function (f) { io.observe(f); });
   }
 
+  /* ───────────────── REVELADO GENÉRICO DE CONTENIDO ──────────────────
+     Contraparte de inicializarFotosReveal() pero para .u-reveal /
+     .u-reveal-stagger (encabezados de sección, side-box, veredicto,
+     grillas de tags/amenities/scores — ver ficha.css, sección "PASE DE
+     REFINAMIENTO PREMIUM"). Mismo patrón: dispara una sola vez por
+     elemento, respeta prefers-reduced-motion, y si no hay
+     IntersectionObserver muestra todo directo en vez de dejarlo
+     invisible para siempre. */
+  function inicializarRevealGenerico() {
+    var elementos = document.querySelectorAll(".u-reveal, .u-reveal-stagger");
+    if (!elementos.length) return;
+
+    var prefiereMenosMovimiento =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefiereMenosMovimiento || !("IntersectionObserver" in window)) {
+      elementos.forEach(function (el) { el.classList.add("is-visible"); });
+      return;
+    }
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          io.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -60px 0px" }
+    );
+    elementos.forEach(function (el) { io.observe(el); });
+  }
+
   /* ───────────────────────── INIT ───────────────────────── */
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -542,8 +584,6 @@
     cargarResenas();
     manejarFormularioResena();
     inicializarFotosReveal();
+    inicializarRevealGenerico();
   });
 })();
-
-
-
