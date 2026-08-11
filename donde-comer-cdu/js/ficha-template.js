@@ -115,15 +115,19 @@ ${bloqueTwitter}<link rel="canonical" href="${shell.canonical}">
      render identico entre todas las fichas. -->
 <link rel="preload" href="../../fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<!-- Preload de la foto del hero (candidata a LCP de esta pagina, auditoria
+${shell.imagePath ? `<!-- Preload de la foto del hero (candidata a LCP de esta pagina, auditoria
      Brode 2026-08): adelanta la descarga antes de que el parser llegue al
      <img> en el <body>, complementando el fetchpriority="high"+loading="eager"
      que ya trae ese tag en cuerpo.html. Usa shell.imagePath, que ya existe en
      el ficha.json de las 51 fichas -- antes vivia hardcodeado a mano solo en
      Brode y se perdia al regenerar. Misma ruta absoluta que debe usar el
-     <img> del hero en cuerpo.html. -->
+     <img> del hero en cuerpo.html. Condicional (auditoria 2026-08): antes se
+     emitia siempre, con href="undefined" en toda ficha sin shell.imagePath
+     -- rompia el preload en las 50 fichas viejas y seguiria rompiendolo en
+     cualquier ficha legitimamente sin foto de hero (ej. parrilla-la-gruta,
+     hero--sin-foto por diseno). Ahora solo se emite si hay imagen real. -->
 <link rel="preload" href="${shell.imagePath}" as="image" fetchpriority="high">
-<link rel="stylesheet" href="../ficha-fonts.css">
+` : ""}<link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
 <!-- El sistema visual de Brode (piloto "marca-naranja") se promovio a
      sistema base de TODAS las fichas - fusionado dentro de ../ficha.css

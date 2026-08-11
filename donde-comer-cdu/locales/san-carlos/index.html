@@ -5,11 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Panadería y Confitería San Carlos — Productos frescos y artesanales en Concepción del Uruguay. Score URU SPOT: 9.0">
 <meta name="theme-color" content="#0d0d0d">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta property="og:title" content="Panadería San Carlos · URU SPOT">
 <meta property="og:description" content="La panadería de tu barrio que endulza tus días con productos frescos y elaboración artesanal. 9 de Julio 1549.">
+<meta property="og:url" content="https://uruspot.pages.dev/donde-comer-cdu/locales/san-carlos/">
+<meta property="og:site_name" content="URU SPOT">
+<meta property="og:locale" content="es_AR">
 <meta property="og:image" content="https://i.imgur.com/WNBQE8b.jpeg">
 <meta property="og:type" content="article">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Panadería San Carlos · URU SPOT">
+<meta name="twitter:description" content="La panadería de tu barrio que endulza tus días con productos frescos y elaboración artesanal. 9 de Julio 1549.">
 <link rel="canonical" href="https://uruspot.pages.dev/donde-comer-cdu/locales/san-carlos/">
+
+<!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditoria
+     Brode 2026-08: faltaban por completo en las fichas - ver Critico 1). -->
+<!-- NOTA (auditoria accesibilidad, 2026-08): el guion largo original de
+     este comentario se corrompia en cada build a un byte de control
+     0x14 - ver escribirLatin1() en build-fichas.js. Cambiado a guion
+     simple ("-"). MISMO MOTIVO (auditoria 2026-08, ver [BUG] mas abajo
+     en el header de este archivo): cualquier caracter fuera de ASCII
+     escrito literal en un comentario HTML dentro de este template
+     literal se emite tal cual al HTML final y rompe el mismo pipeline
+     latin1 -- a diferencia de los comentarios /* JS */ de este mismo
+     archivo, que nunca llegan al output y si pueden usar tildes,
+     guiones largos o cualquier caracter UTF-8 sin riesgo. Por eso todo
+     comentario HTML de este template usa solo ASCII plano desde
+     2026-08 (auditoria pipeline latin1). -->
+<link rel="manifest" href="/donde-comer-cdu/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
 
 <title>Panadería San Carlos · URU SPOT — Gastronomía CDU</title>
 
@@ -18,11 +46,23 @@
      render identico entre todas las fichas. -->
 <link rel="preload" href="../../fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<!-- Preload de la foto del hero (candidata a LCP de esta pagina, auditoria
+     Brode 2026-08): adelanta la descarga antes de que el parser llegue al
+     <img> en el <body>, complementando el fetchpriority="high"+loading="eager"
+     que ya trae ese tag en cuerpo.html. Usa shell.imagePath, que ya existe en
+     el ficha.json de las 51 fichas -- antes vivia hardcodeado a mano solo en
+     Brode y se perdia al regenerar. Misma ruta absoluta que debe usar el
+     <img> del hero en cuerpo.html. Condicional (auditoria 2026-08): antes se
+     emitia siempre, con href="undefined" en toda ficha sin shell.imagePath
+     -- rompia el preload en las 50 fichas viejas y seguiria rompiendolo en
+     cualquier ficha legitimamente sin foto de hero (ej. parrilla-la-gruta,
+     hero--sin-foto por diseno). Ahora solo se emite si hay imagen real. -->
+<link rel="preload" href="https://i.imgur.com/WNBQE8b.jpeg" as="image" fetchpriority="high">
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
-<!-- El sistema visual de Brode (piloto "marca-naranja") se promovió a
+<!-- El sistema visual de Brode (piloto "marca-naranja") se promovio a
      sistema base de TODAS las fichas - fusionado dentro de ../ficha.css
-     (sección "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
+     (seccion "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
      hoja CSS propia. Ver ARCHITECTURE.md. -->
 <script type="application/ld+json">
 {
@@ -87,6 +127,10 @@
 </head>
 <body>
 
+<!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento
+     enfocable del <body>. Apunta al <main> de mas abajo. -->
+<a href="#contenido-principal" class="skip-link">Saltar al contenido</a>
+
 <!-- NAV -->
 <nav class="nav" role="navigation" aria-label="URU SPOT">
   <a href="../../" class="nav-logo">URU SPOT</a>
@@ -94,6 +138,7 @@
   <span class="nav-badge">🥨 Tradicional</span>
 </nav>
 
+<main id="contenido-principal" tabindex="-1">
 <!-- HERO -->
 <section class="hero " aria-label="San Carlos">
   
@@ -374,10 +419,11 @@
 
 
 <!-- FOOTER -->
+</main>
 <footer class="footer">
   <a href="../../" class="footer-logo">URU SPOT</a>
   <span>Guía gastronómica de Concepción del Uruguay</span>
-  <span>Información verificada recientemente</span>
+  <span>Informaci&oacute;n verificada y actualizada &mdash; Agosto 2026</span>
   <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
 </footer>
 
@@ -386,6 +432,24 @@
 </script>
 <script src="../../js/rubros-meta.js" defer></script>
 <script src="../ficha.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Arreglar TODOS los colores problemáticos
+  const elements = document.querySelectorAll('[style*="color"]');
+  elements.forEach(el => {
+    el.style.color = '#ffffff';
+  });
+  
+  // Arreglar elementos específicos
+  document.querySelectorAll('.hero__scroll-cue, #schedStatusText, .btn-primary, a, footer p').forEach(el => {
+    el.style.color = '#ffffff !important';
+  });
+  
+  // Arreglar variables CSS
+  document.documentElement.style.setProperty('--color-tinta-60', '#ffffff', 'important');
+  document.documentElement.style.setProperty('--color-tinta', '#ffffff', 'important');
+});
+</script>
 </body>
 </html>
 

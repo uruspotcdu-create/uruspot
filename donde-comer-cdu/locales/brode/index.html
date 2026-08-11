@@ -59,7 +59,11 @@
      que ya trae ese tag en cuerpo.html. Usa shell.imagePath, que ya existe en
      el ficha.json de las 51 fichas -- antes vivia hardcodeado a mano solo en
      Brode y se perdia al regenerar. Misma ruta absoluta que debe usar el
-     <img> del hero en cuerpo.html. -->
+     <img> del hero en cuerpo.html. Condicional (auditoria 2026-08): antes se
+     emitia siempre, con href="undefined" en toda ficha sin shell.imagePath
+     -- rompia el preload en las 50 fichas viejas y seguiria rompiendolo en
+     cualquier ficha legitimamente sin foto de hero (ej. parrilla-la-gruta,
+     hero--sin-foto por diseno). Ahora solo se emite si hay imagen real. -->
 <link rel="preload" href="/img/brode-og.webp" as="image" fetchpriority="high">
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
