@@ -438,22 +438,25 @@
   .brode-progress,.brode-top-btn,.brode-sticky-bar{display:none !important}
 }
 
-/* ---- Fotos de Historia y Catalogo en la columna derecha (pedido
-   explicito del cliente, senalado con flechas sobre captura de
-   pantalla, ago-2026): el fix anterior las hacia grid-column:1/-1
-   (ancho completo, debajo de AMBAS columnas) para que no quedaran
-   "rompiendo" el texto -- correcto tecnicamente, pero el cliente
-   prefiere que ocupen el espacio vacio que queda a la derecha,
-   apiladas debajo del side-box de su misma fila (Linea de tiempo /
-   Precios verificados), no centradas abajo de todo. Se logra con
-   grid-column:2 (encajan en la 2da columna del grid, la misma donde
-   ya cae el side-box) + max-width:100% (mismo ancho de columna que el
-   side-box, sin el limite de 380px pensado para el layout anterior).
-   Solo aplica en desktop/tablet: en mobile (.about-grid colapsa a
-   1fr en la media query de 768px de ficha.css) no existe una "columna
-   2" a la que anclarse, asi que la figura simplemente cae en el flujo
-   normal de la unica columna, en el mismo lugar de siempre. ---- */
-.reveal-photo--aside{grid-column:2;grid-row:auto;max-width:100%;margin:-16px 0 0}
+/* ---- Fotos de Historia y Catalogo pegadas al side-box de su columna
+   (pedido explicito del cliente, senalado con flechas sobre captura de
+   pantalla, ago-2026) ----
+   Intento anterior (figure como hijo directo de .about-grid +
+   grid-column:2 + grid-row:auto): ubicaba la foto en la columna
+   correcta, pero la ALTURA de esa fila la sigue fijando el contenido
+   mas alto de las dos columnas (el texto, mucho mas largo que el
+   side-box) -- la foto quedaba esperando a que terminara toda la fila
+   antes de caer, muy por debajo de "Hoy" / "Precios verificados" en
+   vez de pegada al cartel. Exactamente lo que marcaba la flecha.
+   Fix real: la figura ahora vive anidada dentro del mismo div que el
+   side-box (ver Historia/Catalogo mas abajo), ya no es un item de grid
+   propio, asi que grid-column/grid-row no tienen efecto (solo aplican
+   a hijos directos de .about-grid) y cae en flujo normal, pegada al
+   borde inferior del side-box sin importar la otra columna. Solo hace
+   falta que ocupe el ancho completo de esa columna (en vez del
+   max-width:380px pensado para cuando vivia sola centrada) y un
+   margen superior para separarla del cartel. ---- */
+.reveal-photo--aside{max-width:100%;margin:24px 0 0}
 </style>
 </head>
 <body>
@@ -670,31 +673,32 @@
       <p class="source-caption">Fuente: entrevistas de La Prensa Federal a Federico y Jonatan Tournour (2024) y a los cuatro socios de Brødë Hermanos (2025). Información verificada adicional: análisis de lahelveticaonline.com.ar, QueResto.com y Google Maps.</p>
     </div>
 
-    <div class="side-box u-reveal" aria-label="Línea de tiempo de Brødë">
-      <div class="side-box-title">Línea de tiempo</div>
-      <ul>
-        <li><strong>2020</strong>Nace en pandemia, en el balcón familiar, como proyecto de pizzas a la piedra.</li>
-        <li><strong>2020–2024</strong>Deriva hacia la panificación artesanal. Se instala en Dr. J. Lacava 491 y se consolida como referente local.</li>
-        <li><strong>2025</strong>Nace Brødë Hermanos: equipo ampliado (Jonatan, Federico, Jerónimo y Abril), nuevos espacios y expansión a otras ciudades.</li>
-        <li><strong>Hoy</strong>Panadería artesanal de masa madre y laminados, con línea mayorista activa en la región.</li>
-      </ul>
-    </div>
+    <!-- COLUMNA DERECHA (auditoría layout, pase 3 — 2026-08): side-box +
+         foto van juntas dentro del mismo div, único hijo directo de
+         .about-grid en la 2da columna. El intento anterior (figure como
+         hijo directo + grid-column:2) ubicaba la foto en la columna
+         correcta, pero la altura de la fila la fija el contenido más
+         alto de las DOS columnas (la de texto, mucho más larga), así
+         que la foto caía muy por debajo de "Hoy" en vez de pegada al
+         cartel — el problema real marcado con flecha por el cliente.
+         Anidada en un div normal, grid-column deja de tener efecto y la
+         foto fluye pegada al side-box sin depender de la otra columna. -->
+    <div>
+      <div class="side-box u-reveal" aria-label="Línea de tiempo de Brødë">
+        <div class="side-box-title">Línea de tiempo</div>
+        <ul>
+          <li><strong>2020</strong>Nace en pandemia, en el balcón familiar, como proyecto de pizzas a la piedra.</li>
+          <li><strong>2020–2024</strong>Deriva hacia la panificación artesanal. Se instala en Dr. J. Lacava 491 y se consolida como referente local.</li>
+          <li><strong>2025</strong>Nace Brødë Hermanos: equipo ampliado (Jonatan, Federico, Jerónimo y Abril), nuevos espacios y expansión a otras ciudades.</li>
+          <li><strong>Hoy</strong>Panadería artesanal de masa madre y laminados, con línea mayorista activa en la región.</li>
+        </ul>
+      </div>
 
-    <!-- FOTO REVEAL 2/3 (auditoria interaccion, 2026-08): FIX REAL
-         (no solo documentado en comentario, esta vez aplicado): esta
-         figure vivia anidada DENTRO de la primera columna (entre el
-         2do parrafo y el pullquote) pese a que el comentario original
-         decia que ya era hermana del grid -- ese drift entre
-         cuerpo.html (donde si estaba bien movida) y este index.html
-         (donde nunca se propago el cambio) es la causa real de que la
-         foto siguiera apareciendo "rompiendo" el texto en produccion.
-         Ahora es hermana directa de las dos columnas del grid
-         (grid-column:1/-1 en ficha.css la hace ocupar el ancho
-         completo), asi siempre queda debajo de AMBAS columnas. -->
-    <figure class="reveal-photo reveal-photo--aside u-fade-in-img">
-      <img src="/img/brode1.webp" alt="Interior y producción de Brødë" loading="lazy" decoding="async" width="509" height="689" />
-      <figcaption>Detrás de escena: el obrador donde nace cada pieza, antes de las 72 horas de proceso.</figcaption>
-    </figure>
+      <figure class="reveal-photo reveal-photo--aside u-fade-in-img">
+        <img src="/img/brode1.webp" alt="Interior y producción de Brødë" loading="lazy" decoding="async" width="509" height="689" />
+        <figcaption>Detrás de escena: el obrador donde nace cada pieza, antes de las 72 horas de proceso.</figcaption>
+      </figure>
+    </div>
   </div>
 </section>
 
@@ -739,29 +743,23 @@
       </div>
     </div>
 
-    <div class="side-box u-reveal" aria-label="Precios verificados">
-      <div class="side-box-title">Precios verificados</div>
-      <ul>
-        <li><div class="side-box-row"><strong>Croissant</strong><span class="side-box-val">$ 1.530</span></div></li>
-        <li><div class="side-box-row"><strong>Pan de Campo</strong><span class="side-box-val">$ 1.650</span></div><span class="side-box-caption">caja de 10 unidades</span></li>
-        <li><div class="side-box-row"><strong>Pan de Hamburguesa</strong><span class="side-box-val">$ 385</span></div><span class="side-box-caption">precio unitario</span></li>
-      </ul>
-      <a href="https://queresto.com/BRODE" class="side-box-cta" target="_blank" rel="noopener noreferrer">🧾 Menú oficial en vivo</a>
-      <p class="source-caption source-caption--bordered"><em>Fuente: menú oficial de Brødë en QueResto.com (consultado ago-2026)</em></p>
-    </div>
+    <div>
+      <div class="side-box u-reveal" aria-label="Precios verificados">
+        <div class="side-box-title">Precios verificados</div>
+        <ul>
+          <li><div class="side-box-row"><strong>Croissant</strong><span class="side-box-val">$ 1.530</span></div></li>
+          <li><div class="side-box-row"><strong>Pan de Campo</strong><span class="side-box-val">$ 1.650</span></div><span class="side-box-caption">caja de 10 unidades</span></li>
+          <li><div class="side-box-row"><strong>Pan de Hamburguesa</strong><span class="side-box-val">$ 385</span></div><span class="side-box-caption">precio unitario</span></li>
+        </ul>
+        <a href="https://queresto.com/BRODE" class="side-box-cta" target="_blank" rel="noopener noreferrer">🧾 Menú oficial en vivo</a>
+        <p class="source-caption source-caption--bordered"><em>Fuente: menú oficial de Brødë en QueResto.com (consultado ago-2026)</em></p>
+      </div>
 
-    <!-- FOTO REVEAL 3/3 (auditoria interaccion, 2026-08): FIX REAL
-         (mismo drift que la foto de Historia -- ver comentario ahi):
-         vivia anidada dentro de la columna de texto, entre "Laminados"
-         y "Panaderia salada", pese a que el comentario original ya
-         hablaba de que "cierra con el croissant" sin aclarar que
-         seguia mal ubicada. Ahora es hermana directa de las dos
-         columnas del grid, asi cae debajo de AMBAS (texto + precios
-         verificados), nunca a un costado. -->
-    <figure class="reveal-photo reveal-photo--aside u-fade-in-img">
-      <img src="/img/brode2.webp" alt="Croissant artesanal recién horneado de Brødë" loading="lazy" decoding="async" width="300" height="547" />
-      <figcaption>Croissant recién horneado — más de 25 capas de manteca y masa hojaldrada.</figcaption>
-    </figure>
+      <figure class="reveal-photo reveal-photo--aside u-fade-in-img">
+        <img src="/img/brode2.webp" alt="Croissant artesanal recién horneado de Brødë" loading="lazy" decoding="async" width="300" height="547" />
+        <figcaption>Croissant recién horneado — más de 25 capas de manteca y masa hojaldrada.</figcaption>
+      </figure>
+    </div>
   </div>
 </div>
 </section>
