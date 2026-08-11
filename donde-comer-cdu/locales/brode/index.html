@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon-180x180.png">
 
-<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
 <meta property="og:title" content="Brødë · URU SPOT">
 <meta property="og:description" content="72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Catálogo, precios y pedidos verificados.">
@@ -63,6 +63,11 @@
      render identico entre todas las fichas. -->
 <link rel="preload" href="../../fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<!-- Preload de la foto del hero (candidata a LCP de esta página): adelanta
+     la descarga antes de que el parser llegue al <img> en el <body>,
+     complementando el fetchpriority="high"+loading="eager" que ya tiene
+     ese tag más abajo. Misma imagen y misma ruta absoluta que el <img>. -->
+<link rel="preload" href="/img/brodefrente.webp" as="image" fetchpriority="high">
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
 <!-- El sistema visual de Brode (piloto "marca-naranja") se promovió a
@@ -122,6 +127,26 @@
     "bestRating": "5",
     "worstRating": "1"
   },
+  "makesOffer": [
+    {
+      "@type": "Offer",
+      "itemOffered": { "@type": "Product", "name": "Croissant" },
+      "price": "1530",
+      "priceCurrency": "ARS"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": { "@type": "Product", "name": "Pan de Campo (caja de 10 unidades)" },
+      "price": "1650",
+      "priceCurrency": "ARS"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": { "@type": "Product", "name": "Pan de Hamburguesa (unidad)" },
+      "price": "385",
+      "priceCurrency": "ARS"
+    }
+  ],
   "openingHoursSpecification": [
     {
       "@type": "OpeningHoursSpecification",
@@ -191,6 +216,84 @@
       "position": 3,
       "name": "Brødë",
       "item": "https://uruspot.pages.dev/donde-comer-cdu/locales/brode/"
+    }
+  ]
+}
+</script>
+<!-- FAQPage (SEO, 2026-08): mismas 8 preguntas y respuestas ya visibles
+     en la sección "Preguntas frecuentes" del <body>, en texto plano
+     (sin el <strong>/marcado visual, JSON-LD no lo necesita). Ningún
+     dato nuevo respecto a lo que ya lee el usuario en la página. Habilita
+     que Google pueda mostrar estas preguntas como rich snippet en el
+     resultado de búsqueda. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Qué días abre Brødë?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cuál es la especialidad de la casa?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como \"los mejores laminados de la zona\". Todo pasa por un proceso de 72 horas."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cuáles son los precios?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Croissant: $1.530. Pan de Campo (caja de 10): $1.650. Pan de Hamburguesa: $385. Para otros productos y promociones, consultar directamente por WhatsApp."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Se puede comprar en otro lugar además del local?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué pasa con el pan que no se vende?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿El local es accesible para sillas de ruedas?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Hay opciones veganas o sin gluten?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cuánto tiempo lleva el proceso de un pan?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "72 horas desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante."
+      }
     }
   ]
 }
