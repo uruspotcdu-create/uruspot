@@ -88,16 +88,20 @@ ${bloqueOg}<meta property="og:type" content="${ogType}">
 
 ${bloqueTwitter}<link rel="canonical" href="${shell.canonical}">
 
-<!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditoría
-     Brode 2026-08: faltaban por completo en las fichas - ver Crítico 1). -->
-<!-- NOTA (auditoría accesibilidad, 2026-08): el guion largo original de
-     este comentario se corrompía en cada build a un byte de control
+<!-- Favicon/manifest (paridad con donde-comer-cdu/index.html, auditoria
+     Brode 2026-08: faltaban por completo en las fichas - ver Critico 1). -->
+<!-- NOTA (auditoria accesibilidad, 2026-08): el guion largo original de
+     este comentario se corrompia en cada build a un byte de control
      0x14 - ver escribirLatin1() en build-fichas.js. Cambiado a guion
-     simple ("-"), el único carácter seguro acá: es un comentario HTML
-     dentro del template literal (se emite tal cual al HTML final), a
-     diferencia de los comentarios /* JS */ de este mismo archivo, que
-     nunca llegan al output y sí pueden usar tildes o guiones largos sin
-     riesgo. -->
+     simple ("-"). MISMO MOTIVO (auditoria 2026-08, ver [BUG] mas abajo
+     en el header de este archivo): cualquier caracter fuera de ASCII
+     escrito literal en un comentario HTML dentro de este template
+     literal se emite tal cual al HTML final y rompe el mismo pipeline
+     latin1 -- a diferencia de los comentarios /* JS */ de este mismo
+     archivo, que nunca llegan al output y si pueden usar tildes,
+     guiones largos o cualquier caracter UTF-8 sin riesgo. Por eso todo
+     comentario HTML de este template usa solo ASCII plano desde
+     2026-08 (auditoria pipeline latin1). -->
 <link rel="manifest" href="/donde-comer-cdu/manifest.json">
 <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
@@ -111,19 +115,19 @@ ${bloqueTwitter}<link rel="canonical" href="${shell.canonical}">
      render identico entre todas las fichas. -->
 <link rel="preload" href="../../fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../fonts/dm-sans-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<!-- Preload de la foto del hero (candidata a LCP de esta página, auditoría
+<!-- Preload de la foto del hero (candidata a LCP de esta pagina, auditoria
      Brode 2026-08): adelanta la descarga antes de que el parser llegue al
      <img> en el <body>, complementando el fetchpriority="high"+loading="eager"
      que ya trae ese tag en cuerpo.html. Usa shell.imagePath, que ya existe en
-     el ficha.json de las 51 fichas -- antes vivía hardcodeado a mano solo en
-     Brode y se perdía al regenerar. Misma ruta absoluta que debe usar el
+     el ficha.json de las 51 fichas -- antes vivia hardcodeado a mano solo en
+     Brode y se perdia al regenerar. Misma ruta absoluta que debe usar el
      <img> del hero en cuerpo.html. -->
 <link rel="preload" href="${shell.imagePath}" as="image" fetchpriority="high">
 <link rel="stylesheet" href="../ficha-fonts.css">
 <link rel="stylesheet" href="../ficha.css">
-<!-- El sistema visual de Brode (piloto "marca-naranja") se promovió a
+<!-- El sistema visual de Brode (piloto "marca-naranja") se promovio a
      sistema base de TODAS las fichas - fusionado dentro de ../ficha.css
-     (sección "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
+     (seccion "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
      hoja CSS propia. Ver ARCHITECTURE.md. -->
 <script type="application/ld+json">
 ${shell.jsonLdRaw}
@@ -131,8 +135,8 @@ ${shell.jsonLdRaw}
 ${shell.breadcrumbBlockRaw || ""}${shell.faqBlockRaw || ""}</head>
 <body>
 
-<!-- SKIP LINK - invariante AGENTS.md §9.2: debe ser el primer elemento
-     enfocable del <body>. Apunta al <main> de más abajo. -->
+<!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento
+     enfocable del <body>. Apunta al <main> de mas abajo. -->
 <a href="#contenido-principal" class="skip-link">Saltar al contenido</a>
 
 <!-- NAV -->
