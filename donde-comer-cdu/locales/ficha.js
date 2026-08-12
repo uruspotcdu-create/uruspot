@@ -613,6 +613,279 @@
     elementos.forEach(function (el) { io.observe(el); });
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     PASE DE REFINAMIENTO PREMIUM — comportamiento (2026-08)
+     Fusionado desde los <script> exclusivos que tenían index.html y
+     cuerpo.html de la ficha Brode. Todo acá abajo sigue el mismo patrón
+     defensivo que el resto de este archivo: si el elemento no existe, la
+     función no hace nada (así que no rompe en fichas que no incluyan
+     este HTML), scroll siempre con requestAnimationFrame, y respeto
+     total de prefers-reduced-motion. Las piezas puramente decorativas
+     (contador animado, tilt de las highlight-card) además respetan un
+     flag opcional en #ficha-data → "features", para que una ficha pueda
+     apagarlas sin tocar este archivo (ej. un rubro más sobrio que no
+     quiere el efecto tilt). Si "features" no viene en los datos, quedan
+     activas por defecto — mismo criterio que ya usaba Brode. */
+  var FEATURES = DATA.features || {};
+
+  /* ───────── Barra de progreso de lectura ───────── */
+  function inicializarBarraProgreso() {
+    var fill = document.getElementById("fichaProgressFill");
+    if (!fill) return;
+    var pendiente = false;
+    function actualizar() {
+      pendiente = false;
+      var doc = document.documentElement;
+      var alto = doc.scrollHeight - doc.clientHeight;
+      var pct = alto > 0 ? Math.min(100, Math.max(0, (doc.scrollTop / alto) * 100)) : 0;
+      fill.style.width = pct + "%";
+    }
+    function solicitar() {
+      if (pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(actualizar);
+    }
+    window.addEventListener("scroll", solicitar, { passive: true });
+    window.addEventListener("resize", solicitar, { passive: true });
+    actualizar();
+  }
+
+  /* ───────── Botón "volver arriba" ───────── */
+  function inicializarBotonVolverArriba() {
+    var topBtn = document.getElementById("fichaTopBtn");
+    if (!topBtn) return;
+    var hero = document.querySelector(".hero");
+    var pendiente = false;
+
+    function actualizar() {
+      pendiente = false;
+      var umbral = hero ? Math.max(hero.offsetHeight - 100, 240) : 500;
+      topBtn.classList.toggle("is-visible", window.scrollY > umbral);
+    }
+    function solicitar() {
+      if (pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(actualizar);
+    }
+    window.addEventListener("scroll", solicitar, { passive: true });
+    window.addEventListener("resize", solicitar, { passive: true });
+    actualizar();
+
+    topBtn.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: prefiereMenosMovimiento() ? "auto" : "smooth" });
+    });
+  }
+
+  /* ───────── Barra .cta-sticky + scroll-cue del hero: un solo listener ─────────
+     Único punto del sistema que muestra/oculta la barra fija de
+     Llamar/WhatsApp en mobile (antes existía, además, una segunda barra
+     redundante -- #brodeStickyBar -- exclusiva de index.html en Brode;
+     se eliminó al fusionar, ver CAMBIOS-2026-08.txt). */
+  function inicializarCtaSticky() {
+    var hero = document.querySelector(".hero");
+    var cue = document.querySelector(".hero-scroll-cue");
+    var cta = document.querySelector(".cta-sticky");
+    if (!hero || (!cue && !cta)) return;
+
+    var stickyLinks = cta ? cta.querySelectorAll("a") : [];
+    var altoHero = hero.offsetHeight;
+    var pendiente = false;
+
+    function actualizar() {
+      pendiente = false;
+      var y = window.scrollY || window.pageYOffset;
+      if (cue) cue.classList.toggle("is-hidden", y > 80);
+      if (cta) {
+        var visible = y > altoHero * 0.6;
+        cta.classList.toggle("is-visible", visible);
+        for (var i = 0; i < stickyLinks.length; i++) {
+          if (visible) stickyLinks[i].removeAttribute("tabindex");
+          else stickyLinks[i].setAttribute("tabindex", "-1");
+        }
+      }
+    }
+    function solicitar() {
+      if (pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(actualizar);
+    }
+
+    actualizar();
+    window.addEventListener("scroll", solicitar, { passive: true });
+    window.addEventListener("resize", function () {
+      altoHero = hero.offsetHeight;
+      solicitar();
+    }, { passive: true });
+  }
+
+  /* ───────── Contador animado de números de puntuación ─────────
+     Versión única: antes existían DOS implementaciones independientes
+     de este mismo efecto corriendo en paralelo sobre la misma página
+     (una en el <script> de index.html, otra en el de cuerpo.html) --
+     ver CAMBIOS-2026-08.txt. ficha.js ya anima las BARRAS (.score-fill,
+     función animarScores() de arriba); esto sólo suma el conteo de los
+     NÚMEROS para que lleguen con la misma sensación de revelado. */
+  function inicializarContadorPuntuacion() {
+    if (FEATURES.animatedCounters === false) return;
+    if (prefiereMenosMovimiento() || !("IntersectionObserver" in window)) return;
+
+    function animar(el, delayMs) {
+      if (!el) return;
+      var textoFinal = (el.textContent || "").trim();
+      var destino = parseFloat(textoFinal.replace(",", "."));
+      if (isNaN(destino)) return;
+      var decimales = /[.,]/.test(textoFinal) ? 1 : 0;
+      setTimeout(function () {
+        var inicio = null;
+        var duracion = 1000;
+        function paso(ts) {
+          if (inicio === null) inicio = ts;
+          var t = Math.min(1, (ts - inicio) / duracion);
+          var facilitado = 1 - Math.pow(1 - t, 3);
+          el.textContent = (destino * facilitado).toFixed(decimales);
+          if (t < 1) requestAnimationFrame(paso);
+          else el.textContent = textoFinal;
+        }
+        requestAnimationFrame(paso);
+      }, delayMs || 0);
+    }
+
+    // Score del hero: siempre sobre el fold, entra en cascada con el resto
+    // del hero (mismo delay que .hero-score en el CSS), no depende de scroll.
+    var numHero = document.querySelector(".hero-score .score-num");
+    if (numHero) setTimeout(function () { animar(numHero, 0); }, 950);
+
+    // Números de la sección de scores: disparan al entrar en viewport.
+    var section = document.querySelector(".scores-section");
+    if (!section) return;
+    var big = section.querySelector(".score-big-num");
+    var vals = section.querySelectorAll(".score-val");
+    if (!big && !vals.length) return;
+
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      animar(big, 0);
+      vals.forEach(function (v, i) { animar(v, i * 150); }); // mismo stagger que animarScores()
+      io.disconnect();
+    }, { threshold: 0.3 });
+    io.observe(section);
+  }
+
+  /* ───────── Spotlight + tilt en highlight cards ───────── */
+  function inicializarHighlightCards() {
+    if (FEATURES.tiltCards === false) return;
+    var puedeHover = !!(window.matchMedia && window.matchMedia("(hover:hover) and (pointer:fine)").matches);
+    if (!puedeHover || prefiereMenosMovimiento()) return;
+    var cards = document.querySelectorAll(".highlight-card");
+    if (!cards.length) return;
+
+    cards.forEach(function (card) {
+      card.addEventListener("mousemove", function (ev) {
+        var r = card.getBoundingClientRect();
+        var x = ev.clientX - r.left;
+        var y = ev.clientY - r.top;
+        card.style.setProperty("--mx", x + "px");
+        card.style.setProperty("--my", y + "px");
+
+        var relX = (x / r.width) - 0.5;
+        var relY = (y / r.height) - 0.5;
+        var rotY = relX * 8;
+        var rotX = relY * -8;
+        card.style.transform =
+          "translateY(-4px) rotateX(" + rotX.toFixed(2) + "deg) rotateY(" + rotY.toFixed(2) + "deg) scale(1.015)";
+      }, { passive: true });
+
+      card.addEventListener("mouseleave", function () {
+        card.style.transform = "";
+      });
+    });
+  }
+
+  /* ───────── Acordeón FAQ: alto animado sobre el <details> nativo ───────── */
+  function inicializarFaqAcordeon() {
+    var items = document.querySelectorAll(".faq-item");
+    if (!items.length) return;
+    if (prefiereMenosMovimiento() || typeof Element.prototype.animate !== "function") return;
+
+    items.forEach(function (item) {
+      var summary = item.querySelector("summary");
+      var contenido = item.querySelector(".faq-a");
+      if (!summary || !contenido) return;
+      var animando = false;
+
+      summary.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (animando) return;
+        if (item.open) {
+          cerrar();
+        } else {
+          item.open = true;
+          abrir();
+        }
+      });
+
+      function abrir() {
+        animando = true;
+        var alto = contenido.scrollHeight;
+        contenido.style.overflow = "hidden";
+        var anim = contenido.animate(
+          [{ height: "0px", opacity: 0.4 }, { height: alto + "px", opacity: 1 }],
+          { duration: 260, easing: "cubic-bezier(.16,.84,.32,1)" }
+        );
+        anim.onfinish = function () {
+          contenido.style.overflow = "";
+          contenido.style.height = "";
+          animando = false;
+        };
+      }
+
+      function cerrar() {
+        animando = true;
+        var alto = contenido.scrollHeight;
+        contenido.style.overflow = "hidden";
+        var anim = contenido.animate(
+          [{ height: alto + "px", opacity: 1 }, { height: "0px", opacity: 0.4 }],
+          { duration: 220, easing: "cubic-bezier(.16,.84,.32,1)" }
+        );
+        anim.onfinish = function () {
+          item.open = false;
+          contenido.style.overflow = "";
+          contenido.style.height = "";
+          animando = false;
+        };
+      }
+    });
+  }
+
+  /* ───────── Chips de copiar (teléfono / dirección) ───────── */
+  function inicializarCopyChips() {
+    var chips = document.querySelectorAll(".copy-chip[data-copy-value]");
+    if (!chips.length) return;
+
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+      chips.forEach(function (chip) { chip.style.display = "none"; });
+      return;
+    }
+
+    chips.forEach(function (chip) {
+      var etiquetaOriginal = chip.textContent;
+      chip.addEventListener("click", function () {
+        var valor = chip.getAttribute("data-copy-value");
+        navigator.clipboard
+          .writeText(valor)
+          .then(function () {
+            chip.setAttribute("data-copied", "true");
+            chip.textContent = "✓ Copiado";
+            setTimeout(function () {
+              chip.removeAttribute("data-copied");
+              chip.textContent = etiquetaOriginal;
+            }, 1800);
+          })
+          .catch(function () {});
+      });
+    });
+  }
+
   /* ───────────────────────── INIT ───────────────────────── */
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -626,5 +899,12 @@
     manejarFormularioResena();
     inicializarFotosReveal();
     inicializarRevealGenerico();
+    inicializarBarraProgreso();
+    inicializarBotonVolverArriba();
+    inicializarCtaSticky();
+    inicializarContadorPuntuacion();
+    inicializarHighlightCards();
+    inicializarFaqAcordeon();
+    inicializarCopyChips();
   });
 })();
