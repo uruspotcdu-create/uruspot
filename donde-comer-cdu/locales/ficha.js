@@ -514,29 +514,78 @@
   // la tarde quedaría invertido (4:00–20:00 en vez de 16:00–20:00). Cuando
   // un extremo no trae período propio, hereda el del otro extremo (mismo
   // criterio que usaría una persona leyendo "4 a 8 de la tarde").
+  function partesHora(p) {
+    var m = p.match(/(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i);
+    if (!m) return null;
+    return {
+      h: parseInt(m[1], 10),
+      min: m[2] ? parseInt(m[2], 10) : 0,
+      ampm: m[3] ? m[3].replace(/\./g, "").toLowerCase() : null,
+    };
+  }
+
+  function aHoraDecimal(hm, ampm) {
+    var h = hm.h;
+    if (ampm === "pm" && h < 12) h += 12;
+    if (ampm === "am" && h === 12) h = 0;
+    return h + hm.min / 60;
+  }
+
+  // [FIX] (2026-08, auditoría migración 1500): la inferencia anterior
+  // ("openAmpm = o.ampm || c.ampm", y su espejo para el cierre) copiaba
+  // LITERALMENTE el mismo período (am/pm) del extremo que sí lo traía
+  // explícito. Funciona para el caso que la motivó ("4 – 8 p.m." -> ambos
+  // extremos son de tarde), pero falla en formatos igual de comunes donde
+  // los dos extremos NO comparten período: "10 a.m. – 6" (comercio típico,
+  // se cerraba a las 6 de la TARDE) se leía como cierre a las 6 de la
+  // mañana DEL DÍA SIGUIENTE (20 horas de apertura); "6 p.m. – 1" (previa/
+  // bar típico, cierra 1 de la MADRUGADA) se leía como cierre a la 1 de
+  // la TARDE del día siguiente (19 horas). Con "tema-nocturno" ya
+  // existente en ficha.css para bares/discotecas/previas, este segundo
+  // caso no es hipotético para las 1500 fichas.
+  //
+  // Reemplazo por minimización de duración: para cada extremo AMBIGUO
+  // (hora 1-12 sin marcador propio) se generan las 2 lecturas posibles
+  // (a.m./p.m.); los extremos ya explícitos, o en formato 24h inequívoco
+  // (13-23), generan una sola. Se cruzan todas las combinaciones open×close
+  // y se elige la de MENOR duración de turno -- mismo criterio que usaría
+  // una persona leyendo el horario: "10 a.m. – 6" son más probablemente
+  // 8 horas de comercio (10-18) que 20 horas cruzando el día (10-30);
+  // "6 p.m. – 1" son más probablemente 7 horas de noche (18-25, cruza
+  // medianoche) que 19 horas hasta la tarde siguiente (18-37). En caso de
+  // empate exacto (ambos extremos totalmente ambiguos, ej. "9 – 5" sin
+  // ningún a.m./p.m. en toda la fila) se prioriza la lectura diurna
+  // (a.m. de apertura) por ser el caso más común en el dataset real,
+  // mediante el orden de generación de candidatos (ver candidatosHora).
+  function candidatosHora(hm) {
+    if (hm.ampm) return [aHoraDecimal(hm, hm.ampm)];
+    if (hm.h === 0 || hm.h >= 13) return [hm.h + hm.min / 60]; // 24h inequívoco
+    // Ambiguo (1-12 sin marcador): a.m. primero, para que desempate a
+    // favor de la lectura diurna cuando las duraciones dan igual.
+    return [aHoraDecimal(hm, "am"), aHoraDecimal(hm, "pm")];
+  }
+
+  function mejorRango(o, c) {
+    var mejor = null;
+    candidatosHora(o).forEach(function (open) {
+      candidatosHora(c).forEach(function (closeCrudo) {
+        var close = closeCrudo <= open ? closeCrudo + 24 : closeCrudo; // cruza medianoche
+        var duracion = close - open;
+        if (duracion <= 0) return; // no debería pasar, resguardo
+        if (!mejor || duracion < mejor.duracion) {
+          mejor = { open: open, close: close, duracion: duracion };
+        }
+      });
+    });
+    return mejor ? { open: mejor.open, close: mejor.close } : null;
+  }
+
   function parseRangosHora(str) {
     if (!str) return [];
     var s = str.toLowerCase();
     if (s.indexOf("cerrado") !== -1) return [];
 
     var turnos = s.split(/·|,(?=\s*\d)/).map(function (t) { return t.trim(); }).filter(Boolean);
-
-    function partesHora(p) {
-      var m = p.match(/(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i);
-      if (!m) return null;
-      return {
-        h: parseInt(m[1], 10),
-        min: m[2] ? parseInt(m[2], 10) : 0,
-        ampm: m[3] ? m[3].replace(/\./g, "").toLowerCase() : null,
-      };
-    }
-
-    function aHoraDecimal(hm, ampm) {
-      var h = hm.h;
-      if (ampm === "pm" && h < 12) h += 12;
-      if (ampm === "am" && h === 12) h = 0;
-      return h + hm.min / 60;
-    }
 
     var rangos = [];
     turnos.forEach(function (turno) {
@@ -547,12 +596,8 @@
       var c = partesHora(partes[1]);
       if (!o || !c) return;
 
-      var openAmpm = o.ampm || c.ampm; // hereda si falta el propio
-      var closeAmpm = c.ampm || o.ampm;
-      var open = aHoraDecimal(o, openAmpm);
-      var close = aHoraDecimal(c, closeAmpm);
-      if (close <= open) close += 24; // cruza medianoche
-      rangos.push({ open: open, close: close });
+      var rango = mejorRango(o, c);
+      if (rango) rangos.push(rango);
     });
     return rangos;
   }
