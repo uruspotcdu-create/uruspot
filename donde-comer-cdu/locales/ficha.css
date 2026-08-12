@@ -615,6 +615,18 @@ html.u-suprimir-vidrio .hero-score{
 .brujula-rosa{color:#fff;flex-shrink:0}
 .brujula-aguja{transition:transform .4s ease;transform-origin:50px 50px}
 .brujula-texto{margin-left:8px;font-size:12px;color:#fff;letter-spacing:0.05em}
+/* [FIX] (2026-08, integración Fase 4): estados dinámicos que
+   inicializarBrujula()/iniciarSeguimientoOrientacion() agregan después
+   del primer render (error de geolocalización, aviso de calibración,
+   aviso de orientación en tiempo real, nota "aproximado") no tenían
+   ninguna regla — quedaban con el estilo por defecto del navegador.
+   Mismos tokens que .brujula-texto para nota/en-vivo; error y
+   calibración usan un tono de aviso (mismo --gold que ya usa el resto
+   de la ficha para llamar la atención sin introducir un color nuevo). */
+.brujula-nota{display:block;flex-basis:100%;font-size:11px;line-height:1.4;color:rgba(255,255,255,.55);letter-spacing:.03em}
+.brujula-error{display:block;flex-basis:100%;font-size:12px;color:#fff;opacity:.8}
+.brujula-calibracion{color:var(--gold);opacity:1}
+.brujula-en-vivo{color:var(--gold);opacity:1;font-weight:600}
 
 /* HORARIOS */
 .schedule-block{background:var(--ink-soft);padding:80px 48px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
