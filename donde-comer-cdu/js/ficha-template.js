@@ -70,10 +70,42 @@ function armarBloqueTwitter(shell) {
   );
 }
 
+// [FIX] (2026-08): shell.features.readingProgress/backToTop activaban el
+// JS de ficha.js (inicializarBarraProgreso()/inicializarBotonArriba(), que
+// buscan #fichaProgressFill/#fichaTopBtn por id) pero ningun renderFicha
+// insertaba esos elementos -- el propio comentario "_comentario_features"
+// de ficha.json ya decia "este flag no los inserta solo, eso lo decide el
+// generador de la pagina", y ese codigo nunca se escribio ahi. Antes se
+// tapaba a mano, pegando el <div>/<button> directo en el index.html
+// commiteado (ver brode, drift detectado por fichas:verify 2026-08) --
+// funcionaba para esa UNICA ficha pero se perdia en cualquier build real
+// y no existia en ninguna otra. Se arma aca, condicional por shell.features,
+// para que sea automatico en las 51 fichas actuales y en las 1500.
+function armarBarraProgreso(shell) {
+  if (!(shell.features && shell.features.readingProgress !== false)) return "";
+  return (
+    '<!-- BARRA DE PROGRESO DE LECTURA (activada por shell.features.readingProgress,\n' +
+    '     ver ficha.json): decorativa y no enfocable (sin tabindex, sin rol\n' +
+    '     interactivo), asi que puede vivir antes del skip-link sin violar el\n' +
+    '     invariante AGENTS.md 9.2 de que el skip-link sea el primer elemento\n' +
+    '     ENFOCABLE del body -- este div no lo es. -->\n' +
+    '<div class="ficha-progress" aria-hidden="true"><div class="ficha-progress-fill" id="fichaProgressFill"></div></div>\n\n'
+  );
+}
+function armarBotonArriba(shell) {
+  if (!(shell.features && shell.features.backToTop !== false)) return "";
+  return (
+    '\n<!-- BOTON VOLVER ARRIBA (activado por shell.features.backToTop, ver ficha.json) -->\n' +
+    '<button type="button" id="fichaTopBtn" class="ficha-top-btn" aria-label="Volver arriba">&uarr;</button>\n'
+  );
+}
+
 function renderFicha(shell, cuerpo) {
   const ogType = shell.ogType || "article";
   const bloqueOg = armarBloqueOg(shell);
   const bloqueTwitter = armarBloqueTwitter(shell);
+  const barraProgreso = armarBarraProgreso(shell);
+  const botonArriba = armarBotonArriba(shell);
   return `<!DOCTYPE html>
 <html lang="es-AR">
 <head>
@@ -139,7 +171,7 @@ ${shell.jsonLdRaw}
 ${shell.breadcrumbBlockRaw || ""}${shell.faqBlockRaw || ""}${shell.webPageBlockRaw || ""}</head>
 <body>
 
-<!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento
+${barraProgreso}<!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento
      enfocable del <body>. Apunta al <main> de mas abajo. -->
 <a href="#contenido-principal" class="skip-link">Saltar al contenido</a>
 
@@ -156,7 +188,7 @@ ${cuerpo}</main>
   <span>${shell.footerLine2}</span>
   <span>${shell.footerLine3}</span>
   <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
-</footer>${shell.colaScriptsRaw}`;
+</footer>${botonArriba}${shell.colaScriptsRaw}`;
 }
 
 module.exports = { renderFicha };

@@ -1,9 +1,3 @@
-<!-- El CSS "premium" que antes vivía acá (animaciones de hero, sombras,
-     FAQ, galería, etc.) se fusionó a ../ficha.css (sección "PASE DE
-     REFINAMIENTO PREMIUM", 2026-08) para que lo puedan usar las 1500
-     fichas sin duplicar CSS por archivo. Ver CAMBIOS-2026-08.txt. -->
-
-
 <!-- HERO -->
 <!-- HISTORIAL (auditoría diseño visual, 2026-08): esta imagen había sido
      cambiada de brodefrente.webp (isotipo de marca, 474x215px estirado a
@@ -58,17 +52,12 @@
     <div class="score-label">URU SPOT Score</div>
     <div class="score-stars" aria-hidden="true">★★★★★</div>
   </div>
-
-  <div class="hero-scroll-cue" aria-hidden="true">
-    <span>Descubrí más</span>
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-  </div>
-
+  
 </section>
 
 <!-- INFO STRIP -->
 
-<div class="info-strip" role="complementary" aria-label="Información rápida">
+<div class="info-strip u-reveal-stagger" role="complementary" aria-label="Información rápida">
   
   <div class="info-cell">
     <span class="info-cell-label">Estado actual</span>
@@ -94,7 +83,6 @@
     
     <span class="info-cell-value">03442 30-6349</span>
     <span class="info-cell-sub">📈 Alta demanda — se recomienda anticiparse</span>
-    <button type="button" class="copy-chip" data-copy-value="+5493442306349" aria-label="Copiar número de teléfono de Brødë">📋 Copiar número</button>
     
     
     <div class="action-row action-row--compact">
@@ -106,7 +94,7 @@
 </div>
 
 <!-- ACCESOS OFICIALES (fuente: linktr.ee/brodepanaderia, verificado ago-2026) -->
-<div class="info-strip info-strip--flush" role="complementary" aria-label="Accesos oficiales de Brødë">
+<div class="info-strip info-strip--flush u-reveal-stagger" role="complementary" aria-label="Accesos oficiales de Brødë">
   <div class="info-cell">
     <span class="info-cell-label">Catálogo oficial</span>
     <span class="info-cell-value">📂 Álbum de fotos</span>
@@ -136,7 +124,7 @@
 
 <!-- ABOUT -->
 
-<section class="page about-section" aria-labelledby="about-heading">
+<section class="page" aria-labelledby="about-heading">
   <div class="section-header u-reveal">
     <span class="section-label">Sobre el lugar</span>
     <span class="section-line" aria-hidden="true"></span>
@@ -146,7 +134,7 @@
       <h2 class="about-title" id="about-heading">El arte del pan <strong>lento</strong>, con propósito y sin atajos</h2>
       <p class="about-body">Los productos más elegidos son los laminados — medialunas, croissants y danesas — junto con sus panes integrales de masa madre, en especial el de molde y el de campo. Piezas únicas, elaboradas con técnicas artesanales y materias primas de calidad, que los clientes reconocen y valoran en cada mordida.</p><p class="about-body">Lo que los distingue es el proceso: desde el inicio de la elaboración hasta que el producto está listo para la venta pasan <strong class="stat">72 horas</strong>. Este enfoque lento y meticuloso permite desarrollar sabores profundos y una calidad constante que pocos pueden replicar — cada paso tiene un propósito definido, y los hermanos Tournour no se apresuran, porque el tiempo es parte de la fórmula. Esa misma exigencia se traslada a los ingredientes: buscan activamente a los mejores proveedores, prueban, ajustan y refinan hasta encontrar lo que mejor encaja con cada receta. <strong>Nada es arbitrario</strong> — cada ingrediente tiene un propósito específico en el producto final, y esa obsesión por la calidad es lo que separa a Brødë de una panadería tradicional.</p>
       
-      <div class="pullquote"><p>"Paciencia, precisión y pasión" — La filosofía de Federico y Jonatan Tournour sobre el arte de hacer pan.</p></div>
+      <div class="pullquote u-reveal"><p>"Paciencia, precisión y pasión" — La filosofía de Federico y Jonatan Tournour sobre el arte de hacer pan.</p></div>
       
       
       <div class="tags-row u-reveal-stagger" aria-label="Características del lugar">
@@ -193,25 +181,21 @@
       
       <p class="about-body"><strong>2025 — Brødë Hermanos.</strong> La expansión llegó con un equipo ampliado: Jonatan, Federico, Jerónimo y Abril forman ahora Brødë Hermanos, un proyecto que va más allá de la panadería. Con un promedio de edad de 25 años, están redefiniendo la experiencia gastronómica local con múltiples formatos de negocio y nuevos puntos de distribución en 2025. Según explicaron sus propios fundadores, el objetivo declarado es abrir nuevos espacios gastronómicos —desde centros de producción hasta conceptos de panadería y café— y llevar la marca a otras ciudades. Ellos mismos describen el proyecto como un ecosistema gastronómico completo: no solo panadería artesanal y pastelería, sino también propuestas listas para disfrutar en casa, con una apuesta declarada por incorporar alternativas veganas y sin gluten a futuro.</p>
 
-      <div class="pullquote"><p>"Cocinar siempre fue nuestro fuerte, en casa siempre comimos rico y casero. La idea de crear este proyecto fue una decisión que ni siquiera discutimos — la empezamos."</p></div>
+      <div class="pullquote u-reveal"><p>"Cocinar siempre fue nuestro fuerte, en casa siempre comimos rico y casero. La idea de crear este proyecto fue una decisión que ni siquiera discutimos — la empezamos."</p></div>
       
       <p class="source-caption">Fuente: entrevistas de La Prensa Federal a Federico y Jonatan Tournour (2024) y a los cuatro socios de Brødë Hermanos (2025). Información verificada adicional: análisis de lahelveticaonline.com.ar, QueResto.com y Google Maps.</p>
     </div>
 
     <!-- COLUMNA DERECHA (auditoría layout, pase 3 — 2026-08): side-box +
-         foto van juntas DENTRO del mismo div, que es el que ahora es
-         hijo directo de .about-grid (un solo item de grid en la 2da
-         columna). Antes eran dos hijos directos separados y la foto
-         dependía de grid-row:auto para "caer" bajo el side-box -- pero
-         la altura de fila la fija el contenido más alto de AMBAS
-         columnas (la columna de texto, mucho más larga), así que la
-         foto terminaba varios cientos de px por debajo de "Hoy" en vez
-         de pegada al cartel, exactamente el problema marcado con
-         flecha por el cliente sobre la captura de pantalla. Al quedar
-         anidada en un div normal, grid-column dejó de tener efecto
-         sobre ella (ver comentario de .reveal-photo en ficha.css), así
-         que ahora fluye en flujo normal justo debajo del side-box, sin
-         depender de la altura de la otra columna. -->
+         foto van juntas dentro del mismo div, único hijo directo de
+         .about-grid en la 2da columna. El intento anterior (figure como
+         hijo directo + grid-column:2) ubicaba la foto en la columna
+         correcta, pero la altura de la fila la fija el contenido más
+         alto de las DOS columnas (la de texto, mucho más larga), así
+         que la foto caía muy por debajo de "Hoy" en vez de pegada al
+         cartel — el problema real marcado con flecha por el cliente.
+         Anidada en un div normal, grid-column deja de tener efecto y la
+         foto fluye pegada al side-box sin depender de la otra columna. -->
     <div>
       <div class="side-box u-reveal" aria-label="Línea de tiempo de Brødë">
         <div class="side-box-title">Línea de tiempo</div>
@@ -265,7 +249,7 @@
       
       <p class="about-body">Los productos se agotan rápido — conviene llegar temprano o consultar disponibilidad por WhatsApp. Para pedidos especiales, eventos o cantidades grandes, contactar directamente.</p>
 
-      <p class="price-warning-box">⚠️ <strong>Brødë actualiza sus precios con frecuencia</strong> — antes de confirmar una compra, corroborá el valor vigente por WhatsApp. El catálogo fotográfico completo (todas las líneas de producto, sin precios listados) está disponible en el álbum oficial de Google Drive que Brødë mantiene enlazado desde su Instagram.</p>
+      <p class="price-warning-box u-reveal">⚠️ <strong>Brødë actualiza sus precios con frecuencia</strong> — antes de confirmar una compra, corroborá el valor vigente por WhatsApp. El catálogo fotográfico completo (todas las líneas de producto, sin precios listados) está disponible en el álbum oficial de Google Drive que Brødë mantiene enlazado desde su Instagram.</p>
 
       <div class="action-row action-row--after-text">
         <a href="https://drive.google.com/drive/folders/1m5vGjX1mYH-nuh84y8LazweEyd5MClgm" class="btn btn-primary" target="_blank" rel="noopener noreferrer">📂 Ver catálogo fotográfico completo</a><a href="https://wa.me/5493442306349?text=Hola!%20Me%20gustar%C3%ADa%20consultar%20sobre%20el%20cat%C3%A1logo%20completo%20y%20disponibilidad" class="btn btn-ghost btn-ghost-onlight" target="_blank" rel="noopener noreferrer">💬 Confirmar precios vigentes</a>
@@ -322,7 +306,7 @@
 
 <!-- HIGHLIGHTS -->
 
-<div class="highlights-grid" role="list" aria-label="Lo mejor del lugar">
+<div class="highlights-grid u-reveal-stagger" role="list" aria-label="Lo mejor del lugar">
   
   <div class="highlight-card" role="listitem">
     <div class="highlight-num" aria-hidden="true">01</div>
@@ -373,7 +357,7 @@
         </ul>
       </div>
     </div>
-    <div class="amenities-icons" role="list" aria-label="Resumen de servicios">
+    <div class="amenities-icons u-reveal-stagger" role="list" aria-label="Resumen de servicios">
       <div class="amenity-icon-item" role="listitem">
         <span aria-hidden="true">🥐</span>
         <span class="amenity-icon-label">Para llevar</span>
@@ -522,13 +506,13 @@
       <span class="section-label">Cómo llegar</span>
       <span class="section-line" aria-hidden="true"></span>
     </div>
-    <div class="map-grid">
+    <div class="map-grid u-reveal-stagger">
       <div class="map-frame">
         <iframe title="Ubicación de Brødë en Google Maps" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d966!2d-58.2545511!3d-32.4806862!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95afdb993273d22f%3A0x4e81d8eef58e9e9a!2sBRODE%20Panader%C3%ADa!5e0!3m2!1ses!2sar!4v1716000000000" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
       </div>
       <div>
         <h2 class="map-info-title" id="map-heading">Dr. J. Lacava 491, Concepción del Uruguay</h2>
-        <strong>Dirección:</strong> Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos <button type="button" class="copy-chip" data-copy-value="Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos" aria-label="Copiar dirección de Brødë">📋 Copiar</button><br>
+        <strong>Dirección:</strong> Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos<br>
         <strong>Zona:</strong> Casco urbano — acceso sencillo desde el centro<br>
         <strong>Recomendación:</strong> Los productos se agotan rápido — conviene llegar temprano o consultar disponibilidad.<br>
         <strong>También disponible en:</strong> Negocios seleccionados de la región (pedidos por WhatsApp para línea mayorista)
@@ -683,61 +667,38 @@
 
 <!-- FAQ -->
 
-<section class="page faq-section" aria-labelledby="faq-heading">
+<section class="page" aria-labelledby="faq-heading">
   <div class="section-header u-reveal">
     <h2 class="section-label" id="faq-heading">Preguntas frecuentes</h2>
     <span class="section-line" aria-hidden="true"></span>
   </div>
-  <!-- FAQ COMO ACORDEÓN (auditoría UX/UI, 2026-08): antes eran 8 pares
-       h3+p mostrados siempre expandidos -- mucho texto compitiendo por
-       atención antes de que el usuario elija qué le importa. <details>/
-       <summary> es accesible de forma nativa (teclado, lectores de
-       pantalla, sin JS) y reduce la carga visual inicial a solo las
-       preguntas; el primer ítem de cada columna queda abierto (atributo
-       "open") para que se entienda de un vistazo que es interactivo. -->
   <div class="about-grid u-reveal-stagger">
     <div>
-      <details class="faq-item" open>
-        <summary>¿Qué días abre Brødë?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
-        <div class="faq-a"><p class="about-body">De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes.</p></div>
-      </details>
-
-      <details class="faq-item">
-        <summary>¿Cuál es la especialidad de la casa?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
-        <div class="faq-a"><p class="about-body">Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como "los mejores laminados de la zona". Todo pasa por un proceso de 72 horas.</p></div>
-      </details>
-
-      <details class="faq-item">
-        <summary>¿Cuáles son los precios?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
-        <div class="faq-a"><p class="about-body">Croissant: <strong class="stat">$1.530</strong>. Pan de Campo (caja de 10): <strong class="stat">$1.650</strong>. Pan de Hamburguesa: <strong class="stat">$385</strong>. Para otros productos y promociones, consultar directamente por WhatsApp.</p></div>
-      </details>
-
-      <details class="faq-item">
-        <summary>¿Se puede comprar en otro lugar además del local?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
-        <div class="faq-a"><p class="about-body">Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp.</p></div>
-      </details>
+      <h3 class="about-title about-subtitle">¿Qué días abre Brødë?</h3>
+      <p class="about-body">De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes.</p>
+      
+      <h3 class="about-title about-subtitle">¿Cuál es la especialidad de la casa?</h3>
+      <p class="about-body">Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como "los mejores laminados de la zona". Todo pasa por un proceso de 72 horas.</p>
+      
+      <h3 class="about-title about-subtitle">¿Cuáles son los precios?</h3>
+      <p class="about-body">Croissant: <strong class="stat">$1.530</strong>. Pan de Campo (caja de 10): <strong class="stat">$1.650</strong>. Pan de Hamburguesa: <strong class="stat">$385</strong>. Para otros productos y promociones, consultar directamente por WhatsApp.</p>
+      
+      <h3 class="about-title about-subtitle">¿Se puede comprar en otro lugar además del local?</h3>
+      <p class="about-body">Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp.</p>
     </div>
 
     <div>
-      <details class="faq-item" open>
-        <summary>¿Qué pasa con el pan que no se vende?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
-        <div class="faq-a"><p class="about-body">Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad.</p></div>
-      </details>
-
-      <details class="faq-item">
-        <summary>¿El local es accesible para sillas de ruedas?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
-        <div class="faq-a"><p class="about-body">No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349.</p></div>
-      </details>
-
-      <details class="faq-item">
-        <summary>¿Hay opciones veganas o sin gluten?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
-        <div class="faq-a"><p class="about-body">Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita.</p></div>
-      </details>
-
-      <details class="faq-item">
-        <summary>¿Cuánto tiempo lleva el proceso de un pan?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
-        <div class="faq-a"><p class="about-body"><strong class="stat">72 horas</strong> desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante.</p></div>
-      </details>
+      <h3 class="about-title about-subtitle">¿Qué pasa con el pan que no se vende?</h3>
+      <p class="about-body">Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad.</p>
+      
+      <h3 class="about-title about-subtitle">¿El local es accesible para sillas de ruedas?</h3>
+      <p class="about-body">No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349.</p>
+      
+      <h3 class="about-title about-subtitle">¿Hay opciones veganas o sin gluten?</h3>
+      <p class="about-body">Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita.</p>
+      
+      <h3 class="about-title about-subtitle">¿Cuánto tiempo lleva el proceso de un pan?</h3>
+      <p class="about-body"><strong class="stat">72 horas</strong> desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante.</p>
     </div>
   </div>
 </section>
@@ -760,25 +721,6 @@
     </div>
   </div>
 </section>
-
-<!-- CTA STICKY EN MOBILE (auditoría UX/UI, 2026-08): las clases
-     .cta-sticky/.cta-sticky__btn ya existían en ficha.css (comentario
-     "creada por ficha.js — inicializarCtaSticky()"), pero esa función
-     nunca se escribió y ningún cuerpo.html traía el markup -- quedaba
-     muerta. Se completa acá, solo para esta ficha: barra fija de acceso
-     rápido a Llamar/WhatsApp, visible solo en mobile (la propia
-     ficha.css ya la oculta en desktop) y solo después de pasar el hero
-     (ver inicializarCtaSticky() en ../ficha.js), para no tapar el hero
-     al entrar. Mismos destinos que los botones ya usados en Info rápida. -->
-<div class="cta-sticky" role="complementary" aria-label="Acciones rápidas">
-  <a href="tel:+5493442306349" class="cta-sticky__btn cta-sticky__btn--principal">📞 Llamar</a><a href="https://wa.me/5493442306349?text=Hola!%20Vi%20Brode%20en%20UruSpot%20y%20quer%C3%ADa%20consultar" target="_blank" rel="noopener noreferrer" class="cta-sticky__btn cta-sticky__btn--secundario">💬 WhatsApp</a>
-</div>
-
-<!-- El JS que antes vivía en un <script> embebido acá (acordeón FAQ,
-     mostrar/ocultar la barra .cta-sticky y el scroll-cue del hero,
-     chips de copiar, contador animado de puntuación) se fusionó a
-     ../ficha.js (2026-08) para que funcione en cualquier ficha que
-     tenga este mismo HTML, no solo en esta. Ver CAMBIOS-2026-08.txt. -->
 
 
 <!-- FOOTER -->

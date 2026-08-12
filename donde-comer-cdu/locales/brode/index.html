@@ -343,23 +343,17 @@
   },
   "about": { "@id": "https://uruspot.pages.dev/donde-comer-cdu/locales/brode/#negocio" },
   "breadcrumb": { "@id": "https://uruspot.pages.dev/donde-comer-cdu/locales/brode/#breadcrumb" },
-  "dateModified": "2026-08-11"
+  "dateModified": "2026-08-12"
 }
 </script>
-
-<!-- El <style> exclusivo que antes vivía acá (barra de progreso, botón
-     volver arriba, entrada del hero-score, spotlight/tilt de las
-     highlight-card...) se fusionó a ../ficha.css (2026-08), renombrando
-     las clases .brode-* a genéricas (.ficha-progress, .ficha-top-btn) y
-     eliminando la barra .brode-sticky-bar por duplicar a .cta-sticky.
-     Ver CAMBIOS-2026-08.txt. --></head>
+</head>
 <body>
 
-<!-- BARRA DE PROGRESO DE LECTURA (mejora exclusiva de esta ficha, ver
-     <style> en <head>): decorativa y no enfocable (sin tabindex, sin
-     rol interactivo), asi que puede vivir antes del skip-link sin
-     violar el invariante AGENTS.md 9.2 de que el skip-link sea el
-     primer elemento ENFOCABLE del body -- este div no lo es. -->
+<!-- BARRA DE PROGRESO DE LECTURA (activada por shell.features.readingProgress,
+     ver ficha.json): decorativa y no enfocable (sin tabindex, sin rol
+     interactivo), asi que puede vivir antes del skip-link sin violar el
+     invariante AGENTS.md 9.2 de que el skip-link sea el primer elemento
+     ENFOCABLE del body -- este div no lo es. -->
 <div class="ficha-progress" aria-hidden="true"><div class="ficha-progress-fill" id="fichaProgressFill"></div></div>
 
 <!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento
@@ -1112,21 +1106,13 @@
   <span>Informaci&oacute;n verificada y actualizada &mdash; Agosto 2026</span>
   <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
 </footer>
-
-<!-- BOTON VOLVER ARRIBA -->
-<button type="button" id="fichaTopBtn" class="ficha-top-btn" aria-label="Volver arriba">↑</button>
+<!-- BOTON VOLVER ARRIBA (activado por shell.features.backToTop, ver ficha.json) -->
+<button type="button" id="fichaTopBtn" class="ficha-top-btn" aria-label="Volver arriba">&uarr;</button>
 
 <script id="ficha-data" type="application/json">
 {"nombre": "Brødë", "uruId": "URU-00624", "rubro": "gastronomia", "schedule_rows": [{"closed": true, "day": "Lunes y Martes", "time": "Cerrado"}, {"closed": false, "day": "Miércoles a Viernes", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Sábado", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Domingo", "time": "9:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}], "share_text": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Brødë — la mejor panadería artesanal de Concepción del Uruguay.", "features": {"readingProgress": true, "backToTop": true, "animatedCounters": true, "tiltCards": true}}
 </script>
 <script src="../../js/rubros-meta.js" defer></script>
 <script src="../ficha.js" defer></script>
-
-<!-- El script "MEJORAS EXCLUSIVAS DE ESTA FICHA" que vivía acá (barra de
-     progreso, boton volver arriba, conteo animado, spotlight/tilt) se
-     fusionó a ../ficha.js (2026-08) -- ver CAMBIOS-2026-08.txt. La barra
-     fija de acciones en mobile que también vivía acá era una segunda
-     implementación redundante de .cta-sticky (más abajo, en cuerpo.html)
-     y se eliminó. -->
 </body>
 </html>
