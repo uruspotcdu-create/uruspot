@@ -494,6 +494,11 @@
     "sábado": 6, sabado: 6, "sábados": 6, sabados: 6, "sáb": 6, sab: 6,
   };
 
+  // Mismo orden que Date.getDay() (0=domingo). Usado solo para armar el
+  // mensaje "Abre el <día> a las HH:MM" cuando la próxima apertura no es
+  // hoy ni mañana (ver FIX "próxima apertura futura" más abajo).
+  var NOMBRE_DIA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+
   // "18:00 p.m. – 02:00 a.m." / "8:00 a.m. – 10:00 p.m." / "8:00 a.m. – 12:30
   // p.m. · 4 – 8 p.m." / "Cerrado" -> lista de {openH, closeH} en escala 0-30
   // (permite cruzar medianoche).
@@ -658,58 +663,81 @@
       return { abierto: null, mensaje: "Consultar horario" };
     }
 
+    // Ventanas horarias de un día de la semana dado (0=domingo..6=sábado),
+    // sin considerar cruces de medianoche desde el día anterior -- eso se
+    // maneja aparte, solo para "hoy" (ver más abajo), porque para calcular
+    // la PRÓXIMA apertura futura alcanza con el horario propio de ese día.
+    function ventanasDelDia(dia) {
+      var vs = [];
+      scheduleRows.forEach(function (row) {
+        if (expandirDias(row.day).indexOf(dia) === -1) return;
+        parseRangosHora(row.time).forEach(function (rango) { vs.push(rango); });
+      });
+      return vs;
+    }
+
+    function formatoHora(horaDecimal) {
+      var h = Math.floor(horaDecimal % 24);
+      var m = Math.round((horaDecimal % 1) * 60);
+      return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
+    }
+
     var ahora = new Date();
     var diaHoy = ahora.getDay(); // 0=domingo
     var horaAhora = ahora.getHours() + ahora.getMinutes() / 60;
 
-    var ventanasHoy = [];
-    scheduleRows.forEach(function (row) {
-      var dias = expandirDias(row.day);
-      if (dias.indexOf(diaHoy) === -1) return;
-      parseRangosHora(row.time).forEach(function (rango) {
-        ventanasHoy.push(rango);
-      });
-    });
+    var ventanasHoy = ventanasDelDia(diaHoy);
 
     // También considerar el cierre "extendido" de la ventana de ayer (cruza medianoche)
     var diaAyer = (diaHoy + 6) % 7;
-    scheduleRows.forEach(function (row) {
-      var dias = expandirDias(row.day);
-      if (dias.indexOf(diaAyer) === -1) return;
-      parseRangosHora(row.time).forEach(function (rango) {
-        if (rango.close > 24) {
-          ventanasHoy.push({ open: rango.open - 24, close: rango.close - 24 });
-        }
-      });
+    ventanasDelDia(diaAyer).forEach(function (rango) {
+      if (rango.close > 24) {
+        ventanasHoy.push({ open: rango.open - 24, close: rango.close - 24 });
+      }
     });
 
-    if (!ventanasHoy.length) {
-      return { abierto: false, mensaje: "Cerrado hoy" };
-    }
+    if (ventanasHoy.length) {
+      for (var i = 0; i < ventanasHoy.length; i++) {
+        var v = ventanasHoy[i];
+        if (horaAhora >= v.open && horaAhora < v.close) {
+          var minsRestantes = Math.round((v.close - horaAhora) * 60);
+          var msg = minsRestantes <= 60
+            ? "Cierra en " + minsRestantes + " min"
+            : "Abierto ahora";
+          return { abierto: true, mensaje: msg };
+        }
+      }
 
-    for (var i = 0; i < ventanasHoy.length; i++) {
-      var v = ventanasHoy[i];
-      if (horaAhora >= v.open && horaAhora < v.close) {
-        var minsRestantes = Math.round((v.close - horaAhora) * 60);
-        var msg = minsRestantes <= 60
-          ? "Cierra en " + minsRestantes + " min"
-          : "Abierto ahora";
-        return { abierto: true, mensaje: msg };
+      // buscar próxima apertura hoy
+      var proxima = ventanasHoy
+        .filter(function (v) { return v.open > horaAhora; })
+        .sort(function (a, b) { return a.open - b.open; })[0];
+
+      if (proxima) {
+        return { abierto: false, mensaje: "Abre hoy a las " + formatoHora(proxima.open) };
       }
     }
 
-    // buscar próxima apertura hoy
-    var proxima = ventanasHoy
-      .filter(function (v) { return v.open > horaAhora; })
-      .sort(function (a, b) { return a.open - b.open; })[0];
-
-    if (proxima) {
-      var h = Math.floor(proxima.open % 24);
-      var m = Math.round((proxima.open % 1) * 60);
-      var hs = (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
-      return { abierto: false, mensaje: "Abre hoy a las " + hs };
+    // FIX (auditoría Brode, 2026-08): antes, si hoy ya no quedaban turnos
+    // (o el día estaba cerrado por completo, ej. lunes/martes de Brødë),
+    // acá se devolvía siempre el mismo mensaje "Cerrado" -- literalmente
+    // idéntico al label del pill ("Cerrado"), así que el usuario veía
+    // "Estado actual: Cerrado / Cerrado" repetido dos veces sin ningún
+    // dato nuevo (ver aplicarEstado(): val.textContent=label,
+    // sub.textContent=estado.mensaje). Ahora se busca la próxima apertura
+    // en los próximos 6 días para dar información real ("Abre mañana a
+    // las 08:00" en vez de un "Cerrado" que no dice nada más).
+    for (var d = 1; d <= 6; d++) {
+      var diaFuturo = (diaHoy + d) % 7;
+      var vsFuturas = ventanasDelDia(diaFuturo).sort(function (a, b) { return a.open - b.open; });
+      if (vsFuturas.length) {
+        var etiquetaDia = d === 1 ? "mañana" : "el " + NOMBRE_DIA[diaFuturo];
+        return { abierto: false, mensaje: "Abre " + etiquetaDia + " a las " + formatoHora(vsFuturas[0].open) };
+      }
     }
 
+    // Ningún día de la semana tiene horario real (caso extremo, no debería
+    // pasar con datos válidos): último fallback, sin más información posible.
     return { abierto: false, mensaje: "Cerrado" };
   }
 
