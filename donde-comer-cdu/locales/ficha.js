@@ -48,6 +48,424 @@
     eyebrow.insertBefore(wrap, textoEl);
   }
 
+  /* ───────────────────────── CARTA DE POSICIÓN (Fase 4) ─────────────────────
+     URUSPOT-PENDIENTES §5: la ficha no tenía ninguna celda de "cómo llegar"
+     con mapa — solo el botón grande de más abajo. Esto es PURAMENTE
+     presentacional: agrega una 4ª celda al .info-strip ya existente. NO
+     toca el algoritmo de recorte/scoring (app.js / motor-exposicion.js) —
+     decisión explícita: ese sigue rigiéndose únicamente por tieneFicha(),
+     sin relación con esta celda.
+
+     Mapa estático: mismo proveedor de tiles que ya usa motor-mapa.js
+     (Carto Voyager, basemaps.cartocdn.com) — sin librería nueva. Un
+     <canvas> chico, cuadrícula de tiles alrededor del centro, y la
+     matemática estándar de slippy map (misma fórmula que cualquier mapa
+     basado en OSM/Carto) para ubicar el pin en el pixel exacto. */
+  var CARTA_TILE_SIZE = 256;
+  var CARTA_ZOOM = 16;
+  var CARTA_SERVIDORES = ['a', 'b', 'c', 'd'];
+
+  function cartaLonLatAPixel(lat, lon, zoom) {
+    var n = Math.pow(2, zoom);
+    var latRad = lat * Math.PI / 180;
+    var x = (lon + 180) / 360 * n;
+    var y = (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n;
+    return { x: x * CARTA_TILE_SIZE, y: y * CARTA_TILE_SIZE };
+  }
+
+  function cartaDibujarPin(ctx, cx, cy) {
+    var gold = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#c9a84c';
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 3, 7, 3, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 20);
+    ctx.bezierCurveTo(cx - 11, cy - 20, cx - 11, cy - 4, cx, cy);
+    ctx.bezierCurveTo(cx + 11, cy - 4, cx + 11, cy - 20, cx, cy - 20);
+    ctx.closePath();
+    ctx.fillStyle = gold;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx, cy - 13, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function cartaRenderizarMinimapa(canvas, lat, lon) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var cssW = canvas.clientWidth || 220;
+    var cssH = canvas.clientHeight || 130;
+    if (!cssW || !cssH) return;
+    canvas.width = cssW * dpr;
+    canvas.height = cssH * dpr;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    var centro = cartaLonLatAPixel(lat, lon, CARTA_ZOOM);
+    var origenX = centro.x - cssW / 2;
+    var origenY = centro.y - cssH / 2;
+    var n = Math.pow(2, CARTA_ZOOM);
+
+    var tileMinX = Math.floor(origenX / CARTA_TILE_SIZE);
+    var tileMaxX = Math.floor((origenX + cssW) / CARTA_TILE_SIZE);
+    var tileMinY = Math.floor(origenY / CARTA_TILE_SIZE);
+    var tileMaxY = Math.floor((origenY + cssH) / CARTA_TILE_SIZE);
+
+    var pendientes = 0, total = 0;
+    for (var tx = tileMinX; tx <= tileMaxX; tx++) {
+      for (var ty = tileMinY; ty <= tileMaxY; ty++) total++;
+    }
+    if (total === 0) return;
+
+    function tileListo() {
+      pendientes++;
+      if (pendientes === total) cartaDibujarPin(ctx, cssW / 2, cssH / 2);
+    }
+
+    for (var txx = tileMinX; txx <= tileMaxX; txx++) {
+      for (var tyy = tileMinY; tyy <= tileMaxY; tyy++) {
+        if (tyy < 0 || tyy >= n) { tileListo(); continue; }
+        (function (txi, tyi) {
+          var xValida = ((txi % n) + n) % n;
+          var servidor = CARTA_SERVIDORES[Math.abs(txi + tyi) % CARTA_SERVIDORES.length];
+          var img = new Image();
+          img.onload = function () {
+            ctx.drawImage(img, txi * CARTA_TILE_SIZE - origenX, tyi * CARTA_TILE_SIZE - origenY,
+              CARTA_TILE_SIZE, CARTA_TILE_SIZE);
+            tileListo();
+          };
+          img.onerror = tileListo;
+          img.src = 'https://' + servidor + '.basemaps.cartocdn.com/rastertiles/voyager/' +
+            CARTA_ZOOM + '/' + xValida + '/' + tyi + '.png';
+        })(txx, tyy);
+      }
+    }
+  }
+
+  // [FIX] (2026-08, integración Fase 4): la versión original de esta
+  // función solo entendía el patrón "@lat,lng,zoom" en el href de "Cómo
+  // llegar", asumiendo que era el formato universal de los links a Maps
+  // de las 51 fichas. No lo es: 48 de las 51 usan
+  // "google.com/maps/place/?q=place_id:XXXX" (sin coordenada en la URL)
+  // y las que sí traen coordenada (ej. Brødë) la traen como
+  // "...search/?api=1&query=LAT,LNG..." — ningún link real de este sitio
+  // usa el patrón "@lat,lng,zoom" que se buscaba. Con el código original
+  // esta feature nunca se hubiera activado en ninguna ficha real.
+  // Fuente primaria ahora: el bloque geo del JSON-LD (LocalBusiness),
+  // que sí es universal para 48/51 fichas (dato estructurado ya
+  // validado — ver scripts/generar-jsonld-fichas.js) y no depende de
+  // qué variante de URL a Maps eligió cada ficha. Fallback: parsear el
+  // href visible, cubriendo ambos patrones reales en uso, para las
+  // fichas nuevas que ya traigan coordenada en el link pero todavía no
+  // en JSON-LD.
+  function obtenerCoordenadaLugar() {
+    var linkMapa = document.querySelector('a[href*="google.com/maps"]');
+    var scripts = document.querySelectorAll('script[type="application/ld+json"]');
+    for (var i = 0; i < scripts.length; i++) {
+      var datos;
+      try {
+        datos = JSON.parse(scripts[i].textContent);
+      } catch (e) {
+        continue;
+      }
+      var geo = datos && datos.geo;
+      if (!geo || geo.latitude == null || geo.longitude == null) continue;
+      var lat = parseFloat(geo.latitude), lon = parseFloat(geo.longitude);
+      if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
+      return { lat: lat, lon: lon, linkMapa: linkMapa };
+    }
+    var candidatos = document.querySelectorAll('a[href*="google.com/maps"]');
+    for (var j = 0; j < candidatos.length; j++) {
+      var href = candidatos[j].href;
+      var m = href.match(/@(-?[\d.]+),(-?[\d.]+)/) || href.match(/[?&]query=(-?[\d.]+),(-?[\d.]+)/);
+      if (!m) continue;
+      var lat2 = parseFloat(m[1]), lon2 = parseFloat(m[2]);
+      if (!isFinite(lat2) || !isFinite(lon2) || Math.abs(lat2) > 90 || Math.abs(lon2) > 180) continue;
+      return { lat: lat2, lon: lon2, linkMapa: candidatos[j] };
+    }
+    return null;
+  }
+
+  function inicializarCartaDePosicion() {
+    var strip = document.querySelector('.info-strip');
+    if (!strip) return;
+
+    var coord = obtenerCoordenadaLugar();
+    if (!coord) return;
+
+    if (navigator.connection && navigator.connection.saveData) return;
+    var lat = coord.lat, lon = coord.lon, linkMapa = coord.linkMapa;
+
+    var celda = document.createElement('div');
+    celda.className = 'info-cell info-cell--posicion';
+
+    var etiqueta = document.createElement('span');
+    etiqueta.className = 'info-cell-label';
+    etiqueta.textContent = 'Ubicación exacta';
+    celda.appendChild(etiqueta);
+
+    var enlace = document.createElement('a');
+    enlace.className = 'carta-posicion';
+    enlace.href = linkMapa ? linkMapa.href : ('https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lon);
+    enlace.target = '_blank';
+    enlace.rel = 'noopener noreferrer';
+    enlace.setAttribute('aria-label', 'Ver mapa y cómo llegar' + (DATA.nombre ? ' a ' + DATA.nombre : ''));
+
+    var lienzo = document.createElement('canvas');
+    lienzo.className = 'carta-posicion__lienzo';
+    enlace.appendChild(lienzo);
+
+    var cta = document.createElement('span');
+    cta.className = 'carta-posicion__etiqueta';
+    cta.setAttribute('aria-hidden', 'true');
+    cta.textContent = '🗺️ Cómo llegar';
+    enlace.appendChild(cta);
+
+    celda.appendChild(enlace);
+    strip.appendChild(celda);
+    strip.classList.add('info-strip--con-mapa');
+
+    requestAnimationFrame(function () { cartaRenderizarMinimapa(lienzo, lat, lon); });
+  }
+
+  /* ───────────────────────── BRÚJULA FUNCIONAL (Blueprint V2 Cap. 4.1) ────
+     Bearing REAL hacia el lugar, reusando la misma coordenada que
+     obtenerCoordenadaLugar() ya factoriza para Carta de Posición.
+
+     Nunca se activa sola: geolocalización y, en iOS 13+, orientación del
+     dispositivo son permisos sensibles — se piden recién al tocar el
+     botón, nunca en el load de la página.
+
+     Degradación en niveles, nunca "todo o nada":
+       1) Sin geolocalización disponible en el navegador: la celda ni se
+          crea.
+       2) El usuario tocó el botón pero denegó el permiso de ubicación:
+          mensaje de error, sin aguja ni texto de dirección.
+       3) Con ubicación pero SIN orientación del dispositivo: se muestra
+          el punto cardinal + distancia como TEXTO, aguja fija apuntando
+          al rumbo absoluto con una nota "aproximado" — nunca se finge
+          que la aguja sigue al teléfono si no hay dato real detrás.
+       4) Con ambos permisos: aguja en tiempo real, rotando contra el
+          rumbo real del dispositivo. */
+  function calcularBearing(lat1, lon1, lat2, lon2) {
+    var toRad = Math.PI / 180;
+    var y = Math.sin((lon2 - lon1) * toRad) * Math.cos(lat2 * toRad);
+    var x = Math.cos(lat1 * toRad) * Math.sin(lat2 * toRad) -
+      Math.sin(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.cos((lon2 - lon1) * toRad);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+
+  function distanciaMetrosBrujula(lat1, lon1, lat2, lon2) {
+    var R = 6371e3, toRad = Math.PI / 180;
+    var dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  var BRUJULA_CARDINALES = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+  function cardinalDe(bearing) {
+    return BRUJULA_CARDINALES[Math.round(bearing / 45) % 8];
+  }
+
+  function formatoDistanciaBrujula(m) {
+    if (m < 1000) return Math.round(m / 10) * 10 + ' m';
+    return (m / 1000).toFixed(1).replace('.0', '') + ' km';
+  }
+
+  function suavizarAngulo(anterior, nuevo, factor) {
+    if (anterior === null || typeof anterior !== 'number' || isNaN(anterior)) return nuevo;
+    var delta = ((nuevo - anterior + 540) % 360) - 180;
+    return (anterior + delta * factor + 360) % 360;
+  }
+
+  function svgRosaDeRumbos() {
+    return '<svg class="brujula-rosa" viewBox="0 0 100 100" width="56" height="56" aria-hidden="true" focusable="false">' +
+      '<g class="brujula-aguja">' +
+      '<path d="M50 12 L58 50 L50 42 L42 50 Z" fill="var(--gold)"/>' +
+      '<path d="M50 88 L42 50 L50 58 L58 50 Z" fill="currentColor" opacity=".35"/>' +
+      '</g>' +
+      '</svg>';
+  }
+
+  function inicializarBrujula() {
+    if (!navigator.geolocation) return;
+    var coord = obtenerCoordenadaLugar();
+    if (!coord) return;
+    var strip = document.querySelector('.info-strip');
+    if (!strip) return;
+
+    var celda = document.createElement('div');
+    celda.className = 'info-cell info-cell--brujula';
+
+    var etiqueta = document.createElement('span');
+    etiqueta.className = 'info-cell-label';
+    etiqueta.textContent = 'Hacia acá';
+    celda.appendChild(etiqueta);
+
+    var cuerpoBrujula = document.createElement('div');
+    cuerpoBrujula.className = 'brujula-cuerpo';
+    cuerpoBrujula.setAttribute('role', 'status');
+    cuerpoBrujula.setAttribute('aria-live', 'polite');
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'brujula-activar';
+    btn.textContent = '🧭 Orientarme';
+    btn.setAttribute('aria-label', 'Mostrar hacia dónde queda' + (DATA.nombre ? ' ' + DATA.nombre : ' el lugar') + ' desde donde estás');
+    cuerpoBrujula.appendChild(btn);
+    celda.appendChild(cuerpoBrujula);
+    strip.appendChild(celda);
+    strip.classList.add('info-strip--con-brujula');
+
+    var desuscribirOrientacion = null;
+
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = 'Ubicándote…';
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        var origenLat = pos.coords.latitude, origenLon = pos.coords.longitude;
+        var bearing = calcularBearing(origenLat, origenLon, coord.lat, coord.lon);
+        var distancia = distanciaMetrosBrujula(origenLat, origenLon, coord.lat, coord.lon);
+        mostrarResultadoBrujula(cuerpoBrujula, bearing, distancia);
+      }, function () {
+        btn.disabled = false;
+        btn.textContent = '🧭 Orientarme';
+        var error = document.createElement('span');
+        error.className = 'brujula-error';
+        error.setAttribute('role', 'status');
+        error.textContent = 'No pudimos acceder a tu ubicación.';
+        cuerpoBrujula.appendChild(error);
+      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+    });
+
+    function mostrarResultadoBrujula(cuerpoBrujula, bearing, distancia) {
+      cuerpoBrujula.innerHTML = svgRosaDeRumbos();
+      var agujaEl = cuerpoBrujula.querySelector('.brujula-aguja');
+      agujaEl.style.transform = 'rotate(' + bearing.toFixed(0) + 'deg)';
+      agujaEl.style.transformOrigin = '50px 50px';
+
+      var texto = document.createElement('span');
+      texto.className = 'brujula-texto';
+      texto.textContent = cardinalDe(bearing) + ' · ' + formatoDistanciaBrujula(distancia);
+      cuerpoBrujula.appendChild(texto);
+
+      var nota = document.createElement('span');
+      nota.className = 'brujula-nota';
+      nota.textContent = 'Aproximado — girá tu teléfono para orientarte mejor.';
+      cuerpoBrujula.appendChild(nota);
+
+      solicitarPermisoOrientacion(function (concedido) {
+        if (!concedido) return;
+        nota.remove();
+        desuscribirOrientacion = iniciarSeguimientoOrientacion(agujaEl, bearing, cuerpoBrujula, texto);
+      });
+    }
+
+    function solicitarPermisoOrientacion(callback) {
+      if (typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(function (resp) { callback(resp === 'granted'); })
+          .catch(function () { callback(false); });
+      } else if (typeof DeviceOrientationEvent !== 'undefined') {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    }
+
+    window.addEventListener('pagehide', function () {
+      if (desuscribirOrientacion) desuscribirOrientacion();
+    }, { once: true });
+  }
+
+  var BRUJULA_PRECISION_MIN_ACEPTABLE = 25;
+  var BRUJULA_SUAVIZADO_FACTOR = 0.18;
+  var BRUJULA_CALIBRACION_SOSTEN_MS = 3000;
+
+  function iniciarSeguimientoOrientacion(agujaEl, bearingHaciaLugar, cuerpoBrujula, texto) {
+    var evento = ('ondeviceorientationabsolute' in window) ? 'deviceorientationabsolute' : 'deviceorientation';
+    var recibioDatoReal = false;
+    var headingSuavizado = null;
+    var desdeCuandoImpreciso = null;
+    var elementoCalibracion = null;
+    var avisoTiempoRealMostrado = false;
+
+    var timeoutSinDatos = setTimeout(function () {
+      if (recibioDatoReal) return;
+      if (cuerpoBrujula && !cuerpoBrujula.querySelector('.brujula-nota')) {
+        var nota = document.createElement('span');
+        nota.className = 'brujula-nota';
+        nota.textContent = 'Tu dispositivo no da datos de orientación en tiempo real — aproximado.';
+        cuerpoBrujula.appendChild(nota);
+      }
+    }, 2500);
+
+    function actualizarAvisoCalibracion(accuracyDeg, ahora) {
+      var imprecisoAhora = typeof accuracyDeg === 'number' && (accuracyDeg < 0 || accuracyDeg > BRUJULA_PRECISION_MIN_ACEPTABLE);
+
+      if (!imprecisoAhora) {
+        desdeCuandoImpreciso = null;
+        if (elementoCalibracion) {
+          elementoCalibracion.remove();
+          elementoCalibracion = null;
+        }
+        return;
+      }
+
+      if (desdeCuandoImpreciso === null) desdeCuandoImpreciso = ahora;
+      if (ahora - desdeCuandoImpreciso < BRUJULA_CALIBRACION_SOSTEN_MS) return;
+      if (elementoCalibracion || !cuerpoBrujula) return;
+
+      elementoCalibracion = document.createElement('span');
+      elementoCalibracion.className = 'brujula-nota brujula-calibracion';
+      elementoCalibracion.textContent = 'Brújula poco precisa — moví el teléfono en forma de 8 para calibrarla.';
+      cuerpoBrujula.appendChild(elementoCalibracion);
+    }
+
+    function manejador(e) {
+      var heading = null;
+      if (typeof e.webkitCompassHeading === 'number') {
+        heading = e.webkitCompassHeading;
+      } else if (e.absolute && typeof e.alpha === 'number') {
+        heading = (360 - e.alpha) % 360;
+      } else {
+        return;
+      }
+      recibioDatoReal = true;
+      clearTimeout(timeoutSinDatos);
+
+      headingSuavizado = suavizarAngulo(headingSuavizado, heading, BRUJULA_SUAVIZADO_FACTOR);
+      var anguloAguja = (bearingHaciaLugar - headingSuavizado + 360) % 360;
+      agujaEl.style.transform = 'rotate(' + anguloAguja.toFixed(1) + 'deg)';
+
+      var ahora = (e.timeStamp && typeof e.timeStamp === 'number') ? e.timeStamp : Date.now();
+      actualizarAvisoCalibracion(e.webkitCompassAccuracy, ahora);
+
+      if (!avisoTiempoRealMostrado && cuerpoBrujula) {
+        avisoTiempoRealMostrado = true;
+        var avisoVivo = document.createElement('span');
+        avisoVivo.className = 'brujula-nota brujula-en-vivo';
+        avisoVivo.textContent = 'Orientación en tiempo real activada.';
+        cuerpoBrujula.appendChild(avisoVivo);
+        setTimeout(function () {
+          if (avisoVivo.parentNode) avisoVivo.remove();
+        }, 4000);
+      }
+    }
+
+    window.addEventListener(evento, manejador);
+    return function desuscribir() {
+      clearTimeout(timeoutSinDatos);
+      window.removeEventListener(evento, manejador);
+    };
+  }
+
   /* ───────────────────────── CONTINUIDAD DE APERTURA (Fase 4, Cap. 6) ─────
      "El elemento de origen (la tarjeta tocada) se convierte visualmente en
      el encabezado de la ficha". Contraparte de la view-transition-name que
@@ -895,6 +1313,8 @@
     aplicarNombreDeTransicion();
     aplicarPictogramaRubro();
     inicializarSupresionVidrio();
+    inicializarCartaDePosicion();
+    inicializarBrujula();
     cargarResenas();
     manejarFormularioResena();
     inicializarFotosReveal();
