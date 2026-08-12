@@ -347,118 +347,12 @@
 }
 </script>
 
-<!-- ============================================================
-     CAPA DE MEJORAS EXCLUSIVA DE ESTA FICHA (auditoria "Ficha
-     Maestra", pase 2026-08): 100% aditiva sobre ../ficha.css y
-     ../ficha-fonts.css -- ningun selector de esos dos archivos
-     compartidos (usados por las otras ~50 fichas) se sobreescribe
-     con !important, y nada de lo de aca abajo vive en ese sistema:
-     o es namespace propio (.brode-*, elementos que solo existen en
-     este documento) o es refinamiento puntual de clases que en la
-     practica solo aparecen en esta pagina (hero-score, highlight-card,
-     score-val). Todo con guardas de prefers-reduced-motion y pensado
-     solo con transform/opacity para no generar layout thrashing,
-     mismo criterio que ya usa el "PASE DE REFINAMIENTO PREMIUM" de
-     ficha.css. -->
-<style>
-/* ---- Barra de progreso de lectura (fija, arriba de todo) ---- */
-.brode-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:210;background:rgba(0,0,0,.06);pointer-events:none}
-.brode-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));will-change:width}
-
-/* ---- Boton "volver arriba" ---- */
-.brode-top-btn{position:fixed;right:20px;bottom:20px;z-index:150;width:48px;height:48px;border-radius:50%;border:1px solid var(--border);background:var(--ink);color:#fff;font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.24);opacity:0;transform:translateY(12px) scale(.9);pointer-events:none;transition:opacity .3s ease,transform .3s cubic-bezier(.16,.84,.32,1),background .2s}
-.brode-top-btn.is-visible{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
-.brode-top-btn:hover{background:var(--gold-dark)}
-.brode-top-btn:active{transform:scale(.92)}
-.brode-top-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-@media (max-width:768px){.brode-top-btn{right:14px;bottom:84px;width:44px;height:44px;font-size:17px}}
-
-/* ---- Barra fija de acciones rapidas (solo mobile, aparece tras el hero) ---- */
-.brode-sticky-bar{display:none}
-@media (max-width:768px){
-  .brode-sticky-bar{
-    display:flex;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:140;
-    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-    background:rgba(20,13,9,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    border-top:1px solid rgba(var(--gold-rgb),.3);
-    transform:translateY(100%);transition:transform .35s cubic-bezier(.16,.84,.32,1);
-  }
-  .brode-sticky-bar.is-visible{transform:translateY(0)}
-  .brode-sticky-bar .btn{flex:1;text-align:center;font-size:12.5px;padding:12px 10px;box-shadow:none}
-}
-
-/* ---- Entrada propia de .hero-score: no usa .u-reveal (ligado a scroll)
-   porque siempre esta sobre el fold -- entra en cascada junto con el
-   resto de .hero-content, con su propio delay para cerrar esa secuencia. ---- */
-.hero-score{animation:brodeHeroScoreIn .8s cubic-bezier(.16,.84,.32,1) both;animation-delay:.36s}
-@keyframes brodeHeroScoreIn{from{opacity:0;transform:translateY(-50%) translateX(14px) scale(.94)}to{opacity:1;transform:translateY(-50%) scale(1)}}
-
-/* Anillo de pulso sutil detras del score del hero -- refuerza que es el
-   dato mas importante de la franja superior sin competir con el titulo
-   (opacidad baja, un solo anillo, nunca mas de un ciclo por vez). */
-.hero-score::before{content:'';position:absolute;inset:-1px;border:1px solid rgba(var(--gold-rgb),.35);pointer-events:none;animation:brodePulseRing 3.2s ease-out infinite}
-@keyframes brodePulseRing{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
-
-/* Numeros con animacion de conteo: tabular-nums evita que el ancho de
-   la caja salte digito a digito mientras el valor sube. */
-.score-num,.score-big-num,.score-val{font-variant-numeric:tabular-nums}
-
-/* ---- Highlight cards: profundidad real + spotlight que sigue el cursor ---- */
-.highlight-card{
-  --mx:50%;--my:40%;
-  transform:translateY(0) rotateX(0deg) rotateY(0deg) scale(1);
-  transition:transform .5s cubic-bezier(.16,.84,.32,1), background .3s, box-shadow .4s;
-  will-change:transform;
-}
-.highlight-card::after{
-  content:'';position:absolute;inset:0;pointer-events:none;opacity:0;
-  background:radial-gradient(280px circle at var(--mx) var(--my), rgba(var(--gold-rgb),.22), transparent 72%);
-  transition:opacity .45s ease;
-}
-.highlight-card:hover{box-shadow:0 20px 44px rgba(0,0,0,.35)}
-.highlight-card:hover::after{opacity:1}
-@media (hover:none){.highlight-card::after{display:none}}
-
-/* ---- Chips del hero: pequeno levantamiento al hover, mismo lenguaje
-   de interaccion que el resto de la ficha (.btn, .side-box-cta). ---- */
-.chip{transition:transform .25s cubic-bezier(.16,.84,.32,1), background .2s, border-color .2s}
-.hero-chips .chip:hover{transform:translateY(-2px)}
-
-@media (prefers-reduced-motion: reduce){
-  .brode-progress-fill,.brode-top-btn,.brode-sticky-bar,.chip,.hero-chips .chip:hover{transition:none !important}
-  .hero-score{animation:none}
-  .hero-score::before{display:none}
-  .highlight-card{transition:background .3s, box-shadow .4s;transform:none !important}
-  .highlight-card:hover{transform:none}
-  .highlight-card::after{display:none}
-}
-
-/* ---- Impresion: los controles flotantes no aportan nada en papel ---- */
-@media print{
-  .brode-progress,.brode-top-btn,.brode-sticky-bar{display:none !important}
-}
-
-/* ---- Fotos de Historia y Catalogo pegadas al side-box de su columna
-   (pedido explicito del cliente, senalado con flechas sobre captura de
-   pantalla, ago-2026) ----
-   Intento anterior (figure como hijo directo de .about-grid +
-   grid-column:2 + grid-row:auto): ubicaba la foto en la columna
-   correcta, pero la ALTURA de esa fila la sigue fijando el contenido
-   mas alto de las dos columnas (el texto, mucho mas largo que el
-   side-box) -- la foto quedaba esperando a que terminara toda la fila
-   antes de caer, muy por debajo de "Hoy" / "Precios verificados" en
-   vez de pegada al cartel. Exactamente lo que marcaba la flecha.
-   Fix real: la figura ahora vive anidada dentro del mismo div que el
-   side-box (ver Historia/Catalogo mas abajo), ya no es un item de grid
-   propio, asi que grid-column/grid-row no tienen efecto (solo aplican
-   a hijos directos de .about-grid) y cae en flujo normal, pegada al
-   borde inferior del side-box sin importar la otra columna. Solo hace
-   falta que ocupe el ancho completo de esa columna (en vez del
-   max-width:380px pensado para cuando vivia sola centrada) y un
-   margen superior para separarla del cartel. ---- */
-.reveal-photo--aside{max-width:100%;margin:24px 0 0}
-</style>
-</head>
+<!-- El <style> exclusivo que antes vivía acá (barra de progreso, botón
+     volver arriba, entrada del hero-score, spotlight/tilt de las
+     highlight-card...) se fusionó a ../ficha.css (2026-08), renombrando
+     las clases .brode-* a genéricas (.ficha-progress, .ficha-top-btn) y
+     eliminando la barra .brode-sticky-bar por duplicar a .cta-sticky.
+     Ver CAMBIOS-2026-08.txt. --></head>
 <body>
 
 <!-- BARRA DE PROGRESO DE LECTURA (mejora exclusiva de esta ficha, ver
@@ -466,7 +360,7 @@
      rol interactivo), asi que puede vivir antes del skip-link sin
      violar el invariante AGENTS.md 9.2 de que el skip-link sea el
      primer elemento ENFOCABLE del body -- este div no lo es. -->
-<div class="brode-progress" aria-hidden="true"><div class="brode-progress-fill" id="brodeProgressFill"></div></div>
+<div class="ficha-progress" aria-hidden="true"><div class="ficha-progress-fill" id="fichaProgressFill"></div></div>
 
 <!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento
      enfocable del <body>. Apunta al <main> de mas abajo. -->
@@ -1219,189 +1113,20 @@
   <span><a href="/donde-comer-cdu/privacidad.html" rel="privacy-policy">Privacidad</a></span>
 </footer>
 
-<!-- BOTON VOLVER ARRIBA (mejora exclusiva de esta ficha) -->
-<button type="button" id="brodeTopBtn" class="brode-top-btn" aria-label="Volver arriba">↑</button>
-
-<!-- BARRA FIJA DE ACCIONES RAPIDAS, solo mobile (mejora exclusiva de esta
-     ficha): mismos numeros/enlaces ya verificados que usa el resto de la
-     pagina (info-strip, schedule-block) -- no se inventa ningun dato
-     nuevo, solo se los deja siempre a mano mientras el usuario scrollea. -->
-<div class="brode-sticky-bar" id="brodeStickyBar" aria-hidden="true">
-  <a href="tel:+5493442306349" class="btn btn-primary" target="_self" rel="noopener noreferrer" tabindex="-1">📞 Llamar</a>
-  <a href="https://wa.me/5493442306349?text=Hola!%20Vi%20Brode%20en%20UruSpot%20y%20quer%C3%ADa%20consultar" class="btn btn-primary" target="_blank" rel="noopener noreferrer" tabindex="-1">💬 WhatsApp</a>
-</div>
+<!-- BOTON VOLVER ARRIBA -->
+<button type="button" id="fichaTopBtn" class="ficha-top-btn" aria-label="Volver arriba">↑</button>
 
 <script id="ficha-data" type="application/json">
-{"nombre": "Brødë", "uruId": "URU-00624", "rubro": "gastronomia", "schedule_rows": [{"closed": true, "day": "Lunes y Martes", "time": "Cerrado"}, {"closed": false, "day": "Miércoles a Viernes", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Sábado", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Domingo", "time": "9:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}], "share_text": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Brødë — la mejor panadería artesanal de Concepción del Uruguay."}
+{"nombre": "Brødë", "uruId": "URU-00624", "rubro": "gastronomia", "schedule_rows": [{"closed": true, "day": "Lunes y Martes", "time": "Cerrado"}, {"closed": false, "day": "Miércoles a Viernes", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Sábado", "time": "8:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}, {"closed": false, "day": "Domingo", "time": "9:00 a.m. – 12:30 p.m. · 4 – 8 p.m."}], "share_text": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Brødë — la mejor panadería artesanal de Concepción del Uruguay.", "features": {"readingProgress": true, "backToTop": true, "animatedCounters": true, "tiltCards": true}}
 </script>
 <script src="../../js/rubros-meta.js" defer></script>
 <script src="../ficha.js" defer></script>
 
-<!-- ============================================================
-     MEJORAS EXCLUSIVAS DE ESTA FICHA (2026-08): modulo propio,
-     independiente de ficha.js (no lo modifica ni depende de sus
-     funciones internas) -- barra de progreso de lectura, boton
-     volver arriba, barra fija de acciones en mobile, conteo animado
-     de los numeros de puntuacion y spotlight/tilt en las highlight
-     cards. Mismo patron defensivo que ya usa ficha.js: guardas de
-     "si el elemento no existe, no hacer nada", scroll con rAF (nunca
-     trabajo pesado por evento crudo) y respeto total de
-     prefers-reduced-motion. No usa librerias externas. -->
-<script>
-(function () {
-  "use strict";
-
-  function prefiereMenosMovimiento() {
-    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }
-  var puedeHover = !!(window.matchMedia && window.matchMedia("(hover:hover) and (pointer:fine)").matches);
-
-  /* ───────────────── Barra de progreso de lectura ───────────────── */
-  function inicializarBarraProgreso() {
-    var fill = document.getElementById("brodeProgressFill");
-    if (!fill) return;
-    var pendiente = false;
-    function actualizar() {
-      pendiente = false;
-      var doc = document.documentElement;
-      var alto = doc.scrollHeight - doc.clientHeight;
-      var pct = alto > 0 ? Math.min(100, Math.max(0, (doc.scrollTop / alto) * 100)) : 0;
-      fill.style.width = pct + "%";
-    }
-    function solicitar() {
-      if (pendiente) return;
-      pendiente = true;
-      requestAnimationFrame(actualizar);
-    }
-    window.addEventListener("scroll", solicitar, { passive: true });
-    window.addEventListener("resize", solicitar, { passive: true });
-    actualizar();
-  }
-
-  /* ───────────────── Boton volver arriba + barra sticky mobile ───────────────── */
-  function inicializarControlesFlotantes() {
-    var topBtn = document.getElementById("brodeTopBtn");
-    var stickyBar = document.getElementById("brodeStickyBar");
-    var hero = document.querySelector(".hero");
-    if (!topBtn && !stickyBar) return;
-
-    var stickyLinks = stickyBar ? stickyBar.querySelectorAll("a") : [];
-    var pendiente = false;
-
-    function actualizar() {
-      pendiente = false;
-      var umbral = hero ? Math.max(hero.offsetHeight - 100, 240) : 500;
-      var pasoElUmbral = window.scrollY > umbral;
-
-      if (topBtn) topBtn.classList.toggle("is-visible", pasoElUmbral);
-
-      if (stickyBar) {
-        stickyBar.classList.toggle("is-visible", pasoElUmbral);
-        stickyBar.setAttribute("aria-hidden", pasoElUmbral ? "false" : "true");
-        for (var i = 0; i < stickyLinks.length; i++) {
-          if (pasoElUmbral) stickyLinks[i].removeAttribute("tabindex");
-          else stickyLinks[i].setAttribute("tabindex", "-1");
-        }
-      }
-    }
-    function solicitar() {
-      if (pendiente) return;
-      pendiente = true;
-      requestAnimationFrame(actualizar);
-    }
-
-    window.addEventListener("scroll", solicitar, { passive: true });
-    window.addEventListener("resize", solicitar, { passive: true });
-    actualizar();
-
-    if (topBtn) {
-      topBtn.addEventListener("click", function () {
-        window.scrollTo({ top: 0, behavior: prefiereMenosMovimiento() ? "auto" : "smooth" });
-      });
-    }
-  }
-
-  /* ───────────────── Conteo animado de numeros de puntuacion ───────────────── */
-  function animarConteo(el, delayMs) {
-    if (!el) return;
-    var destino = parseFloat((el.textContent || "").replace(",", "."));
-    if (isNaN(destino)) return;
-    var decimales = /\./.test(el.textContent) || /,/.test(el.textContent) ? 1 : 0;
-    setTimeout(function () {
-      var inicio = null;
-      var duracion = 900;
-      function paso(ts) {
-        if (inicio === null) inicio = ts;
-        var t = Math.min(1, (ts - inicio) / duracion);
-        var facilitado = 1 - Math.pow(1 - t, 3); // easeOutCubic
-        var valor = destino * facilitado;
-        el.textContent = valor.toFixed(decimales);
-        if (t < 1) requestAnimationFrame(paso);
-        else el.textContent = destino.toFixed(decimales);
-      }
-      requestAnimationFrame(paso);
-    }, delayMs || 0);
-  }
-
-  function inicializarConteoHero() {
-    if (prefiereMenosMovimiento()) return;
-    var num = document.querySelector(".hero-score .score-num");
-    if (!num) return;
-    setTimeout(function () { animarConteo(num, 0); }, 950); // sincronizado con brodeHeroScoreIn
-  }
-
-  function inicializarConteoScores() {
-    if (prefiereMenosMovimiento() || !("IntersectionObserver" in window)) return;
-    var section = document.querySelector(".scores-section");
-    if (!section) return;
-    var big = section.querySelector(".score-big-num");
-    var vals = section.querySelectorAll(".score-val");
-
-    var io = new IntersectionObserver(function (entries) {
-      if (!entries[0].isIntersecting) return;
-      animarConteo(big, 0);
-      vals.forEach(function (v, i) { animarConteo(v, i * 150); }); // mismo stagger que animarScores() en ficha.js
-      io.disconnect();
-    }, { threshold: 0.3 });
-    io.observe(section);
-  }
-
-  /* ───────────────── Spotlight + tilt en highlight cards ───────────────── */
-  function inicializarHighlightCards() {
-    if (!puedeHover || prefiereMenosMovimiento()) return;
-    var cards = document.querySelectorAll(".highlight-card");
-    if (!cards.length) return;
-
-    cards.forEach(function (card) {
-      card.addEventListener("mousemove", function (ev) {
-        var r = card.getBoundingClientRect();
-        var x = ev.clientX - r.left;
-        var y = ev.clientY - r.top;
-        card.style.setProperty("--mx", x + "px");
-        card.style.setProperty("--my", y + "px");
-
-        var relX = (x / r.width) - 0.5;
-        var relY = (y / r.height) - 0.5;
-        var rotY = relX * 8; // grados
-        var rotX = relY * -8;
-        card.style.transform =
-          "translateY(-4px) rotateX(" + rotX.toFixed(2) + "deg) rotateY(" + rotY.toFixed(2) + "deg) scale(1.015)";
-      }, { passive: true });
-
-      card.addEventListener("mouseleave", function () {
-        card.style.transform = "";
-      });
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", function () {
-    inicializarBarraProgreso();
-    inicializarControlesFlotantes();
-    inicializarConteoHero();
-    inicializarConteoScores();
-    inicializarHighlightCards();
-  });
-})();
-</script>
+<!-- El script "MEJORAS EXCLUSIVAS DE ESTA FICHA" que vivía acá (barra de
+     progreso, boton volver arriba, conteo animado, spotlight/tilt) se
+     fusionó a ../ficha.js (2026-08) -- ver CAMBIOS-2026-08.txt. La barra
+     fija de acciones en mobile que también vivía acá era una segunda
+     implementación redundante de .cta-sticky (más abajo, en cuerpo.html)
+     y se eliminó. -->
 </body>
 </html>
