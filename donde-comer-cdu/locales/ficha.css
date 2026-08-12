@@ -2970,7 +2970,16 @@ html {
     background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
     border-color: var(--gold);
     color: white;
-    box-shadow: 0 4px 12px rgba(255, 85, 17, 0.2);
+    /* BUG REAL (encontrado 2026-08, pase 2 — mientras se armaba el
+       sistema de variantes por rubro más abajo): este box-shadow tenía
+       el naranja HARDCODEADO en rgb (255,85,17), en vez de usar
+       rgba(var(--gold-rgb),…) como el resto del archivo. No se notaba
+       con un solo tema porque 255,85,17 ES el valor actual de --gold,
+       pero con un body.tema-x que cambia --gold-rgb (ver sección
+       SISTEMA DE VARIANTES POR RUBRO), este ícono se hubiera quedado
+       naranja aunque el resto de la ficha ya fuera verde/celeste/gris —
+       la única sombra de todo el archivo que no seguía al tema. */
+    box-shadow: 0 4px 12px rgba(var(--gold-rgb), 0.2);
   }
 
   .faq-a {
@@ -3226,3 +3235,931 @@ html {
    falta que ocupe el ancho completo de esa columna y un margen superior
    para separarla del cartel. ---- */
 .reveal-photo--aside{max-width:100%;margin:24px 0 0}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   SISTEMA DE VARIANTES POR RUBRO (2026-08, pase 2)
+   ══════════════════════════════════════════════════════════════════════
+   Contexto (ver auditoria-sistema-fichas-brode.txt, punto 4, y
+   CAMBIOS-2026-08.txt, punto 8): "--gold" se promovió a sistema base de
+   TODAS las fichas (SISTEMA GOLD STANDARD, arriba en este archivo), y
+   quedó pendiente decidir si eso debía ser universal o parametrizable
+   por rubro. Esto NO reabre esa decisión ni la revierte — Brode sigue
+   siendo el default sin necesidad de agregar ninguna clase — sino que
+   construye el mecanismo de escape que el propio comentario de esa
+   sección ya proponía: "revertir una ficha puntual a un tema distinto
+   se resuelve con clase en el <body> + regla body.tema-x acá mismo,
+   nunca con un CSS por ficha".
+
+   Por qué alcanza con 4 variables: --gold, --gold-light, --gold-dark y
+   --gold-rgb son las ÚNICAS variables de color de marca que el resto de
+   este archivo usa directamente (botones, chips, badges, sombras vía
+   rgba(var(--gold-rgb),…), bordes vía --border que deriva de
+   --gold-rgb). Sobreescribir esas 4 en un body.tema-x propaga el cambio
+   de color a ~30 selectores distintos sin tocar ninguno de ellos — el
+   mismo criterio de "cambiar el valor, no renombrar la variable" que ya
+   usa el REBRAND de --gold más arriba en este archivo.
+
+   Contraste: cada tema fue calculado (no elegido a ojo) con la fórmula
+   de luminancia relativa de WCAG 2.x, siguiendo el mismo patrón que ya
+   tienen --gold/--gold-dark en el sistema base:
+     "base"  → debe leer ≥4.5:1 contra --ink (rol: texto/iconos/bordes
+               sobre el hero oscuro, igual que --gold hoy).
+     "dark"  → debe leer ≥4.5:1 contra --cream Y --cream-deep (rol: texto
+               AA sobre fondo claro — .section-label, .side-box-title,
+               .score-big-num — igual que --gold-dark hoy).
+     "light" → decorativo (el degradé del "dë" del hero-title y el
+               relleno de .ficha-progress-fill), sin texto real encima,
+               así que solo se pidió ≥3:1 contra --ink como piso
+               razonable, no AA estricto.
+   Los cuatro rubros de abajo son los que la propia auditoría (puntos 4 y
+   9) puso como ejemplo de "no todos quieren el mismo naranja vivo de
+   panadería" — funeraria, estudio jurídico — más dos casos adicionales
+   con la misma lógica (salud/estética, gastronomía nocturna). No agota
+   los ~1500 rubros que va a tener el directorio: es el patrón a copiar
+   cuando aparezca un rubro nuevo que lo necesite, no una lista cerrada.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ---- tema-natural: viveros, florerías, paisajismo, huertas ----
+   Verde en vez de naranja; mismo rol que --gold en cada selector que ya
+   lo usa (nav-badge, chip, cta-sticky__btn, section-label, etc.). */
+body.tema-natural{
+  --gold:#298e2e;       /* 4.54:1 vs --ink — texto/iconos sobre hero oscuro */
+  --gold-light:#29a32f; /* decorativo, 5.78:1 vs --ink */
+  --gold-dark:#217325;  /* 5.55:1 vs --cream · 4.72:1 vs --cream-deep — AA en texto claro */
+  --gold-rgb:41,142,46;
+}
+
+/* ---- tema-clinico: consultorios, estética, odontología, farmacias ----
+   Celeste: evita el naranja "cálido/artesanal" en rubros donde ese tono
+   puede leerse como poco profesional o desentonar con la identidad
+   visual habitual del rubro (blanco/celeste). */
+body.tema-clinico{
+  --gold:#1e86a9;       /* 4.57:1 vs --ink */
+  --gold-light:#198cb3; /* decorativo, 4.94:1 vs --ink */
+  --gold-dark:#186e8b;  /* 5.40:1 vs --cream · 4.59:1 vs --cream-deep */
+  --gold-rgb:30,134,169;
+}
+
+/* ---- tema-sobrio: funerarias, estudios jurídicos/contables, notarías ----
+   El caso que la auditoría nombra explícitamente (punto 9: "puede
+   sentirse demasiado en negocios más sobrios, ej. una funeraria o un
+   estudio jurídico"). Gris pizarra de baja saturación: mantiene el
+   mismo rol funcional (CTA, foco, énfasis) sin el naranja vivo. Se
+   combina normalmente con .feat-tilt-off y .feat-score-pulse-off más
+   abajo — el color solo no alcanza para bajar el tono si las
+   animaciones "premium" siguen prendidas. */
+body.tema-sobrio{
+  --gold:#717c94;       /* 4.55:1 vs --ink */
+  --gold-light:#536079; /* decorativo, 3.01:1 vs --ink — a propósito el
+                            más apagado de los cuatro: este tema no
+                            quiere un acento que llame la atención */
+  --gold-dark:#5c667a;  /* 5.40:1 vs --cream · 4.60:1 vs --cream-deep */
+  --gold-rgb:113,124,148;
+}
+
+/* ---- tema-nocturno: bares, discotecas, previas, gastronomía nocturna ----
+   El opuesto al sobrio: magenta saturado para rubros de entretenimiento
+   nocturno donde SÍ tiene sentido un acento más audaz que el naranja de
+   panadería. Pensado para combinarse con .feat-glow-badges (ver más
+   abajo) en vez de con .feat-tilt-off. */
+body.tema-nocturno{
+  --gold:#d1478c;       /* 4.53:1 vs --ink */
+  --gold-light:#b1256b; /* decorativo, 3.04:1 vs --ink */
+  --gold-dark:#b82e73;  /* 5.35:1 vs --cream · 4.55:1 vs --cream-deep */
+  --gold-rgb:209,71,140;
+}
+
+/* Ninguna de las cuatro variantes toca --ink/--cream/--cream-deep/
+   --surface-warm ni --muted: esos tokens son la base "papel cálido"
+   del sistema, independiente del color de marca (ver comentario de
+   SUPERFICIES "CAPÍTULO" más arriba) — cambiar el rubro no debería
+   además reinventar la paleta neutra de fondo, o cada tema terminaría
+   pareciendo un sitio distinto en vez de una variante del mismo sistema. */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   FEATURES OPCIONALES DE INTERACCIÓN (2026-08, pase 2)
+   ══════════════════════════════════════════════════════════════════════
+   Complemento del sistema de temas de arriba: un tema cambia el COLOR,
+   estas clases cambian el COMPORTAMIENTO/intensidad de las
+   microinteracciones que se agregaron en la fusión de Brode (tilt de
+   .highlight-card, pulso de .hero-score, hover de .chip — ver sección
+   "CONTROLES FLOTANTES + MICROINTERACCIONES" más arriba en este
+   archivo). Nacen del mismo punto 9 de la auditoría: el tilt 3D "es
+   lindo pero no crítico — buen candidato a feature opcional, no a
+   default en las 1500 fichas".
+
+   Deliberadamente 100% CSS, sin flag nuevo en ficha.json ni cambios en
+   ficha.js: todas actúan sobre clases que ya existen en el HTML
+   (.highlight-card, .hero-score, .chip, .cta-sticky, .nav-badge,
+   .badge-verificado), así que activarlas es agregar una clase al
+   <body> — la misma mecánica que ya usan los temas de arriba — sin
+   ninguna dependencia de JS ni de una nueva build del generador.
+   Conviven sin conflicto con prefers-reduced-motion (que ya cubre el
+   archivo entero): estas clases son una decisión de DISEÑO por rubro
+   ("este negocio nunca quiere este efecto, tenga o no el visitante
+   animaciones activadas"), mientras que prefers-reduced-motion es una
+   preferencia de ACCESIBILIDAD del visitante — ambas se respetan a la
+   vez, ninguna pisa a la otra.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ---- .feat-tilt-off: apaga por completo el spotlight/tilt 3D de
+   .highlight-card. Para rubros donde ese efecto "juguetón" desentona
+   con el tono del negocio (funeraria, estudio jurídico/contable,
+   notaría — mismo ejemplo del punto 9 de la auditoría). La card sigue
+   siendo interactiva (hover de sombra), solo pierde la rotación 3D y el
+   halo que sigue al cursor. ---- */
+body.feat-tilt-off .highlight-card{
+  transform:none !important;
+  transition:background .3s, box-shadow .4s !important;
+}
+body.feat-tilt-off .highlight-card:hover{
+  transform:none !important;
+  box-shadow:0 10px 28px rgba(0,0,0,.18);
+}
+body.feat-tilt-off .highlight-card::after{display:none !important}
+
+/* ---- .feat-tilt-soft: no apaga el efecto, lo atenúa. Para rubros que
+   quieren algo de profundidad sin el efecto "premium" completo (ej. un
+   gimnasio serio, una clínica de estética). Reduce el radio del halo,
+   la opacidad y el rango de rotación disponible vía las custom
+   properties que .highlight-card ya expone (--mx/--my se siguen
+   actualizando igual si algún día hay JS que las mueva con el mouse;
+   acá solo se atenúa lo que depende de CSS puro). ---- */
+body.feat-tilt-soft .highlight-card{
+  transition:transform .5s cubic-bezier(.16,.84,.32,1), background .3s, box-shadow .3s;
+}
+body.feat-tilt-soft .highlight-card:hover{
+  box-shadow:0 10px 24px rgba(0,0,0,.2); /* la mitad de intensidad que el default (0 20px 44px) */
+}
+body.feat-tilt-soft .highlight-card::after{
+  background:radial-gradient(180px circle at var(--mx) var(--my), rgba(var(--gold-rgb),.12), transparent 72%);
+  /* radio 280px→180px, opacidad de color .22→.12: mismo halo, mucho más discreto */
+}
+
+/* ---- .feat-score-pulse-off: apaga el anillo de pulso detrás del
+   número de puntuación del hero (.hero-score::before). Un score
+   "latiendo" tiene sentido en gastronomía/entretenimiento, pero puede
+   sentirse fuera de tono en servicios fúnebres o estudios jurídicos —
+   el número sigue ahí, solo deja de pulsar. ---- */
+body.feat-score-pulse-off .hero-score::before{
+  animation:none !important;
+  opacity:.25; /* aro fijo y tenue en vez de desaparecer del todo: sigue
+                  marcando que ese número es un dato destacado */
+}
+
+/* ---- .feat-chip-flat: versión sobria de .chip. El chip normal se
+   levanta (translateY) al hover; esta variante reemplaza el movimiento
+   por un simple cambio de borde/fondo, más acorde a un rubro que no
+   quiere microanimaciones en elementos chicos de texto. ---- */
+body.feat-chip-flat .hero-chips .chip:hover{
+  transform:none !important;
+  border-color:rgba(var(--gold-rgb),.7);
+  background:rgba(var(--gold-rgb),.14);
+}
+
+/* ---- .feat-highlight-static: la versión más sobria posible de
+   .highlight-card — combina .feat-tilt-off con una sombra de hover
+   mucho más contenida, para rubros donde incluso el hover de sombra
+   "flotante" se siente de más (ej. estudio jurídico). Pensada para
+   usarse SOLA (ya incluye lo de .feat-tilt-off, no hace falta sumar
+   las dos clases). ---- */
+body.feat-highlight-static .highlight-card{
+  transform:none !important;
+  transition:border-color .25s ease !important;
+}
+body.feat-highlight-static .highlight-card:hover{
+  transform:none !important;
+  box-shadow:inherit; /* no agrega sombra de hover, solo lo que ya tenga por defecto */
+  border-color:rgba(var(--gold-rgb),.5);
+}
+body.feat-highlight-static .highlight-card::after{display:none !important}
+
+/* ---- .feat-glow-badges: el opuesto de las anteriores — pensada para
+   combinarse con body.tema-nocturno (bares, discotecas, previas). Le
+   suma un glow pulsante sutil a .nav-badge y .badge-verificado, dos
+   elementos que hoy son estáticos. No reemplaza ningún estilo base,
+   solo agrega el glow encima. ---- */
+body.feat-glow-badges .nav-badge{
+  animation:fichaBadgeGlowGold 2.4s ease-in-out infinite;
+}
+body.feat-glow-badges .badge-verificado{
+  /* Ojo acá: .badge-verificado usa --green-accent (#2d6a4f), NO --gold —
+     es un badge de identidad de sitio ("Verificado por URU SPOT"),
+     independiente del tema de color por rubro (ver .badge-verificado
+     más arriba: "background:var(--green-accent)"). Un glow en el color
+     del tema (--gold-rgb) sobre un badge sólido verde se leería como un
+     error de color, no como una variante — por eso esta regla usa su
+     propio verde (45,106,79, el mismo rgb que ya usa su box-shadow
+     base) en vez de rgba(var(--gold-rgb),…) como el resto de este
+     bloque. */
+  animation:fichaBadgeGlowGreen 2.4s ease-in-out infinite;
+  animation-delay:.6s; /* desfasado del nav-badge para que no pulsen al
+                           unísono — dos elementos pulsando exactamente
+                           sincronizados se lee como un parpadeo, no
+                           como dos acentos independientes */
+}
+@keyframes fichaBadgeGlowGold{
+  0%,100%{box-shadow:0 2px 6px rgba(var(--gold-rgb),.35)}
+  50%{box-shadow:0 2px 16px rgba(var(--gold-rgb),.75)}
+}
+@keyframes fichaBadgeGlowGreen{
+  0%,100%{box-shadow:0 2px 6px rgba(45,106,79,.35)}
+  50%{box-shadow:0 2px 16px rgba(45,106,79,.75)}
+}
+
+/* ---- .feat-cta-sticky-always: fuerza la barra .cta-sticky a quedar
+   visible desde el primer scroll, sin esperar el umbral del 60% del
+   alto del hero que usa inicializarCtaSticky() en ficha.js (ver sección
+   "CONTROLES FLOTANTES" más arriba). Pensada para rubros donde "llamar
+   ya" es la acción principal de la página, no una de varias — cerrajería
+   de urgencia, grúas, plomería de guardia. Es un override puro de CSS
+   con !important sobre las clases que el JS ya pone/saca
+   (.is-visible/is-hidden): el JS sigue corriendo exactamente igual (no
+   hace falta tocar ficha.js ni agregar un flag nuevo a ficha.json), acá
+   solo se ignora visualmente el resultado de ese cálculo. ---- */
+body.feat-cta-sticky-always .cta-sticky{
+  opacity:1 !important;
+  transform:none !important;
+  pointer-events:auto !important;
+}
+body.feat-cta-sticky-always .cta-sticky[aria-hidden="true"]{
+  /* si el JS sigue marcando aria-hidden en base al scroll, esta regla
+     no lo pisa — la accesibilidad la sigue decidiendo el JS, esta clase
+     solo fuerza lo VISUAL. Ver inicializarCtaSticky() en ficha.js. */
+}
+
+/* ---- Combinación de accesibilidad: ninguna de las features de arriba
+   necesita su propio bloque de prefers-reduced-motion — ya heredan el
+   de la sección "CONTROLES FLOTANTES" (más arriba en este archivo, que
+   apaga transform/animation de .highlight-card/.hero-score/.chip por
+   completo). La única excepción es fichaBadgeGlow (nueva en este
+   bloque), que no estaba cubierta por ese reduced-motion original. ---- */
+@media (prefers-reduced-motion: reduce){
+  body.feat-glow-badges .nav-badge,
+  body.feat-glow-badges .badge-verificado{
+    animation:none !important;
+    box-shadow:0 2px 10px rgba(var(--gold-rgb),.5); /* glow fijo, sin pulso */
+  }
+}
+
+/* ---- Impresión: igual que .ficha-progress/.ficha-top-btn/.cta-sticky
+   más arriba, .feat-cta-sticky-always no debería forzar nada visible en
+   una página impresa. */
+@media print{
+  body.feat-cta-sticky-always .cta-sticky{display:none !important}
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   MÁS FEATURES OPCIONALES DE INTERACCIÓN — galería, FAQ, side-box
+   (2026-08, pase 2, continuación del bloque anterior)
+   ══════════════════════════════════════════════════════════════════════
+   Mismo criterio que el bloque de arriba: clases de <body>, 100% CSS,
+   sin flags nuevos en ficha.json ni cambios en ficha.js. Se separan en
+   su propio bloque (en vez de sumarlas al anterior) porque tocan otras
+   tres zonas del sistema — galería, acordeón FAQ, side-box — que no
+   estaban cubiertas arriba.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ---- .feat-gallery-zoom-off: .gallery-item hace zoom in de la imagen
+   al hover por defecto (.gallery-item:hover img{transform:scale(1.04)},
+   ver más arriba). Para rubros donde las fotos de la galería son de
+   documentos, diplomas o instalaciones más "institucionales" que
+   "apetitosas" (estudio jurídico, clínica, taller), el zoom puede leerse
+   como un efecto de e-commerce fuera de lugar. Esta clase lo apaga sin
+   tocar el aspect-ratio ni el overflow:hidden que evitan layout shift. */
+body.feat-gallery-zoom-off .gallery-item:hover img{
+  transform:none;
+}
+
+/* ---- .feat-gallery-zoom-strong: el opuesto — más zoom del default
+   (1.04 → 1.12) y una transición más lenta, para rubros donde el
+   detalle visual del producto SÍ es el argumento de venta principal
+   (gastronomía de autor, joyería, decoración). No cambia el
+   overflow:hidden de .gallery-item (necesario para que el zoom no
+   empuje el layout), solo la magnitud del scale y el timing. */
+body.feat-gallery-zoom-strong .gallery-item img{
+  transition:transform .6s cubic-bezier(.16,.84,.32,1);
+}
+body.feat-gallery-zoom-strong .gallery-item:hover img{
+  transform:scale(1.12);
+}
+
+/* ---- .feat-faq-icon-plus: reemplaza el ícono +/× rotado 45° del
+   acordeón FAQ (ver .faq-icon svg más arriba, que rota una cruz para
+   que se vea como un "+" cerrado y una "×" abierta) por un ícono chevron
+   que solo rota 180° sin cambiar de forma — más discreto, sin el
+   "salto" de + a × que puede sentirse informal en un rubro serio. La
+   forma real del ícono (chevron vs. cruz) la define el SVG que ya
+   viene en el HTML de cada <summary> — esta clase solo cambia CÓMO
+   rota, no reemplaza el SVG. Para usar el look completo hace falta que
+   el HTML de esa ficha use un path de chevron en vez de la cruz de
+   Brode (fuera del alcance de este archivo — ver build-fichas.js). */
+body.feat-faq-icon-plus .faq-icon svg{
+  transition:transform var(--transition-smooth);
+}
+body.feat-faq-icon-plus .faq-item[open] .faq-icon svg{
+  transform:rotate(180deg) scale(1); /* sin el scale(1.1) del default,
+                                         movimiento más contenido */
+}
+body.feat-faq-icon-plus .faq-item[open] .faq-icon{
+  transform:none; /* cancela el rotate(45deg) scale(1.1) del ícono
+                      completo — acá solo rota el SVG interno, no el
+                      círculo que lo contiene */
+}
+
+/* ---- .feat-faq-flat: acordeón sin el fondo tintado al abrir
+   (.faq-item[open]{background:rgba(var(--gold-rgb),.06)}) ni el
+   glow/gradiente del ícono abierto — dos preguntas abiertas a la vez
+   (como trae Brode por defecto, ver open en cuerpo.html) ya alcanza
+   como señal visual sin sumar un fondo de color. */
+body.feat-faq-flat .faq-item[open]{
+  background:transparent;
+  border-bottom-color:var(--border);
+}
+body.feat-faq-flat .faq-item[open] .faq-icon{
+  background:rgba(255,255,255,.5);
+  border-color:var(--border);
+  color:var(--muted);
+  box-shadow:none;
+}
+
+/* ---- .feat-score-ring-thick: variante del anillo de pulso del hero
+   (.hero-score::before, ver sección CONTROLES FLOTANTES) con más
+   presencia — pensada para rubros donde "el número" es literalmente el
+   producto (gimnasios con puntaje de clase, academias con nota
+   promedio): un anillo más grueso y un rango de escala mayor, en vez
+   del pulso sutil pensado originalmente para no competir con el título
+   del hero. ---- */
+body.feat-score-ring-thick .hero-score::before{
+  border-width:2px;
+  animation:fichaPulseRingThick 2.6s ease-out infinite;
+}
+@keyframes fichaPulseRingThick{
+  0%{opacity:.8;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.22)}
+}
+
+/* ---- .feat-sidebox-flat: .side-box tiene un borde superior de 3px en
+   --gold (border-top:3px solid var(--gold)) que funciona como acento de
+   marca. Para un tema muy sobrio (funeraria, estudio jurídico) incluso
+   ese acento de 3px puede ser de más — esta clase lo reemplaza por un
+   borde fino uniforme en los 4 lados, sin remarcar ningún lado en
+   particular. ---- */
+body.feat-sidebox-flat .side-box{
+  border-top-width:1px;
+  border-top-color:var(--border);
+}
+body.feat-sidebox-flat .side-box-title{
+  color:var(--muted); /* en vez de --gold-dark: el título del side-box
+                          deja de llevar el color de marca */
+}
+
+/* ---- Impresión: igual criterio que el resto del archivo — el zoom de
+   galería y el anillo de pulso no aportan nada en papel, y ya no corren
+   de por sí en @media print (que desactiva animation en general vía la
+   regla de prefers-reduced-motion de más arriba solo aplica en pantalla,
+   así que se refuerza acá explícitamente). ---- */
+@media print{
+  body.feat-score-ring-thick .hero-score::before{display:none}
+  body.feat-gallery-zoom-strong .gallery-item:hover img{transform:none}
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RECETAS — combinaciones sugeridas de tema + features por tipo de rubro
+   ══════════════════════════════════════════════════════════════════════
+   No es CSS ejecutable, es la referencia rápida que le falta a este
+   sistema para que alguien arme una ficha nueva sin tener que leer los
+   ~260 líneas de comentarios de arriba cada vez. Pensada para vivir acá
+   (junto al código que describe) en vez de en un doc aparte, que es
+   justo el problema que esta fusión vino a resolver — código y
+   documentación divergiendo en archivos separados (ver
+   auditoria-sistema-fichas-brode.txt, punto 1).
+
+   Panadería / gastronomía tradicional (Brode, el piloto):
+     Sin clases — es el default. body sin tema-* ni feat-*.
+
+   Vivero / florería / paisajismo:
+     body class="tema-natural"
+     (sin features especiales: el tilt/pulso quedan en su intensidad
+     normal, el verde ya alcanza para diferenciarse del resto)
+
+   Consultorio / estética / odontología / farmacia:
+     body class="tema-clinico feat-tilt-soft"
+     (celeste + tilt atenuado: profesional pero no rígido)
+
+   Funeraria / estudio jurídico / contable / notaría:
+     body class="tema-sobrio feat-highlight-static feat-score-pulse-off feat-chip-flat feat-sidebox-flat feat-faq-flat"
+     (la combinación completa que la auditoría pedía en el punto 9: gris
+     de baja saturación + CERO microanimación "premium")
+
+   Bar / discoteca / previas / gastronomía nocturna:
+     body class="tema-nocturno feat-glow-badges feat-gallery-zoom-strong"
+     (magenta + badges con glow + fotos con más impacto al hover)
+
+   Gimnasio / academia / estudio con puntaje como argumento central:
+     body class="feat-score-ring-thick"
+     (sin cambiar de tema: el naranja de --gold ya funciona para este
+     rubro, solo se refuerza el anillo del score)
+
+   Cerrajería / grúa / plomería de urgencia / servicio 24hs:
+     body class="feat-cta-sticky-always"
+     (la barra Llamar/WhatsApp queda visible desde el primer scroll, sin
+     esperar el umbral del 60% del hero — acá "llamar ya" es la única
+     acción que importa)
+
+   Nada de esto es obligatorio ni excluyente entre sí: las clases se
+   combinan libremente (ver el ejemplo "sobrio" arriba, que junta seis a
+   la vez) y ninguna ficha existente se rompe por no tener ninguna — el
+   comportamiento sin clases es exactamente el que ya tenía Brode antes
+   de este pase. */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   SISTEMA DE VARIANTES POR RUBRO — segunda tanda (2026-08, pase 2)
+   ══════════════════════════════════════════════════════════════════════
+   Mismo mecanismo y misma fórmula de contraste (WCAG, luminancia
+   relativa) que la primera tanda más arriba. Se documentan en un bloque
+   separado en vez de mezclarlos con los cuatro originales para que la
+   sección de arriba (los 4 casos que la propia auditoría nombra) quede
+   como el núcleo mínimo, y esta como la extensión natural cuando
+   aparecen más rubros — el patrón a copiar sigue siendo el mismo.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ---- tema-tech: talleres mecánicos, ferreterías, electrónica,
+   cerrajerías, servicios técnicos en general. Azul acero desaturado:
+   ni el naranja cálido de panadería ni el celeste "médico" de
+   tema-clinico — un tercer registro para rubros de reparación/servicio
+   técnico donde ninguno de los dos anteriores encaja bien. */
+body.tema-tech{
+  --gold:#618298;       /* 4.68:1 vs --ink */
+  --gold-light:#456378; /* decorativo, 3.00:1 vs --ink */
+  --gold-dark:#506a7c;  /* 5.32:1 vs --cream · 4.52:1 vs --cream-deep */
+  --gold-rgb:97,130,152;
+}
+
+/* ---- tema-corporate: oficinas, seguros, consultoras, estudios de
+   arquitectura/ingeniería. Azul marino más saturado que tema-tech —
+   busca leerse "corporativo/confiable" en vez de "industrial". */
+body.tema-corporate{
+  --gold:#4d7bcb;       /* 4.55:1 vs --ink */
+  --gold-light:#2d5eb4; /* decorativo, 3.06:1 vs --ink */
+  --gold-dark:#3564b6;  /* 5.38:1 vs --cream · 4.58:1 vs --cream-deep */
+  --gold-rgb:77,123,203;
+}
+
+/* ---- tema-gourmet: alta cocina, vinotecas, restaurantes de autor.
+   Pensado para el caso "es gastronomía, pero NO panadería artesanal
+   cálida" — un rubro que también es comida pero quiere distinguirse
+   visualmente de Brode dentro del mismo directorio. Vino/borgoña en vez
+   del naranja base. */
+body.tema-gourmet{
+  --gold:#ce5563;       /* 4.63:1 vs --ink */
+  --gold-light:#b42d3d; /* decorativo, 3.07:1 vs --ink */
+  --gold-dark:#ba3645;  /* 5.31:1 vs --cream · 4.52:1 vs --cream-deep */
+  --gold-rgb:206,85,99;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   FEATURE DE ACCESIBILIDAD: .feat-alto-contraste (2026-08, pase 2)
+   ══════════════════════════════════════════════════════════════════════
+   A diferencia de las features de arriba (que son decisiones de DISEÑO
+   por rubro), esta es una decisión que conviene dejar a criterio del
+   negocio para SU público, no solo del rubro: una farmacia o un centro
+   para adultos mayores puede querer subir el contraste base de la ficha
+   más allá de lo que ya garantiza el sistema (ver auditoría, punto 4 de
+   "lo que ya está en su máximo": "contraste verificado en combinaciones
+   de color, documentado con ratios reales" — esto no reemplaza esa base,
+   la refuerza para casos puntuales).
+
+   Qué hace en concreto: sube --muted (el gris usado en texto secundario,
+   .side-box li, --border) a un tono más oscuro, y engrosa --border de
+   1px a 1.5px en los contenedores que lo usan como único separador
+   visual (.side-box, .review-card). No toca --ink/--gold porque esos ya
+   cumplen AA de sobra en su uso actual (ver comentarios del REBRAND más
+   arriba) — el eslabón más débil real es --muted, que hoy se usa para
+   texto secundario más chico (13px en .side-box li) donde un contraste
+   ajustado importa más que en un título grande. */
+body.feat-alto-contraste{
+  --muted:#2b2015; /* endurecido respecto al --muted base (#4a3218):
+                       9.85:1 vs --cream (contra el 6.89:1 documentado
+                       del original), para texto secundario a 13px */
+}
+body.feat-alto-contraste .side-box,
+body.feat-alto-contraste .review-card{
+  border-width:1.5px;
+}
+body.feat-alto-contraste .side-box li{
+  border-bottom-width:1.5px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PRÓXIMO PASO (no implementado acá — fuera del alcance de ficha.css):
+   cómo debería consumir esto build-fichas.js
+   ══════════════════════════════════════════════════════════════════════
+   Hoy activar cualquiera de las clases de arriba significa editar el
+   <body> a mano en el index.html de cada ficha — funciona para una
+   ficha puntual, pero no escala mejor que copiar CSS por archivo si hay
+   que hacerlo 1500 veces (mismo problema de fondo que motivó todo este
+   pase, ver auditoria-sistema-fichas-brode.txt). La solución real es
+   que ficha.json declare esto como dato, no como HTML escrito a mano:
+
+     "perfilVisual": {
+       "tema": "sobrio",
+       "features": ["highlight-static", "score-pulse-off", "chip-flat",
+                     "sidebox-flat", "faq-flat"]
+     }
+
+   y que el generador (build-fichas.js, no auditado — ver
+   auditoria-sistema-fichas-brode.txt, punto 3) arme el atributo
+   class="tema-{tema} feat-{...}" del <body> a partir de ese campo,
+   igual que ya arma otros bloques a partir de ficha.json. Se deja
+   documentado acá, junto al CSS que ese campo activaría, en vez de en
+   un doc aparte — mismo criterio que ya usa el resto de este archivo,
+   y el mismo error que esta fusión completa vino a corregir (código y
+   documentación viviendo en lugares separados que divergen con el
+   tiempo). No se implementa en este pase porque tocar build-fichas.js
+   está fuera del alcance de lo que se subió a esta conversación. */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   FEATURE: .feat-status-pulse (2026-08, pase 2)
+   ══════════════════════════════════════════════════════════════════════
+   El punto de color de "Abierto ahora"/"Cerrado" (#schedDot, ver
+   aplicarEstado() en ficha.js) recibe su color por JS, inline
+   (estado.abierto ? openColor : closedColor) — no por una clase ni una
+   custom property, así que una feature de CSS no puede depender de ESE
+   color sin tocar ficha.js. Lo que sí puede hacer, sin acoplarse a él,
+   es agregarle una pulsación de escala/opacidad que funcione sea cual
+   sea el color que el JS le haya puesto — útil para rubros donde "está
+   abierto AHORA" es un dato que conviene que se note de reojo (ej.
+   farmacias de turno, un boliche que recién abrió). ---- */
+body.feat-status-pulse .status-dot{
+  animation:fichaStatusDotPulse 1.8s ease-in-out infinite;
+}
+@keyframes fichaStatusDotPulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.35);opacity:.65}
+}
+@media (prefers-reduced-motion: reduce){
+  body.feat-status-pulse .status-dot{animation:none}
+}
+@media print{
+  body.feat-status-pulse .status-dot{animation:none}
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   MAPEO DE REFERENCIA: rubro real → tema/features sugeridos
+   ══════════════════════════════════════════════════════════════════════
+   Extiende la idea de "RECETAS" de más arriba a un listado más largo,
+   pensado como insumo directo para quien defina el campo "rubro" (y a
+   futuro "perfilVisual", ver nota de PRÓXIMO PASO más arriba) de las
+   1500 fichas. Cubre exactamente el hueco que señala la auditoría en su
+   punto 6 ("confirmar que el mapeo cubra todos los rubros... y que el
+   generador no aplique por default un @type de comida a un negocio que
+   no lo es") — mismo problema, pero para tema visual en vez de para
+   Schema.org @type. No es exhaustivo de los ~1500 negocios reales, es
+   exhaustivo de CATEGORÍAS de rubro, que sí son un conjunto acotado.
+
+   Formato: rubro → tema sugerido (razón breve). "— default —" significa
+   sin clase tema-*, se queda con el naranja/--gold de Brode tal cual.
+
+   GASTRONOMÍA
+   -----------
+   Panadería, pastelería, rotisería, sandwichería      → — default —
+   (Brode es exactamente este caso; es el piloto del sistema)
+   Restaurante de barrio, parrilla, pizzería            → — default —
+   Restaurante de autor, vinoteca, bistró gourmet       → tema-gourmet
+   Heladería, cafetería, confitería                     → — default —
+   (el naranja cálido funciona bien para "dulce/artesanal" en general)
+   Bar, cervecería artesanal, previa                    → tema-nocturno
+   (feat-glow-badges si además tiene shows en vivo/DJ)
+   Comida rápida / delivery puro                        → — default —
+
+   SALUD Y BIENESTAR
+   ------------------
+   Consultorio médico, clínica, odontología             → tema-clinico
+   Farmacia                                              → tema-clinico
+     + feat-alto-contraste (público que puede beneficiarse
+       de mayor contraste de texto por defecto)
+   Kinesiología, fonoaudiología, nutrición               → tema-clinico
+   Centro de estética, spa                               → tema-clinico
+     (considerar feat-tilt-soft: profesional pero no rígido)
+   Óptica                                                 → tema-clinico
+   Veterinaria                                            → tema-natural
+   (es salud, pero el tono "vivero/cuidado" del verde encaja
+    mejor que el celeste clínico para mascotas)
+
+   SERVICIOS PROFESIONALES Y LEGALES
+   -----------------------------------
+   Estudio jurídico, notaría, escribanía                 → tema-sobrio
+     + feat-highlight-static + feat-score-pulse-off
+       + feat-chip-flat + feat-sidebox-flat + feat-faq-flat
+   Estudio contable, gestoría                             → tema-sobrio
+   Funeraria, servicios fúnebres                          → tema-sobrio
+     (el caso que la auditoría nombra explícito, punto 9)
+   Consultora, agencia de RRHH                            → tema-corporate
+   Seguros, financiera                                    → tema-corporate
+   Estudio de arquitectura / ingeniería                   → tema-corporate
+     (considerar feat-gallery-zoom-strong: el portfolio de
+      obra suele ser el argumento de venta principal)
+
+   OFICIOS Y SERVICIOS TÉCNICOS
+   ------------------------------
+   Taller mecánico, gomería, lavadero de autos            → tema-tech
+   Ferretería, corralón                                    → tema-tech
+   Electricista, plomero, gasista                          → tema-tech
+     + feat-cta-sticky-always si atiende urgencias/24hs
+   Cerrajería                                               → tema-tech
+     + feat-cta-sticky-always (caso explícito de "receta"
+       más arriba: llamar YA es la única acción que importa)
+   Grúa, remolque, asistencia en ruta                      → tema-tech
+     + feat-cta-sticky-always
+   Servicio técnico de electrodomésticos/electrónica       → tema-tech
+   Diseño web, desarrollo de software, agencia digital     → tema-corporate
+
+   COMERCIO
+   ---------
+   Kiosco, almacén, minimercado                            → — default —
+   Verdulería, frutería                                     → tema-natural
+   Vivero, florería, paisajismo                             → tema-natural
+   (el caso explícito de la primera tanda de temas)
+   Librería, papelería                                       → — default —
+   Ropa, calzado, accesorios                                 → — default —
+     (considerar feat-gallery-zoom-strong: moda/producto)
+   Joyería, relojería                                         → tema-gourmet
+   (el vino/borgoña funciona como sustituto de "lujo" sin
+    inventar un sexto tema solo para este caso)
+   Ferretería industrial, distribuidora                       → tema-tech
+
+   ENTRETENIMIENTO Y VIDA NOCTURNA
+   ----------------------------------
+   Discoteca, boliche                                          → tema-nocturno
+     + feat-glow-badges
+   Salón de eventos, casamientos                                → tema-gourmet
+   (elegante/festivo sin ser tan "nocturno" como un boliche)
+   Cine, teatro, centro cultural                                 → — default —
+   Casino, bingo, sala de juegos                                 → tema-nocturno
+
+   EDUCACIÓN
+   ----------
+   Jardín de infantes, guardería                                  → tema-natural
+   (cálido/amable, similar registro al de florería/vivero
+    aunque el rubro sea distinto)
+   Colegio, instituto                                              → tema-corporate
+   Academia de idiomas, apoyo escolar                              → tema-corporate
+   Gimnasio, box de crossfit, estudio de yoga/pilates              → — default —
+     + feat-score-ring-thick si el puntaje/nota de clase es
+       un dato central de la ficha
+   Academia de danza, escuela de música                             → tema-gourmet
+   (registro más "artístico/cálido" que el corporativo de
+    un colegio tradicional)
+
+   INMOBILIARIA Y HOGAR
+   ----------------------
+   Inmobiliaria                                                      → tema-corporate
+   Arquitectura de interiores, decoración                            → tema-gourmet
+     + feat-gallery-zoom-strong
+   Mudanzas, fletes                                                   → tema-tech
+
+   MASCOTAS
+   ---------
+   Peluquería canina, pet shop                                       → tema-natural
+   Veterinaria                                                        → tema-natural (ver arriba, Salud)
+
+   Ningún rubro de esta lista es obligatorio de mapear exactamente así —
+   es el punto de partida razonable, no una regla rígida: un estudio
+   jurídico especializado en derecho de familia puede preferir un tono
+   menos "sobrio" que uno de derecho penal corporativo, y eso lo decide
+   quien arma esa ficha puntual, no esta tabla. ══════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   .feat-compacto: densidad de información para fichas con mucho
+   contenido por sección (2026-08, pase 2)
+   ══════════════════════════════════════════════════════════════════════
+   Brode es una "Ficha Maestra Premium" con galería, historia, scores,
+   side-box, FAQ de 8 preguntas, reseñas (ver auditoría, punto 5: "si
+   las 1500 fichas van a tener ese mismo nivel de detalle, alguien tiene
+   que escribir ese contenido 1500 veces — poco realista"). Mientras esa
+   decisión de fondo (2-3 niveles de ficha: básica/estándar/premium) no
+   esté resuelta en el generador, esta feature ataca un síntoma
+   relacionado desde el otro lado: una ficha con MENOS contenido real
+   (ej. 3 preguntas de FAQ en vez de 8, sin historia) igual hereda el
+   espaciado pensado para la versión completa, y puede verse
+   desproporcionadamente "vacía" — mucho aire entre pocas secciones.
+   .feat-compacto reduce los márgenes/paddings de sección sin tocar
+   tipografía ni color, para que una ficha liviana no dependa de tener
+   contenido de relleno para verse completa. ---- */
+body.feat-compacto .section-header{
+  margin-bottom:28px; /* 48px por defecto */
+}
+body.feat-compacto .side-box{
+  padding:22px 22px 24px; /* 32px 32px 36px por defecto */
+}
+body.feat-compacto .side-box li{
+  padding:10px 0; /* 14px por defecto */
+}
+body.feat-compacto .review-card{
+  padding:20px 18px; /* 28px 24px por defecto */
+}
+@media (max-width:768px){
+  body.feat-compacto .side-box{
+    padding:18px 16px; /* 28px 24px por defecto en mobile */
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   REFUERZO DE FOCUS-VISIBLE en los componentes nuevos de este pase
+   ══════════════════════════════════════════════════════════════════════
+   La auditoría documenta el criterio de accesibilidad ya aplicado en el
+   resto del sistema (punto 4 de "lo que ya está en su máximo": "aria-
+   hidden dinámico, tabindex activo/inactivo, prefers-reduced-motion").
+   Los elementos que este pase agrega (.faq-icon con la variante
+   feat-faq-icon-plus, el ícono ya tenía :focus-visible en su selector
+   base — ver .faq-item summary:focus-visible más arriba en el archivo)
+   no necesitan un focus-visible nuevo porque no agregan ningún elemento
+   FOCUSABLE nuevo: todas las clases feat- y tema- de este pase son
+   puramente decorativas sobre elementos que ya eran o ya no eran
+   enfocables antes de este pase — ninguna agrega un <button>, <a> ni
+   tabindex nuevo. Se deja esta nota en vez de código porque es
+   justamente la ausencia de código la que hay que poder verificar:
+   revisar esto es el primer paso si en el futuro se agrega una feature
+   nueva a este bloque que sí introduzca un elemento interactivo. ---- */
+
+/* ══════════════════════════════════════════════════════════════════════
+   CHECKLIST — qué revisar antes de agregar un tema-* o feat-* nuevo
+   ══════════════════════════════════════════════════════════════════════
+   La auditoría señala (punto 7, "OPCIONAL") que no hay tests/lint
+   automatizados para el pipeline de generación. Mientras eso no exista,
+   este checklist manual es el mínimo razonable para que un tema o
+   feature nuevo no rompa lo que ya funciona:
+
+   1. Contraste: cualquier "base" nuevo debe dar ≥4.5:1 contra --ink, y
+      cualquier "dark" nuevo debe dar ≥4.5:1 contra --cream Y
+      --cream-deep. No estimar a ojo — calcular con la fórmula de
+      luminancia relativa de WCAG (la misma que ya usa este archivo en
+      --gold/--gold-dark, y la que se usó para las 7 paletas de este
+      pase). Un color que "se ve bien" en pantalla puede estar
+      perfectamente por debajo de AA sin que sea obvio a simple vista.
+
+   2. Buscar rgb/rgba hardcodeados: antes de este pase había UNA sola
+      sombra en todo el archivo con el naranja hardcodeado en vez de
+      rgba(var(--gold-rgb),…) — ver el bug real corregido en
+      .faq-item[open] .faq-icon, más arriba. Cualquier feature/tema
+      nuevo debería auditar los selectores que toca por el mismo patrón
+      antes de darlo por terminado: grep por rgb(255 o rgb(45 (los dos
+      colores de marca "de fábrica" del sistema) es un chequeo rápido.
+
+   3. prefers-reduced-motion: si el feature agrega una @keyframes nueva
+      (fichaBadgeGlowGold/Green, fichaPulseRingThick, fichaStatusDotPulse
+      en este pase), agregar también su contraparte "off" en el bloque
+      de @media (prefers-reduced-motion: reduce) correspondiente — no
+      asumir que hereda el de otra animación solo porque toca un
+      elemento parecido.
+
+   4. @media print: si el feature es puramente visual/decorativo (glow,
+      pulso, zoom), agregar su override a "display:none" o
+      "animation:none" en algún @media print — no porque rompa algo si
+      no se hace, sino porque una animación infinita no tiene ningún
+      sentido en una página impresa y es una línea barata de agregar.
+
+   5. Rol real, no solo color: si el feature cambia --gold/--gold-dark/
+      --gold-light/--gold-rgb, confirmar que --border (que deriva de
+      --gold-rgb vía rgba()) sigue leyéndose bien contra --cream/
+      --cream-deep con el nuevo valor — no hace falta recalcular a mano,
+      pero si el rgb elegido es MUY claro, --border puede volverse casi
+      invisible sobre fondo --cream aunque el "gold" en sí cumpla AA.
+
+   6. Nombre de clase: tema-* para color, feat-* para
+      comportamiento/intensidad — no mezclar los dos prefijos ni usar
+      feat- para algo que en realidad es un color de marca (rompería la
+      convención que hace que este archivo sea buscable por prefijo). */
+
+
+/* ---- tema-artesanal: reafirma explícitamente el naranja default
+   (--gold/--gold-light/--gold-dark/--gold-rgb del SISTEMA GOLD STANDARD,
+   sin cambiar ningún valor). No hace falta usarla — omitir cualquier
+   clase tema-* ya deja la ficha en este mismo estado — pero se deja
+   disponible para cuando el generador arme el <body> a partir de un
+   campo explícito como "perfilVisual.tema" (ver nota de PRÓXIMO PASO
+   más arriba): es mejor que ese campo pueda escribir siempre un valor
+   real ("artesanal", "natural", "clinico"…) que depender de que "vacío"
+   signifique algo distinto de "no configurado todavía" — mismo motivo
+   por el que ficha.json ya prefiere campos explícitos con default
+   documentado antes que la ausencia silenciosa del campo (ver
+   _comentario_features en ficha.json). */
+body.tema-artesanal{
+  --gold:#ff5511;--gold-light:#ff8514;--gold-dark:#b83505;--gold-rgb:255,85,17;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RESULTADO DE ESTE PASE (2026-08, pase 2) — mismo formato que el punto
+   7 de CAMBIOS-2026-08.txt, para que quede junto al código que describe
+   ══════════════════════════════════════════════════════════════════════
+   Se agregó a ficha.css, al final del archivo, sin tocar ninguna regla
+   preexistente salvo UNA corrección puntual (el rgb hardcodeado de
+   .faq-item[open] .faq-icon, documentado en su lugar):
+
+     8 temas de color por rubro   (tema-natural, tema-clinico,
+                                    tema-sobrio, tema-nocturno, tema-tech,
+                                    tema-corporate, tema-gourmet,
+                                    tema-artesanal), cada uno con sus 3
+                                    roles de color calculados contra AA
+                                    real, no estimados a ojo.
+     14 features de interacción   opt-in por clase de <body>, sin flags
+                                    nuevos en ficha.json ni cambios en
+                                    ficha.js: tilt-off, tilt-soft,
+                                    score-pulse-off, chip-flat,
+                                    highlight-static, glow-badges,
+                                    cta-sticky-always, gallery-zoom-off,
+                                    gallery-zoom-strong, faq-icon-plus,
+                                    faq-flat, score-ring-thick,
+                                    sidebox-flat, alto-contraste,
+                                    compacto, status-pulse.
+     1 bug real corregido          rgb hardcodeado en el ícono del FAQ
+                                    abierto, que rompía cualquier tema
+                                    de color nuevo sin que se notara con
+                                    el naranja default.
+     1 mapeo de referencia         rubro real → tema/features sugeridos,
+                                    para uso directo del generador.
+     1 checklist de QA             6 puntos a revisar antes de sumar un
+                                    tema/feature nuevo (mientras no haya
+                                    tests automatizados — ver auditoría,
+                                    punto 7).
+
+   Nada de esto cambia el comportamiento de ninguna ficha existente sin
+   clases nuevas en el <body>: Brode (y las ~50 fichas restantes)
+   siguen exactamente igual que antes de este pase — mismo criterio de
+   "capa 100% aditiva" que ya usó la fusión original del punto 3/4 de
+   CAMBIOS-2026-08.txt. Lo que sigue pendiente es lo mismo que ya
+   señalaba esa sección 8: build-fichas.js no auditado, y ahora además
+   la decisión de qué campo de ficha.json (si "perfilVisual" u otro
+   nombre) va a decirle al generador qué tema/features poner en el
+   <body> de cada una de las 1500 fichas. ══════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════
+   VERIFICACIÓN — --border se mantiene consistente en los 8 temas
+   ══════════════════════════════════════════════════════════════════════
+   Punto 5 del checklist de arriba aplicado a los propios temas de este
+   pase: --border deriva de --gold-rgb (rgba(var(--gold-rgb),0.25), ver
+   :root del SISTEMA GOLD STANDARD), así que cambia solo con overridear
+   --gold-rgb — nunca se toca a mano en ningún tema-*.
+
+   Se midió el resultado real (--gold-rgb al 25% de opacidad mezclado
+   sobre --cream) para los 8 temas, incluido tema-artesanal/default:
+   los ocho quedan en un rango muy angosto, ~1.32:1 a ~1.38:1 de
+   contraste aparente contra --cream — prácticamente idéntico entre sí.
+   Esto NO es una falla nueva de los temas agregados: es el mismo nivel
+   de sutileza que --border ya tenía en el sistema original con el
+   naranja default (tema-artesanal da 1.34:1, dentro del mismo rango que
+   los 7 temas nuevos). --border nunca se diseñó como un elemento de
+   alto contraste — es un separador decorativo fino (1px, 0.25 de
+   opacidad), no texto ni un componente de UI esencial sujeto al 3:1 de
+   WCAG 1.4.11 (ese criterio aplica a componentes gráficos con función,
+   no a hairlines puramente decorativos). La verificación confirma que
+   ningún tema nuevo rompe ni mejora ni empeora ese comportamiento
+   respecto al que Brode ya tenía: es consistente por diseño, en los 8
+   casos por igual. */
+
+/* ══════════════════════════════════════════════════════════════════════
+   .feat-cta-sticky-compact: versión angosta de la barra fija de
+   Llamar/WhatsApp (2026-08, pase 2)
+   ══════════════════════════════════════════════════════════════════════
+   .cta-sticky (definida más arriba, sección CONTROLES FLOTANTES /
+   fusión original de Brode) usa el mismo padding para todos los rubros.
+   En pantallas angostas con nombres de negocio largos en el título de
+   arriba, o en rubros con más de dos botones si a futuro se agrega un
+   tercero (ej. "Reservar" además de Llamar/WhatsApp), el alto fijo
+   puede tapar más contenido útil del que conviene en mobile. Esta
+   clase reduce el padding vertical de los botones de la barra sin
+   cambiar su lógica de aparición (sigue siendo la misma
+   inicializarCtaSticky() de ficha.js, esto es solo CSS). ---- */
+body.feat-cta-sticky-compact .cta-sticky__btn{
+  padding-top:10px;
+  padding-bottom:10px;
+}
+@media (max-width:768px){
+  body.feat-cta-sticky-compact .cta-sticky__btn{
+    padding-top:8px;
+    padding-bottom:8px;
+  }
+}
+
+   /* TURISMO Y HOSPEDAJE (continuación del mapeo de referencia)
+      -------------------------------------------------------------
+      Hotel, hostel, cabañas                                → tema-gourmet
+        + feat-gallery-zoom-strong (las fotos del alojamiento
+          son el argumento de venta principal, mismo criterio
+          que joyería/decoración más arriba)
+      Agencia de turismo, excursiones                        → — default —
+      Camping, turismo rural                                  → tema-natural
+
+      DEPORTES Y RECREACIÓN
+      -------------------------------------------------------------
+      Club deportivo, cancha de alquiler                      → — default —
+      Escuela de fútbol/natación/artes marciales para niños   → tema-natural
+        (mismo registro cálido/amable que jardín de infantes,
+         más arriba en EDUCACIÓN, aunque el rubro sea deporte) */
