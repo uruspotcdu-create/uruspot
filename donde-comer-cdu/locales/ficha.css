@@ -705,6 +705,19 @@ html.u-suprimir-vidrio .hero-score{
 .review-note{font-size:12px;color:var(--muted);text-align:center;margin-top:32px;letter-spacing:0.03em}
 
 @media(max-width:768px){
+  /* ALTURA DEL HERO EN MOBILE (auditoría hostil pre-migración, 2026-08):
+     .hero{height:100vh} de la regla base (línea ~450) no tenía ninguna
+     excepción por viewport -- medido en vivo con Playwright a 360x800:
+     el hero ocupaba el alto EXACTO del viewport, dejando título,
+     descripción y badges recién visibles después de un scroll completo
+     de pantalla casi vacía (el isotipo de marca, 474x215 estirado con
+     object-fit:cover, se ve como un rectángulo mayormente negro a ese
+     ancho). No revierte la decisión de negocio de usar el isotipo en
+     vez de una foto panorámica (ver AGENTS.md §6.6.1, ficha.json
+     _comentario_hero_revertido) -- reduce el ALTO del contenedor en
+     mobile, no la imagen elegida. min-height 420px evita que quede
+     demasiado bajo en landscape de celular (viewport height chico). */
+  .hero{height:62vh;min-height:420px}
   .amenities-grid{grid-template-columns:1fr}
   .reviews-grid{grid-template-columns:1fr}
   .review-summary-body{grid-template-columns:1fr;text-align:center;gap:20px}
