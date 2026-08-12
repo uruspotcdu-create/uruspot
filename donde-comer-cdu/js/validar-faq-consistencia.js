@@ -35,11 +35,28 @@
 // bloque que usa validar-precios-cuerpo.js con el side-box).
 const RE_FAQ_SECCION = /id="faq-heading"[\s\S]*?<\/section>/;
 
-// Cada pregunta/respuesta visible dentro de esa sección:
-// <h3 class="about-title about-subtitle">PREGUNTA</h3>
-// <p class="about-body">RESPUESTA (puede traer <strong>/<a> internos)</p>
-const RE_PREGUNTA_RESPUESTA =
+// Cada pregunta/respuesta visible dentro de esa sección. Dos formatos
+// conviven en el repo (ambos igual de válidos, ninguno es "el nuevo que
+// reemplaza al viejo"):
+//   1) Estático:  <h3 class="about-title about-subtitle">PREGUNTA</h3>
+//                 <p class="about-body">RESPUESTA</p>
+//   2) Acordeón:  <details class="faq-item"><summary>PREGUNTA<span
+//                 class="faq-icon">...</span></summary><div class="faq-a">
+//                 <p class="about-body">RESPUESTA</p></div></details>
+// AGREGADO (auditoría fresca de Brode, 2026-08): hasta ahora solo existía
+// el patrón 1 acá, porque hasta ahora ninguna ficha usaba el 2 en su
+// cuerpo.html real (aunque el CSS/JS del acordeón sí existían y estaban
+// probados — ver ficha.css "FAQ SECTION — Premium accordion interaction").
+// Al restaurar el acordeón de Brode (regresión real del commit 04d6210,
+// confirmada con `git show 04d6210^`), este validador daba un falso
+// "8 faqItems vs 0 preguntas visibles" -- no porque el contenido visible
+// hubiera desaparecido, sino porque el regex no sabía buscarlo en su
+// nueva forma. Cualquier ficha nueva de las 1500 puede usar el patrón
+// que prefiera; este validador ahora entiende los dos.
+const RE_PREGUNTA_RESPUESTA_ESTATICO =
   /<h3 class="about-title about-subtitle">([\s\S]*?)<\/h3>\s*<p class="about-body">([\s\S]*?)<\/p>/g;
+const RE_PREGUNTA_RESPUESTA_ACORDEON =
+  /<summary>([\s\S]*?)<span class="faq-icon"[\s\S]*?<\/summary>\s*<div class="faq-a"><p class="about-body">([\s\S]*?)<\/p><\/div>/g;
 
 function latin1AUtf8(txt) {
   return Buffer.from(txt, "latin1").toString("utf8");
@@ -64,9 +81,19 @@ function extraerFaqVisible(cuerpo) {
   if (!seccionMatch) return null;
   const items = [];
   let m;
-  RE_PREGUNTA_RESPUESTA.lastIndex = 0;
-  while ((m = RE_PREGUNTA_RESPUESTA.exec(seccionMatch[0])) !== null) {
+  RE_PREGUNTA_RESPUESTA_ESTATICO.lastIndex = 0;
+  while ((m = RE_PREGUNTA_RESPUESTA_ESTATICO.exec(seccionMatch[0])) !== null) {
     items.push({ question: limpiarTexto(m[1]), answer: limpiarTexto(m[2]) });
+  }
+  // Una ficha usa un solo patrón para todo su FAQ, nunca los dos a la
+  // vez (ver comentario de las regex arriba) -- si el estático no
+  // encontró nada, probamos el de acordeón antes de concluir que la
+  // sección no tiene preguntas visibles.
+  if (!items.length) {
+    RE_PREGUNTA_RESPUESTA_ACORDEON.lastIndex = 0;
+    while ((m = RE_PREGUNTA_RESPUESTA_ACORDEON.exec(seccionMatch[0])) !== null) {
+      items.push({ question: limpiarTexto(m[1]), answer: limpiarTexto(m[2]) });
+    }
   }
   return items;
 }

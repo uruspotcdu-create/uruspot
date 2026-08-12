@@ -416,7 +416,22 @@
     <div class="score-label">URU SPOT Score</div>
     <div class="score-stars" aria-hidden="true">★★★★★</div>
   </div>
-  
+
+  <!-- RESTAURADO (auditoría fresca, 2026-08): este bloque existía antes
+       del commit 04d6210 ("sincronizar drift de brode"), que pese a su
+       mensaje ("le faltaban... se actualiza cuerpo.html con contenido
+       real") en realidad SOBREESCRIBIÓ cuerpo.html con una versión más
+       vieja e incompleta -- confirmado comparando el cuerpo.html previo
+       (git show 04d6210^) contra ficha.js/ficha.css, que ya tienen
+       inicializarCtaSticky() completo y funcionando esperando este
+       elemento (".hero-scroll-cue" se oculta al pasar 80px de scroll).
+       Sin este div, esa función corría en vacío para Brode desde ese
+       commit. -->
+  <div class="hero-scroll-cue" aria-hidden="true">
+    <span>Descubrí más</span>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </div>
+
 </section>
 
 <!-- INFO STRIP -->
@@ -447,6 +462,13 @@
     
     <span class="info-cell-value">03442 30-6349</span>
     <span class="info-cell-sub">📈 Alta demanda — se recomienda anticiparse</span>
+    <!-- RESTAURADO (auditoría fresca, 2026-08, misma causa que el
+         hero-scroll-cue de arriba): ficha.js ya trae
+         inicializarCopyChips() (busca ".copy-chip[data-copy-value]",
+         copia al portapapeles y confirma con feedback visual) desde
+         antes de esta ficha existir -- este botón es el único consumidor
+         real que tenía Brode y se perdió en el mismo drift. -->
+    <button type="button" class="copy-chip" data-copy-value="+5493442306349" aria-label="Copiar número de teléfono de Brødë">📋 Copiar número</button>
     
     
     <div class="action-row action-row--compact">
@@ -488,7 +510,7 @@
 
 <!-- ABOUT -->
 
-<section class="page" aria-labelledby="about-heading">
+<section class="page about-section" aria-labelledby="about-heading">
   <div class="section-header u-reveal">
     <span class="section-label">Sobre el lugar</span>
     <span class="section-line" aria-hidden="true"></span>
@@ -572,8 +594,8 @@
       </div>
 
       <figure class="reveal-photo reveal-photo--aside u-fade-in-img">
-        <img src="/img/brode1.webp" alt="Interior y producción de Brødë" loading="lazy" decoding="async" width="509" height="689" />
-        <figcaption>Detrás de escena: el obrador donde nace cada pieza, antes de las 72 horas de proceso.</figcaption>
+        <img src="/img/brode1.webp" alt="Pan dulce artesanal navideño de Brødë, con decoración de fin de año" loading="lazy" decoding="async" width="509" height="689" />
+        <figcaption>Uno de los productos de temporada de Brødë — la misma dedicación artesanal de siempre, en cada pieza especial.</figcaption>
       </figure>
     </div>
   </div>
@@ -876,7 +898,7 @@
       </div>
       <div>
         <h2 class="map-info-title" id="map-heading">Dr. J. Lacava 491, Concepción del Uruguay</h2>
-        <strong>Dirección:</strong> Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos<br>
+        <strong>Dirección:</strong> Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos <button type="button" class="copy-chip" data-copy-value="Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos" aria-label="Copiar dirección de Brødë">📋 Copiar</button><br>
         <strong>Zona:</strong> Casco urbano — acceso sencillo desde el centro<br>
         <strong>Recomendación:</strong> Los productos se agotan rápido — conviene llegar temprano o consultar disponibilidad.<br>
         <strong>También disponible en:</strong> Negocios seleccionados de la región (pedidos por WhatsApp para línea mayorista)
@@ -1031,38 +1053,66 @@
 
 <!-- FAQ -->
 
-<section class="page" aria-labelledby="faq-heading">
+<section class="page faq-section" aria-labelledby="faq-heading">
   <div class="section-header u-reveal">
     <h2 class="section-label" id="faq-heading">Preguntas frecuentes</h2>
     <span class="section-line" aria-hidden="true"></span>
   </div>
+  <!-- FAQ COMO ACORDEÓN: RESTAURADO (auditoría fresca, 2026-08). Existía
+       ya como details con summary nativo (accesible sin JS) hasta que el
+       commit 04d6210 lo reemplazó por 8 pares h3+p siempre expandidos --
+       confirmado con `git show 04d6210^` vs. HEAD. El CSS
+       del acordeón (ficha.css, sección "FAQ SECTION — Premium accordion
+       interaction") y los comentarios de las variantes .feat-faq-icon-plus
+       / .feat-faq-flat siguen citando textualmente "la cruz de Brode" y
+       "como trae Brode por defecto" como su caso de referencia -- prueba
+       de que este markup es el que el resto del sistema espera encontrar
+       acá. Mismo texto exacto que la versión estática (0 cambios de
+       contenido, solo de estructura); primer ítem de cada columna abierto
+       por defecto, igual que antes. -->
   <div class="about-grid u-reveal-stagger">
     <div>
-      <h3 class="about-title about-subtitle">¿Qué días abre Brødë?</h3>
-      <p class="about-body">De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes.</p>
-      
-      <h3 class="about-title about-subtitle">¿Cuál es la especialidad de la casa?</h3>
-      <p class="about-body">Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como "los mejores laminados de la zona". Todo pasa por un proceso de 72 horas.</p>
-      
-      <h3 class="about-title about-subtitle">¿Cuáles son los precios?</h3>
-      <p class="about-body">Croissant: <strong class="stat">$1.530</strong>. Pan de Campo (caja de 10): <strong class="stat">$1.650</strong>. Pan de Hamburguesa: <strong class="stat">$385</strong>. Para otros productos y promociones, consultar directamente por WhatsApp.</p>
-      
-      <h3 class="about-title about-subtitle">¿Se puede comprar en otro lugar además del local?</h3>
-      <p class="about-body">Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp.</p>
+      <details class="faq-item" open>
+        <summary>¿Qué días abre Brødë?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Cuál es la especialidad de la casa?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como "los mejores laminados de la zona". Todo pasa por un proceso de 72 horas.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Cuáles son los precios?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Croissant: <strong class="stat">$1.530</strong>. Pan de Campo (caja de 10): <strong class="stat">$1.650</strong>. Pan de Hamburguesa: <strong class="stat">$385</strong>. Para otros productos y promociones, consultar directamente por WhatsApp.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Se puede comprar en otro lugar además del local?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp.</p></div>
+      </details>
     </div>
 
     <div>
-      <h3 class="about-title about-subtitle">¿Qué pasa con el pan que no se vende?</h3>
-      <p class="about-body">Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad.</p>
-      
-      <h3 class="about-title about-subtitle">¿El local es accesible para sillas de ruedas?</h3>
-      <p class="about-body">No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349.</p>
-      
-      <h3 class="about-title about-subtitle">¿Hay opciones veganas o sin gluten?</h3>
-      <p class="about-body">Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita.</p>
-      
-      <h3 class="about-title about-subtitle">¿Cuánto tiempo lleva el proceso de un pan?</h3>
-      <p class="about-body"><strong class="stat">72 horas</strong> desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante.</p>
+      <details class="faq-item" open>
+        <summary>¿Qué pasa con el pan que no se vende?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿El local es accesible para sillas de ruedas?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Hay opciones veganas o sin gluten?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body">Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary>¿Cuánto tiempo lleva el proceso de un pan?<span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span></summary>
+        <div class="faq-a"><p class="about-body"><strong class="stat">72 horas</strong> desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante.</p></div>
+      </details>
     </div>
   </div>
 </section>
@@ -1086,6 +1136,18 @@
   </div>
 </section>
 
+
+<!-- CTA STICKY EN MOBILE: RESTAURADO (auditoría fresca, 2026-08, misma
+     causa que el resto de este pase). Las clases .cta-sticky/
+     .cta-sticky__btn ya existen y están estilizadas en ficha.css, y
+     inicializarCtaSticky() en ficha.js ya las controla (aparece solo en
+     mobile, solo después de pasar el 60% del hero, y actualiza
+     tabindex de sus links para que no sean focables mientras están
+     ocultos) -- todo eso corría en vacío para Brode desde el commit que
+     borró este markup. Mismos destinos que los botones de Info rápida. -->
+<div class="cta-sticky" role="complementary" aria-label="Acciones rápidas">
+  <a href="tel:+5493442306349" class="cta-sticky__btn cta-sticky__btn--principal">📞 Llamar</a><a href="https://wa.me/5493442306349?text=Hola!%20Vi%20Brode%20en%20UruSpot%20y%20quer%C3%ADa%20consultar" target="_blank" rel="noopener noreferrer" class="cta-sticky__btn cta-sticky__btn--secundario">💬 WhatsApp</a>
+</div>
 
 <!-- FOOTER -->
 </main>
