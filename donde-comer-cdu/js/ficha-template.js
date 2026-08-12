@@ -39,6 +39,44 @@
  * sumen después.
  */
 "use strict";
+const {
+  generarNegocioJsonLd,
+  generarBreadcrumb,
+  generarFaq,
+  generarWebPage,
+} = require("./ficha-jsonld.js");
+
+// [FIX] (2026-08, cierre de CRÍTICO 5): jsonLdRaw/breadcrumbBlockRaw/
+// faqBlockRaw/webPageBlockRaw dejan de depender exclusivamente de venir
+// ya renderizados a mano en ficha.json. Si la ficha trae los campos
+// estructurados (shell.negocio / shell.rubro / shell.faqItems), estos
+// 4 bloques se generan acá con ficha-jsonld.js. Si no los trae (las 51
+// fichas del esquema viejo, todavía no migradas), gana el *BlockRaw tal
+// cual estaba -- mismo patrón de fallback que armarBloqueOg/
+// armarBloqueTwitter dos funciones más abajo. Migrar una ficha del
+// esquema viejo al nuevo es aditivo: se agregan los 3 campos
+// estructurados a su ficha.json y, en el próximo build, los *BlockRaw
+// quedan sin uso (se pueden borrar del JSON en ese momento, no antes).
+function armarJsonLd(shell) {
+  const generado = generarNegocioJsonLd(shell);
+  return generado !== null ? generado : shell.jsonLdRaw;
+}
+function armarBreadcrumbBlock(shell) {
+  const generado = generarBreadcrumb(shell);
+  return generado !== null ? generado : shell.breadcrumbBlockRaw || "";
+}
+function armarFaqBlock(shell) {
+  const generado = generarFaq(shell);
+  return generado !== null ? generado : shell.faqBlockRaw || "";
+}
+function armarWebPageBlock(shell) {
+  // WebPage no tiene equivalente estructurado propio para "decidir si
+  // generar" -- depende de breadcrumb (necesita shell.rubro para el
+  // @id de #breadcrumb tenga sentido). Se genera siempre que haya
+  // shell.rubro; si no, cae al *BlockRaw viejo igual que los otros 3.
+  if (shell.rubro) return generarWebPage(shell);
+  return shell.webPageBlockRaw || "";
+}
 
 // [FIX] (2026-08): dos esquemas conviven en locales/*/ficha.json — las 50
 // fichas "viejas" traen ogImageBlockRaw suelto (og:url/site_name/locale y
@@ -106,6 +144,10 @@ function renderFicha(shell, cuerpo) {
   const bloqueTwitter = armarBloqueTwitter(shell);
   const barraProgreso = armarBarraProgreso(shell);
   const botonArriba = armarBotonArriba(shell);
+  const jsonLd = armarJsonLd(shell);
+  const breadcrumbBlock = armarBreadcrumbBlock(shell);
+  const faqBlock = armarFaqBlock(shell);
+  const webPageBlock = armarWebPageBlock(shell);
   return `<!DOCTYPE html>
 <html lang="es-AR">
 <head>
@@ -166,9 +208,9 @@ ${shell.imagePath ? `<!-- Preload de la foto del hero (candidata a LCP de esta p
      (seccion "SISTEMA GOLD STANDARD", 2026-08). Ninguna ficha carga una
      hoja CSS propia. Ver ARCHITECTURE.md. -->
 <script type="application/ld+json">
-${shell.jsonLdRaw}
+${jsonLd}
 </script>
-${shell.breadcrumbBlockRaw || ""}${shell.faqBlockRaw || ""}${shell.webPageBlockRaw || ""}</head>
+${breadcrumbBlock}${faqBlock}${webPageBlock}</head>
 <body>
 
 ${barraProgreso}<!-- SKIP LINK - invariante AGENTS.md 9.2: debe ser el primer elemento

@@ -184,11 +184,22 @@ function main() {
       // todavía no adoptaron este placeholder. Campo opcional: fichas
       // sin __DATE_MODIFIED__ en ningún *BlockRaw no sufren ningún
       // cambio (String.replace de un patrón ausente es no-op).
+      //
+      // [FIX] (2026-08, generador jsonLdRaw/breadcrumb/faq/webpage en
+      // ficha-jsonld.js): el reemplazo se hace SOBRE EL HTML YA
+      // RENDERIZADO (`generado`), no sobre shell.webPageBlockRaw acá
+      // arriba. Antes solo funcionaba si webPageBlockRaw ya venía
+      // escrito a mano en ficha.json (esquema viejo). Con el esquema
+      // nuevo, ese bloque se genera DENTRO de renderFicha() a partir de
+      // shell.rubro -- en ese caso el placeholder no existe todavía en
+      // el momento de este reemplazo y __DATE_MODIFIED__ se filtraba
+      // crudo al HTML final. Reemplazar después de renderizar cubre
+      // los dos esquemas por igual desde un solo lugar.
       const fechaIso = formatearFechaIso(fecha);
-      if (shell.webPageBlockRaw && shell.webPageBlockRaw.indexOf("__DATE_MODIFIED__") !== -1) {
-        shell.webPageBlockRaw = shell.webPageBlockRaw.split("__DATE_MODIFIED__").join(fechaIso);
+      let generado = renderFicha(shell, cuerpo);
+      if (generado.indexOf("__DATE_MODIFIED__") !== -1) {
+        generado = generado.split("__DATE_MODIFIED__").join(fechaIso);
       }
-      const generado = renderFicha(shell, cuerpo);
       warningsSeo.push(...validarLongitudesMeta(slug, shell));
       warningsPrecios.push(...validarPreciosCuerpo(slug, cuerpo));
       if (VERIFY) {
