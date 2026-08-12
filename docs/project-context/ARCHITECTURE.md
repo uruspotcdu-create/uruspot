@@ -153,33 +153,37 @@ fatales, ofrece reintento con backoff (`NETWORK_RETRY_ATTEMPTS=2`,
 autochequea invariantes de estado (ej. conteo de favoritos vs. contador
 en DOM) y puede auto-repararse (`reparar()`).
 
-## 8. ⚠ Hallazgo P0 — Cloudflare Pages Functions de reseñas mal ubicadas
+## 8. ✅ Resuelto — Cloudflare Pages Functions de reseñas (antes Hallazgo P0)
 
-Cloudflare Pages Functions usa ruteo por convención de archivos: todo lo
-que esté en `/functions` (raíz del proyecto desplegado) se mapea a rutas
-HTTP (`/functions/reviews.js` → `/reviews`). El archivo real está en
-`donde-comer-cdu/js/functions/reviews.js` — **fuera** del directorio que
-Cloudflare Pages indexa. La única carpeta `functions/` en la raíz del
-repo contiene únicamente `weather.js`.
+**ACTUALIZADO 2026-08 (auditoría "ficha madre" Brode):** verificado
+directamente contra el filesystem del repo — `functions/reviews.js` y
+`functions/reviews-admin.js` están en la raíz del proyecto (`/functions`),
+la ubicación correcta que indexa Cloudflare Pages Functions. El hallazgo
+original de esta sección (que describía el archivo como ubicado en
+`donde-comer-cdu/js/functions/reviews.js`, fuera del directorio indexado)
+ya no describe el estado real del repo — se corrige acá en vez de
+borrarse, para no perder el historial de por qué se investigó esto.
 
-`ficha.js` (línea 324 y 355, verificado) hace:
-```js
-fetch("/reviews?id=" + encodeURIComponent(DATA.uru_id))
-fetch("/reviews", { method: "POST", ... })
-```
-Si mi lectura de la convención de Cloudflare es correcta, estas llamadas
-devuelven 404 en producción, y toda la feature de reseñas propias
-(mostrar reseñas + formulario de carga) está silenciosamente rota — el
-propio `ficha.js` tiene un manejo de error que probablemente muestra
-"No pudimos cargar las reseñas ahora" en cada visita a cualquier ficha.
+`donde-comer-cdu/locales/ficha.js` (función `cargarResenas()` /
+`manejarFormularioResena()`) consume `GET/POST /reviews?id=URU-XXXXX`
+usando el campo `uruId` que cada ficha declara en su bloque
+`#ficha-data` — confirmado en `locales/brode/ficha.json` (`uruId:
+"URU-00624"`), la ficha piloto de este cableado.
 
-**No pude confirmar esto contra producción real** (sin ruta de red desde
-este entorno a `uruspot.pages.dev`). Es una inferencia de alta confianza
-a partir de la convención documentada de Cloudflare Pages, no una
-observación directa del comportamiento en vivo. **Verificación sugerida
-inmediata:** abrir cualquier ficha en producción y ver si la sección de
-reseñas carga o muestra el mensaje de error; o `curl -I
-https://uruspot.pages.dev/reviews?id=URU-00120` y ver si da 404.
+**Esquema de storage real (corrección sobre esta misma sección):** el
+propio `functions/reviews.js` (comentario de cabecera) ya señalaba que
+este documento describía el esquema viejo — una sola key de KV por
+lugar (`reviews:<id>`) con un array de todas sus reseñas. El esquema
+actual usa **una key de KV por reseña** (`reviews:<id>:<reviewId>`),
+cambio hecho para eliminar una race condition real donde dos POST casi
+simultáneos podían pisarse entre sí (ver comentario completo en
+`functions/reviews.js`, auditoría 2026-08-05).
+
+**Pendiente real, no cerrado por esta corrección:** seguir sin poder
+confirmar contra `uruspot.pages.dev` en producción desde este entorno
+(sin ruta de red hacia ese dominio). La verificación sugerida sigue
+siendo válida: `curl -I https://uruspot.pages.dev/reviews?id=URU-00624`
+debería devolver 200, no 404.
 
 ## 9. ⚠ Hallazgo P0 — Bundles de producción desactualizados
 

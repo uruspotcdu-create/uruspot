@@ -5,11 +5,23 @@
 # `must-revalidate` obliga a Cloudflare a chequear con el origen en
 # cada visita antes de servir algo desde caché, así un deploy nuevo
 # se ve reflejado al instante sin esperar a que expire un TTL viejo.
+#
+# CSP (auditoría "ficha madre" Brode, 2026-08): donde-comer-cdu/index.html
+# ya tenía esta misma política como <meta http-equiv> (ver AGENTS.md
+# §10.1), pero ninguna de las 51 fichas de locales/<slug>/ la tenía —
+# cada ficha es su propio documento HTML (AGENTS.md §3.3), así que sin
+# esto nacían sin CSP. Se define acá, a nivel de header HTTP y global
+# (/*), en vez de agregarla al generador (ficha-template.js) o a cada
+# ficha.json, para que cubra las 51 fichas actuales y las 1500 futuras
+# de una sola vez, sin que la migración tenga que acordarse de este
+# campo. Mismo valor exacto que la meta tag de index.html para no tener
+# dos políticas divergentes en el mismo sitio.
 
 /*
   Cache-Control: public, max-age=0, must-revalidate
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
+  Content-Security-Policy: default-src 'self' https:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https:;
 
 # ---------------------------------------------------------------------
 # EXCEPCIÓN (perf, iteración 2): íconos de PWA, logo y primitivas SVG

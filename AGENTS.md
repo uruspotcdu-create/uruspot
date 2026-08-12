@@ -366,6 +366,24 @@ de "ningún elemento funcional depende exclusivamente del movimiento").
 El puente es el nombre compartido `tarjeta-nombre`/`hero-title` entre
 `app.js` y `ficha.js`.
 
+### 3.3.1 Criterio: `amenityFeature` cuando el dato no está confirmado
+
+Caso real: `locales/brode/ficha.json` declara
+`{"name": "Acceso para sillas de ruedas", "value": false}`, pero la FAQ
+de la misma ficha aclara honestamente que "no hay confirmación oficial" y
+remite a WhatsApp para consultar — o sea, lo que se sabe de verdad es
+"no confirmado", no "no tiene". `amenityFeature.value` en JSON-LD/
+schema.org solo admite `true`/`false`, no un tercer estado; publicar
+`false` ahí es una afirmación categórica que puede no ser cierta (Google
+podría mostrarla en rich results como si fuera un hecho verificado).
+
+**Regla para las próximas 1500 fichas:** cuando no haya confirmación
+oficial de una amenity, **omitir esa entrada de `amenityFeature` por
+completo** en vez de declararla `false`. El texto libre de la FAQ (como
+ya hace Brode) es el lugar correcto para explicar la incertidumbre y
+remitir a un canal de contacto — el dato estructurado no debe inventar
+una certeza que no existe.
+
 ### 3.4 Datos: el dataset real vs. el dataset editado a mano
 
 - `lugares-mapa.json` (708 KB) es la fuente **cruda**, editada a mano por
@@ -714,6 +732,26 @@ distinto del motion del Ambient Engine — ver Capítulo 7). Cada archivo
 nuevo de componente debe declarar sus propios estados (`:hover`,
 `:focus-visible`, `[disabled]`) usando los tokens ya existentes, nunca
 valores nuevos.
+
+### 6.6.1 Criterio: isotipo de marca vs. foto panorámica en el hero
+
+Caso real que fijó este criterio: `locales/brode/ficha.json`
+(`_comentario_hero_revertido`). Una auditoría de diseño 2026-08 había
+reemplazado el hero de Brode de `brodefrente.webp` (isotipo de marca,
+474×215, se pixela al estirarse a 100vh) a una foto panorámica de mejor
+resolución, por criterio de calidad visual. El cliente pidió expresamente
+volver al isotipo, para que el hero muestre el nombre de la marca,
+aceptando el pixelado como consecuencia conocida.
+
+**Regla para las próximas 1500 fichas:** si el dueño de un local pide
+explícitamente que el hero muestre el isotipo/logo de su marca en vez de
+una foto panorámica del lugar, esto es una decisión de producto válida y
+NO debe "corregirse" automáticamente en una auditoría futura solo por
+mejorar la nitidez visual. `ogImagePath`/`ogImageUrl` (lo que ve
+Facebook/WhatsApp/Twitter al compartir) siguen siendo independientes de
+`imagePath` (lo que se ve en el hero) — separar ambos campos, como ya
+hace `ficha.json`, permite que el cliente tenga su isotipo en el hero sin
+que las cards de redes sociales salgan pixeladas también.
 
 ### 6.7 Responsive y grids
 
