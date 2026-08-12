@@ -54,6 +54,21 @@ function generarNegocioJsonLd(shell) {
   const n = shell.negocio;
   if (!n) return null;
   const id = idBase(shell);
+  // Falla fuerte, no en silencio: mismo criterio que el guard de
+  // nombreCorto en generarBreadcrumb() más abajo. Sin este check,
+  // n.address.streetAddress explota con un TypeError genérico
+  // ("Cannot read properties of undefined") que no dice qué ficha ni
+  // qué campo falta -- inútil para diagnosticar entre 1500 fichas.
+  // Se detectó auditando Brode: hoy todas las fichas tienen address,
+  // pero nada en el contrato (ver cabecera de este archivo) marca el
+  // campo como opcional, así que el resto de negocio.* (amenityFeature,
+  // makesOffer, geo, hasMap) sí tiene fallback -- address quedaba como
+  // la única excepción sin guardar.
+  if (!n.address) {
+    throw new Error(
+      "shell.negocio está presente pero falta shell.negocio.address (slug: " + (shell.slug || "?") + ")"
+    );
+  }
   const obj = {
     "@context": "https://schema.org",
     "@type": n.tipo,
