@@ -58,6 +58,7 @@ const { execSync } = require("child_process");
 const { renderFicha } = require("./ficha-template.js");
 const { validarLongitudesMeta } = require("./validar-meta-longitud.js");
 const { validarPreciosCuerpo } = require("./validar-precios-cuerpo.js");
+const { validarFaqConsistencia } = require("./validar-faq-consistencia.js");
 const LOCALES_DIR = path.join(__dirname, "..", "locales");
 const VERIFY = process.argv.includes("--verify");
 const MESES_ES = [
@@ -161,6 +162,7 @@ function main() {
   const errores = [];
   const warningsSeo = [];
   const warningsPrecios = [];
+  const warningsFaq = [];
   for (const slug of slugs) {
     const dir = path.join(LOCALES_DIR, slug);
     const fichaJsonPath = path.join(dir, "ficha.json");
@@ -202,6 +204,7 @@ function main() {
       }
       warningsSeo.push(...validarLongitudesMeta(slug, shell));
       warningsPrecios.push(...validarPreciosCuerpo(slug, cuerpo));
+      warningsFaq.push(...validarFaqConsistencia(slug, cuerpo, shell));
       if (VERIFY) {
         const actual = fs.existsSync(indexPath) ? leerLatin1(indexPath) : null;
         if (actual !== generado) {
@@ -226,6 +229,10 @@ function main() {
   if (warningsPrecios.length) {
     console.log("PRECIOS — " + warningsPrecios.length + " advertencia(s) de desincronización side-box/FAQ:");
     warningsPrecios.forEach((w) => console.log(" - " + w));
+  }
+  if (warningsFaq.length) {
+    console.log("FAQ — " + warningsFaq.length + " advertencia(s) de desincronización ficha.json/cuerpo.html:");
+    warningsFaq.forEach((w) => console.log(" - " + w));
   }
   if (VERIFY) {
     console.log("fichas:verify — " + procesadas + " fichas chequeadas.");
