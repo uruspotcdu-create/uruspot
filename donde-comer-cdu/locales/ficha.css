@@ -807,6 +807,15 @@ html.u-suprimir-vidrio .hero-score{
 .side-box li:last-child{border-bottom:none;padding-bottom:0}
 .side-box li:first-child{padding-top:0}
 .side-box li strong{color:var(--ink);font-weight:500;display:block;margin-bottom:3px;font-size:13px;letter-spacing:0.02em}
+/* BUG REAL (auditoria diseno visual, 2026-08, ficha madre Brode): los <a>
+   sueltos dentro de un <li> de .side-box (ej. "@brodepanaderia" en
+   Canales de contacto) no tenian ningun selector propio -- heredaban el
+   azul/subrayado por defecto del navegador en vez de la paleta del
+   sitio, confirmado con captura real (Playwright). .side-box-cta (el
+   boton de ancho completo) ya tenia su propio estilo y no se toca; esta
+   regla es solo para links de texto sueltos dentro de <li>. */
+.side-box li a{color:var(--gold-dark);font-weight:600;text-decoration:underline;text-decoration-color:rgba(255,85,17,0.35);text-underline-offset:2px;transition:color .2s,text-decoration-color .2s}
+.side-box li a:hover,.side-box li a:focus-visible{color:var(--ink);text-decoration-color:currentColor}
 .side-box-val{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold-dark);font-weight:400}
 
 /* SIDE-BOX CTA (auditoría Brode, 2026-08-2) — antes "Menú oficial en
@@ -1777,8 +1786,19 @@ p[style*="font-size:10px"] {
   border: 0;
 }
 .review-rating-stars label {
+  /* BUG REAL (auditoria diseno visual, 2026-08, ficha madre Brode): esta
+     regla ponia font-size:30px directo en el label, pero el label
+     contiene el TEXTO real ("5 estrellas", "4 estrellas"...) ademas del
+     glifo que agrega label::before -- el resultado visible era el texto
+     completo en naranja gigante apilado con la estrella, confirmado con
+     captura real (Playwright). El texto se necesita en el DOM para que
+     el lector de pantalla anuncie "5 estrellas", pero no debe verse: se
+     baja a font-size:0 en el label (oculta visualmente sin sacarlo del
+     arbol de accesibilidad) y se restaura el tamano solo en ::before,
+     que es el unico elemento que debe mostrarse. Afecta a las ~51
+     fichas que comparten este archivo y tienen formulario de reseña. */
   cursor: pointer;
-  font-size: 30px;
+  font-size: 0;
   line-height: 1;
   color: var(--border);
   text-transform: none;
@@ -1788,6 +1808,7 @@ p[style*="font-size:10px"] {
 }
 .review-rating-stars label::before {
   content: "★";
+  font-size: 30px;
 }
 .review-rating-stars input:focus-visible + label {
   outline: 2px solid var(--gold);
@@ -2241,11 +2262,20 @@ html {
   }
 
   .breadcrumb ol {
+    /* BUG REAL (auditoria diseno visual, 2026-08, ficha madre Brode): esta
+       regla traia fondo claro tipo "papel calido" (rgba(250,247,242,.85))
+       pero .breadcrumb a usa texto blanco/claro (rgba(255,255,255,.72),
+       pensado para el hero oscuro, ver linea ~476) -- resultado: texto
+       casi ilegible sobre fondo claro, confirmado con captura real
+       (Playwright, desktop y mobile). Se cambia a un fondo oscuro
+       translucido, coherente con .hero-overlay (rgba(20,13,9,...)) en vez
+       de el tono claro que solo tiene sentido sobre secciones .page
+       blancas. Afecta a las ~51 fichas que comparten este archivo. */
     backdrop-filter: blur(8px);
-    background: rgba(250, 247, 242, 0.85);
+    background: rgba(20, 13, 9, 0.45);
     padding: 10px 16px;
     border-radius: 6px;
-    border: 1px solid rgba(255, 85, 17, 0.1);
+    border: 1px solid rgba(255, 85, 17, 0.18);
   }
 
   .breadcrumb a {
