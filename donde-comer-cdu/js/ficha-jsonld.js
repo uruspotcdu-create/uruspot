@@ -74,7 +74,7 @@ function generarNegocioJsonLd(shell) {
     "@type": n.tipo,
     "@id": id + "#negocio",
     inLanguage: IN_LANGUAGE,
-    name: shell.title,
+    name: shell.nombreCorto || shell.title,
     description: n.descripcion,
     image: n.imagenes,
     url: shell.canonical,
