@@ -1514,11 +1514,23 @@ verificación directa contra el código.
    spot seleccionado, consumida por `ficha.js`/`motor-mapa.js`) — hoy
    solo existe `ambiente-brujula.js`, que es la familia decorativa de
    fondo, no un widget de navegación real.
-8. **"Carta de Posición" en fichas de lugar** (coordenadas, distancia,
-   "cómo llegar" con mapa embebido) — hoy `info-strip` en las fichas solo
-   tiene 3 celdas (estado, ubicación, contacto), sin mapa ni distancia.
-9. **CTA sticky en mobile dentro de la ficha** — no existe ningún
-   `position:sticky`/`fixed` en `ficha.css` al momento de esta auditoría.
+8. ~~**"Carta de Posición" en fichas de lugar**~~ — **RESUELTO** (verificado
+   2026-08 contra el código real, no contra este documento): `ficha.js`
+   ya tiene `inicializarCartaDePosicion()`, que lee la coordenada del
+   bloque `geo` del JSON-LD (`obtenerCoordenadaLugar()`), inserta la 4ª
+   celda `.info-cell--posicion` en `.info-strip` y renderiza un
+   minimapa real en `<canvas>` (tiles de CartoDB Voyager) con link a
+   "Cómo llegar". Confirmado funcionando end-to-end en Brode
+   (`negocio.geo` en `ficha.json` → JSON-LD generado en `index.html` →
+   celda insertada en runtime). Este ítem quedó desactualizado en este
+   documento porque un grep superficial sobre el HTML estático no ve
+   una celda que el propio JS inserta en tiempo de carga — cuidado con
+   ese mismo error al auditar otras fichas.
+9. ~~**CTA sticky en mobile dentro de la ficha**~~ — **RESUELTO**:
+   `.cta-sticky`/`.cta-sticky__btn` ya están en `ficha.css` (Llamar +
+   WhatsApp, `position:fixed`, oculto en desktop) y Brode ya lo usa en
+   `cuerpo.html`. Verificar que las 50 fichas restantes lo tengan
+   también sigue siendo trabajo pendiente real, pero no en Brode.
 
 ### 16.3 Prioridad baja / mantenimiento recurrente
 
