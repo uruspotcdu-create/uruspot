@@ -26,4 +26,154 @@
   "_comentario_breadcrumb": "NUEVO (auditoría SEO, 2026-08, pase 2): Google recomienda que todo dato estructurado de breadcrumb (BreadcrumbList en JSON-LD) tenga equivalente visible en la página para el usuario. La sección de breadcrumb visible en cuerpo.html ya existe desde antes, pero faltaba el schema.org/BreadcrumbList en JSON-LD del <head>. Se agrega acá para que el template lo inyecte en ambos lugares (visible + structured data). Tres niveles siempre: Inicio → Gastronomía → Brødë (nombre del local actual).",
   "breadcrumbBlockRaw": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"BreadcrumbList\",\n  \"itemListElement\": [\n    {\n      \"@type\": \"ListItem\",\n      \"position\": 1,\n      \"name\": \"Inicio\",\n      \"item\": \"https://uruspot.pages.dev/\"\n    },\n    {\n      \"@type\": \"ListItem\",\n      \"position\": 2,\n      \"name\": \"Gastronomía\",\n      \"item\": \"https://uruspot.pages.dev/donde-comer-cdu/\"\n    },\n    {\n      \"@type\": \"ListItem\",\n      \"position\": 3,\n      \"name\": \"Brødë\",\n      \"item\": \"https://uruspot.pages.dev/donde-comer-cdu/locales/brode/\"\n    }\n  ]\n}\n</script>\n",
   "colaScriptsRaw": "\n<script id=\"ficha-data\" type=\"application/json\">\n{\"nombre\": \"Brødë\", \"uruId\": \"URU-00624\", \"rubro\": \"gastronomia\", \"schedule_rows\": [{\"closed\": true, \"day\": \"Lunes y Martes\", \"time\": \"Cerrado\"}, {\"closed\": false, \"day\": \"Miércoles a Viernes\", \"time\": \"8:00 a.m. – 12:30 p.m. · 4 – 8 p.m.\"}, {\"closed\": false, \"day\": \"Sábado\", \"time\": \"8:00 a.m. – 12:30 p.m. · 4 – 8 p.m.\"}, {\"closed\": false, \"day\": \"Domingo\", \"time\": \"9:00 a.m. – 12:30 p.m. · 4 – 8 p.m.\"}], \"share_text\": \"72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Brødë — la mejor panadería artesanal de Concepción del Uruguay.\", \"features\": {\"readingProgress\": true, \"backToTop\": true, \"animatedCounters\": true, \"tiltCards\": true}}\n</script>\n<script src=\"../../js/rubros-meta.js\" defer></script>\n<script src=\"../ficha.js\" defer></script>\n</body>\n</html>\n",
-  "_comentario_imagenes": "CORRECCION (auditoria diseno visual, 2026-08): el criterio anterior (\\\"brodefrente.webp se queda como esta, no se toca\\\") daba por sentado que ese archivo era un recorte de diseno intencional del hero. Capturas reales (Playwright, desktop y mobile) mostraron que en realidad es SOLO el isotipo de marca a 474x215px, estirado con object-fit:cover a 100vh de alto en el hero -> pixelado/ilegible en desktop, y en mobile el hero recorta directo sobre las letras (peor aun). Como ya existia ogImagePath (brode-og.webp, 1200x630, cover-crop de brode3.webp sin texto horneado ni tematica estacional) pensado para OG/Twitter, se reutiliza tambien como imagePath del hero: mismo asset, formato panoramico nativo que casi no requiere upscaling. brodefrente.webp queda sin uso en esta ficha (no se borra el archivo por si alguna otra pieza del sitio lo referencia). Sigue en pie el resto del criterio original: para OG/Twitter/JSON-LD priorizar la imagen de mejor resolucion sin texto superpuesto conocido (ver brode2.webp, que tiene un texto de 'Dia Internacional del Croissant' horneado, y brode1.webp, que es tematica navidena) y cover-crop a 1200x630 con unsharp mask leve si la fuente es menor a 1200px de ancho. CORRECCION (auditoria contenido, 2026-08): el criterio de arriba daba por sentado que brode3.webp era una foto real de un producto de Brode. Comparado contra el menu verificado de esta ficha (laminados, pan de campo, focaccia, rolls de canela, pan de hamburguesa, pan de molde -- nunca bagels, en ningun FAQ/catalogo/about) y contra el analisis visual directo, brode3.webp (y por lo tanto el og:image que era un cover-crop de esa misma foto) muestra una bandeja de bagels con semillas de amapola, un producto que no aparece en absoluto en el resto de esta ficha. Se reemplazo og:image/twitter:image por una composicion nueva (isotipo real de marca, brodefrente.webp, centrado sobre fondo solido #140d09 a 1200x630 -- mismo asset ya aprobado por el cliente para el hero, sin inventar contenido nuevo) y se saco brode3.webp de negocio.imagenes (JSON-LD) para que Google no lo indexe como foto real del negocio. El cliente confirmo (2026-08) que brode3.webp no es un producto real de Brode: se habia reemplazado como foto principal de la galeria en cuerpo.html (seccion Sobre el lugar) por brode1.webp (pan dulce navideno, foto real de producto de temporada, ya usada tambien en Historia). CORRECCION (auditoria consistencia, 2026-08): ese cambio se REVIRTIO despues -- el cliente pidio explicitamente mantener la foto de bagels en la galeria de 'Sobre el lugar' y no duplicar brode1.webp (que ya se usa en Historia) -- ver comentario inline en cuerpo.html junto a la galeria. Este parrafo quedaba desactualizado respecto al HTML real y se corrige aca para que quien lea solo ficha.json (sin abrir cuerpo.html) no asuma lo contrario: HOY brode3.webp SI se usa como foto principal de la galeria en cuerpo.html (aunque sigue afuera de negocio.imagenes/JSON-LD, eso no cambio). brode3.webp por lo tanto no esta sin uso en esta ficha; el archivo se sigue sin indexar en structured data por el mismo motivo de contenido (no es un producto real) pero si es visible para el visitante humano.\",\n  \"_comentario_features\": \"NUEVO (2026-08, fusion del pase premium): controla que funcionalidades opcionales de ficha.js se activan para ESTA ficha. Si una clave no esta presente, ficha.js la trata como activa por defecto (mismo comportamiento que tenia Brode antes de esta fusion). readingProgress/backToTop necesitan ademas que el HTML tenga los elementos #fichaProgressFill / #fichaTopBtn -- este flag no los inserta solo, eso lo decide el generador de la pagina.\",\n  "features": {\n    "readingProgress": true,\n    "backToTop": true,\n    "animatedCounters": true,\n    "tiltCards": true\n  },\n  "negocio": {\n    "tipo": "Bakery",\n    "descripcion": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Panadería artesanal de masa madre con especialidades en laminados.",\n    "imagenes": [\n      "https://uruspot.pages.dev/img/brode-og.webp",\n      "https://uruspot.pages.dev/img/brodefrente.webp",\n      "https://uruspot.pages.dev/img/brode1.webp",\n      "https://uruspot.pages.dev/img/brode2.webp"\n    ],\n    "telefono": "+5493442306349",\n    "priceRange": "$385 - $1.650",\n    "servesCuisine": "Panadería artesanal de masa madre y laminados",\n    "hasMenu": "https://queresto.com/BRODE",\n    "sameAs": [\n      "https://www.instagram.com/brodepanaderia/",\n      "https://www.instagram.com/brodefabricadepan/"\n    ],\n    "address": {\n      "streetAddress": "Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos",\n      "addressLocality": "Concepción del Uruguay",\n      "addressRegion": "Entre Ríos",\n      "addressCountry": "AR"\n    },\n    "hasMap": "https://www.google.com/maps/place/?q=place_id:ChIJL9JzMpnbr5URmp6O9e7YgU4",\n    "geo": {\n      "latitude": "-32.4806862",\n      "longitude": "-58.2545511"\n    },\n    "amenityFeature": [\n      {\n        "name": "Para llevar",\n        "value": true\n      },\n      {\n        "name": "Línea mayorista",\n        "value": true\n      },\n      {\n        "name": "Pedidos por WhatsApp",\n        "value": true\n      },\n      {\n        "name": "Catálogo fotográfico online",\n        "value": true\n      }\n    ],\n    "makesOffer": [\n      {\n        "name": "Croissant",\n        "price": "1530",\n        "priceCurrency": "ARS",\n        "availability": "https://schema.org/InStock"\n      },\n      {\n        "name": "Pan de Campo (caja de 10 unidades)",\n        "price": "1650",\n        "priceCurrency": "ARS",\n        "availability": "https://schema.org/InStock"\n      },\n      {\n        "name": "Pan de Hamburguesa (unidad)",\n        "price": "385",\n        "priceCurrency": "ARS",\n        "availability": "https://schema.org/InStock"\n      }\n    ],\n    "openingHoursSpecification": [\n      {\n        "dayOfWeek": [\n          "Wednesday",\n          "Thursday",\n          "Friday",\n          "Saturday"\n        ],\n        "opens": "08:00",\n        "closes": "12:30"\n      },\n      {\n        "dayOfWeek": [\n          "Wednesday",\n          "Thursday",\n          "Friday",\n          "Saturday"\n        ],\n        "opens": "16:00",\n        "closes": "20:00"\n      },\n      {\n        "dayOfWeek": [\n          "Sunday"\n        ],\n        "opens": "09:00",\n        "closes": "12:30"\n      },\n      {\n        "dayOfWeek": [\n          "Sunday"\n        ],\n        "opens": "16:00",\n        "closes": "20:00"\n      }\n    ]\n  },\n  "nombreCorto": "Brødë",\n  "rubro": {\n    "label": "Gastronomía",\n    "path": "/donde-comer-cdu/"\n  },\n  "faqItems": [\n    {\n      "question": "¿Qué días abre Brødë?",\n      "answer": "De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes."\n    },\n    {\n      "question": "¿Cuál es la especialidad de la casa?",\n      "answer": "Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como \\\"los mejores laminados de la zona\\\". Todo pasa por un proceso de 72 horas."\n    },\n    {\n      "question": "¿Cuáles son los precios?",\n      "answer": "Croissant: $1.530. Pan de Campo (caja de 10): $1.650. Pan de Hamburguesa: $385. Para otros productos y promociones, consultar directamente por WhatsApp."\n    },\n    {\n      "question": "¿Se puede comprar en otro lugar además del local?",\n      "answer": "Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp."\n    },\n    {\n      "question": "¿Qué pasa con el pan que no se vende?",\n      "answer": "Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad."\n    },\n    {\n      "question": "¿El local es accesible para sillas de ruedas?",\n      "answer": "No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349."\n    },\n    {\n      "question": "¿Hay opciones veganas o sin gluten?",\n      "answer": "Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita."\n    },\n    {\n      "question": "¿Cuánto tiempo lleva el proceso de un pan?",\n      "answer": "72 horas desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante."\n    }\n  ],\n  "_comentario_negocio": "[MIGRADO, generador ficha-jsonld.js] negocio/rubro/faqItems reemplazan a jsonLdRaw/breadcrumbBlockRaw/faqBlockRaw/webPageBlockRaw escritos a mano: ficha-template.js arma esos 4 bloques a partir de estos campos en cada build. faviconBlockRaw/robotsBlockRaw se eliminaron: nunca los leia el template (hardcodeados ahi, identicos en las 1500 fichas), eran campos muertos que invitaban a editarlos sin efecto real."\n}
+  "_comentario_imagenes": "CORRECCION (auditoria diseno visual, 2026-08): el criterio anterior (\\\"brodefrente.webp se queda como esta, no se toca\\\") daba por sentado que ese archivo era un recorte de diseno intencional del hero. Capturas reales (Playwright, desktop y mobile) mostraron que en realidad es SOLO el isotipo de marca a 474x215px, estirado con object-fit:cover a 100vh de alto en el hero -> pixelado/ilegible en desktop, y en mobile el hero recorta directo sobre las letras (peor aun). Como ya existia ogImagePath (brode-og.webp, 1200x630, cover-crop de brode3.webp sin texto horneado ni tematica estacional) pensado para OG/Twitter, se reutiliza tambien como imagePath del hero: mismo asset, formato panoramico nativo que casi no requiere upscaling. brodefrente.webp queda sin uso en esta ficha (no se borra el archivo por si alguna otra pieza del sitio lo referencia). Sigue en pie el resto del criterio original: para OG/Twitter/JSON-LD priorizar la imagen de mejor resolucion sin texto superpuesto conocido (ver brode2.webp, que tiene un texto de 'Dia Internacional del Croissant' horneado, y brode1.webp, que es tematica navidena) y cover-crop a 1200x630 con unsharp mask leve si la fuente es menor a 1200px de ancho. CORRECCION (auditoria contenido, 2026-08): el criterio de arriba daba por sentado que brode3.webp era una foto real de un producto de Brode. Comparado contra el menu verificado de esta ficha (laminados, pan de campo, focaccia, rolls de canela, pan de hamburguesa, pan de molde -- nunca bagels, en ningun FAQ/catalogo/about) y contra el analisis visual directo, brode3.webp (y por lo tanto el og:image que era un cover-crop de esa misma foto) muestra una bandeja de bagels con semillas de amapola, un producto que no aparece en absoluto en el resto de esta ficha. Se reemplazo og:image/twitter:image por una composicion nueva (isotipo real de marca, brodefrente.webp, centrado sobre fondo solido #140d09 a 1200x630 -- mismo asset ya aprobado por el cliente para el hero, sin inventar contenido nuevo) y se saco brode3.webp de negocio.imagenes (JSON-LD) para que Google no lo indexe como foto real del negocio. El cliente confirmo (2026-08) que brode3.webp no es un producto real de Brode: se habia reemplazado como foto principal de la galeria en cuerpo.html (seccion Sobre el lugar) por brode1.webp (pan dulce navideno, foto real de producto de temporada, ya usada tambien en Historia). CORRECCION (auditoria consistencia, 2026-08): ese cambio se REVIRTIO despues -- el cliente pidio explicitamente mantener la foto de bagels en la galeria de 'Sobre el lugar' y no duplicar brode1.webp (que ya se usa en Historia) -- ver comentario inline en cuerpo.html junto a la galeria. Este parrafo quedaba desactualizado respecto al HTML real y se corrige aca para que quien lea solo ficha.json (sin abrir cuerpo.html) no asuma lo contrario: HOY brode3.webp SI se usa como foto principal de la galeria en cuerpo.html (aunque sigue afuera de negocio.imagenes/JSON-LD, eso no cambio). brode3.webp por lo tanto no esta sin uso en esta ficha; el archivo se sigue sin indexar en structured data por el mismo motivo de contenido (no es un producto real) pero si es visible para el visitante humano.\",\n  \"_comentario_features\": \"NUEVO (2026-08, fusion del pase premium): controla que funcionalidades opcionales de ficha.js se activan para ESTA ficha. Si una clave no esta presente, ficha.js la trata como activa por defecto (mismo comportamiento que tenia Brode antes de esta fusion). readingProgress/backToTop necesitan ademas que el HTML tenga los elementos #fichaProgressFill / #fichaTopBtn -- este flag no los inserta solo, eso lo decide el generador de la pagina.",
+  "features": {
+    "readingProgress": true,
+    "backToTop": true,
+    "animatedCounters": true,
+    "tiltCards": true
+  },
+  "negocio": {
+    "tipo": "Bakery",
+    "descripcion": "72 horas de proceso, ingredientes de primer nivel y el arte de hacer pan en cada pieza. Panadería artesanal de masa madre con especialidades en laminados.",
+    "imagenes": [
+      "https://uruspot.pages.dev/img/brode-og.webp",
+      "https://uruspot.pages.dev/img/brodefrente.webp",
+      "https://uruspot.pages.dev/img/brode1.webp",
+      "https://uruspot.pages.dev/img/brode2.webp"
+    ],
+    "telefono": "+5493442306349",
+    "priceRange": "$385 - $1.650",
+    "servesCuisine": "Panadería artesanal de masa madre y laminados",
+    "hasMenu": "https://queresto.com/BRODE",
+    "sameAs": [
+      "https://www.instagram.com/brodepanaderia/",
+      "https://www.instagram.com/brodefabricadepan/"
+    ],
+    "address": {
+      "streetAddress": "Dr. J. Lacava 491, E3260, Concepción del Uruguay, Entre Ríos",
+      "addressLocality": "Concepción del Uruguay",
+      "addressRegion": "Entre Ríos",
+      "addressCountry": "AR"
+    },
+    "hasMap": "https://www.google.com/maps/place/?q=place_id:ChIJL9JzMpnbr5URmp6O9e7YgU4",
+    "geo": {
+      "latitude": "-32.4806862",
+      "longitude": "-58.2545511"
+    },
+    "amenityFeature": [
+      {
+        "name": "Para llevar",
+        "value": true
+      },
+      {
+        "name": "Línea mayorista",
+        "value": true
+      },
+      {
+        "name": "Pedidos por WhatsApp",
+        "value": true
+      },
+      {
+        "name": "Catálogo fotográfico online",
+        "value": true
+      }
+    ],
+    "makesOffer": [
+      {
+        "name": "Croissant",
+        "price": "1530",
+        "priceCurrency": "ARS",
+        "availability": "https://schema.org/InStock"
+      },
+      {
+        "name": "Pan de Campo (caja de 10 unidades)",
+        "price": "1650",
+        "priceCurrency": "ARS",
+        "availability": "https://schema.org/InStock"
+      },
+      {
+        "name": "Pan de Hamburguesa (unidad)",
+        "price": "385",
+        "priceCurrency": "ARS",
+        "availability": "https://schema.org/InStock"
+      }
+    ],
+    "openingHoursSpecification": [
+      {
+        "dayOfWeek": [
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "opens": "08:00",
+        "closes": "12:30"
+      },
+      {
+        "dayOfWeek": [
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "opens": "16:00",
+        "closes": "20:00"
+      },
+      {
+        "dayOfWeek": [
+          "Sunday"
+        ],
+        "opens": "09:00",
+        "closes": "12:30"
+      },
+      {
+        "dayOfWeek": [
+          "Sunday"
+        ],
+        "opens": "16:00",
+        "closes": "20:00"
+      }
+    ]
+  },
+  "nombreCorto": "Brødë",
+  "rubro": {
+    "label": "Gastronomía",
+    "path": "/donde-comer-cdu/"
+  },
+  "faqItems": [
+    {
+      "question": "¿Qué días abre Brødë?",
+      "answer": "De miércoles a sábado: 8:00 a 12:30 hs. y de 16:00 a 20:00 hs. Los domingos: 9:00 a 12:30 hs. y de 16:00 a 20:00 hs. Cierra lunes y martes."
+    },
+    {
+      "question": "¿Cuál es la especialidad de la casa?",
+      "answer": "Los laminados — medialunas, croissants y danesas — y los panes integrales de masa madre, en especial el de molde y el de campo. Los croissants son reconocidos como \"los mejores laminados de la zona\". Todo pasa por un proceso de 72 horas."
+    },
+    {
+      "question": "¿Cuáles son los precios?",
+      "answer": "Croissant: $1.530. Pan de Campo (caja de 10): $1.650. Pan de Hamburguesa: $385. Para otros productos y promociones, consultar directamente por WhatsApp."
+    },
+    {
+      "question": "¿Se puede comprar en otro lugar además del local?",
+      "answer": "Sí. Brødë abastece a negocios seleccionados de la región a través de su línea mayorista. También disponible para pedidos especiales, eventos o grandes cantidades coordinados por WhatsApp."
+    },
+    {
+      "question": "¿Qué pasa con el pan que no se vende?",
+      "answer": "Se dona: el pan que sobra al cierre del día se destina a comedores y hogares locales, como Carita Feliz y el Hogar de Abuelas San Vicente. Brødë tiene compromiso real con la comunidad."
+    },
+    {
+      "question": "¿El local es accesible para sillas de ruedas?",
+      "answer": "No hay confirmación oficial de una entrada accesible. Si esto es determinante para tu visita, te recomendamos consultarlo directamente por WhatsApp antes de ir: +54 3442 30-6349."
+    },
+    {
+      "question": "¿Hay opciones veganas o sin gluten?",
+      "answer": "Sus propios fundadores declararon en 2025 que incorporar alternativas veganas y sin gluten es parte de la visión de expansión de Brødë Hermanos. No hay confirmación de que ya estén disponibles en el local actual — consultá directamente por WhatsApp sobre disponibilidad de productos adaptados antes de tu visita."
+    },
+    {
+      "question": "¿Cuánto tiempo lleva el proceso de un pan?",
+      "answer": "72 horas desde el inicio de la elaboración hasta que está listo para venta. Este tiempo es clave para desarrollar sabores profundos y garantizar calidad constante."
+    }
+  ],
+  "_comentario_negocio": "[MIGRADO, generador ficha-jsonld.js] negocio/rubro/faqItems reemplazan a jsonLdRaw/breadcrumbBlockRaw/faqBlockRaw/webPageBlockRaw escritos a mano: ficha-template.js arma esos 4 bloques a partir de estos campos en cada build. faviconBlockRaw/robotsBlockRaw se eliminaron: nunca los leia el template (hardcodeados ahi, identicos en las 1500 fichas), eran campos muertos que invitaban a editarlos sin efecto real."
+}
