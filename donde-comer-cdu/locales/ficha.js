@@ -650,6 +650,23 @@
     return idxs;
   }
 
+  // [FIX] (2026-08, auditoría migración 1500): "Estado actual" (abierto/
+  // cerrado) se calculaba con new Date().getDay()/getHours(), que leen la
+  // hora LOCAL DEL DISPOSITIVO del visitante -- correcto para alguien
+  // navegando desde Argentina, pero silenciosamente incorrecto para
+  // cualquiera con el reloj del teléfono en otro huso horario (turista
+  // extranjero planificando la visita antes de viajar, el caso de uso más
+  // relevante para una guía gastronómica). Argentina no aplica horario de
+  // verano desde 2009 (UTC-3 fijo todo el año), así que alcanza con restar
+  // el offset y leer los campos en UTC para obtener el reloj real de
+  // Concepción del Uruguay sin importar dónde esté physicalmente el
+  // dispositivo del visitante.
+  function ahoraEnArgentina() {
+    var epochMs = Date.now() - 3 * 60 * 60 * 1000;
+    var d = new Date(epochMs);
+    return { dia: d.getUTCDay(), hora: d.getUTCHours() + d.getUTCMinutes() / 60 };
+  }
+
   function calcularEstado(scheduleRows) {
     if (!Array.isArray(scheduleRows) || !scheduleRows.length) return null;
 
@@ -682,9 +699,9 @@
       return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
     }
 
-    var ahora = new Date();
-    var diaHoy = ahora.getDay(); // 0=domingo
-    var horaAhora = ahora.getHours() + ahora.getMinutes() / 60;
+    var ahora = ahoraEnArgentina();
+    var diaHoy = ahora.dia; // 0=domingo
+    var horaAhora = ahora.hora;
 
     var ventanasHoy = ventanasDelDia(diaHoy);
 
