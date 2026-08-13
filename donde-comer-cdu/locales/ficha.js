@@ -958,12 +958,27 @@
 
     status.dataset.loading = "true";
 
-    fetch("/reviews?id=" + encodeURIComponent(DATA.uruId))
+    // MEJORA (auditoría robustez, 2026-08): timeout de 5s vía AbortController.
+    // Sin esto, si /reviews no responde (red caída, función colgada), el
+    // status se queda en "Cargando…" para siempre. Con el fetch cancelado
+    // solo, el usuario ve un mensaje claro en vez de un spinner infinito.
+    // Feature-detect: en navegadores sin AbortController simplemente no
+    // hay timeout, igual que el comportamiento original.
+    var timeoutMs = 5000;
+    var controller = ("AbortController" in window) ? new AbortController() : null;
+    var timedOut = false;
+    var timeoutId = controller && setTimeout(function () {
+      timedOut = true;
+      controller.abort();
+    }, timeoutMs);
+
+    fetch("/reviews?id=" + encodeURIComponent(DATA.uruId), controller ? { signal: controller.signal } : undefined)
       .then(function (res) {
         if (!res.ok) throw new Error("http_" + res.status);
         return res.json();
       })
       .then(function (data) {
+        if (timeoutId) clearTimeout(timeoutId);
         delete status.dataset.loading;
         var resenas = (data && data.resenas) || [];
         if (!resenas.length) {
@@ -992,8 +1007,12 @@
         });
       })
       .catch(function () {
+        if (timeoutId) clearTimeout(timeoutId);
         delete status.dataset.loading;
-        status.textContent = "No pudimos cargar las reseñas en este momento. Podés escribirnos directo por WhatsApp mientras tanto.";
+        status.hidden = false;
+        status.textContent = timedOut
+          ? "La carga de reseñas tardó demasiado. Recargá la página o escribinos directo por WhatsApp mientras tanto."
+          : "No pudimos cargar las reseñas en este momento. Podés escribirnos directo por WhatsApp mientras tanto.";
       });
   }
 
@@ -1002,6 +1021,23 @@
     if (!form) return;
     var btn = document.getElementById("reviewSubmitBtn");
     var statusEl = document.getElementById("reviewFormStatus");
+    var autorEl = document.getElementById("reviewAutor");
+    var autorError = document.getElementById("reviewAutorError");
+
+    // MEJORA (auditoría UX, 2026-08): validación visual en tiempo real del
+    // campo nombre -- aria-invalid + mensaje en el span que ya existía en
+    // el HTML (reviewAutorError) pero hasta ahora no se usaba desde JS.
+    if (autorEl && autorError) {
+      autorEl.addEventListener("blur", function () {
+        if (!autorEl.value.trim()) {
+          autorEl.setAttribute("aria-invalid", "true");
+          autorError.textContent = "Ingresá tu nombre.";
+        } else {
+          autorEl.removeAttribute("aria-invalid");
+          autorError.textContent = "";
+        }
+      });
+    }
 
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
@@ -1015,17 +1051,38 @@
       var puntuacionEl = form.querySelector('input[name="puntuacion"]:checked');
       var website = form.website ? form.website.value : "";
 
-      if (!autor) {
-        if (statusEl) statusEl.textContent = "Falta tu nombre.";
-        form.autor.focus();
+      // Honeypot anti-spam (auditoría UX, 2026-08): si el campo trampa
+      // viene completo, es casi seguro un bot. Se corta acá mismo, sin
+      // pegarle al backend, y se muestra éxito falso para no delatar el
+      // mecanismo -- el backend (functions/reviews.js) ya lo descartaba
+      // también del lado del servidor; esto solo evita el round-trip.
+      if (website) {
+        form.reset();
+        if (statusEl) statusEl.textContent = "¡Gracias! Tu reseña quedó pendiente de aprobación y se va a publicar pronto.";
         return;
       }
+
+      if (!autor) {
+        if (statusEl) statusEl.textContent = "Falta tu nombre.";
+        if (autorEl) {
+          autorEl.setAttribute("aria-invalid", "true");
+          autorEl.focus();
+        }
+        if (autorError) autorError.textContent = "Ingresá tu nombre.";
+        return;
+      }
+      if (autorEl) autorEl.removeAttribute("aria-invalid");
+      if (autorError) autorError.textContent = "";
+
       if (!puntuacionEl) {
         if (statusEl) statusEl.textContent = "Elegí una puntuación de 1 a 5 estrellas.";
         return;
       }
 
-      if (btn) btn.disabled = true;
+      if (btn) {
+        btn.disabled = true;
+        btn.setAttribute("aria-busy", "true");
+      }
       if (statusEl) statusEl.textContent = "Enviando…";
 
       fetch("/reviews", {
@@ -1047,7 +1104,6 @@
         .then(function () {
           form.reset();
           if (statusEl) statusEl.textContent = "¡Gracias! Tu reseña quedó pendiente de aprobación y se va a publicar pronto.";
-          if (btn) btn.disabled = false;
         })
         .catch(function (err) {
           if (statusEl) {
@@ -1055,7 +1111,12 @@
               ? "Ya enviaste una reseña hace poco. Probá de nuevo en unos minutos."
               : "No pudimos enviar tu reseña. Probá de nuevo o escribinos por WhatsApp.";
           }
-          if (btn) btn.disabled = false;
+        })
+        .finally(function () {
+          if (btn) {
+            btn.disabled = false;
+            btn.removeAttribute("aria-busy");
+          }
         });
     });
   }
@@ -1377,6 +1438,15 @@
 
     chips.forEach(function (chip) {
       var etiquetaOriginal = chip.textContent;
+      // MEJORA (auditoría UX, 2026-08): si el chip tiene un .copy-feedback
+      // como hermano (como el de teléfono en Info rápida), el resultado
+      // también se anuncia ahí vía aria-live -- mejor para lectores de
+      // pantalla que solo el cambio de texto del botón. Si no existe (la
+      // mayoría de los chips no lo tienen), se mantiene el comportamiento
+      // anterior sin romper nada.
+      var feedback = chip.nextElementSibling;
+      if (!feedback || !feedback.classList.contains("copy-feedback")) feedback = null;
+
       chip.addEventListener("click", function () {
         var valor = chip.getAttribute("data-copy-value");
         navigator.clipboard
@@ -1384,12 +1454,21 @@
           .then(function () {
             chip.setAttribute("data-copied", "true");
             chip.textContent = "✓ Copiado";
+            if (feedback) feedback.textContent = "✓ Copiado al portapapeles";
             setTimeout(function () {
               chip.removeAttribute("data-copied");
               chip.textContent = etiquetaOriginal;
+              if (feedback) feedback.textContent = "";
             }, 1800);
           })
-          .catch(function () {});
+          .catch(function () {
+            chip.textContent = "❌ No se pudo copiar";
+            if (feedback) feedback.textContent = "No se pudo copiar. Copiá el valor manualmente.";
+            setTimeout(function () {
+              chip.textContent = etiquetaOriginal;
+              if (feedback) feedback.textContent = "";
+            }, 3000);
+          });
       });
     });
   }
