@@ -383,15 +383,27 @@
      lector de pantalla (describe algo que no está en la imagen) y para
      SEO de imágenes — se corrige acá porque esta ficha es la plantilla
      madre que se migra a las 1500 fichas restantes.
-     MEJORA (auditoría performance, 2026-08, pase 2): imagen hero sin srcset
-     → upscaling innecesario. Se agrega versión 800w para desktop, evitando
-     redimensionar 474px a 600+px. Fallback a 474w en mobile. -->
+     CORRECCIÓN (auditoría técnica, 2026-08, pase 3): el pase anterior
+     ("MEJORA performance") agregaba un srcset con un candidato de 800w
+     (/img/brodefrente-800.webp) que nunca se generó -- el archivo no
+     existe en /img/, así que ese candidato devolvía 404 en cualquier
+     viewport que lo eligiera (exactamente el hero, la imagen de mayor
+     prioridad de la página: fetchpriority="high"+loading="eager"). Además
+     el razonamiento del pase anterior era contradictorio en sí mismo: el
+     activo nativo es 474x215px (verificado), así que un candidato "800w"
+     solo puede obtenerse escalando hacia arriba ese mismo archivo -- no
+     "evita el upscaling", lo hace explícito y ya está cubierto por el
+     object-fit:cover del propio <img> a través de CSS, sin necesitar un
+     segundo archivo. Se quita el srcset/sizes roto y se vuelve a un único
+     src real (mismo criterio ya documentado arriba: el cliente aceptó el
+     pixelado de brodefrente.webp a cambio de que el hero muestre el
+     nombre de marca). Si en el futuro se genera un activo nativo de mayor
+     resolución para el hero (foto real, no el isotipo), ahí sí un srcset
+     tiene sentido -- no antes. -->
 <section class="hero " aria-label="Brødë">
   
   <img class="hero-img" 
        src="/img/brodefrente.webp" 
-       srcset="/img/brodefrente-800.webp 800w, /img/brodefrente.webp 474w"
-       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 600px, 700px"
        alt="Isotipo de Brødë sobre fondo oscuro de marca — Concepción del Uruguay" 
        fetchpriority="high" 
        loading="eager" 
